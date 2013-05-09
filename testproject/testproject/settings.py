@@ -1,6 +1,3 @@
-import sys
-sys.path.append('/Users/marcobraak/.virtualenvs/quickimpress/lib/python2.7/site-packages')
-
 from settings_default import *
 
 
