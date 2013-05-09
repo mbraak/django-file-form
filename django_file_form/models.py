@@ -5,7 +5,7 @@ from path import path
 from django.core.files.storage import FileSystemStorage
 from django.conf import settings
 from django.db import models
-from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.files import File
 
 from .util import ModelManager
 
@@ -79,16 +79,16 @@ class UploadedFile(models.Model):
         else:
             return None
 
-    def get_simple_uploaded_file(self):
-        return SimpleUploadedFileWithId(
+    def get_uploaded_file(self):
+        return UploadedFileWithId(
+            self.uploaded_file,
             self.get_basename(),
-            self.get_path().bytes(),
             self.file_id
         )
 
 
-class SimpleUploadedFileWithId(SimpleUploadedFile):
-    def __init__(self, name, content, file_id, content_type='text/plain'):
-        super(SimpleUploadedFileWithId, self).__init__(name, content, content_type)
+class UploadedFileWithId(File):
+    def __init__(self, file, name, file_id):
+        super(UploadedFileWithId, self).__init__(file, name)
 
         self.file_id = file_id

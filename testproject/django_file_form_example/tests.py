@@ -167,11 +167,10 @@ class FileFormWebTests(WebTest):
             self.assertEqual(files[0].input_file.name, 'example/%s' % filename)
 
             self.assertTrue(uploaded_file.exists())
-
         finally:
             uploaded_file.remove_p()
 
-    def upload_ajax_file(self, form, field_name, filename):
+    def upload_ajax_file(self, form, field_name, filename, content='xyz'):
         csrf_token = form['csrfmiddlewaretoken'].value
         form_id = form['form_id'].value
         upload_url = form['upload_url'].value
@@ -190,7 +189,7 @@ class FileFormWebTests(WebTest):
             headers=dict(X_REQUESTED_WITH='XMLHttpRequest'),
             status=200,
             upload_files=[
-                ('qqfile', filename, 'xyz')
+                ('qqfile', filename, content)
             ]
         )
 

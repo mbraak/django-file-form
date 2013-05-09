@@ -16,6 +16,7 @@ class ExampleForm(BootstrapFormMixin, FileFormMixin, forms.Form):
             title=self.cleaned_data['title'],
             input_file=self.cleaned_data['input_file']
         )
+        self.delete_temporary_files()
 
 
 class MultipleFileExampleForm(BootstrapFormMixin, FileFormMixin, forms.Form):
@@ -32,3 +33,5 @@ class MultipleFileExampleForm(BootstrapFormMixin, FileFormMixin, forms.Form):
                 example=example,
                 input_file=f
             )
+
+        self.delete_temporary_files()

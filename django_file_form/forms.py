@@ -32,10 +32,6 @@ class FileFormMixin(object):
             # Call super
             super(FileFormMixin, self).full_clean()
 
-            if not self._errors:
-                # The form is valid; delete temp files
-                self.delete_temporary_files()
-
     def update_files_data(self):
         form_id = self.data['form_id']
 
@@ -95,7 +91,7 @@ class UploadedFileField(FileField):
         qs = self.get_file_qs(field_name, form_id)
 
         if qs.exists():
-            return qs.get().get_simple_uploaded_file()
+            return qs.get().get_uploaded_file()
         else:
             return None
 
@@ -117,7 +113,7 @@ class MultipleUploadedFileField(UploadedFileField):
         qs = self.get_file_qs(field_name, form_id)
 
         return [
-            f.get_simple_uploaded_file() for f in qs
+            f.get_uploaded_file() for f in qs
         ]
 
     def to_python(self, data):
