@@ -170,6 +170,28 @@ class FileFormWebTests(WebTest):
         finally:
             uploaded_file.remove_p()
 
+    def test_submit_multiple_for_single_filefield(self):
+        # setup
+        filename1, filename2 = get_random_ids(2)
+        uploaded_file1 = settings.MEDIA_ROOT.joinpath('example', filename1)
+        uploaded_file2 = settings.MEDIA_ROOT.joinpath('example', filename2)
+        try:
+            form = self.app.get('/').form
+
+            # upload files
+            self.upload_ajax_file(form, 'input_file', filename1)
+            self.upload_ajax_file(form, 'input_file', filename2)
+
+            # submit form
+            form['title'] = 'aaa'
+            form.submit().follow()
+
+            example = Example.objects.get(title='aaa')
+            self.assertEqual(example.input_file.name, 'example/%s' % filename2)
+        finally:
+            uploaded_file1.remove_p()
+            uploaded_file2.remove_p()
+
     def upload_ajax_file(self, form, field_name, filename, content='xyz'):
         csrf_token = form['csrfmiddlewaretoken'].value
         form_id = form['form_id'].value

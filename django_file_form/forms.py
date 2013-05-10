@@ -91,7 +91,7 @@ class UploadedFileField(FileField):
         qs = self.get_file_qs(field_name, form_id)
 
         if qs.exists():
-            return qs.get().get_uploaded_file()
+            return qs.latest('created').get_uploaded_file()
         else:
             return None
 
