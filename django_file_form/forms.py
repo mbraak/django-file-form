@@ -1,6 +1,8 @@
 import json
 import uuid
 
+import six
+
 from django.core.urlresolvers import reverse
 from django.forms import FileField, ClearableFileInput, CharField, HiddenInput
 from django.template.loader import render_to_string
@@ -35,7 +37,7 @@ class FileFormMixin(object):
     def update_files_data(self):
         form_id = self.data['form_id']
 
-        for field_name, field in self.fields.iteritems():
+        for field_name, field in six.iteritems(self.fields):
             if hasattr(field, 'get_file_data'):
                 file_data = field.get_file_data(field_name, form_id)
 
@@ -45,7 +47,7 @@ class FileFormMixin(object):
     def delete_temporary_files(self):
         form_id = self.data['form_id']
 
-        for field_name, field in self.fields.iteritems():
+        for field_name, field in six.iteritems(self.fields):
             if hasattr(field, 'delete_file_data'):
                 field.delete_file_data(field_name, form_id)
 

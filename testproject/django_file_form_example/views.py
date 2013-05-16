@@ -1,7 +1,7 @@
 from django.core.urlresolvers import reverse
 from django.views import generic
 
-import forms
+from . import forms
 
 
 class ExampleFormView(generic.FormView):

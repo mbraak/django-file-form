@@ -1,6 +1,8 @@
 import json
 import uuid
 
+import six
+
 from django.conf import settings
 
 from django_webtest import WebTest
@@ -89,12 +91,12 @@ class FileFormWebTests(WebTest):
         try:
             # submit form with error
             form = self.app.get('/').form
-            form['input_file'] = (filename, 'xyz')
+            form['input_file'] = (filename, six.b('xyz'))
             form = form.submit().form
 
             # submit form correctly
             form['title'] = 'abc'
-            form['input_file'] = (filename, 'xyz')
+            form['input_file'] = (filename, six.b('xyz'))
             form.submit().follow()
 
             example = Example.objects.get(title='abc')
@@ -137,8 +139,8 @@ class FileFormWebTests(WebTest):
             example2 = Example2.objects.get(title='abc')
             files = example2.files.all()
             self.assertEqual(files.count(), 2)
-            self.assertEqual(unicode(files[0]), 'example/%s' % filename1)
-            self.assertEqual(unicode(files[1]), 'example/%s' % filename2)
+            self.assertEqual(six.text_type(files[0]), 'example/%s' % filename1)
+            self.assertEqual(six.text_type(files[1]), 'example/%s' % filename2)
 
             self.assertTrue(uploaded_file1.exists())
             self.assertTrue(uploaded_file2.exists())
@@ -153,12 +155,12 @@ class FileFormWebTests(WebTest):
         try:
             # submit form with error
             form = self.app.get('/multiple').form
-            form['input_file'] = (filename, 'xyz')
+            form['input_file'] = (filename, six.b('xyz'))
             form = form.submit().form
 
             # submit form correctly
             form['title'] = 'abc'
-            form['input_file'] = (filename, 'xyz')
+            form['input_file'] = (filename, six.b('xyz'))
             form.submit().follow()
 
             example2 = Example2.objects.get(title='abc')
@@ -192,7 +194,7 @@ class FileFormWebTests(WebTest):
             uploaded_file1.remove_p()
             uploaded_file2.remove_p()
 
-    def upload_ajax_file(self, form, field_name, filename, content='xyz'):
+    def upload_ajax_file(self, form, field_name, filename, content=six.b('xyz')):
         csrf_token = form['csrfmiddlewaretoken'].value
         form_id = form['form_id'].value
         upload_url = form['upload_url'].value
@@ -208,15 +210,15 @@ class FileFormWebTests(WebTest):
         response = self.app.post(
             upload_url,
             params=params,
-            headers=dict(X_REQUESTED_WITH='XMLHttpRequest'),
+            headers=dict(X_REQUESTED_WITH=six.b('XMLHttpRequest')),
             status=200,
             upload_files=[
-                ('qqfile', filename, content)
+                (six.b('qqfile'), filename, content)
             ]
         )
 
         # - check response data; nb. cannot use response.json because content type is text/html
-        assert json.loads(response.content) == dict(success=True, filename=filename, path='temp_uploads/%s' % filename)
+        assert json.loads(response.content.decode()) == dict(success=True, filename=filename, path='temp_uploads/%s' % filename)
 
         return file_id
 
@@ -231,7 +233,7 @@ class FileFormWebTests(WebTest):
                 X_CSRFTOKEN=csrf_token
             ),
         )
-        self.assertEqual(response.content, 'ok')
+        self.assertEqual(response.content, six.b('ok'))
 
 
 def get_random_id():
@@ -239,5 +241,5 @@ def get_random_id():
 
 
 def get_random_ids(count):
-    for _ in xrange(count):
+    for _ in six.moves.xrange(count):
         yield get_random_id()
