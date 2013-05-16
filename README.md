@@ -9,7 +9,7 @@ Features:
     * This means that you don't have to change your code to support ajax upload.
 * Supports single and multiple file upload.
 
-Works with Django 1.5. Other versions are not tested yet.
+Works with Django 1.4 and 1.5.
 
 ## Usage
 
