@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 from django.core.management.base import NoArgsCommand
 
 from django_file_form.models import UploadedFile
@@ -8,6 +10,6 @@ class Command(NoArgsCommand):
         deleted_files = UploadedFile.objects.delete_unused_files()
 
         if not deleted_files:
-            print 'No files deleted'
+            print('No files deleted')
         else:
-            print 'Deleted files: %s' % ', '.join(deleted_files)
+            print ('Deleted files: %s' % ', '.join(deleted_files))
