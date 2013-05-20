@@ -14,6 +14,8 @@ install:
 script:
   - cd testproject
   - python manage.py test django_file_form_example
+  - coverage run --source=django_file_form,django_file_form_example manage.py test django_file_form_example
+  - coverage report
 after_success:
   - pip install -r requirements_coveralls.txt
   - coveralls
