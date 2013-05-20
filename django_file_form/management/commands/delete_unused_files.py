@@ -12,4 +12,4 @@ class Command(NoArgsCommand):
         if not deleted_files:
             print('No files deleted')
         else:
-            print ('Deleted files: %s' % ', '.join(deleted_files))
+            print('Deleted files: %s' % ', '.join(deleted_files))
