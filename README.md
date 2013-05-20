@@ -1,3 +1,7 @@
+[![Build Status](https://travis-ci.org/mbraak/django-file-form.png?branch=master)](https://travis-ci.org/mbraak/django-file-form)
+
+[![Coverage Status](https://coveralls.io/repos/mbraak/django-file-form/badge.png?branch=master)](https://coveralls.io/r/mbraak/django-file-form?branch=master)
+
 #Django file form
 
 **Django-file-form** helps you to write forms with a pretty ajax upload.
