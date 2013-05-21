@@ -13,6 +13,8 @@ Features:
     * This means that you don't have to change your code to support ajax upload.
 * Supports single and multiple file upload.
 
+The project is hosted on [github](https://github.com/mbraak/django-file-form).
+
 Works with Django 1.4 and 1.5.
 
 ## Usage
@@ -85,7 +87,7 @@ By the way, you must also include jquery.
  </script>
 ```
 
-**8 Handle uploaded files **
+**8 Handle uploaded files**
 
 ```
 class ExampleFormView(generic.FormView):
