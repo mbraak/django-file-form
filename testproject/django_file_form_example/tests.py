@@ -1,6 +1,4 @@
-from datetime import datetime
 import json
-import uuid
 
 import six
 
@@ -14,6 +12,7 @@ from django_webtest import WebTest
 from django_file_form.models import UploadedFile
 
 from .models import Example, Example2
+from .test_utils import get_random_id, get_random_ids, encode_datetime
 
 
 class FileFormWebTests(WebTest):
@@ -265,8 +264,7 @@ class FileFormTests(TestCase):
         uploaded_file_path = self.temp_uploads_path.joinpath(filename)
         try:
             uploaded_file_path.write_text('abc')
-
-            UploadedFile.objects.create(created=datetime(2010, 1, 1))
+            UploadedFile.objects.create(created=encode_datetime(2010, 1, 1))
 
             # - delete unused files
             UploadedFile.objects.delete_unused_files()
@@ -289,12 +287,3 @@ class FileFormTests(TestCase):
             self.assertEqual(six.text_type(UploadedFile()), '')
         finally:
             uploaded_file_path.remove_p()
-
-
-def get_random_id():
-    return uuid.uuid4().hex
-
-
-def get_random_ids(count):
-    for _ in six.moves.xrange(count):
-        yield get_random_id()

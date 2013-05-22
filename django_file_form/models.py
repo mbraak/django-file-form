@@ -1,11 +1,10 @@
-from datetime import datetime
-
 from path import path
 
 from django.core.files.storage import FileSystemStorage
 from django.conf import settings
 from django.db import models
 from django.core.files import File
+from django.utils import timezone
 
 from .util import ModelManager
 
@@ -43,7 +42,7 @@ class UploadedFileManager(ModelManager):
 class UploadedFile(models.Model):
     fs = FileSystemStorage(location=settings.MEDIA_ROOT)
 
-    created = models.DateTimeField(default=datetime.now)
+    created = models.DateTimeField(default=timezone.now)
     uploaded_file = models.FileField(max_length=255, upload_to='temp_uploads', storage=fs)
     field_name = models.CharField(max_length=255, null=True, blank=True)
     file_id = models.CharField(max_length=40)
@@ -64,7 +63,7 @@ class UploadedFile(models.Model):
             self.get_path().remove_p()
 
     def must_be_deleted(self, now=None):
-        now = now or datetime.now()
+        now = now or timezone.now()
 
         return (now - self.created).days >= 1
 

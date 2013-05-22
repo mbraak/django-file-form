@@ -44,6 +44,8 @@ MEDIA_ROOT = BASE_DIR.joinpath('media')
 MEDIA_ROOT.mkdir_p()
 MEDIA_ROOT.joinpath('example').mkdir_p()
 
+USE_TZ = True
+
 # django jenkins settings
 try:
     import django_jenkins
