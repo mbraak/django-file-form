@@ -43,6 +43,7 @@ STATIC_ROOT = BASE_DIR.joinpath('static')
 MEDIA_ROOT = BASE_DIR.joinpath('media')
 MEDIA_ROOT.mkdir_p()
 MEDIA_ROOT.joinpath('example').mkdir_p()
+MEDIA_ROOT.joinpath('temp_uploads').mkdir_p()
 
 USE_TZ = True
 
