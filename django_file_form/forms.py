@@ -21,7 +21,7 @@ class FileFormMixin(object):
         self.add_hidden_field('delete_url', reverse('file_form_handle_delete_no_args'))
 
     def add_hidden_field(self, name, initial):
-        self.fields[name] = CharField(widget=HiddenInput, initial=initial)
+        self.fields[name] = CharField(widget=HiddenInput, initial=initial, required=False)
 
     def full_clean(self):
         if not self.is_bound:
@@ -35,14 +35,15 @@ class FileFormMixin(object):
             super(FileFormMixin, self).full_clean()
 
     def update_files_data(self):
-        form_id = self.data['form_id']
+        form_id = self.data.get('form_id')
 
-        for field_name, field in six.iteritems(self.fields):
-            if hasattr(field, 'get_file_data'):
-                file_data = field.get_file_data(field_name, form_id)
+        if form_id:
+            for field_name, field in six.iteritems(self.fields):
+                if hasattr(field, 'get_file_data'):
+                    file_data = field.get_file_data(field_name, form_id)
 
-                if file_data:
-                    self.files[field_name] = file_data
+                    if file_data:
+                        self.files[field_name] = file_data
 
     def delete_temporary_files(self):
         form_id = self.data['form_id']
