@@ -46,11 +46,12 @@ class FileFormMixin(object):
                         self.files[field_name] = file_data
 
     def delete_temporary_files(self):
-        form_id = self.data['form_id']
+        form_id = self.data.get('form_id')
 
-        for field_name, field in six.iteritems(self.fields):
-            if hasattr(field, 'delete_file_data'):
-                field.delete_file_data(field_name, form_id)
+        if form_id:
+            for field_name, field in six.iteritems(self.fields):
+                if hasattr(field, 'delete_file_data'):
+                    field.delete_file_data(field_name, form_id)
 
 
 class UploadWidget(ClearableFileInput):
