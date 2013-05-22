@@ -52,7 +52,10 @@ class UploadedFile(models.Model):
     objects = UploadedFileManager()
 
     def __unicode__(self):
-        return self.get_basename()
+        return unicode(self.get_basename() or u'')
+
+    def __str__(self):
+        return str(self.get_basename() or '')
 
     def delete(self, using=None):
         super(UploadedFile, self).delete(using)
@@ -88,7 +91,7 @@ class UploadedFile(models.Model):
 
 
 class UploadedFileWithId(File):
-    def __init__(self, file, name, file_id):
-        super(UploadedFileWithId, self).__init__(file, name)
+    def __init__(self, _file, name, file_id):
+        super(UploadedFileWithId, self).__init__(_file, name)
 
         self.file_id = file_id

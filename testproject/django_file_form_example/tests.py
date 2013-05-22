@@ -1,9 +1,13 @@
+from datetime import datetime
 import json
 import uuid
 
 import six
 
 from django.conf import settings
+from django.test import TestCase
+from django.core.management import call_command
+from django.core.files.base import ContentFile
 
 from django_webtest import WebTest
 
@@ -194,6 +198,18 @@ class FileFormWebTests(WebTest):
             uploaded_file1.remove_p()
             uploaded_file2.remove_p()
 
+    def test_submit_multiple_empty(self):
+        """
+        - Form with multiple file field
+        - Submit with empty values
+        """
+        # submit form
+        form = self.app.get('/multiple').form
+        page = form.submit()
+
+        # expect error class on input-file row
+        page.pyquery('#row-input_file').hasClass('error')
+
     def upload_ajax_file(self, form, field_name, filename, content=six.b('xyz')):
         csrf_token = form['csrfmiddlewaretoken'].value
         form_id = form['form_id'].value
@@ -234,6 +250,45 @@ class FileFormWebTests(WebTest):
             ),
         )
         self.assertEqual(response.content, six.b('ok'))
+
+
+class FileFormTests(TestCase):
+    def setUp(self):
+        self.temp_uploads_path = settings.MEDIA_ROOT.joinpath('temp_uploads')
+
+    def test_delete_unused_files_command(self):
+        call_command('delete_unused_files', verbosity=0)
+
+    def test_delete_unused_files(self):
+        # setup
+        filename = get_random_id()
+        uploaded_file_path = self.temp_uploads_path.joinpath(filename)
+        try:
+            uploaded_file_path.write_text('abc')
+
+            UploadedFile.objects.create(created=datetime(2010, 1, 1))
+
+            # - delete unused files
+            UploadedFile.objects.delete_unused_files()
+
+            # UploadedFile must be deleted
+            self.assertEquals(UploadedFile.objects.count(), 0)
+
+            # file must be deleted
+            self.assertFalse(uploaded_file_path.exists())
+        finally:
+            uploaded_file_path.remove_p()
+
+    def test_uploaded_file_unicode(self):
+        filename = get_random_id()
+        uploaded_file_path = self.temp_uploads_path.joinpath(filename)
+
+        uploaded_file = UploadedFile.objects.create(uploaded_file=ContentFile('xyz', filename))
+        try:
+            self.assertEqual(six.text_type(uploaded_file), filename)
+            self.assertEqual(six.text_type(UploadedFile()), '')
+        finally:
+            uploaded_file_path.remove_p()
 
 
 def get_random_id():
