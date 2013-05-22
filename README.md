@@ -29,11 +29,14 @@ Works with Django 1.4 and 1.5.
 pip install django-file-form
 ```
 
-**2 Include the app in your settings**
+This also installs the ajaxuploader app.
+
+**2 Include the app ajaxuploader and django_file_form in your settings**
 
 ```
 INSTALLED_APPS = [
     …
+    'ajaxuploader',
     'django_file_form'
 ]
 ```
