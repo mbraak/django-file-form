@@ -6,6 +6,7 @@ from django.http import HttpResponse
 
 from django_file_form.views import DeleteFile as OriginalDeleteFileView
 from django_file_form.forms import ExistingFile
+from django_file_form.uploader import FileFormUploader
 
 from . import forms
 from .models import Example
@@ -67,3 +68,6 @@ class DeleteFileView(OriginalDeleteFileView):
                 return HttpResponse("ok")
         except ValueError:
             return super(DeleteFileView, self).delete(request, file_id)
+
+
+handle_upload = FileFormUploader()

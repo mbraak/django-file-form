@@ -17,7 +17,7 @@ class FileFormMixin(object):
         super(FileFormMixin, self).__init__(*args, **kwargs)
 
         self.add_hidden_field('form_id', uuid.uuid4)
-        self.add_hidden_field('upload_url', reverse('file_form_handle_upload'))
+        self.add_hidden_field('upload_url', self.get_upload_url())
         self.add_hidden_field('delete_url', self.get_delete_url())
 
     def add_hidden_field(self, name, initial):
@@ -25,6 +25,9 @@ class FileFormMixin(object):
 
     def get_delete_url(self):
         return reverse('file_form_handle_delete_no_args')
+
+    def get_upload_url(self):
+        return reverse('file_form_handle_upload')
 
     def full_clean(self):
         if not self.is_bound:

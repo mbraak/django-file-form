@@ -237,8 +237,11 @@ class FileFormWebTests(WebTest):
                 ]
             )
 
-            # expect different delete-url
+            # expect different delete url
             self.assertEquals(form['delete_url'].value, '/handle_delete')
+
+            # expect different upload url
+            self.assertEqual(form['upload_url'].value, '/handle_upload')
 
             # - delete existing file
             self.delete_ajax_file(form, str(example.id))

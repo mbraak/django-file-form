@@ -11,4 +11,5 @@ urlpatterns = patterns(
     url(r'^existing/(?P<id>\d+)$', views.ExistingFileExampleView.as_view(), name='existing_file_example'),
     url(r'^handle_delete$', views.DeleteFileView.as_view(), name='example_handle_delete_no_args'),
     url(r'^handle_delete/(?P<file_id>[\w-]+)$', views.DeleteFileView.as_view(), name='example_handle_delete'),
+    url(r'^handle_upload$', views.handle_upload, name='example_handle_upload'),
 )
