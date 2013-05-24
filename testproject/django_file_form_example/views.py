@@ -4,7 +4,7 @@ from django.views import generic
 from . import forms
 
 
-class ExampleFormView(generic.FormView):
+class ExampleView(generic.FormView):
     template_name = 'example_form.html'
     form_class = forms.ExampleForm
 
@@ -13,14 +13,14 @@ class ExampleFormView(generic.FormView):
 
     def form_valid(self, form):
         form.save()
-        return super(ExampleFormView, self).form_valid(form)
+        return super(ExampleView, self).form_valid(form)
 
 
-class ExampleSuccess(generic.TemplateView):
+class ExampleSuccessView(generic.TemplateView):
     template_name = 'success.html'
 
 
-class MultipleExampleForm(generic.FormView):
+class MultipleExampleView(generic.FormView):
     template_name = 'example_form.html'
     form_class = forms.MultipleFileExampleForm
 
@@ -29,4 +29,4 @@ class MultipleExampleForm(generic.FormView):
 
     def form_valid(self, form):
         form.save()
-        return super(MultipleExampleForm, self).form_valid(form)
+        return super(MultipleExampleView, self).form_valid(form)
