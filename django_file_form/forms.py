@@ -142,6 +142,7 @@ class ExistingFile(object):
     def __init__(self, name, file_id):
         self.name = name
         self.file_id = file_id
+        self.is_existing = True
 
     def get_values(self):
         return dict(name=self.name, id=self.file_id)
