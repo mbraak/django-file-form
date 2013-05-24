@@ -46,17 +46,3 @@ MEDIA_ROOT.joinpath('example').mkdir_p()
 MEDIA_ROOT.joinpath('temp_uploads').mkdir_p()
 
 USE_TZ = True
-
-# django jenkins settings
-try:
-    import django_jenkins
-    INSTALLED_APPS.append('django_jenkins')
-except ImportError:
-    pass
-
-PROJECT_APPS = ['django_file_form', 'django_file_form_example']
-
-JENKINS_TASKS = (
-    'django_jenkins.tasks.with_coverage',
-    'django_jenkins.tasks.django_tests',
-)
