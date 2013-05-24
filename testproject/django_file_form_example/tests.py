@@ -209,6 +209,58 @@ class FileFormWebTests(WebTest):
         # expect error class on input-file row
         page.pyquery('#row-input_file').hasClass('error')
 
+    def test_existing_file(self):
+        """
+        Test a form with an existing file.
+        """
+        # setup
+        example_filename = get_random_id()
+        example_file_path = settings.MEDIA_ROOT.joinpath('example', example_filename)
+        temp_filename = get_random_id()
+        temp_file_path = settings.MEDIA_ROOT.joinpath('temp_uploads', temp_filename)
+        try:
+            example = Example.objects.create(title='abc', input_file=ContentFile('xyz', example_filename))
+
+            # - get form
+            page = self.app.get('/existing/%d' % example.id)
+            form = page.form
+
+            self.assertTrue(example_file_path.exists())
+
+            # expect file in 'data-files'
+            upload_container = page.pyquery('#row-input_file .upload-container')
+            files_data = upload_container.attr('data-files')
+            self.assertEqual(
+                json.loads(files_data),
+                [
+                    dict(name=example_filename, id=example.id)
+                ]
+            )
+
+            # expect different delete-url
+            self.assertEquals(form['delete_url'].value, '/handle_delete')
+
+            # - delete existing file
+            self.delete_ajax_file(form, str(example.id))
+
+            example = Example.objects.get(id=example.id)
+            self.assertEqual(example.input_file.name, '')
+
+            self.assertFalse(example_file_path.exists())
+
+            # - upload file
+            file_id = self.upload_ajax_file(form, 'input_file', temp_filename)
+
+            self.assertTrue(temp_file_path.exists())
+
+            # - delete file
+            self.delete_ajax_file(form, file_id)
+
+            self.assertFalse(temp_file_path.exists())
+        finally:
+            example_file_path.remove_p()
+            temp_file_path.remove_p()
+
     def upload_ajax_file(self, form, field_name, filename, content=six.b('xyz')):
         csrf_token = form['csrfmiddlewaretoken'].value
         form_id = form['form_id'].value

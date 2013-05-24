@@ -18,10 +18,13 @@ class FileFormMixin(object):
 
         self.add_hidden_field('form_id', uuid.uuid4)
         self.add_hidden_field('upload_url', reverse('file_form_handle_upload'))
-        self.add_hidden_field('delete_url', reverse('file_form_handle_delete_no_args'))
+        self.add_hidden_field('delete_url', self.get_delete_url())
 
     def add_hidden_field(self, name, initial):
         self.fields[name] = CharField(widget=HiddenInput, initial=initial, required=False)
+
+    def get_delete_url(self):
+        return reverse('file_form_handle_delete_no_args')
 
     def full_clean(self):
         if not self.is_bound:
@@ -67,7 +70,7 @@ class UploadWidget(ClearableFileInput):
             if hasattr(values[0], 'file_id'):
                 files_data = json.dumps(
                     [
-                        dict(id=value.file_id, name=value.name) for value in values
+                        value.get_values() for value in values
                     ]
                 )
 
@@ -130,3 +133,12 @@ class MultipleUploadedFileField(UploadedFileField):
             return data
         else:
             return [data]
+
+
+class ExistingFile(object):
+    def __init__(self, name, file_id):
+        self.name = name
+        self.file_id = file_id
+
+    def get_values(self):
+        return dict(name=self.name, id=self.file_id)

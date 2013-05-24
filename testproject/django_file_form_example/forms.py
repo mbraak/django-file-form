@@ -1,4 +1,5 @@
 from django import forms
+from django.core.urlresolvers import reverse
 
 from django_pony_forms.pony_forms import BootstrapFormMixin
 
@@ -7,8 +8,11 @@ from django_file_form.forms import UploadedFileField, MultipleUploadedFileField,
 from .models import Example, Example2, ExampleFile
 
 
-class ExampleForm(BootstrapFormMixin, FileFormMixin, forms.Form):
+class BaseForm(BootstrapFormMixin, FileFormMixin, forms.Form):
     title = forms.CharField()
+
+
+class ExampleForm(BaseForm):
     input_file = UploadedFileField()
 
     def save(self):
@@ -19,8 +23,7 @@ class ExampleForm(BootstrapFormMixin, FileFormMixin, forms.Form):
         self.delete_temporary_files()
 
 
-class MultipleFileExampleForm(BootstrapFormMixin, FileFormMixin, forms.Form):
-    title = forms.CharField()
+class MultipleFileExampleForm(BaseForm):
     input_file = MultipleUploadedFileField()
 
     def save(self):
@@ -35,3 +38,8 @@ class MultipleFileExampleForm(BootstrapFormMixin, FileFormMixin, forms.Form):
             )
 
         self.delete_temporary_files()
+
+
+class ExistingFileForm(ExampleForm):
+    def get_delete_url(self):
+        return reverse('example_handle_delete_no_args')

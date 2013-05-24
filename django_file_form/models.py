@@ -94,3 +94,6 @@ class UploadedFileWithId(File):
         super(UploadedFileWithId, self).__init__(_file, name)
 
         self.file_id = file_id
+
+    def get_values(self):
+        return dict(id=self.file_id, name=self.name)
