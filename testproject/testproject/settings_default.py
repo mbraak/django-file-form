@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'ajaxuploader',
     'django_file_form',
     'django_pony_forms',
+    'south',
 
     # Django
     'django.contrib.auth',

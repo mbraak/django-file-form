@@ -4,6 +4,7 @@ coverage==3.6
 git+git://github.com/mbraak/django-webtest.git@django1.6
 lxml==3.2.1  # needed by pyquery
 pyquery==1.2.4  # needed by webtest
+South==0.8.1
 waitress==0.8.3  # needed by webtest
 WebOb==1.2.3  # needed by webtest
 WebTest==2.0.5
