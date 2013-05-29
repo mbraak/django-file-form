@@ -44,6 +44,7 @@ class UploadedFile(models.Model):
 
     created = models.DateTimeField(default=timezone.now)
     uploaded_file = models.FileField(max_length=255, upload_to='temp_uploads', storage=fs)
+    original_filename = models.CharField(max_length=255)
     field_name = models.CharField(max_length=255, null=True, blank=True)
     file_id = models.CharField(max_length=40)
     form_id = models.CharField(max_length=40)
@@ -51,10 +52,10 @@ class UploadedFile(models.Model):
     objects = UploadedFileManager()
 
     def __unicode__(self):
-        return unicode(self.get_basename() or u'')
+        return unicode(self.original_filename or u'')
 
     def __str__(self):
-        return str(self.get_basename() or '')
+        return str(self.original_filename or '')
 
     def delete(self, using=None):
         super(UploadedFile, self).delete(using)
@@ -67,14 +68,6 @@ class UploadedFile(models.Model):
 
         return (now - self.created).days >= 1
 
-    def get_basename(self):
-        p = self.get_path()
-
-        if p:
-            return p.basename()
-        else:
-            return None
-
     def get_path(self):
         if self.uploaded_file:
             return path(self.uploaded_file.path)
@@ -84,7 +77,7 @@ class UploadedFile(models.Model):
     def get_uploaded_file(self):
         return UploadedFileWithId(
             self.uploaded_file,
-            self.get_basename(),
+            self.original_filename,
             self.file_id
         )
 

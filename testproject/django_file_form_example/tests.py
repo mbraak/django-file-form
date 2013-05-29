@@ -22,7 +22,7 @@ class FileFormWebTests(WebTest):
         """
         # setup
         filename = get_random_id()
-        uploaded_file = settings.MEDIA_ROOT.joinpath('temp_uploads', filename)
+        temp_filepath = None
         try:
             form = self.app.get('/').form
             self.assertEqual(form['delete_url'].value, '/upload/handle_delete')
@@ -30,16 +30,20 @@ class FileFormWebTests(WebTest):
             # upload file
             file_id = self.upload_ajax_file(form, 'input_file', filename)
 
-            self.assertTrue(uploaded_file.exists())
+            uploaded_file = UploadedFile.objects.get(file_id=file_id)
+            temp_filepath = settings.MEDIA_ROOT.joinpath(uploaded_file.uploaded_file.name)
+
+            self.assertTrue(temp_filepath.exists())
             UploadedFile.objects.get(file_id=file_id)
 
             # delete file
             self.delete_ajax_file(form, file_id)
 
-            self.assertFalse(uploaded_file.exists())
+            self.assertFalse(temp_filepath.exists())
             self.assertFalse(UploadedFile.objects.filter(file_id=file_id).exists())
         finally:
-            uploaded_file.remove_p()
+            if temp_filepath:
+                temp_filepath.remove_p()
 
     def test_submit_form_with_ajax_upload(self):
         """
@@ -47,22 +51,26 @@ class FileFormWebTests(WebTest):
         """
         # setup
         filename = get_random_id()
-        temp_uploaded_file = settings.MEDIA_ROOT.joinpath('temp_uploads', filename)
-        uploaded_file = settings.MEDIA_ROOT.joinpath('example', filename)
+        temp_filepath = None
+        example_filepath = settings.MEDIA_ROOT.joinpath('example', filename)
         try:
             form = self.app.get('/').form
 
             # upload file
             file_id = self.upload_ajax_file(form, 'input_file', filename)
 
-            self.assertTrue(temp_uploaded_file.exists())
-            UploadedFile.objects.get(file_id=file_id)
+            uploaded_file = UploadedFile.objects.get(file_id=file_id)
+            self.assertEqual(uploaded_file.original_filename, filename)
+            self.assertNotEqual(uploaded_file.uploaded_file.name, 'temp_uploads/%s' % filename)
+
+            temp_filepath = settings.MEDIA_ROOT.joinpath(uploaded_file.uploaded_file.name)
+            self.assertTrue(temp_filepath.exists())
 
             # submit the form with an error
             page = form.submit()
             form = page.form
 
-            self.assertTrue(temp_uploaded_file.exists())
+            self.assertTrue(temp_filepath.exists())
 
             upload_container = page.pyquery('#row-input_file .upload-container')
 
@@ -80,12 +88,13 @@ class FileFormWebTests(WebTest):
             example = Example.objects.get(title='abc')
             self.assertEqual(example.input_file.name, 'example/%s' % filename)
 
-            self.assertFalse(temp_uploaded_file.exists())
+            self.assertFalse(temp_filepath.exists())
             self.assertFalse(UploadedFile.objects.filter(file_id=file_id).exists())
-            self.assertTrue(uploaded_file.exists())
+            self.assertTrue(example_filepath.exists())
         finally:
-            temp_uploaded_file.remove_p()
-            uploaded_file.remove_p()
+            if temp_filepath:
+                temp_filepath.remove_p()
+            example_filepath.remove_p()
 
     def test_submit_without_ajax(self):
         # setup
@@ -217,7 +226,7 @@ class FileFormWebTests(WebTest):
         example_filename = get_random_id()
         example_file_path = settings.MEDIA_ROOT.joinpath('example', example_filename)
         temp_filename = get_random_id()
-        temp_file_path = settings.MEDIA_ROOT.joinpath('temp_uploads', temp_filename)
+        temp_file_path = None
         try:
             example = Example.objects.create(title='abc', input_file=ContentFile('xyz', example_filename))
 
@@ -254,6 +263,9 @@ class FileFormWebTests(WebTest):
             # - upload file
             file_id = self.upload_ajax_file(form, 'input_file', temp_filename)
 
+            uploaded_file = UploadedFile.objects.get(file_id=file_id)
+            temp_file_path = settings.MEDIA_ROOT.joinpath(uploaded_file.uploaded_file.name)
+
             self.assertTrue(temp_file_path.exists())
 
             # - delete file
@@ -262,7 +274,9 @@ class FileFormWebTests(WebTest):
             self.assertFalse(temp_file_path.exists())
         finally:
             example_file_path.remove_p()
-            temp_file_path.remove_p()
+
+            if temp_file_path:
+                temp_file_path.remove_p()
 
     def upload_ajax_file(self, form, field_name, filename, content=six.b('xyz')):
         csrf_token = form['csrfmiddlewaretoken'].value
@@ -288,7 +302,8 @@ class FileFormWebTests(WebTest):
         )
 
         # - check response data; nb. cannot use response.json because content type is text/html
-        assert json.loads(response.content.decode()) == dict(success=True, filename=filename, path='temp_uploads/%s' % filename)
+        result = json.loads(response.content.decode())
+        assert result['success']
 
         return file_id
 
@@ -336,9 +351,12 @@ class FileFormTests(TestCase):
         filename = get_random_id()
         uploaded_file_path = self.temp_uploads_path.joinpath(filename)
 
-        uploaded_file = UploadedFile.objects.create(uploaded_file=ContentFile('xyz', filename))
+        uploaded_file = UploadedFile.objects.create(
+            uploaded_file=ContentFile('xyz', filename),
+            original_filename='ooo.txt'
+        )
         try:
-            self.assertEqual(six.text_type(uploaded_file), filename)
+            self.assertEqual(six.text_type(uploaded_file), 'ooo.txt')
             self.assertEqual(six.text_type(UploadedFile()), '')
         finally:
             uploaded_file_path.remove_p()
