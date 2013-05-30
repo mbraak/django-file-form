@@ -247,7 +247,7 @@ class FileFormWebTests(WebTest):
             )
 
             # expect different delete url
-            self.assertEquals(form['delete_url'].value, '/handle_delete')
+            self.assertEqual(form['delete_url'].value, '/handle_delete')
 
             # expect different upload url
             self.assertEqual(form['upload_url'].value, '/handle_upload')
@@ -340,7 +340,7 @@ class FileFormTests(TestCase):
             UploadedFile.objects.delete_unused_files()
 
             # UploadedFile must be deleted
-            self.assertEquals(UploadedFile.objects.count(), 0)
+            self.assertEqual(UploadedFile.objects.count(), 0)
 
             # file must be deleted
             self.assertFalse(uploaded_file_path.exists())
