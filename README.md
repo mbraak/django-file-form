@@ -33,9 +33,8 @@ This also installs the ajaxuploader app.
 
 **2 Include the app ajaxuploader and django_file_form in your settings**
 
-```
+```python
 INSTALLED_APPS = [
-    …
     'ajaxuploader',
     'django_file_form'
 ]
@@ -45,7 +44,7 @@ INSTALLED_APPS = [
 
 In this example we use the url **upload/**. You can use a different url if you like.
 
-```
+```python
 urlpatterns = patterns(
     '',
     url(r'^upload/', include('django_file_form.urls')),
@@ -54,7 +53,7 @@ urlpatterns = patterns(
 
 **4 Add FileFormMixin to your form**
 
-```
+```python
 from django_file_form.forms import FileFormMixin
 
 class ExampleForm(FileFormMixin, forms.Form):
@@ -63,7 +62,7 @@ class ExampleForm(FileFormMixin, forms.Form):
 
 **5 Add a UploadedFileField**
 
-```
+```python
 from django_file_form.forms import FileFormMixin, UploadedFileField
 
 class ExampleForm(FileFormMixin, forms.Form):
@@ -72,7 +71,7 @@ class ExampleForm(FileFormMixin, forms.Form):
 
 **6 Include fileuploader.js and file_form.js in your template**
 
-```
+```html
  <script src="{{ STATIC_URL }}ajaxuploader/js/fileuploader.js"></script>
  <script src="{{ STATIC_URL }}file_form/file_form.js"></script>
 ```
@@ -81,22 +80,22 @@ By the way, you must also include jquery.
 
 **7 Call the initUploadFields javascript function**
 
-```
+```html
  <form id="example-form" method="POST" enctype="multipart/form-data">
- 	{% csrf_token %}
-    {{ form }}
+     {% csrf_token %}
+     {{ form }}
  </form>
 
  <script>
- 	$(function() {
-    	initUploadFields($('#example-form'));
-   	});
+     $(function() {
+         initUploadFields($('#example-form'));
+     });
  </script>
 ```
 
 **8 Handle uploaded files**
 
-```
+```python
 class ExampleFormView(generic.FormView):
     template_name = 'example_form.html'
     form_class = forms.ExampleForm
@@ -109,7 +108,7 @@ class ExampleFormView(generic.FormView):
 
 **9 Delete temporary files**
 
-```
+```python
 class ExampleFormView(generic.FormView):
     template_name = 'example_form.html'
     form_class = forms.ExampleForm
