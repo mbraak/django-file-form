@@ -1,3 +1,2 @@
-Django==1.5.1
 django-pony-forms==0.3.4
 path.py==4.3
