@@ -7,4 +7,4 @@ pyquery==1.2.4  # needed by webtest
 South==0.8.2
 waitress==0.8.7  # needed by webtest
 WebOb==1.2.3  # needed by webtest
-WebTest==2.0.8
+WebTest==2.0.9
