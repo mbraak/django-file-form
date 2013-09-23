@@ -64,7 +64,7 @@ qq.FineUploader.prototype.addExistingFile = function(uuid, name) {
 
     this._listElement.appendChild(item);
 
-    if (this._isDeletePossible()) {
+    if (uuid && this._isDeletePossible()) {
         this._showDeleteLink(id);
     }
 }
