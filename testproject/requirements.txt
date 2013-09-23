@@ -1,3 +1,3 @@
-django-pony-forms==0.3.4
+https://github.com/mbraak/django_pony_forms/archive/0.3.5.tar.gz#egg=django_pony_forms-0.3.5
 path.py==4.3
 six==1.4.1
