@@ -64,7 +64,7 @@ class UploadWidget(ClearableFileInput):
     def render(self, name, value, attrs=None):
         def get_file_value(f):
             if hasattr(f, 'file_id'):
-                return value.get_values()
+                return f.get_values()
             else:
                 return dict(name=f.name)
 
@@ -78,7 +78,7 @@ class UploadWidget(ClearableFileInput):
 
             files_data = json.dumps(
                 [
-                    get_file_value(value) for value in values
+                    get_file_value(v) for v in values
                 ]
             )
 
