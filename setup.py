@@ -12,8 +12,8 @@ setup(
     zip_safe=False,
     author='Marco Braak',
     author_email='mbraak@ridethepony.nl',
-    install_requires=['ajaxuploader==0.3.0.2', 'six', 'path.py'],
+    install_requires=['ajaxuploader==0.3.0.3', 'six', 'path.py'],
     dependency_links=[
-        'https://github.com/mbraak/django-ajax-uploader/archive/0.3.0.2.tar.gz#egg=ajaxuploader-0.3.0.2',
+        'https://github.com/mbraak/django-ajax-uploader/archive/0.3.0.3.tar.gz#egg=ajaxuploader-0.3.0.3',
     ]
 )
