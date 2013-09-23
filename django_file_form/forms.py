@@ -62,6 +62,12 @@ class FileFormMixin(object):
 
 class UploadWidget(ClearableFileInput):
     def render(self, name, value, attrs=None):
+        def get_file_value(f):
+            if hasattr(f, 'file_id'):
+                return value.get_values()
+            else:
+                return dict(name=f.name)
+
         files_data = None
 
         if value:
@@ -70,12 +76,11 @@ class UploadWidget(ClearableFileInput):
             else:
                 values = [value]
 
-            if hasattr(values[0], 'file_id'):
-                files_data = json.dumps(
-                    [
-                        value.get_values() for value in values
-                    ]
-                )
+            files_data = json.dumps(
+                [
+                    get_file_value(value) for value in values
+                ]
+            )
 
         return mark_safe(
             render_to_string(
