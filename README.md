@@ -2,6 +2,8 @@
 
 [![Coverage Status](https://coveralls.io/repos/mbraak/django-file-form/badge.png?branch=master)](https://coveralls.io/r/mbraak/django-file-form?branch=master)
 
+[![Violations](https://coviolations.io/projects/mbraak/django-file-form/badge/?)](http://coviolations.io/projects/mbraak/django-file-form/)
+
 [![Downloads](https://pypip.in/d/django-file-form/badge.png)](https://pypi.python.org/pypi/django-file-form/)
 
 [![Downloads](https://pypip.in/v/django-file-form/badge.png)](https://pypi.python.org/pypi/django-file-form/)
