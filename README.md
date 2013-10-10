@@ -19,7 +19,7 @@ Features:
 
 The project is hosted on [github](https://github.com/mbraak/django-file-form).
 
-Works with Django 1.4 and 1.5.
+Works with Django 1.4 - 1.6beta.
 
 ## Usage
 
