@@ -9,7 +9,7 @@ from django_file_form.migration import table_exists
 
 class Migration(SchemaMigration):
     def forwards(self, orm):
-        if not table_exists:
+        if not table_exists('django_file_form_uploadedfile'):
             # Adding model 'UploadedFile'
             db.create_table(u'django_file_form_uploadedfile', (
                 (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
