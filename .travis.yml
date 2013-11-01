@@ -30,4 +30,4 @@ after_success:
 matrix:
   exclude:
     - python: 3.3
-      env: DJANGO=Django==1.4.8
+      env: DJANGO=Django==1.4.9
