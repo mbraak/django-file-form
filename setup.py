@@ -13,8 +13,8 @@ setup(
     author='Marco Braak',
     author_email='mbraak@ridethepony.nl',
     description='Django-file-form helps you to write forms with a pretty ajax upload',
-    install_requires=['ajaxuploader==0.3.0.3', 'six', 'path.py'],
+    install_requires=['ajaxuploader==0.3.1.1', 'six', 'path.py'],
     dependency_links=[
-        'https://github.com/mbraak/django-ajax-uploader/archive/0.3.0.3.tar.gz#egg=ajaxuploader-0.3.0.3',
+        'https://github.com/mbraak/django-ajax-uploader/archive/0.3.1.1.tar.gz#egg=ajaxuploader-0.3.1.1',
     ]
 )
