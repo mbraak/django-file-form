@@ -8,6 +8,8 @@
 
 [![Downloads](https://pypip.in/v/django-file-form/badge.png)](https://pypi.python.org/pypi/django-file-form/)
 
+[![Requirements Status](https://requires.io/github/mbraak/django-file-form/requirements.png?branch=master)](https://requires.io/github/mbraak/django-file-form/requirements/?branch=master)
+
 #Django file form
 
 **Django-file-form** helps you to write forms with a pretty ajax upload.
