@@ -1,4 +1,4 @@
-function initUploadFields($form) {
+function initUploadFields($form, error_text_display_mode) {
     var csrf_token = $form.find('[name=csrfmiddlewaretoken]').val();
     var upload_url = $form.find('[name=upload_url]').val();
     var delete_url = $form.find('[name=delete_url]').val();
@@ -10,32 +10,55 @@ function initUploadFields($form) {
             var field_name = $input_file.attr('name');
             var multiple = !! $input_file.attr('multiple');
 
-            initFileUploader(element, field_name, csrf_token, upload_url, delete_url, form_id, multiple);
+            var options = {
+                element: element,
+                field_name: field_name,
+                csrf_token: csrf_token,
+                upload_url: upload_url,
+                delete_url: delete_url,
+                form_id: form_id,
+                multiple: multiple,
+                error_text_display_mode: error_text_display_mode
+            };
+
+            initFileUploader(options);
         }
     );
 }
 
-function initFileUploader(element, field_name, csrf_token, upload_url, delete_url, form_id, multiple) {
-    var $container = $(element);
+function initFileUploader(options) {
+    var $container = $(options.element);
 
-    $container.fineUploader({
+    if (! options.error_text_display_mode) {
+        options.error_text_display_mode = 'default';
+    }
+
+    var uploader_options = {
         request: {
-            endpoint: upload_url,
+            endpoint: options.upload_url,
             params: {
-                csrfmiddlewaretoken: csrf_token,
-                field_name: field_name,
-                form_id: form_id
+                csrfmiddlewaretoken: options.csrf_token,
+                field_name: options.field_name,
+                form_id: options.form_id
             }
         },
-        multiple: multiple,
+        multiple: options.multiple,
         deleteFile: {
             enabled: true,
-            endpoint: delete_url,
+            endpoint: options.delete_url,
             customHeaders: {
-                X_CSRFTOKEN: csrf_token
+                X_CSRFTOKEN: options.csrf_token
             }
+        },
+        failedUploadTextDisplay: {
+            mode: options.error_text_display_mode,
+            maxChars: 100,
+            responseProperty: 'error',
+            enableTooltip: true
         }
-    });
+    };
+
+    $container.fineUploader(uploader_options);
 
     var files_data = $container.data('files');
     if (files_data) {
