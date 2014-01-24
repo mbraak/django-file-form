@@ -48,7 +48,7 @@ function initFileUploader(options) {
             endpoint: options.delete_url,
             method: 'POST',
             customHeaders: {
-                X_CSRFTOKEN: options.csrf_token
+                "X-CSRFToken": options.csrf_token
             }
         },
         failedUploadTextDisplay: {
