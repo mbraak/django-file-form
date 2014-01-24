@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 
-version = '0.1.4.9'
+version = '0.1.4.10'
 
 setup(
     name='django-file-form',
