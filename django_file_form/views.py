@@ -11,7 +11,13 @@ handle_upload = FileFormUploader()
 
 
 class DeleteFile(generic.View):
+    def post(self, request, file_id):
+        return self.delete_file(request, file_id)
+
     def delete(self, request, file_id):
+        return self.delete_file(request, file_id)
+
+    def delete_file(self, request, file_id):
         if conf.MUST_LOGIN and not request.user.is_authenticated():
             raise PermissionDenied()
 

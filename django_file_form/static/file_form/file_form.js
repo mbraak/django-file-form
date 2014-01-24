@@ -46,6 +46,7 @@ function initFileUploader(options) {
         deleteFile: {
             enabled: true,
             endpoint: options.delete_url,
+            method: 'POST',
             customHeaders: {
                 X_CSRFTOKEN: options.csrf_token
             }
