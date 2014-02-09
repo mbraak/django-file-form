@@ -6,7 +6,8 @@ python:
 env:
   - DJANGO=Django==1.4.10
   - DJANGO=Django==1.5.5
-  - DJANGO=Django==1.6.1
+  - DJANGO=Django==1.6.2
+  - DJANGO=https://www.djangoproject.com/download/1.7a2/tarball/
 install:
   - pip install $DJANGO
   - pip install -r testproject/requirements.txt
@@ -27,5 +28,7 @@ after_success:
   - covio
 matrix:
   exclude:
+    - python: 2.6
+      env: DJANGO=https://www.djangoproject.com/download/1.7a2/tarball/
     - python: 3.3
       env: DJANGO=Django==1.4.10
