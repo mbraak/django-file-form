@@ -1,14 +1,14 @@
 from django import forms
 from django.core.urlresolvers import reverse
 
-from django_pony_forms.pony_forms import BootstrapFormMixin
+from django_pony_forms.pony_forms import PonyFormMixin
 
 from django_file_form.forms import UploadedFileField, MultipleUploadedFileField, FileFormMixin
 
 from .models import Example, Example2, ExampleFile
 
 
-class BaseForm(BootstrapFormMixin, FileFormMixin, forms.Form):
+class BaseForm(PonyFormMixin, FileFormMixin, forms.Form):
     title = forms.CharField()
 
 
