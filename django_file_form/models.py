@@ -13,7 +13,7 @@ class UploadedFileManager(ModelManager):
     def delete_unused_files(self, delete=True, now=None):
         deleted_files = []
 
-        for t in self.get_queryset():
+        for t in self.get_query_set():
             if t.must_be_deleted(now):
                 if delete:
                     t.delete()
