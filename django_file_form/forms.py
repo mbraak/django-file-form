@@ -18,13 +18,10 @@ class FileFormMixin(object):
 
         self.add_hidden_field('form_id', uuid.uuid4)
         self.add_hidden_field('upload_url', self.get_upload_url())
-        self.add_hidden_field('delete_url', self.get_delete_url())
+        self.add_hidden_field('delete_url', reverse('file_form_handle_delete_no_args'))
 
     def add_hidden_field(self, name, initial):
         self.fields[name] = CharField(widget=HiddenInput, initial=initial, required=False)
-
-    def get_delete_url(self):
-        return reverse('file_form_handle_delete_no_args')
 
     def get_upload_url(self):
         return reverse('file_form_handle_upload')
@@ -59,16 +56,24 @@ class FileFormMixin(object):
                 if hasattr(field, 'delete_file_data'):
                     field.delete_file_data(field_name, form_id)
 
+    def add_existing_file(self, field_name, filename, delete_url=None, view_url=None):
+        self.initial.setdefault(field_name, [])
+
+        existing_file = ExistingFile(name=filename, delete_url=delete_url, view_url=view_url)
+
+        self.initial[field_name].append(existing_file)
+
 
 class UploadWidget(ClearableFileInput):
     def render(self, name, value, attrs=None):
         def get_file_value(f):
-            if hasattr(f, 'file_id'):
+            if getattr(f, 'is_existing', False) or hasattr(f, 'file_id'):
                 return f.get_values()
             else:
                 return dict(name=f.name)
 
-        files_data = None
+        uploaded_files = []
+        existing_files = []
 
         if value:
             if isinstance(value, list):
@@ -76,18 +81,21 @@ class UploadWidget(ClearableFileInput):
             else:
                 values = [value]
 
-            files_data = json.dumps(
-                [
-                    get_file_value(v) for v in values
-                ]
-            )
+            for file_info in values:
+                if getattr(file_info, 'existing', False):
+                    existing_files.append(file_info.get_values())
+                elif hasattr(file_info, 'file_id'):
+                    uploaded_files.append(file_info.get_values())
+                else:
+                    uploaded_files.append(dict(name=file_info.name))
 
         return mark_safe(
             render_to_string(
                 'django_file_form/upload_widget.html',
                 dict(
                     input=super(UploadWidget, self).render(name, value, attrs),
-                    files_data=files_data
+                    uploaded_files=json.dumps(uploaded_files),
+                    existing_files=existing_files
                 )
             )
         )
@@ -96,14 +104,8 @@ class UploadWidget(ClearableFileInput):
 class UploadedFileField(FileField):
     widget = UploadWidget
 
-    def get_file_qs(self, field_name, form_id):
-        return UploadedFile.objects.filter(
-            form_id=form_id,
-            field_name=field_name
-        )
-
     def get_file_data(self, field_name, form_id):
-        qs = self.get_file_qs(field_name, form_id)
+        qs = self._get_file_qs(field_name, form_id)
 
         if qs.exists():
             return qs.latest('created').get_uploaded_file()
@@ -111,10 +113,16 @@ class UploadedFileField(FileField):
             return None
 
     def delete_file_data(self, field_name, form_id):
-        qs = self.get_file_qs(field_name, form_id)
+        qs = self._get_file_qs(field_name, form_id)
 
         for f in qs:
             f.delete()
+
+    def _get_file_qs(self, field_name, form_id):
+        return UploadedFile.objects.filter(
+            form_id=form_id,
+            field_name=field_name
+        )
 
 
 class MultipleUploadedFileField(UploadedFileField):
@@ -125,7 +133,7 @@ class MultipleUploadedFileField(UploadedFileField):
         return attrs
 
     def get_file_data(self, field_name, form_id):
-        qs = self.get_file_qs(field_name, form_id)
+        qs = self._get_file_qs(field_name, form_id)
 
         return [
             f.get_uploaded_file() for f in qs
@@ -135,19 +143,49 @@ class MultipleUploadedFileField(UploadedFileField):
         if data in validators.EMPTY_VALUES:
             return None
         elif isinstance(data, list):
-            for f in data:
+            return [
                 super(MultipleUploadedFileField, self).to_python(f)
-
-            return data
+                for f in data
+            ]
         else:
             return [data]
 
+    def bound_data(self, data, initial):
+        result = []
+
+        if initial:
+            result += get_list(initial)
+
+        if data:
+            result += get_list(data)
+
+        return result
+
 
 class ExistingFile(object):
-    def __init__(self, name, file_id):
+    def __init__(self, name, delete_url=None, view_url=None):
         self.name = name
-        self.file_id = file_id
-        self.is_existing = True
+        self.delete_url = delete_url
+        self.view_url = view_url
+        self.existing = True
 
     def get_values(self):
-        return dict(name=self.name, id=self.file_id)
+        result = dict(
+            name=self.name,
+            existing=True
+        )
+
+        if self.delete_url:
+            result['delete_url'] = self.delete_url
+
+        if self.view_url:
+            result['view_url'] = self.view_url
+
+        return result
+
+
+def get_list(v):
+    if isinstance(v, list):
+        return v
+    else:
+        return [v]

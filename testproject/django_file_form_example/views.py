@@ -2,9 +2,7 @@ from path import path
 
 from django.core.urlresolvers import reverse
 from django.views import generic
-from django.http import HttpResponse
 
-from django_file_form.views import DeleteFile as OriginalDeleteFileView
 from django_file_form.forms import ExistingFile
 from django_file_form.uploader import FileFormUploader
 
@@ -46,28 +44,10 @@ class ExistingFileExampleView(BaseFormView):
         if example.input_file:
             name = path(example.input_file.name).basename()
             form_kwargs['initial'] = dict(
-                input_file=ExistingFile(name, example.id)
+                input_file=ExistingFile(name)
             )
 
         return form_kwargs
-
-
-class DeleteFileView(OriginalDeleteFileView):
-    def delete(self, request, file_id):
-        try:
-            example_id = int(file_id)
-            qs = Example.objects.filter(id=example_id)
-
-            if not qs.exists:
-                return super(DeleteFileView, self).delete(request, file_id)
-            else:
-                example = qs.get()
-                example.input_file.delete()
-                example.save()
-
-                return HttpResponse("ok")
-        except ValueError:
-            return super(DeleteFileView, self).delete(request, file_id)
 
 
 handle_upload = FileFormUploader()

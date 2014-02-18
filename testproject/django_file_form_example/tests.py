@@ -72,7 +72,7 @@ class FileFormWebTests(WebTest):
 
             self.assertTrue(temp_filepath.exists())
 
-            upload_container = page.pyquery('#row-input_file .upload-container')
+            upload_container = page.pyquery('#row-input_file .file-uploader-container')
 
             self.assertEqual(
                 json.loads(upload_container.attr('data-files')),
@@ -133,7 +133,7 @@ class FileFormWebTests(WebTest):
             # submit the form with an error
             page = form.submit()
 
-            upload_container = page.pyquery('#row-input_file .upload-container')
+            upload_container = page.pyquery('#row-input_file .file-uploader-container')
 
             self.assertEqual(
                 json.loads(upload_container.attr('data-files')),
@@ -236,29 +236,16 @@ class FileFormWebTests(WebTest):
 
             self.assertTrue(example_file_path.exists())
 
-            # expect file in 'data-files'
-            upload_container = page.pyquery('#row-input_file .upload-container')
+            # expect no uploaded files
+            upload_container = page.pyquery('#row-input_file .file-uploader-container')
             files_data = upload_container.attr('data-files')
-            self.assertEqual(
-                json.loads(files_data),
-                [
-                    dict(name=example_filename, id=example.id)
-                ]
-            )
+            self.assertEqual(json.loads(files_data), [])
 
-            # expect different delete url
-            self.assertEqual(form['delete_url'].value, '/handle_delete')
+            # expect same delete url
+            self.assertEqual(form['delete_url'].value, '/upload/handle_delete')
 
             # expect different upload url
             self.assertEqual(form['upload_url'].value, '/handle_upload')
-
-            # - delete existing file
-            self.delete_ajax_file(form, str(example.id))
-
-            example = Example.objects.get(id=example.id)
-            self.assertEqual(example.input_file.name, '')
-
-            self.assertFalse(example_file_path.exists())
 
             # - upload file
             file_id = self.upload_ajax_file(form, 'input_file', temp_filename)
@@ -311,7 +298,7 @@ class FileFormWebTests(WebTest):
         csrf_token = str(form['csrfmiddlewaretoken'].value)
         delete_url = '%s/%s' % (form['delete_url'].value, file_id)
 
-        response = self.app.delete(
+        response = self.app.post(
             delete_url,
             headers=dict(
                 X_REQUESTED_WITH='XMLHttpRequest',

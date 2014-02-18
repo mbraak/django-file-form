@@ -41,8 +41,5 @@ class MultipleFileExampleForm(BaseForm):
 
 
 class ExistingFileForm(ExampleForm):
-    def get_delete_url(self):
-        return reverse('example_handle_delete_no_args')
-
     def get_upload_url(self):
         return reverse('example_handle_upload')

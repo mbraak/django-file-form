@@ -4,14 +4,18 @@ function initUploadFields($form, options) {
     var delete_url = $form.find('[name=delete_url]').val();
     var form_id = $form.find('[name=form_id]').val();
 
-    $form.find('.upload-container').each(
+    $form.find('.file-uploader').each(
         function(i, element) {
-            var $input_file = $(element).find('input[type=file]');
+            var $element = $(element);
+
+            var $input_file = $($element.find('input[type=file]'));
+            var container = $element.find('.file-uploader-container');
+
             var field_name = $input_file.attr('name');
             var multiple = !! $input_file.attr('multiple');
 
             var uploader_options = {
-                element: element,
+                element: container,
                 field_name: field_name,
                 csrf_token: csrf_token,
                 upload_url: upload_url,
@@ -24,6 +28,12 @@ function initUploadFields($form, options) {
                 $.extend(uploader_options, options);
             }
 
+            if (! multiple) {
+                $(container).on('complete', function() {
+                    $($element.find('.existing-files')).remove();
+                });
+            }
+
             initFileUploader(uploader_options);
         }
     );
@@ -31,10 +41,6 @@ function initUploadFields($form, options) {
 
 function initFileUploader(options) {
     var $container = $(options.element);
-
-    if (! options.error_text_display_mode) {
-        options.error_text_display_mode = 'default';
-    }
 
     var uploader_options = {
         request: {
@@ -55,7 +61,6 @@ function initFileUploader(options) {
             }
         },
         failedUploadTextDisplay: {
-            mode: options.error_text_display_mode,
             maxChars: 100,
             responseProperty: 'error',
             enableTooltip: true
@@ -74,6 +79,10 @@ function initFileUploader(options) {
         $.extend(uploader_options.failedUploadTextDisplay, options.failedUploadTextDisplay);
     }
 
+    if (options.callbacks) {
+        uploader_options.callbacks = options.callbacks;
+    }
+
     $container.fineUploader(uploader_options);
 
     var files_data = $container.data('files');
@@ -81,7 +90,9 @@ function initFileUploader(options) {
         $.each(
             files_data,
             function(index, value) {
-                $container.fineUploader('addExistingFile', value['id'], value['name']);
+                if (! value.existing) {
+                    $container.fineUploader('addExistingFile', value['id'], value['name']);
+                }
             }
         );
     }
