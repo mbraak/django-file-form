@@ -2,7 +2,7 @@ beautifulsoup4==4.3.2  # needed by webtest
 coverage==3.7.1
 cssselect==0.9.1  # needed by pyquery
 django-webtest==1.7.6
-lxml==3.3.1  # needed by pyquery
+lxml==3.3.2  # needed by pyquery
 pyquery==1.2.8  # needed by webtest
 South==0.8.4
 waitress==0.8.8  # needed by webtest
