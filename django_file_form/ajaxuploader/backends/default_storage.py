@@ -5,7 +5,7 @@ from django.conf import settings
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 
-from ajaxuploader.backends.base import AbstractUploadBackend
+from django_file_form.ajaxuploader.backends.base import AbstractUploadBackend
 
 
 class DefaultStorageUploadBackend(AbstractUploadBackend):

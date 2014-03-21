@@ -3,13 +3,12 @@ try:
 except ImportError:
     from django.utils import simplejson as json
 
-from django.core.files.base import File
 from django.core.serializers.json import DjangoJSONEncoder
 
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotAllowed
 
-from ajaxuploader.backends.local import LocalUploadBackend
-from ajaxuploader.signals import file_uploaded
+from django_file_form.ajaxuploader.backends.local import LocalUploadBackend
+from django_file_form.ajaxuploader.signals import file_uploaded
 
 
 class AjaxFileUploader(object):

@@ -8,7 +8,7 @@ from tempfile import TemporaryFile
 from couchdb import Server
 from django.conf import settings
 
-from ajaxuploader.backends.base import AbstractUploadBackend
+from django_file_form.ajaxuploader.backends.base import AbstractUploadBackend
 
 class CouchDBUploadBackend(AbstractUploadBackend):
     """Stores the file in a CouchDB Backend

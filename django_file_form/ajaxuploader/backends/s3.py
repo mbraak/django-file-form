@@ -4,7 +4,7 @@ from StringIO import StringIO
 import boto
 from django.conf import settings
 
-from ajaxuploader.backends.base import AbstractUploadBackend
+from django_file_form.ajaxuploader.backends.base import AbstractUploadBackend
 
 
 class S3UploadBackend(AbstractUploadBackend):

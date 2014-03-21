@@ -3,7 +3,7 @@ import os
 from django.conf import settings
 from easy_thumbnails.files import get_thumbnailer
 
-from ajaxuploader.backends.local import LocalUploadBackend
+from django_file_form.ajaxuploader.backends.local import LocalUploadBackend
 
 
 class EasyThumbnailUploadBackend(LocalUploadBackend):

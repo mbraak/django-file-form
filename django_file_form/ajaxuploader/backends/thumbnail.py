@@ -3,7 +3,7 @@ import os
 from django.conf import settings
 from sorl.thumbnail import get_thumbnail
 
-from ajaxuploader.backends.local import LocalUploadBackend
+from django_file_form.ajaxuploader.backends.local import LocalUploadBackend
 
 class ThumbnailUploadBackend(LocalUploadBackend):
     DIMENSIONS = "100x100"
