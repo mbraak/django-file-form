@@ -2,8 +2,8 @@ import uuid
 
 from django.core.exceptions import PermissionDenied
 
-from ajaxuploader.backends.local import LocalUploadBackend
-from ajaxuploader.views import AjaxFileUploader
+from .ajaxuploader.backends.local import LocalUploadBackend
+from .ajaxuploader.views import AjaxFileUploader
 
 from .models import UploadedFile
 from . import conf
