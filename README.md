@@ -25,18 +25,7 @@ Works with Django 1.4 - 1.7a.
 pip install django-file-form
 ```
 
-This also installs the ajaxuploader app.
-
-**2 Include the app ajaxuploader and django_file_form in your settings**
-
-```python
-INSTALLED_APPS = [
-    'ajaxuploader',
-    'django_file_form'
-]
-```
-
-**3 Add the app to your urls**
+**2 Add the app to your urls**
 
 In this example we use the url **upload/**. You can use a different url if you like.
 
@@ -47,7 +36,7 @@ urlpatterns = patterns(
 )
 ```
 
-**4 Add FileFormMixin to your form**
+**3 Add FileFormMixin to your form**
 
 ```python
 from django_file_form.forms import FileFormMixin
@@ -56,7 +45,7 @@ class ExampleForm(FileFormMixin, forms.Form):
     pass
 ```
 
-**5 Add a UploadedFileField**
+**4 Add a UploadedFileField**
 
 ```python
 from django_file_form.forms import FileFormMixin, UploadedFileField
@@ -65,7 +54,7 @@ class ExampleForm(FileFormMixin, forms.Form):
     input_file = UploadedFileField()
 ```
 
-**6 Include fileuploader.js and file_form.js in your template**
+**5 Include fileuploader.js and file_form.js in your template**
 
 ```html
  <script src="{{ STATIC_URL }}ajaxuploader/js/fileuploader.js"></script>
@@ -74,7 +63,7 @@ class ExampleForm(FileFormMixin, forms.Form):
 
 By the way, you must also include jquery.
 
-**7 Call the initUploadFields javascript function**
+**6 Call the initUploadFields javascript function**
 
 ```html
  <form id="example-form" method="POST" enctype="multipart/form-data">
@@ -89,7 +78,7 @@ By the way, you must also include jquery.
  </script>
 ```
 
-**8 Handle uploaded files**
+**7 Handle uploaded files**
 
 ```python
 class ExampleFormView(generic.FormView):
@@ -102,7 +91,7 @@ class ExampleFormView(generic.FormView):
     	return super(ExampleFormView, self).form_valid(form)
 ```
 
-**9 Delete temporary files**
+**8 Delete temporary files**
 
 ```python
 class ExampleFormView(generic.FormView):

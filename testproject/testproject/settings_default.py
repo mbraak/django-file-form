@@ -22,7 +22,6 @@ INSTALLED_APPS = [
     'django_file_form_example',
 
     # Generic apps
-    'ajaxuploader',
     'django_file_form',
     'django_pony_forms',
 
