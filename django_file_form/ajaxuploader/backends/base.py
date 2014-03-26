@@ -12,8 +12,7 @@ class AbstractUploadBackend(object):
         """Returns a new name for the file being uploaded."""
 
     def upload_chunk(self, chunk, *args, **kwargs):
-        """Called when a string was read from the client, responsible for 
-        writing that string to the destination file."""
+        """Called when a string was read from the client, responsible for writing that string to the destination file."""
         raise NotImplementedError
 
     def upload_complete(self, request, filename, file_id, *args, **kwargs):

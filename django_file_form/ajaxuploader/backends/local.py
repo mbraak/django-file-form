@@ -55,4 +55,3 @@ class LocalUploadBackend(AbstractUploadBackend):
             return filename
         else:
             return filename_no_extension + str(filename_suffix) + extension
-
