@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/mbraak/django-file-form.png?branch=master)](https://travis-ci.org/mbraak/django-file-form) [![Coverage Status](https://coveralls.io/repos/mbraak/django-file-form/badge.png?branch=master)](https://coveralls.io/r/mbraak/django-file-form?branch=master) [![Downloads](https://pypip.in/d/django-file-form/badge.png)](https://pypi.python.org/pypi/django-file-form/) [![Downloads](https://pypip.in/v/django-file-form/badge.png)](https://pypi.python.org/pypi/django-file-form/) [![Requirements Status](https://requires.io/github/mbraak/django-file-form/requirements.png?branch=master)](https://requires.io/github/mbraak/django-file-form/requirements/?branch=master) [![Wheel Status](https://pypip.in/wheel/django-file-form/badge.png)](https://pypi.python.org/pypi/django-file-form/) [![Egg Status](https://pypip.in/egg/django-file-form/badge.png)](https://pypi.python.org/pypi/django-file-form/) [![License](https://pypip.in/license/django-file-form/badge.png)](https://pypi.python.org/pypi/django-file-form/)
+[![Build Status](https://travis-ci.org/mbraak/django-file-form.png?branch=master)](https://travis-ci.org/mbraak/django-file-form) [![Coverage Status](https://coveralls.io/repos/mbraak/django-file-form/badge.png?branch=master)](https://coveralls.io/r/mbraak/django-file-form?branch=master) [![Downloads](https://pypip.in/d/django-file-form/badge.png)](https://pypi.python.org/pypi/django-file-form/) [![Requirements Status](https://requires.io/github/mbraak/django-file-form/requirements.png?branch=master)](https://requires.io/github/mbraak/django-file-form/requirements/?branch=master) [![Wheel Status](https://pypip.in/wheel/django-file-form/badge.png)](https://pypi.python.org/pypi/django-file-form/) [![Egg Status](https://pypip.in/egg/django-file-form/badge.png)](https://pypi.python.org/pypi/django-file-form/) [![License](https://pypip.in/license/django-file-form/badge.png)](https://pypi.python.org/pypi/django-file-form/)
 
 [![Violations](https://coviolations.io/projects/mbraak/django-file-form/badge/?)](http://coviolations.io/projects/mbraak/django-file-form/)
 
@@ -15,7 +15,7 @@ Features:
 
 The project is hosted on [github](https://github.com/mbraak/django-file-form).
 
-Works with Django 1.4 - 1.7a.
+Works with Django 1.4 - 1.7beta.
 
 ## Usage
 
