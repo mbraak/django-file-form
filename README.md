@@ -15,7 +15,7 @@ Features:
 
 The project is hosted on [github](https://github.com/mbraak/django-file-form).
 
-Works with Django 1.4 - 1.7beta.
+Works with Django 1.4 - 1.7.
 
 ## Usage
 
@@ -25,7 +25,18 @@ Works with Django 1.4 - 1.7beta.
 pip install django-file-form
 ```
 
-**2 Add the app to your urls**
+**2 Add the app to your INSTALLED_APPS**
+
+You must include 'django_file_form' and 'django_file_form.ajaxuploader'
+
+```python
+INSTALLED_APPS = [
+    'django_file_form',
+    'django_file_form.ajaxuploader',
+]
+```
+
+**3 Add the app to your urls**
 
 In this example we use the url **upload/**. You can use a different url if you like.
 
@@ -36,7 +47,7 @@ urlpatterns = patterns(
 )
 ```
 
-**3 Add FileFormMixin to your form**
+**4 Add FileFormMixin to your form**
 
 ```python
 from django_file_form.forms import FileFormMixin
@@ -45,7 +56,7 @@ class ExampleForm(FileFormMixin, forms.Form):
     pass
 ```
 
-**4 Add a UploadedFileField**
+**5 Add a UploadedFileField**
 
 ```python
 from django_file_form.forms import FileFormMixin, UploadedFileField
@@ -54,7 +65,7 @@ class ExampleForm(FileFormMixin, forms.Form):
     input_file = UploadedFileField()
 ```
 
-**5 Include fileuploader.js and file_form.js in your template**
+**6 Include fileuploader.js and file_form.js in your template**
 
 ```html
  <script src="{{ STATIC_URL }}ajaxuploader/js/fileuploader.js"></script>
@@ -63,7 +74,7 @@ class ExampleForm(FileFormMixin, forms.Form):
 
 By the way, you must also include jquery.
 
-**6 Call the initUploadFields javascript function**
+**7 Call the initUploadFields javascript function**
 
 ```html
  <form id="example-form" method="POST" enctype="multipart/form-data">
@@ -78,7 +89,7 @@ By the way, you must also include jquery.
  </script>
 ```
 
-**7 Handle uploaded files**
+**8 Handle uploaded files**
 
 ```python
 class ExampleFormView(generic.FormView):
@@ -91,7 +102,7 @@ class ExampleFormView(generic.FormView):
     	return super(ExampleFormView, self).form_valid(form)
 ```
 
-**8 Delete temporary files**
+**9 Delete temporary files**
 
 ```python
 class ExampleFormView(generic.FormView):
