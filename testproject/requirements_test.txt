@@ -4,7 +4,6 @@ cssselect==0.9.1  # required by pyquery
 django-webtest==1.7.7
 lxml==3.4.1  # required by pyquery
 pyquery==1.2.9  # required by webtest
-South==1.0.1
 waitress==0.8.9  # required by webtest
 WebOb==1.4  # required by webtest
 WebTest==2.0.16
