@@ -12,4 +12,4 @@ WebTest==2.0.16
 
 # bootstrap3 form
 django-bootstrap3-form==0.1.0
-django-pony-forms==0.3.6
+django-pony-forms==0.3.7
