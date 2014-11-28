@@ -11,7 +11,9 @@ handle_upload = FileFormUploader()
 
 
 class DeleteFile(generic.View):
-    def post(self, request, file_id):
+    def post(self, request, file_id=None):
+        file_id = file_id or request.POST.get('qquuid')
+
         return self.delete_file(request, file_id)
 
     def delete(self, request, file_id):

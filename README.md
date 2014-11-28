@@ -70,12 +70,12 @@ class ExampleForm(FileFormMixin, forms.Form):
 **6 Include javascript and css in your template**
 
 ```html
-<script src="{{ STATIC_URL }}ajaxuploader/js/fileuploader.js"></script>
-<script src="{{ STATIC_URL }}file_form/file_form.js"></script>
-<link rel="stylesheet" href="{{ STATIC_URL }}ajaxuploader/css/fileuploader.css">
+<script src="{% static "ajaxuploader/js/fileuploader.js" %}"></script>
+<script src="{% static "file_form/file_form.js" %}"></script>
+<link rel="stylesheet" href="{% static "ajaxuploader/css/fileuploader.css" %}">
 ```
 
-By the way, you must also include jquery.
+You must also include jquery
 
 **7 Call the initUploadFields javascript function**
 
@@ -92,20 +92,13 @@ By the way, you must also include jquery.
 </script>
 ```
 
-**8 Handle uploaded files**
+**8 Include the upload_template.html in your template**
 
-```python
-class ExampleFormView(generic.FormView):
-    template_name = 'example_form.html'
-    form_class = forms.ExampleForm
-
-    def form_valid(self, form):
-    	input_file = form.cleaned_data['input_file']
-
-    	return super(ExampleFormView, self).form_valid(form)
+```html
+{% include 'django_file_form/upload_template.html' %}
 ```
 
-**9 Delete temporary files**
+**9 Handle uploaded files**
 
 ```python
 class ExampleFormView(generic.FormView):
@@ -113,11 +106,24 @@ class ExampleFormView(generic.FormView):
     form_class = forms.ExampleForm
 
     def form_valid(self, form):
-    	input_file = form.cleaned_data['input_file']
+        input_file = form.cleaned_data['input_file']
 
-		self.delete_temporary_files()
+        return super(ExampleFormView, self).form_valid(form)
+```
 
-    	return super(ExampleFormView, self).form_valid(form)
+**10 Delete temporary files**
+
+```python
+class ExampleFormView(generic.FormView):
+    template_name = 'example_form.html'
+    form_class = forms.ExampleForm
+
+    def form_valid(self, form):
+        input_file = form.cleaned_data['input_file']
+
+        self.delete_temporary_files()
+
+        return super(ExampleFormView, self).form_valid(form)
 ```
 
 Also see the testproject in the repository.

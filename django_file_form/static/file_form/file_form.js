@@ -91,30 +91,15 @@ function initFileUploader(options) {
             files_data,
             function(index, value) {
                 if (! value.existing) {
-                    $container.fineUploader('addExistingFile', value['id'], value['name']);
+                    $container.fineUploader(
+                        'addCannedFile',
+                        {
+                            uuid: value['id'],
+                            name: value['name']
+                        }
+                    );
                 }
             }
         );
-    }
-}
-
-qq.FineUploader.prototype.addExistingFile = function(uuid, name) {
-    var id = this._handler.addExistingFile(uuid, name);
-
-    var item = qq.toElement(this._options.fileTemplate);
-    item.qqFileId = id;
-
-    qq(this._find(item, 'cancel')).remove();
-    qq(item).addClass(this._classes.success);
-
-    var fileElement = this._find(item, 'file');
-    qq(fileElement).setText(this._options.formatFileName(name));
-    qq(this._find(item, 'size')).hide();
-    qq(this._find(item, 'spinner')).hide();
-
-    this._listElement.appendChild(item);
-
-    if (uuid && this._isDeletePossible()) {
-        this._showDeleteLink(id);
     }
 }

@@ -1,11 +1,12 @@
 {% extends 'base.html' %}
+{% load staticfiles %}
 
 {% block title %}Form example{% endblock %}
 
 {% block head %}
     {{ block.super }}
-    <link rel="stylesheet" href="{{ STATIC_URL }}ajaxuploader/css/fileuploader.css">
-    <link rel="stylesheet" href="{{ STATIC_URL }}example.css">
+    <link rel="stylesheet" href="{% static "ajaxuploader/css/fileuploader.css" %}">
+    <link rel="stylesheet" href="{% static "example.css" %}">
 {% endblock %}
 
 {% block body %}
@@ -22,9 +23,11 @@
         </div>
     </form>
 
-    <script src="{{ STATIC_URL }}jquery-1.9.1.js"></script>
-    <script src="{{ STATIC_URL }}ajaxuploader/js/fileuploader.js"></script>
-    <script src="{{ STATIC_URL }}file_form/file_form.js"></script>
+    {% include 'django_file_form/upload_template.html' %}
+
+    <script src="{% static "jquery-1.9.1.js" %}"></script>
+    <script src="{% static "ajaxuploader/js/fileuploader.js" %}"></script>
+    <script src="{% static "file_form/file_form.js" %}"></script>
     <script>
         $(function() {
             initUploadFields($('#example-form'));
