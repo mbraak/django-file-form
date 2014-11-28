@@ -1,40 +1,30 @@
 # -*- coding: utf-8 -*-
-import datetime
+from __future__ import unicode_literals
 
-from south.db import db
-from south.v2 import SchemaMigration
+from django.db import models, migrations
+import django.utils.timezone
+import django.core.files.storage
 
-from django_file_form.migration import table_exists
 
+class Migration(migrations.Migration):
 
-class Migration(SchemaMigration):
-    def forwards(self, orm):
-        if not table_exists('django_file_form_uploadedfile'):
-            # Adding model 'UploadedFile'
-            db.create_table(u'django_file_form_uploadedfile', (
-                (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-                ('created', self.gf('django.db.models.fields.DateTimeField')(default=datetime.datetime.now)),
-                ('uploaded_file', self.gf('django.db.models.fields.files.FileField')(max_length=255)),
-                ('field_name', self.gf('django.db.models.fields.CharField')(max_length=255, null=True, blank=True)),
-                ('file_id', self.gf('django.db.models.fields.CharField')(max_length=40)),
-                ('form_id', self.gf('django.db.models.fields.CharField')(max_length=40)),
-            ))
-            db.send_create_signal(u'django_file_form', ['UploadedFile'])
+    dependencies = [
+    ]
 
-    def backwards(self, orm):
-        # Deleting model 'UploadedFile'
-        db.delete_table(u'django_file_form_uploadedfile')
-
-    models = {
-        u'django_file_form.uploadedfile': {
-            'Meta': {'object_name': 'UploadedFile'},
-            'created': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
-            'field_name': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
-            'file_id': ('django.db.models.fields.CharField', [], {'max_length': '40'}),
-            'form_id': ('django.db.models.fields.CharField', [], {'max_length': '40'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'uploaded_file': ('django.db.models.fields.files.FileField', [], {'max_length': '255'})
-        }
-    }
-
-    complete_apps = ['django_file_form']
+    operations = [
+        migrations.CreateModel(
+            name='UploadedFile',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created', models.DateTimeField(default=django.utils.timezone.now)),
+                ('uploaded_file', models.FileField(storage=django.core.files.storage.FileSystemStorage(), max_length=255, upload_to=b'temp_uploads')),
+                ('original_filename', models.CharField(max_length=255)),
+                ('field_name', models.CharField(max_length=255, null=True, blank=True)),
+                ('file_id', models.CharField(max_length=40)),
+                ('form_id', models.CharField(max_length=40)),
+            ],
+            options={
+            },
+            bases=(models.Model,),
+        ),
+    ]
