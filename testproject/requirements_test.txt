@@ -1,6 +1,8 @@
 beautifulsoup4==4.3.2  # required by webtest
 coverage==3.7.1
 cssselect==0.9.1  # required by pyquery
+django-bootstrap3-form==0.1.0
+django-pony-forms==0.3.6  # required by django-bootstrap3-form
 django-webtest==1.7.7
 lxml==3.4.1  # required by pyquery
 pyquery==1.2.9  # required by webtest

@@ -14,13 +14,10 @@
         method="POST"
         enctype="multipart/form-data"
         id="example-form"
-        class="form-horizontal"
     >
         {% csrf_token %}
         {{ form }}
-        <div class="form-actions">
-            <input class="btn btn-primary" type="submit" value="Save" />
-        </div>
+        <input class="btn btn-primary" type="submit" value="Save" />
     </form>
 
     {% include 'django_file_form/upload_template.html' %}

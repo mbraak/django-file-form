@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+{% load staticfiles %}<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <title>{% block title %}{% endblock %}</title>
     {% block head %}
-        <link rel="stylesheet" href="{{ STATIC_URL }}bootstrap.css">
+        <link rel="stylesheet" href="{% static "django_bootstrap3_form/bootstrap/dist/css/bootstrap.css" %}">
     {% endblock %}
 </head>
 <body>
