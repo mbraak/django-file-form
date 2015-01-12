@@ -1,3 +1,6 @@
-django-pony-forms==0.3.7
 path.py==7.0
-six==1.8.0
+six==1.9.0
+
+# bootstrap3 form
+django-bootstrap3-form==0.1.0
+django-pony-forms==0.3.7
