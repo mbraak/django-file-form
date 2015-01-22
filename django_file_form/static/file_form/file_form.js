@@ -83,6 +83,14 @@ function initFileUploader(options) {
         uploader_options.callbacks = options.callbacks;
     }
 
+    if (options.template) {
+        uploader_options.template = options.template;
+    }
+
+    if (options.validation) {
+        uploader_options.validation= options.validation;
+    }
+
     $container.fineUploader(uploader_options);
 
     var files_data = $container.data('files');
