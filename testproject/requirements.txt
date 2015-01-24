@@ -1,4 +1,4 @@
-path.py==7.0
+path.py==7.1
 six==1.9.0
 
 # bootstrap3 form
