@@ -1,4 +1,0 @@
-violations:
-  pep8: pep8 . --exclude='*migrations*','build' --ignore=E501,W292
-  sloccount: sloccount django_file_form
-  pip_review: pip-review
