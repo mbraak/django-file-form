@@ -16,18 +16,16 @@ install:
   - pip install -r testproject/requirements.txt
   - pip install -r testproject/requirements_test.txt
   - pip install -r testproject/requirements_travis.txt
-  - python setup.py install
+  - pip install -e .
 script:
-  - cd testproject
-  - python manage.py test django_file_form_example
-  - coverage run --source=django_file_form,django_file_form_example manage.py test django_file_form_example
+  - python testproject/manage.py test django_file_form_example
+  - coverage run --source=django_file_form,django_file_form_example testproject/manage.py test django_file_form_example
   - coverage report
 before_install:
   - sudo apt-get update -qq
   - sudo apt-get install -qq sloccount
 after_success:
   - coveralls
-  - cd ..
   - covio
 matrix:
   exclude:
