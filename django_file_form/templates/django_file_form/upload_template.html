@@ -1,8 +1,15 @@
 <script type="text/template" id="qq-template">
     <div class="qq-uploader-selector qq-uploader">
+        <div class="qq-upload-drop-area-selector qq-upload-drop-area" qq-hide-dropzone>
+            <span>Drop files here to upload</span>
+        </div>
         <div class="qq-upload-button-selector qq-upload-button">
             <div>Upload a file</div>
         </div>
+        <span class="qq-drop-processing-selector qq-drop-processing">
+            <span>Processing dropped files...</span>
+            <span class="qq-drop-processing-spinner-selector qq-drop-processing-spinner"></span>
+        </span>
         <ul class="qq-upload-list-selector qq-upload-list">
             <li>
                 <div class="qq-progress-bar-container-selector">
