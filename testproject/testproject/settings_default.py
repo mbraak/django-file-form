@@ -55,3 +55,10 @@ MEDIA_ROOT.joinpath('example').mkdir_p()
 MEDIA_ROOT.joinpath('temp_uploads').mkdir_p()
 
 USE_TZ = True
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'APP_DIRS': True
+    }
+]
