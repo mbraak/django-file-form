@@ -1,8 +1,6 @@
-[![Build Status](https://travis-ci.org/mbraak/django-file-form.svg?branch=master)](https://travis-ci.org/mbraak/django-file-form) [![Version](https://pypip.in/version/django-file-form/badge.svg)](https://pypi.python.org/pypi/django-file-form/) [![Development Status](https://pypip.in/status/django-file-form/badge.svg)](https://pypi.python.org/pypi/django-file-form/)
+[![Build Status](https://travis-ci.org/mbraak/django-file-form.svg?branch=master)](https://travis-ci.org/mbraak/django-file-form) [![Version](https://badge.fury.io/py/django-file-form.svg)](https://pypi.python.org/pypi/django-file-form/)
 
-[![Coverage Status](https://img.shields.io/coveralls/mbraak/django-file-form.svg)](https://coveralls.io/r/mbraak/django-file-form?branch=master) [![Downloads](https://pypip.in/d/django-file-form/badge.svg)](https://pypi.python.org/pypi/django-file-form/) [![Format](https://pypip.in/format/django-file-form/badge.svg)](https://pypi.python.org/pypi/django-file-form/) [![Requirements Status](https://requires.io/github/mbraak/django-file-form/requirements.png?branch=master)](https://requires.io/github/mbraak/django-file-form/requirements/?branch=master)
-
-[![License](https://pypip.in/license/django-file-form/badge.svg)](https://pypi.python.org/pypi/django-file-form/) [![Supported Python versions](https://pypip.in/py_versions/django-file-form/badge.svg)](https://pypi.python.org/pypi/django-file-form/) [![Supported Python implementations](https://pypip.in/implementation/django-file-form/badge.svg)](https://pypi.python.org/pypi/django-file-form/)
+[![Coverage Status](https://img.shields.io/coveralls/mbraak/django-file-form.svg)](https://coveralls.io/r/mbraak/django-file-form?branch=master) [![Downloads](https://img.shields.io/pypi/dm/django-file-form.svg)](https://pypi.python.org/pypi/django-file-form/) [![Requirements Status](https://requires.io/github/mbraak/django-file-form/requirements.svg?branch=master)](https://requires.io/github/mbraak/django-file-form/requirements/?branch=master)
 
 #Django file form
 
