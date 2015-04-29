@@ -2,6 +2,8 @@
 
 [![Coverage Status](https://img.shields.io/coveralls/mbraak/django-file-form.svg)](https://coveralls.io/r/mbraak/django-file-form?branch=master) [![Downloads](https://img.shields.io/pypi/dm/django-file-form.svg)](https://pypi.python.org/pypi/django-file-form/) [![Requirements Status](https://requires.io/github/mbraak/django-file-form/requirements.svg?branch=master)](https://requires.io/github/mbraak/django-file-form/requirements/?branch=master)
 
+[![License](https://img.shields.io/pypi/l/django-file-form.svg)](https://pypi.python.org/pypi/django-file-form/)
+
 #Django file form
 
 **Django-file-form** helps you to write forms with a pretty ajax upload.
