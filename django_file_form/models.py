@@ -1,4 +1,4 @@
-from path import path
+from pathlib import Path
 
 from django.core.files.storage import FileSystemStorage
 from django.conf import settings
@@ -18,16 +18,16 @@ class UploadedFileManager(ModelManager):
                 if delete:
                     t.delete()
 
-                deleted_files.append(path(t.uploaded_file.name).basename())
+                deleted_files.append(Path(t.uploaded_file.name).name)
 
-        temp_path = path(settings.MEDIA_ROOT).joinpath('temp_uploads')
+        temp_path = Path(settings.MEDIA_ROOT).joinpath('temp_uploads')
 
-        for f in temp_path.files():
-            basename = f.basename()
+        for f in temp_path.iterdir():
+            basename = f.name
 
             if not self.get_for_file(basename):
                 if delete:
-                    f.remove()
+                    f.unlink()
 
                 deleted_files.append(basename)
 
@@ -61,7 +61,10 @@ class UploadedFile(models.Model):
         super(UploadedFile, self).delete(using)
 
         if self.uploaded_file:
-            self.get_path().remove_p()
+            path = self.get_path()
+
+            if path.exists():
+                path.unlink()
 
     def must_be_deleted(self, now=None):
         now = now or timezone.now()
@@ -70,7 +73,7 @@ class UploadedFile(models.Model):
 
     def get_path(self):
         if self.uploaded_file:
-            return path(self.uploaded_file.path)
+            return Path(self.uploaded_file.path)
         else:
             return None
 

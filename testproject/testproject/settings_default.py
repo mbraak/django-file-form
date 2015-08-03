@@ -1,7 +1,22 @@
-from path import path
+from pathlib import Path
 
 
-BASE_DIR = path(__file__).parent.parent.abspath()
+def mkdir_p(path):
+    if not path.exists():
+        path.mkdir()
+
+
+def resolve_paths():
+    base_dir = Path(__file__).parent.parent.resolve()
+
+    return str(base_dir.joinpath('media')), str(base_dir.joinpath('static'))
+
+
+def create_media_paths(media_root):
+    mkdir_p(media_root)
+    mkdir_p(media_root.joinpath('example'))
+    mkdir_p(media_root.joinpath('temp_uploads'))
+
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -47,12 +62,11 @@ MIDDLEWARE_CLASSES = (
 STATIC_URL = '/static/'
 ROOT_URLCONF = 'testproject.urls'
 
-STATIC_ROOT = BASE_DIR.joinpath('static')
 
-MEDIA_ROOT = BASE_DIR.joinpath('media')
-MEDIA_ROOT.mkdir_p()
-MEDIA_ROOT.joinpath('example').mkdir_p()
-MEDIA_ROOT.joinpath('temp_uploads').mkdir_p()
+MEDIA_ROOT, STATIC_ROOT = resolve_paths()
+
+create_media_paths(Path(MEDIA_ROOT))
+
 
 USE_TZ = True
 

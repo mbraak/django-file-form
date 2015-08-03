@@ -13,7 +13,7 @@ setup(
     author='Marco Braak',
     author_email='mbraak@ridethepony.nl',
     description='Django-file-form helps you to write forms with a pretty ajax upload',
-    install_requires=['six', 'path.py'],
+    install_requires=['six', 'pathlib'],
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Framework :: Django",

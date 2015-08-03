@@ -27,3 +27,8 @@ def encode_datetime(*args, **kwargs):
         return timezone.make_aware(naive_datime, timezone.get_current_timezone())
     else:
         return naive_datime
+
+
+def remove_p(path):
+    if path.exists():
+        path.unlink()

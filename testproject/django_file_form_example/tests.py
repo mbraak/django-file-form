@@ -2,6 +2,8 @@ import json
 
 import six
 
+from pathlib import Path
+
 from django.conf import settings
 from django.test import TestCase
 from django.core.management import call_command
@@ -12,7 +14,10 @@ from django_webtest import WebTest
 from django_file_form.models import UploadedFile
 
 from .models import Example, Example2
-from .test_utils import get_random_id, get_random_ids, encode_datetime
+from .test_utils import get_random_id, get_random_ids, encode_datetime, remove_p
+
+
+media_root = Path(settings.MEDIA_ROOT)
 
 
 class FileFormWebTests(WebTest):
@@ -31,7 +36,7 @@ class FileFormWebTests(WebTest):
             file_id = self.upload_ajax_file(form, 'input_file', filename)
 
             uploaded_file = UploadedFile.objects.get(file_id=file_id)
-            temp_filepath = settings.MEDIA_ROOT.joinpath(uploaded_file.uploaded_file.name)
+            temp_filepath = media_root.joinpath(uploaded_file.uploaded_file.name)
 
             self.assertTrue(temp_filepath.exists())
             UploadedFile.objects.get(file_id=file_id)
@@ -43,7 +48,7 @@ class FileFormWebTests(WebTest):
             self.assertFalse(UploadedFile.objects.filter(file_id=file_id).exists())
         finally:
             if temp_filepath:
-                temp_filepath.remove_p()
+                remove_p(temp_filepath)
 
     def test_submit_form_with_ajax_upload(self):
         """
@@ -52,7 +57,7 @@ class FileFormWebTests(WebTest):
         # setup
         filename = get_random_id()
         temp_filepath = None
-        example_filepath = settings.MEDIA_ROOT.joinpath('example', filename)
+        example_filepath = media_root.joinpath('example', filename)
         try:
             form = self.app.get('/').form
 
@@ -63,7 +68,7 @@ class FileFormWebTests(WebTest):
             self.assertEqual(uploaded_file.original_filename, filename)
             self.assertNotEqual(uploaded_file.uploaded_file.name, 'temp_uploads/%s' % filename)
 
-            temp_filepath = settings.MEDIA_ROOT.joinpath(uploaded_file.uploaded_file.name)
+            temp_filepath = media_root.joinpath(uploaded_file.uploaded_file.name)
             self.assertTrue(temp_filepath.exists())
 
             # submit the form with an error
@@ -93,13 +98,13 @@ class FileFormWebTests(WebTest):
             self.assertTrue(example_filepath.exists())
         finally:
             if temp_filepath:
-                temp_filepath.remove_p()
-            example_filepath.remove_p()
+                remove_p(temp_filepath)
+            remove_p(example_filepath)
 
     def test_submit_without_ajax(self):
         # setup
         filename = get_random_id()
-        uploaded_file = settings.MEDIA_ROOT.joinpath('example', filename)
+        uploaded_file = media_root.joinpath('example', filename)
         try:
             # submit form with error
             form = self.app.get('/').form
@@ -116,13 +121,13 @@ class FileFormWebTests(WebTest):
 
             self.assertTrue(uploaded_file.exists())
         finally:
-            uploaded_file.remove_p()
+            remove_p(uploaded_file)
 
     def test_submit_multiple(self):
         # setup
         filename1, filename2 = get_random_ids(2)
-        uploaded_file1 = settings.MEDIA_ROOT.joinpath('example', filename1)
-        uploaded_file2 = settings.MEDIA_ROOT.joinpath('example', filename2)
+        uploaded_file1 = media_root.joinpath('example', filename1)
+        uploaded_file2 = media_root.joinpath('example', filename2)
         try:
             form = self.app.get('/multiple').form
 
@@ -157,13 +162,13 @@ class FileFormWebTests(WebTest):
             self.assertTrue(uploaded_file1.exists())
             self.assertTrue(uploaded_file2.exists())
         finally:
-            uploaded_file1.remove_p()
-            uploaded_file2.remove_p()
+            remove_p(uploaded_file1)
+            remove_p(uploaded_file2)
 
     def test_submit_multiple_without_ajax(self):
         # setup
         filename = get_random_id()
-        uploaded_file = settings.MEDIA_ROOT.joinpath('example', filename)
+        uploaded_file = media_root.joinpath('example', filename)
         try:
             # submit form with error
             form = self.app.get('/multiple').form
@@ -182,13 +187,13 @@ class FileFormWebTests(WebTest):
 
             self.assertTrue(uploaded_file.exists())
         finally:
-            uploaded_file.remove_p()
+            remove_p(uploaded_file)
 
     def test_submit_multiple_for_single_filefield(self):
         # setup
         filename1, filename2 = get_random_ids(2)
-        uploaded_file1 = settings.MEDIA_ROOT.joinpath('example', filename1)
-        uploaded_file2 = settings.MEDIA_ROOT.joinpath('example', filename2)
+        uploaded_file1 = media_root.joinpath('example', filename1)
+        uploaded_file2 = media_root.joinpath('example', filename2)
         try:
             form = self.app.get('/').form
 
@@ -203,8 +208,8 @@ class FileFormWebTests(WebTest):
             example = Example.objects.get(title='aaa')
             self.assertEqual(example.input_file.name, 'example/%s' % filename2)
         finally:
-            uploaded_file1.remove_p()
-            uploaded_file2.remove_p()
+            remove_p(uploaded_file1)
+            remove_p(uploaded_file2)
 
     def test_submit_multiple_empty(self):
         """
@@ -224,7 +229,7 @@ class FileFormWebTests(WebTest):
         """
         # setup
         example_filename = get_random_id()
-        example_file_path = settings.MEDIA_ROOT.joinpath('example', example_filename)
+        example_file_path = media_root.joinpath('example', example_filename)
         temp_filename = get_random_id()
         temp_file_path = None
         try:
@@ -251,7 +256,7 @@ class FileFormWebTests(WebTest):
             file_id = self.upload_ajax_file(form, 'input_file', temp_filename)
 
             uploaded_file = UploadedFile.objects.get(file_id=file_id)
-            temp_file_path = settings.MEDIA_ROOT.joinpath(uploaded_file.uploaded_file.name)
+            temp_file_path = media_root.joinpath(uploaded_file.uploaded_file.name)
 
             self.assertTrue(temp_file_path.exists())
 
@@ -260,10 +265,10 @@ class FileFormWebTests(WebTest):
 
             self.assertFalse(temp_file_path.exists())
         finally:
-            example_file_path.remove_p()
+            remove_p(example_file_path)
 
             if temp_file_path:
-                temp_file_path.remove_p()
+                remove_p(temp_file_path)
 
     def upload_ajax_file(self, form, field_name, filename, content=six.b('xyz')):
         csrf_token = form['csrfmiddlewaretoken'].value
@@ -310,7 +315,7 @@ class FileFormWebTests(WebTest):
 
 class FileFormTests(TestCase):
     def setUp(self):
-        self.temp_uploads_path = settings.MEDIA_ROOT.joinpath('temp_uploads')
+        self.temp_uploads_path = media_root.joinpath('temp_uploads')
 
     def test_delete_unused_files_command(self):
         call_command('delete_unused_files', verbosity=0)
@@ -320,7 +325,9 @@ class FileFormTests(TestCase):
         filename = get_random_id()
         uploaded_file_path = self.temp_uploads_path.joinpath(filename)
         try:
-            uploaded_file_path.write_text('abc')
+            with uploaded_file_path.open('w') as f:
+                f.write(u'abc')
+
             UploadedFile.objects.create(created=encode_datetime(2010, 1, 1))
 
             # - delete unused files
@@ -332,7 +339,7 @@ class FileFormTests(TestCase):
             # file must be deleted
             self.assertFalse(uploaded_file_path.exists())
         finally:
-            uploaded_file_path.remove_p()
+            remove_p(uploaded_file_path)
 
     def test_uploaded_file_unicode(self):
         filename = get_random_id()
@@ -346,4 +353,4 @@ class FileFormTests(TestCase):
             self.assertEqual(six.text_type(uploaded_file), 'ooo.txt')
             self.assertEqual(six.text_type(UploadedFile()), '')
         finally:
-            uploaded_file_path.remove_p()
+            remove_p(uploaded_file_path)

@@ -1,4 +1,4 @@
-path.py==7.5
+pathlib==1.0.1
 six==1.9.0
 
 # bootstrap3 form

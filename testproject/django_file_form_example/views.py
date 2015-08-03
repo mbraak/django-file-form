@@ -1,4 +1,4 @@
-from path import path
+from pathlib import Path
 
 from django.core.urlresolvers import reverse
 from django.views import generic
@@ -42,7 +42,7 @@ class ExistingFileExampleView(BaseFormView):
         example = Example.objects.get(id=self.kwargs['id'])
 
         if example.input_file:
-            name = path(example.input_file.name).basename()
+            name = Path(example.input_file.name).name
             form_kwargs['initial'] = dict(
                 input_file=ExistingFile(name)
             )
