@@ -69,10 +69,3 @@ create_media_paths(Path(MEDIA_ROOT))
 
 
 USE_TZ = True
-
-TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'APP_DIRS': True
-    }
-]
