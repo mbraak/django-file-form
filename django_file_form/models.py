@@ -40,7 +40,7 @@ class UploadedFileManager(ModelManager):
 
 
 class UploadedFile(models.Model):
-    fs = FileSystemStorage(location=settings.MEDIA_ROOT)
+    # fs = FileSystemStorage(location=settings.MEDIA_ROOT)
 
     created = models.DateTimeField(default=timezone.now)
     uploaded_file = models.FileField(max_length=255, upload_to='temp_uploads', storage=fs)
