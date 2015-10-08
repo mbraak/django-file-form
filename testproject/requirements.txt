@@ -1,6 +1,6 @@
 pathlib==1.0.1
 pytz==2015.6
-six==1.9.0
+six==1.10.0
 
 # bootstrap3 form
 git+https://github.com/mbraak/django-bootstrap3-form.git@0.3.0dev#egg=django-bootstrap3-form
