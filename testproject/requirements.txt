@@ -4,4 +4,4 @@ six==1.10.0
 
 # bootstrap3 form
 git+https://github.com/mbraak/django-bootstrap3-form.git@0.3.0dev#egg=django-bootstrap3-form
-git+https://github.com/mbraak/django_pony_forms.git@0.4.0dev2#egg=django_pony_forms
+django_pony_forms==0.3.9
