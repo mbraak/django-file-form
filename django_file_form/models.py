@@ -1,5 +1,7 @@
 from pathlib import Path
 
+from six import python_2_unicode_compatible
+
 from django.core.files.storage import FileSystemStorage
 from django.conf import settings
 from django.db import models
@@ -39,6 +41,7 @@ class UploadedFileManager(ModelManager):
         )
 
 
+@python_2_unicode_compatible
 class UploadedFile(models.Model):
     fs = FileSystemStorage(location=settings.MEDIA_ROOT)
 
@@ -50,9 +53,6 @@ class UploadedFile(models.Model):
     form_id = models.CharField(max_length=40)
 
     objects = UploadedFileManager()
-
-    def __unicode__(self):
-        return unicode(self.original_filename or u'')
 
     def __str__(self):
         return str(self.original_filename or '')
