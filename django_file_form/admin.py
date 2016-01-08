@@ -4,7 +4,7 @@ from . import models
 
 
 class UploadedFileAdmin(admin.ModelAdmin):
-    list_display = ['__unicode__', 'created']
+    list_display = ['original_filename', 'created']
     date_hierarchy = 'created'
 
 
