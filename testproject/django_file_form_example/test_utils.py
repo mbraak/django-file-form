@@ -19,7 +19,7 @@ def get_random_ids(count):
 def encode_datetime(*args, **kwargs):
     """
     Return a valid datetime.
-    - depends on timezine settings
+    - depends on timezone settings
     """
     naive_datime = datetime(*args, **kwargs)
 
