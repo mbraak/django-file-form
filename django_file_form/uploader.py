@@ -16,7 +16,7 @@ class FileFormUploadBackend(LocalUploadBackend):
         result = super(FileFormUploadBackend, self).upload_complete(request, filename, file_id, *args, **kwargs)
 
         # get the filename if only resized image is uploaded
-        if request.POST['qqfilename']:
+        if request.POST.get('qqfilename'):
             original_filename = request.POST['qqfilename']
         else:
             original_filename = request.FILES['qqfile'].name
