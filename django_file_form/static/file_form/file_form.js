@@ -1,8 +1,19 @@
 function initUploadFields($form, options) {
     var csrf_token = $form.find('[name=csrfmiddlewaretoken]').val();
+
     var upload_url = $form.find('[name=upload_url]').val();
+    if (!upload_url) {
+        console.warn("upload_url field is empty; aborting initialization");
+        return;
+    }
+
     var delete_url = $form.find('[name=delete_url]').val();
+
     var form_id = $form.find('[name=form_id]').val();
+    if (!form_id) {
+        console.warn("form_id field is empty; aborting initialization");
+        return;
+    }
 
     $form.find('.file-uploader').each(
         function(i, element) {
