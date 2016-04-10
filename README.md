@@ -121,7 +121,7 @@ class ExampleFormView(generic.FormView):
     def form_valid(self, form):
         input_file = form.cleaned_data['input_file']
 
-        self.delete_temporary_files()
+        form.delete_temporary_files()
 
         return super(ExampleFormView, self).form_valid(form)
 ```
