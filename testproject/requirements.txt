@@ -1,5 +1,5 @@
 pathlib==1.0.1
-pytz==2016.6
+pytz==2016.6.1
 six==1.10.0
 
 # bootstrap3 form
