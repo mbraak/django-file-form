@@ -25,7 +25,7 @@ function initUploadFields($form, options) {  // eslint-disable-line no-unused-va
             const container = $element.find(".file-uploader-container");
 
             const field_name = $input_file.attr("name");
-            const multiple = !! $input_file.attr("multiple");
+            const multiple = !!$input_file.attr("multiple");
 
             const uploader_options = {
                 element: container,
@@ -41,7 +41,7 @@ function initUploadFields($form, options) {  // eslint-disable-line no-unused-va
                 $.extend(uploader_options, options);
             }
 
-            if (! multiple) {
+            if (!multiple) {
                 $(container).on("complete", () => {
                     $($element.find(".existing-files")).remove();
                 });
@@ -111,7 +111,7 @@ function initFileUploader(options) {
     if (files_data) {
         files_data.forEach(
             value => {
-                if (! value.existing) {
+                if (!value.existing) {
                     $container.fineUploader(
                         "addCannedFile",
                         {
