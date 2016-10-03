@@ -5,9 +5,9 @@ python:
   - 3.4
   - 3.5
 env:
-  - DJANGO=Django==1.8.14
-  - DJANGO=Django==1.9.9
-  - DJANGO=Django==1.10
+  - DJANGO=Django==1.8.15
+  - DJANGO=Django==1.9.15
+  - DJANGO=Django==1.10.2
   - DJANGO=https://github.com/django/django/archive/master.tar.gz
 install:
   - pip install $DJANGO
