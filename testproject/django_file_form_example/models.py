@@ -20,7 +20,7 @@ class Example2(models.Model):
 class ExampleFile(models.Model):
     fs = FileSystemStorage(location=settings.MEDIA_ROOT)
 
-    example = models.ForeignKey(Example2, related_name='files')
+    example = models.ForeignKey(Example2, related_name='files', on_delete=models.CASCADE)
     input_file = models.FileField(max_length=255, upload_to='example', storage=fs)
 
     def __str__(self):

@@ -3,13 +3,13 @@ import uuid
 
 import six
 
-from django.core.urlresolvers import reverse
 from django.forms import FileField, ClearableFileInput, CharField, HiddenInput
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from django.core import validators
 
 from .models import UploadedFile
+from .util import url_reverse as reverse
 
 
 class FileFormMixin(object):
