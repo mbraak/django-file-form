@@ -1,8 +1,7 @@
-from django.core.urlresolvers import reverse
-
 import django_bootstrap3_form
 
 from django_file_form.forms import UploadedFileField, MultipleUploadedFileField, FileFormMixin
+from django_file_form.util import url_reverse as reverse
 
 from .models import Example, Example2, ExampleFile
 
