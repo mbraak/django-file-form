@@ -37,7 +37,7 @@ class UploadedFileManager(ModelManager):
 
     def get_for_file(self, filename):
         return self.try_get(
-            uploaded_file='temp_uploads/%s' % filename
+            uploaded_file='temp_uploads/{0!s}'.format(filename)
         )
 
 

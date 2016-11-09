@@ -66,7 +66,7 @@ class FileFormWebTests(WebTest):
 
             uploaded_file = UploadedFile.objects.get(file_id=file_id)
             self.assertEqual(uploaded_file.original_filename, filename)
-            self.assertNotEqual(uploaded_file.uploaded_file.name, 'temp_uploads/%s' % filename)
+            self.assertNotEqual(uploaded_file.uploaded_file.name, 'temp_uploads/{0!s}'.format(filename))
 
             temp_filepath = media_root.joinpath(uploaded_file.uploaded_file.name)
             self.assertTrue(temp_filepath.exists())
@@ -91,7 +91,7 @@ class FileFormWebTests(WebTest):
             form.submit().follow()
 
             example = Example.objects.get(title='abc')
-            self.assertEqual(example.input_file.name, 'example/%s' % filename)
+            self.assertEqual(example.input_file.name, 'example/{0!s}'.format(filename))
 
             self.assertFalse(temp_filepath.exists())
             self.assertFalse(UploadedFile.objects.filter(file_id=file_id).exists())
@@ -117,7 +117,7 @@ class FileFormWebTests(WebTest):
             form.submit().follow()
 
             example = Example.objects.get(title='abc')
-            self.assertEqual(example.input_file.name, 'example/%s' % filename)
+            self.assertEqual(example.input_file.name, 'example/{0!s}'.format(filename))
 
             self.assertTrue(uploaded_file.exists())
         finally:
@@ -156,8 +156,8 @@ class FileFormWebTests(WebTest):
             example2 = Example2.objects.get(title='abc')
             files = example2.files.all()
             self.assertEqual(files.count(), 2)
-            self.assertEqual(six.text_type(files[0]), 'example/%s' % filename1)
-            self.assertEqual(six.text_type(files[1]), 'example/%s' % filename2)
+            self.assertEqual(six.text_type(files[0]), 'example/{0!s}'.format(filename1))
+            self.assertEqual(six.text_type(files[1]), 'example/{0!s}'.format(filename2))
 
             self.assertTrue(uploaded_file1.exists())
             self.assertTrue(uploaded_file2.exists())
@@ -183,7 +183,7 @@ class FileFormWebTests(WebTest):
             example2 = Example2.objects.get(title='abc')
             files = example2.files.all()
             self.assertEqual(files.count(), 1)
-            self.assertEqual(files[0].input_file.name, 'example/%s' % filename)
+            self.assertEqual(files[0].input_file.name, 'example/{0!s}'.format(filename))
 
             self.assertTrue(uploaded_file.exists())
         finally:
@@ -206,7 +206,7 @@ class FileFormWebTests(WebTest):
             form.submit().follow()
 
             example = Example.objects.get(title='aaa')
-            self.assertEqual(example.input_file.name, 'example/%s' % filename2)
+            self.assertEqual(example.input_file.name, 'example/{0!s}'.format(filename2))
         finally:
             remove_p(uploaded_file1)
             remove_p(uploaded_file2)
@@ -236,7 +236,7 @@ class FileFormWebTests(WebTest):
             example = Example.objects.create(title='abc', input_file=ContentFile('xyz', example_filename))
 
             # - get form
-            page = self.app.get('/existing/%d' % example.id)
+            page = self.app.get('/existing/{0:d}'.format(example.id))
             form = page.form
 
             self.assertTrue(example_file_path.exists())
@@ -301,7 +301,7 @@ class FileFormWebTests(WebTest):
 
     def delete_ajax_file(self, form, file_id):
         csrf_token = str(form['csrfmiddlewaretoken'].value)
-        delete_url = '%s/%s' % (form['delete_url'].value, file_id)
+        delete_url = '{0!s}/{1!s}'.format(form['delete_url'].value, file_id)
 
         response = self.app.post(
             delete_url,
