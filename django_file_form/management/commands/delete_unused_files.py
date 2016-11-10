@@ -14,4 +14,4 @@ class Command(BaseCommand):
             if not deleted_files:
                 print('No files deleted')
             else:
-                print('Deleted files: %s' % ', '.join(deleted_files))
+                print('Deleted files: {0!s}'.format(', '.join(deleted_files)))
