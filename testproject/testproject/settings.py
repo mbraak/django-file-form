@@ -3,4 +3,4 @@ from .settings_default import *
 
 DEBUG = True
 
-SECRET_KEY = 'secret1'
+SECRET_KEY = 'test_key'
