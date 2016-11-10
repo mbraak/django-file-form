@@ -129,3 +129,6 @@ class ExampleFormView(generic.FormView):
 ```
 
 Also see the testproject in the repository.
+
+
+[![Code Issues](https://www.quantifiedcode.com/api/v1/project/a13eb4100b7246d0bc394d31b87a4335/badge.svg)](https://www.quantifiedcode.com/app/project/a13eb4100b7246d0bc394d31b87a4335)
