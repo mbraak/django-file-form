@@ -19,7 +19,7 @@ class AjaxFileUploader(object):
 
     def _ajax_upload(self, request, *args, **kwargs):
         if request.method == "POST":
-            upload = request.FILES.get('qqfile', None)
+            upload = request.FILES.get('qqfile')
             if not upload:
                 return HttpResponseBadRequest("AJAX request not valid")
 

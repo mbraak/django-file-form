@@ -28,7 +28,7 @@ class FileFormUploadBackend(LocalUploadBackend):
             original_filename=original_filename,
         )
 
-        field_name = request.POST.get('field_name', None)
+        field_name = request.POST.get('field_name')
         if field_name:
             values['field_name'] = field_name
 
