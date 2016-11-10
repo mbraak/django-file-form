@@ -13,3 +13,10 @@ class ModelManager(models.Manager):
             return qs.get()
         else:
             return None
+
+
+def get_list(v):
+    if isinstance(v, list):
+        return v
+    else:
+        return [v]
