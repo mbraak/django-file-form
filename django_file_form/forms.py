@@ -66,12 +66,6 @@ class FileFormMixin(object):
 
 class UploadWidget(ClearableFileInput):
     def render(self, name, value, attrs=None):
-        def get_file_value(f):
-            if getattr(f, 'is_existing', False) or hasattr(f, 'file_id'):
-                return f.get_values()
-            else:
-                return dict(name=f.name)
-
         uploaded_files = []
         existing_files = []
 
