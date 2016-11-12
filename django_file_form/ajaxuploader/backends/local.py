@@ -13,7 +13,7 @@ class LocalUploadBackend(AbstractUploadBackend):
         self._path = self.get_path(filename, *args, **kwargs)
         try:
             os.makedirs(os.path.realpath(os.path.dirname(self._path)))
-        except:
+        except OSError:
             pass
         self._dest = BufferedWriter(FileIO(self._path, "w"))
 

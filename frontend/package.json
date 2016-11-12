@@ -4,7 +4,9 @@
   "description": "Frontend code for django-file-form",
   "main": "index.js",
   "scripts": {
-    "test": "eslint file_form.js"
+    "test": "eslint file_form.js",
+    "build": "gulp",
+    "watch": "gulp watch"
   },
   "repository": {
     "type": "git",
@@ -17,14 +19,14 @@
   },
   "homepage": "https://github.com/mbraak/django-file-form#readme",
   "devDependencies": {
-    "babel-eslint": "^6.1.2",
-    "babel-preset-es2015": "^6.14.0",
+    "babel-eslint": "^7.1.0",
+    "babel-preset-es2015": "^6.18.0",
     "babel-preset-stage-0": "^6.5.0",
-    "eslint": "^3.5.0",
-    "eslint-config-airbnb": "^11.1.0",
-    "eslint-plugin-import": "^1.15.0",
-    "eslint-plugin-jsx-a11y": "^2.2.2",
-    "eslint-plugin-react": "^6.2.1",
+    "eslint": "^3.9.1",
+    "eslint-config-airbnb": "^13.0.0",
+    "eslint-plugin-import": "^2.2.0",
+    "eslint-plugin-jsx-a11y": "^2.2.3",
+    "eslint-plugin-react": "^6.6.0",
     "gulp": "^3.9.1",
     "gulp-babel": "^6.1.2",
     "gulp-uglify": "^2.0.0"

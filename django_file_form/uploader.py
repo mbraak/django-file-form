@@ -22,13 +22,13 @@ class FileFormUploadBackend(LocalUploadBackend):
             original_filename = request.FILES['qqfile'].name
 
         values = dict(
-            uploaded_file='%s/%s' % (self.UPLOAD_DIR, filename),
+            uploaded_file='{0!s}/{1!s}'.format(self.UPLOAD_DIR, filename),
             file_id=file_id,
             form_id=request.POST['form_id'],
             original_filename=original_filename,
         )
 
-        field_name = request.POST.get('field_name', None)
+        field_name = request.POST.get('field_name')
         if field_name:
             values['field_name'] = field_name
 
