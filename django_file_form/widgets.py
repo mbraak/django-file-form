@@ -1,12 +1,24 @@
 import json
 
+import django
 from django.forms import ClearableFileInput
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 
 
 class UploadWidgetMixin(ClearableFileInput):
-    def render(self, name, value, attrs=None):
+    if django.VERSION[0:2] >= (1, 11):
+        def render(self, name, value, attrs=None, renderer=None):
+            input = super(UploadWidgetMixin, self).render(name, value, attrs, renderer)
+
+            return self._render_input(value, input)
+    else:
+        def render(self, name, value, attrs=None):
+            input = super(UploadWidgetMixin, self).render(name, value, attrs)
+
+            return self._render_input(value, input)
+
+    def _render_input(self, value, input):
         uploaded_files = []
         existing_files = []
 
@@ -28,7 +40,7 @@ class UploadWidgetMixin(ClearableFileInput):
             render_to_string(
                 'django_file_form/upload_widget.html',
                 dict(
-                    input=super(UploadWidgetMixin, self).render(name, value, attrs),
+                    input=input,
                     uploaded_files=json.dumps(uploaded_files),
                     existing_files=existing_files
                 )
