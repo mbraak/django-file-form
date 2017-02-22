@@ -272,7 +272,7 @@ class FileFormWebTests(WebTest):
                 remove_p(temp_file_path)
 
     def test_unicode_filename(self):
-        filename = u'àęö%s' % get_random_id()
+        filename = u'àęö{0!s}'.format(get_random_id())
         temp_filepath = None
 
         form = self.app.get('/').form
