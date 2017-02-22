@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from six import python_2_unicode_compatible
+from six import python_2_unicode_compatible, text_type
 
 from django.core.files.storage import FileSystemStorage
 from django.conf import settings
@@ -55,7 +55,7 @@ class UploadedFile(models.Model):
     objects = UploadedFileManager()
 
     def __str__(self):
-        return str(self.original_filename or '')
+        return text_type(self.original_filename or '')
 
     def delete(self, using=None):
         super(UploadedFile, self).delete(using)
