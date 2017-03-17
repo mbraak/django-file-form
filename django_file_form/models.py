@@ -1,14 +1,15 @@
+import os
+import sys
 from pathlib import Path
 
+from django.conf import settings
+from django.core.files import File
+from django.db import models
+from django.utils import timezone
 from six import python_2_unicode_compatible, text_type
 
-from django.core.files.storage import FileSystemStorage
-from django.conf import settings
-from django.db import models
-from django.core.files import File
-from django.utils import timezone
-
-from .util import ModelManager
+from . import conf
+from .util import ModelManager, load_class
 
 
 class UploadedFileManager(ModelManager):
@@ -22,7 +23,7 @@ class UploadedFileManager(ModelManager):
 
                 deleted_files.append(Path(t.uploaded_file.name).name)
 
-        temp_path = Path(settings.MEDIA_ROOT).joinpath('temp_uploads')
+        temp_path = Path(settings.MEDIA_ROOT).joinpath(conf.UPLOAD_DIR)
 
         for f in temp_path.iterdir():
             basename = f.name
@@ -36,17 +37,25 @@ class UploadedFileManager(ModelManager):
         return deleted_files
 
     def get_for_file(self, filename):
-        return self.try_get(
-            uploaded_file='temp_uploads/{0!s}'.format(filename)
-        )
+        path = os.path.join(conf.UPLOAD_DIR, filename)
+        return self.try_get(uploaded_file=path)
+
+
+def get_storage():
+    if ('makemigrations' in sys.argv or 'migrate' in sys.argv):
+        return "settings.FILE_FORM_FILE_STORAGE"
+    return load_class('FILE_STORAGE')()
+
+
+def upload_to(obj):
+    return conf.UPLOAD_DIR
 
 
 @python_2_unicode_compatible
 class UploadedFile(models.Model):
-    fs = FileSystemStorage()
-
     created = models.DateTimeField(default=timezone.now)
-    uploaded_file = models.FileField(max_length=255, upload_to='temp_uploads', storage=fs)
+    uploaded_file = models.FileField(max_length=255, upload_to=upload_to,
+                                     storage=get_storage())
     original_filename = models.CharField(max_length=255)
     field_name = models.CharField(max_length=255, null=True, blank=True)
     file_id = models.CharField(max_length=40)
