@@ -31,6 +31,5 @@ def load_class(setting_string):
         return import_string(getattr(conf, setting_string))
     except ImportError:
         raise ImproperlyConfigured(
-            "%s refers to a class '%s' that is not available" %
-            (setting_string, getattr(conf, setting_string))
+            "{0!s} refers to a class '{1!s}' that is not available".format(setting_string, getattr(conf, setting_string))
         )
