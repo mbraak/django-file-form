@@ -47,7 +47,7 @@ def get_storage():
     return load_class('FILE_STORAGE')()
 
 
-def upload_to(obj):
+def upload_to(instance, filename):
     return conf.UPLOAD_DIR
 
 
