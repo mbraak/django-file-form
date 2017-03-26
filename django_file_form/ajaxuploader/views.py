@@ -34,7 +34,7 @@ class AjaxFileUploader(object):
                         or filename)
             # save the file
             backend.setup(filename, *args, **kwargs)
-            success = backend.upload(upload, filename, False, *args, **kwargs)
+            success = backend.upload(upload, *args, **kwargs)
 
             if success:
                 file_uploaded.send(sender=self.__class__, backend=backend, request=request)

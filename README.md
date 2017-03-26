@@ -4,7 +4,7 @@
 
 [![License](https://img.shields.io/pypi/l/django-file-form.svg)](https://pypi.python.org/pypi/django-file-form/)
 
-#Django file form
+# Django file form
 
 **Django-file-form** helps you to write forms with a pretty ajax upload.
 
@@ -130,5 +130,26 @@ class ExampleFormView(generic.FormView):
 
 Also see the testproject in the repository.
 
+## Settings
+
+Settings in `settings.py`:
+
+* **MUST_LOGIN** (True / False):
+  * Must the user be logged in to upload a file.
+  * The default is `False`.
+
+* **UPLOAD_DIR** (string):
+  * The directory for the temporary uploads.
+  * The setting is not full path, but must be a subdirectory of `MEDIA_ROOT`.
+  * The default is `temp_uploads`.
+
+* **FILE_STORAGE** (string):
+  * The class that is used to store the temporary uploads.
+  * The default is `django.core.files.storage.FileSystemStorage`.
+
+* **UPLOAD_BACKEND** (string)
+  * The class that is used for the upload backend.
+  * This makes it possible to write your upload backend.
+  * The default is `django_file_form.uploader.FileFormUploadBackend`.
 
 [![Code Issues](https://www.quantifiedcode.com/api/v1/project/a13eb4100b7246d0bc394d31b87a4335/badge.svg)](https://www.quantifiedcode.com/app/project/a13eb4100b7246d0bc394d31b87a4335)
