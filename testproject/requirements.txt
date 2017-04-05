@@ -1,7 +1,7 @@
 pathlib==1.0.1
-pytz==2016.10
+pytz==2017.2
 six==1.10.0
 
 # bootstrap3 form
 django-bootstrap3-form==0.4.0
-django_pony_forms==0.4.0
+django-pony-forms==0.4.1
