@@ -19,10 +19,10 @@
   },
   "homepage": "https://github.com/mbraak/django-file-form#readme",
   "devDependencies": {
-    "babel-eslint": "^7.2.0",
+    "babel-eslint": "^7.2.1",
     "babel-preset-es2015": "^6.24.0",
     "babel-preset-stage-0": "^6.22.0",
-    "eslint": "^3.18.0",
+    "eslint": "^3.19.0",
     "eslint-config-airbnb": "^14.0.0",
     "eslint-plugin-import": "^2.2.0",
     "eslint-plugin-jsx-a11y": "^3.0.2",
