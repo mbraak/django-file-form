@@ -132,7 +132,7 @@ class FileFormWebTests(WebTest):
         try:
             form = self.app.get('/multiple').form
 
-            # upload file2
+            # upload two files
             file_id1 = self.upload_ajax_file(form, 'input_file', filename1)
             file_id2 = self.upload_ajax_file(form, 'input_file', filename2)
 
