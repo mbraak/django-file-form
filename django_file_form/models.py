@@ -63,6 +63,10 @@ class UploadedFile(models.Model):
 
     objects = UploadedFileManager()
 
+    class Meta(object):
+        # Query string to get back existing uploaded file is using form_id and field_name
+        index_together = (("form_id", "field_name"),)
+
     def __str__(self):
         return text_type(self.original_filename or '')
 
