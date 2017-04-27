@@ -74,7 +74,8 @@ class UploadedFile(models.Model):
         super(UploadedFile, self).delete(using)
 
         if self.uploaded_file:
-            self.uploaded_file.delete()
+            if self.uploaded_file.storage.exists(self.uploaded_file.name):
+                self.uploaded_file.delete()
 
     def must_be_deleted(self, now=None):
         now = now or timezone.now()
