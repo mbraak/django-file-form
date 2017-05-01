@@ -70,13 +70,12 @@ class UploadedFile(models.Model):
     def __str__(self):
         return text_type(self.original_filename or '')
 
-    def delete(self, using=None):
-        super(UploadedFile, self).delete(using)
+    def delete(self, *args, **kwargs):
+        if self.uploaded_file and self.uploaded_file.storage.exists(self.uploaded_file.name):
+            self.uploaded_file.delete()
 
-        if self.uploaded_file:
-            if self.uploaded_file.storage.exists(self.uploaded_file.name):
-                self.uploaded_file.delete()
-
+        super(UploadedFile, self).delete(*args, **kwargs)
+                
     def must_be_deleted(self, now=None):
         now = now or timezone.now()
 
