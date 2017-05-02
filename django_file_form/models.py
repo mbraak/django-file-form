@@ -60,7 +60,9 @@ class UploadedFile(models.Model):
     field_name = models.CharField(max_length=255, null=True, blank=True)
     file_id = models.CharField(max_length=40)
     form_id = models.CharField(max_length=40)
-
+    
+    # Query string to get back existing uploaded file is using form_id and field_name
+    unique_together = (("form_id", "field_name"),)
     objects = UploadedFileManager()
 
     class Meta(object):
