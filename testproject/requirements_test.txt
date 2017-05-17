@@ -1,5 +1,5 @@
 # webtest
-django-webtest==1.9.1
+django-webtest==1.9.2
 beautifulsoup4==4.6.0
 cssselect==1.0.1
 pyquery==1.2.17
