@@ -63,18 +63,19 @@ class UploadedFile(models.Model):
 
     objects = UploadedFileManager()
 
+    class Meta(object):
+        # Query string to get back existing uploaded file is using form_id and field_name
+        index_together = (("form_id", "field_name"),)
+
     def __str__(self):
         return text_type(self.original_filename or '')
 
-    def delete(self, using=None):
-        super(UploadedFile, self).delete(using)
+    def delete(self, *args, **kwargs):
+        if self.uploaded_file and self.uploaded_file.storage.exists(self.uploaded_file.name):
+            self.uploaded_file.delete()
 
-        if self.uploaded_file:
-            path = self.get_path()
-
-            if path.exists():
-                path.unlink()
-
+        super(UploadedFile, self).delete(*args, **kwargs)
+                
     def must_be_deleted(self, now=None):
         now = now or timezone.now()
 

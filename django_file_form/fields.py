@@ -10,11 +10,11 @@ class UploadedFileField(FileField):
     widget = UploadWidget
 
     def get_file_data(self, field_name, form_id):
-        qs = self._get_file_qs(field_name, form_id)
-
-        if qs.exists():
-            return qs.latest('created').get_uploaded_file()
-        else:
+        try:
+            return self._get_file_qs(field_name, form_id)\
+                .latest('created')\
+                .get_uploaded_file()
+        except UploadedFile.DoesNotExist:
             return None
 
     def delete_file_data(self, field_name, form_id):

@@ -3,5 +3,5 @@ pytz==2017.2
 six==1.10.0
 
 # bootstrap3 form
-django-bootstrap3-form==0.4.0
+django-bootstrap3-form==0.4.1
 django-pony-forms==0.4.1
