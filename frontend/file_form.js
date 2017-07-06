@@ -1,6 +1,6 @@
 /* global $ */
 
-function initUploadFields($form, options) {  // eslint-disable-line no-unused-vars
+function initUploadFields($form, options) { // eslint-disable-line no-unused-vars
     const csrf_token = $form.find("[name=csrfmiddlewaretoken]").val();
 
     const upload_url = $form.find("[name=upload_url]").val();
