@@ -151,5 +151,3 @@ Settings in `settings.py`:
   * The class that is used for the upload backend.
   * This makes it possible to write your upload backend.
   * The default is `django_file_form.uploader.FileFormUploadBackend`.
-
-[![Code Issues](https://www.quantifiedcode.com/api/v1/project/a13eb4100b7246d0bc394d31b87a4335/badge.svg)](https://www.quantifiedcode.com/app/project/a13eb4100b7246d0bc394d31b87a4335)
