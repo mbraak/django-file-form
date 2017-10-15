@@ -8,6 +8,7 @@
         "comma-dangle": 0,
         "default-case": 0,
         "func-names": 0,
+        "function-paren-newline": 0,
         "id-length": 0,
         "indent": 0,
         "max-len": 0,
