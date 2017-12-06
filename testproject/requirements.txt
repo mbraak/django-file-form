@@ -4,4 +4,4 @@ six==1.11.0
 
 # bootstrap3 form
 django-bootstrap3-form==0.4.1
-django-pony-forms==0.4.1
+django-pony-forms==0.5.0
