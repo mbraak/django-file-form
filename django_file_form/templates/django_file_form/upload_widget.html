@@ -1,3 +1,4 @@
+{% load i18n %}
 <div class="file-uploader">
     <div
         class="file-uploader-container"
@@ -13,10 +14,10 @@
                 <li>
                     <span>{{ f.name }}</span>
                     {% if f.view_url %}
-                        <a href="{{ f.view_url }}">View</a>
+                        <a href="{{ f.view_url }}">{% trans 'View' %}</a>
                     {% endif %}
                     {% if f.delete_url %}
-                        <a class="delete" href="{{ f.delete_url }}">Delete</a>
+                        <a class="delete" href="{{ f.delete_url }}">{% trans 'Delete' %}</a>
                     {% endif %}
                 </li>
             {% endfor %}
