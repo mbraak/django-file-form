@@ -1,10 +1,10 @@
 from pathlib import Path
 
 from django.views import generic
+from django.urls import reverse
 
 from django_file_form.forms import ExistingFile
 from django_file_form.uploader import FileFormUploader
-from django_file_form.util import url_reverse as reverse
 
 from . import forms
 from .models import Example

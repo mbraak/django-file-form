@@ -7,18 +7,9 @@ from django.utils.safestring import mark_safe
 
 
 class UploadWidgetMixin(ClearableFileInput):
-    if django.VERSION[0:2] >= (1, 11):
-        def render(self, name, value, attrs=None, renderer=None):
-            input = super(UploadWidgetMixin, self).render(name, value, attrs, renderer)
+    def render(self, name, value, attrs=None, renderer=None):
+        input = super(UploadWidgetMixin, self).render(name, value, attrs, renderer)
 
-            return self._render_input(value, input)
-    else:
-        def render(self, name, value, attrs=None):
-            input = super(UploadWidgetMixin, self).render(name, value, attrs)
-
-            return self._render_input(value, input)
-
-    def _render_input(self, value, input):
         uploaded_files = []
         existing_files = []
 

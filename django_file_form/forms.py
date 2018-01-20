@@ -2,9 +2,8 @@ import uuid
 
 import six
 
+from django.urls import reverse
 from django.forms import CharField, HiddenInput
-
-from .util import url_reverse as reverse
 
 # UploadedFileField and MultipleUploadedFileField must be in this module because they are in the api
 from .fields import UploadedFileField, MultipleUploadedFileField

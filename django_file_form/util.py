@@ -4,11 +4,6 @@ from django.utils.module_loading import import_string
 
 from . import conf
 
-try:
-    from django.urls import reverse as url_reverse
-except ImportError:
-    from django.core.urlresolvers import reverse as url_reverse
-
 
 class ModelManager(models.Manager):
     def try_get(self, **kwargs):
