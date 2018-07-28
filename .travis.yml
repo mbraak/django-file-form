@@ -6,7 +6,7 @@ python:
 env:
   - DJANGO="Django==1.11.14"
   - DJANGO="Django==2.0.7"
-  - DJANGO="https://www.djangoproject.com/download/2.1b1/tarball/"
+  - DJANGO="https://www.djangoproject.com/download/2.1rc1/tarball/"
 install:
   - pip install $DJANGO
   - pip install -r testproject/requirements.txt
@@ -24,4 +24,4 @@ matrix:
   - python: 2.7
     env: DJANGO="Django==2.0.7"
   - python: 2.7
-    env: DJANGO="https://www.djangoproject.com/download/2.1b1/tarball/"
+    env: DJANGO="https://www.djangoproject.com/download/2.1rc1/tarball/"
