@@ -4,8 +4,8 @@ python:
   - 2.7
   - 3.6
 env:
-  - DJANGO="Django==1.11.14"
-  - DJANGO="Django==2.0.7"
+  - DJANGO="Django==1.11.15"
+  - DJANGO="Django==2.0.8"
   - DJANGO="Django==2.1"
 install:
   - pip install $DJANGO
@@ -22,6 +22,6 @@ after_success:
 matrix:
   exclude:
   - python: 2.7
-    env: DJANGO="Django==2.0.7"
+    env: DJANGO="Django==2.0.8"
   - python: 2.7
     env: DJANGO="Django==2.1"
