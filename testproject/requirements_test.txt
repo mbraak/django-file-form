@@ -1,6 +1,6 @@
 # webtest
 django-webtest==1.9.3
-beautifulsoup4==4.6.1
+beautifulsoup4==4.6.2
 cssselect==1.0.3
 pyquery==1.4.0
 lxml==4.2.4
