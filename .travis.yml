@@ -6,7 +6,7 @@ python:
 env:
   - DJANGO="Django==1.11.15"
   - DJANGO="Django==2.0.8"
-  - DJANGO="Django==2.1"
+  - DJANGO="Django==2.1.1"
 install:
   - pip install $DJANGO
   - pip install -r testproject/requirements.txt
@@ -24,4 +24,4 @@ matrix:
   - python: 2.7
     env: DJANGO="Django==2.0.8"
   - python: 2.7
-    env: DJANGO="Django==2.1"
+    env: DJANGO="Django==2.1.1"
