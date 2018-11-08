@@ -135,20 +135,20 @@ Also see the testproject in the repository.
 
 Settings in `settings.py`:
 
-* **MUST_LOGIN** (True / False):
+* **FILE_FORM_MUST_LOGIN** (True / False):
   * Must the user be logged in to upload a file.
   * The default is `False`.
 
-* **UPLOAD_DIR** (string):
+* **FILE_FORM_UPLOAD_DIR** (string):
   * The directory for the temporary uploads.
   * The setting is not full path, but must be a subdirectory of `MEDIA_ROOT`.
   * The default is `temp_uploads`.
 
-* **FILE_STORAGE** (string):
+* **FILE_FORM_FILE_STORAGE** (string):
   * The class that is used to store the temporary uploads.
   * The default is `django.core.files.storage.FileSystemStorage`.
 
-* **UPLOAD_BACKEND** (string)
+* **FILE_FORM_UPLOAD_BACKEND** (string)
   * The class that is used for the upload backend.
   * This makes it possible to write your upload backend.
   * The default is `django_file_form.uploader.FileFormUploadBackend`.
