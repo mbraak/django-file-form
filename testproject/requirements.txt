@@ -1,6 +1,6 @@
 pathlib==1.0.1
 pytz==2018.7
-six==1.11.0
+six==1.12.0
 
 # bootstrap3 form
 django-bootstrap3-form==0.6.0
