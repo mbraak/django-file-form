@@ -49,7 +49,7 @@ class FileFormUploader(AjaxFileUploader):
         super(FileFormUploader, self).__init__(backend, **kwargs)
 
     def __call__(self, request, *args, **kwargs):
-        if conf.MUST_LOGIN and not request.user.is_authenticated():
+        if conf.MUST_LOGIN and not request.user.is_authenticated:
             raise PermissionDenied()
 
         return super(FileFormUploader, self).__call__(request, *args, **kwargs)
