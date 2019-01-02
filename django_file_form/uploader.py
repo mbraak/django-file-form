@@ -1,13 +1,11 @@
 import os
 import uuid
 
-from django.core.exceptions import PermissionDenied
-
 from . import conf
 from .ajaxuploader.backends.local import LocalUploadBackend
 from .ajaxuploader.views import AjaxFileUploader
 from .models import UploadedFile
-from .util import load_class
+from .util import load_class, check_permission
 
 
 class FileFormUploadBackend(LocalUploadBackend):
@@ -49,7 +47,6 @@ class FileFormUploader(AjaxFileUploader):
         super(FileFormUploader, self).__init__(backend, **kwargs)
 
     def __call__(self, request, *args, **kwargs):
-        if conf.MUST_LOGIN and not request.user.is_authenticated:
-            raise PermissionDenied()
+        check_permission(request)
 
         return super(FileFormUploader, self).__call__(request, *args, **kwargs)

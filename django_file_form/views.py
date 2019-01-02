@@ -1,10 +1,9 @@
-from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse, HttpResponseNotFound
 from django.views import generic
 
 from .models import UploadedFile
 from .uploader import FileFormUploader
-from . import conf
+from .util import check_permission
 
 
 handle_upload = FileFormUploader()
@@ -20,8 +19,7 @@ class DeleteFile(generic.View):
         return self.delete_file(request, file_id)
 
     def delete_file(self, request, file_id):
-        if conf.MUST_LOGIN and not request.user.is_authenticated:
-            raise PermissionDenied()
+        check_permission(request)
 
         uploaded_file = UploadedFile.objects.try_get(file_id=file_id)
 
