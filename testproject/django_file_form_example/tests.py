@@ -6,7 +6,8 @@ import six
 from pathlib import Path
 
 from django.conf import settings
-from django.test import TestCase
+from django.contrib.auth.models import User
+from django.test import TestCase, override_settings
 from django.core.management import call_command
 from django.core.files.base import ContentFile
 
@@ -291,7 +292,37 @@ class FileFormWebTests(WebTest):
             if temp_filepath:
                 remove_p(temp_filepath)
 
-    def upload_ajax_file(self, form, field_name, filename, content=six.b('xyz')):
+    @override_settings(FILE_FORM_MUST_LOGIN=True)
+    def test_permission_for_upload(self):
+        # submit without permission
+        filename = get_random_id()
+        form = self.app.get('/').form
+
+        self.upload_ajax_file(form, 'input_file', filename, expected_status=403)
+
+        # submit with permission
+        User.objects.create(username='test1', email='test@test.nl')
+
+        form = self.app.get('/', user='test1').form
+        self.upload_ajax_file(form, 'input_file', filename, user='test1')
+
+    @override_settings(FILE_FORM_MUST_LOGIN=True)
+    def test_permission_for_delete(self):
+        file_id = get_random_id()
+        UploadedFile.objects.create(file_id=file_id)
+
+        # delete without permission
+
+        form = self.app.get('/').form
+        self.delete_ajax_file(form, file_id, expected_status=403)
+
+        # delete with permission
+        User.objects.create(username='test1', email='test@test.nl')
+
+        form = self.app.get('/', user='test1').form
+        self.delete_ajax_file(form, file_id, user='test1')
+
+    def upload_ajax_file(self, form, field_name, filename, content=six.b('xyz'), expected_status=200, user=None):
         csrf_token = form['csrfmiddlewaretoken'].value
         form_id = form['form_id'].value
         upload_url = form['upload_url'].value
@@ -308,19 +339,21 @@ class FileFormWebTests(WebTest):
             upload_url,
             params=params,
             headers=dict(X_REQUESTED_WITH=six.b('XMLHttpRequest')),
-            status=200,
+            status=expected_status,
             upload_files=[
                 (six.b('qqfile'), filename, content)
-            ]
+            ],
+            user=user,
         )
 
-        # - check response data; nb. cannot use response.json because content type is text/html
-        result = json.loads(response.content.decode())
-        assert result['success']
+        if response.status_code == 200:
+            # - check response data; nb. cannot use response.json because content type is text/html
+            result = json.loads(response.content.decode())
+            assert result['success']
 
-        return file_id
+            return file_id
 
-    def delete_ajax_file(self, form, file_id):
+    def delete_ajax_file(self, form, file_id, expected_status=200, user=None):
         csrf_token = str(form['csrfmiddlewaretoken'].value)
         delete_url = '{0!s}/{1!s}'.format(form['delete_url'].value, file_id)
 
@@ -330,8 +363,12 @@ class FileFormWebTests(WebTest):
                 X_REQUESTED_WITH='XMLHttpRequest',
                 X_CSRFTOKEN=csrf_token
             ),
+            status=expected_status,
+            user=user,
         )
-        self.assertEqual(response.content, six.b('ok'))
+
+        if response.status_code == 200:
+            self.assertEqual(response.content, six.b('ok'))
 
 
 class FileFormTests(TestCase):
