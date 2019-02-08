@@ -43,7 +43,8 @@ class FileFormMixin(object):
                     file_data = field.get_file_data(field_name, form_id)
 
                     if file_data:
-                        if isinstance(file_data, list):
+                        # Django <= 1.11 has no setlist
+                        if isinstance(file_data, list) and hasattr(self.files, 'setlist'):
                             self.files.setlist(field_name, file_data)
                         else:
                             self.files[field_name] = file_data
