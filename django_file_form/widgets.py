@@ -1,6 +1,5 @@
 import json
 
-import django
 from django.forms import ClearableFileInput
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
@@ -41,3 +40,8 @@ class UploadWidgetMixin(ClearableFileInput):
 
 class UploadWidget(UploadWidgetMixin, ClearableFileInput):
     pass
+
+
+class UploadMultipleWidget(UploadWidget):
+    def value_from_datadict(self, data, files, name):
+        return files.getlist(name)
