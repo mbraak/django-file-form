@@ -15,8 +15,8 @@ from django_webtest import WebTest
 
 from django_file_form.models import UploadedFile
 
-from .models import Example, Example2
-from .test_utils import get_random_id, get_random_ids, encode_datetime, remove_p
+from django_file_form_example.models import Example, Example2
+from django_file_form_example.test_utils import get_random_id, get_random_ids, encode_datetime, remove_p
 
 
 media_root = Path(settings.MEDIA_ROOT)

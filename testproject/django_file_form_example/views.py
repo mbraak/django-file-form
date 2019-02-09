@@ -12,6 +12,7 @@ from .models import Example
 
 class BaseFormView(generic.FormView):
     template_name = 'example_form.html'
+    use_ajax = True
 
     def get_success_url(self):
         return reverse('example_success')
@@ -19,6 +20,11 @@ class BaseFormView(generic.FormView):
     def form_valid(self, form):
         form.save()
         return super(BaseFormView, self).form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        kwargs['use_ajax'] = self.use_ajax
+
+        return super(BaseFormView, self).get_context_data(**kwargs)
 
 
 class ExampleView(BaseFormView):
@@ -31,6 +37,10 @@ class ExampleSuccessView(generic.TemplateView):
 
 class MultipleExampleView(BaseFormView):
     form_class = forms.MultipleFileExampleForm
+
+
+class MultipleWithoutJsExampleView(MultipleExampleView):
+    use_ajax = False
 
 
 class ExistingFileExampleView(BaseFormView):
