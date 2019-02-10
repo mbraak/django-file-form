@@ -24,6 +24,10 @@ matrix:
       env: DJANGO="https://www.djangoproject.com/download/2.2a1/tarball/" MOZ_HEADLESS=1
       dist: xenial
       sudo: true
+    - python: 3.7
+      env: DJANGO="https://github.com/django/django/archive/master.zip" MOZ_HEADLESS=1
+      dist: xenial
+      sudo: true
 before_install:
   - CHROME_VERSION="$(google-chrome --version)"
   - export CHROMEDRIVER_RELEASE="$(echo $CHROME_VERSION | sed 's/^Google Chrome //')" && export CHROMEDRIVER_RELEASE=${CHROMEDRIVER_RELEASE%%.*}
