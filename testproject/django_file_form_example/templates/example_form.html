@@ -22,12 +22,14 @@
 
     {% include 'django_file_form/upload_template.html' %}
 
-    <script src="{% static "jquery/dist/jquery.js" %}"></script>
-    <script src="{% static "ajaxuploader/js/fileuploader.js" %}"></script>
-    <script src="{% static "file_form/file_form.js" %}"></script>
-    <script>
-        $(function() {
-            initUploadFields($('#example-form'));
-        });
-    </script>
+    {% if use_ajax %}
+        <script src="{% static "jquery/dist/jquery.js" %}"></script>
+        <script src="{% static "ajaxuploader/js/fileuploader.js" %}"></script>
+        <script src="{% static "file_form/file_form.js" %}"></script>
+        <script>
+            $(function() {
+                initUploadFields($('#example-form'));
+            });
+        </script>
+    {% endif %}
 {% endblock %}

@@ -1,7 +1,7 @@
 from django.forms import FileField
 from django.core import validators
 
-from .widgets import UploadWidget
+from .widgets import UploadWidget, UploadMultipleWidget
 from .models import UploadedFile
 from .util import get_list
 
@@ -31,6 +31,8 @@ class UploadedFileField(FileField):
 
 
 class MultipleUploadedFileField(UploadedFileField):
+    widget = UploadMultipleWidget
+
     def widget_attrs(self, widget):
         attrs = super(MultipleUploadedFileField, self).widget_attrs(widget)
 
