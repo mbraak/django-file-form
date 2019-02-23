@@ -22,12 +22,6 @@ setup(
     author_email='mbraak@ridethepony.nl',
     description='Django-file-form helps you to write forms with a pretty ajax upload',
     url='https://github.com/mbraak/django-file-form',
-    install_requires=['six'],
-    extras_require={
-        ':python_version < "3.4"': [
-            'pathlib2',
-        ],
-    },
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Framework :: Django",

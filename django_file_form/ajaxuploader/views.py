@@ -8,7 +8,7 @@ from django_file_form.ajaxuploader.backends.local import LocalUploadBackend
 from django_file_form.ajaxuploader.signals import file_uploaded
 
 
-class AjaxFileUploader(object):
+class AjaxFileUploader:
     def __init__(self, backend=None, **kwargs):
         if backend is None:
             backend = LocalUploadBackend

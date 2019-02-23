@@ -1,7 +1,5 @@
 import uuid
 
-import six
-
 from django.urls import reverse
 from django.forms import CharField, HiddenInput
 
@@ -38,7 +36,7 @@ class FileFormMixin(object):
         form_id = self.data.get(self.add_prefix('form_id'))
 
         if form_id:
-            for field_name, field in six.iteritems(self.fields):
+            for field_name, field in self.fields.items():
                 if hasattr(field, 'get_file_data'):
                     prefixed_field_name = self.add_prefix(field_name)
                     file_data = field.get_file_data(prefixed_field_name, form_id)
@@ -54,7 +52,7 @@ class FileFormMixin(object):
         form_id = self.data.get(self.add_prefix('form_id'))
 
         if form_id:
-            for field_name, field in six.iteritems(self.fields):
+            for field_name, field in self.fields.items():
                 if hasattr(field, 'delete_file_data'):
                     prefixed_field_name = self.add_prefix(field_name)
                     field.delete_file_data(prefixed_field_name, form_id)
