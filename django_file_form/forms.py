@@ -35,27 +35,29 @@ class FileFormMixin(object):
             super(FileFormMixin, self).full_clean()
 
     def update_files_data(self):
-        form_id = self.data.get('form_id')
+        form_id = self.data.get(self.add_prefix('form_id'))
 
         if form_id:
             for field_name, field in six.iteritems(self.fields):
                 if hasattr(field, 'get_file_data'):
-                    file_data = field.get_file_data(field_name, form_id)
+                    prefixed_field_name = self.add_prefix(field_name)
+                    file_data = field.get_file_data(prefixed_field_name, form_id)
 
                     if file_data:
                         # Django <= 1.11 has no setlist
                         if isinstance(file_data, list) and hasattr(self.files, 'setlist'):
-                            self.files.setlist(field_name, file_data)
+                            self.files.setlist(prefixed_field_name, file_data)
                         else:
-                            self.files[field_name] = file_data
+                            self.files[prefixed_field_name] = file_data
 
     def delete_temporary_files(self):
-        form_id = self.data.get('form_id')
+        form_id = self.data.get(self.add_prefix('form_id'))
 
         if form_id:
             for field_name, field in six.iteritems(self.fields):
                 if hasattr(field, 'delete_file_data'):
-                    field.delete_file_data(field_name, form_id)
+                    prefixed_field_name = self.add_prefix(field_name)
+                    field.delete_file_data(prefixed_field_name, form_id)
 
     def add_existing_file(self, field_name, filename, delete_url=None, view_url=None):
         self.initial.setdefault(field_name, [])
@@ -71,6 +73,7 @@ class ExistingFile(object):
         self.delete_url = delete_url
         self.view_url = view_url
         self.existing = True
+        self._committed = True
 
     def get_values(self):
         result = dict(

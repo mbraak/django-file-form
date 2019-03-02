@@ -28,7 +28,7 @@
         <script src="{% static "file_form/file_form.js" %}"></script>
         <script>
             $(function() {
-                initUploadFields($('#example-form'));
+                initUploadFields($('#example-form'), { prefix: 'example' });
             });
         </script>
     {% endif %}

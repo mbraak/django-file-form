@@ -45,10 +45,10 @@ class LiveTestCase(StaticLiveServerTestCase):
             filename2 = os.path.basename(file2.name)
 
             selenium.get('%s%s' % (self.live_server_url, '/multiple_without_js'))
-            selenium.find_element_by_name('title').send_keys('abc')
+            selenium.find_element_by_name('example-title').send_keys('abc')
 
-            selenium.find_element_by_name('input_file').send_keys(file1.name)
-            selenium.find_element_by_name('input_file').send_keys(file2.name)
+            selenium.find_element_by_name('example-input_file').send_keys(file1.name)
+            selenium.find_element_by_name('example-input_file').send_keys(file2.name)
 
             selenium.find_element_by_class_name('btn').click()
 

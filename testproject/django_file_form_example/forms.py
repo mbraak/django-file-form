@@ -12,6 +12,7 @@ class BaseForm(FileFormMixin, django_bootstrap3_form.BootstrapForm):
 
 
 class ExampleForm(BaseForm):
+    prefix = 'example'
     input_file = UploadedFileField()
 
     def save(self):
@@ -23,6 +24,7 @@ class ExampleForm(BaseForm):
 
 
 class MultipleFileExampleForm(BaseForm):
+    prefix = 'example'
     input_file = MultipleUploadedFileField()
 
     def save(self):
@@ -40,5 +42,7 @@ class MultipleFileExampleForm(BaseForm):
 
 
 class ExistingFileForm(ExampleForm):
+    prefix = 'example'
+
     def get_upload_url(self):
         return reverse('example_handle_upload')

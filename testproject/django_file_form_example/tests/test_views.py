@@ -32,7 +32,7 @@ class FileFormWebTests(WebTest):
         temp_filepath = None
         try:
             form = self.app.get('/').form
-            self.assertEqual(form['delete_url'].value, '/upload/handle_delete')
+            self.assertEqual(form['example-delete_url'].value, '/upload/handle_delete')
 
             # upload file
             file_id = self.upload_ajax_file(form, 'input_file', filename)
@@ -89,7 +89,7 @@ class FileFormWebTests(WebTest):
             )
 
             # submit valid form
-            form['title'] = 'abc'
+            form['example-title'] = 'abc'
             form.submit().follow()
 
             example = Example.objects.get(title='abc')
@@ -110,12 +110,12 @@ class FileFormWebTests(WebTest):
         try:
             # submit form with error
             form = self.app.get('/').form
-            form['input_file'] = (filename, six.b('xyz'))
+            form['example-input_file'] = (filename, six.b('xyz'))
             form = form.submit().form
 
             # submit form correctly
-            form['title'] = 'abc'
-            form['input_file'] = (filename, six.b('xyz'))
+            form['example-title'] = 'abc'
+            form['example-input_file'] = (filename, six.b('xyz'))
             form.submit().follow()
 
             example = Example.objects.get(title='abc')
@@ -152,7 +152,7 @@ class FileFormWebTests(WebTest):
 
             # submit valid form
             form = page.form
-            form['title'] = 'abc'
+            form['example-title'] = 'abc'
             form.submit().follow()
 
             example2 = Example2.objects.get(title='abc')
@@ -174,12 +174,12 @@ class FileFormWebTests(WebTest):
         try:
             # submit form with error
             form = self.app.get('/multiple').form
-            form['input_file'] = (filename, six.b('xyz'))
+            form['example-input_file'] = (filename, six.b('xyz'))
             form = form.submit().form
 
             # submit form correctly
-            form['title'] = 'abc'
-            form['input_file'] = (filename, six.b('xyz'))
+            form['example-title'] = 'abc'
+            form['example-input_file'] = (filename, six.b('xyz'))
             form.submit().follow()
 
             example2 = Example2.objects.get(title='abc')
@@ -204,7 +204,7 @@ class FileFormWebTests(WebTest):
             self.upload_ajax_file(form, 'input_file', filename2)
 
             # submit form
-            form['title'] = 'aaa'
+            form['example-title'] = 'aaa'
             form.submit().follow()
 
             example = Example.objects.get(title='aaa')
@@ -249,13 +249,13 @@ class FileFormWebTests(WebTest):
             self.assertEqual(json.loads(files_data), [])
 
             # expect same delete url
-            self.assertEqual(form['delete_url'].value, '/upload/handle_delete')
+            self.assertEqual(form['example-delete_url'].value, '/upload/handle_delete')
 
             # expect different upload url
-            self.assertEqual(form['upload_url'].value, '/handle_upload')
+            self.assertEqual(form['example-upload_url'].value, '/handle_upload')
 
             # - upload file
-            file_id = self.upload_ajax_file(form, 'input_file', temp_filename)
+            file_id = self.upload_ajax_file(form, 'example-input_file', temp_filename)
 
             uploaded_file = UploadedFile.objects.get(file_id=file_id)
             temp_file_path = media_root.joinpath(uploaded_file.uploaded_file.name)
@@ -324,15 +324,15 @@ class FileFormWebTests(WebTest):
 
     def upload_ajax_file(self, form, field_name, filename, content=six.b('xyz'), expected_status=200, user=None):
         csrf_token = form['csrfmiddlewaretoken'].value
-        form_id = form['form_id'].value
-        upload_url = form['upload_url'].value
+        form_id = form['example-form_id'].value
+        upload_url = form['example-upload_url'].value
         file_id = get_random_id()
 
         params = dict(
             csrfmiddlewaretoken=csrf_token,
             qquuid=file_id,
             form_id=form_id,
-            field_name=field_name,
+            field_name='example-%s' % field_name,
         )
 
         response = self.app.post(
@@ -355,7 +355,7 @@ class FileFormWebTests(WebTest):
 
     def delete_ajax_file(self, form, file_id, expected_status=200, user=None):
         csrf_token = str(form['csrfmiddlewaretoken'].value)
-        delete_url = '{0!s}/{1!s}'.format(form['delete_url'].value, file_id)
+        delete_url = '{0!s}/{1!s}'.format(form['example-delete_url'].value, file_id)
 
         response = self.app.post(
             delete_url,
