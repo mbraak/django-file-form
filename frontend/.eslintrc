@@ -10,11 +10,17 @@
         "func-names": 0,
         "function-paren-newline": 0,
         "id-length": 0,
+        "implicit-arrow-linebreak": 0,
         "indent": 0,
         "max-len": 0,
         "new-cap": 0,
+        "no-confusing-arrow": 0,
         "no-console": 0,
         "no-else-return": 0,
+        "no-unused-vars": [
+            "error",
+            { "varsIgnorePattern": "initUploadFields" }
+        ],
         "no-use-before-define": 0,
         "one-var": 0,
         "react/jsx-boolean-value": 0,

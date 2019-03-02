@@ -1,5 +1,4 @@
 /* global $ */
-/* exported */
 
 function initUploadFields($form, options) {
     const csrfToken = $form.find("[name=csrfmiddlewaretoken]").val();
