@@ -95,6 +95,15 @@ You must also include jquery
 </script>
 ```
 
+If your form has a prefix, then call `initUploadFields` as follows:
+
+```js
+  // for example, with prefix 'abc'
+  initUploadFields($('#example-form'), { prefix: 'abc' });
+```
+
+See the [Django documentation](https://docs.djangoproject.com/en/2.1/ref/forms/api/#prefixes-for-forms) for more information about form prefixes.
+
 **8 Include the upload_template.html in your template**
 
 ```html
