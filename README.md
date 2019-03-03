@@ -161,3 +161,15 @@ Settings in `settings.py`:
   * The class that is used for the upload backend.
   * This makes it possible to write your upload backend.
   * The default is `django_file_form.uploader.FileFormUploadBackend`.
+
+
+## Changelog
+
+* **0.4.1 (5 January 2019)**
+  * Issue #201: fix multiple file upload without ajax (thanks to Lionqueen94)
+  * Issue #194: correctly call `is_authenticated` (thanks to Dureba)
+* **0.4.0 (3 August 2018)**
+  * Support Django 2.1 and Python 3.7
+  * Issue #173: add i18n to upload widget (thanks to Arman Roomana)
+* **0.3.0 (6 December 2017)**
+  * Support Django 2.0
