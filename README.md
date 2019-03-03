@@ -165,8 +165,10 @@ Settings in `settings.py`:
 
 ## Changelog
 
-* **0.4.1 (5 January 2019)**
+* **0.4.2 (3 March 2019)**
+  * Issue #207: support form prefixes (thanks to Iw108)
   * Issue #201: fix multiple file upload without ajax (thanks to Lionqueen94)
+* **0.4.1 (5 January 2019)**
   * Issue #194: correctly call `is_authenticated` (thanks to Dureba)
 * **0.4.0 (3 August 2018)**
   * Support Django 2.1 and Python 3.7
