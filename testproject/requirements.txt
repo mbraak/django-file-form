@@ -1,4 +1,4 @@
-pathlib==1.0.1
+pathlib==1.0.1; python_version < '3.4'
 pytz==2018.9
 six==1.12.0
 
