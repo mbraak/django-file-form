@@ -165,6 +165,9 @@ Settings in `settings.py`:
 
 ## Changelog
 
+* **development version**
+  * Issue #208: skip install of pathlib for python >= 3.4 (thanks to Simon Maillard)
+
 * **0.4.2 (3 March 2019)**
   * Issue #207: support form prefixes (thanks to Iw108)
   * Issue #201: fix multiple file upload without ajax (thanks to Lionqueen94)
