@@ -79,7 +79,7 @@ class FileFormWebTests(WebTest):
 
             self.assertTrue(temp_filepath.exists())
 
-            upload_container = page.pyquery('#row-input_file .file-uploader-container')
+            upload_container = page.pyquery('#row-example-input_file .file-uploader-container')
 
             self.assertEqual(
                 json.loads(upload_container.attr('data-files')),
@@ -140,7 +140,7 @@ class FileFormWebTests(WebTest):
             # submit the form with an error
             page = form.submit()
 
-            upload_container = page.pyquery('#row-input_file .file-uploader-container')
+            upload_container = page.pyquery('#row-example-input_file .file-uploader-container')
 
             self.assertEqual(
                 json.loads(upload_container.attr('data-files')),
@@ -244,7 +244,7 @@ class FileFormWebTests(WebTest):
             self.assertTrue(example_file_path.exists())
 
             # expect no uploaded files
-            upload_container = page.pyquery('#row-input_file .file-uploader-container')
+            upload_container = page.pyquery('#row-example-input_file .file-uploader-container')
             files_data = upload_container.attr('data-files')
             self.assertEqual(json.loads(files_data), [])
 
