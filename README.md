@@ -18,7 +18,7 @@ Features:
 
 The project is hosted on [github](https://github.com/mbraak/django-file-form).
 
-Works with Django 1.11 - 2.1. Also with Python 2.7, 3.5 - 3.7
+Works with Django 1.11 - 2.2. Also with Python 2.7, 3.6 - 3.7
 
 Note that version 0.3.0 also supports Django 1.8 - 1.10.
 
@@ -165,8 +165,9 @@ Settings in `settings.py`:
 
 ## Changelog
 
-* **development version**
+* **0.5.0**
   * Issue #208: skip install of pathlib for python >= 3.4 (thanks to Simon Maillard)
+  * Issue #212: support Django 2.2
 
 * **0.4.2 (3 March 2019)**
   * Issue #207: support form prefixes (thanks to Iw108)
