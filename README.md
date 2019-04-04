@@ -165,7 +165,7 @@ Settings in `settings.py`:
 
 ## Changelog
 
-* **0.5.0**
+* **0.5.0 (3 April 2019)**
   * Issue #208: skip install of pathlib for python >= 3.4 (thanks to Simon Maillard)
   * Issue #212: support Django 2.2
 
