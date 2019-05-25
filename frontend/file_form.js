@@ -133,3 +133,5 @@ function initFileUploader(options) {
         });
     }
 }
+
+global.initUploadFields = initUploadFields;

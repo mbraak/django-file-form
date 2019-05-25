@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "lint": "eslint file_form.js",
-    "build": "gulp",
-    "watch": "gulp watch"
+    "build": "webpack --mode production",
+    "watch": "webpack --mode development"
   },
   "repository": {
     "type": "git",
@@ -22,13 +22,13 @@
     "@babel/core": "^7.4.5",
     "@babel/preset-env": "^7.4.5",
     "babel-eslint": "^10.0.1",
+    "babel-loader": "^8.0.6",
     "eslint": "^5.16.0",
     "eslint-config-airbnb": "^17.1.0",
     "eslint-plugin-import": "^2.17.3",
     "eslint-plugin-jsx-a11y": "^6.2.1",
     "eslint-plugin-react": "^7.13.0",
-    "gulp": "^4.0.2",
-    "gulp-babel": "^8.0.0",
-    "gulp-uglify": "^3.0.2"
+    "webpack": "^4.32.2",
+    "webpack-cli": "^3.3.2"
   }
 }
