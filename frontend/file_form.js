@@ -60,6 +60,7 @@ function initUploadFields($form, options) {
         }
 
         initFileUploader(uploaderOptions);
+        $inputFile.remove();
     });
 }
 
