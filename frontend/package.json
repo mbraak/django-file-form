@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "eslint file_form.js",
     "build": "webpack --mode production",
-    "watch": "webpack --mode development"
+    "watch": "webpack --mode development --watch"
   },
   "repository": {
     "type": "git",
@@ -30,5 +30,8 @@
     "eslint-plugin-react": "^7.13.0",
     "webpack": "^4.32.2",
     "webpack-cli": "^3.3.2"
+  },
+  "dependencies": {
+    "tus-js-client": "^1.8.0-1"
   }
 }

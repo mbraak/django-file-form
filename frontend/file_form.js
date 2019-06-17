@@ -1,136 +1,69 @@
 /* global $ */
 
+import { Upload } from "tus-js-client";
+
 function initUploadFields($form, options) {
-    const csrfToken = $form.find("[name=csrfmiddlewaretoken]").val();
+  const getInputNameWithPrefix = fieldName =>
+    options && options.prefix ? `${options.prefix}-${fieldName}` : fieldName;
 
-    const getInputNameWithPrefix = fieldName =>
-        options && options.prefix
-            ? `${options.prefix}-${fieldName}`
-            : fieldName;
+  const getInputValue = fieldName => {
+    const inputNameWithPrefix = getInputNameWithPrefix(fieldName);
+    const input = $form.find(`[name=${inputNameWithPrefix}]`);
 
-    const getInputValue = fieldName => {
-        const inputNameWithPrefix = getInputNameWithPrefix(fieldName);
-        const input = $form.find(`[name=${inputNameWithPrefix}]`);
-
-        if (!input.length) {
-            console.error(
-                `Cannot find input with name '${inputNameWithPrefix}'`
-            );
-            return null;
-        }
-
-        return input.val();
-    };
-
-    const uploadUrl = getInputValue("upload_url");
-    const deleteUrl = getInputValue("delete_url");
-    const formId = getInputValue("form_id");
-
-    if (!formId || !uploadUrl) {
-        return;
+    if (!input.length) {
+      console.error(`Cannot find input with name '${inputNameWithPrefix}'`);
+      return null;
     }
 
-    $form.find(".file-uploader").each((i, element) => {
-        const $element = $(element);
+    return input.val();
+  };
 
-        const $inputFile = $($element.find("input[type=file]"));
-        const container = $element.find(".file-uploader-container");
+  const uploadUrl = getInputValue("upload_url");
+  const formId = getInputValue("form_id");
 
-        const fieldName = $inputFile.attr("name");
-        const multiple = Boolean($inputFile.attr("multiple"));
+  if (!formId || !uploadUrl) {
+    return;
+  }
 
-        const uploaderOptions = {
-            element: container,
-            fieldName,
-            csrfToken,
-            uploadUrl,
-            deleteUrl,
-            formId,
-            multiple
-        };
+  $form.find(".file-uploader").each((i, element) => {
+    const $element = $(element);
 
-        if (options) {
-            $.extend(uploaderOptions, options);
-        }
+    const $inputFile = $($element.find("input[type=file]"));
 
-        if (!multiple) {
-            $(container).on("complete", () => {
-                $($element.find(".existing-files")).remove();
-            });
-        }
-
-        initFileUploader(uploaderOptions);
-        $inputFile.remove();
-    });
-}
-
-function initFileUploader(options) {
-    const $container = $(options.element);
+    const fieldName = $inputFile.attr("name");
+    const multiple = Boolean($inputFile.attr("multiple"));
 
     const uploaderOptions = {
-        request: {
-            endpoint: options.uploadUrl,
-            params: {
-                csrfmiddlewaretoken: options.csrfToken,
-                field_name: options.fieldName,
-                form_id: options.formId
-            }
-        },
-        multiple: options.multiple,
-        deleteFile: {
-            enabled: true,
-            endpoint: options.deleteUrl,
-            method: "POST",
-            customHeaders: {
-                "X-CSRFToken": options.csrfToken
-            }
-        },
-        failedUploadTextDisplay: {
-            maxChars: 100,
-            responseProperty: "error",
-            enableTooltip: true
-        }
+      input: $inputFile[0],
+      fieldName,
+      uploadUrl,
+      formId,
+      multiple
     };
 
-    if (options.text) {
-        uploaderOptions.text = options.text;
+    if (options) {
+      $.extend(uploaderOptions, options);
     }
 
-    if (options.deleteFile) {
-        $.extend(uploaderOptions.deleteFile, options.deleteFile);
-    }
-
-    if (options.failedUploadTextDisplay) {
-        $.extend(
-            uploaderOptions.failedUploadTextDisplay,
-            options.failedUploadTextDisplay
-        );
-    }
-
-    if (options.callbacks) {
-        uploaderOptions.callbacks = options.callbacks;
-    }
-
-    if (options.template) {
-        uploaderOptions.template = options.template;
-    }
-
-    if (options.validation) {
-        uploaderOptions.validation = options.validation;
-    }
-
-    $container.fineUploader(uploaderOptions);
-
-    const filesData = $container.data("files");
-
-    if (filesData) {
-        $container.fineUploader(
-            "addInitialFiles",
-            filesData
-                .filter(f => !f.existing)
-                .map(f => ({ uuid: f.id, name: f.name }))
-        );
-    }
+    initUploadField(uploaderOptions);
+  });
 }
+
+const initUploadField = ({ fieldName, formId, input, uploadUrl }) => {
+  input.addEventListener("change", e => {
+    const file = e.target.files[0];
+
+    const upload = new Upload(file, {
+      endpoint: uploadUrl,
+      metadata: {
+        fieldName,
+        filename: file.name,
+        formId
+      }
+    });
+
+    upload.start();
+  });
+};
 
 global.initUploadFields = initUploadFields;

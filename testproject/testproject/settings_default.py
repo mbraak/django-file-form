@@ -42,7 +42,7 @@ INSTALLED_APPS = [
 
     # Generic apps
     'django_file_form',
-    'django_file_form.ajaxuploader',
+    'django_tus',
     'django_bootstrap3_form',
     'django_pony_forms',
 
@@ -74,6 +74,7 @@ MEDIA_ROOT, STATIC_ROOT = resolve_paths()
 
 create_media_paths(Path(MEDIA_ROOT))
 
+TUS_UPLOAD_DIR = Path(MEDIA_ROOT).joinpath('temp_uploads')
 
 USE_TZ = True
 

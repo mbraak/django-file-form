@@ -5,7 +5,6 @@ from django.views import generic
 from django.urls import reverse
 
 from django_file_form.forms import ExistingFile
-from django_file_form.uploader import FileFormUploader
 
 try:
     from pathlib import Path
@@ -68,9 +67,6 @@ class ExistingFileExampleView(BaseFormView):
             )
 
         return form_kwargs
-
-
-handle_upload = FileFormUploader()
 
 
 def permission_denied(request, exception):

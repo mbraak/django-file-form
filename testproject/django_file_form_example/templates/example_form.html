@@ -5,7 +5,6 @@
 
 {% block head %}
     {{ block.super }}
-    <link rel="stylesheet" href="{% static "ajaxuploader/css/fileuploader.css" %}">
     <link rel="stylesheet" href="{% static "example.css" %}">
 {% endblock %}
 
@@ -20,11 +19,8 @@
         <input class="btn btn-primary" type="submit" value="Save" />
     </form>
 
-    {% include 'django_file_form/upload_template.html' %}
-
     {% if use_ajax %}
         <script src="{% static "jquery/dist/jquery.js" %}"></script>
-        <script src="{% static "ajaxuploader/js/fileuploader.js" %}"></script>
         <script src="{% static "file_form/file_form.js" %}"></script>
         <script>
             $(function() {
