@@ -103,28 +103,6 @@ class FileFormWebTests(WebTest):
                 remove_p(temp_filepath)
             remove_p(example_filepath)
 
-    def test_submit_without_ajax(self):
-        # setup
-        filename = get_random_id()
-        uploaded_file = media_root.joinpath('example', filename)
-        try:
-            # submit form with error
-            form = self.app.get('/').form
-            form['example-input_file'] = (filename, six.b('xyz'))
-            form = form.submit().form
-
-            # submit form correctly
-            form['example-title'] = 'abc'
-            form['example-input_file'] = (filename, six.b('xyz'))
-            form.submit().follow()
-
-            example = Example.objects.get(title='abc')
-            self.assertEqual(example.input_file.name, 'example/{0!s}'.format(filename))
-
-            self.assertTrue(uploaded_file.exists())
-        finally:
-            remove_p(uploaded_file)
-
     def test_submit_multiple(self):
         # setup
         filename1, filename2 = get_random_ids(2)

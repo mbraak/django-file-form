@@ -31,6 +31,10 @@ class ExampleView(BaseFormView):
     form_class = forms.ExampleForm
 
 
+class WithoutJsExampleView(ExampleView):
+    use_ajax = False
+
+
 class ExampleSuccessView(generic.TemplateView):
     template_name = 'success.html'
 
