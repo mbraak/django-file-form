@@ -6,6 +6,7 @@ from selenium.webdriver.firefox.options import Options
 
 class BaseLiveTestCase(StaticLiveServerTestCase):
     selenium = None
+    page_class = None
 
     @classmethod
     def setUpClass(cls):
@@ -22,8 +23,8 @@ class BaseLiveTestCase(StaticLiveServerTestCase):
         cls.selenium.quit()
         super(BaseLiveTestCase, cls).tearDownClass()
 
-    def get_page(self, page):
-        self.selenium.get('%s%s' % (self.live_server_url, page))
+    def setUp(self):
+        self.page = self.page_class(self.selenium, self.live_server_url)
 
-    def assert_page_contains_text(self, text):
-        self.selenium.find_element_by_xpath("//*[contains(text(), '%s')]" % text)
+    def tearDown(self):
+        self.page.cleanup()
