@@ -20,7 +20,7 @@ class LiveTestCase(BaseLiveTestCase):
 
             selenium.find_element_by_class_name('btn').click()
 
-            selenium.find_element_by_xpath("//*[contains(text(), 'Upload success')]")
+            self.assert_page_contains_text('Upload success')
 
             self.assertEqual(temp_file.uploaded_file().read_text(), "content1")
 
@@ -46,7 +46,7 @@ class LiveTestCase(BaseLiveTestCase):
 
             selenium.find_element_by_class_name('btn').click()
 
-            selenium.find_element_by_xpath("//*[contains(text(), 'Upload success')]")
+            self.assert_page_contains_text('Upload success')
 
             self.assertEqual(temp_file1.uploaded_file().read_text(), "content1")
             self.assertEqual(temp_file2.uploaded_file().read_text(), "content2")
@@ -77,16 +77,42 @@ class LiveTestCase(BaseLiveTestCase):
 
             el = selenium.find_element_by_class_name('qq-upload-success')
             self.assertTrue(el.text.startswith(temp_file.base_name()))
-
             self.assertEqual(UploadedFile.objects.count(), 1)
 
             selenium.find_element_by_class_name('btn').click()
 
-            selenium.find_element_by_xpath("//*[contains(text(), 'Upload success')]")
+            self.assert_page_contains_text('Upload success')
 
             self.assertEqual(temp_file.uploaded_file().read_text(), "content1")
 
             example = Example.objects.get(title='abc')
             self.assertEqual(example.input_file.name, 'example/{0!s}'.format(temp_file.base_name()))
+        finally:
+            temp_file.destroy()
+
+    def test_form_error(self):
+        selenium = self.selenium
+
+        temp_file = TempFile()
+        try:
+            temp_file.create('content1')
+
+            self.get_page('/')
+            selenium.find_element_by_css_selector('input[type=file]').send_keys(temp_file.path())
+
+            el = selenium.find_element_by_class_name('qq-upload-success')
+            self.assertTrue(el.text.startswith(temp_file.base_name()))
+
+            selenium.find_element_by_id('id_example-title')
+            selenium.find_element_by_class_name('btn').click()
+
+            self.assert_page_contains_text('Title field is required')
+
+            el = selenium.find_element_by_class_name('qq-upload-success')
+            self.assertTrue(el.text.startswith(temp_file.base_name()))
+
+            selenium.find_element_by_name('example-title').send_keys('abc')
+            selenium.find_element_by_class_name('btn').click()
+            self.assert_page_contains_text('Upload success')
         finally:
             temp_file.destroy()

@@ -52,57 +52,6 @@ class FileFormWebTests(WebTest):
             if temp_filepath:
                 remove_p(temp_filepath)
 
-    def test_submit_form_with_ajax_upload(self):
-        """
-        Submit a form with a file that is uploaded using ajax
-        """
-        # setup
-        filename = get_random_id()
-        temp_filepath = None
-        example_filepath = media_root.joinpath('example', filename)
-        try:
-            form = self.app.get('/').form
-
-            # upload file
-            file_id = self.upload_ajax_file(form, 'input_file', filename)
-
-            uploaded_file = UploadedFile.objects.get(file_id=file_id)
-            self.assertEqual(uploaded_file.original_filename, filename)
-            self.assertNotEqual(uploaded_file.uploaded_file.name, 'temp_uploads/{0!s}'.format(filename))
-
-            temp_filepath = media_root.joinpath(uploaded_file.uploaded_file.name)
-            self.assertTrue(temp_filepath.exists())
-
-            # submit the form with an error
-            page = form.submit()
-            form = page.form
-
-            self.assertTrue(temp_filepath.exists())
-
-            upload_container = page.pyquery('#row-example-input_file .file-uploader-container')
-
-            self.assertEqual(
-                json.loads(upload_container.attr('data-files')),
-                [
-                    dict(id=file_id, name=filename)
-                ]
-            )
-
-            # submit valid form
-            form['example-title'] = 'abc'
-            form.submit().follow()
-
-            example = Example.objects.get(title='abc')
-            self.assertEqual(example.input_file.name, 'example/{0!s}'.format(filename))
-
-            self.assertFalse(temp_filepath.exists())
-            self.assertFalse(UploadedFile.objects.filter(file_id=file_id).exists())
-            self.assertTrue(example_filepath.exists())
-        finally:
-            if temp_filepath:
-                remove_p(temp_filepath)
-            remove_p(example_filepath)
-
     def test_submit_multiple(self):
         # setup
         filename1, filename2 = get_random_ids(2)

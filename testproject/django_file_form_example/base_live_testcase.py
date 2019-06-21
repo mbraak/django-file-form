@@ -24,3 +24,6 @@ class BaseLiveTestCase(StaticLiveServerTestCase):
 
     def get_page(self, page):
         self.selenium.get('%s%s' % (self.live_server_url, page))
+
+    def assert_page_contains_text(self, text):
+        self.selenium.find_element_by_xpath("//*[contains(text(), '%s')]" % text)
