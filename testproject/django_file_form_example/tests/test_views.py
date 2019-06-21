@@ -15,7 +15,7 @@ from django_webtest import WebTest
 
 from django_file_form.models import UploadedFile
 
-from django_file_form_example.models import Example, Example2
+from django_file_form_example.models import Example
 from django_file_form_example.test_utils import get_random_id, get_random_ids, encode_datetime, remove_p
 
 
@@ -51,72 +51,6 @@ class FileFormWebTests(WebTest):
         finally:
             if temp_filepath:
                 remove_p(temp_filepath)
-
-    def test_submit_multiple(self):
-        # setup
-        filename1, filename2 = get_random_ids(2)
-        uploaded_file1 = media_root.joinpath('example', filename1)
-        uploaded_file2 = media_root.joinpath('example', filename2)
-        try:
-            form = self.app.get('/multiple').form
-
-            # upload two files
-            file_id1 = self.upload_ajax_file(form, 'input_file', filename1)
-            file_id2 = self.upload_ajax_file(form, 'input_file', filename2)
-
-            # submit the form with an error
-            page = form.submit()
-
-            upload_container = page.pyquery('#row-example-input_file .file-uploader-container')
-
-            self.assertEqual(
-                json.loads(upload_container.attr('data-files')),
-                [
-                    dict(id=file_id1, name=filename1),
-                    dict(id=file_id2, name=filename2)
-                ]
-            )
-
-            # submit valid form
-            form = page.form
-            form['example-title'] = 'abc'
-            form.submit().follow()
-
-            example2 = Example2.objects.get(title='abc')
-            files = example2.files.all()
-            self.assertEqual(files.count(), 2)
-            self.assertEqual(six.text_type(files[0]), 'example/{0!s}'.format(filename1))
-            self.assertEqual(six.text_type(files[1]), 'example/{0!s}'.format(filename2))
-
-            self.assertTrue(uploaded_file1.exists())
-            self.assertTrue(uploaded_file2.exists())
-        finally:
-            remove_p(uploaded_file1)
-            remove_p(uploaded_file2)
-
-    def test_submit_multiple_without_ajax(self):
-        # setup
-        filename = get_random_id()
-        uploaded_file = media_root.joinpath('example', filename)
-        try:
-            # submit form with error
-            form = self.app.get('/multiple').form
-            form['example-input_file'] = (filename, six.b('xyz'))
-            form = form.submit().form
-
-            # submit form correctly
-            form['example-title'] = 'abc'
-            form['example-input_file'] = (filename, six.b('xyz'))
-            form.submit().follow()
-
-            example2 = Example2.objects.get(title='abc')
-            files = example2.files.all()
-            self.assertEqual(files.count(), 1)
-            self.assertEqual(files[0].input_file.name, 'example/{0!s}'.format(filename))
-
-            self.assertTrue(uploaded_file.exists())
-        finally:
-            remove_p(uploaded_file)
 
     def test_submit_multiple_for_single_filefield(self):
         # setup

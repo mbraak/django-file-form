@@ -61,8 +61,7 @@ class LiveTestCase(BaseLiveTestCase):
         page.fill_title_field('abc')
         page.upload_using_js(temp_file)
 
-        el = page.find_upload_success()
-        self.assertTrue(el.text.startswith(temp_file.base_name()))
+        page.find_upload_success(temp_file)
         self.assertEqual(UploadedFile.objects.count(), 1)
 
         page.submit()
@@ -74,6 +73,36 @@ class LiveTestCase(BaseLiveTestCase):
         self.assertEqual(example.input_file.name, 'example/{0!s}'.format(temp_file.base_name()))
         self.assertEqual(UploadedFile.objects.count(), 0)
 
+    def test_upload_multiple(self):
+        page = self.page
+
+        temp_file1 = page.create_temp_file('content1')
+        temp_file2 = page.create_temp_file('content2')
+
+        page.open('/multiple')
+
+        page.fill_title_field('abc')
+
+        page.upload_using_js(temp_file1)
+        page.find_upload_success(temp_file1, upload_index=0)
+
+        page.upload_using_js(temp_file2)
+        page.find_upload_success(temp_file2, upload_index=1)
+
+        self.assertEqual(UploadedFile.objects.count(), 2)
+
+        page.submit()
+
+        self.assertEqual(Example2.objects.count(), 1)
+
+        example2 = Example2.objects.first()
+        self.assertEqual(example2.title, 'abc')
+
+        self.assertSetEqual(
+            {f.input_file.name for f in example2.files.all()},
+            {'example/%s' % temp_file1.base_name(), 'example/%s' % temp_file2.base_name()}
+        )
+
     def test_form_error(self):
         page = self.page
 
@@ -81,12 +110,11 @@ class LiveTestCase(BaseLiveTestCase):
 
         page.open('/')
         page.upload_using_js(temp_file)
-        page.find_upload_success()
+        page.find_upload_success(temp_file)
 
         page.submit()
 
-        el = page.find_upload_success()
-        self.assertTrue(el.text.startswith(temp_file.base_name()))
+        page.find_upload_success(temp_file)
         self.assertEqual(UploadedFile.objects.count(), 1)
 
         page.fill_title_field('abc')
