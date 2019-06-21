@@ -124,14 +124,12 @@ function initFileUploader(options) {
     const filesData = $container.data("files");
 
     if (filesData) {
-        filesData.forEach(value => {
-            if (!value.existing) {
-                $container.fineUploader("addCannedFile", {
-                    uuid: value.id,
-                    name: value.name
-                });
-            }
-        });
+        $container.fineUploader(
+            "addInitialFiles",
+            filesData
+                .filter(f => !f.existing)
+                .map(f => ({ uuid: f.id, name: f.name }))
+        );
     }
 }
 
