@@ -1,3 +1,4 @@
+from django_file_form.models import UploadedFile
 from django_file_form_example.base_live_testcase import BaseLiveTestCase
 from django_file_form_example.models import Example, Example2
 from django_file_form_example.temp_file import TempFile
@@ -14,6 +15,7 @@ class LiveTestCase(BaseLiveTestCase):
             self.get_page('/without_js')
 
             selenium.find_element_by_name('example-title').send_keys('xyz')
+
             selenium.find_element_by_name('example-input_file').send_keys(temp_file.path())
 
             selenium.find_element_by_class_name('btn').click()
@@ -61,3 +63,30 @@ class LiveTestCase(BaseLiveTestCase):
         finally:
             temp_file1.destroy()
             temp_file2.destroy()
+
+    def test_upload(self):
+        selenium = self.selenium
+
+        temp_file = TempFile()
+        try:
+            temp_file.create('content1')
+
+            self.get_page('/')
+            selenium.find_element_by_name('example-title').send_keys('abc')
+            selenium.find_element_by_css_selector('input[type=file]').send_keys(temp_file.path())
+
+            el = selenium.find_element_by_class_name('qq-upload-success')
+            self.assertTrue(el.text.startswith(temp_file.base_name()))
+
+            self.assertEqual(UploadedFile.objects.count(), 1)
+
+            selenium.find_element_by_class_name('btn').click()
+
+            selenium.find_element_by_xpath("//*[contains(text(), 'Upload success')]")
+
+            self.assertEqual(temp_file.uploaded_file().read_text(), "content1")
+
+            example = Example.objects.get(title='abc')
+            self.assertEqual(example.input_file.name, 'example/{0!s}'.format(temp_file.base_name()))
+        finally:
+            temp_file.destroy()
