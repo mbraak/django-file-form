@@ -1,6 +1,9 @@
-from pathlib import Path
-
 import django
+
+try:
+    from pathlib import Path
+except ImportError:
+    from pathlib2 import Path
 
 
 def mkdir_p(path):

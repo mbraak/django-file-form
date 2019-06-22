@@ -1,12 +1,16 @@
 import os
 import sys
-from pathlib import Path
 
 from django.conf import settings
 from django.core.files import File
 from django.db import models
 from django.utils import timezone
 from six import python_2_unicode_compatible, text_type
+
+try:
+    from pathlib import Path
+except ImportError:
+    from pathlib2 import Path
 
 from . import conf
 from .util import ModelManager, load_class

@@ -1,7 +1,11 @@
 from tempfile import NamedTemporaryFile
-from pathlib import Path
 
 from django.conf import settings
+
+try:
+    from pathlib import Path
+except ImportError:
+    from pathlib2 import Path
 
 
 class TempFile(object):

@@ -3,8 +3,6 @@ import json
 
 import six
 
-from pathlib import Path
-
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.test import TestCase, override_settings
@@ -17,6 +15,11 @@ from django_file_form.models import UploadedFile
 
 from django_file_form_example.models import Example
 from django_file_form_example.test_utils import get_random_id, get_random_ids, encode_datetime, remove_p
+
+try:
+    from pathlib import Path
+except ImportError:
+    from pathlib2 import Path
 
 
 media_root = Path(settings.MEDIA_ROOT)
