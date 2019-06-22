@@ -92,6 +92,7 @@ class LiveTestCase(BaseLiveTestCase):
         self.assertEqual(UploadedFile.objects.count(), 2)
 
         page.submit()
+        page.assert_page_contains_text('Upload success')
 
         self.assertEqual(Example2.objects.count(), 1)
 
