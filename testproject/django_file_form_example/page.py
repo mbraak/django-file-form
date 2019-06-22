@@ -1,3 +1,5 @@
+from selenium.webdriver.support.wait import WebDriverWait
+
 from django_file_form_example.temp_file import TempFile
 
 
@@ -35,8 +37,17 @@ class Page(object):
         el = self.selenium.find_element_by_css_selector('.qq-file-id-%d.qq-upload-success' % upload_index)
         el.find_element_by_xpath("//*[contains(text(), '%s')]" % temp_file.base_name())
 
+    def find_not_upload_success(self, upload_index=0):
+        WebDriverWait(self.selenium, timeout=10).until_not(
+            lambda selenium: selenium.find_element_by_css_selector('.qq-file-id-%d.qq-upload-success' % upload_index)
+        )
+
     def submit(self):
         self.selenium.find_element_by_class_name('btn').click()
 
     def assert_page_contains_text(self, text):
         self.selenium.find_element_by_xpath("//*[contains(text(), '%s')]" % text)
+
+    def delete_ajax_file(self, upload_index=0):
+        el = self.selenium.find_element_by_css_selector('.qq-file-id-%d.qq-upload-success' % upload_index)
+        el.find_element_by_link_text('Delete').click()

@@ -26,35 +26,6 @@ media_root = Path(settings.MEDIA_ROOT)
 
 
 class FileFormWebTests(WebTest):
-    def test_ajax_delete(self):
-        """
-        Upload and delete a file using ajax.
-        """
-        # setup
-        filename = get_random_id()
-        temp_filepath = None
-        try:
-            form = self.app.get('/').form
-            self.assertEqual(form['example-delete_url'].value, '/upload/handle_delete')
-
-            # upload file
-            file_id = self.upload_ajax_file(form, 'input_file', filename)
-
-            uploaded_file = UploadedFile.objects.get(file_id=file_id)
-            temp_filepath = media_root.joinpath(uploaded_file.uploaded_file.name)
-
-            self.assertTrue(temp_filepath.exists())
-            UploadedFile.objects.get(file_id=file_id)
-
-            # delete file
-            self.delete_ajax_file(form, file_id)
-
-            self.assertFalse(temp_filepath.exists())
-            self.assertFalse(UploadedFile.objects.filter(file_id=file_id).exists())
-        finally:
-            if temp_filepath:
-                remove_p(temp_filepath)
-
     def test_submit_multiple_for_single_filefield(self):
         # setup
         filename1, filename2 = get_random_ids(2)

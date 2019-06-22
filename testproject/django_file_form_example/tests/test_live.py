@@ -128,3 +128,18 @@ class LiveTestCase(BaseLiveTestCase):
 
         self.assertEqual(Example.objects.count(), 1)
         self.assertEqual(UploadedFile.objects.count(), 0)
+
+    def test_ajax_delete(self):
+        page = self.page
+
+        temp_file = page.create_temp_file('content1')
+
+        page.open('/')
+        page.upload_using_js(temp_file)
+        page.find_upload_success(temp_file)
+        self.assertEqual(UploadedFile.objects.count(), 1)
+
+        page.delete_ajax_file()
+        page.find_not_upload_success()
+
+        self.assertEqual(UploadedFile.objects.count(), 0)
