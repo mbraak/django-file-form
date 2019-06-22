@@ -12,7 +12,7 @@ class BaseForm(FileFormMixin, django_bootstrap3_form.BootstrapForm):
     title = django_bootstrap3_form.CharField(required=False)
 
     def clean(self):
-        cleaned_data = super().clean()
+        cleaned_data = super(BaseForm, self).clean()
 
         if not cleaned_data['title']:
             raise ValidationError('Title field is required')
