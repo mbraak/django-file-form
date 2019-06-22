@@ -17,6 +17,8 @@ class BaseForm(FileFormMixin, django_bootstrap3_form.BootstrapForm):
         if not cleaned_data['title']:
             raise ValidationError('Title field is required')
 
+        return cleaned_data
+
 
 class ExampleForm(BaseForm):
     prefix = 'example'

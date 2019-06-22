@@ -120,6 +120,7 @@ class LiveTestCase(BaseLiveTestCase):
 
         page.fill_title_field('abc')
         page.submit()
+
         page.assert_page_contains_text('Upload success')
 
         example = Example.objects.get(title='abc')
