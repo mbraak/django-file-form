@@ -1,7 +1,19 @@
+from django.core.files.base import ContentFile
+from django.conf import settings
+
 from django_file_form.models import UploadedFile
 from django_file_form_example.base_live_testcase import BaseLiveTestCase
 from django_file_form_example.models import Example, Example2
 from django_file_form_example.page import Page
+from django_file_form_example.test_utils import get_random_id, remove_p
+
+try:
+    from pathlib import Path
+except ImportError:
+    from pathlib2 import Path
+
+
+media_root = Path(settings.MEDIA_ROOT)
 
 
 class LiveTestCase(BaseLiveTestCase):
@@ -177,3 +189,20 @@ class LiveTestCase(BaseLiveTestCase):
         page.find_not_upload_success()
 
         self.assertEqual(UploadedFile.objects.count(), 0)
+
+    def test_existing_file(self):
+        page = self.page
+
+        example_filename = get_random_id()
+        example_file_path = media_root.joinpath('example', example_filename)
+        example = Example.objects.create(title='abc', input_file=ContentFile('xyz', example_filename))
+        try:
+            self.assertTrue(example_file_path.exists())
+
+            page.open('/existing/%d' % example.id)
+            el = self.selenium.find_element_by_css_selector('.existing-files')
+            el.find_element_by_xpath("//*[contains(text(), '%s')]" % example_filename)
+        finally:
+            remove_p(example_file_path)
+
+

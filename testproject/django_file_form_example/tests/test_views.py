@@ -5,13 +5,11 @@ import six
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.test import override_settings
-from django.core.files.base import ContentFile
 
 from django_webtest import WebTest
 
 from django_file_form.models import UploadedFile
 
-from django_file_form_example.models import Example
 from django_file_form_example.test_utils import get_random_id, remove_p
 
 try:
@@ -24,53 +22,6 @@ media_root = Path(settings.MEDIA_ROOT)
 
 
 class FileFormWebTests(WebTest):
-    def test_existing_file(self):
-        """
-        Test a form with an existing file.
-        """
-        # setup
-        example_filename = get_random_id()
-        example_file_path = media_root.joinpath('example', example_filename)
-        temp_filename = get_random_id()
-        temp_file_path = None
-        try:
-            example = Example.objects.create(title='abc', input_file=ContentFile('xyz', example_filename))
-
-            # - get form
-            page = self.app.get('/existing/{0:d}'.format(example.id))
-            form = page.form
-
-            self.assertTrue(example_file_path.exists())
-
-            # expect no uploaded files
-            upload_container = page.pyquery('#row-example-input_file .file-uploader-container')
-            files_data = upload_container.attr('data-files')
-            self.assertEqual(json.loads(files_data), [])
-
-            # expect same delete url
-            self.assertEqual(form['example-delete_url'].value, '/upload/handle_delete')
-
-            # expect different upload url
-            self.assertEqual(form['example-upload_url'].value, '/handle_upload')
-
-            # - upload file
-            file_id = self.upload_ajax_file(form, 'example-input_file', temp_filename)
-
-            uploaded_file = UploadedFile.objects.get(file_id=file_id)
-            temp_file_path = media_root.joinpath(uploaded_file.uploaded_file.name)
-
-            self.assertTrue(temp_file_path.exists())
-
-            # - delete file
-            self.delete_ajax_file(form, file_id)
-
-            self.assertFalse(temp_file_path.exists())
-        finally:
-            remove_p(example_file_path)
-
-            if temp_file_path:
-                remove_p(temp_file_path)
-
     def test_unicode_filename(self):
         filename = u'àęö{0!s}'.format(get_random_id())
         temp_filepath = None
