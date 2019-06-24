@@ -12,7 +12,7 @@ from django_webtest import WebTest
 from django_file_form.models import UploadedFile
 
 from django_file_form_example.models import Example
-from django_file_form_example.test_utils import get_random_id, get_random_ids, remove_p
+from django_file_form_example.test_utils import get_random_id, remove_p
 
 try:
     from pathlib import Path
@@ -24,28 +24,6 @@ media_root = Path(settings.MEDIA_ROOT)
 
 
 class FileFormWebTests(WebTest):
-    def test_submit_multiple_for_single_filefield(self):
-        # setup
-        filename1, filename2 = get_random_ids(2)
-        uploaded_file1 = media_root.joinpath('example', filename1)
-        uploaded_file2 = media_root.joinpath('example', filename2)
-        try:
-            form = self.app.get('/').form
-
-            # upload files
-            self.upload_ajax_file(form, 'input_file', filename1)
-            self.upload_ajax_file(form, 'input_file', filename2)
-
-            # submit form
-            form['example-title'] = 'aaa'
-            form.submit().follow()
-
-            example = Example.objects.get(title='aaa')
-            self.assertEqual(example.input_file.name, 'example/{0!s}'.format(filename2))
-        finally:
-            remove_p(uploaded_file1)
-            remove_p(uploaded_file2)
-
     def test_submit_multiple_empty(self):
         """
         - Form with multiple file field

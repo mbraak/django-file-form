@@ -104,6 +104,32 @@ class LiveTestCase(BaseLiveTestCase):
             {'example/%s' % temp_file1.base_name(), 'example/%s' % temp_file2.base_name()}
         )
 
+        self.assertEqual(UploadedFile.objects.count(), 0)
+
+    def test_upload_multiple_for_single_filefield(self):
+        page = self.page
+
+        temp_file1 = page.create_temp_file('content1')
+        temp_file2 = page.create_temp_file('content2')
+
+        page.open('/')
+
+        page.fill_title_field('abc')
+
+        page.upload_using_js(temp_file1)
+        page.find_upload_success(temp_file1, upload_index=0)
+
+        page.upload_using_js(temp_file2)
+        page.assert_page_contains_text(temp_file2.base_name())
+
+        page.submit()
+        page.assert_page_contains_text('Upload success')
+
+        example = Example.objects.get(title='abc')
+        self.assertEqual(example.input_file.name, 'example/{0!s}'.format(temp_file2.base_name()))
+
+        self.assertEqual(UploadedFile.objects.count(), 0)
+
     def test_form_error(self):
         page = self.page
 
