@@ -12,12 +12,12 @@ class TempFile(object):
     def __init__(self):
         self.named_temporary_file = None
 
-    def create(self, content='abc'):
+    def create(self, content='abc', prefix=None):
         if self.named_temporary_file:
             raise Exception('Tempfile is already created')
 
         def create_named_temporary_file():
-            f = NamedTemporaryFile(mode='w+b')
+            f = NamedTemporaryFile(mode='w+b', prefix=prefix)
             f.write(content.encode())
             f.seek(0)
 

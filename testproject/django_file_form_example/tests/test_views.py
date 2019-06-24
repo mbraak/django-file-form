@@ -10,7 +10,7 @@ from django_webtest import WebTest
 
 from django_file_form.models import UploadedFile
 
-from django_file_form_example.test_utils import get_random_id, remove_p
+from django_file_form_example.test_utils import get_random_id
 
 try:
     from pathlib import Path
@@ -22,26 +22,6 @@ media_root = Path(settings.MEDIA_ROOT)
 
 
 class FileFormWebTests(WebTest):
-    def test_unicode_filename(self):
-        filename = u'àęö{0!s}'.format(get_random_id())
-        temp_filepath = None
-
-        form = self.app.get('/').form
-
-        try:
-            file_id = self.upload_ajax_file(form, 'input_file', filename)
-
-            uploaded_file = UploadedFile.objects.get(file_id=file_id)
-            self.assertEqual(uploaded_file.original_filename, filename)
-
-            self.assertEqual(six.text_type(uploaded_file), filename)
-
-            temp_filepath = media_root.joinpath(uploaded_file.uploaded_file.name)
-            self.assertTrue(temp_filepath.exists())
-        finally:
-            if temp_filepath:
-                remove_p(temp_filepath)
-
     @override_settings(FILE_FORM_MUST_LOGIN=True)
     def test_permission_for_upload(self):
         # submit without permission

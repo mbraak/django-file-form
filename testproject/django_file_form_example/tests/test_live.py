@@ -1,3 +1,5 @@
+# coding=utf-8
+import six
 from django.core.files.base import ContentFile
 from django.conf import settings
 
@@ -205,4 +207,23 @@ class LiveTestCase(BaseLiveTestCase):
         finally:
             remove_p(example_file_path)
 
+    def test_unicode_filename(self):
+        page = self.page
+        prefix = u'àęö'
 
+        temp_file = page.create_temp_file('content1', prefix=prefix)
+
+        page.open('/')
+        page.upload_using_js(temp_file)
+        page.find_upload_success(temp_file)
+
+        uploaded_file = UploadedFile.objects.first()
+        self.assertEqual(uploaded_file.original_filename, temp_file.base_name())
+        self.assertEqual(six.text_type(uploaded_file), temp_file.base_name())
+        self.assertTrue(prefix in temp_file.base_name())
+
+        page.fill_title_field('abc')
+        page.submit()
+        page.assert_page_contains_text('Upload success')
+
+        self.assertEqual(temp_file.uploaded_file().read_text(), "content1")
