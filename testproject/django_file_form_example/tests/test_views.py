@@ -24,18 +24,6 @@ media_root = Path(settings.MEDIA_ROOT)
 
 
 class FileFormWebTests(WebTest):
-    def test_submit_multiple_empty(self):
-        """
-        - Form with multiple file field
-        - Submit with empty values
-        """
-        # submit form
-        form = self.app.get('/multiple').form
-        page = form.submit()
-
-        # expect error class on input-file row
-        page.pyquery('#row-input_file').hasClass('error')
-
     def test_existing_file(self):
         """
         Test a form with an existing file.

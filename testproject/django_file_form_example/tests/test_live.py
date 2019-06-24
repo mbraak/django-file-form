@@ -130,6 +130,14 @@ class LiveTestCase(BaseLiveTestCase):
 
         self.assertEqual(UploadedFile.objects.count(), 0)
 
+    def test_submit_multiple_empty(self):
+        page = self.page
+
+        page.open('/multiple')
+        page.submit()
+
+        page.selenium.find_element_by_css_selector('#row-example-input_file.has-error')
+
     def test_form_error(self):
         page = self.page
 
