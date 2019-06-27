@@ -219,6 +219,7 @@ class LiveTestCase(BaseLiveTestCase):
         page.find_upload_success(temp_file)
 
         uploaded_file = UploadedFile.objects.first()
+
         self.assertEqual(uploaded_file.original_filename, temp_file.base_name())
         self.assertEqual(six.text_type(uploaded_file), temp_file.base_name())
         self.assertTrue(prefix in temp_file.base_name())

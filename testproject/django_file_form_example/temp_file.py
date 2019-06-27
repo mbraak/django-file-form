@@ -1,3 +1,4 @@
+import os
 from tempfile import NamedTemporaryFile
 
 from django.conf import settings
@@ -17,7 +18,7 @@ class TempFile(object):
             raise Exception('Tempfile is already created')
 
         def create_named_temporary_file():
-            f = NamedTemporaryFile(mode='w+b', prefix=prefix)
+            f = NamedTemporaryFile(mode='w+b', prefix=prefix or 'tmp')
             f.write(content.encode())
             f.seek(0)
 
@@ -29,7 +30,7 @@ class TempFile(object):
         if not self.named_temporary_file:
             raise Exception('Tempfile is not created')
 
-        return Path(self.named_temporary_file.name).name
+        return os.path.basename(self.named_temporary_file.name)
 
     def path(self):
         if not self.named_temporary_file:
