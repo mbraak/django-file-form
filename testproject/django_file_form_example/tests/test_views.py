@@ -23,20 +23,6 @@ media_root = Path(settings.MEDIA_ROOT)
 
 class FileFormWebTests(WebTest):
     @override_settings(FILE_FORM_MUST_LOGIN=True)
-    def test_permission_for_upload(self):
-        # submit without permission
-        filename = get_random_id()
-        form = self.app.get('/').form
-
-        self.upload_ajax_file(form, 'input_file', filename, expected_status=403)
-
-        # submit with permission
-        User.objects.create(username='test1', email='test@test.nl')
-
-        form = self.app.get('/', user='test1').form
-        self.upload_ajax_file(form, 'input_file', filename, user='test1')
-
-    @override_settings(FILE_FORM_MUST_LOGIN=True)
     def test_permission_for_delete(self):
         file_id = get_random_id()
         UploadedFile.objects.create(file_id=file_id)

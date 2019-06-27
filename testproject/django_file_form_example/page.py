@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from selenium.webdriver.support.wait import WebDriverWait
 
 from django_file_form_example.temp_file import TempFile
@@ -37,6 +38,10 @@ class Page(object):
         el = self.selenium.find_element_by_css_selector('.qq-file-id-%d.qq-upload-success' % upload_index)
         el.find_element_by_xpath("//*[contains(text(), '%s')]" % temp_file.base_name())
 
+    def find_upload_fail(self, temp_file, upload_index=0):
+        el = self.selenium.find_element_by_css_selector('.qq-file-id-%d.qq-upload-fail' % upload_index)
+        el.find_element_by_xpath("//*[contains(text(), '%s')]" % temp_file.base_name())
+
     def find_not_upload_success(self, upload_index=0):
         WebDriverWait(self.selenium, timeout=10).until_not(
             lambda selenium: selenium.find_element_by_css_selector('.qq-file-id-%d.qq-upload-success' % upload_index)
@@ -51,3 +56,14 @@ class Page(object):
     def delete_ajax_file(self, upload_index=0):
         el = self.selenium.find_element_by_css_selector('.qq-file-id-%d.qq-upload-success' % upload_index)
         el.find_element_by_link_text('Delete').click()
+
+    def create_user(self, username, password):
+        u = User.objects.create(username=username, email='%s@test.nl' % username)
+        u.set_password(password)
+        u.save()
+
+    def login(self, username, password):
+        self.open('/login/?next=/')
+        self.selenium.find_element_by_name('username').send_keys(username)
+        self.selenium.find_element_by_name('password').send_keys(password)
+        self.selenium.find_element_by_css_selector('input[type=submit]').click()

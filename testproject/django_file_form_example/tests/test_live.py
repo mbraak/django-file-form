@@ -2,6 +2,7 @@
 import six
 from django.core.files.base import ContentFile
 from django.conf import settings
+from django.test import override_settings
 
 from django_file_form.models import UploadedFile
 from django_file_form_example.base_live_testcase import BaseLiveTestCase
@@ -227,3 +228,29 @@ class LiveTestCase(BaseLiveTestCase):
         page.assert_page_contains_text('Upload success')
 
         self.assertEqual(temp_file.uploaded_file().read_text(), "content1")
+
+    @override_settings(FILE_FORM_MUST_LOGIN=True)
+    def test_permission_fail(self):
+        page = self.page
+
+        temp_file = page.create_temp_file('content1')
+
+        page.open('/')
+        page.upload_using_js(temp_file)
+        page.find_upload_fail(temp_file)
+
+    @override_settings(FILE_FORM_MUST_LOGIN=True)
+    def test_permission_success(self):
+        page = self.page
+
+        page.create_user('test1', 'password')
+
+        page.login('test1', 'password')
+        page.assert_page_contains_text('Title')
+
+        temp_file = page.create_temp_file('content1')
+
+        page.open('/')
+
+        page.upload_using_js(temp_file)
+        page.find_upload_success(temp_file)
