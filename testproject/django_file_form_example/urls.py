@@ -1,4 +1,5 @@
 from django.conf.urls import url
+from django.contrib.auth.views import LoginView
 
 from . import views
 
@@ -11,4 +12,5 @@ urlpatterns = (
     url(r'^multiple_without_js$', views.MultipleWithoutJsExampleView.as_view(), name='multiple_without_js_example'),
     url(r'^existing/(?P<id>\d+)$', views.ExistingFileExampleView.as_view(), name='existing_file_example'),
     url(r'^handle_upload$', views.handle_upload, name='example_handle_upload'),
+    url(r'^login/$', LoginView.as_view(template_name='admin/login.html')),
 )
