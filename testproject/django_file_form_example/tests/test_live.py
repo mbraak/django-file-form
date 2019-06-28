@@ -189,7 +189,7 @@ class LiveTestCase(BaseLiveTestCase):
         self.assertEqual(UploadedFile.objects.count(), 1)
 
         page.delete_ajax_file()
-        page.find_not_upload_success()
+        page.wait_until_upload_is_removed()
 
         self.assertEqual(UploadedFile.objects.count(), 0)
 
@@ -245,8 +245,8 @@ class LiveTestCase(BaseLiveTestCase):
         page = self.page
 
         page.create_user('test1', 'password')
-
         page.login('test1', 'password')
+
         page.assert_page_contains_text('Title')
 
         temp_file = page.create_temp_file('content1')
@@ -255,3 +255,40 @@ class LiveTestCase(BaseLiveTestCase):
 
         page.upload_using_js(temp_file)
         page.find_upload_success(temp_file)
+
+    @override_settings(FILE_FORM_MUST_LOGIN=True)
+    def test_permission_for_delete_fail(self):
+        page = self.page
+
+        page.create_user('test1', 'password')
+        page.login('test1', 'password')
+
+        temp_file = page.create_temp_file('content1')
+
+        page.open('/')
+
+        page.upload_using_js(temp_file)
+        page.find_upload_success(temp_file)
+        self.assertEqual(UploadedFile.objects.count(), 1)
+
+        page.selenium.delete_all_cookies()
+        page.delete_ajax_file()
+        page.find_delete_failed()
+
+    @override_settings(FILE_FORM_MUST_LOGIN=True)
+    def test_permission_for_delete_success(self):
+        page = self.page
+
+        page.create_user('test1', 'password')
+        page.login('test1', 'password')
+
+        temp_file = page.create_temp_file('content1')
+
+        page.open('/')
+
+        page.upload_using_js(temp_file)
+        page.find_upload_success(temp_file)
+        self.assertEqual(UploadedFile.objects.count(), 1)
+
+        page.delete_ajax_file()
+        page.wait_until_upload_is_removed()
