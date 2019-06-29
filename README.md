@@ -167,6 +167,8 @@ Settings in `settings.py`:
 
 * **development**
   * Issue #217: update fine uploader
+  * Issue #219: use Selenium for all tests
+  * Issue #222: use pathlib2 (instead of pathlib)
 
 * **0.5.0 (3 April 2019)**
   * Issue #208: skip install of pathlib for python >= 3.4 (thanks to Simon Maillard)
