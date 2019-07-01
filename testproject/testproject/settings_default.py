@@ -75,6 +75,7 @@ MEDIA_ROOT, STATIC_ROOT = resolve_paths()
 create_media_paths(Path(MEDIA_ROOT))
 
 TUS_UPLOAD_DIR = Path(MEDIA_ROOT).joinpath('temp_uploads')
+TUS_DESTINATION_DIR = TUS_UPLOAD_DIR
 
 USE_TZ = True
 

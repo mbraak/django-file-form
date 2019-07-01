@@ -1,3 +1,4 @@
+import os
 from django.dispatch import receiver
 from django_tus.signals import tus_upload_finished_signal
 
@@ -12,7 +13,7 @@ UPLOAD_DIR = conf.UPLOAD_DIR
 def handle_upload_finished(sender, **kwargs):
     metadata = kwargs.get('metadata')
     file_id = kwargs.get('filename')
-    upload_file_path = kwargs.get('upload_file_path')
+    upload_file_path = os.path.join(kwargs.get('destination_folder'), file_id)
 
     field_name = metadata.get('fieldName')
     form_id = metadata.get('formId')
