@@ -47,7 +47,6 @@ class FileFormTests(TestCase):
 
     def test_uploaded_file_unicode(self):
         filename = get_random_id()
-        uploaded_file_path = self.temp_uploads_path.joinpath(filename)
 
         uploaded_file = UploadedFile.objects.create(
             uploaded_file=ContentFile('xyz', filename),
@@ -57,4 +56,4 @@ class FileFormTests(TestCase):
             self.assertEqual(six.text_type(uploaded_file), 'ooo.txt')
             self.assertEqual(six.text_type(UploadedFile()), '')
         finally:
-            remove_p(uploaded_file_path)
+            uploaded_file.uploaded_file.delete()

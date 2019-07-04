@@ -79,6 +79,9 @@ class LiveTestCase(BaseLiveTestCase):
         page.find_upload_success(temp_file)
         self.assertEqual(UploadedFile.objects.count(), 1)
 
+        uploaded_file = UploadedFile.objects.first()
+        self.assertEqual(uploaded_file.uploaded_file.read(), b'content1')
+
         page.submit()
         page.assert_page_contains_text('Upload success')
 
@@ -86,7 +89,10 @@ class LiveTestCase(BaseLiveTestCase):
 
         example = Example.objects.get(title='abc')
         self.assertEqual(example.input_file.name, 'example/{0!s}'.format(temp_file.base_name()))
+        self.assertEqual(example.input_file.read(), b'content1')
+
         self.assertEqual(UploadedFile.objects.count(), 0)
+        self.assertFalse(Path(uploaded_file.uploaded_file.path).exists())
 
     def test_upload_multiple(self):
         page = self.page
@@ -106,6 +112,12 @@ class LiveTestCase(BaseLiveTestCase):
 
         self.assertEqual(UploadedFile.objects.count(), 2)
 
+        uploaded_files = UploadedFile.objects.order_by('id')
+        uploaded_file1 = uploaded_files[0]
+        uploaded_file2 = uploaded_files[1]
+        self.assertEqual(uploaded_file1.uploaded_file.read(), b'content1')
+        self.assertEqual(uploaded_file2.uploaded_file.read(), b'content2')
+
         page.submit()
         page.assert_page_contains_text('Upload success')
 
@@ -114,12 +126,19 @@ class LiveTestCase(BaseLiveTestCase):
         example2 = Example2.objects.first()
         self.assertEqual(example2.title, 'abc')
 
+        examples_files = example2.files.order_by('id')
+
         self.assertSetEqual(
-            {f.input_file.name for f in example2.files.all()},
+            {f.input_file.name for f in examples_files},
             {'example/%s' % temp_file1.base_name(), 'example/%s' % temp_file2.base_name()}
         )
 
+        self.assertEqual(examples_files[0].input_file.read(), b'content1')
+        self.assertEqual(examples_files[1].input_file.read(), b'content2')
+
         self.assertEqual(UploadedFile.objects.count(), 0)
+        self.assertFalse(Path(uploaded_file1.uploaded_file.path).exists())
+        self.assertFalse(Path(uploaded_file2.uploaded_file.path).exists())
 
     def test_upload_multiple_for_single_filefield(self):
         page = self.page
