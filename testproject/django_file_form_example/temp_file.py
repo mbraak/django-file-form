@@ -3,6 +3,8 @@ from tempfile import NamedTemporaryFile
 
 from django.conf import settings
 
+from django_file_form.models import UploadedFile
+
 try:
     from pathlib import Path
 except ImportError:
@@ -47,6 +49,9 @@ class TempFile(object):
 
             self.named_temporary_file.close()
             self.named_temporary_file = None
+
+            for uploaded_file in UploadedFile.objects.all():
+                uploaded_file.uploaded_file.delete()
 
     def uploaded_file(self):
         if not self.named_temporary_file:
