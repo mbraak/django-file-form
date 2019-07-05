@@ -1,4 +1,4 @@
-pathlib2==2.3.3; python_version < '3.4'
+pathlib2==2.3.4; python_version < '3.4'
 pytz==2019.1
 six==1.12.0
 
