@@ -4,16 +4,29 @@ import { Upload } from "tus-js-client";
 
 
 class UploadFile {
-  constructor({ input, container, fieldName, formId, multiple, uploadUrl }) {
+  constructor({ input, container, fieldName, formId, initial, multiple, uploadUrl }) {
     this.input = input;
     this.container = container;
     this.fieldName = fieldName;
     this.formId = formId;
+    this.initial = initial;
     this.multiple = multiple;
     this.uploadUrl = uploadUrl;
 
     this.currentUpload = {};
     this.uploadIndex = 0;
+
+    if (initial) {
+      initial.forEach(f => {
+        this.addFile(f.name);
+
+        if (multiple) {
+          this.uploadIndex += 1;
+        }
+
+        this.input.required = false;
+      });
+    }
 
     this.connect();
   }
@@ -60,17 +73,23 @@ class UploadFile {
   }
 
   handleSuccess = () => {
-    const { filename, uploadIndex } = this.currentUpload;
-    const { container, input } = this;
+    const { filename } = this.currentUpload;
+    const { input } = this;
 
     input.value = "";
     input.required = false;
+
+    this.addFile(filename);
+  };
+
+  addFile(filename) {
+    const { container, uploadIndex } = this;
 
     const div = document.createElement("div");
     div.className = `qq-file-id-${uploadIndex} qq-upload-success`;
     div.innerHTML = filename;
     container.appendChild(div);
-  };
+  }
 }
 
 function initUploadFields($form, options) {
@@ -97,16 +116,17 @@ function initUploadFields($form, options) {
   }
 
   $form.find(".file-uploader").each((i, container) => {
-    const $element = $(container);
+    const $element = $(container).find(".file-uploader-container");
 
     const $inputFile = $($element.find("input[type=file]"));
     const input = $inputFile[0];
 
     const fieldName = $inputFile.attr("name");
     const multiple = Boolean($inputFile.attr("multiple"));
+    const initial = ($element.data("files") || []).filter(f => !f.existing);
 
     new UploadFile({
-      container, fieldName, formId, input, multiple, uploadUrl
+      container, fieldName, formId, initial, input, multiple, uploadUrl
     });
   });
 }
