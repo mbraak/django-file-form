@@ -20,12 +20,12 @@
     </form>
 
     {% if use_ajax %}
-        <script src="{% static "jquery/dist/jquery.js" %}"></script>
         <script src="{% static "file_form/file_form.js" %}"></script>
         <script>
-            $(function() {
-                initUploadFields($('#example-form'), { prefix: 'example' });
-            });
+            initUploadFields(
+                document.getElementById("example-form"),
+                { prefix: "example" }
+            );
         </script>
     {% endif %}
 {% endblock %}

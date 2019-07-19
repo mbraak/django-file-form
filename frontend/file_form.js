@@ -1,38 +1,78 @@
-/* global $, document */
+/* global document, window */
 
 import { Upload } from "tus-js-client";
 
 
+class RenderUploadFile {
+  constructor({ container, input }) {
+    this.container = container;
+    this.input = input;
+    this.uploadIndex = 0;
+  }
+
+  addFile(filename) {
+    const { container, uploadIndex } = this;
+
+    const div = document.createElement("div");
+    div.className = `qq-file-id-${uploadIndex} qq-upload-success`;
+
+    const nameSpan = document.createElement("span");
+    nameSpan.innerHTML = filename; // todo: escape
+
+    const deleteLink = document.createElement("a");
+    deleteLink.innerHTML = "Delete"; // todo: i18n
+    deleteLink.className = "qq-delete";
+    deleteLink.href = "#";
+
+    div.appendChild(nameSpan);
+    div.appendChild(deleteLink);
+
+    container.appendChild(div);
+
+    this.input.required = false;
+    this.uploadIndex += 1;
+  }
+
+  clearInput() {
+    const { input } = this;
+
+    input.value = "";
+  }
+}
+
 class UploadFile {
   constructor({ input, container, fieldName, formId, initial, multiple, uploadUrl }) {
-    this.input = input;
-    this.container = container;
     this.fieldName = fieldName;
     this.formId = formId;
-    this.initial = initial;
     this.multiple = multiple;
     this.uploadUrl = uploadUrl;
 
     this.currentUpload = {};
-    this.uploadIndex = 0;
+
+    this.renderer = new RenderUploadFile({ container, input });
 
     if (initial) {
-      initial.forEach(f => {
-        this.addFile(f.name);
-
-        if (multiple) {
-          this.uploadIndex += 1;
-        }
-
-        this.input.required = false;
-      });
+      this.addFiles(initial.map(f => f.name));
     }
 
-    this.connect();
+    input.addEventListener("change", this.onChange);
+    container.addEventListener("click", this.onClick);
   }
 
-  connect() {
-    this.input.addEventListener("change", this.onChange);
+  addFiles(filenames) {
+    if (filenames.length === 0) {
+      return;
+    }
+
+    const { multiple, renderer } = this;
+
+    if (multiple) {
+      renderer.addFile(filenames[filenames.length - 1]);
+    }
+
+    filenames.forEach(
+      filename => renderer.addFile(filename)
+    );
   }
 
   onChange = e => {
@@ -42,7 +82,7 @@ class UploadFile {
 
     const file = e.target.files[0];
 
-    const { fieldName, formId, multiple, uploadIndex, uploadUrl } = this;
+    const { fieldName, formId, uploadUrl } = this;
     const filename = file.name;
 
     const upload = new Upload(file, {
@@ -53,13 +93,16 @@ class UploadFile {
       onSuccess: this.handleSuccess,
     });
 
-    this.currentUpload = { filename, uploadIndex };
-
-    if (multiple) {
-      this.uploadIndex += 1;
-    }
-
     upload.start();
+
+    const { url } = upload;
+    this.currentUpload = { filename, url };
+  }
+
+  onClick = e => {
+    if (e.target.classList.contains("qq-delete")) {
+      this.handleDelete();
+    }
   }
 
   handleProgress = (bytesUploaded, bytesTotal) => {
@@ -74,38 +117,51 @@ class UploadFile {
 
   handleSuccess = () => {
     const { filename } = this.currentUpload;
-    const { input } = this;
+    const { renderer } = this;
 
-    input.value = "";
-    input.required = false;
-
-    this.addFile(filename);
+    renderer.clearInput();
+    renderer.addFile(filename);
   };
 
-  addFile(filename) {
-    const { container, uploadIndex } = this;
+  handleDelete() {
+    const { url } = this.currentUpload;
+    console.log("handledelete", url, true);
 
-    const div = document.createElement("div");
-    div.className = `qq-file-id-${uploadIndex} qq-upload-success`;
-    div.innerHTML = filename;
-    container.appendChild(div);
+    const xhr = new window.XMLHttpRequest();
+    xhr.open("DELETE", url);
+
+    xhr.onload = () => {
+      console.log("deleted");
+    };
+    xhr.setRequestHeader("Tus-Resumable", "1.0.0");
+    xhr.send(null);
   }
 }
 
-function initUploadFields($form, options) {
+function initUploadFields(form, options) {
   const getInputNameWithPrefix = fieldName =>
     options && options.prefix ? `${options.prefix}-${fieldName}` : fieldName;
 
   const getInputValue = fieldName => {
     const inputNameWithPrefix = getInputNameWithPrefix(fieldName);
-    const input = $form.find(`[name=${inputNameWithPrefix}]`);
+    const input = form.querySelector(`[name=${inputNameWithPrefix}]`);
 
-    if (!input.length) {
+    if (!input) {
       console.error(`Cannot find input with name '${inputNameWithPrefix}'`);
       return null;
     }
 
-    return input.val();
+    return input.value;
+  };
+
+  const getInitialFiles = element => {
+    const filesData = element.dataset.files;
+
+    if (!filesData) {
+      return [];
+    }
+
+    return JSON.parse(filesData);
   };
 
   const uploadUrl = getInputValue("upload_url");
@@ -115,15 +171,22 @@ function initUploadFields($form, options) {
     return;
   }
 
-  $form.find(".file-uploader").each((i, container) => {
-    const $element = $(container).find(".file-uploader-container");
+  form.querySelectorAll(".file-uploader").forEach(container => {
+    const element = container.querySelector(".file-uploader-container");
 
-    const $inputFile = $($element.find("input[type=file]"));
-    const input = $inputFile[0];
+    if (!element) {
+      return;
+    }
 
-    const fieldName = $inputFile.attr("name");
-    const multiple = Boolean($inputFile.attr("multiple"));
-    const initial = ($element.data("files") || []).filter(f => !f.existing);
+    const input = element.querySelector("input[type=file]");
+
+    if (!input) {
+      return;
+    }
+
+    const fieldName = input.name;
+    const { multiple } = input;
+    const initial = getInitialFiles(element).filter(f => !f.existing);
 
     new UploadFile({
       container, fieldName, formId, initial, input, multiple, uploadUrl

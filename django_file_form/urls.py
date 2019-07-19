@@ -1,5 +1,5 @@
 from django.conf.urls import url
-from django_tus.views import TusUpload
+from .views.tus import TusUpload
 
 
 urlpatterns = (

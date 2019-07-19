@@ -1,6 +1,0 @@
-{
-    "name": "django-file-form-test",
-    "dependencies": {
-        "jquery": "3.2.1"
-    }
-}

@@ -42,7 +42,6 @@ INSTALLED_APPS = [
 
     # Generic apps
     'django_file_form',
-    'django_tus',
     'django_bootstrap3_form',
     'django_pony_forms',
 
@@ -74,8 +73,7 @@ MEDIA_ROOT, STATIC_ROOT = resolve_paths()
 
 create_media_paths(Path(MEDIA_ROOT))
 
-TUS_UPLOAD_DIR = Path(MEDIA_ROOT).joinpath('temp_uploads')
-TUS_DESTINATION_DIR = TUS_UPLOAD_DIR
+FILE_FORM_UPLOAD_DIR = Path(MEDIA_ROOT).joinpath('temp_uploads')
 
 USE_TZ = True
 
