@@ -1,2 +1,6 @@
 *.pyc
 *.egg-info
+testproject/*.db
+testproject/*.log
+testproject/media
+testproject/t
