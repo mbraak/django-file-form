@@ -4,10 +4,14 @@ import { Upload } from "tus-js-client";
 
 
 class RenderUploadFile {
-  constructor({ container, input }) {
+  constructor({ container, input, skipRequired }) {
     this.container = container;
     this.input = input;
     this.uploadIndex = 0;
+
+    if (skipRequired) {
+      this.input.required = false;
+    }
   }
 
   addFile(filename) {
@@ -33,6 +37,12 @@ class RenderUploadFile {
     this.uploadIndex += 1;
   }
 
+  deleteFile(index) {
+    const { container } = this;
+
+    container.querySelector(`.qq-file-id-${index}`).remove();
+  }
+
   clearInput() {
     const { input } = this;
 
@@ -41,7 +51,7 @@ class RenderUploadFile {
 }
 
 class UploadFile {
-  constructor({ input, container, fieldName, formId, initial, multiple, uploadUrl }) {
+  constructor({ input, container, fieldName, formId, initial, multiple, skipRequired, uploadUrl }) {
     this.fieldName = fieldName;
     this.formId = formId;
     this.multiple = multiple;
@@ -49,7 +59,7 @@ class UploadFile {
 
     this.currentUpload = {};
 
-    this.renderer = new RenderUploadFile({ container, input });
+    this.renderer = new RenderUploadFile({ container, input, skipRequired });
 
     if (initial) {
       this.addFiles(initial.map(f => f.name));
@@ -95,8 +105,7 @@ class UploadFile {
 
     upload.start();
 
-    const { url } = upload;
-    this.currentUpload = { filename, url };
+    this.currentUpload = upload;
   }
 
   onClick = e => {
@@ -116,7 +125,7 @@ class UploadFile {
   }
 
   handleSuccess = () => {
-    const { filename } = this.currentUpload;
+    const { filename } = this.currentUpload.options.metadata;
     const { renderer } = this;
 
     renderer.clearInput();
@@ -125,20 +134,19 @@ class UploadFile {
 
   handleDelete() {
     const { url } = this.currentUpload;
-    console.log("handledelete", url, true);
 
     const xhr = new window.XMLHttpRequest();
     xhr.open("DELETE", url);
 
     xhr.onload = () => {
-      console.log("deleted");
+      this.renderer.deleteFile(0);
     };
     xhr.setRequestHeader("Tus-Resumable", "1.0.0");
     xhr.send(null);
   }
 }
 
-function initUploadFields(form, options) {
+function initUploadFields(form, options = {}) {
   const getInputNameWithPrefix = fieldName =>
     options && options.prefix ? `${options.prefix}-${fieldName}` : fieldName;
 
@@ -166,6 +174,7 @@ function initUploadFields(form, options) {
 
   const uploadUrl = getInputValue("upload_url");
   const formId = getInputValue("form_id");
+  const skipRequired = options.skipRequired || false;
 
   if (!formId || !uploadUrl) {
     return;
@@ -189,7 +198,7 @@ function initUploadFields(form, options) {
     const initial = getInitialFiles(element).filter(f => !f.existing);
 
     new UploadFile({
-      container, fieldName, formId, initial, input, multiple, uploadUrl
+      container, fieldName, formId, initial, input, multiple, skipRequired, uploadUrl
     });
   });
 }

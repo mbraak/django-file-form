@@ -138,7 +138,6 @@ class TusUpload(View):
         return response
 
     def patch(self, request, *args, **kwargs):
-
         response = self.get_tus_response()
 
         resource_id = kwargs.get('resource_id', None)
@@ -184,21 +183,41 @@ class TusUpload(View):
         response.status_code = 204
 
         if file_size == new_offset:
-            cache.delete_many([
-                "tus-uploads/{}/file_size".format(resource_id),
-                "tus-uploads/{}/filename".format(resource_id),
-                "tus-uploads/{}/offset".format(resource_id),
-                "tus-uploads/{}/metadata".format(resource_id),
-            ])
+            self.remove_from_cache(resource_id)
 
             self.create_uploaded_file_in_db(
                 field_name=metadata.get('fieldName'),
-                file_id=filename,
+                file_id=resource_id,
                 form_id=metadata.get('formId'),
                 original_filename=metadata.get('filename'),
                 uploaded_file=upload_file_path
             )
 
+        return response
+
+    def remove_from_cache(self, resource_id):
+        cache.delete_many([
+            "tus-uploads/{}/file_size".format(resource_id),
+            "tus-uploads/{}/filename".format(resource_id),
+            "tus-uploads/{}/offset".format(resource_id),
+            "tus-uploads/{}/metadata".format(resource_id),
+        ])
+
+    def delete(self, request, *args, **kwargs):
+        response = self.get_tus_response()
+        resource_id = kwargs.get('resource_id', None)
+
+        upload_file_path = os.path.join(conf.UPLOAD_DIR, resource_id)
+        os.unlink(upload_file_path)
+
+        uploaded_file = UploadedFile.objects.try_get(file_id=resource_id)
+
+        if uploaded_file:
+            uploaded_file.delete()
+
+        self.remove_from_cache(resource_id)
+
+        response.status_code = 204
         return response
 
     def create_uploaded_file_in_db(self, field_name, file_id, form_id, original_filename, uploaded_file):
