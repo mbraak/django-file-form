@@ -248,7 +248,7 @@ class LiveTestCase(BaseLiveTestCase):
         page.submit()
         page.assert_page_contains_text('Upload success')
 
-        self.assertEqual(temp_file.uploaded_file().read_text(), "content1")
+        self.assertEqual(temp_file.uploaded_file().read_text(), "content1\x00")
 
     @override_settings(FILE_FORM_MUST_LOGIN=True)
     def test_permission_fail(self):

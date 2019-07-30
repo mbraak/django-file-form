@@ -53,7 +53,7 @@ class MultipleWithoutJsExampleView(MultipleExampleView):
 
 
 class ExistingFileExampleView(BaseFormView):
-    form_class = forms.ExistingFileForm
+    form_class = forms.ExampleForm
 
     def get_form_kwargs(self):
         form_kwargs = super(ExistingFileExampleView, self).get_form_kwargs()

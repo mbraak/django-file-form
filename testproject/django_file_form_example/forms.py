@@ -48,10 +48,3 @@ class MultipleFileExampleForm(BaseForm):
             )
 
         self.delete_temporary_files()
-
-
-class ExistingFileForm(ExampleForm):
-    prefix = 'example'
-
-    def get_upload_url(self):
-        return reverse('example_handle_upload')
