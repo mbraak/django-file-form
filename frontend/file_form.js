@@ -7,18 +7,17 @@ class RenderUploadFile {
   constructor({ container, input, skipRequired }) {
     this.container = container;
     this.input = input;
-    this.uploadIndex = 0;
 
     if (skipRequired) {
       this.input.required = false;
     }
   }
 
-  addFile(filename) {
-    const { container, uploadIndex } = this;
+  addFile(filename, uploadIndex) {
+    const { container } = this;
 
     const div = document.createElement("div");
-    div.className = `qq-file-id-${uploadIndex} qq-upload-success`;
+    div.className = `qq-file-id-${uploadIndex}`;
 
     const nameSpan = document.createElement("span");
     nameSpan.innerHTML = filename; // todo: escape
@@ -34,13 +33,26 @@ class RenderUploadFile {
     container.appendChild(div);
 
     this.input.required = false;
-    this.uploadIndex += 1;
   }
 
   deleteFile(index) {
     const { container } = this;
 
     container.querySelector(`.qq-file-id-${index}`).remove();
+  }
+
+  setError(index) {
+    const { container } = this;
+
+    const el = container.querySelector(`.qq-file-id-${index}`);
+    el.classList.add("qq-upload-fail");
+  }
+
+  setSuccess(index) {
+    const { container } = this;
+
+    const el = container.querySelector(`.qq-file-id-${index}`);
+    el.classList.add("qq-upload-success");
   }
 
   clearInput() {
@@ -55,6 +67,7 @@ class UploadFile {
     this.fieldName = fieldName;
     this.formId = formId;
     this.multiple = multiple;
+    this.uploadIndex = 0;
     this.uploadUrl = uploadUrl;
 
     this.currentUpload = {};
@@ -62,7 +75,7 @@ class UploadFile {
     this.renderer = new RenderUploadFile({ container, input, skipRequired });
 
     if (initial) {
-      this.addFiles(initial.map(f => f.name));
+      this.addFiles(initial.map(f => f.name)); // todo: success
     }
 
     input.addEventListener("change", this.onChange);
@@ -75,14 +88,24 @@ class UploadFile {
     }
 
     const { multiple, renderer } = this;
+    let { uploadIndex } = this;
 
     if (multiple) {
-      renderer.addFile(filenames[filenames.length - 1]);
+      filenames.forEach(
+        filename => {
+          renderer.addFile(filename, uploadIndex);
+          uploadIndex += 1;
+        }
+      );
+    } else {
+      renderer.addFile(
+        filenames[filenames.length - 1],
+        uploadIndex
+      );
+      uploadIndex += 1;
     }
 
-    filenames.forEach(
-      filename => renderer.addFile(filename)
-    );
+    this.uploadIndex = uploadIndex;
   }
 
   onChange = e => {
@@ -92,7 +115,7 @@ class UploadFile {
 
     const file = e.target.files[0];
 
-    const { fieldName, formId, uploadUrl } = this;
+    const { fieldName, formId, renderer, uploadIndex, uploadUrl } = this;
     const filename = file.name;
 
     const upload = new Upload(file, {
@@ -104,8 +127,10 @@ class UploadFile {
     });
 
     upload.start();
+    renderer.addFile(filename, uploadIndex);
 
     this.currentUpload = upload;
+    this.uploadIndex = uploadIndex + 1;
   }
 
   onClick = e => {
@@ -119,17 +144,16 @@ class UploadFile {
     console.log("progress", bytesUploaded, bytesTotal, `${percentage}%`);
   };
 
-  handleError = error => {
-    console.log(`Failed because: ${error}`);
+  handleError = () => {
+    this.renderer.setError(0);
     this.currentUpload = {};
   }
 
   handleSuccess = () => {
-    const { filename } = this.currentUpload.options.metadata;
-    const { renderer } = this;
+    const { renderer, uploadIndex } = this;
 
     renderer.clearInput();
-    renderer.addFile(filename);
+    renderer.setSuccess(uploadIndex - 1);
   };
 
   handleDelete() {
@@ -146,7 +170,7 @@ class UploadFile {
   }
 }
 
-function initUploadFields(form, options = {}) {
+const initUploadFields = (form, options = {}) => {
   const getInputNameWithPrefix = fieldName =>
     options && options.prefix ? `${options.prefix}-${fieldName}` : fieldName;
 
@@ -201,6 +225,6 @@ function initUploadFields(form, options = {}) {
       container, fieldName, formId, initial, input, multiple, skipRequired, uploadUrl
     });
   });
-}
+};
 
 global.initUploadFields = initUploadFields;
