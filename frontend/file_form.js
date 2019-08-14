@@ -22,30 +22,34 @@ class RenderUploadFile {
     const nameSpan = document.createElement("span");
     nameSpan.innerHTML = filename; // todo: escape
 
-    const deleteLink = document.createElement("a");
-    deleteLink.innerHTML = "Delete"; // todo: i18n
-    deleteLink.className = "qq-delete";
-    deleteLink.href = "#";
-
     div.appendChild(nameSpan);
-    div.appendChild(deleteLink);
-
     container.appendChild(div);
 
     this.input.required = false;
   }
 
   deleteFile(index) {
-    const { container } = this;
-
-    container.querySelector(`.qq-file-id-${index}`).remove();
+    this.findFileDiv(index).remove();
   }
 
   setError(index) {
+    const el = this.findFileDiv(index);
+    el.classList.add("qq-upload-fail");
+  }
+
+  setDeleteFailed(index) {
+    const el = this.findFileDiv(index);
+
+    const span = document.createElement("span");
+    span.innerHTML = "Delete failed";
+
+    el.appendChild(span);
+  }
+
+  findFileDiv(index) {
     const { container } = this;
 
-    const el = container.querySelector(`.qq-file-id-${index}`);
-    el.classList.add("qq-upload-fail");
+    return container.querySelector(`.qq-file-id-${index}`);
   }
 
   setSuccess(index) {
@@ -53,6 +57,13 @@ class RenderUploadFile {
 
     const el = container.querySelector(`.qq-file-id-${index}`);
     el.classList.add("qq-upload-success");
+
+    const deleteLink = document.createElement("a");
+    deleteLink.innerHTML = "Delete"; // todo: i18n
+    deleteLink.className = "qq-delete";
+    deleteLink.href = "#";
+
+    el.appendChild(deleteLink);
   }
 
   clearInput() {
@@ -75,14 +86,14 @@ class UploadFile {
     this.renderer = new RenderUploadFile({ container, input, skipRequired });
 
     if (initial) {
-      this.addFiles(initial.map(f => f.name)); // todo: success
+      this.addInitialFiles(initial.map(f => f.name)); // todo: success
     }
 
     input.addEventListener("change", this.onChange);
     container.addEventListener("click", this.onClick);
   }
 
-  addFiles(filenames) {
+  addInitialFiles(filenames) {
     if (filenames.length === 0) {
       return;
     }
@@ -94,15 +105,17 @@ class UploadFile {
       filenames.forEach(
         filename => {
           renderer.addFile(filename, uploadIndex);
+          renderer.setSuccess(uploadIndex);
           uploadIndex += 1;
         }
       );
     } else {
       renderer.addFile(
         filenames[filenames.length - 1],
-        uploadIndex
+        0
       );
-      uploadIndex += 1;
+      renderer.setSuccess(0);
+      uploadIndex = 1;
     }
 
     this.uploadIndex = uploadIndex;
@@ -145,7 +158,7 @@ class UploadFile {
   };
 
   handleError = () => {
-    this.renderer.setError(0);
+    this.renderer.setError(this.uploadIndex - 1);
     this.currentUpload = {};
   }
 
@@ -163,7 +176,11 @@ class UploadFile {
     xhr.open("DELETE", url);
 
     xhr.onload = () => {
-      this.renderer.deleteFile(0);
+      if (xhr.status === 204) {
+        this.renderer.deleteFile(0);
+      } else {
+        this.renderer.setDeleteFailed(0);
+      }
     };
     xhr.setRequestHeader("Tus-Resumable", "1.0.0");
     xhr.send(null);

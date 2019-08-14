@@ -11,7 +11,7 @@ from django.views.generic import View
 
 from django_file_form import conf
 from django_file_form.models import UploadedFile
-
+from django_file_form.util import check_permission
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +23,8 @@ class TusUpload(View):
 
     @method_decorator(csrf_exempt)
     def dispatch(self, *args, **kwargs):
+        check_permission(self.request)
+
         override_method = self.request.META.get('HTTP_X_HTTP_METHOD_OVERRIDE', None)
         if override_method:
             self.request.method = override_method

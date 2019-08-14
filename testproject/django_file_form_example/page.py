@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from selenium.webdriver.support.wait import WebDriverWait
 
 from django_file_form_example.temp_file import TempFile
+from django_file_form_example.test_utils import to_class_string
 
 
 class Page(object):
@@ -39,8 +40,14 @@ class Page(object):
         el.find_element_by_xpath("//*[contains(text(), '%s')]" % temp_file.base_name())
 
     def find_upload_fail(self, temp_file, upload_index=0):
-        el = self.selenium.find_element_by_css_selector('.qq-file-id-%d.qq-upload-fail' % upload_index)
+        el = self.find_upload_element(upload_index, extra_class='qq-upload-fail')
         el.find_element_by_xpath("//*[contains(text(), '%s')]" % temp_file.base_name())
+        return el
+
+    def find_upload_element(self, upload_index=0, extra_class=None):
+        classes = ['qq-file-id-%d' % upload_index, extra_class]
+
+        return self.selenium.find_element_by_css_selector(to_class_string(classes))
 
     def wait_until_upload_is_removed(self, upload_index=0):
         WebDriverWait(self.selenium, timeout=10).until_not(

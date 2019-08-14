@@ -25,3 +25,7 @@ def encode_datetime(*args, **kwargs):
 def remove_p(path):
     if path.exists():
         path.unlink()
+
+
+def to_class_string(classes):
+    return ''.join('.%s' % v for v in classes if v)

@@ -19,7 +19,6 @@ except ImportError:
 media_root = Path(settings.MEDIA_ROOT)
 
 
-@override_settings(DEBUG=True)
 class LiveTestCase(BaseLiveTestCase):
     page_class = Page
 
@@ -258,7 +257,9 @@ class LiveTestCase(BaseLiveTestCase):
 
         page.open('/')
         page.upload_using_js(temp_file)
-        page.find_upload_fail(temp_file)
+
+        el = page.find_upload_fail(temp_file)
+        self.assertEqual(el.find_elements_by_link_text('Delete'), [])
 
     @override_settings(FILE_FORM_MUST_LOGIN=True)
     def test_permission_success(self):
