@@ -1,4 +1,3 @@
-import os
 import sys
 
 from django.conf import settings
@@ -41,7 +40,7 @@ class UploadedFileManager(ModelManager):
         return deleted_files
 
     def get_for_file(self, filename):
-        path = os.path.join(conf.UPLOAD_DIR, filename)
+        path = Path(conf.UPLOAD_DIR).joinpath(filename)
         return self.try_get(uploaded_file=path)
 
 
@@ -52,7 +51,7 @@ def get_storage():
 
 
 def upload_to(instance, filename):
-    return conf.UPLOAD_DIR
+    return text_type(conf.UPLOAD_DIR)
 
 
 @python_2_unicode_compatible
@@ -79,17 +78,11 @@ class UploadedFile(models.Model):
             self.uploaded_file.delete()
 
         super(UploadedFile, self).delete(*args, **kwargs)
-                
+
     def must_be_deleted(self, now=None):
         now = now or timezone.now()
 
         return (now - self.created).days >= 1
-
-    def get_path(self):
-        if self.uploaded_file:
-            return Path(self.uploaded_file.path)
-        else:
-            return None
 
     def get_uploaded_file(self):
         return UploadedFileWithId(

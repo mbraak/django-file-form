@@ -1,7 +1,8 @@
 import base64
 import logging
-import os
 import uuid
+
+import six
 
 from django.core.cache import cache
 from django.http import HttpResponse
@@ -12,6 +13,12 @@ from django.views.generic import View
 from django_file_form import conf
 from django_file_form.models import UploadedFile
 from django_file_form.util import check_permission
+
+try:
+    from pathlib import Path
+except ImportError:
+    from pathlib2 import Path
+
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +65,7 @@ class TusUpload(View):
             metadata[key] = base64.b64decode(value)
 
         if metadata.get("filename", None) and metadata.get(
-                "filename").upper() in [f.upper() for f in os.listdir(os.path.dirname(conf.UPLOAD_DIR))]:
+                "filename").upper() in [f.upper() for f in Path(conf.UPLOAD_DIR).iterdir()]:
             response['Tus-File-Name'] = metadata.get("filename")
             response['Tus-File-Exists'] = True
         else:
@@ -107,7 +114,7 @@ class TusUpload(View):
         cache.add("tus-uploads/{}/metadata".format(resource_id), metadata, conf.TIMEOUT)
 
         try:
-            f = open(os.path.join(conf.UPLOAD_DIR, resource_id), "wb")
+            f = Path(conf.UPLOAD_DIR).joinpath(resource_id).open("wb")
             f.seek(file_size)
             f.write(b"\0")
             f.close()
@@ -152,8 +159,8 @@ class TusUpload(View):
         file_offset = int(request.META.get("HTTP_UPLOAD_OFFSET", 0))
         chunk_size = int(request.META.get("CONTENT_LENGTH", 102400))
 
-        upload_file_path = os.path.join(conf.UPLOAD_DIR, resource_id)
-        if filename is None or os.path.lexists(upload_file_path) is False:
+        upload_file_path = Path(conf.UPLOAD_DIR).joinpath(resource_id)
+        if filename is None or not upload_file_path.exists():
             response.status_code = 410
             return response
 
@@ -170,14 +177,16 @@ class TusUpload(View):
             "upload_file_path": upload_file_path,
         }})
 
+        file = None
         try:
-            file = open(upload_file_path, "r+b")
+            file = upload_file_path.open("r+b")
         except IOError:
-            file = open(upload_file_path, "wb")
+            file = upload_file_path.open("wb")
         finally:
-            file.seek(file_offset)
-            file.write(request.body)
-            file.close()
+            if file:
+                file.seek(file_offset)
+                file.write(request.body)
+                file.close()
 
         new_offset = cache.incr("tus-uploads/{}/offset".format(resource_id), chunk_size)
         response['Upload-Offset'] = new_offset
@@ -209,8 +218,8 @@ class TusUpload(View):
         response = self.get_tus_response()
         resource_id = kwargs.get('resource_id', None)
 
-        upload_file_path = os.path.join(conf.UPLOAD_DIR, resource_id)
-        os.unlink(upload_file_path)
+        upload_file_path = Path(conf.UPLOAD_DIR).joinpath(resource_id)
+        upload_file_path.unlink()
 
         uploaded_file = UploadedFile.objects.try_get(file_id=resource_id)
 
@@ -226,7 +235,7 @@ class TusUpload(View):
         values = dict(
             file_id=file_id,
             form_id=form_id,
-            uploaded_file=uploaded_file,
+            uploaded_file=six.text_type(uploaded_file),
             original_filename=original_filename
         )
 
