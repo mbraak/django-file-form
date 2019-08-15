@@ -19,6 +19,7 @@ except ImportError:
 media_root = Path(settings.MEDIA_ROOT)
 
 
+@override_settings(DEBUG=True)
 class LiveTestCase(BaseLiveTestCase):
     page_class = Page
 
