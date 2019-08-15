@@ -290,7 +290,7 @@ class LiveTestCase(BaseLiveTestCase):
         page.find_upload_success(temp_file)
         self.assertEqual(UploadedFile.objects.count(), 1)
 
-        page.selenium.delete_all_cookies()
+        page.selenium.delete_cookie('sessionid')
         page.delete_ajax_file()
         page.find_delete_failed()
 
