@@ -16,7 +16,7 @@ class BaseLiveTestCase(StaticLiveServerTestCase):
         options.headless = True
 
         cls.selenium = WebDriver(options=options)
-        cls.selenium.implicitly_wait(10)
+        cls.selenium.implicitly_wait(20)
 
     @classmethod
     def tearDownClass(cls):
