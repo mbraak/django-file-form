@@ -28,6 +28,10 @@ class Page(object):
     def fill_title_field(self, value):
         self.selenium.find_element_by_name('example-title').send_keys(value)
 
+        WebDriverWait(self.selenium, timeout=10).until(
+            lambda selenium: self.selenium.find_element_by_name('example-title').get_attribute('value') == value
+        )
+
     def upload_without_js(self, temp_file):
         self.selenium.find_element_by_name('example-input_file').send_keys(temp_file.path())
 
