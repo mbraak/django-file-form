@@ -106,9 +106,9 @@ class TusUpload(View):
                 metadata[key] = base64.b64decode(value).decode("utf-8")
 
         file_size = int(request.META.get("HTTP_UPLOAD_LENGTH", "0"))
-        resource_id = str(uuid.uuid4())
+        resource_id = six.text_type(uuid.uuid4())
 
-        cache.add("tus-uploads/{}/filename".format(resource_id), "{}".format(metadata.get("filename")), conf.TIMEOUT)
+        cache.add("tus-uploads/{}/filename".format(resource_id), metadata.get("filename"), conf.TIMEOUT)
         cache.add("tus-uploads/{}/file_size".format(resource_id), file_size, conf.TIMEOUT)
         cache.add("tus-uploads/{}/offset".format(resource_id), 0, conf.TIMEOUT)
         cache.add("tus-uploads/{}/metadata".format(resource_id), metadata, conf.TIMEOUT)
