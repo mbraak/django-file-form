@@ -1,3 +1,6 @@
+import json
+
+from django.http import HttpResponseForbidden
 from django.views import generic
 from django.urls import reverse
 
@@ -68,3 +71,10 @@ class ExistingFileExampleView(BaseFormView):
 
 
 handle_upload = FileFormUploader()
+
+
+def permission_denied(request, exception):
+    return HttpResponseForbidden(
+        json.dumps(dict(status='permission denied')),
+        content_type='application/json'
+    )
