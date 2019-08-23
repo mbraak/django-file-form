@@ -30,6 +30,7 @@ before_install:
   - rm -rf chromedriver_linux64.zip
   - sudo mv chromedriver /usr/bin/chromedriver
   - sudo chmod +x /usr/bin/chromedriver
+  - cd $TRAVIS_BUILD_DIR
 install:
   - pip install $DJANGO
   - pip install -r testproject/requirements.txt
