@@ -21,10 +21,15 @@ matrix:
       dist: xenial
       sudo: true
 before_install:
-  - wget https://chromedriver.storage.googleapis.com/76.0.3809.126/chromedriver_linux64.zip
-  - mkdir chromedriver
-  - unzip chromedriver_linux64.zip -d chromedriver/
-  - export PATH=$PATH:$PWD/chromedriver
+  - CHROME_VERSION="$(google-chrome --version)"
+  - export CHROMEDRIVER_RELEASE="$(echo $CHROME_VERSION | sed 's/^Google Chrome //')" && export CHROMEDRIVER_RELEASE=${CHROMEDRIVER_RELEASE%%.*}
+  - CHROMEDRIVER_VERSION=$(curl --location --fail --retry 3 http://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROMEDRIVER_RELEASE})
+  - curl --silent --show-error --location --fail --retry 3 --output /tmp/chromedriver_linux64.zip "http://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip"
+  - cd /tmp
+  - unzip chromedriver_linux64.zip
+  - rm -rf chromedriver_linux64.zip
+  - sudo mv chromedriver /usr/bin/chromedriver
+  - sudo chmod +x /usr/bin/chromedriver
 install:
   - pip install $DJANGO
   - pip install -r testproject/requirements.txt
