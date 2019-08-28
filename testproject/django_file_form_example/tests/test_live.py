@@ -197,7 +197,7 @@ class LiveTestCase(BaseLiveTestCase):
         self.assertEqual(Example.objects.count(), 1)
         self.assertEqual(UploadedFile.objects.count(), 0)
 
-    def test_ajax_delete(self):
+    def test_delete(self):
         page = self.page
 
         temp_file = page.create_temp_file('content1')
@@ -209,6 +209,31 @@ class LiveTestCase(BaseLiveTestCase):
 
         page.delete_ajax_file()
         page.wait_until_upload_is_removed()
+
+        self.assertEqual(UploadedFile.objects.count(), 0)
+
+    def test_delete_multiple(self):
+        page = self.page
+
+        temp_file1 = page.create_temp_file('content1')
+        temp_file2 = page.create_temp_file('content2')
+
+        page.open('/multiple')
+        page.upload_using_js(temp_file1)
+        page.find_upload_success(temp_file1)
+
+        page.upload_using_js(temp_file2)
+        page.find_upload_success(temp_file2)
+
+        self.assertEqual(UploadedFile.objects.count(), 2)
+
+        page.delete_ajax_file(upload_index=1)
+        page.wait_until_upload_is_removed(upload_index=1)
+
+        self.assertEqual(UploadedFile.objects.count(), 1)
+
+        page.delete_ajax_file(upload_index=0)
+        page.wait_until_upload_is_removed(upload_index=0)
 
         self.assertEqual(UploadedFile.objects.count(), 0)
 

@@ -59,8 +59,9 @@ class RenderUploadFile {
     el.classList.add("qq-upload-success");
 
     const deleteLink = document.createElement("a");
-    deleteLink.innerHTML = "Delete"; // todo: i18n
+    deleteLink.innerHTML = "Delete";
     deleteLink.className = "qq-delete";
+    deleteLink.setAttribute("data-index", index);
     deleteLink.href = "#";
 
     el.appendChild(deleteLink);
@@ -78,10 +79,10 @@ class UploadFile {
     this.fieldName = fieldName;
     this.formId = formId;
     this.multiple = multiple;
-    this.uploadIndex = 0;
     this.uploadUrl = uploadUrl;
 
-    this.currentUpload = {};
+    this.uploadIndex = 0;
+    this.uploads = [];
 
     this.renderer = new RenderUploadFile({ container, input, skipRequired });
 
@@ -99,9 +100,10 @@ class UploadFile {
     }
 
     const { multiple, renderer } = this;
-    let { uploadIndex } = this;
 
     if (multiple) {
+      let uploadIndex = 0;
+
       filenames.forEach(
         filename => {
           renderer.addFile(filename, uploadIndex);
@@ -115,10 +117,7 @@ class UploadFile {
         0
       );
       renderer.setSuccess(0);
-      uploadIndex = 1;
     }
-
-    this.uploadIndex = uploadIndex;
   }
 
   onChange = e => {
@@ -128,58 +127,60 @@ class UploadFile {
 
     const file = e.target.files[0];
 
-    const { fieldName, formId, renderer, uploadIndex, uploadUrl } = this;
+    const { fieldName, formId, renderer, uploads, uploadUrl } = this;
     const filename = file.name;
+    const uploadIndex = uploads.length;
 
     const upload = new Upload(file, {
       endpoint: uploadUrl,
       metadata: { fieldName, filename, formId },
-      onError: this.handleError,
-      onProgress: this.handleProgress,
-      onSuccess: this.handleSuccess,
+      onError: () => this.handleError(uploadIndex),
+      onProgress: (bytesUploaded, bytesTotal) => this.handleProgress(uploadIndex, bytesUploaded, bytesTotal),
+      onSuccess: () => this.handleSuccess(uploadIndex),
     });
 
     upload.start();
     renderer.addFile(filename, uploadIndex);
 
-    this.currentUpload = upload;
-    this.uploadIndex = uploadIndex + 1;
+    this.uploads.push(upload);
   }
 
   onClick = e => {
-    if (e.target.classList.contains("qq-delete")) {
-      this.handleDelete();
+    const { target } = e;
+
+    if (target.classList.contains("qq-delete")) {
+      const uploadIndex = parseInt(target.getAttribute("data-index"), 10);
+      this.handleDelete(uploadIndex);
     }
   }
 
-  handleProgress = (bytesUploaded, bytesTotal) => {
+  handleProgress = (uploadIndex, bytesUploaded, bytesTotal) => {
     const percentage = (bytesUploaded / bytesTotal * 100).toFixed(2);
     console.log("progress", bytesUploaded, bytesTotal, `${percentage}%`);
   };
 
-  handleError = () => {
-    this.renderer.setError(this.uploadIndex - 1);
-    this.currentUpload = {};
+  handleError = uploadIndex => {
+    this.renderer.setError(uploadIndex);
   }
 
-  handleSuccess = () => {
-    const { renderer, uploadIndex } = this;
+  handleSuccess = uploadIndex => {
+    const { renderer } = this;
 
     renderer.clearInput();
-    renderer.setSuccess(uploadIndex - 1);
+    renderer.setSuccess(uploadIndex);
   };
 
-  handleDelete() {
-    const { url } = this.currentUpload;
+  handleDelete(uploadIndex) {
+    const { url } = this.uploads[uploadIndex];
 
     const xhr = new window.XMLHttpRequest();
     xhr.open("DELETE", url);
 
     xhr.onload = () => {
       if (xhr.status === 204) {
-        this.renderer.deleteFile(0);
+        this.renderer.deleteFile(uploadIndex);
       } else {
-        this.renderer.setDeleteFailed(0);
+        this.renderer.setDeleteFailed(uploadIndex);
       }
     };
     xhr.setRequestHeader("Tus-Resumable", "1.0.0");
