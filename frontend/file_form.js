@@ -4,9 +4,10 @@ import { Upload } from "tus-js-client";
 
 
 class RenderUploadFile {
-  constructor({ container, input, skipRequired }) {
+  constructor({ container, input, skipRequired, translations }) {
     this.container = container;
     this.input = input;
+    this.translations = translations;
 
     if (skipRequired) {
       this.input.required = false;
@@ -41,7 +42,7 @@ class RenderUploadFile {
     const el = this.findFileDiv(index);
 
     const span = document.createElement("span");
-    span.innerHTML = "Delete failed";
+    span.innerHTML = this.translations["Delete failed"];
 
     el.appendChild(span);
   }
@@ -53,13 +54,13 @@ class RenderUploadFile {
   }
 
   setSuccess(index) {
-    const { container } = this;
+    const { container, translations } = this;
 
     const el = container.querySelector(`.qq-file-id-${index}`);
     el.classList.add("qq-upload-success");
 
     const deleteLink = document.createElement("a");
-    deleteLink.innerHTML = "Delete";
+    deleteLink.innerHTML = translations.Delete;
     deleteLink.className = "qq-delete";
     deleteLink.setAttribute("data-index", index);
     deleteLink.href = "#";
@@ -75,7 +76,7 @@ class RenderUploadFile {
 }
 
 class UploadFile {
-  constructor({ input, container, fieldName, formId, initial, multiple, skipRequired, uploadUrl }) {
+  constructor({ input, container, fieldName, formId, initial, multiple, skipRequired, translations, uploadUrl }) {
     this.fieldName = fieldName;
     this.formId = formId;
     this.multiple = multiple;
@@ -84,7 +85,7 @@ class UploadFile {
     this.uploadIndex = 0;
     this.uploads = [];
 
-    this.renderer = new RenderUploadFile({ container, input, skipRequired });
+    this.renderer = new RenderUploadFile({ container, input, skipRequired, translations });
 
     if (initial) {
       this.addInitialFiles(initial.map(f => f.name)); // todo: success
@@ -238,9 +239,10 @@ const initUploadFields = (form, options = {}) => {
     const fieldName = input.name;
     const { multiple } = input;
     const initial = getInitialFiles(element).filter(f => !f.existing);
+    const translations = JSON.parse(element.getAttribute("data-translations"));
 
     new UploadFile({
-      container, fieldName, formId, initial, input, multiple, skipRequired, uploadUrl
+      container, fieldName, formId, initial, input, multiple, skipRequired, translations, uploadUrl
     });
   });
 };

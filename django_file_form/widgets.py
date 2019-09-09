@@ -3,6 +3,7 @@ import json
 from django.forms import ClearableFileInput
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
+from django.utils import translation
 
 
 class UploadWidgetMixin(ClearableFileInput):
@@ -31,11 +32,19 @@ class UploadWidgetMixin(ClearableFileInput):
                 'django_file_form/upload_widget.html',
                 dict(
                     input=input,
+                    translations=json.dumps(self.get_translations()),
                     uploaded_files=json.dumps(uploaded_files),
                     existing_files=existing_files
                 )
             )
         )
+
+    def get_translations(self):
+        keys = ['Delete', 'Delete failed']
+
+        return {
+            key: translation.gettext(key) for key in keys
+        }
 
 
 class UploadWidget(UploadWidgetMixin, ClearableFileInput):

@@ -54,9 +54,9 @@ class Page(object):
             lambda selenium: selenium.find_element_by_css_selector('.qq-file-id-%d.qq-upload-success' % upload_index)
         )
 
-    def find_delete_failed(self, upload_index=0):
+    def find_delete_failed(self, upload_index=0, text='Delete failed'):
         el = self.selenium.find_element_by_css_selector('.qq-file-id-%d.qq-upload-success' % upload_index)
-        el.find_element_by_xpath("//*[contains(text(), '%s')]" % 'Delete failed')
+        el.find_element_by_xpath("//*[contains(text(), '%s')]" % text)
 
     def submit(self):
         self.selenium.find_element_by_class_name('btn').click()
@@ -64,9 +64,9 @@ class Page(object):
     def assert_page_contains_text(self, text):
         self.selenium.find_element_by_xpath("//*[contains(text(), '%s')]" % text)
 
-    def delete_ajax_file(self, upload_index=0):
+    def delete_ajax_file(self, upload_index=0, text='Delete'):
         el = self.selenium.find_element_by_css_selector('.qq-file-id-%d.qq-upload-success' % upload_index)
-        el.find_element_by_link_text('Delete').click()
+        el.find_element_by_link_text(text).click()
 
     def create_user(self, username, password):
         u = User.objects.create(username=username, email='%s@test.nl' % username)
