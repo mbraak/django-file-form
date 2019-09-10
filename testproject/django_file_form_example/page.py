@@ -35,6 +35,11 @@ class Page(object):
     def upload_using_js(self, temp_file):
         self.selenium.find_element_by_css_selector('input[type=file]').send_keys(temp_file.path())
 
+    def upload_multiple_using_js(self, *temp_files):
+        self.selenium.find_element_by_css_selector('input[type=file]').send_keys(
+            "\n".join(temp_file.path() for temp_file in temp_files)
+        )
+
     def find_upload_success(self, temp_file, upload_index=0):
         el = self.selenium.find_element_by_css_selector('.qq-file-id-%d.qq-upload-success' % upload_index)
         el.find_element_by_xpath("//*[contains(text(), '%s')]" % temp_file.base_name())

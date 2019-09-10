@@ -122,28 +122,32 @@ class UploadFile {
   }
 
   onChange = e => {
-    if (e.target.files.length === 0) {
+    const files = [...e.target.files];
+
+    if (files.length === 0) {
       return;
     }
 
-    const file = e.target.files[0];
+    files.forEach(
+      file => {
+        const { fieldName, formId, renderer, uploads, uploadUrl } = this;
+        const filename = file.name;
+        const uploadIndex = uploads.length;
 
-    const { fieldName, formId, renderer, uploads, uploadUrl } = this;
-    const filename = file.name;
-    const uploadIndex = uploads.length;
+        const upload = new Upload(file, {
+          endpoint: uploadUrl,
+          metadata: { fieldName, filename, formId },
+          onError: () => this.handleError(uploadIndex),
+          onProgress: (bytesUploaded, bytesTotal) => this.handleProgress(uploadIndex, bytesUploaded, bytesTotal),
+          onSuccess: () => this.handleSuccess(uploadIndex),
+        });
 
-    const upload = new Upload(file, {
-      endpoint: uploadUrl,
-      metadata: { fieldName, filename, formId },
-      onError: () => this.handleError(uploadIndex),
-      onProgress: (bytesUploaded, bytesTotal) => this.handleProgress(uploadIndex, bytesUploaded, bytesTotal),
-      onSuccess: () => this.handleSuccess(uploadIndex),
-    });
+        upload.start();
+        renderer.addFile(filename, uploadIndex);
 
-    upload.start();
-    renderer.addFile(filename, uploadIndex);
-
-    this.uploads.push(upload);
+        this.uploads.push(upload);
+      }
+    );
   }
 
   onClick = e => {

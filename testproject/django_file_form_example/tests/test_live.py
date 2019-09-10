@@ -140,6 +140,19 @@ class LiveTestCase(BaseLiveTestCase):
         self.assertFalse(Path(uploaded_file1.uploaded_file.path).exists())
         self.assertFalse(Path(uploaded_file2.uploaded_file.path).exists())
 
+    def test_upload_multiple_at_the_same_time(self):
+        page = self.page
+
+        temp_file1 = page.create_temp_file('content1')
+        temp_file2 = page.create_temp_file('content2')
+
+        page.open('/multiple')
+
+        page.fill_title_field('abc')
+        page.upload_multiple_using_js(temp_file1, temp_file2)
+        page.find_upload_success(temp_file1, upload_index=0)
+        page.find_upload_success(temp_file2, upload_index=1)
+
     def test_upload_multiple_for_single_filefield(self):
         page = self.page
 
