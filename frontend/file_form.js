@@ -160,7 +160,7 @@ class UploadFile {
   }
 
   handleProgress = (uploadIndex, bytesUploaded, bytesTotal) => {
-    const percentage = (bytesUploaded / bytesTotal * 100).toFixed(2);
+    const percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2);
     console.log("progress", bytesUploaded, bytesTotal, `${percentage}%`);
   };
 

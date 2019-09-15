@@ -12,6 +12,7 @@
         "id-length": 0,
         "implicit-arrow-linebreak": 0,
         "indent": 0,
+        "max-classes-per-file": 0,
         "max-len": 0,
         "new-cap": 0,
         "no-confusing-arrow": 0,
