@@ -80,16 +80,16 @@ class LiveTestCase(BaseLiveTestCase):
         self.assertEqual(UploadedFile.objects.count(), 1)
 
         uploaded_file = UploadedFile.objects.first()
-        self.assertEqual(uploaded_file.uploaded_file.read(), b'content1\x00')
+        self.assertEqual(uploaded_file.uploaded_file.read(), b'content1')
 
         page.submit()
         page.assert_page_contains_text('Upload success')
 
-        self.assertEqual(temp_file.uploaded_file().read_text(), "content1\x00")
+        self.assertEqual(temp_file.uploaded_file().read_text(), "content1")
 
         example = Example.objects.get(title='abc')
         self.assertEqual(example.input_file.name, 'example/{0!s}'.format(temp_file.base_name()))
-        self.assertEqual(example.input_file.read(), b'content1\x00')
+        self.assertEqual(example.input_file.read(), b'content1')
 
         self.assertEqual(UploadedFile.objects.count(), 0)
         self.assertFalse(Path(uploaded_file.uploaded_file.path).exists())
@@ -115,8 +115,8 @@ class LiveTestCase(BaseLiveTestCase):
         uploaded_files = UploadedFile.objects.order_by('id')
         uploaded_file1 = uploaded_files[0]
         uploaded_file2 = uploaded_files[1]
-        self.assertEqual(uploaded_file1.uploaded_file.read(), b'content1\x00')
-        self.assertEqual(uploaded_file2.uploaded_file.read(), b'content2\x00')
+        self.assertEqual(uploaded_file1.uploaded_file.read(), b'content1')
+        self.assertEqual(uploaded_file2.uploaded_file.read(), b'content2')
 
         page.submit()
         page.assert_page_contains_text('Upload success')
@@ -133,8 +133,8 @@ class LiveTestCase(BaseLiveTestCase):
             {'example/%s' % temp_file1.base_name(), 'example/%s' % temp_file2.base_name()}
         )
 
-        self.assertEqual(examples_files[0].input_file.read(), b'content1\x00')
-        self.assertEqual(examples_files[1].input_file.read(), b'content2\x00')
+        self.assertEqual(examples_files[0].input_file.read(), b'content1')
+        self.assertEqual(examples_files[1].input_file.read(), b'content2')
 
         self.assertEqual(UploadedFile.objects.count(), 0)
         self.assertFalse(Path(uploaded_file1.uploaded_file.path).exists())
@@ -285,7 +285,7 @@ class LiveTestCase(BaseLiveTestCase):
         page.submit()
         page.assert_page_contains_text('Upload success')
 
-        self.assertEqual(temp_file.uploaded_file().read_text(), "content1\x00")
+        self.assertEqual(temp_file.uploaded_file().read_text(), "content1")
 
     @override_settings(FILE_FORM_MUST_LOGIN=True)
     def test_permission_fail(self):

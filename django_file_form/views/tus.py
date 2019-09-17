@@ -115,8 +115,7 @@ class TusUpload(View):
 
         try:
             with Path(conf.UPLOAD_DIR).joinpath(resource_id).open("wb") as f:
-                f.seek(file_size)
-                f.write(b"\0")
+                pass
         except IOError as e:
             logger.error("Unable to create file: {}".format(e), exc_info=True, extra={
                 'request': request,
