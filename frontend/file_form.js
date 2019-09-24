@@ -18,7 +18,7 @@ class RenderUploadFile {
     const { container } = this;
 
     const div = document.createElement("div");
-    div.className = `qq-file-id-${uploadIndex}`;
+    div.className = `dff-file-id-${uploadIndex}`;
 
     const nameSpan = document.createElement("span");
     nameSpan.innerHTML = filename; // todo: escape
@@ -35,7 +35,7 @@ class RenderUploadFile {
 
   setError(index) {
     const el = this.findFileDiv(index);
-    el.classList.add("qq-upload-fail");
+    el.classList.add("dff-upload-fail");
   }
 
   setDeleteFailed(index) {
@@ -50,18 +50,18 @@ class RenderUploadFile {
   findFileDiv(index) {
     const { container } = this;
 
-    return container.querySelector(`.qq-file-id-${index}`);
+    return container.querySelector(`.dff-file-id-${index}`);
   }
 
   setSuccess(index) {
     const { container, translations } = this;
 
-    const el = container.querySelector(`.qq-file-id-${index}`);
-    el.classList.add("qq-upload-success");
+    const el = container.querySelector(`.dff-file-id-${index}`);
+    el.classList.add("dff-upload-success");
 
     const deleteLink = document.createElement("a");
     deleteLink.innerHTML = translations.Delete;
-    deleteLink.className = "qq-delete";
+    deleteLink.className = "dff-delete";
     deleteLink.setAttribute("data-index", index);
     deleteLink.href = "#";
 
@@ -153,7 +153,7 @@ class UploadFile {
   onClick = e => {
     const { target } = e;
 
-    if (target.classList.contains("qq-delete")) {
+    if (target.classList.contains("dff-delete")) {
       const uploadIndex = parseInt(target.getAttribute("data-index"), 10);
       this.handleDelete(uploadIndex);
     }

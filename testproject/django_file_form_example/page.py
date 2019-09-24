@@ -41,26 +41,26 @@ class Page(object):
         )
 
     def find_upload_success(self, temp_file, upload_index=0):
-        el = self.selenium.find_element_by_css_selector('.qq-file-id-%d.qq-upload-success' % upload_index)
+        el = self.selenium.find_element_by_css_selector('.dff-file-id-%d.dff-upload-success' % upload_index)
         el.find_element_by_xpath("//*[contains(text(), '%s')]" % temp_file.base_name())
 
     def find_upload_fail(self, temp_file, upload_index=0):
-        el = self.find_upload_element(upload_index, extra_class='qq-upload-fail')
+        el = self.find_upload_element(upload_index, extra_class='dff-upload-fail')
         el.find_element_by_xpath("//*[contains(text(), '%s')]" % temp_file.base_name())
         return el
 
     def find_upload_element(self, upload_index=0, extra_class=None):
-        classes = ['qq-file-id-%d' % upload_index, extra_class]
+        classes = ['dff-file-id-%d' % upload_index, extra_class]
 
         return self.selenium.find_element_by_css_selector(to_class_string(classes))
 
     def wait_until_upload_is_removed(self, upload_index=0):
         WebDriverWait(self.selenium, timeout=10).until_not(
-            lambda selenium: selenium.find_element_by_css_selector('.qq-file-id-%d.qq-upload-success' % upload_index)
+            lambda selenium: selenium.find_element_by_css_selector('.dff-file-id-%d.dff-upload-success' % upload_index)
         )
 
     def find_delete_failed(self, upload_index=0, text='Delete failed'):
-        el = self.selenium.find_element_by_css_selector('.qq-file-id-%d.qq-upload-success' % upload_index)
+        el = self.selenium.find_element_by_css_selector('.dff-file-id-%d.dff-upload-success' % upload_index)
         el.find_element_by_xpath("//*[contains(text(), '%s')]" % text)
 
     def submit(self):
@@ -70,7 +70,7 @@ class Page(object):
         self.selenium.find_element_by_xpath("//*[contains(text(), '%s')]" % text)
 
     def delete_ajax_file(self, upload_index=0, text='Delete'):
-        el = self.selenium.find_element_by_css_selector('.qq-file-id-%d.qq-upload-success' % upload_index)
+        el = self.selenium.find_element_by_css_selector('.dff-file-id-%d.dff-upload-success' % upload_index)
         el.find_element_by_link_text(text).click()
 
     def create_user(self, username, password):
