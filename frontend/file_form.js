@@ -1,7 +1,7 @@
 /* global document, window */
 
 import { Upload } from "tus-js-client";
-
+import escape from "escape-html";
 
 class RenderUploadFile {
   constructor({ container, input, skipRequired, translations }) {
@@ -21,7 +21,7 @@ class RenderUploadFile {
     div.className = `dff-file-id-${uploadIndex}`;
 
     const nameSpan = document.createElement("span");
-    nameSpan.innerHTML = filename; // todo: escape
+    nameSpan.innerHTML = escape(filename);
 
     div.appendChild(nameSpan);
     container.appendChild(div);

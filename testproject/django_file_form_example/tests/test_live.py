@@ -381,3 +381,20 @@ class LiveTestCase(BaseLiveTestCase):
         page.selenium.delete_cookie('sessionid')
         page.delete_ajax_file(text='Verwijderen')
         page.find_delete_failed(text='Verwijderen mislukt')
+
+    def test_escape_filename(self):
+        page = self.page
+
+        prefix = u"&amp;"
+
+        temp_file = page.create_temp_file('content1', prefix=prefix)
+
+        page.open('/')
+        page.upload_using_js(temp_file)
+        page.find_upload_success(temp_file)
+
+        uploaded_file = UploadedFile.objects.first()
+
+        self.assertEqual(uploaded_file.original_filename, temp_file.base_name())
+        self.assertEqual(six.text_type(uploaded_file), temp_file.base_name())
+        self.assertTrue(prefix in temp_file.base_name())
