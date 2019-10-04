@@ -8,15 +8,26 @@ class RenderUploadFile {
     this.container = container;
     this.input = input;
     this.translations = translations;
+    this.filesContainer = null;
 
     if (skipRequired) {
       this.input.required = false;
     }
   }
 
-  addFile(filename, uploadIndex) {
-    const { container } = this;
+  getFilesContainer() {
+    if (!this.filesContainer) {
+      const div = document.createElement("div");
+      div.className = "dff-files";
+      this.container.appendChild(div);
 
+      this.filesContainer = div;
+    }
+
+    return this.filesContainer;
+  }
+
+  addFile(filename, uploadIndex) {
     const div = document.createElement("div");
     div.className = `dff-file-id-${uploadIndex}`;
 
@@ -24,7 +35,7 @@ class RenderUploadFile {
     nameSpan.innerHTML = escape(filename);
 
     div.appendChild(nameSpan);
-    container.appendChild(div);
+    this.getFilesContainer().appendChild(div);
 
     this.input.required = false;
   }
@@ -48,15 +59,13 @@ class RenderUploadFile {
   }
 
   findFileDiv(index) {
-    const { container } = this;
-
-    return container.querySelector(`.dff-file-id-${index}`);
+    return this.getFilesContainer().querySelector(`.dff-file-id-${index}`);
   }
 
   setSuccess(index) {
-    const { container, translations } = this;
+    const { translations } = this;
 
-    const el = container.querySelector(`.dff-file-id-${index}`);
+    const el = this.getFilesContainer().querySelector(`.dff-file-id-${index}`);
     el.classList.add("dff-upload-success");
 
     const deleteLink = document.createElement("a");
@@ -227,8 +236,8 @@ const initUploadFields = (form, options = {}) => {
     return;
   }
 
-  form.querySelectorAll(".file-uploader").forEach(container => {
-    const element = container.querySelector(".file-uploader-container");
+  form.querySelectorAll(".dff-uploader").forEach(container => {
+    const element = container.querySelector(".dff-container");
 
     if (!element) {
       return;

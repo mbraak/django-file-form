@@ -1,0 +1,17 @@
+.dff-uploader .dff-files {
+  display: flex;
+  flex-direction: column;
+  margin: 16px 0 16px 0;
+}
+
+.dff-uploader .dff-files > div {
+  margin-bottom: 8px;
+}
+
+.dff-uploader .dff-files > div&:last-child {
+  margin-bottom: 0;
+}
+
+.dff-uploader .dff-files .dff-delete {
+  margin-left: 8px;
+}

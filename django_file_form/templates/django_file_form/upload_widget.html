@@ -1,7 +1,7 @@
 {% load i18n %}
-<div class="file-uploader">
+<div class="dff-uploader">
     <div
-        class="file-uploader-container"
+        class="dff-container"
         {% if uploaded_files %}
             data-files='{{ uploaded_files }}'
         {% endif %}
@@ -10,7 +10,7 @@
         {{ input }}
     </div>
     {% if existing_files %}
-        <ul class="existing-files">
+        <ul class="dff-existing-files">
             {% for f in existing_files %}
                 <li>
                     <span>{{ f.name }}</span>
