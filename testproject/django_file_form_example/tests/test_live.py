@@ -260,7 +260,7 @@ class LiveTestCase(BaseLiveTestCase):
             self.assertTrue(example_file_path.exists())
 
             page.open('/existing/%d' % example.id)
-            el = self.selenium.find_element_by_css_selector('.existing-files')
+            el = self.selenium.find_element_by_css_selector('.dff-existing-files')
             el.find_element_by_xpath("//*[contains(text(), '%s')]" % example_filename)
         finally:
             remove_p(example_file_path)
