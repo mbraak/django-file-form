@@ -137,6 +137,11 @@ class UploadFile {
       return;
     }
 
+    if (!this.multiple && this.uploads.length !== 0) {
+      this.renderer.deleteFile(0);
+      this.uploads = [];
+    }
+
     files.forEach(
       file => {
         const { fieldName, formId, renderer, uploads, uploadUrl } = this;

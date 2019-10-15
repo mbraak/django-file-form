@@ -168,6 +168,9 @@ class LiveTestCase(BaseLiveTestCase):
 
         page.upload_using_js(temp_file2)
         page.assert_page_contains_text(temp_file2.base_name())
+        page.find_upload_success(temp_file2, upload_index=0)
+
+        self.assertEqual(page.get_upload_count(), 1)
 
         page.submit()
         page.assert_page_contains_text('Upload success')

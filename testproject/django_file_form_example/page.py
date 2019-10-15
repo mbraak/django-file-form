@@ -44,6 +44,9 @@ class Page(object):
         el = self.selenium.find_element_by_css_selector('.dff-file-id-%d.dff-upload-success' % upload_index)
         el.find_element_by_xpath("//*[contains(text(), '%s')]" % temp_file.base_name())
 
+    def get_upload_count(self):
+        return len(self.selenium.find_elements_by_css_selector('.dff-upload-success'))
+
     def find_upload_fail(self, temp_file, upload_index=0):
         el = self.find_upload_element(upload_index, extra_class='dff-upload-fail')
         el.find_element_by_xpath("//*[contains(text(), '%s')]" % temp_file.base_name())
