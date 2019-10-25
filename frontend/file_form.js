@@ -27,6 +27,24 @@ class RenderUploadFile {
     return this.filesContainer;
   }
 
+  addUploadedFile(filename, uploadIndex) {
+    this.addFile(filename);
+    this.setSuccess(uploadIndex);
+  }
+
+  addNewUpload(filename, uploadIndex) {
+    const div = this.addFile(filename, uploadIndex);
+
+    const progressSpan = document.createElement("span");
+    progressSpan.className = "dff-progress";
+
+    const innerSpan = document.createElement("span");
+    innerSpan.className = "dff-progress-inner";
+
+    progressSpan.appendChild(innerSpan);
+    div.appendChild(progressSpan);
+  }
+
   addFile(filename, uploadIndex) {
     const div = document.createElement("div");
     div.className = `dff-file-id-${uploadIndex}`;
@@ -38,10 +56,15 @@ class RenderUploadFile {
     this.getFilesContainer().appendChild(div);
 
     this.input.required = false;
+    return div;
   }
 
   deleteFile(index) {
-    this.findFileDiv(index).remove();
+    const div = this.findFileDiv(index);
+
+    if (div) {
+      div.remove();
+    }
   }
 
   setError(index) {
@@ -75,12 +98,27 @@ class RenderUploadFile {
     deleteLink.href = "#";
 
     el.appendChild(deleteLink);
+
+    const progressSpan = el.querySelector(".dff-progress");
+
+    if (progressSpan) {
+      progressSpan.remove();
+    }
   }
 
   clearInput() {
     const { input } = this;
 
     input.value = "";
+  }
+
+  updateProgress(index, percentage) {
+    const el = this.getFilesContainer().querySelector(`.dff-file-id-${index}`);
+    const innerProgressSpan = el.querySelector(".dff-progress-inner");
+
+    if (innerProgressSpan) {
+      innerProgressSpan.style.width = `${percentage}%`;
+    }
   }
 }
 
@@ -116,17 +154,15 @@ class UploadFile {
 
       filenames.forEach(
         filename => {
-          renderer.addFile(filename, uploadIndex);
-          renderer.setSuccess(uploadIndex);
+          renderer.addUploadedFile(filename, uploadIndex);
           uploadIndex += 1;
         }
       );
     } else {
-      renderer.addFile(
+      renderer.addUploadedFile(
         filenames[filenames.length - 1],
         0
       );
-      renderer.setSuccess(0);
     }
   }
 
@@ -157,7 +193,7 @@ class UploadFile {
         });
 
         upload.start();
-        renderer.addFile(filename, uploadIndex);
+        renderer.addNewUpload(filename, uploadIndex);
 
         this.uploads.push(upload);
       }
@@ -175,7 +211,8 @@ class UploadFile {
 
   handleProgress = (uploadIndex, bytesUploaded, bytesTotal) => {
     const percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2);
-    console.log("progress", bytesUploaded, bytesTotal, `${percentage}%`);
+
+    this.renderer.updateProgress(uploadIndex, percentage);
   };
 
   handleError = uploadIndex => {
