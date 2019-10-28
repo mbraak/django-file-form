@@ -50,6 +50,7 @@ class Page(object):
     def find_upload_fail(self, temp_file, upload_index=0):
         el = self.find_upload_element(upload_index, extra_class='dff-upload-fail')
         el.find_element_by_xpath("//*[contains(text(), '%s')]" % temp_file.base_name())
+        el.find_element_by_xpath("//*[contains(text(), 'Upload failed')]")
         return el
 
     def find_upload_element(self, upload_index=0, extra_class=None):
