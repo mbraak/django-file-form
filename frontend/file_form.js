@@ -28,7 +28,7 @@ class RenderUploadFile {
   }
 
   addUploadedFile(filename, uploadIndex) {
-    this.addFile(filename);
+    this.addFile(filename, uploadIndex);
     this.setSuccess(uploadIndex);
   }
 
@@ -68,8 +68,15 @@ class RenderUploadFile {
   }
 
   setError(index) {
+    const span = document.createElement("span");
+    span.classList.add("dff-error");
+    span.innerHTML = this.translations["Upload failed"];
+
     const el = this.findFileDiv(index);
+    el.appendChild(span);
     el.classList.add("dff-upload-fail");
+
+    this.removeProgress(index);
   }
 
   setDeleteFailed(index) {
@@ -88,7 +95,7 @@ class RenderUploadFile {
   setSuccess(index) {
     const { translations } = this;
 
-    const el = this.getFilesContainer().querySelector(`.dff-file-id-${index}`);
+    const el = this.findFileDiv(index);
     el.classList.add("dff-upload-success");
 
     const deleteLink = document.createElement("a");
@@ -98,6 +105,12 @@ class RenderUploadFile {
     deleteLink.href = "#";
 
     el.appendChild(deleteLink);
+
+    this.removeProgress(index);
+  }
+
+  removeProgress(index) {
+    const el = this.findFileDiv(index);
 
     const progressSpan = el.querySelector(".dff-progress");
 

@@ -40,7 +40,7 @@ class UploadWidgetMixin(ClearableFileInput):
         )
 
     def get_translations(self):
-        keys = ['Delete', 'Delete failed']
+        keys = ['Delete', 'Delete failed', 'Upload failed']
 
         return {
             key: translation.gettext(key) for key in keys

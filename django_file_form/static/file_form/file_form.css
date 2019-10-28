@@ -32,3 +32,8 @@
   background-color: green;
   position: absolute;
 }
+
+.dff-uploader .dff-error {
+  margin-left: 8px;
+  color: red;
+}
