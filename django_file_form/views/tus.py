@@ -186,7 +186,12 @@ class TusUpload(View):
                 file.write(request.body)
                 file.close()
 
-        new_offset = cache.incr("tus-uploads/{}/offset".format(resource_id), chunk_size)
+        try:
+            new_offset = cache.incr("tus-uploads/{}/offset".format(resource_id), chunk_size)
+        except ValueError:
+            response.status_code = 404
+            return response
+
         response['Upload-Offset'] = new_offset
 
         response.status_code = 204
@@ -217,7 +222,9 @@ class TusUpload(View):
         resource_id = kwargs.get('resource_id', None)
 
         upload_file_path = Path(conf.UPLOAD_DIR).joinpath(resource_id)
-        upload_file_path.unlink()
+
+        if upload_file_path.exists():
+            upload_file_path.unlink()
 
         uploaded_file = UploadedFile.objects.try_get(file_id=resource_id)
 
@@ -226,7 +233,7 @@ class TusUpload(View):
 
         self.remove_from_cache(resource_id)
 
-        response.status_code = 204
+        response.status_code = 204 if uploaded_file else 404
         return response
 
     def create_uploaded_file_in_db(self, field_name, file_id, form_id, original_filename, uploaded_file):

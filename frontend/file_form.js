@@ -43,6 +43,13 @@ class RenderUploadFile {
 
     progressSpan.appendChild(innerSpan);
     div.appendChild(progressSpan);
+
+    const cancelLink = document.createElement("a");
+    cancelLink.className = "dff-cancel";
+    cancelLink.innerHTML = this.translations.Cancel;
+    cancelLink.setAttribute("data-index", uploadIndex);
+    cancelLink.href = "#";
+    div.appendChild(cancelLink);
   }
 
   addFile(filename, uploadIndex) {
@@ -77,6 +84,7 @@ class RenderUploadFile {
     el.classList.add("dff-upload-fail");
 
     this.removeProgress(index);
+    this.removeCancel(index);
   }
 
   setDeleteFailed(index) {
@@ -107,6 +115,7 @@ class RenderUploadFile {
     el.appendChild(deleteLink);
 
     this.removeProgress(index);
+    this.removeCancel(index);
   }
 
   removeProgress(index) {
@@ -116,6 +125,16 @@ class RenderUploadFile {
 
     if (progressSpan) {
       progressSpan.remove();
+    }
+  }
+
+  removeCancel(index) {
+    const el = this.findFileDiv(index);
+
+    const cancelSpan = el.querySelector(".dff-cancel");
+
+    if (cancelSpan) {
+      cancelSpan.remove();
     }
   }
 
@@ -219,6 +238,9 @@ class UploadFile {
     if (target.classList.contains("dff-delete")) {
       const uploadIndex = parseInt(target.getAttribute("data-index"), 10);
       this.handleDelete(uploadIndex);
+    } else if (target.classList.contains("dff-cancel")) {
+      const uploadIndex = parseInt(target.getAttribute("data-index"), 10);
+      this.handleCancel(uploadIndex);
     }
   }
 
@@ -254,6 +276,13 @@ class UploadFile {
     };
     xhr.setRequestHeader("Tus-Resumable", "1.0.0");
     xhr.send(null);
+  }
+
+  handleCancel(uploadIndex) {
+    const upload = this.uploads[uploadIndex];
+    upload.abort(true);
+
+    this.renderer.deleteFile(uploadIndex);
   }
 }
 

@@ -1,3 +1,6 @@
+msgid "Cancel"
+msgstr "Annuleren"
+
 msgid "Delete failed"
 msgstr "Verwijderen mislukt"
 
