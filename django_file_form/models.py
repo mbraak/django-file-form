@@ -1,15 +1,11 @@
 import os
 import sys
+from pathlib import Path
 
 from django.conf import settings
 from django.core.files import File
 from django.db import models
 from django.utils import timezone
-
-try:
-    from pathlib import Path
-except ImportError:
-    from pathlib2 import Path
 
 from . import conf
 from .util import ModelManager, load_class
@@ -77,7 +73,7 @@ class UploadedFile(models.Model):
             self.uploaded_file.delete()
 
         super(UploadedFile, self).delete(*args, **kwargs)
-                
+
     def must_be_deleted(self, now=None):
         now = now or timezone.now()
 
