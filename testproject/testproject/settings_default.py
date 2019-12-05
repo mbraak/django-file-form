@@ -1,9 +1,4 @@
-import django
-
-try:
-    from pathlib import Path
-except ImportError:
-    from pathlib2 import Path
+from pathlib import Path
 
 
 def mkdir_p(path):
@@ -62,9 +57,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
 ]
-
-if django.VERSION[0:2] < (2, 0):
-    MIDDLEWARE.append('django.contrib.auth.middleware.SessionAuthenticationMiddleware')
 
 STATIC_URL = '/static/'
 ROOT_URLCONF = 'testproject.urls'

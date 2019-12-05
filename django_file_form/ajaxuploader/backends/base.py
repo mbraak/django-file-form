@@ -1,4 +1,4 @@
-class AbstractUploadBackend(object):
+class AbstractUploadBackend:
     BUFFER_SIZE = 10485760  # 10MB
 
     def __init__(self, **kwargs):

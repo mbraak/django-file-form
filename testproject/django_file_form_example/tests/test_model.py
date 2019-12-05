@@ -1,5 +1,6 @@
 # coding=utf-8
-import six
+from pathlib import Path
+
 from django.test import TestCase
 from django.core.management import call_command
 from django.conf import settings
@@ -7,11 +8,6 @@ from django.core.files.base import ContentFile
 
 from django_file_form_example.test_utils import get_random_id, encode_datetime, remove_p
 from django_file_form.models import UploadedFile
-
-try:
-    from pathlib import Path
-except ImportError:
-    from pathlib2 import Path
 
 
 media_root = Path(settings.MEDIA_ROOT)
@@ -53,7 +49,7 @@ class FileFormTests(TestCase):
             original_filename='ooo.txt'
         )
         try:
-            self.assertEqual(six.text_type(uploaded_file), 'ooo.txt')
-            self.assertEqual(six.text_type(UploadedFile()), '')
+            self.assertEqual(str(uploaded_file), 'ooo.txt')
+            self.assertEqual(str(UploadedFile()), '')
         finally:
             uploaded_file.uploaded_file.delete()
