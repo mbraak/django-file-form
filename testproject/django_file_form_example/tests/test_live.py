@@ -1,5 +1,6 @@
 # coding=utf-8
-import six
+from pathlib import Path
+
 from django.core.files.base import ContentFile
 from django.conf import settings
 from django.test import override_settings
@@ -9,11 +10,6 @@ from django_file_form_example.base_live_testcase import BaseLiveTestCase
 from django_file_form_example.models import Example, Example2
 from django_file_form_example.page import Page
 from django_file_form_example.test_utils import get_random_id, remove_p
-
-try:
-    from pathlib import Path
-except ImportError:
-    from pathlib2 import Path
 
 
 media_root = Path(settings.MEDIA_ROOT)
@@ -281,7 +277,7 @@ class LiveTestCase(BaseLiveTestCase):
         uploaded_file = UploadedFile.objects.first()
 
         self.assertEqual(uploaded_file.original_filename, temp_file.base_name())
-        self.assertEqual(six.text_type(uploaded_file), temp_file.base_name())
+        self.assertEqual(str(uploaded_file), temp_file.base_name())
         self.assertTrue(prefix in temp_file.base_name())
 
         page.fill_title_field('abc')
@@ -399,5 +395,5 @@ class LiveTestCase(BaseLiveTestCase):
         uploaded_file = UploadedFile.objects.first()
 
         self.assertEqual(uploaded_file.original_filename, temp_file.base_name())
-        self.assertEqual(six.text_type(uploaded_file), temp_file.base_name())
+        self.assertEqual(str(uploaded_file), temp_file.base_name())
         self.assertTrue(prefix in temp_file.base_name())

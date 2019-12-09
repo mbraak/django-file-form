@@ -1,16 +1,10 @@
 import sys
+from pathlib import Path
 
 from django.conf import settings
 from django.core.files import File
 from django.db import models
 from django.utils import timezone
-from six import python_2_unicode_compatible, text_type
-
-try:
-    from pathlib import Path
-except ImportError:
-    from pathlib2 import Path
-
 from . import conf
 from .util import ModelManager, load_class
 
@@ -51,10 +45,9 @@ def get_storage():
 
 
 def upload_to(instance, filename):
-    return text_type(conf.UPLOAD_DIR)
+    return str(conf.UPLOAD_DIR)
 
 
-@python_2_unicode_compatible
 class UploadedFile(models.Model):
     created = models.DateTimeField(default=timezone.now)
     uploaded_file = models.FileField(max_length=255, upload_to=upload_to,
@@ -71,7 +64,7 @@ class UploadedFile(models.Model):
         index_together = (("form_id", "field_name"),)
 
     def __str__(self):
-        return text_type(self.original_filename or '')
+        return str(self.original_filename or '')
 
     def delete(self, *args, **kwargs):
         if self.uploaded_file and self.uploaded_file.storage.exists(self.uploaded_file.name):
