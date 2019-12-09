@@ -1,25 +1,17 @@
 language: python
-sudo: false
+dist: bionic
 addons:
   chrome: stable
 matrix:
   include:
     - python: 3.7
       env: DJANGO="Django==2.0.13"
-      dist: xenial
-      sudo: true
     - python: 3.7
       env: DJANGO="Django==2.1.15"
-      dist: xenial
-      sudo: true
     - python: 3.7
       env: DJANGO="Django==2.2.8"
-      dist: xenial
-      sudo: true
     - python: 3.7
       env: DJANGO="Django==3.0"
-      dist: xenial
-      sudo: true
 before_install:
   - CHROME_VERSION="$(google-chrome --version)"
   - export CHROMEDRIVER_RELEASE="$(echo $CHROME_VERSION | sed 's/^Google Chrome //')" && export CHROMEDRIVER_RELEASE=${CHROMEDRIVER_RELEASE%%.*}
