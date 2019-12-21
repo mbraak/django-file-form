@@ -39,7 +39,7 @@ class UploadedFileManager(ModelManager):
 
 
 def get_storage():
-    if ('makemigrations' in sys.argv or 'migrate' in sys.argv):
+    if 'makemigrations' in sys.argv or 'migrate' in sys.argv:
         return "settings.FILE_FORM_FILE_STORAGE"
     return load_class('FILE_STORAGE')()
 
