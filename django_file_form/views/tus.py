@@ -1,8 +1,7 @@
 import base64
 import logging
 import uuid
-
-import six
+from pathlib import Path
 
 from django.core.cache import cache
 from django.http import HttpResponse
@@ -13,11 +12,6 @@ from django.views.generic import View
 from django_file_form import conf
 from django_file_form.models import UploadedFile
 from django_file_form.util import check_permission
-
-try:
-    from pathlib import Path
-except ImportError:
-    from pathlib2 import Path
 
 
 logger = logging.getLogger(__name__)
@@ -106,7 +100,7 @@ class TusUpload(View):
                 metadata[key] = base64.b64decode(value).decode("utf-8")
 
         file_size = int(request.META.get("HTTP_UPLOAD_LENGTH", "0"))
-        resource_id = six.text_type(uuid.uuid4())
+        resource_id = str(uuid.uuid4())
 
         cache.add("tus-uploads/{}/filename".format(resource_id), metadata.get("filename"), conf.TIMEOUT)
         cache.add("tus-uploads/{}/file_size".format(resource_id), file_size, conf.TIMEOUT)
@@ -240,7 +234,7 @@ class TusUpload(View):
         values = dict(
             file_id=file_id,
             form_id=form_id,
-            uploaded_file=six.text_type(uploaded_file),
+            uploaded_file=str(uploaded_file),
             original_filename=original_filename
         )
 
