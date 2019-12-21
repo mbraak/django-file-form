@@ -1,3 +1,2 @@
 recursive-include django_file_form/templates *
 recursive-include django_file_form/static *
-recursive-include django_file_form/ajaxuploader/static *
