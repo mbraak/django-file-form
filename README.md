@@ -18,9 +18,13 @@ Features:
 
 The project is hosted on [github](https://github.com/mbraak/django-file-form).
 
-Works with Django 1.11 - 2.2. Also with Python 2.7, 3.6 - 3.7
+Works with Django 2.0 - 3.0. Also with Python 3.6 - 3.7
 
-Note that version 0.3.0 also supports Django 1.8 - 1.10.
+Older versions:
+* 1.01 uses fine uploader for the javascript part
+* 0.5.0 supports Django 1.11 and Python 2.
+
+Version 2.0 has changed: see 'Upgrade from version 1.0' below, if you're upgrading from version 1.0 (or lower).
 
 ## Usage
 
@@ -32,12 +36,11 @@ pip install django-file-form
 
 **2 Add the apps to your INSTALLED_APPS**
 
-You must include 'django_file_form' and 'django_file_form.ajaxuploader'
+You must include 'django_file_form'
 
 ```python
 INSTALLED_APPS = [
     'django_file_form',
-    'django_file_form.ajaxuploader',
 ]
 ```
 
@@ -72,13 +75,9 @@ class ExampleForm(FileFormMixin, forms.Form):
 
 **6 Include javascript and css in your template**
 
-```html
-<script src="{% static "ajaxuploader/js/fileuploader.js" %}"></script>
 <script src="{% static "file_form/file_form.js" %}"></script>
-<link rel="stylesheet" href="{% static "ajaxuploader/css/fileuploader.css" %}">
+<link rel="stylesheet" href="{% static "file_form/file_form.css" %}">
 ```
-
-You must also include jquery
 
 **7 Call the initUploadFields javascript function**
 
@@ -138,7 +137,29 @@ class ExampleFormView(generic.FormView):
         return super(ExampleFormView, self).form_valid(form)
 ```
 
+**11 Include hidden fields**
+
+Include hidden form fields in your template:
+
+```python
+{% for hidden in form.hidden_fields %}
+    {{ hidden }}
+{% endfor %}
+```
+
+NB: it's possible that the hidden fields are already included; for example if you use ``form.as_p``. Do not include the hidden fields twice.
+
 Also see the testproject in the repository.
+
+## Upgrade from version 1.0 (to 2.0)
+
+* Add reference to file_form/file_form.css:
+  * `<link rel="stylesheet" href="{% static "file_form/file_form.css" %}">`
+* Remove `django_file_form.ajaxuploader` from `INSTALLED_APPS` in your settings
+* Remove reference to `ajaxuploader/js/fileuploader.js` in your template
+* Remove reference to `ajaxuploader/css/fileuploader.css` in your template
+* You don't have to include jquery; the fileuploader doesn't use it
+* The setting `FILE_FORM_UPLOAD_BACKEND` is removed
 
 ## Settings
 
@@ -162,17 +183,22 @@ Settings in `settings.py`:
   * This makes it possible to write your upload backend.
   * The default is `django_file_form.uploader.FileFormUploadBackend`.
 
+* **FILE_FORM_MAX_FILE_SIZE** (int)
+  * Maximum upload size in bytes
+  * Default is 4GB
+
 
 ## Changelog
 
 * **development**
+  * Use tus instead of fine uploader
+
+* **1.0 (5 december 2019)**
+  * Drop support for Python 2 and Django < 2
   * Issue #217: update fine uploader
   * Issue #219: use Selenium for all tests
   * Issue #222: use pathlib2 (instead of pathlib)
-
-* **0.5.0 (3 April 2019)**
-  * Issue #208: skip install of pathlib for python >= 3.4 (thanks to Simon Maillard)
-  * Issue #212: support Django 2.2
+  * Issue #235: support Django 3.0
 
 * **0.4.2 (3 March 2019)**
   * Issue #207: support form prefixes (thanks to Iw108)

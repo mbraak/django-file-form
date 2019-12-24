@@ -1,16 +1,11 @@
 import json
+from pathlib import Path
 
 from django.http import HttpResponseForbidden
 from django.views import generic
 from django.urls import reverse
 
 from django_file_form.forms import ExistingFile
-from django_file_form.uploader import FileFormUploader
-
-try:
-    from pathlib import Path
-except ImportError:
-    from pathlib2 import Path
 
 from . import forms
 from .models import Example
@@ -54,7 +49,7 @@ class MultipleWithoutJsExampleView(MultipleExampleView):
 
 
 class ExistingFileExampleView(BaseFormView):
-    form_class = forms.ExistingFileForm
+    form_class = forms.ExampleForm
 
     def get_form_kwargs(self):
         form_kwargs = super(ExistingFileExampleView, self).get_form_kwargs()
@@ -68,9 +63,6 @@ class ExistingFileExampleView(BaseFormView):
             )
 
         return form_kwargs
-
-
-handle_upload = FileFormUploader()
 
 
 def permission_denied(request, exception):

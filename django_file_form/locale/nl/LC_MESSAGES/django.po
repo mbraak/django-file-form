@@ -1,0 +1,8 @@
+msgid "Cancel"
+msgstr "Annuleren"
+
+msgid "Delete failed"
+msgstr "Verwijderen mislukt"
+
+msgid "Upload failed"
+msgstr "Upload mislukt"

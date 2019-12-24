@@ -1,14 +1,10 @@
 import os
 from tempfile import NamedTemporaryFile
+from pathlib import Path
 
 from django.conf import settings
 
 from django_file_form.models import UploadedFile
-
-try:
-    from pathlib import Path
-except ImportError:
-    from pathlib2 import Path
 
 
 class TempFile(object):

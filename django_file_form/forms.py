@@ -1,7 +1,5 @@
 import uuid
 
-import six
-
 from django.urls import reverse
 from django.forms import CharField, HiddenInput
 
@@ -15,13 +13,12 @@ class FileFormMixin(object):
 
         self.add_hidden_field('form_id', uuid.uuid4())
         self.add_hidden_field('upload_url', self.get_upload_url())
-        self.add_hidden_field('delete_url', reverse('file_form_handle_delete_no_args'))
 
     def add_hidden_field(self, name, initial):
         self.fields[name] = CharField(widget=HiddenInput, initial=initial, required=False)
 
     def get_upload_url(self):
-        return reverse('file_form_handle_upload')
+        return reverse('tus_upload')
 
     def full_clean(self):
         if not self.is_bound:
@@ -38,7 +35,7 @@ class FileFormMixin(object):
         form_id = self.data.get(self.add_prefix('form_id'))
 
         if form_id:
-            for field_name, field in six.iteritems(self.fields):
+            for field_name, field in self.fields.items():
                 if hasattr(field, 'get_file_data'):
                     prefixed_field_name = self.add_prefix(field_name)
                     file_data = field.get_file_data(prefixed_field_name, form_id)
@@ -54,7 +51,7 @@ class FileFormMixin(object):
         form_id = self.data.get(self.add_prefix('form_id'))
 
         if form_id:
-            for field_name, field in six.iteritems(self.fields):
+            for field_name, field in self.fields.items():
                 if hasattr(field, 'delete_file_data'):
                     prefixed_field_name = self.add_prefix(field_name)
                     field.delete_file_data(prefixed_field_name, form_id)

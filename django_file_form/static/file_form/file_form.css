@@ -1,0 +1,43 @@
+.dff-uploader .dff-files {
+  display: flex;
+  flex-direction: column;
+  margin: 16px 0 16px 0;
+}
+
+.dff-uploader .dff-files > div {
+  margin-bottom: 8px;
+}
+
+.dff-uploader .dff-files > div&:last-child {
+  margin-bottom: 0;
+}
+
+.dff-uploader .dff-files .dff-delete {
+  margin-left: 8px;
+}
+
+.dff-uploader .dff-progress {
+  background-color: #ccc;
+  width: 10em;
+  height: 4px;
+  display: inline-block;
+  margin-left: 8px;
+  vertical-align: middle;
+  position: relative;
+}
+
+.dff-uploader .dff-progress .dff-progress-inner {
+  height: 100%;
+  display: inline-block;
+  background-color: green;
+  position: absolute;
+}
+
+.dff-uploader .dff-error {
+  margin-left: 8px;
+  color: red;
+}
+
+.dff-uploader .dff-cancel {
+  margin-left: 8px;
+}

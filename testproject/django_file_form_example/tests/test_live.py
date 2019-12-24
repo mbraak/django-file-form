@@ -1,5 +1,6 @@
 # coding=utf-8
-import six
+from pathlib import Path
+
 from django.core.files.base import ContentFile
 from django.conf import settings
 from django.test import override_settings
@@ -9,11 +10,6 @@ from django_file_form_example.base_live_testcase import BaseLiveTestCase
 from django_file_form_example.models import Example, Example2
 from django_file_form_example.page import Page
 from django_file_form_example.test_utils import get_random_id, remove_p
-
-try:
-    from pathlib import Path
-except ImportError:
-    from pathlib2 import Path
 
 
 media_root = Path(settings.MEDIA_ROOT)
@@ -140,6 +136,19 @@ class LiveTestCase(BaseLiveTestCase):
         self.assertFalse(Path(uploaded_file1.uploaded_file.path).exists())
         self.assertFalse(Path(uploaded_file2.uploaded_file.path).exists())
 
+    def test_upload_multiple_at_the_same_time(self):
+        page = self.page
+
+        temp_file1 = page.create_temp_file('content1')
+        temp_file2 = page.create_temp_file('content2')
+
+        page.open('/multiple')
+
+        page.fill_title_field('abc')
+        page.upload_multiple_using_js(temp_file1, temp_file2)
+        page.find_upload_success(temp_file1, upload_index=0)
+        page.find_upload_success(temp_file2, upload_index=1)
+
     def test_upload_multiple_for_single_filefield(self):
         page = self.page
 
@@ -155,6 +164,9 @@ class LiveTestCase(BaseLiveTestCase):
 
         page.upload_using_js(temp_file2)
         page.assert_page_contains_text(temp_file2.base_name())
+        page.find_upload_success(temp_file2, upload_index=0)
+
+        self.assertEqual(page.get_upload_count(), 1)
 
         page.submit()
         page.assert_page_contains_text('Upload success')
@@ -197,7 +209,7 @@ class LiveTestCase(BaseLiveTestCase):
         self.assertEqual(Example.objects.count(), 1)
         self.assertEqual(UploadedFile.objects.count(), 0)
 
-    def test_ajax_delete(self):
+    def test_delete(self):
         page = self.page
 
         temp_file = page.create_temp_file('content1')
@@ -212,6 +224,31 @@ class LiveTestCase(BaseLiveTestCase):
 
         self.assertEqual(UploadedFile.objects.count(), 0)
 
+    def test_delete_multiple(self):
+        page = self.page
+
+        temp_file1 = page.create_temp_file('content1')
+        temp_file2 = page.create_temp_file('content2')
+
+        page.open('/multiple')
+        page.upload_using_js(temp_file1)
+        page.find_upload_success(temp_file1)
+
+        page.upload_using_js(temp_file2)
+        page.find_upload_success(temp_file2)
+
+        self.assertEqual(UploadedFile.objects.count(), 2)
+
+        page.delete_ajax_file(upload_index=1)
+        page.wait_until_upload_is_removed(upload_index=1)
+
+        self.assertEqual(UploadedFile.objects.count(), 1)
+
+        page.delete_ajax_file(upload_index=0)
+        page.wait_until_upload_is_removed(upload_index=0)
+
+        self.assertEqual(UploadedFile.objects.count(), 0)
+
     def test_existing_file(self):
         page = self.page
 
@@ -222,7 +259,7 @@ class LiveTestCase(BaseLiveTestCase):
             self.assertTrue(example_file_path.exists())
 
             page.open('/existing/%d' % example.id)
-            el = self.selenium.find_element_by_css_selector('.existing-files')
+            el = self.selenium.find_element_by_css_selector('.dff-existing-files')
             el.find_element_by_xpath("//*[contains(text(), '%s')]" % example_filename)
         finally:
             remove_p(example_file_path)
@@ -240,7 +277,7 @@ class LiveTestCase(BaseLiveTestCase):
         uploaded_file = UploadedFile.objects.first()
 
         self.assertEqual(uploaded_file.original_filename, temp_file.base_name())
-        self.assertEqual(six.text_type(uploaded_file), temp_file.base_name())
+        self.assertEqual(str(uploaded_file), temp_file.base_name())
         self.assertTrue(prefix in temp_file.base_name())
 
         page.fill_title_field('abc')
@@ -257,7 +294,9 @@ class LiveTestCase(BaseLiveTestCase):
 
         page.open('/')
         page.upload_using_js(temp_file)
-        page.find_upload_fail(temp_file)
+
+        el = page.find_upload_fail(temp_file)
+        self.assertEqual(el.find_elements_by_link_text('Delete'), [])
 
     @override_settings(FILE_FORM_MUST_LOGIN=True)
     def test_permission_success(self):
@@ -311,3 +350,50 @@ class LiveTestCase(BaseLiveTestCase):
 
         page.delete_ajax_file()
         page.wait_until_upload_is_removed()
+
+    @override_settings(LANGUAGE_CODE='nl')
+    def test_translation_delete(self):
+        page = self.page
+
+        temp_file = page.create_temp_file('content1')
+
+        page.open('/')
+        page.upload_using_js(temp_file)
+
+        page.delete_ajax_file(text='Verwijderen')
+        page.wait_until_upload_is_removed()
+
+    @override_settings(LANGUAGE_CODE='nl', FILE_FORM_MUST_LOGIN=True)
+    def test_translation_delete_failed(self):
+        page = self.page
+
+        page.create_user('test1', 'password')
+        page.login('test1', 'password')
+
+        temp_file = page.create_temp_file('content1')
+
+        page.open('/')
+
+        page.upload_using_js(temp_file)
+        page.find_upload_success(temp_file)
+
+        page.selenium.delete_cookie('sessionid')
+        page.delete_ajax_file(text='Verwijderen')
+        page.find_delete_failed(text='Verwijderen mislukt')
+
+    def test_escape_filename(self):
+        page = self.page
+
+        prefix = u"&amp;"
+
+        temp_file = page.create_temp_file('content1', prefix=prefix)
+
+        page.open('/')
+        page.upload_using_js(temp_file)
+        page.find_upload_success(temp_file)
+
+        uploaded_file = UploadedFile.objects.first()
+
+        self.assertEqual(uploaded_file.original_filename, temp_file.base_name())
+        self.assertEqual(str(uploaded_file), temp_file.base_name())
+        self.assertTrue(prefix in temp_file.base_name())

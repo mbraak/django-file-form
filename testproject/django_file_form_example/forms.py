@@ -1,5 +1,4 @@
 from django.core.exceptions import ValidationError
-from django.urls import reverse
 
 import django_bootstrap3_form
 
@@ -48,10 +47,3 @@ class MultipleFileExampleForm(BaseForm):
             )
 
         self.delete_temporary_files()
-
-
-class ExistingFileForm(ExampleForm):
-    prefix = 'example'
-
-    def get_upload_url(self):
-        return reverse('example_handle_upload')

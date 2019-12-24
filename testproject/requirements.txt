@@ -1,7 +1,5 @@
-pathlib2==2.3.5; python_version < '3.4'
 pytz==2019.3
-six==1.13.0
 
 # bootstrap3 form
-django-bootstrap3-form==0.7.0
-django-pony-forms==0.7.1
+django-bootstrap3-form==1.0.0
+django-pony-forms==1.0.0
