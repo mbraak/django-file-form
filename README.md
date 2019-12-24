@@ -24,6 +24,8 @@ Older versions:
 * 1.01 uses fine uploader for the javascript part
 * 0.5.0 supports Django 1.11 and Python 2.
 
+Version 2.0 has changed: see 'Upgrade from version 1.0' below, if you're upgrading from version 1.0 (or lower).
+
 ## Usage
 
 **1 Install django-file-form**
@@ -135,7 +137,29 @@ class ExampleFormView(generic.FormView):
         return super(ExampleFormView, self).form_valid(form)
 ```
 
+**11 Include hidden fields**
+
+Include hidden form fields in your template:
+
+```python
+{% for hidden in form.hidden_fields %}
+    {{ hidden }}
+{% endfor %}
+```
+
+NB: it's possible that the hidden fields are already included; for example if you use ``form.as_p``. Do not include the hidden fields twice.
+
 Also see the testproject in the repository.
+
+## Upgrade from version 1.0 (to 2.0)
+
+* Add reference to file_form/file_form.css:
+  * `<link rel="stylesheet" href="{% static "file_form/file_form.css" %}">`
+* Remove `django_file_form.ajaxuploader` from `INSTALLED_APPS` in your settings
+* Remove reference to `ajaxuploader/js/fileuploader.js` in your template
+* Remove reference to `ajaxuploader/css/fileuploader.css` in your template
+* You don't have to include jquery; the fileuploader doesn't use it
+* The setting `FILE_FORM_UPLOAD_BACKEND` is removed
 
 ## Settings
 
