@@ -160,6 +160,8 @@ Also see the testproject in the repository.
 * Remove reference to `ajaxuploader/css/fileuploader.css` in your template
 * You don't have to include jquery; the fileuploader doesn't use it
 * The setting `FILE_FORM_UPLOAD_BACKEND` is removed
+* If you use custom css, you might have to change it.
+  * The html uses the prefix `dff` now.
 
 ## Settings
 
