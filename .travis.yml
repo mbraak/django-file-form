@@ -30,7 +30,7 @@ install:
   - pip install -r testproject/requirements_travis.txt
   - pip install -e .
 script:
-  - python testproject/manage.py test django_file_form_example
+  - python -Wd testproject/manage.py test django_file_form_example
   - coverage run --source=django_file_form,testproject/django_file_form_example testproject/manage.py test django_file_form_example
   - coverage report
 after_success:
