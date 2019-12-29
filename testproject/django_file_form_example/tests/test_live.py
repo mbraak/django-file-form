@@ -9,8 +9,7 @@ from django_file_form.models import UploadedFile
 from django_file_form_example.base_live_testcase import BaseLiveTestCase
 from django_file_form_example.models import Example, Example2
 from django_file_form_example.page import Page
-from django_file_form_example.test_utils import get_random_id, remove_p
-
+from django_file_form_example.test_utils import get_random_id, remove_p, read_file
 
 media_root = Path(settings.MEDIA_ROOT)
 
@@ -76,7 +75,7 @@ class LiveTestCase(BaseLiveTestCase):
         self.assertEqual(UploadedFile.objects.count(), 1)
 
         uploaded_file = UploadedFile.objects.first()
-        self.assertEqual(uploaded_file.uploaded_file.read(), b'content1')
+        self.assertEqual(read_file(uploaded_file.uploaded_file), b'content1')
 
         page.submit()
         page.assert_page_contains_text('Upload success')
@@ -85,7 +84,7 @@ class LiveTestCase(BaseLiveTestCase):
 
         example = Example.objects.get(title='abc')
         self.assertEqual(example.input_file.name, 'example/{0!s}'.format(temp_file.base_name()))
-        self.assertEqual(example.input_file.read(), b'content1')
+        self.assertEqual(read_file(example.input_file), b'content1')
 
         self.assertEqual(UploadedFile.objects.count(), 0)
         self.assertFalse(Path(uploaded_file.uploaded_file.path).exists())
@@ -111,8 +110,8 @@ class LiveTestCase(BaseLiveTestCase):
         uploaded_files = UploadedFile.objects.order_by('id')
         uploaded_file1 = uploaded_files[0]
         uploaded_file2 = uploaded_files[1]
-        self.assertEqual(uploaded_file1.uploaded_file.read(), b'content1')
-        self.assertEqual(uploaded_file2.uploaded_file.read(), b'content2')
+        self.assertEqual(read_file(uploaded_file1.uploaded_file), b'content1')
+        self.assertEqual(read_file(uploaded_file2.uploaded_file), b'content2')
 
         page.submit()
         page.assert_page_contains_text('Upload success')
@@ -129,8 +128,8 @@ class LiveTestCase(BaseLiveTestCase):
             {'example/%s' % temp_file1.base_name(), 'example/%s' % temp_file2.base_name()}
         )
 
-        self.assertEqual(examples_files[0].input_file.read(), b'content1')
-        self.assertEqual(examples_files[1].input_file.read(), b'content2')
+        self.assertEqual(read_file(examples_files[0].input_file), b'content1')
+        self.assertEqual(read_file(examples_files[1].input_file), b'content2')
 
         self.assertEqual(UploadedFile.objects.count(), 0)
         self.assertFalse(Path(uploaded_file1.uploaded_file.path).exists())
