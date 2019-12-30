@@ -192,7 +192,7 @@ Settings in `settings.py`:
 
 ## Changelog
 
-* **development**
+* **2.0 (30 december 2019)**
   * Use tus instead of fine uploader
 
 * **1.0 (5 december 2019)**
