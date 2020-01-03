@@ -8,23 +8,19 @@ class RenderUploadFile {
     this.container = container;
     this.input = input;
     this.translations = translations;
-    this.filesContainer = null;
+    this.filesContainer = this.createFilesContainer();
 
     if (skipRequired) {
       this.input.required = false;
     }
   }
 
-  getFilesContainer() {
-    if (!this.filesContainer) {
-      const div = document.createElement("div");
-      div.className = "dff-files";
-      this.container.appendChild(div);
+  createFilesContainer() {
+    const div = document.createElement("div");
+    div.className = "dff-files";
+    this.container.appendChild(div);
 
-      this.filesContainer = div;
-    }
-
-    return this.filesContainer;
+    return div;
   }
 
   addUploadedFile(filename, uploadIndex) {
@@ -60,7 +56,7 @@ class RenderUploadFile {
     nameSpan.innerHTML = escape(filename);
 
     div.appendChild(nameSpan);
-    this.getFilesContainer().appendChild(div);
+    this.filesContainer.appendChild(div);
 
     this.input.required = false;
     return div;
@@ -97,7 +93,7 @@ class RenderUploadFile {
   }
 
   findFileDiv(index) {
-    return this.getFilesContainer().querySelector(`.dff-file-id-${index}`);
+    return this.filesContainer.querySelector(`.dff-file-id-${index}`);
   }
 
   setSuccess(index) {
@@ -145,7 +141,7 @@ class RenderUploadFile {
   }
 
   updateProgress(index, percentage) {
-    const el = this.getFilesContainer().querySelector(`.dff-file-id-${index}`);
+    const el = this.filesContainer.querySelector(`.dff-file-id-${index}`);
     const innerProgressSpan = el.querySelector(".dff-progress-inner");
 
     if (innerProgressSpan) {
