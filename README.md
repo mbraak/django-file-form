@@ -180,11 +180,6 @@ Settings in `settings.py`:
   * The class that is used to store the temporary uploads.
   * The default is `django.core.files.storage.FileSystemStorage`.
 
-* **FILE_FORM_UPLOAD_BACKEND** (string)
-  * The class that is used for the upload backend.
-  * This makes it possible to write your upload backend.
-  * The default is `django_file_form.uploader.FileFormUploadBackend`.
-
 * **FILE_FORM_MAX_FILE_SIZE** (int)
   * Maximum upload size in bytes
   * Default is 4GB
