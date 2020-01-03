@@ -192,6 +192,9 @@ Settings in `settings.py`:
 
 ## Changelog
 
+* **development**
+  * Issue #240: add empty dff files div (thanks to Lionqueen94)
+
 * **2.0 (30 december 2019)**
   * Use tus instead of fine uploader
 
