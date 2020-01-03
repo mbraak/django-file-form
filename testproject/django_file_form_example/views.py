@@ -65,6 +65,10 @@ class ExistingFileExampleView(BaseFormView):
         return form_kwargs
 
 
+class FormSetExampleView(BaseFormView):
+    form_class = forms.ExampleFormSet
+
+
 def permission_denied(request, exception):
     return HttpResponseForbidden(
         json.dumps(dict(status='permission denied')),

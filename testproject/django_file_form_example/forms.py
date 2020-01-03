@@ -1,4 +1,5 @@
 from django.core.exceptions import ValidationError
+from django.forms import formset_factory
 
 import django_bootstrap3_form
 
@@ -29,6 +30,9 @@ class ExampleForm(BaseForm):
             input_file=self.cleaned_data['input_file']
         )
         self.delete_temporary_files()
+
+
+ExampleFormSet = formset_factory(ExampleForm, extra=2)
 
 
 class MultipleFileExampleForm(BaseForm):
