@@ -22,11 +22,6 @@
 
     {% if use_ajax %}
         <script src="{% static "file_form/file_form.js" %}"></script>
-        <script>
-            initUploadFields(
-                document.getElementById("example-form"),
-                { prefix: "example", skipRequired: true }
-            );
-        </script>
+        <script src="{% static "example_form.js" %}"></script>
     {% endif %}
 {% endblock %}
