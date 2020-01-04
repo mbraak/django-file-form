@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
-from django.utils import timezone
 
+from django.utils import timezone
 from django.conf import settings
 
 
