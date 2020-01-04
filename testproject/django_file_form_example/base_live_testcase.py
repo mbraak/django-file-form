@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 
 from selenium.webdriver.chrome.webdriver import WebDriver
@@ -27,4 +29,16 @@ class BaseLiveTestCase(StaticLiveServerTestCase):
         self.page = self.page_class(self.selenium, self.live_server_url)
 
     def tearDown(self):
+        if any(error for (_, error) in self._outcome.errors if error):
+            self.save_screenshot(self.id())
+
         self.page.cleanup()
+
+    @classmethod
+    def save_screenshot(cls, method_name):
+        screenshots_path = Path('screenshots')
+        if not screenshots_path.exists():
+            screenshots_path.mkdir()
+
+        filename = str(screenshots_path.joinpath(method_name + ".png"))
+        cls.selenium.get_screenshot_as_file(filename)
