@@ -70,6 +70,8 @@ class LiveTestCase(BaseLiveTestCase):
 
         page.open('/')
 
+        page.selenium.find_element_by_css_selector('.dff-files')
+
         page.fill_title_field('abc')
         page.upload_using_js(temp_file)
 

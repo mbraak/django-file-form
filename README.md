@@ -188,6 +188,7 @@ Settings in `settings.py`:
 ## Changelog
 
 * **development**
+  * Issue #240: add empty dff files div (thanks to Lionqueen94)
   * Issue #241: Csp compliance (thanks to Lionqueen94)
 
 * **2.0 (30 december 2019)**

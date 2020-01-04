@@ -4,6 +4,10 @@
   margin: 16px 0 16px 0;
 }
 
+.dff-uploader .dff-files:empty {
+  margin: 0;
+}
+
 .dff-uploader .dff-files > div {
   margin-bottom: 8px;
 }
