@@ -1,7 +1,6 @@
 # coding=utf-8
 from pathlib import Path
 
-from django import get_version, VERSION
 from django.core.files.base import ContentFile
 from django.conf import settings
 from django.test import override_settings
