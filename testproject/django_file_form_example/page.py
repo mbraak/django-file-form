@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support.wait import WebDriverWait
 
 from django_file_form_example.temp_file import TempFile
@@ -41,8 +42,14 @@ class Page(object):
         )
 
     def find_upload_success(self, temp_file, upload_index=0):
-        el = self.selenium.find_element_by_css_selector('.dff-file-id-%d.dff-upload-success' % upload_index)
-        el.find_element_by_xpath("//*[contains(text(), '%s')]" % temp_file.base_name())
+        try:
+            el = self.selenium.find_element_by_css_selector('.dff-file-id-%d.dff-upload-success' % upload_index)
+            return el.find_element_by_xpath("//*[contains(text(), '%s')]" % temp_file.base_name())
+        except NoSuchElementException as e:
+            print(
+                self.selenium.find_element_by_css_selector('.dff-files').get_attribute('outerHTML')
+            )
+            raise e
 
     def get_upload_count(self):
         return len(self.selenium.find_elements_by_css_selector('.dff-upload-success'))

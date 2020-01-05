@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
+from selenium.webdriver import DesiredCapabilities
 
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.chrome.options import Options
@@ -16,8 +17,12 @@ class BaseLiveTestCase(StaticLiveServerTestCase):
 
         options = Options()
         options.headless = True
+        options.add_argument('--disable-dev-shm-usage')
 
-        cls.selenium = WebDriver(options=options)
+        desired_capabilities = DesiredCapabilities.CHROME.copy()
+        desired_capabilities['goog:loggingPrefs'] = {'browser': 'ALL'}
+
+        cls.selenium = WebDriver(desired_capabilities=desired_capabilities, options=options)
         cls.selenium.implicitly_wait(10)
 
     @classmethod
@@ -28,9 +33,13 @@ class BaseLiveTestCase(StaticLiveServerTestCase):
     def setUp(self):
         self.page = self.page_class(self.selenium, self.live_server_url)
 
+    def didTestHaveErrors(self):
+        return any(error for (_, error) in self._outcome.errors if error)
+
     def tearDown(self):
-        if any(error for (_, error) in self._outcome.errors if error):
+        if self.didTestHaveErrors():
             self.save_screenshot(self.id())
+            self.print_browser_log()
 
         self.page.cleanup()
 
@@ -42,3 +51,8 @@ class BaseLiveTestCase(StaticLiveServerTestCase):
 
         filename = str(screenshots_path.joinpath(method_name + ".png"))
         cls.selenium.get_screenshot_as_file(filename)
+
+    @classmethod
+    def print_browser_log(cls):
+        for entry in cls.selenium.get_log('browser'):
+            print(entry)
