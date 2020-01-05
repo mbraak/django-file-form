@@ -187,7 +187,7 @@ Settings in `settings.py`:
 
 ## Changelog
 
-* **development**
+* **2.0.1 (6 january 2020)**
   * Issue #240: add empty dff files div (thanks to Lionqueen94)
   * Issue #241: Csp compliance (thanks to Lionqueen94)
 
@@ -204,10 +204,13 @@ Settings in `settings.py`:
 * **0.4.2 (3 March 2019)**
   * Issue #207: support form prefixes (thanks to Iw108)
   * Issue #201: fix multiple file upload without ajax (thanks to Lionqueen94)
+
 * **0.4.1 (5 January 2019)**
   * Issue #194: correctly call `is_authenticated` (thanks to Dureba)
+
 * **0.4.0 (3 August 2018)**
   * Support Django 2.1 and Python 3.7
   * Issue #173: add i18n to upload widget (thanks to Arman Roomana)
+
 * **0.3.0 (6 December 2017)**
   * Support Django 2.0
