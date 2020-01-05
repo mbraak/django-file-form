@@ -150,10 +150,6 @@ class LiveTestCase(BaseLiveTestCase):
         page.fill_title_field('abc')
         page.upload_multiple_using_js(temp_file1, temp_file2)
 
-        if VERSION[:2] == (2, 0):
-            # Tets fails randomly on Django 2.0. Disable temporarily.
-            return
-
         page.find_upload_success(temp_file1, upload_index=0)
         page.find_upload_success(temp_file2, upload_index=1)
 
