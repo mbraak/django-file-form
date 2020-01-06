@@ -1,6 +1,5 @@
 from pathlib import Path
-
-import django
+import logging
 
 
 def mkdir_p(path):
@@ -60,9 +59,6 @@ MIDDLEWARE = [
     'csp.middleware.CSPMiddleware',
 ]
 
-if django.VERSION[0:2] < (2, 0):
-    MIDDLEWARE.append('django.contrib.auth.middleware.SessionAuthenticationMiddleware')
-
 STATIC_URL = '/static/'
 ROOT_URLCONF = 'testproject.urls'
 
@@ -94,3 +90,5 @@ TEMPLATES = [
 ]
 
 ALLOWED_HOSTS = ['*']
+
+logging.basicConfig(level='DEBUG')
