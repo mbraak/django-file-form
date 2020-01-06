@@ -1,7 +1,5 @@
 from pathlib import Path
 
-import django
-
 
 def mkdir_p(path):
     if not path.exists():
@@ -59,9 +57,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'csp.middleware.CSPMiddleware',
 ]
-
-if django.VERSION[0:2] < (2, 0):
-    MIDDLEWARE.append('django.contrib.auth.middleware.SessionAuthenticationMiddleware')
 
 STATIC_URL = '/static/'
 ROOT_URLCONF = 'testproject.urls'
