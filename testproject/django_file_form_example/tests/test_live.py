@@ -110,11 +110,11 @@ class LiveTestCase(BaseLiveTestCase):
 
         self.assertEqual(UploadedFile.objects.count(), 2)
 
-        uploaded_files = UploadedFile.objects.order_by('id')
-        uploaded_file1 = uploaded_files[0]
-        uploaded_file2 = uploaded_files[1]
-        self.assertEqual(read_file(uploaded_file1.uploaded_file), b'content1')
-        self.assertEqual(read_file(uploaded_file2.uploaded_file), b'content2')
+        uploaded_files = UploadedFile.objects.all()
+        self.assertSetEqual(
+            {read_file(uploaded_file.uploaded_file) for uploaded_file in uploaded_files},
+            {b'content1', b'content2'}
+        )
 
         page.submit()
         page.assert_page_contains_text('Upload success')
@@ -124,19 +124,22 @@ class LiveTestCase(BaseLiveTestCase):
         example2 = Example2.objects.first()
         self.assertEqual(example2.title, 'abc')
 
-        examples_files = example2.files.order_by('id')
+        examples_files = example2.files.all()
 
         self.assertSetEqual(
             {f.input_file.name for f in examples_files},
             {'example/%s' % temp_file1.base_name(), 'example/%s' % temp_file2.base_name()}
         )
 
-        self.assertEqual(read_file(examples_files[0].input_file), b'content1')
-        self.assertEqual(read_file(examples_files[1].input_file), b'content2')
+        self.assertSetEqual(
+            {read_file(example_file.input_file) for example_file in examples_files},
+            {b'content1', b'content2'}
+        )
 
         self.assertEqual(UploadedFile.objects.count(), 0)
-        self.assertFalse(Path(uploaded_file1.uploaded_file.path).exists())
-        self.assertFalse(Path(uploaded_file2.uploaded_file.path).exists())
+        self.assertFalse(
+            any(Path(uploaded_file.uploaded_file.path).exists() for uploaded_file in uploaded_files)
+        )
 
     def test_upload_multiple_at_the_same_time(self):
         page = self.page
