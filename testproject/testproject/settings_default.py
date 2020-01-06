@@ -1,4 +1,5 @@
 from pathlib import Path
+import logging
 
 
 def mkdir_p(path):
@@ -89,3 +90,5 @@ TEMPLATES = [
 ]
 
 ALLOWED_HOSTS = ['*']
+
+logging.basicConfig(level='DEBUG')
