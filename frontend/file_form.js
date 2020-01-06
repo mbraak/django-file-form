@@ -283,7 +283,7 @@ class UploadFile {
 }
 
 const initUploadFields = (form, options = {}) => {
-  const getInputNameWithPrefix = fieldName =>
+    const getInputNameWithPrefix = fieldName =>
     options && options.prefix ? `${options.prefix}-${fieldName}` : fieldName;
 
   const getInputValue = fieldName => {
@@ -297,6 +297,15 @@ const initUploadFields = (form, options = {}) => {
 
     return input.value;
   };
+
+  const checkFormSet = () => {
+    const inputNameWithPrefix = getInputNameWithPrefix("TOTAL_FORMS");
+    const input = form.querySelector(`[name=${inputNameWithPrefix}]`);
+
+    return Boolean(input);
+  };
+
+  const isFormSet = checkFormSet();
 
   const getInitialFiles = element => {
     const filesData = element.dataset.files;

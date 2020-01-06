@@ -14,6 +14,7 @@ from .models import Example
 class BaseFormView(generic.FormView):
     template_name = 'example_form.html'
     use_ajax = True
+    custom_js_file = 'example_form.js'
 
     def get_success_url(self):
         return reverse('example_success')
@@ -24,6 +25,7 @@ class BaseFormView(generic.FormView):
 
     def get_context_data(self, **kwargs):
         kwargs['use_ajax'] = self.use_ajax
+        kwargs['custom_js_file'] = self.custom_js_file
 
         return super(BaseFormView, self).get_context_data(**kwargs)
 
@@ -67,6 +69,7 @@ class ExistingFileExampleView(BaseFormView):
 
 class FormSetExampleView(BaseFormView):
     form_class = forms.ExampleFormSet
+    custom_js_file = 'example_form_set.js'
 
 
 def permission_denied(request, exception):
