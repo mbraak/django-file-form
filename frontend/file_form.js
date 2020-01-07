@@ -288,7 +288,7 @@ const initUploadFields = (form, options = {}) => {
 
   const getInputValue = fieldName => {
     const inputNameWithPrefix = getInputNameWithPrefix(fieldName);
-    const input = form.querySelector(`[name=${inputNameWithPrefix}]`);
+    const input = form.querySelector(`[name="${inputNameWithPrefix}"]`);
 
     if (!input) {
       console.error(`Cannot find input with name '${inputNameWithPrefix}'`);
