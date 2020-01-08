@@ -255,21 +255,6 @@ class LiveTestCase(BaseLiveTestCase):
 
         self.assertEqual(UploadedFile.objects.count(), 0)
 
-    def test_existing_file(self):
-        page = self.page
-
-        example_filename = get_random_id()
-        example_file_path = media_root.joinpath('example', example_filename)
-        example = Example.objects.create(title='abc', input_file=ContentFile('xyz', example_filename))
-        try:
-            self.assertTrue(example_file_path.exists())
-
-            page.open('/existing/%d' % example.id)
-            el = self.selenium.find_element_by_css_selector('.dff-existing-files')
-            el.find_element_by_xpath("//*[contains(text(), '%s')]" % example_filename)
-        finally:
-            remove_p(example_file_path)
-
     def test_unicode_filename(self):
         page = self.page
         prefix = u'àęö'

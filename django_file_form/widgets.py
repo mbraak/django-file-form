@@ -11,7 +11,6 @@ class UploadWidgetMixin(ClearableFileInput):
         input = super(UploadWidgetMixin, self).render(name, value, attrs, renderer)
 
         uploaded_files = []
-        existing_files = []
 
         if value:
             if isinstance(value, list):
@@ -20,9 +19,7 @@ class UploadWidgetMixin(ClearableFileInput):
                 values = [value]
 
             for file_info in values:
-                if getattr(file_info, 'existing', False):
-                    existing_files.append(file_info.get_values())
-                elif hasattr(file_info, 'file_id'):
+                if hasattr(file_info, 'file_id'):
                     uploaded_files.append(file_info.get_values())
                 else:
                     uploaded_files.append(dict(name=file_info.name))
@@ -34,7 +31,6 @@ class UploadWidgetMixin(ClearableFileInput):
                     input=input,
                     translations=json.dumps(self.get_translations()),
                     uploaded_files=json.dumps(uploaded_files),
-                    existing_files=existing_files
                 )
             )
         )
