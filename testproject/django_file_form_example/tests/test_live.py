@@ -215,6 +215,22 @@ class LiveTestCase(BaseLiveTestCase):
         self.assertEqual(Example.objects.count(), 1)
         self.assertEqual(UploadedFile.objects.count(), 0)
 
+    def test_delete_after_submit(self):
+        page = self.page
+
+        temp_file = page.create_temp_file('content1')
+
+        page.open('/')
+        page.upload_using_js(temp_file)
+        page.find_upload_success(temp_file)
+
+        page.submit()
+        page.assert_page_contains_text('Title field is required')
+
+        page.find_upload_success(temp_file)
+        page.delete_ajax_file()
+        page.wait_until_upload_is_removed()
+
     def test_delete(self):
         page = self.page
 
@@ -254,21 +270,6 @@ class LiveTestCase(BaseLiveTestCase):
         page.wait_until_upload_is_removed(upload_index=0)
 
         self.assertEqual(UploadedFile.objects.count(), 0)
-
-    def test_existing_file(self):
-        page = self.page
-
-        example_filename = get_random_id()
-        example_file_path = media_root.joinpath('example', example_filename)
-        example = Example.objects.create(title='abc', input_file=ContentFile('xyz', example_filename))
-        try:
-            self.assertTrue(example_file_path.exists())
-
-            page.open('/existing/%d' % example.id)
-            el = self.selenium.find_element_by_css_selector('.dff-existing-files')
-            el.find_element_by_xpath("//*[contains(text(), '%s')]" % example_filename)
-        finally:
-            remove_p(example_file_path)
 
     def test_unicode_filename(self):
         page = self.page
