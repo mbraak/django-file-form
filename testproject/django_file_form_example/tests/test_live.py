@@ -421,4 +421,3 @@ class LiveTestCase(BaseLiveTestCase):
         previous_button.click()
 
         page.find_upload_success(temp_file)
-
