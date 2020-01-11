@@ -9,19 +9,4 @@
     >
         {{ input }}
     </div>
-    {% if existing_files %}
-        <ul class="dff-existing-files">
-            {% for f in existing_files %}
-                <li>
-                    <span>{{ f.name }}</span>
-                    {% if f.view_url %}
-                        <a href="{{ f.view_url }}">{% trans 'View' %}</a>
-                    {% endif %}
-                    {% if f.delete_url %}
-                        <a class="delete" href="{{ f.delete_url }}">{% trans 'Delete' %}</a>
-                    {% endif %}
-                </li>
-            {% endfor %}
-        </ul>
-    {% endif %}
 </div>
