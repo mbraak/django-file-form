@@ -5,6 +5,7 @@ from django.test import TestCase
 from django.core.management import call_command
 from django.conf import settings
 from django.core.files.base import ContentFile
+from django.test.utils import captured_stdout
 
 from django_file_form_example.test_utils import get_random_id, encode_datetime, remove_p
 from django_file_form.models import UploadedFile
@@ -18,7 +19,10 @@ class FileFormTests(TestCase):
         self.temp_uploads_path = media_root.joinpath('temp_uploads')
 
     def test_delete_unused_files_command(self):
-        call_command('delete_unused_files', verbosity=0)
+        with captured_stdout() as stdout:
+            call_command('delete_unused_files')
+
+        self.assertEqual(stdout.getvalue().strip(), "No files deleted")
 
     def test_delete_unused_files(self):
         # setup
