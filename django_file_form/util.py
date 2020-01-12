@@ -22,12 +22,14 @@ def get_list(v):
         return [v]
 
 
-def load_class(setting_string):
+def load_class(setting_string, conf_module=conf):
+    class_name = getattr(conf_module, setting_string)
+
     try:
-        return import_string(getattr(conf, setting_string))
+        return import_string(class_name)
     except ImportError:
         raise ImproperlyConfigured(
-            "{0!s} refers to a class '{1!s}' that is not available".format(setting_string, getattr(conf, setting_string))
+            f"{setting_string} refers to a class '{class_name}' that is not available"
         )
 
 
