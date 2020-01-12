@@ -19,10 +19,31 @@ class FileFormTests(TestCase):
         self.temp_uploads_path = media_root.joinpath('temp_uploads')
 
     def test_delete_unused_files_command(self):
-        with captured_stdout() as stdout:
-            call_command('delete_unused_files')
+        def call_delete_unused_files_command():
+            with captured_stdout() as stdout:
+                call_command('delete_unused_files')
+                return stdout.getvalue()
 
-        self.assertEqual(stdout.getvalue().strip(), "No files deleted")
+        def test_with_no_files():
+            self.assertEqual(call_delete_unused_files_command().strip(), "No files deleted")
+
+        def test_with_files():
+            filename = get_random_id()
+            uploaded_file_path = self.temp_uploads_path.joinpath(filename)
+            try:
+                uploaded_file = UploadedFile.objects.create(
+                    created=encode_datetime(2010, 1, 1),
+                    uploaded_file=ContentFile('', filename)
+                )
+
+                output = call_delete_unused_files_command()
+                self.assertEqual(output.strip(), f"Deleted files: {Path(uploaded_file.uploaded_file.name).name}")
+                self.assertEqual(UploadedFile.objects.count(), 0)
+            finally:
+                remove_p(uploaded_file_path)
+
+        test_with_no_files()
+        test_with_files()
 
     def test_delete_unused_files(self):
         # setup

@@ -15,10 +15,10 @@ class UploadedFileManager(ModelManager):
 
         for t in self.get_queryset():
             if t.must_be_deleted(now):
+                deleted_files.append(Path(t.uploaded_file.name).name)
+
                 if delete:
                     t.delete()
-
-                deleted_files.append(Path(t.uploaded_file.name).name)
 
         temp_path = Path(settings.MEDIA_ROOT).joinpath(conf.UPLOAD_DIR)
 
@@ -26,10 +26,10 @@ class UploadedFileManager(ModelManager):
             basename = f.name
 
             if not self.get_for_file(basename):
+                deleted_files.append(basename)
+
                 if delete:
                     f.unlink()
-
-                deleted_files.append(basename)
 
         return deleted_files
 
