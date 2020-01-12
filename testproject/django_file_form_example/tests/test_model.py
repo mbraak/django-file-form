@@ -9,6 +9,7 @@ from django.test.utils import captured_stdout
 
 from django_file_form_example.test_utils import get_random_id, encode_datetime, remove_p
 from django_file_form.models import UploadedFile
+from django_file_form.util import get_list
 
 
 media_root = Path(settings.MEDIA_ROOT)
@@ -78,3 +79,7 @@ class FileFormTests(TestCase):
             self.assertEqual(str(UploadedFile()), '')
         finally:
             uploaded_file.uploaded_file.delete()
+
+    def test_get_list(self):
+        self.assertEqual(get_list(['abc']), ['abc'])
+        self.assertEqual(get_list('abc'), ['abc'])
