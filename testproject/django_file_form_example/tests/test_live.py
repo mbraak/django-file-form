@@ -404,3 +404,20 @@ class LiveTestCase(BaseLiveTestCase):
         self.assertEqual(uploaded_file.original_filename, temp_file.base_name())
         self.assertEqual(str(uploaded_file), temp_file.base_name())
         self.assertTrue(prefix in temp_file.base_name())
+
+    def test_wizard(self):
+        page = self.page
+        temp_file = page.create_temp_file('content1')
+
+        page.open('/wizard')
+        page.fill_title_field('abc', form_prefix='0')
+        page.upload_using_js(temp_file)
+
+        page.find_upload_success(temp_file)
+        page.submit()
+
+        previous_button = page.selenium.find_element_by_css_selector('button')
+        self.assertEqual(previous_button.text, 'Previous')
+        previous_button.click()
+
+        page.find_upload_success(temp_file)

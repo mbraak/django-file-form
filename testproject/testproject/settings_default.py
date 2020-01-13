@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django_file_form',
     'django_bootstrap3_form',
     'django_pony_forms',
+    'formtools',
 
     # Django
     'django.contrib.auth',

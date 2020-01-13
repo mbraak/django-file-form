@@ -49,4 +49,8 @@ class UploadWidget(UploadWidgetMixin, ClearableFileInput):
 
 class UploadMultipleWidget(UploadWidget):
     def value_from_datadict(self, data, files, name):
-        return files.getlist(name)
+        if hasattr(files, 'getlist'):
+            return files.getlist(name)
+        else:
+            # NB: django-formtools wizard uses dict instead of MultiValueDict
+            return super(UploadMultipleWidget, self).value_from_datadict(data, files, name)

@@ -41,7 +41,8 @@ class FileFormMixin(object):
                     file_data = field.get_file_data(prefixed_field_name, form_id)
 
                     if file_data:
-                        if isinstance(file_data, list):
+                        # NB: django-formtools wizard uses dict instead of MultiValueDict
+                        if isinstance(file_data, list) and hasattr(self.files, 'setlist'):
                             self.files.setlist(prefixed_field_name, file_data)
                         else:
                             self.files[prefixed_field_name] = file_data

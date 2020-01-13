@@ -1,8 +1,11 @@
 import json
 
-from django.http import HttpResponseForbidden
+from django.conf import settings
+from django.core.files.storage import FileSystemStorage
+from django.http import HttpResponseForbidden, HttpResponseRedirect
 from django.views import generic
 from django.urls import reverse
+from formtools.wizard.views import SessionWizardView
 
 from . import forms
 
@@ -42,6 +45,15 @@ class MultipleExampleView(BaseFormView):
 
 class MultipleWithoutJsExampleView(MultipleExampleView):
     use_ajax = False
+
+
+class WizardExampleview(SessionWizardView):
+    form_list = [forms.MultipleFileExampleForm, forms.WizardStepForm]
+    file_storage = FileSystemStorage(location=settings.FILE_FORM_UPLOAD_DIR)
+    template_name = 'wizard.html'
+
+    def done(self, form_list, **kwargs):
+        return HttpResponseRedirect('/wizard')
 
 
 def permission_denied(request, exception):
