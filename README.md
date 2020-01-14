@@ -187,7 +187,7 @@ Settings in `settings.py`:
 
 ## Changelog
 
-* **development**
+* **2.0.2 (14 january 2020)**
   * Issue #247: support form wizard (thanks to Lionqueen94)
   * Issue #251: delete after submit
 
