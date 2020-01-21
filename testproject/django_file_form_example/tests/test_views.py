@@ -4,6 +4,14 @@ from django.test import TestCase, Client
 
 
 class ModelTests(TestCase):
+    def test_post(self):
+        self.do_post(Client())
+
+    def test_post_without_metadata(self):
+        response = Client().post('/upload/')
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(response.reason_phrase, 'Received File upload for unsupported file transfer protocol')
+
     def test_head(self):
         client = Client()
 
