@@ -1,5 +1,5 @@
 pytz==2019.3
-https://github.com/mozilla/django-csp/archive/master.zip
+django-csp==3.6
 
 # bootstrap3 form
 django-bootstrap3-form==1.0.0
