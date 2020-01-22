@@ -1,7 +1,6 @@
 # coding=utf-8
 from pathlib import Path
 
-from django.core.files.base import ContentFile
 from django.conf import settings
 from django.test import override_settings
 
@@ -9,7 +8,7 @@ from django_file_form.models import UploadedFile
 from django_file_form_example.base_live_testcase import BaseLiveTestCase
 from django_file_form_example.models import Example, Example2
 from django_file_form_example.page import Page
-from django_file_form_example.test_utils import get_random_id, remove_p, read_file
+from django_file_form_example.test_utils import read_file
 
 
 media_root = Path(settings.MEDIA_ROOT)
@@ -33,7 +32,7 @@ class LiveTestCase(BaseLiveTestCase):
         self.assertEqual(temp_file.uploaded_file().read_text(), "content")
 
         example = Example.objects.get(title='xyz')
-        self.assertEqual(example.input_file.name, 'example/{0!s}'.format(temp_file.base_name()))
+        self.assertEqual(example.input_file.name, f'example/{temp_file.base_name()}')
 
     def test_submit_multiple_without_ajax(self):
         page = self.page
@@ -59,7 +58,7 @@ class LiveTestCase(BaseLiveTestCase):
 
         self.assertSetEqual(
             {f.input_file.name for f in example2.files.all()},
-            {'example/%s' % temp_file1.base_name(), 'example/%s' % temp_file2.base_name()}
+            {f'example/{temp_file1.base_name()}', f'example/{temp_file2.base_name()}'}
         )
 
     def test_upload(self):
@@ -86,7 +85,7 @@ class LiveTestCase(BaseLiveTestCase):
         self.assertEqual(temp_file.uploaded_file().read_text(), "content1")
 
         example = Example.objects.get(title='abc')
-        self.assertEqual(example.input_file.name, 'example/{0!s}'.format(temp_file.base_name()))
+        self.assertEqual(example.input_file.name, f'example/{temp_file.base_name()}')
         self.assertEqual(read_file(example.input_file), b'content1')
 
         self.assertEqual(UploadedFile.objects.count(), 0)
@@ -128,7 +127,7 @@ class LiveTestCase(BaseLiveTestCase):
 
         self.assertSetEqual(
             {f.input_file.name for f in examples_files},
-            {'example/%s' % temp_file1.base_name(), 'example/%s' % temp_file2.base_name()}
+            {f'example/{temp_file1.base_name()}', f'example/{temp_file2.base_name()}'}
         )
 
         self.assertSetEqual(
@@ -178,7 +177,7 @@ class LiveTestCase(BaseLiveTestCase):
         page.assert_page_contains_text('Upload success')
 
         example = Example.objects.get(title='abc')
-        self.assertEqual(example.input_file.name, 'example/{0!s}'.format(temp_file2.base_name()))
+        self.assertEqual(example.input_file.name, f'example/{temp_file2.base_name()}')
 
         self.assertEqual(UploadedFile.objects.count(), 0)
 
@@ -210,7 +209,7 @@ class LiveTestCase(BaseLiveTestCase):
         page.assert_page_contains_text('Upload success')
 
         example = Example.objects.get(title='abc')
-        self.assertEqual(example.input_file.name, 'example/{0!s}'.format(temp_file.base_name()))
+        self.assertEqual(example.input_file.name, f'example/{temp_file.base_name()}')
 
         self.assertEqual(Example.objects.count(), 1)
         self.assertEqual(UploadedFile.objects.count(), 0)
