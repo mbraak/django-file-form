@@ -19,6 +19,12 @@ class ModelTests(TestCase):
 
         response = client.head(f"/upload/{resource_id}")
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Upload-Offset'], '0')
+        self.assertEqual(response['Upload-Length'], '0')
+
+    def test_head_with_unknown_resource_id(self):
+        response = Client().head('/upload/unknown')
+        self.assertEqual(response.status_code, 404)
 
     def do_post(self, client):
         response = client.post('/upload/', HTTP_TUS_RESUMABLE=True)
