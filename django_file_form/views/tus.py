@@ -49,7 +49,7 @@ class TusUpload(View):
     def dispatch(self, *args, **kwargs):
         check_permission(self.request)
 
-        logger.info("TUS dispatch", extra={'requestMETA': self.request.META, "requestMethod": self.request.method})
+        logger.info(f"TUS dispatch method={self.request.method}")
 
         return super(TusUpload, self).dispatch(*args, **kwargs)
 
@@ -79,12 +79,12 @@ class TusUpload(View):
         metadata = {}
         upload_metadata = request.META.get("HTTP_UPLOAD_METADATA", None)
 
-        logger.info("TUS Request", extra={'request': request.META})
-
         if upload_metadata:
             for kv in upload_metadata.split(","):
                 (key, value) = kv.split(" ")
                 metadata[key] = base64.b64decode(value).decode("utf-8")
+
+        logger.info(f"TUS post metadata={upload_metadata}")
 
         file_size = int(request.META.get("HTTP_UPLOAD_LENGTH", "0"))
         resource_id = str(uuid.uuid4())
@@ -112,9 +112,12 @@ class TusUpload(View):
         response = self.get_tus_response()
         resource_id = kwargs.get('resource_id', None)
 
+        logger.info(f"TUS head resource_id={resource_id}")
+
         offset = cache.get("tus-uploads/{}/offset".format(resource_id))
         file_size = cache.get("tus-uploads/{}/file_size".format(resource_id))
         if offset is None:
+            logger.info("TUS head resource not found")
             response.status_code = 404
             return response
 
@@ -147,14 +150,7 @@ class TusUpload(View):
             response.status_code = 409  # HTTP 409 Conflict
             return response
 
-        logger.info("patch", extra={'request': self.request.META, 'tus': {
-            "resource_id": resource_id,
-            "filename": filename,
-            "file_size": file_size,
-            "metadata": metadata,
-            "offset": offset,
-            "upload_file_path": upload_file_path,
-        }})
+        logger.info(f"TUS patch resource_id={resource_id} filename={filename} file_size={file_size} metadata={metadata} offset={offset} upload_file_path={upload_file_path}")
 
         file = None
         try:
@@ -193,6 +189,8 @@ class TusUpload(View):
     def delete(self, request, *args, **kwargs):
         response = self.get_tus_response()
         resource_id = kwargs.get('resource_id', None)
+
+        logger.info(f"TUS delete resource_id={resource_id}")
 
         upload_file_path = Path(conf.UPLOAD_DIR).joinpath(resource_id)
 
