@@ -92,4 +92,4 @@ TEMPLATES = [
 
 ALLOWED_HOSTS = ['*']
 
-logging.basicConfig(level='DEBUG')
+logging.basicConfig(level='INFO')
