@@ -1,14 +1,13 @@
 import json
-from pathlib import Path
 
-from django.http import HttpResponseForbidden
+from django.conf import settings
+from django.core.files.storage import FileSystemStorage
+from django.http import HttpResponseForbidden, HttpResponseRedirect
 from django.views import generic
 from django.urls import reverse
-
-from django_file_form.forms import ExistingFile
+from formtools.wizard.views import SessionWizardView
 
 from . import forms
-from .models import Example
 
 
 class BaseFormView(generic.FormView):
@@ -50,21 +49,13 @@ class MultipleWithoutJsExampleView(MultipleExampleView):
     use_ajax = False
 
 
-class ExistingFileExampleView(BaseFormView):
-    form_class = forms.ExampleForm
+class WizardExampleview(SessionWizardView):
+    form_list = [forms.MultipleFileExampleForm, forms.WizardStepForm]
+    file_storage = FileSystemStorage(location=settings.FILE_FORM_UPLOAD_DIR)
+    template_name = 'wizard.html'
 
-    def get_form_kwargs(self):
-        form_kwargs = super(ExistingFileExampleView, self).get_form_kwargs()
-
-        example = Example.objects.get(id=self.kwargs['id'])
-
-        if example.input_file:
-            name = Path(example.input_file.name).name
-            form_kwargs['initial'] = dict(
-                input_file=ExistingFile(name)
-            )
-
-        return form_kwargs
+    def done(self, form_list, **kwargs):
+        return HttpResponseRedirect('/wizard')
 
 
 class FormSetExampleView(BaseFormView):

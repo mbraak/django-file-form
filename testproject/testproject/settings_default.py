@@ -1,6 +1,5 @@
 from pathlib import Path
-
-import django
+import logging
 
 
 def mkdir_p(path):
@@ -24,9 +23,9 @@ DEBUG = True
 
 DATABASES = dict(
     default=dict(
-        ENGINE='django.db.backends.sqlite3',
-        NAME='example.db',
-        USER='',
+        ENGINE='django.db.backends.postgresql',
+        NAME='example',
+        USER='postgres',
         PASSWORD='',
         HOST='',
         PORT='',
@@ -41,6 +40,7 @@ INSTALLED_APPS = [
     'django_file_form',
     'django_bootstrap3_form',
     'django_pony_forms',
+    'formtools',
 
     # Django
     'django.contrib.auth',
@@ -59,9 +59,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'csp.middleware.CSPMiddleware',
 ]
-
-if django.VERSION[0:2] < (2, 0):
-    MIDDLEWARE.append('django.contrib.auth.middleware.SessionAuthenticationMiddleware')
 
 STATIC_URL = '/static/'
 ROOT_URLCONF = 'testproject.urls'
@@ -94,3 +91,5 @@ TEMPLATES = [
 ]
 
 ALLOWED_HOSTS = ['*']
+
+logging.basicConfig(level='INFO')

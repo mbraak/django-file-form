@@ -27,8 +27,8 @@ class Page(object):
     def open(self, page):
         self.selenium.get('%s%s' % (self.live_server_url, page))
 
-    def fill_title_field(self, value):
-        self.selenium.find_element_by_name('example-title').send_keys(value)
+    def fill_title_field(self, value, form_prefix='example'):
+        self.selenium.find_element_by_name(f'{form_prefix}-title').send_keys(value)
 
     def upload_without_js(self, temp_file):
         self.selenium.find_element_by_name('example-input_file').send_keys(temp_file.path())

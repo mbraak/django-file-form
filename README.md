@@ -187,6 +187,10 @@ Settings in `settings.py`:
 
 ## Changelog
 
+* **2.0.2 (14 january 2020)**
+  * Issue #247: support form wizard (thanks to Lionqueen94)
+  * Issue #251: delete after submit
+
 * **2.0.1 (6 january 2020)**
   * Issue #240: add empty dff files div (thanks to Lionqueen94)
   * Issue #241: Csp compliance (thanks to Lionqueen94)

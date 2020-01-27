@@ -51,3 +51,7 @@ class MultipleFileExampleForm(BaseForm):
             )
 
         self.delete_temporary_files()
+
+
+class WizardStepForm(django_bootstrap3_form.BootstrapForm):
+    name = django_bootstrap3_form.CharField(required=False)

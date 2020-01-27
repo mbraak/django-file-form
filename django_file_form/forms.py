@@ -41,7 +41,7 @@ class FileFormMixin(object):
                     file_data = field.get_file_data(prefixed_field_name, form_id)
 
                     if file_data:
-                        # Django <= 1.11 has no setlist
+                        # NB: django-formtools wizard uses dict instead of MultiValueDict
                         if isinstance(file_data, list) and hasattr(self.files, 'setlist'):
                             self.files.setlist(prefixed_field_name, file_data)
                         else:
@@ -55,33 +55,3 @@ class FileFormMixin(object):
                 if hasattr(field, 'delete_file_data'):
                     prefixed_field_name = self.add_prefix(field_name)
                     field.delete_file_data(prefixed_field_name, form_id)
-
-    def add_existing_file(self, field_name, filename, delete_url=None, view_url=None):
-        self.initial.setdefault(field_name, [])
-
-        existing_file = ExistingFile(name=filename, delete_url=delete_url, view_url=view_url)
-
-        self.initial[field_name].append(existing_file)
-
-
-class ExistingFile(object):
-    def __init__(self, name, delete_url=None, view_url=None):
-        self.name = name
-        self.delete_url = delete_url
-        self.view_url = view_url
-        self.existing = True
-        self._committed = True
-
-    def get_values(self):
-        result = dict(
-            name=self.name,
-            existing=True
-        )
-
-        if self.delete_url:
-            result['delete_url'] = self.delete_url
-
-        if self.view_url:
-            result['view_url'] = self.view_url
-
-        return result

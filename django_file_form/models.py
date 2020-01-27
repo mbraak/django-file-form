@@ -1,8 +1,9 @@
 import sys
+import os
 from pathlib import Path
 
 from django.conf import settings
-from django.core.files import File
+from django.core.files import uploadedfile
 from django.db import models
 from django.utils import timezone
 from . import conf
@@ -15,10 +16,10 @@ class UploadedFileManager(ModelManager):
 
         for t in self.get_queryset():
             if t.must_be_deleted(now):
+                deleted_files.append(Path(t.uploaded_file.name).name)
+
                 if delete:
                     t.delete()
-
-                deleted_files.append(Path(t.uploaded_file.name).name)
 
         temp_path = Path(settings.MEDIA_ROOT).joinpath(conf.UPLOAD_DIR)
 
@@ -26,10 +27,10 @@ class UploadedFileManager(ModelManager):
             basename = f.name
 
             if not self.get_for_file(basename):
+                deleted_files.append(basename)
+
                 if delete:
                     f.unlink()
-
-                deleted_files.append(basename)
 
         return deleted_files
 
@@ -79,17 +80,18 @@ class UploadedFile(models.Model):
 
     def get_uploaded_file(self):
         return UploadedFileWithId(
-            self.uploaded_file,
-            self.original_filename,
-            self.file_id
+            file=self.uploaded_file,
+            name=self.original_filename,
+            file_id=self.file_id
         )
 
 
-class UploadedFileWithId(File):
-    def __init__(self, _file, name, file_id):
-        super(UploadedFileWithId, self).__init__(_file, name)
+class UploadedFileWithId(uploadedfile.UploadedFile):
+    def __init__(self, file_id, **kwargs):
+        super(UploadedFileWithId, self).__init__(**kwargs)
 
         self.file_id = file_id
+        self.size = os.path.getsize(self.file.name)
 
     def get_values(self):
         return dict(id=self.file_id, name=self.name)

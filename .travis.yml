@@ -2,6 +2,8 @@ language: python
 dist: bionic
 addons:
   chrome: stable
+services:
+  - postgresql
 matrix:
   include:
     - python: 3.7
@@ -11,7 +13,7 @@ matrix:
     - python: 3.7
       env: DJANGO="Django==2.2.9"
     - python: 3.8
-      env: DJANGO="Django==3.0.1"
+      env: DJANGO="Django==3.0.2"
 before_install:
   - CHROME_VERSION="$(google-chrome --version)"
   - export CHROMEDRIVER_RELEASE="$(echo $CHROME_VERSION | sed 's/^Google Chrome //')" && export CHROMEDRIVER_RELEASE=${CHROMEDRIVER_RELEASE%%.*}
@@ -30,8 +32,8 @@ install:
   - pip install -r testproject/requirements_travis.txt
   - pip install -e .
 script:
-  - python -Wd testproject/manage.py test django_file_form_example
-  - coverage run --source=django_file_form,testproject/django_file_form_example testproject/manage.py test django_file_form_example
+  - python -Wd testproject/manage.py test django_file_form_example -v 2
+  - coverage run --source=django_file_form,testproject/django_file_form_example testproject/manage.py test django_file_form_example -v 2
   - coverage report
 after_success:
   - coveralls

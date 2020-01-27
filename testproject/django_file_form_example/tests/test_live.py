@@ -1,7 +1,6 @@
 # coding=utf-8
 from pathlib import Path
 
-from django.core.files.base import ContentFile
 from django.conf import settings
 from django.test import override_settings
 
@@ -9,7 +8,7 @@ from django_file_form.models import UploadedFile
 from django_file_form_example.base_live_testcase import BaseLiveTestCase
 from django_file_form_example.models import Example, Example2
 from django_file_form_example.page import Page
-from django_file_form_example.test_utils import get_random_id, remove_p, read_file
+from django_file_form_example.test_utils import read_file
 
 
 media_root = Path(settings.MEDIA_ROOT)
@@ -33,7 +32,7 @@ class LiveTestCase(BaseLiveTestCase):
         self.assertEqual(temp_file.uploaded_file().read_text(), "content")
 
         example = Example.objects.get(title='xyz')
-        self.assertEqual(example.input_file.name, 'example/{0!s}'.format(temp_file.base_name()))
+        self.assertEqual(example.input_file.name, f'example/{temp_file.base_name()}')
 
     def test_submit_multiple_without_ajax(self):
         page = self.page
@@ -59,7 +58,7 @@ class LiveTestCase(BaseLiveTestCase):
 
         self.assertSetEqual(
             {f.input_file.name for f in example2.files.all()},
-            {'example/%s' % temp_file1.base_name(), 'example/%s' % temp_file2.base_name()}
+            {f'example/{temp_file1.base_name()}', f'example/{temp_file2.base_name()}'}
         )
 
     def test_upload(self):
@@ -86,7 +85,7 @@ class LiveTestCase(BaseLiveTestCase):
         self.assertEqual(temp_file.uploaded_file().read_text(), "content1")
 
         example = Example.objects.get(title='abc')
-        self.assertEqual(example.input_file.name, 'example/{0!s}'.format(temp_file.base_name()))
+        self.assertEqual(example.input_file.name, f'example/{temp_file.base_name()}')
         self.assertEqual(read_file(example.input_file), b'content1')
 
         self.assertEqual(UploadedFile.objects.count(), 0)
@@ -110,11 +109,11 @@ class LiveTestCase(BaseLiveTestCase):
 
         self.assertEqual(UploadedFile.objects.count(), 2)
 
-        uploaded_files = UploadedFile.objects.order_by('id')
-        uploaded_file1 = uploaded_files[0]
-        uploaded_file2 = uploaded_files[1]
-        self.assertEqual(read_file(uploaded_file1.uploaded_file), b'content1')
-        self.assertEqual(read_file(uploaded_file2.uploaded_file), b'content2')
+        uploaded_files = UploadedFile.objects.all()
+        self.assertSetEqual(
+            {read_file(uploaded_file.uploaded_file) for uploaded_file in uploaded_files},
+            {b'content1', b'content2'}
+        )
 
         page.submit()
         page.assert_page_contains_text('Upload success')
@@ -124,19 +123,22 @@ class LiveTestCase(BaseLiveTestCase):
         example2 = Example2.objects.first()
         self.assertEqual(example2.title, 'abc')
 
-        examples_files = example2.files.order_by('id')
+        examples_files = example2.files.all()
 
         self.assertSetEqual(
             {f.input_file.name for f in examples_files},
-            {'example/%s' % temp_file1.base_name(), 'example/%s' % temp_file2.base_name()}
+            {f'example/{temp_file1.base_name()}', f'example/{temp_file2.base_name()}'}
         )
 
-        self.assertEqual(read_file(examples_files[0].input_file), b'content1')
-        self.assertEqual(read_file(examples_files[1].input_file), b'content2')
+        self.assertSetEqual(
+            {read_file(example_file.input_file) for example_file in examples_files},
+            {b'content1', b'content2'}
+        )
 
         self.assertEqual(UploadedFile.objects.count(), 0)
-        self.assertFalse(Path(uploaded_file1.uploaded_file.path).exists())
-        self.assertFalse(Path(uploaded_file2.uploaded_file.path).exists())
+        self.assertFalse(
+            any(Path(uploaded_file.uploaded_file.path).exists() for uploaded_file in uploaded_files)
+        )
 
     def test_upload_multiple_at_the_same_time(self):
         page = self.page
@@ -175,7 +177,7 @@ class LiveTestCase(BaseLiveTestCase):
         page.assert_page_contains_text('Upload success')
 
         example = Example.objects.get(title='abc')
-        self.assertEqual(example.input_file.name, 'example/{0!s}'.format(temp_file2.base_name()))
+        self.assertEqual(example.input_file.name, f'example/{temp_file2.base_name()}')
 
         self.assertEqual(UploadedFile.objects.count(), 0)
 
@@ -207,10 +209,26 @@ class LiveTestCase(BaseLiveTestCase):
         page.assert_page_contains_text('Upload success')
 
         example = Example.objects.get(title='abc')
-        self.assertEqual(example.input_file.name, 'example/{0!s}'.format(temp_file.base_name()))
+        self.assertEqual(example.input_file.name, f'example/{temp_file.base_name()}')
 
         self.assertEqual(Example.objects.count(), 1)
         self.assertEqual(UploadedFile.objects.count(), 0)
+
+    def test_delete_after_submit(self):
+        page = self.page
+
+        temp_file = page.create_temp_file('content1')
+
+        page.open('/')
+        page.upload_using_js(temp_file)
+        page.find_upload_success(temp_file)
+
+        page.submit()
+        page.assert_page_contains_text('Title field is required')
+
+        page.find_upload_success(temp_file)
+        page.delete_ajax_file()
+        page.wait_until_upload_is_removed()
 
     def test_delete(self):
         page = self.page
@@ -234,6 +252,8 @@ class LiveTestCase(BaseLiveTestCase):
         temp_file2 = page.create_temp_file('content2')
 
         page.open('/multiple')
+        page.fill_title_field('abc')
+
         page.upload_using_js(temp_file1)
         page.find_upload_success(temp_file1)
 
@@ -251,21 +271,6 @@ class LiveTestCase(BaseLiveTestCase):
         page.wait_until_upload_is_removed(upload_index=0)
 
         self.assertEqual(UploadedFile.objects.count(), 0)
-
-    def test_existing_file(self):
-        page = self.page
-
-        example_filename = get_random_id()
-        example_file_path = media_root.joinpath('example', example_filename)
-        example = Example.objects.create(title='abc', input_file=ContentFile('xyz', example_filename))
-        try:
-            self.assertTrue(example_file_path.exists())
-
-            page.open('/existing/%d' % example.id)
-            el = self.selenium.find_element_by_css_selector('.dff-existing-files')
-            el.find_element_by_xpath("//*[contains(text(), '%s')]" % example_filename)
-        finally:
-            remove_p(example_file_path)
 
     def test_unicode_filename(self):
         page = self.page
@@ -400,3 +405,20 @@ class LiveTestCase(BaseLiveTestCase):
         self.assertEqual(uploaded_file.original_filename, temp_file.base_name())
         self.assertEqual(str(uploaded_file), temp_file.base_name())
         self.assertTrue(prefix in temp_file.base_name())
+
+    def test_wizard(self):
+        page = self.page
+        temp_file = page.create_temp_file('content1')
+
+        page.open('/wizard')
+        page.fill_title_field('abc', form_prefix='0')
+        page.upload_using_js(temp_file)
+
+        page.find_upload_success(temp_file)
+        page.submit()
+
+        previous_button = page.selenium.find_element_by_css_selector('button')
+        self.assertEqual(previous_button.text, 'Previous')
+        previous_button.click()
+
+        page.find_upload_success(temp_file)
