@@ -252,6 +252,8 @@ class LiveTestCase(BaseLiveTestCase):
         temp_file2 = page.create_temp_file('content2')
 
         page.open('/multiple')
+        page.fill_title_field('abc')
+
         page.upload_using_js(temp_file1)
         page.find_upload_success(temp_file1)
 
