@@ -281,8 +281,16 @@ class UploadFile {
 }
 
 const initUploadFields = (form, options = {}) => {
-    const getInputNameWithPrefix = fieldName =>
+  const getInputNameWithPrefix = fieldName =>
     options && options.prefix ? `${options.prefix}-${fieldName}` : fieldName;
+
+  const hasPrefix = name => {
+    if (!(options && options.prefix)) {
+      return true;
+    }
+
+    return name.startsWith(`${options.prefix}-`);
+  };
 
   const getInputValue = fieldName => {
     const inputNameWithPrefix = getInputNameWithPrefix(fieldName);
@@ -296,14 +304,22 @@ const initUploadFields = (form, options = {}) => {
     return input.value;
   };
 
-  const checkFormSet = () => {
+  const isFormSet = () => {
     const inputNameWithPrefix = getInputNameWithPrefix("TOTAL_FORMS");
-    const input = form.querySelector(`[name=${inputNameWithPrefix}]`);
+    const input = form.querySelector(`[name="${inputNameWithPrefix}"]`);
 
     return Boolean(input);
   };
 
-  const isFormSet = checkFormSet();
+  if (isFormSet()) {
+    const formCount = parseInt(getInputValue("TOTAL_FORMS"), 10);
+
+    for (let i = 0; i < formCount; i += 1) {
+      const prefix = getInputNameWithPrefix(`${i}`);
+      initUploadFields(form, { prefix });
+    }
+    return;
+  }
 
   const getInitialFiles = element => {
     const filesData = element.dataset.files;
@@ -332,7 +348,7 @@ const initUploadFields = (form, options = {}) => {
 
     const input = element.querySelector("input[type=file]");
 
-    if (!input) {
+    if (!(input && hasPrefix(input.name))) {
       return;
     }
 
