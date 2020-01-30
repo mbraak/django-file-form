@@ -34,22 +34,39 @@ class Page(object):
         self.selenium.find_element_by_name('example-input_file').send_keys(temp_file.path())
 
     def upload_using_js(self, temp_file):
-        self.selenium.find_element_by_css_selector('input[type=file]').send_keys(temp_file.path())
+        self.upload_js_for_input(
+            temp_file,
+            self.selenium.find_element_by_css_selector('input[type=file]')
+        )
+
+    def upload_js_for_input(self, temp_file, input_element):
+        return input_element.send_keys(temp_file.path())
 
     def upload_multiple_using_js(self, *temp_files):
         self.selenium.find_element_by_css_selector('input[type=file]').send_keys(
             "\n".join(temp_file.path() for temp_file in temp_files)
         )
 
-    def find_upload_success(self, temp_file, upload_index=0):
+    def find_upload_success(self, temp_file, upload_index=0, container_element=None):
+        parent_element = container_element or self.selenium
+
         try:
-            el = self.selenium.find_element_by_css_selector('.dff-file-id-%d.dff-upload-success' % upload_index)
+            el = parent_element.find_element_by_css_selector('.dff-file-id-%d.dff-upload-success' % upload_index)
             return el.find_element_by_xpath("//*[contains(text(), '%s')]" % temp_file.base_name())
         except NoSuchElementException as e:
             print(
-                self.selenium.find_element_by_css_selector('.dff-files').get_attribute('outerHTML')
+                parent_element.find_element_by_css_selector('.dff-files').get_attribute('outerHTML')
             )
             raise e
+
+    def find_upload_success_for_input(self, temp_file, input_element, upload_index=0):
+        container_element = input_element.get_property('parentElement')
+        assert container_element.get_attribute('class') == 'dff-container'
+
+        uploader_element = container_element.get_property('parentElement')
+        assert uploader_element.get_attribute('class') == 'dff-uploader'
+
+        return self.find_upload_success(temp_file, upload_index=upload_index, container_element=uploader_element)
 
     def get_upload_count(self):
         return len(self.selenium.find_elements_by_css_selector('.dff-upload-success'))

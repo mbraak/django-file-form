@@ -422,3 +422,44 @@ class LiveTestCase(BaseLiveTestCase):
         previous_button.click()
 
         page.find_upload_success(temp_file)
+
+    def test_form_set(self):
+        page = self.page
+
+        temp_file1 = page.create_temp_file('content1')
+        temp_file2 = page.create_temp_file('content2')
+
+        page.open('/form_set')
+
+        page.fill_title_field('title1', form_prefix='form-0')
+
+        file_input_element1 = page.selenium.find_element_by_css_selector('#id_form-0-input_file')
+        page.upload_js_for_input(temp_file1, file_input_element1)
+        page.find_upload_success_for_input(temp_file1, file_input_element1)
+
+        page.fill_title_field('title2', form_prefix='form-1')
+
+        file_input_element2 = page.selenium.find_element_by_css_selector('#id_form-1-input_file')
+        page.upload_js_for_input(temp_file2, file_input_element2)
+        page.find_upload_success_for_input(temp_file2, file_input_element2)
+
+        self.assertEqual(UploadedFile.objects.count(), 2)
+
+        uploaded_files = UploadedFile.objects.all()
+        self.assertSetEqual(
+            {read_file(uploaded_file.uploaded_file) for uploaded_file in uploaded_files},
+            {b'content1', b'content2'}
+        )
+
+        page.submit()
+        page.assert_page_contains_text('Upload success')
+
+        example1 = Example.objects.get(title='title1')
+        self.assertEqual(example1.input_file.name, f'example/{temp_file1.base_name()}')
+        self.assertEqual(read_file(example1.input_file), b'content1')
+
+        example2 = Example.objects.get(title='title2')
+        self.assertEqual(example2.input_file.name, f'example/{temp_file2.base_name()}')
+        self.assertEqual(read_file(example2.input_file), b'content2')
+
+        self.assertEqual(UploadedFile.objects.count(), 0)
