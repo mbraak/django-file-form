@@ -84,7 +84,7 @@ class TusUpload(View):
                 (key, value) = kv.split(" ")
                 metadata[key] = base64.b64decode(value).decode("utf-8")
 
-        logger.info(f"TUS post metadata={upload_metadata}")
+        logger.info(f"TUS post metadata={metadata}")
 
         file_size = int(request.META.get("HTTP_UPLOAD_LENGTH", "0"))
         resource_id = str(uuid.uuid4())
