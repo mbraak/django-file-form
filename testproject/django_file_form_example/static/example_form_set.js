@@ -1,4 +1,5 @@
-initUploadFields(
+initFormSet(
     document.getElementById("example-form"),
-    { prefix: "form", skipRequired: true }
+    "form",
+    { skipRequired: true },
 );
