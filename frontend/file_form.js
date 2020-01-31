@@ -280,46 +280,41 @@ class UploadFile {
   }
 }
 
-const initUploadFields = (form, options = {}) => {
-  const getInputNameWithPrefix = fieldName =>
-    options && options.prefix ? `${options.prefix}-${fieldName}` : fieldName;
+const getInputNameWithPrefix = (fieldName, prefix) => (prefix ? `${prefix}-${fieldName}` : fieldName);
 
-  const hasPrefix = name => {
+const getInputValueForFormAndPrefix = (form, fieldName, prefix) => {
+  const inputNameWithPrefix = getInputNameWithPrefix(fieldName, prefix);
+  const input = form.querySelector(`[name="${inputNameWithPrefix}"]`);
+
+  if (!input) {
+    console.error(`Cannot find input with name '${inputNameWithPrefix}'`);
+    return null;
+  }
+
+  return input.value;
+};
+
+const initFormSet = (form, prefix) => {
+  const formCount = parseInt(getInputValueForFormAndPrefix(form, "TOTAL_FORMS", prefix), 10);
+
+  for (let i = 0; i < formCount; i += 1) {
+    const subFormPrefix = getInputNameWithPrefix(`${i}`);
+    initUploadFields(form, { prefix: `form-${subFormPrefix}` });
+  }
+};
+
+const initUploadFields = (form, options = {}) => {
+  const matchesPrefix = fieldName => {
     if (!(options && options.prefix)) {
       return true;
     }
 
-    return name.startsWith(`${options.prefix}-`);
+    return fieldName.startsWith(`${options.prefix}-`);
   };
 
-  const getInputValue = fieldName => {
-    const inputNameWithPrefix = getInputNameWithPrefix(fieldName);
-    const input = form.querySelector(`[name="${inputNameWithPrefix}"]`);
+  const getPrefix = () => (options && options.prefix ? options.prefix : null);
 
-    if (!input) {
-      console.error(`Cannot find input with name '${inputNameWithPrefix}'`);
-      return null;
-    }
-
-    return input.value;
-  };
-
-  const isFormSet = () => {
-    const inputNameWithPrefix = getInputNameWithPrefix("TOTAL_FORMS");
-    const input = form.querySelector(`[name="${inputNameWithPrefix}"]`);
-
-    return Boolean(input);
-  };
-
-  if (isFormSet()) {
-    const formCount = parseInt(getInputValue("TOTAL_FORMS"), 10);
-
-    for (let i = 0; i < formCount; i += 1) {
-      const prefix = getInputNameWithPrefix(`${i}`);
-      initUploadFields(form, { prefix });
-    }
-    return;
-  }
+  const getInputValue = fieldName => getInputValueForFormAndPrefix(form, fieldName, getPrefix());
 
   const getInitialFiles = element => {
     const filesData = element.dataset.files;
@@ -348,7 +343,7 @@ const initUploadFields = (form, options = {}) => {
 
     const input = element.querySelector("input[type=file]");
 
-    if (!(input && hasPrefix(input.name))) {
+    if (!(input && matchesPrefix(input.name))) {
       return;
     }
 
@@ -371,4 +366,5 @@ const initUploadFields = (form, options = {}) => {
   });
 };
 
+global.initFormSet = initFormSet;
 global.initUploadFields = initUploadFields;
