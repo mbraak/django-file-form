@@ -258,7 +258,7 @@ class LiveTestCase(BaseLiveTestCase):
         page.find_upload_success(temp_file1)
 
         page.upload_using_js(temp_file2)
-        page.find_upload_success(temp_file2)
+        page.find_upload_success(temp_file2, upload_index=1)
 
         self.assertEqual(UploadedFile.objects.count(), 2)
 
