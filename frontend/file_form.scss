@@ -1,0 +1,51 @@
+.dff-uploader {
+  .dff-files {
+    display: flex;
+    flex-direction: column;
+    margin: 16px 0 16px 0;
+  }
+
+  .dff-files {
+    &:empty {
+      margin: 0;
+    }
+
+    > div {
+      margin-bottom: 8px;
+    }
+
+    > div:last-child {
+      margin-bottom: 0;
+    }
+
+    .dff-delete {
+      margin-left: 8px;
+    }
+  }
+
+  .dff-progress {
+    background-color: #ccc;
+    width: 10em;
+    height: 4px;
+    display: inline-block;
+    margin-left: 8px;
+    vertical-align: middle;
+    position: relative;
+
+    .dff-progress-inner {
+      height: 100%;
+      display: inline-block;
+      background-color: green;
+      position: absolute;
+    }
+  }
+
+  .dff-error {
+    margin-left: 8px;
+    color: red;
+  }
+
+  .dff-cancel {
+    margin-left: 8px;
+  }
+}

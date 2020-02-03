@@ -6,6 +6,7 @@
   "scripts": {
     "lint": "eslint file_form.js",
     "build": "webpack --mode production",
+    "sass": "node-sass file_form.scss -o ../django_file_form/static/file_form/",
     "watch": "webpack --mode development --watch"
   },
   "repository": {
@@ -29,6 +30,7 @@
     "eslint-plugin-import": "^2.19.1",
     "eslint-plugin-jsx-a11y": "^6.2.3",
     "eslint-plugin-react": "^7.17.0",
+    "node-sass": "^4.13.1",
     "webpack": "^4.41.2",
     "webpack-cli": "^3.3.10"
   },
