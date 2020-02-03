@@ -1,24 +1,19 @@
 .dff-uploader .dff-files {
   display: flex;
   flex-direction: column;
-  margin: 16px 0 16px 0;
-}
+  margin: 16px 0 16px 0; }
 
 .dff-uploader .dff-files:empty {
-  margin: 0;
-}
+  margin: 0; }
 
 .dff-uploader .dff-files > div {
-  margin-bottom: 8px;
-}
+  margin-bottom: 8px; }
 
-.dff-uploader .dff-files > div&:last-child {
-  margin-bottom: 0;
-}
+.dff-uploader .dff-files > div:last-child {
+  margin-bottom: 0; }
 
 .dff-uploader .dff-files .dff-delete {
-  margin-left: 8px;
-}
+  margin-left: 8px; }
 
 .dff-uploader .dff-progress {
   background-color: #ccc;
@@ -27,21 +22,16 @@
   display: inline-block;
   margin-left: 8px;
   vertical-align: middle;
-  position: relative;
-}
-
-.dff-uploader .dff-progress .dff-progress-inner {
-  height: 100%;
-  display: inline-block;
-  background-color: green;
-  position: absolute;
-}
+  position: relative; }
+  .dff-uploader .dff-progress .dff-progress-inner {
+    height: 100%;
+    display: inline-block;
+    background-color: green;
+    position: absolute; }
 
 .dff-uploader .dff-error {
   margin-left: 8px;
-  color: red;
-}
+  color: red; }
 
 .dff-uploader .dff-cancel {
-  margin-left: 8px;
-}
+  margin-left: 8px; }
