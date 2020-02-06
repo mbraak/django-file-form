@@ -185,7 +185,28 @@ Settings in `settings.py`:
   * Default is 4GB
 
 
+## Form sets
+
+You can also use a form set instead of a form. In that case `initFormSet` (instead of `initUploadFields`)
+in your javascript code.
+
+```
+initFormSet(form_element, form_set_prefix)
+```
+
+```js
+initFormSet(
+  document.getElementById("example-form"),
+  "form"
+);
+```
+
+Note that the default form set prefix is `form`.
+
 ## Changelog
+
+* **development**
+  * Issue #237: using with form set (thanks to Juan Carlos Carvajal)
 
 * **2.0.2 (14 january 2020)**
   * Issue #247: support form wizard (thanks to Lionqueen94)
