@@ -201,7 +201,8 @@ initFormSet(
 );
 ```
 
-Note that the default form set prefix is `form`.
+* Note that the default form set prefix is `form`.
+* Also see the `testproject` directory in the repository for an example.
 
 ## Changelog
 
