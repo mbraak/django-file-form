@@ -1,4 +1,5 @@
 from django.core.exceptions import ValidationError
+from django.forms import formset_factory, BaseFormSet
 
 import django_bootstrap3_form
 
@@ -24,11 +25,25 @@ class ExampleForm(BaseForm):
     input_file = UploadedFileField()
 
     def save(self):
+        input_file = self.cleaned_data['input_file']
+
         Example.objects.create(
             title=self.cleaned_data['title'],
-            input_file=self.cleaned_data['input_file']
+            input_file=input_file
         )
+
+        input_file.close()
+
         self.delete_temporary_files()
+
+
+class ExampleBaseFormSet(BaseFormSet):
+    def save(self):
+        for form in self.forms:
+            form.save()
+
+
+ExampleFormSet = formset_factory(ExampleForm, extra=2, formset=ExampleBaseFormSet)
 
 
 class MultipleFileExampleForm(BaseForm):
@@ -45,6 +60,7 @@ class MultipleFileExampleForm(BaseForm):
                 example=example,
                 input_file=f
             )
+            f.close()
 
         self.delete_temporary_files()
 
