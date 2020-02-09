@@ -718,7 +718,7 @@ var initFormSet = function initFormSet(form, prefix) {
   for (var i = 0; i < formCount; i += 1) {
     var subFormPrefix = getInputNameWithPrefix("".concat(i));
     initUploadFields(form, {
-      prefix: "form-".concat(subFormPrefix)
+      prefix: "".concat(prefix, "-").concat(subFormPrefix)
     });
   }
 };
