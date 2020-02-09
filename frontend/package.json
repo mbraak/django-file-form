@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "lint": "eslint file_form.js",
-    "build": "webpack --mode production",
+    "build": "webpack --mode production; SKIP_COMPRESS_JS=true webpack --mode production",
     "sass": "node-sass file_form.scss -o ../django_file_form/static/file_form/",
     "watch": "webpack --mode development --watch"
   },

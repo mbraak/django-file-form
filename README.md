@@ -79,6 +79,8 @@ class ExampleForm(FileFormMixin, forms.Form):
 <link rel="stylesheet" href="{% static "file_form/file_form.css" %}">
 ```
 
+There is also an uncompressed javascript version: `file_form/file_form.debug.js`.
+
 **7 Call the initUploadFields javascript function**
 
 ```html
@@ -208,6 +210,7 @@ initFormSet(
 
 * **development**
   * Issue #237: using with form set (thanks to Juan Carlos Carvajal)
+  * Issue #259: include uncompressed js
 
 * **2.0.2 (14 january 2020)**
   * Issue #247: support form wizard (thanks to Lionqueen94)
