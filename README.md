@@ -79,6 +79,8 @@ class ExampleForm(FileFormMixin, forms.Form):
 <link rel="stylesheet" href="{% static "file_form/file_form.css" %}">
 ```
 
+There is also an uncompressed javascript version: `file_form/file_form.debug.js`.
+
 **7 Call the initUploadFields javascript function**
 
 ```html
