@@ -299,7 +299,7 @@ const initFormSet = (form, prefix) => {
 
   for (let i = 0; i < formCount; i += 1) {
     const subFormPrefix = getInputNameWithPrefix(`${i}`);
-    initUploadFields(form, { prefix: `form-${subFormPrefix}` });
+    initUploadFields(form, { prefix: `${prefix}-${subFormPrefix}` });
   }
 };
 
