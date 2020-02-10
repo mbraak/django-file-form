@@ -212,6 +212,7 @@ initFormSet(
   * Issue #237: using with form set (thanks to Juan Carlos Carvajal)
   * Issue #259: include uncompressed js
   * Issue #260: correctly use formset prefix (thanks to Gzuba)
+  * Issue #261: fix default for FILE_FORM_UPLOAD_DIR (thanks to Gzuba)
 
 * **2.0.2 (14 january 2020)**
   * Issue #247: support form wizard (thanks to Lionqueen94)
