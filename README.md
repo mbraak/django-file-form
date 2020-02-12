@@ -79,6 +79,8 @@ class ExampleForm(FileFormMixin, forms.Form):
 <link rel="stylesheet" href="{% static "file_form/file_form.css" %}">
 ```
 
+There is also an uncompressed javascript version: `file_form/file_form.debug.js`.
+
 **7 Call the initUploadFields javascript function**
 
 ```html
@@ -185,7 +187,32 @@ Settings in `settings.py`:
   * Default is 4GB
 
 
+## Form sets
+
+You can also use a form set instead of a form. In that case `initFormSet` (instead of `initUploadFields`)
+in your javascript code.
+
+```
+initFormSet(form_element, form_set_prefix)
+```
+
+```js
+initFormSet(
+  document.getElementById("example-form"),
+  "form"
+);
+```
+
+* Note that the default form set prefix is `form`.
+* Also see the `testproject` directory in the repository for an example.
+
 ## Changelog
+
+* **development**
+  * Issue #237: using with form set (thanks to Juan Carlos Carvajal)
+  * Issue #259: include uncompressed js
+  * Issue #260: correctly use formset prefix (thanks to Gzuba)
+  * Issue #261: fix default for FILE_FORM_UPLOAD_DIR (thanks to Gzuba)
 
 * **2.0.2 (14 january 2020)**
   * Issue #247: support form wizard (thanks to Lionqueen94)

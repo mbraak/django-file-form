@@ -280,21 +280,41 @@ class UploadFile {
   }
 }
 
+const getInputNameWithPrefix = (fieldName, prefix) => (prefix ? `${prefix}-${fieldName}` : fieldName);
+
+const getInputValueForFormAndPrefix = (form, fieldName, prefix) => {
+  const inputNameWithPrefix = getInputNameWithPrefix(fieldName, prefix);
+  const input = form.querySelector(`[name="${inputNameWithPrefix}"]`);
+
+  if (!input) {
+    console.error(`Cannot find input with name '${inputNameWithPrefix}'`);
+    return null;
+  }
+
+  return input.value;
+};
+
+const initFormSet = (form, prefix) => {
+  const formCount = parseInt(getInputValueForFormAndPrefix(form, "TOTAL_FORMS", prefix), 10);
+
+  for (let i = 0; i < formCount; i += 1) {
+    const subFormPrefix = getInputNameWithPrefix(`${i}`);
+    initUploadFields(form, { prefix: `${prefix}-${subFormPrefix}` });
+  }
+};
+
 const initUploadFields = (form, options = {}) => {
-  const getInputNameWithPrefix = fieldName =>
-    options && options.prefix ? `${options.prefix}-${fieldName}` : fieldName;
-
-  const getInputValue = fieldName => {
-    const inputNameWithPrefix = getInputNameWithPrefix(fieldName);
-    const input = form.querySelector(`[name="${inputNameWithPrefix}"]`);
-
-    if (!input) {
-      console.error(`Cannot find input with name '${inputNameWithPrefix}'`);
-      return null;
+  const matchesPrefix = fieldName => {
+    if (!(options && options.prefix)) {
+      return true;
     }
 
-    return input.value;
+    return fieldName.startsWith(`${options.prefix}-`);
   };
+
+  const getPrefix = () => (options && options.prefix ? options.prefix : null);
+
+  const getInputValue = fieldName => getInputValueForFormAndPrefix(form, fieldName, getPrefix());
 
   const getInitialFiles = element => {
     const filesData = element.dataset.files;
@@ -323,7 +343,7 @@ const initUploadFields = (form, options = {}) => {
 
     const input = element.querySelector("input[type=file]");
 
-    if (!input) {
+    if (!(input && matchesPrefix(input.name))) {
       return;
     }
 
@@ -346,4 +366,5 @@ const initUploadFields = (form, options = {}) => {
   });
 };
 
+global.initFormSet = initFormSet;
 global.initUploadFields = initUploadFields;
