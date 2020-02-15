@@ -208,7 +208,7 @@ initFormSet(
 
 ## Changelog
 
-* **development**
+* **2.0.3 (15 february 2020)**
   * Issue #237: using with form set (thanks to Juan Carlos Carvajal)
   * Issue #259: include uncompressed js
   * Issue #260: correctly use formset prefix (thanks to Gzuba)
