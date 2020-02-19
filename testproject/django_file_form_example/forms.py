@@ -1,15 +1,13 @@
 from django.core.exceptions import ValidationError
-from django.forms import formset_factory, BaseFormSet
-
-import django_bootstrap3_form
+from django.forms import formset_factory, BaseFormSet, Form, CharField
 
 from django_file_form.forms import UploadedFileField, MultipleUploadedFileField, FileFormMixin
 
 from .models import Example, Example2, ExampleFile
 
 
-class BaseForm(FileFormMixin, django_bootstrap3_form.BootstrapForm):
-    title = django_bootstrap3_form.CharField(required=False)
+class BaseForm(FileFormMixin, Form):
+    title = CharField(required=False)
 
     def clean(self):
         cleaned_data = super(BaseForm, self).clean()
@@ -65,5 +63,5 @@ class MultipleFileExampleForm(BaseForm):
         self.delete_temporary_files()
 
 
-class WizardStepForm(django_bootstrap3_form.BootstrapForm):
-    name = django_bootstrap3_form.CharField(required=False)
+class WizardStepForm(Form):
+    name = CharField(required=False)

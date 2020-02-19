@@ -16,7 +16,7 @@
         id="example-form"
     >
         {% csrf_token %}
-        {{ form }}
+        {{ form.as_p }}
         <input class="btn btn-primary" type="submit" value="Save" />
     </form>
 
