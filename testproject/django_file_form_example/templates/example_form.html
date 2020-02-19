@@ -16,8 +16,20 @@
         id="example-form"
     >
         {% csrf_token %}
-        {{ form.as_p }}
-        <input class="btn btn-primary" type="submit" value="Save" />
+        {% for hidden in form.hidden_fields %}
+            {{ hidden }}
+        {% endfor %}
+        {{ form.non_field_errors }}
+        <div id="row-example-input_title">
+            {{ form.title.errors }}
+            <label for="{{ form.title.id_for_label }}">Title</label>
+            {{ form.title }}
+        </div>
+        <div id="row-example-input_file" {% if form.input_file.errors %} class="has-error" {% endif %}>
+            {{ form.input_file.errors }}
+            {{ form.input_file }}
+        </div>
+        <input type="submit" value="Save" />
     </form>
 
     {% if use_ajax %}
