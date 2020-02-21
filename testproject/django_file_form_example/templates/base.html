@@ -3,14 +3,10 @@
 <head>
     <meta charset="utf-8" />
     <title>{% block title %}{% endblock %}</title>
-    {% block head %}
-        <link rel="stylesheet" href="{% static "django_bootstrap3_form/bootstrap/dist/css/bootstrap.css" %}">
-    {% endblock %}
+    {% block head %}{% endblock %}
 </head>
 <body>
-    <div class="container">
-        {% block body %}
-        {% endblock %}
-    </div>
+    {% block body %}
+    {% endblock %}
 </body>
 </html>

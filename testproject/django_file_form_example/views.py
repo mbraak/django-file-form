@@ -60,7 +60,7 @@ class WizardExampleview(SessionWizardView):
 
 class FormSetExampleView(BaseFormView):
     form_class = forms.ExampleFormSet
-    custom_js_file = 'example_form_set.js'
+    template_name = 'form_set.html'
 
 
 def permission_denied(request, exception):

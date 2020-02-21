@@ -1,0 +1,19 @@
+{% extends 'example_form.html' %}
+{% load static %}
+
+{% block title %}Form set example{% endblock %}
+
+{% block body %}
+    <form
+        method="POST"
+        enctype="multipart/form-data"
+        id="example-form-set"
+    >
+        {% csrf_token %}
+        {{ form }}
+        <input type="submit" value="Submit" />
+    </form>
+
+    <script src="{% static "file_form/file_form.js" %}"></script>
+    <script src="{% static "example_form_set.js" %}"></script>
+{% endblock %}

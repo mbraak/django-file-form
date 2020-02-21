@@ -92,7 +92,7 @@ class Page(object):
         el.find_element_by_xpath("//*[contains(text(), '%s')]" % text)
 
     def submit(self):
-        self.selenium.find_element_by_class_name('btn').click()
+        self.selenium.find_element_by_css_selector('input[type=submit]').click()
 
     def assert_page_contains_text(self, text):
         self.selenium.find_element_by_xpath("//*[contains(text(), '%s')]" % text)
