@@ -37,14 +37,14 @@ class BaseLiveTestCase(StaticLiveServerTestCase):
         return any(error for (_, error) in self._outcome.errors if error)
 
     def tearDown(self):
-        if self.didTestHaveErrors():
+        if self.didTestHaveErrors(): # pragma: no cover
             self.save_screenshot(self.id())
             self.print_browser_log()
 
         self.page.cleanup()
 
     @classmethod
-    def save_screenshot(cls, method_name):
+    def save_screenshot(cls, method_name): # pragma: no cover
         screenshots_path = Path('screenshots')
         if not screenshots_path.exists():
             screenshots_path.mkdir()
@@ -53,6 +53,6 @@ class BaseLiveTestCase(StaticLiveServerTestCase):
         cls.selenium.get_screenshot_as_file(filename)
 
     @classmethod
-    def print_browser_log(cls):
+    def print_browser_log(cls): # pragma: no cover
         for entry in cls.selenium.get_log('browser'):
             print(entry)
