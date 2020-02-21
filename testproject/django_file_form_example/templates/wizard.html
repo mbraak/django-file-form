@@ -15,7 +15,7 @@
         {% if wizard.steps.prev %}
             <button name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}">Previous</button>
         {% endif %}
-        <input class="btn btn-primary" type="submit" value="Submit" />
+        <input type="submit" value="Submit" />
     </form>
 
     <script src="{% static "file_form/file_form.js" %}"></script>

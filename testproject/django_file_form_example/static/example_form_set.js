@@ -1,5 +1,5 @@
 initFormSet(
-    document.getElementById("example-form"),
+    document.getElementById("example-form-set"),
     "form",
     { skipRequired: true },
 );
