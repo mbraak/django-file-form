@@ -105,13 +105,7 @@ If your form has a prefix, then call `initUploadFields` as follows:
 
 See the [Django documentation](https://docs.djangoproject.com/en/2.1/ref/forms/api/#prefixes-for-forms) for more information about form prefixes.
 
-**8 Include the upload_template.html in your template**
-
-```html
-{% include 'django_file_form/upload_template.html' %}
-```
-
-**9 Handle uploaded files**
+**8 Handle uploaded files**
 
 ```python
 class ExampleFormView(generic.FormView):
@@ -124,7 +118,7 @@ class ExampleFormView(generic.FormView):
         return super(ExampleFormView, self).form_valid(form)
 ```
 
-**10 Delete temporary files**
+**9 Delete temporary files**
 
 ```python
 class ExampleFormView(generic.FormView):
@@ -139,7 +133,7 @@ class ExampleFormView(generic.FormView):
         return super(ExampleFormView, self).form_valid(form)
 ```
 
-**11 Include hidden fields**
+**10 Include hidden fields**
 
 Include hidden form fields in your template:
 
