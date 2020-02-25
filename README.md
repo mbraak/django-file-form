@@ -90,9 +90,9 @@ There is also an uncompressed javascript version: `file_form/file_form.debug.js`
 </form>
 
 <script>
-   $(function() {
-       initUploadFields($('#example-form'));
-   });
+   initUploadFields(
+      document.getElementById("example-form")
+   );
 </script>
 ```
 
@@ -100,7 +100,10 @@ If your form has a prefix, then call `initUploadFields` as follows:
 
 ```js
   // for example, with prefix 'abc'
-  initUploadFields($('#example-form'), { prefix: 'abc' });
+  initUploadFields(
+    document.getElementById("example-form"),
+    { prefix: 'abc' }
+  );
 ```
 
 See the [Django documentation](https://docs.djangoproject.com/en/2.1/ref/forms/api/#prefixes-for-forms) for more information about form prefixes.
@@ -133,9 +136,11 @@ class ExampleFormView(generic.FormView):
         return super(ExampleFormView, self).form_valid(form)
 ```
 
-**10 Include hidden fields**
+## Details
 
-Include hidden form fields in your template:
+**1 Include hidden fields**
+
+Make sure that hidden form fields are included:
 
 ```python
 {% for hidden in form.hidden_fields %}
@@ -146,6 +151,17 @@ Include hidden form fields in your template:
 NB: it's possible that the hidden fields are already included; for example if you use ``form.as_p``. Do not include the hidden fields twice.
 
 Also see the testproject in the repository.
+
+**2 Temp upload dir must exist**
+
+Make sure the `FILE_FORM_UPLOAD_DIR` directory exists.
+
+```
+temp_upload_dir = settings.FILE_FORM_UPLOAD_DIR
+
+if not os.path.exists(temp_upload_dir):
+  os.mkdir(temp_upload_dir)
+```
 
 ## Upgrade from version 1.0 (to 2.0)
 
