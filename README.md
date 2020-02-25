@@ -140,7 +140,7 @@ class ExampleFormView(generic.FormView):
 
 **1 Include hidden fields**
 
-Include hidden form fields in your template:
+Make sure that hidden form fields are included:
 
 ```python
 {% for hidden in form.hidden_fields %}
