@@ -191,76 +191,46 @@ class UploadFile {
     }
   }
 
+  uploadFiles = files => {
+    if (files.length === 0) {
+      return;
+    }
+
+    if (!this.multiple && this.uploads.length !== 0) {
+      this.renderer.deleteFile(0);
+      this.uploads = [];
+    }
+
+    files.forEach(file => {
+      const { fieldName, formId, renderer, uploads, uploadUrl } = this;
+      const filename = file.name;
+      const uploadIndex = uploads.length;
+
+      const upload = new Upload(file, {
+        endpoint: uploadUrl,
+        metadata: { fieldName, filename, formId },
+        onError: () => this.handleError(uploadIndex),
+        onProgress: (bytesUploaded, bytesTotal) => this.handleProgress(uploadIndex, bytesUploaded, bytesTotal),
+        onSuccess: () => this.handleSuccess(uploadIndex)
+      });
+
+      upload.start();
+      renderer.addNewUpload(filename, uploadIndex);
+
+      this.uploads.push(upload);
+    });
+  }
 
   onDrop = e => {
     e.target.classList.remove('entered');
-
-    const files = [...e.dataTransfer.files];
-
-    if (files.length === 0) {
-      e.preventDefault();
-      e.stopPropagation();
-      return;
-    }
-
-    if (!this.multiple && this.uploads.length !== 0) {
-      this.renderer.deleteFile(0);
-      this.uploads = [];
-    }
-
-    files.forEach(file => {
-      const { fieldName, formId, renderer, uploads, uploadUrl } = this;
-      const filename = file.name;
-      const uploadIndex = uploads.length;
-
-      const upload = new Upload(file, {
-        endpoint: uploadUrl,
-        metadata: { fieldName, filename, formId },
-        onError: () => this.handleError(uploadIndex),
-        onProgress: (bytesUploaded, bytesTotal) => this.handleProgress(uploadIndex, bytesUploaded, bytesTotal),
-        onSuccess: () => this.handleSuccess(uploadIndex)
-      });
-
-      upload.start();
-      renderer.addNewUpload(filename, uploadIndex);
-
-      this.uploads.push(upload);
-    });
-
     e.preventDefault();
     e.stopPropagation();
+
+    this.uploadFiles([...e.dataTransfer.files]);
   };
 
   onChange = e => {
-    const files = [...e.target.files];
-
-    if (files.length === 0) {
-      return;
-    }
-
-    if (!this.multiple && this.uploads.length !== 0) {
-      this.renderer.deleteFile(0);
-      this.uploads = [];
-    }
-
-    files.forEach(file => {
-      const { fieldName, formId, renderer, uploads, uploadUrl } = this;
-      const filename = file.name;
-      const uploadIndex = uploads.length;
-
-      const upload = new Upload(file, {
-        endpoint: uploadUrl,
-        metadata: { fieldName, filename, formId },
-        onError: () => this.handleError(uploadIndex),
-        onProgress: (bytesUploaded, bytesTotal) => this.handleProgress(uploadIndex, bytesUploaded, bytesTotal),
-        onSuccess: () => this.handleSuccess(uploadIndex)
-      });
-
-      upload.start();
-      renderer.addNewUpload(filename, uploadIndex);
-
-      this.uploads.push(upload);
-    });
+    this.uploadFiles([...e.target.files]);
   };
 
   onClick = e => {
