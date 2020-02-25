@@ -136,7 +136,9 @@ class ExampleFormView(generic.FormView):
         return super(ExampleFormView, self).form_valid(form)
 ```
 
-**10 Include hidden fields**
+## Details
+
+**1 Include hidden fields**
 
 Include hidden form fields in your template:
 
@@ -149,6 +151,17 @@ Include hidden form fields in your template:
 NB: it's possible that the hidden fields are already included; for example if you use ``form.as_p``. Do not include the hidden fields twice.
 
 Also see the testproject in the repository.
+
+**2 Temp upload dir must exist**
+
+Make sure the `FILE_FORM_UPLOAD_DIR` directory exists.
+
+```
+temp_upload_dir = settings.FILE_FORM_UPLOAD_DIR
+
+if not os.path.exists(temp_upload_dir):
+  os.mkdir(temp_upload_dir)
+```
 
 ## Upgrade from version 1.0 (to 2.0)
 
