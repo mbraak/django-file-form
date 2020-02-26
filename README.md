@@ -157,7 +157,7 @@ Also see the testproject in the repository.
 Make sure the `FILE_FORM_UPLOAD_DIR` directory exists.
 
 ```
-temp_upload_dir = settings.FILE_FORM_UPLOAD_DIR
+temp_upload_dir = os.path.join(settings.MEDIA_ROOT,  settings.FILE_FORM_UPLOAD_DIR)
 
 if not os.path.exists(temp_upload_dir):
   os.mkdir(temp_upload_dir)
@@ -185,7 +185,7 @@ Settings in `settings.py`:
 
 * **FILE_FORM_UPLOAD_DIR** (string):
   * The directory for the temporary uploads.
-  * The setting is not full path, but must be a subdirectory of `MEDIA_ROOT`.
+  * The setting is relative to `MEDIA_ROOT`.
   * The default is `temp_uploads`.
 
 * **FILE_FORM_FILE_STORAGE** (string):
@@ -217,6 +217,9 @@ initFormSet(
 * Also see the `testproject` directory in the repository for an example.
 
 ## Changelog
+
+* **development**
+  * Issue #266: Allow relative FILE_FORM_UPLOAD_DIR setting (thanks to Bo Peng)
 
 * **2.0.3 (15 february 2020)**
   * Issue #237: using with form set (thanks to Juan Carlos Carvajal)
