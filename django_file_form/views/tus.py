@@ -141,7 +141,7 @@ class TusUpload(View):
         file_offset = int(request.META.get("HTTP_UPLOAD_OFFSET", 0))
         chunk_size = int(request.META.get("CONTENT_LENGTH", 102400))
 
-        upload_file_path = Path(conf.UPLOAD_DIR).joinpath(resource_id)
+        upload_file_path = get_upload_path().joinpath(resource_id)
         if filename is None or not upload_file_path.exists():
             response.status_code = 410
             return response
