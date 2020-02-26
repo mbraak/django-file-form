@@ -66,8 +66,6 @@ MEDIA_ROOT, STATIC_ROOT = resolve_paths()
 
 create_media_paths(Path(MEDIA_ROOT))
 
-FILE_FORM_UPLOAD_DIR = Path(MEDIA_ROOT).joinpath('temp_uploads')
-
 USE_TZ = True
 
 TEMPLATES = [

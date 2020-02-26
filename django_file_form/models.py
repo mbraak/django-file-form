@@ -7,7 +7,7 @@ from django.core.files import uploadedfile
 from django.db import models
 from django.utils import timezone
 from . import conf
-from .util import ModelManager, load_class
+from .util import ModelManager, load_class, get_upload_path
 
 
 class UploadedFileManager(ModelManager):
@@ -21,7 +21,7 @@ class UploadedFileManager(ModelManager):
                 if delete:
                     t.delete()
 
-        temp_path = Path(settings.MEDIA_ROOT).joinpath(conf.UPLOAD_DIR)
+        temp_path = get_upload_path()
 
         for f in temp_path.iterdir():
             basename = f.name
@@ -35,7 +35,7 @@ class UploadedFileManager(ModelManager):
         return deleted_files
 
     def get_for_file(self, filename):
-        path = Path(conf.UPLOAD_DIR).joinpath(filename)
+        path = get_upload_path().joinpath(filename)
         return self.try_get(uploaded_file=path)
 
 
@@ -46,7 +46,7 @@ def get_storage():
 
 
 def upload_to(instance, filename):
-    return str(conf.UPLOAD_DIR)
+    return str(get_upload_path())
 
 
 class UploadedFile(models.Model):

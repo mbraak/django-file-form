@@ -11,7 +11,7 @@ from django.views.generic import View
 
 from django_file_form import conf
 from django_file_form.models import UploadedFile
-from django_file_form.util import check_permission
+from django_file_form.util import check_permission, get_upload_path
 
 
 logger = logging.getLogger(__name__)
@@ -95,7 +95,7 @@ class TusUpload(View):
         cache.add("tus-uploads/{}/metadata".format(resource_id), metadata, conf.TIMEOUT)
 
         try:
-            with Path(conf.UPLOAD_DIR).joinpath(resource_id).open("wb") as f:
+            with Path(get_upload_path()).joinpath(resource_id).open("wb") as f:
                 pass
         except IOError as e:
             logger.error("Unable to create file: {}".format(e), exc_info=True, extra={
@@ -141,7 +141,7 @@ class TusUpload(View):
         file_offset = int(request.META.get("HTTP_UPLOAD_OFFSET", 0))
         chunk_size = int(request.META.get("CONTENT_LENGTH", 102400))
 
-        upload_file_path = Path(conf.UPLOAD_DIR).joinpath(resource_id)
+        upload_file_path = get_upload_path().joinpath(resource_id)
         if filename is None or not upload_file_path.exists():
             response.status_code = 410
             return response
@@ -192,7 +192,7 @@ class TusUpload(View):
 
         logger.info(f"TUS delete resource_id={resource_id}")
 
-        upload_file_path = Path(conf.UPLOAD_DIR).joinpath(resource_id)
+        upload_file_path = get_upload_path().joinpath(resource_id)
 
         if upload_file_path.exists():
             upload_file_path.unlink()

@@ -8,11 +8,11 @@ from django.test import TestCase
 from django.core.management import call_command
 from django.conf import settings
 from django.core.files.base import ContentFile
-from django.test.utils import captured_stdout
+from django.test.utils import captured_stdout, override_settings
 
 from django_file_form_example.test_utils import get_random_id, encode_datetime, remove_p
 from django_file_form.models import UploadedFile
-from django_file_form.util import get_list, load_class
+from django_file_form.util import get_list, load_class, get_upload_path
 
 
 media_root = Path(settings.MEDIA_ROOT)
@@ -99,3 +99,16 @@ class UtilTests(TestCase):
             expected_message = r"FILE_STORAGE refers to a class 'django_file_form\.DoesNotExist' that is not available"
             with self.assertRaisesRegex(ImproperlyConfigured, expected_message):
                 load_class('FILE_STORAGE', mock_conf)
+
+
+class ConfTest(TestCase):
+    @override_settings(FILE_FORM_UPLOAD_DIR='/absolute/path/')
+    def test_get_upload_path_absolute(self):
+        self.assertEqual(str(get_upload_path()), '/absolute/path')
+
+    @override_settings(FILE_FORM_UPLOAD_DIR='relative/path/')
+    def test_get_upload_path_relative(self):
+        self.assertEqual(
+            str(get_upload_path()),
+            str(Path(settings.MEDIA_ROOT).joinpath('relative/path'))
+        )
