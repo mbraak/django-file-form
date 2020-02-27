@@ -380,7 +380,6 @@ function () {
     this.container = container;
     this.input = input;
     this.translations = translations;
-    this.filesContainer = this.createFilesContainer();
 
     if (skipRequired) {
       this.input.required = false;
@@ -388,14 +387,6 @@ function () {
   }
 
   _createClass(RenderUploadFile, [{
-    key: "createFilesContainer",
-    value: function createFilesContainer() {
-      var div = document.createElement("div");
-      div.className = "dff-files";
-      this.container.appendChild(div);
-      return div;
-    }
-  }, {
     key: "addUploadedFile",
     value: function addUploadedFile(filename, uploadIndex) {
       this.addFile(filename, uploadIndex);
@@ -422,11 +413,11 @@ function () {
     key: "addFile",
     value: function addFile(filename, uploadIndex) {
       var div = document.createElement("div");
-      div.className = "dff-file-id-".concat(uploadIndex);
+      div.className = "dff-file dff-file-id-".concat(uploadIndex);
       var nameSpan = document.createElement("span");
       nameSpan.innerHTML = escape_html__WEBPACK_IMPORTED_MODULE_1___default()(filename);
       div.appendChild(nameSpan);
-      this.filesContainer.appendChild(div);
+      this.container.appendChild(div);
       this.input.required = false;
       return div;
     }
@@ -462,7 +453,7 @@ function () {
   }, {
     key: "findFileDiv",
     value: function findFileDiv(index) {
-      return this.filesContainer.querySelector(".dff-file-id-".concat(index));
+      return this.container.querySelector(".dff-file-id-".concat(index));
     }
   }, {
     key: "setSuccess",
@@ -508,7 +499,7 @@ function () {
   }, {
     key: "updateProgress",
     value: function updateProgress(index, percentage) {
-      var el = this.filesContainer.querySelector(".dff-file-id-".concat(index));
+      var el = this.container.querySelector(".dff-file-id-".concat(index));
       var innerProgressSpan = el.querySelector(".dff-progress-inner");
 
       if (innerProgressSpan) {
@@ -533,14 +524,13 @@ function () {
         initial = _ref2.initial,
         multiple = _ref2.multiple,
         skipRequired = _ref2.skipRequired,
+        supportDropArea = _ref2.supportDropArea,
         translations = _ref2.translations,
         _uploadUrl = _ref2.uploadUrl;
 
     _classCallCheck(this, UploadFile);
 
-    _defineProperty(this, "onChange", function (e) {
-      var files = _toConsumableArray(e.target.files);
-
+    _defineProperty(this, "uploadFiles", function (files) {
       if (files.length === 0) {
         return;
       }
@@ -583,6 +573,10 @@ function () {
       });
     });
 
+    _defineProperty(this, "onChange", function (e) {
+      _this.uploadFiles(_toConsumableArray(e.target.files));
+    });
+
     _defineProperty(this, "onClick", function (e) {
       var target = e.target;
 
@@ -613,14 +607,22 @@ function () {
       renderer.setSuccess(uploadIndex);
     });
 
+    this.container = container;
     this.fieldName = _fieldName;
     this.formId = _formId;
     this.multiple = multiple;
+    this.translations = translations;
     this.uploadUrl = _uploadUrl;
     this.uploadIndex = 0;
     this.uploads = [];
+
+    if (supportDropArea) {
+      this.initDropArea();
+    }
+
+    this.filesContainer = this.createFilesContainer();
     this.renderer = new RenderUploadFile({
-      container: container,
+      container: this.filesContainer,
       input: input,
       skipRequired: skipRequired,
       translations: translations
@@ -631,10 +633,18 @@ function () {
     }
 
     input.addEventListener("change", this.onChange);
-    container.addEventListener("click", this.onClick);
+    this.filesContainer.addEventListener("click", this.onClick);
   }
 
   _createClass(UploadFile, [{
+    key: "createFilesContainer",
+    value: function createFilesContainer() {
+      var div = document.createElement("div");
+      div.className = "dff-files";
+      this.container.appendChild(div);
+      return div;
+    }
+  }, {
     key: "addInitialFiles",
     value: function addInitialFiles(initialFiles) {
       var _this2 = this;
@@ -691,10 +701,57 @@ function () {
       upload.abort(true);
       this.renderer.deleteFile(uploadIndex);
     }
+  }, {
+    key: "initDropArea",
+    value: function initDropArea() {
+      new DropArea({
+        container: this.container,
+        onUploadFiles: this.uploadFiles,
+        translations: this.translations
+      });
+    }
   }]);
 
   return UploadFile;
 }();
+
+var DropArea = function DropArea(_ref3) {
+  var _this4 = this;
+
+  var container = _ref3.container,
+      onUploadFiles = _ref3.onUploadFiles,
+      translations = _ref3.translations;
+
+  _classCallCheck(this, DropArea);
+
+  _defineProperty(this, "onDrop", function (e) {
+    _this4.dropArea.classList.remove("dff-entered");
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    _this4.onUploadFiles(_toConsumableArray(e.dataTransfer.files));
+  });
+
+  this.container = container;
+  this.onUploadFiles = onUploadFiles;
+  var dropArea = document.createElement("div");
+  dropArea.className = "dff-drop-area";
+  dropArea.innerHTML = translations["Drop your files here"];
+  dropArea.addEventListener("dragenter", function () {
+    dropArea.classList.add("dff-entered");
+  });
+  dropArea.addEventListener("dragleave", function () {
+    dropArea.classList.remove("dff-entered");
+  });
+  dropArea.addEventListener("dragover", function (e) {
+    dropArea.classList.add("dff-entered");
+    e.preventDefault();
+  });
+  dropArea.addEventListener("drop", this.onDrop);
+  this.container.appendChild(dropArea);
+  this.dropArea = dropArea;
+};
 
 var getInputNameWithPrefix = function getInputNameWithPrefix(fieldName, prefix) {
   return prefix ? "".concat(prefix, "-").concat(fieldName) : fieldName;
@@ -777,14 +834,16 @@ var initUploadFields = function initUploadFields(form) {
     var multiple = input.multiple;
     var initial = getInitialFiles(element);
     var translations = JSON.parse(element.getAttribute("data-translations"));
+    var supportDropArea = options.supportDropArea || false;
     new UploadFile({
-      container: container,
+      container: element,
       fieldName: fieldName,
       formId: formId,
       initial: initial,
       input: input,
       multiple: multiple,
       skipRequired: skipRequired,
+      supportDropArea: supportDropArea,
       translations: translations,
       uploadUrl: uploadUrl
     });
