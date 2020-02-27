@@ -8,7 +8,6 @@ class RenderUploadFile {
     this.container = container;
     this.input = input;
     this.translations = translations;
-    this.filesContainer = document.getElementsByClassName('dff-files')[0];
 
     if (skipRequired) {
       this.input.required = false;
@@ -42,13 +41,13 @@ class RenderUploadFile {
 
   addFile(filename, uploadIndex) {
     const div = document.createElement("div");
-    div.className = `dff-file-id-${uploadIndex}`;
+    div.className = `dff-file dff-file-id-${uploadIndex}`;
 
     const nameSpan = document.createElement("span");
     nameSpan.innerHTML = escape(filename);
 
     div.appendChild(nameSpan);
-    this.filesContainer.appendChild(div);
+    this.container.appendChild(div);
 
     this.input.required = false;
     return div;
@@ -85,7 +84,7 @@ class RenderUploadFile {
   }
 
   findFileDiv(index) {
-    return this.filesContainer.querySelector(`.dff-file-id-${index}`);
+    return this.container.querySelector(`.dff-file-id-${index}`);
   }
 
   setSuccess(index) {
@@ -133,7 +132,7 @@ class RenderUploadFile {
   }
 
   updateProgress(index, percentage) {
-    const el = this.filesContainer.querySelector(`.dff-file-id-${index}`);
+    const el = this.container.querySelector(`.dff-file-id-${index}`);
     const innerProgressSpan = el.querySelector(".dff-progress-inner");
 
     if (innerProgressSpan) {
@@ -143,28 +142,50 @@ class RenderUploadFile {
 }
 
 class UploadFile {
-  constructor({ input, container, files, fieldName, formId, initial, multiple, skipRequired, translations, uploadUrl }) {
+  constructor({
+    input,
+    container,
+    fieldName,
+    formId,
+    initial,
+    multiple,
+    skipRequired,
+    supportDropArea,
+    translations,
+    uploadUrl
+  }) {
+    this.container = container;
     this.fieldName = fieldName;
     this.formId = formId;
     this.multiple = multiple;
+    this.translations = translations;
     this.uploadUrl = uploadUrl;
 
     this.uploadIndex = 0;
     this.uploads = [];
 
-    this.renderer = new RenderUploadFile({ container, input, skipRequired, translations });
+    if (supportDropArea) {
+      this.initDropArea();
+    }
+
+    this.filesContainer = this.createFilesContainer();
+
+    this.renderer = new RenderUploadFile({ container: this.filesContainer, input, skipRequired, translations });
 
     if (initial) {
       this.addInitialFiles(initial);
     }
 
     input.addEventListener("change", this.onChange);
-    container.addEventListener("click", this.onClick);
+    this.filesContainer.addEventListener("click", this.onClick);
+  }
 
-    files.addEventListener('dragenter', e => { e.target.classList.add('entered'); });
-    files.addEventListener('dragleave', e => { e.target.classList.remove('entered'); });
-    files.addEventListener('dragover', e => { e.target.classList.add('entered'); e.preventDefault(); });
-    files.addEventListener('drop', this.onDrop);
+  createFilesContainer() {
+    const div = document.createElement("div");
+    div.className = "dff-files";
+    this.container.appendChild(div);
+
+    return div;
   }
 
   addInitialFiles(initialFiles) {
@@ -219,14 +240,6 @@ class UploadFile {
 
       this.uploads.push(upload);
     });
-  }
-
-  onDrop = e => {
-    e.target.classList.remove('entered');
-    e.preventDefault();
-    e.stopPropagation();
-
-    this.uploadFiles([...e.dataTransfer.files]);
   };
 
   onChange = e => {
@@ -285,6 +298,49 @@ class UploadFile {
 
     this.renderer.deleteFile(uploadIndex);
   }
+
+  initDropArea() {
+    new DropArea({
+      container: this.container,
+      onUploadFiles: this.uploadFiles,
+      translations: this.translations
+    });
+  }
+}
+
+class DropArea {
+  constructor({ container, onUploadFiles, translations }) {
+    this.container = container;
+    this.onUploadFiles = onUploadFiles;
+
+    const dropArea = document.createElement("div");
+    dropArea.className = "dff-drop-area";
+    dropArea.innerHTML = translations["Drop your files here"];
+
+    dropArea.addEventListener("dragenter", () => {
+      dropArea.classList.add("dff-entered");
+    });
+    dropArea.addEventListener("dragleave", () => {
+      dropArea.classList.remove("dff-entered");
+    });
+    dropArea.addEventListener("dragover", e => {
+      dropArea.classList.add("dff-entered");
+      e.preventDefault();
+    });
+    dropArea.addEventListener("drop", this.onDrop);
+
+    this.container.appendChild(dropArea);
+
+    this.dropArea = dropArea;
+  }
+
+  onDrop = e => {
+    this.dropArea.classList.remove("dff-entered");
+    e.preventDefault();
+    e.stopPropagation();
+
+    this.onUploadFiles([...e.dataTransfer.files]);
+  };
 }
 
 const getInputNameWithPrefix = (fieldName, prefix) => (prefix ? `${prefix}-${fieldName}` : fieldName);
@@ -350,8 +406,6 @@ const initUploadFields = (form, options = {}) => {
 
     const input = element.querySelector("input[type=file]");
 
-    const files = container.querySelector(".dff-files");
-
     if (!(input && matchesPrefix(input.name))) {
       return;
     }
@@ -360,16 +414,17 @@ const initUploadFields = (form, options = {}) => {
     const { multiple } = input;
     const initial = getInitialFiles(element);
     const translations = JSON.parse(element.getAttribute("data-translations"));
+    const supportDropArea = options.supportDropArea || false;
 
     new UploadFile({
-      container,
+      container: element,
       fieldName,
       formId,
       initial,
-      files,
       input,
       multiple,
       skipRequired,
+      supportDropArea,
       translations,
       uploadUrl
     });

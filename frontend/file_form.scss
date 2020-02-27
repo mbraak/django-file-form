@@ -2,27 +2,18 @@
   .dff-files {
     display: flex;
     flex-direction: column;
-    margin: 8px 0 8px 0;
-    padding: 8px 5px 8px 0;
+    margin: 16px 0 16px 0;
 
-    min-height: 2.5em;
-    width: 100%;
-    border-style: solid;
-    border-color: rgb(209, 213, 218);
-    background-color: #fafbfc;
-  }
-
-  .dff-files {
     &:empty {
-
+      margin: 0;
     }
 
-    > div {
+    .dff-file {
       margin-bottom: 8px;
-    }
 
-    > div:last-child {
-      margin-bottom: 0;
+      &:last-child {
+        margin-bottom: 0;
+      }
     }
 
     .dff-delete {
@@ -32,16 +23,16 @@
     span {
       margin-left: 8px;
     }
+  }
 
+  .dff-drop-area {
+    background-color: #eee;
+    padding: 8px;
+    max-width: 20em;
+    margin-top: 16px;
 
-    &.entered {
-      border-color: purple;
-    }
-
-    &:empty::before  {
-      content: 'Drop your files here';
-      color: gray;
-      padding: 10px;
+    &.dff-entered {
+      background-color: #ddd;
     }
   }
 
@@ -71,4 +62,3 @@
     margin-left: 8px;
   }
 }
-
