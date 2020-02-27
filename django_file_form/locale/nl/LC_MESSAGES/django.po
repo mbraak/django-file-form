@@ -6,3 +6,6 @@ msgstr "Verwijderen mislukt"
 
 msgid "Upload failed"
 msgstr "Upload mislukt"
+
+msgid "Drop your files here"
+msgstr "Sleep uw bestanden"
