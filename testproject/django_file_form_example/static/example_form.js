@@ -1,4 +1,4 @@
 initUploadFields(
     document.getElementById("example-form"),
-    { prefix: "example", skipRequired: true }
+    { prefix: "example", skipRequired: true, supportDropArea: true }
 );
