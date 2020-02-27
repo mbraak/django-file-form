@@ -8,19 +8,11 @@ class RenderUploadFile {
     this.container = container;
     this.input = input;
     this.translations = translations;
-    this.filesContainer = this.createFilesContainer();
+    this.filesContainer = document.getElementsByClassName('dff-files')[0];
 
     if (skipRequired) {
       this.input.required = false;
     }
-  }
-
-  createFilesContainer() {
-    const div = document.createElement("div");
-    div.className = "dff-files";
-    this.container.appendChild(div);
-
-    return div;
   }
 
   addUploadedFile(filename, uploadIndex) {
@@ -151,7 +143,7 @@ class RenderUploadFile {
 }
 
 class UploadFile {
-  constructor({ input, container, fieldName, formId, initial, multiple, skipRequired, translations, uploadUrl }) {
+  constructor({ input, container, files, fieldName, formId, initial, multiple, skipRequired, translations, uploadUrl }) {
     this.fieldName = fieldName;
     this.formId = formId;
     this.multiple = multiple;
@@ -168,6 +160,11 @@ class UploadFile {
 
     input.addEventListener("change", this.onChange);
     container.addEventListener("click", this.onClick);
+
+    files.addEventListener('dragenter', e => { e.target.classList.add('entered'); });
+    files.addEventListener('dragleave', e => { e.target.classList.remove('entered'); });
+    files.addEventListener('dragover', e => { e.target.classList.add('entered'); e.preventDefault(); });
+    files.addEventListener('drop', this.onDrop);
   }
 
   addInitialFiles(initialFiles) {
@@ -194,9 +191,7 @@ class UploadFile {
     }
   }
 
-  onChange = e => {
-    const files = [...e.target.files];
-
+  uploadFiles = files => {
     if (files.length === 0) {
       return;
     }
@@ -224,6 +219,18 @@ class UploadFile {
 
       this.uploads.push(upload);
     });
+  }
+
+  onDrop = e => {
+    e.target.classList.remove('entered');
+    e.preventDefault();
+    e.stopPropagation();
+
+    this.uploadFiles([...e.dataTransfer.files]);
+  };
+
+  onChange = e => {
+    this.uploadFiles([...e.target.files]);
   };
 
   onClick = e => {
@@ -343,6 +350,8 @@ const initUploadFields = (form, options = {}) => {
 
     const input = element.querySelector("input[type=file]");
 
+    const files = container.querySelector(".dff-files");
+
     if (!(input && matchesPrefix(input.name))) {
       return;
     }
@@ -357,6 +366,7 @@ const initUploadFields = (form, options = {}) => {
       fieldName,
       formId,
       initial,
+      files,
       input,
       multiple,
       skipRequired,
