@@ -346,6 +346,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var tus_js_client__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(tus_js_client__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var escape_html__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(4);
 /* harmony import */ var escape_html__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(escape_html__WEBPACK_IMPORTED_MODULE_1__);
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
 
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
@@ -584,10 +588,14 @@ function () {
         var uploadIndex = parseInt(target.getAttribute("data-index"), 10);
 
         _this.handleDelete(uploadIndex);
+
+        e.preventDefault();
       } else if (target.classList.contains("dff-cancel")) {
         var _uploadIndex = parseInt(target.getAttribute("data-index"), 10);
 
         _this.handleCancel(_uploadIndex);
+
+        e.preventDefault();
       }
     });
 
@@ -769,14 +777,14 @@ var getInputValueForFormAndPrefix = function getInputValueForFormAndPrefix(form,
   return input.value;
 };
 
-var initFormSet = function initFormSet(form, prefix) {
+var initFormSet = function initFormSet(form, prefix, options) {
   var formCount = parseInt(getInputValueForFormAndPrefix(form, "TOTAL_FORMS", prefix), 10);
 
   for (var i = 0; i < formCount; i += 1) {
     var subFormPrefix = getInputNameWithPrefix("".concat(i));
-    initUploadFields(form, {
+    initUploadFields(form, _objectSpread({}, options, {
       prefix: "".concat(prefix, "-").concat(subFormPrefix)
-    });
+    }));
   }
 };
 
