@@ -196,6 +196,38 @@ Settings in `settings.py`:
   * Maximum upload size in bytes
   * Default is 4GB
 
+## initUploadFields
+
+Signature of `initUploadFields` is:
+
+```
+initUploadFields(formDomElement, options);
+```
+
+* `formDomElement` (required); e.g. `document.getElementById("example-form")`
+* options (optional)
+  * `prefix` : set this if the Django form has a prefix; default is empty
+  * `skipRequired` : don't set the `required` field of the file input; default is `false`
+  * `supportDropArea` : add a drop area; default is `false`
+
+Examples:
+
+```js
+initUploadFields(
+  document.getElementById("example-form")
+);
+```
+
+```js
+initUploadFields(
+  document.getElementById("example-form"),
+  {
+    prefix: "example",
+    skipRequired: true,
+    supportDropArea: true
+  }
+);
+```
 
 ## Form sets
 
