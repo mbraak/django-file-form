@@ -361,7 +361,17 @@ const getInputValueForFormAndPrefix = (form, fieldName, prefix) => {
   return input.value;
 };
 
-const initFormSet = (form, prefix, options) => {
+const initFormSet = (form, optionsParam) => {
+  let options;
+
+  if (typeof optionsParam === "string") {
+    options = { prefix: optionsParam };
+  } else {
+    options = optionsParam;
+  }
+
+  const prefix = options.prefix || "form";
+
   const formCount = parseInt(getInputValueForFormAndPrefix(form, "TOTAL_FORMS", prefix), 10);
 
   for (let i = 0; i < formCount; i += 1) {
@@ -369,7 +379,8 @@ const initFormSet = (form, prefix, options) => {
     initUploadFields(
       form,
       {
-        ...options, prefix: `${prefix}-${subFormPrefix}`,
+        ...options,
+        prefix: `${prefix}-${subFormPrefix}`,
       }
     );
   }
