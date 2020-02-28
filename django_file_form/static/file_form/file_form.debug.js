@@ -777,7 +777,18 @@ var getInputValueForFormAndPrefix = function getInputValueForFormAndPrefix(form,
   return input.value;
 };
 
-var initFormSet = function initFormSet(form, prefix, options) {
+var initFormSet = function initFormSet(form, optionsParam) {
+  var options;
+
+  if (typeof optionsParam === "string") {
+    options = {
+      prefix: optionsParam
+    };
+  } else {
+    options = optionsParam;
+  }
+
+  var prefix = options.prefix || "form";
   var formCount = parseInt(getInputValueForFormAndPrefix(form, "TOTAL_FORMS", prefix), 10);
 
   for (var i = 0; i < formCount; i += 1) {
