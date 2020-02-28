@@ -252,9 +252,13 @@ class UploadFile {
     if (target.classList.contains("dff-delete")) {
       const uploadIndex = parseInt(target.getAttribute("data-index"), 10);
       this.handleDelete(uploadIndex);
+
+      e.preventDefault();
     } else if (target.classList.contains("dff-cancel")) {
       const uploadIndex = parseInt(target.getAttribute("data-index"), 10);
       this.handleCancel(uploadIndex);
+
+      e.preventDefault();
     }
   };
 
