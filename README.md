@@ -203,13 +203,13 @@ You can also use a form set instead of a form. In that case `initFormSet` (inste
 in your javascript code.
 
 ```
-initFormSet(form_element, form_set_prefix)
+initFormSet(form_element, options)
 ```
 
 ```js
 initFormSet(
   document.getElementById("example-form"),
-  "form"
+  { prefix: "form" }
 );
 ```
 
