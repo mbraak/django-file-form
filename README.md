@@ -219,7 +219,8 @@ initFormSet(
 ## Changelog
 
 * **development**
-  * Issue #266: Allow relative FILE_FORM_UPLOAD_DIR setting (thanks to Bo Peng)
+  * Issue #266: allow relative FILE_FORM_UPLOAD_DIR setting (thanks to Bo Peng)
+  * Issue #267: add drop area (thanks to Bo Peng)
 
 * **2.0.3 (15 february 2020)**
   * Issue #237: using with form set (thanks to Juan Carlos Carvajal)
