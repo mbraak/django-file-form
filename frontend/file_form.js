@@ -310,6 +310,8 @@ class UploadFile {
     xhr.onload = () => {
       if (xhr.status === 204) {
         this.renderer.deleteFile(uploadIndex);
+        delete this.uploads[uploadIndex];
+        this.checkDropHint();
       } else {
         this.renderer.setDeleteFailed(uploadIndex);
       }
@@ -323,6 +325,8 @@ class UploadFile {
     upload.abort(true);
 
     this.renderer.deleteFile(uploadIndex);
+    delete this.uploads[uploadIndex];
+    this.checkDropHint();
   }
 
   initDropArea(container) {
@@ -337,7 +341,9 @@ class UploadFile {
       return;
     }
 
-    if (this.uploads.length === 0) {
+    const nonEmptyUploads = this.uploads.filter(e => e);
+
+    if (nonEmptyUploads.length === 0) {
       this.renderer.renderDropHint();
     } else {
       this.renderer.removeDropHint();
