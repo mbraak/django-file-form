@@ -462,7 +462,7 @@ const initUploadFields = (form, options = {}) => {
     const { multiple } = input;
     const initial = getInitialFiles(container);
     const translations = JSON.parse(container.getAttribute("data-translations"));
-    const supportDropArea = options.supportDropArea || false;
+    const supportDropArea = options.supportDropArea || true;
 
     new UploadFile({
       fieldName,

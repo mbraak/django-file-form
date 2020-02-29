@@ -208,7 +208,7 @@ initUploadFields(formDomElement, options);
 * options (optional)
   * `prefix` : set this if the Django form has a prefix; default is empty
   * `skipRequired` : don't set the `required` field of the file input; default is `false`
-  * `supportDropArea` : add a drop area; default is `false`
+  * `supportDropArea` : add a drop area; default is `true`
 
 Examples:
 
