@@ -4,8 +4,8 @@ import { Upload } from "tus-js-client";
 import escape from "escape-html";
 
 class RenderUploadFile {
-  constructor({ container, input, skipRequired, translations }) {
-    this.container = container;
+  constructor({ parent, input, skipRequired, translations }) {
+    this.container = this.createFilesContainer(parent);
     this.input = input;
     this.translations = translations;
 
@@ -13,6 +13,14 @@ class RenderUploadFile {
       this.input.required = false;
     }
   }
+
+  createFilesContainer = parent => {
+    const div = document.createElement("div");
+    div.className = "dff-files";
+    parent.appendChild(div);
+
+    return div;
+  };
 
   addUploadedFile(filename, uploadIndex) {
     this.addFile(filename, uploadIndex);
@@ -139,53 +147,65 @@ class RenderUploadFile {
       innerProgressSpan.style.width = `${percentage}%`;
     }
   }
+
+  renderDropHint() {
+    if (this.container.querySelector(".dff-drop-hint")) {
+      return;
+    }
+
+    const dropHint = document.createElement("div");
+    dropHint.className = "dff-drop-hint";
+    dropHint.innerHTML = this.translations["Drop your files here"];
+
+    this.container.appendChild(dropHint);
+  }
+
+  removeDropHint() {
+    const dropHint = this.container.querySelector(".dff-drop-hint");
+
+    if (dropHint) {
+      dropHint.remove();
+    }
+  }
 }
 
 class UploadFile {
   constructor({
     input,
-    container,
     fieldName,
     formId,
     initial,
     multiple,
+    parent,
     skipRequired,
     supportDropArea,
     translations,
     uploadUrl
   }) {
-    this.container = container;
     this.fieldName = fieldName;
     this.formId = formId;
     this.multiple = multiple;
-    this.translations = translations;
+    this.supportDropArea = supportDropArea;
     this.uploadUrl = uploadUrl;
 
     this.uploadIndex = 0;
     this.uploads = [];
 
+    this.renderer = new RenderUploadFile({ parent, input, skipRequired, translations });
+    const filesContainer = this.renderer.container;
+
     if (supportDropArea) {
-      this.initDropArea();
+      this.initDropArea(filesContainer);
     }
-
-    this.filesContainer = this.createFilesContainer();
-
-    this.renderer = new RenderUploadFile({ container: this.filesContainer, input, skipRequired, translations });
 
     if (initial) {
       this.addInitialFiles(initial);
     }
 
+    this.checkDropHint();
+
     input.addEventListener("change", this.onChange);
-    this.filesContainer.addEventListener("click", this.onClick);
-  }
-
-  createFilesContainer() {
-    const div = document.createElement("div");
-    div.className = "dff-files";
-    this.container.appendChild(div);
-
-    return div;
+    filesContainer.addEventListener("click", this.onClick);
   }
 
   addInitialFiles(initialFiles) {
@@ -240,6 +260,8 @@ class UploadFile {
 
       this.uploads.push(upload);
     });
+
+    this.checkDropHint();
   };
 
   onChange = e => {
@@ -303,43 +325,46 @@ class UploadFile {
     this.renderer.deleteFile(uploadIndex);
   }
 
-  initDropArea() {
+  initDropArea(container) {
     new DropArea({
-      container: this.container,
-      onUploadFiles: this.uploadFiles,
-      translations: this.translations
+      container,
+      onUploadFiles: this.uploadFiles
     });
+  }
+
+  checkDropHint() {
+    if (!this.supportDropArea) {
+      return;
+    }
+
+    if (this.uploads.length === 0) {
+      this.renderer.renderDropHint();
+    } else {
+      this.renderer.removeDropHint();
+    }
   }
 }
 
 class DropArea {
-  constructor({ container, onUploadFiles, translations }) {
+  constructor({ container, onUploadFiles }) {
     this.container = container;
     this.onUploadFiles = onUploadFiles;
 
-    const dropArea = document.createElement("div");
-    dropArea.className = "dff-drop-area";
-    dropArea.innerHTML = translations["Drop your files here"];
-
-    dropArea.addEventListener("dragenter", () => {
-      dropArea.classList.add("dff-entered");
+    container.addEventListener("dragenter", () => {
+      container.classList.add("dff-dropping");
     });
-    dropArea.addEventListener("dragleave", () => {
-      dropArea.classList.remove("dff-entered");
+    container.addEventListener("dragleave", () => {
+      container.classList.remove("dff-dropping");
     });
-    dropArea.addEventListener("dragover", e => {
-      dropArea.classList.add("dff-entered");
+    container.addEventListener("dragover", e => {
+      container.classList.add("dff-dropping");
       e.preventDefault();
     });
-    dropArea.addEventListener("drop", this.onDrop);
-
-    this.container.appendChild(dropArea);
-
-    this.dropArea = dropArea;
+    container.addEventListener("drop", this.onDrop);
   }
 
   onDrop = e => {
-    this.dropArea.classList.remove("dff-entered");
+    this.container.classList.remove("dff-dropping");
     e.preventDefault();
     e.stopPropagation();
 
@@ -376,13 +401,10 @@ const initFormSet = (form, optionsParam) => {
 
   for (let i = 0; i < formCount; i += 1) {
     const subFormPrefix = getInputNameWithPrefix(`${i}`);
-    initUploadFields(
-      form,
-      {
-        ...options,
-        prefix: `${prefix}-${subFormPrefix}`,
-      }
-    );
+    initUploadFields(form, {
+      ...options,
+      prefix: `${prefix}-${subFormPrefix}`
+    });
   }
 };
 
@@ -417,14 +439,14 @@ const initUploadFields = (form, options = {}) => {
     return;
   }
 
-  form.querySelectorAll(".dff-uploader").forEach(container => {
-    const element = container.querySelector(".dff-container");
+  form.querySelectorAll(".dff-uploader").forEach(uploaderDiv => {
+    const container = uploaderDiv.querySelector(".dff-container");
 
-    if (!element) {
+    if (!container) {
       return;
     }
 
-    const input = element.querySelector("input[type=file]");
+    const input = container.querySelector("input[type=file]");
 
     if (!(input && matchesPrefix(input.name))) {
       return;
@@ -432,17 +454,17 @@ const initUploadFields = (form, options = {}) => {
 
     const fieldName = input.name;
     const { multiple } = input;
-    const initial = getInitialFiles(element);
-    const translations = JSON.parse(element.getAttribute("data-translations"));
+    const initial = getInitialFiles(container);
+    const translations = JSON.parse(container.getAttribute("data-translations"));
     const supportDropArea = options.supportDropArea || false;
 
     new UploadFile({
-      container: element,
       fieldName,
       formId,
       initial,
       input,
       multiple,
+      parent: container,
       skipRequired,
       supportDropArea,
       translations,
