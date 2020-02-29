@@ -358,13 +358,13 @@ function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.
 
 function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
 
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 /* global document, window */
 
@@ -374,14 +374,21 @@ var RenderUploadFile =
 /*#__PURE__*/
 function () {
   function RenderUploadFile(_ref) {
-    var container = _ref.container,
+    var _parent = _ref.parent,
         input = _ref.input,
         skipRequired = _ref.skipRequired,
         translations = _ref.translations;
 
     _classCallCheck(this, RenderUploadFile);
 
-    this.container = container;
+    _defineProperty(this, "createFilesContainer", function (parent) {
+      var div = document.createElement("div");
+      div.className = "dff-files";
+      parent.appendChild(div);
+      return div;
+    });
+
+    this.container = this.createFilesContainer(_parent);
     this.input = input;
     this.translations = translations;
 
@@ -510,6 +517,27 @@ function () {
         innerProgressSpan.style.width = "".concat(percentage, "%");
       }
     }
+  }, {
+    key: "renderDropHint",
+    value: function renderDropHint() {
+      if (this.container.querySelector(".dff-drop-hint")) {
+        return;
+      }
+
+      var dropHint = document.createElement("div");
+      dropHint.className = "dff-drop-hint";
+      dropHint.innerHTML = this.translations["Drop your files here"];
+      this.container.appendChild(dropHint);
+    }
+  }, {
+    key: "removeDropHint",
+    value: function removeDropHint() {
+      var dropHint = this.container.querySelector(".dff-drop-hint");
+
+      if (dropHint) {
+        dropHint.remove();
+      }
+    }
   }]);
 
   return RenderUploadFile;
@@ -522,11 +550,11 @@ function () {
     var _this = this;
 
     var input = _ref2.input,
-        container = _ref2.container,
         _fieldName = _ref2.fieldName,
         _formId = _ref2.formId,
         initial = _ref2.initial,
         multiple = _ref2.multiple,
+        parent = _ref2.parent,
         skipRequired = _ref2.skipRequired,
         supportDropArea = _ref2.supportDropArea,
         translations = _ref2.translations,
@@ -575,6 +603,8 @@ function () {
 
         _this.uploads.push(upload);
       });
+
+      _this.checkDropHint();
     });
 
     _defineProperty(this, "onChange", function (e) {
@@ -615,44 +645,35 @@ function () {
       renderer.setSuccess(uploadIndex);
     });
 
-    this.container = container;
     this.fieldName = _fieldName;
     this.formId = _formId;
     this.multiple = multiple;
-    this.translations = translations;
+    this.supportDropArea = supportDropArea;
     this.uploadUrl = _uploadUrl;
     this.uploadIndex = 0;
     this.uploads = [];
-
-    if (supportDropArea) {
-      this.initDropArea();
-    }
-
-    this.filesContainer = this.createFilesContainer();
     this.renderer = new RenderUploadFile({
-      container: this.filesContainer,
+      parent: parent,
       input: input,
       skipRequired: skipRequired,
       translations: translations
     });
+    var filesContainer = this.renderer.container;
+
+    if (supportDropArea) {
+      this.initDropArea(filesContainer);
+    }
 
     if (initial) {
       this.addInitialFiles(initial);
     }
 
+    this.checkDropHint();
     input.addEventListener("change", this.onChange);
-    this.filesContainer.addEventListener("click", this.onClick);
+    filesContainer.addEventListener("click", this.onClick);
   }
 
   _createClass(UploadFile, [{
-    key: "createFilesContainer",
-    value: function createFilesContainer() {
-      var div = document.createElement("div");
-      div.className = "dff-files";
-      this.container.appendChild(div);
-      return div;
-    }
-  }, {
     key: "addInitialFiles",
     value: function addInitialFiles(initialFiles) {
       var _this2 = this;
@@ -694,6 +715,10 @@ function () {
       xhr.onload = function () {
         if (xhr.status === 204) {
           _this3.renderer.deleteFile(uploadIndex);
+
+          delete _this3.uploads[uploadIndex];
+
+          _this3.checkDropHint();
         } else {
           _this3.renderer.setDeleteFailed(uploadIndex);
         }
@@ -708,15 +733,33 @@ function () {
       var upload = this.uploads[uploadIndex];
       upload.abort(true);
       this.renderer.deleteFile(uploadIndex);
+      delete this.uploads[uploadIndex];
+      this.checkDropHint();
     }
   }, {
     key: "initDropArea",
-    value: function initDropArea() {
+    value: function initDropArea(container) {
       new DropArea({
-        container: this.container,
-        onUploadFiles: this.uploadFiles,
-        translations: this.translations
+        container: container,
+        onUploadFiles: this.uploadFiles
       });
+    }
+  }, {
+    key: "checkDropHint",
+    value: function checkDropHint() {
+      if (!this.supportDropArea) {
+        return;
+      }
+
+      var nonEmptyUploads = this.uploads.filter(function (e) {
+        return e;
+      });
+
+      if (nonEmptyUploads.length === 0) {
+        this.renderer.renderDropHint();
+      } else {
+        this.renderer.removeDropHint();
+      }
     }
   }]);
 
@@ -727,13 +770,12 @@ var DropArea = function DropArea(_ref3) {
   var _this4 = this;
 
   var container = _ref3.container,
-      onUploadFiles = _ref3.onUploadFiles,
-      translations = _ref3.translations;
+      onUploadFiles = _ref3.onUploadFiles;
 
   _classCallCheck(this, DropArea);
 
   _defineProperty(this, "onDrop", function (e) {
-    _this4.dropArea.classList.remove("dff-entered");
+    _this4.container.classList.remove("dff-dropping");
 
     e.preventDefault();
     e.stopPropagation();
@@ -743,22 +785,17 @@ var DropArea = function DropArea(_ref3) {
 
   this.container = container;
   this.onUploadFiles = onUploadFiles;
-  var dropArea = document.createElement("div");
-  dropArea.className = "dff-drop-area";
-  dropArea.innerHTML = translations["Drop your files here"];
-  dropArea.addEventListener("dragenter", function () {
-    dropArea.classList.add("dff-entered");
+  container.addEventListener("dragenter", function () {
+    container.classList.add("dff-dropping");
   });
-  dropArea.addEventListener("dragleave", function () {
-    dropArea.classList.remove("dff-entered");
+  container.addEventListener("dragleave", function () {
+    container.classList.remove("dff-dropping");
   });
-  dropArea.addEventListener("dragover", function (e) {
-    dropArea.classList.add("dff-entered");
+  container.addEventListener("dragover", function (e) {
+    container.classList.add("dff-dropping");
     e.preventDefault();
   });
-  dropArea.addEventListener("drop", this.onDrop);
-  this.container.appendChild(dropArea);
-  this.dropArea = dropArea;
+  container.addEventListener("drop", this.onDrop);
 };
 
 var getInputNameWithPrefix = function getInputNameWithPrefix(fieldName, prefix) {
@@ -836,14 +873,14 @@ var initUploadFields = function initUploadFields(form) {
     return;
   }
 
-  form.querySelectorAll(".dff-uploader").forEach(function (container) {
-    var element = container.querySelector(".dff-container");
+  form.querySelectorAll(".dff-uploader").forEach(function (uploaderDiv) {
+    var container = uploaderDiv.querySelector(".dff-container");
 
-    if (!element) {
+    if (!container) {
       return;
     }
 
-    var input = element.querySelector("input[type=file]");
+    var input = container.querySelector("input[type=file]");
 
     if (!(input && matchesPrefix(input.name))) {
       return;
@@ -851,16 +888,16 @@ var initUploadFields = function initUploadFields(form) {
 
     var fieldName = input.name;
     var multiple = input.multiple;
-    var initial = getInitialFiles(element);
-    var translations = JSON.parse(element.getAttribute("data-translations"));
+    var initial = getInitialFiles(container);
+    var translations = JSON.parse(container.getAttribute("data-translations"));
     var supportDropArea = options.supportDropArea || false;
     new UploadFile({
-      container: element,
       fieldName: fieldName,
       formId: formId,
       initial: initial,
       input: input,
       multiple: multiple,
+      parent: container,
       skipRequired: skipRequired,
       supportDropArea: supportDropArea,
       translations: translations,
