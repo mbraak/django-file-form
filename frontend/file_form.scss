@@ -3,16 +3,17 @@
     display: flex;
     flex-direction: column;
     margin: 16px 0 16px 0;
-    border: solid 2px #fff;
-    max-width: 20em;
-    padding: 8px;
+    outline: solid 1px #ddd;
+    max-width: 40em;
+    padding: 16px;
 
     &:empty {
       margin: 0;
+      outline: none;
     }
 
     &.dff-dropping {
-      border: dashed 2px #ccc;
+      outline: dashed 2px #ddd;
     }
 
     .dff-file {
@@ -30,11 +31,6 @@
     span {
       margin-left: 8px;
     }
-  }
-
-  .dff-drop-hint {
-    background-color: #eee;
-    padding: 8px;
   }
 
   .dff-progress {
