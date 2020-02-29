@@ -890,7 +890,7 @@ var initUploadFields = function initUploadFields(form) {
     var multiple = input.multiple;
     var initial = getInitialFiles(container);
     var translations = JSON.parse(container.getAttribute("data-translations"));
-    var supportDropArea = options.supportDropArea || false;
+    var supportDropArea = options.supportDropArea || true;
     new UploadFile({
       fieldName: fieldName,
       formId: formId,
