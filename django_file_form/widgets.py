@@ -9,7 +9,7 @@ from django_file_form.util import get_list
 
 
 def get_translations():
-    keys = ['Cancel', 'Delete', 'Delete failed', 'Upload failed']
+    keys = ['Cancel', 'Delete', 'Delete failed', 'Upload failed', 'Drop your files here']
 
     return {
         key: translation.gettext(key) for key in keys

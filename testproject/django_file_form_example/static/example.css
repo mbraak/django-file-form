@@ -6,7 +6,6 @@ body {
     margin-top: 16px;
 }
 
-form > div,
-form > input {
+form > div {
     margin-top: 16px;
 }

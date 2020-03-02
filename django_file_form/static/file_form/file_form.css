@@ -1,19 +1,23 @@
 .dff-uploader .dff-files {
   display: flex;
   flex-direction: column;
-  margin: 16px 0 16px 0; }
-
-.dff-uploader .dff-files:empty {
-  margin: 0; }
-
-.dff-uploader .dff-files > div {
-  margin-bottom: 8px; }
-
-.dff-uploader .dff-files > div:last-child {
-  margin-bottom: 0; }
-
-.dff-uploader .dff-files .dff-delete {
-  margin-left: 8px; }
+  margin: 16px 0 16px 0;
+  outline: solid 1px #ddd;
+  max-width: 40em;
+  padding: 16px; }
+  .dff-uploader .dff-files:empty {
+    margin: 0;
+    outline: none; }
+  .dff-uploader .dff-files.dff-dropping {
+    outline: dashed 2px #ddd; }
+  .dff-uploader .dff-files .dff-file {
+    margin-bottom: 8px; }
+    .dff-uploader .dff-files .dff-file:last-child {
+      margin-bottom: 0; }
+  .dff-uploader .dff-files .dff-delete {
+    margin-left: 8px; }
+  .dff-uploader .dff-files span {
+    margin-left: 8px; }
 
 .dff-uploader .dff-progress {
   background-color: #ccc;

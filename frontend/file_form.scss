@@ -3,22 +3,32 @@
     display: flex;
     flex-direction: column;
     margin: 16px 0 16px 0;
-  }
+    outline: solid 1px #ddd;
+    max-width: 40em;
+    padding: 16px;
 
-  .dff-files {
     &:empty {
       margin: 0;
+      outline: none;
     }
 
-    > div {
+    &.dff-dropping {
+      outline: dashed 2px #ddd;
+    }
+
+    .dff-file {
       margin-bottom: 8px;
-    }
 
-    > div:last-child {
-      margin-bottom: 0;
+      &:last-child {
+        margin-bottom: 0;
+      }
     }
 
     .dff-delete {
+      margin-left: 8px;
+    }
+
+    span {
       margin-left: 8px;
     }
   }

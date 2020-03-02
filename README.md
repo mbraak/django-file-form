@@ -196,6 +196,38 @@ Settings in `settings.py`:
   * Maximum upload size in bytes
   * Default is 4GB
 
+## initUploadFields
+
+Signature of `initUploadFields` is:
+
+```
+initUploadFields(formDomElement, options);
+```
+
+* `formDomElement` (required); e.g. `document.getElementById("example-form")`
+* options (optional)
+  * `prefix` : set this if the Django form has a prefix; default is empty
+  * `skipRequired` : don't set the `required` field of the file input; default is `false`
+  * `supportDropArea` : add a drop area; default is `true`
+
+Examples:
+
+```js
+initUploadFields(
+  document.getElementById("example-form")
+);
+```
+
+```js
+initUploadFields(
+  document.getElementById("example-form"),
+  {
+    prefix: "example",
+    skipRequired: true,
+    supportDropArea: true
+  }
+);
+```
 
 ## Form sets
 
@@ -203,13 +235,13 @@ You can also use a form set instead of a form. In that case `initFormSet` (inste
 in your javascript code.
 
 ```
-initFormSet(form_element, form_set_prefix)
+initFormSet(form_element, options)
 ```
 
 ```js
 initFormSet(
   document.getElementById("example-form"),
-  "form"
+  { prefix: "form" }
 );
 ```
 
@@ -219,7 +251,8 @@ initFormSet(
 ## Changelog
 
 * **development**
-  * Issue #266: Allow relative FILE_FORM_UPLOAD_DIR setting (thanks to Bo Peng)
+  * Issue #266: allow relative FILE_FORM_UPLOAD_DIR setting (thanks to Bo Peng)
+  * Issue #267: add drop area (thanks to Bo Peng)
 
 * **2.0.3 (15 february 2020)**
   * Issue #237: using with form set (thanks to Juan Carlos Carvajal)

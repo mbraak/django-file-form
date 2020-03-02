@@ -10,7 +10,7 @@
         id="example-form-set"
     >
         {% csrf_token %}
-        {{ form }}
+        {{ form.as_p }}
         <input type="submit" value="Submit" />
     </form>
 

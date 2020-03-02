@@ -346,6 +346,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var tus_js_client__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(tus_js_client__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var escape_html__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(4);
 /* harmony import */ var escape_html__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(escape_html__WEBPACK_IMPORTED_MODULE_1__);
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
 
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
@@ -354,13 +358,13 @@ function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.
 
 function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
 
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 /* global document, window */
 
@@ -370,17 +374,23 @@ var RenderUploadFile =
 /*#__PURE__*/
 function () {
   function RenderUploadFile(_ref) {
-    var container = _ref.container,
+    var _parent = _ref.parent,
         input = _ref.input,
         skipRequired = _ref.skipRequired,
         translations = _ref.translations;
 
     _classCallCheck(this, RenderUploadFile);
 
-    this.container = container;
+    _defineProperty(this, "createFilesContainer", function (parent) {
+      var div = document.createElement("div");
+      div.className = "dff-files";
+      parent.appendChild(div);
+      return div;
+    });
+
+    this.container = this.createFilesContainer(_parent);
     this.input = input;
     this.translations = translations;
-    this.filesContainer = this.createFilesContainer();
 
     if (skipRequired) {
       this.input.required = false;
@@ -388,14 +398,6 @@ function () {
   }
 
   _createClass(RenderUploadFile, [{
-    key: "createFilesContainer",
-    value: function createFilesContainer() {
-      var div = document.createElement("div");
-      div.className = "dff-files";
-      this.container.appendChild(div);
-      return div;
-    }
-  }, {
     key: "addUploadedFile",
     value: function addUploadedFile(filename, uploadIndex) {
       this.addFile(filename, uploadIndex);
@@ -422,11 +424,11 @@ function () {
     key: "addFile",
     value: function addFile(filename, uploadIndex) {
       var div = document.createElement("div");
-      div.className = "dff-file-id-".concat(uploadIndex);
+      div.className = "dff-file dff-file-id-".concat(uploadIndex);
       var nameSpan = document.createElement("span");
       nameSpan.innerHTML = escape_html__WEBPACK_IMPORTED_MODULE_1___default()(filename);
       div.appendChild(nameSpan);
-      this.filesContainer.appendChild(div);
+      this.container.appendChild(div);
       this.input.required = false;
       return div;
     }
@@ -462,7 +464,7 @@ function () {
   }, {
     key: "findFileDiv",
     value: function findFileDiv(index) {
-      return this.filesContainer.querySelector(".dff-file-id-".concat(index));
+      return this.container.querySelector(".dff-file-id-".concat(index));
     }
   }, {
     key: "setSuccess",
@@ -508,11 +510,32 @@ function () {
   }, {
     key: "updateProgress",
     value: function updateProgress(index, percentage) {
-      var el = this.filesContainer.querySelector(".dff-file-id-".concat(index));
+      var el = this.container.querySelector(".dff-file-id-".concat(index));
       var innerProgressSpan = el.querySelector(".dff-progress-inner");
 
       if (innerProgressSpan) {
         innerProgressSpan.style.width = "".concat(percentage, "%");
+      }
+    }
+  }, {
+    key: "renderDropHint",
+    value: function renderDropHint() {
+      if (this.container.querySelector(".dff-drop-hint")) {
+        return;
+      }
+
+      var dropHint = document.createElement("div");
+      dropHint.className = "dff-drop-hint";
+      dropHint.innerHTML = this.translations["Drop your files here"];
+      this.container.appendChild(dropHint);
+    }
+  }, {
+    key: "removeDropHint",
+    value: function removeDropHint() {
+      var dropHint = this.container.querySelector(".dff-drop-hint");
+
+      if (dropHint) {
+        dropHint.remove();
       }
     }
   }]);
@@ -527,20 +550,19 @@ function () {
     var _this = this;
 
     var input = _ref2.input,
-        container = _ref2.container,
         _fieldName = _ref2.fieldName,
         _formId = _ref2.formId,
         initial = _ref2.initial,
         multiple = _ref2.multiple,
+        parent = _ref2.parent,
         skipRequired = _ref2.skipRequired,
+        supportDropArea = _ref2.supportDropArea,
         translations = _ref2.translations,
         _uploadUrl = _ref2.uploadUrl;
 
     _classCallCheck(this, UploadFile);
 
-    _defineProperty(this, "onChange", function (e) {
-      var files = _toConsumableArray(e.target.files);
-
+    _defineProperty(this, "uploadFiles", function (files) {
       if (files.length === 0) {
         return;
       }
@@ -581,6 +603,12 @@ function () {
 
         _this.uploads.push(upload);
       });
+
+      _this.checkDropHint();
+    });
+
+    _defineProperty(this, "onChange", function (e) {
+      _this.uploadFiles(_toConsumableArray(e.target.files));
     });
 
     _defineProperty(this, "onClick", function (e) {
@@ -590,10 +618,14 @@ function () {
         var uploadIndex = parseInt(target.getAttribute("data-index"), 10);
 
         _this.handleDelete(uploadIndex);
+
+        e.preventDefault();
       } else if (target.classList.contains("dff-cancel")) {
         var _uploadIndex = parseInt(target.getAttribute("data-index"), 10);
 
         _this.handleCancel(_uploadIndex);
+
+        e.preventDefault();
       }
     });
 
@@ -616,22 +648,29 @@ function () {
     this.fieldName = _fieldName;
     this.formId = _formId;
     this.multiple = multiple;
+    this.supportDropArea = supportDropArea;
     this.uploadUrl = _uploadUrl;
     this.uploadIndex = 0;
     this.uploads = [];
     this.renderer = new RenderUploadFile({
-      container: container,
+      parent: parent,
       input: input,
       skipRequired: skipRequired,
       translations: translations
     });
+    var filesContainer = this.renderer.container;
+
+    if (supportDropArea) {
+      this.initDropArea(filesContainer);
+    }
 
     if (initial) {
       this.addInitialFiles(initial);
     }
 
+    this.checkDropHint();
     input.addEventListener("change", this.onChange);
-    container.addEventListener("click", this.onClick);
+    filesContainer.addEventListener("click", this.onClick);
   }
 
   _createClass(UploadFile, [{
@@ -676,6 +715,10 @@ function () {
       xhr.onload = function () {
         if (xhr.status === 204) {
           _this3.renderer.deleteFile(uploadIndex);
+
+          delete _this3.uploads[uploadIndex];
+
+          _this3.checkDropHint();
         } else {
           _this3.renderer.setDeleteFailed(uploadIndex);
         }
@@ -690,11 +733,70 @@ function () {
       var upload = this.uploads[uploadIndex];
       upload.abort(true);
       this.renderer.deleteFile(uploadIndex);
+      delete this.uploads[uploadIndex];
+      this.checkDropHint();
+    }
+  }, {
+    key: "initDropArea",
+    value: function initDropArea(container) {
+      new DropArea({
+        container: container,
+        onUploadFiles: this.uploadFiles
+      });
+    }
+  }, {
+    key: "checkDropHint",
+    value: function checkDropHint() {
+      if (!this.supportDropArea) {
+        return;
+      }
+
+      var nonEmptyUploads = this.uploads.filter(function (e) {
+        return e;
+      });
+
+      if (nonEmptyUploads.length === 0) {
+        this.renderer.renderDropHint();
+      } else {
+        this.renderer.removeDropHint();
+      }
     }
   }]);
 
   return UploadFile;
 }();
+
+var DropArea = function DropArea(_ref3) {
+  var _this4 = this;
+
+  var container = _ref3.container,
+      onUploadFiles = _ref3.onUploadFiles;
+
+  _classCallCheck(this, DropArea);
+
+  _defineProperty(this, "onDrop", function (e) {
+    _this4.container.classList.remove("dff-dropping");
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    _this4.onUploadFiles(_toConsumableArray(e.dataTransfer.files));
+  });
+
+  this.container = container;
+  this.onUploadFiles = onUploadFiles;
+  container.addEventListener("dragenter", function () {
+    container.classList.add("dff-dropping");
+  });
+  container.addEventListener("dragleave", function () {
+    container.classList.remove("dff-dropping");
+  });
+  container.addEventListener("dragover", function (e) {
+    container.classList.add("dff-dropping");
+    e.preventDefault();
+  });
+  container.addEventListener("drop", this.onDrop);
+};
 
 var getInputNameWithPrefix = function getInputNameWithPrefix(fieldName, prefix) {
   return prefix ? "".concat(prefix, "-").concat(fieldName) : fieldName;
@@ -712,14 +814,25 @@ var getInputValueForFormAndPrefix = function getInputValueForFormAndPrefix(form,
   return input.value;
 };
 
-var initFormSet = function initFormSet(form, prefix) {
+var initFormSet = function initFormSet(form, optionsParam) {
+  var options;
+
+  if (typeof optionsParam === "string") {
+    options = {
+      prefix: optionsParam
+    };
+  } else {
+    options = optionsParam;
+  }
+
+  var prefix = options.prefix || "form";
   var formCount = parseInt(getInputValueForFormAndPrefix(form, "TOTAL_FORMS", prefix), 10);
 
   for (var i = 0; i < formCount; i += 1) {
     var subFormPrefix = getInputNameWithPrefix("".concat(i));
-    initUploadFields(form, {
+    initUploadFields(form, _objectSpread({}, options, {
       prefix: "".concat(prefix, "-").concat(subFormPrefix)
-    });
+    }));
   }
 };
 
@@ -760,14 +873,14 @@ var initUploadFields = function initUploadFields(form) {
     return;
   }
 
-  form.querySelectorAll(".dff-uploader").forEach(function (container) {
-    var element = container.querySelector(".dff-container");
+  form.querySelectorAll(".dff-uploader").forEach(function (uploaderDiv) {
+    var container = uploaderDiv.querySelector(".dff-container");
 
-    if (!element) {
+    if (!container) {
       return;
     }
 
-    var input = element.querySelector("input[type=file]");
+    var input = container.querySelector("input[type=file]");
 
     if (!(input && matchesPrefix(input.name))) {
       return;
@@ -775,16 +888,18 @@ var initUploadFields = function initUploadFields(form) {
 
     var fieldName = input.name;
     var multiple = input.multiple;
-    var initial = getInitialFiles(element);
-    var translations = JSON.parse(element.getAttribute("data-translations"));
+    var initial = getInitialFiles(container);
+    var translations = JSON.parse(container.getAttribute("data-translations"));
+    var supportDropArea = !(options.supportDropArea === false);
     new UploadFile({
-      container: container,
       fieldName: fieldName,
       formId: formId,
       initial: initial,
       input: input,
       multiple: multiple,
+      parent: container,
       skipRequired: skipRequired,
+      supportDropArea: supportDropArea,
       translations: translations,
       uploadUrl: uploadUrl
     });

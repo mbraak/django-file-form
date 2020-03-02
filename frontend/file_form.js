@@ -4,24 +4,23 @@ import { Upload } from "tus-js-client";
 import escape from "escape-html";
 
 class RenderUploadFile {
-  constructor({ container, input, skipRequired, translations }) {
-    this.container = container;
+  constructor({ parent, input, skipRequired, translations }) {
+    this.container = this.createFilesContainer(parent);
     this.input = input;
     this.translations = translations;
-    this.filesContainer = this.createFilesContainer();
 
     if (skipRequired) {
       this.input.required = false;
     }
   }
 
-  createFilesContainer() {
+  createFilesContainer = parent => {
     const div = document.createElement("div");
     div.className = "dff-files";
-    this.container.appendChild(div);
+    parent.appendChild(div);
 
     return div;
-  }
+  };
 
   addUploadedFile(filename, uploadIndex) {
     this.addFile(filename, uploadIndex);
@@ -50,13 +49,13 @@ class RenderUploadFile {
 
   addFile(filename, uploadIndex) {
     const div = document.createElement("div");
-    div.className = `dff-file-id-${uploadIndex}`;
+    div.className = `dff-file dff-file-id-${uploadIndex}`;
 
     const nameSpan = document.createElement("span");
     nameSpan.innerHTML = escape(filename);
 
     div.appendChild(nameSpan);
-    this.filesContainer.appendChild(div);
+    this.container.appendChild(div);
 
     this.input.required = false;
     return div;
@@ -93,7 +92,7 @@ class RenderUploadFile {
   }
 
   findFileDiv(index) {
-    return this.filesContainer.querySelector(`.dff-file-id-${index}`);
+    return this.container.querySelector(`.dff-file-id-${index}`);
   }
 
   setSuccess(index) {
@@ -141,33 +140,72 @@ class RenderUploadFile {
   }
 
   updateProgress(index, percentage) {
-    const el = this.filesContainer.querySelector(`.dff-file-id-${index}`);
+    const el = this.container.querySelector(`.dff-file-id-${index}`);
     const innerProgressSpan = el.querySelector(".dff-progress-inner");
 
     if (innerProgressSpan) {
       innerProgressSpan.style.width = `${percentage}%`;
     }
   }
+
+  renderDropHint() {
+    if (this.container.querySelector(".dff-drop-hint")) {
+      return;
+    }
+
+    const dropHint = document.createElement("div");
+    dropHint.className = "dff-drop-hint";
+    dropHint.innerHTML = this.translations["Drop your files here"];
+
+    this.container.appendChild(dropHint);
+  }
+
+  removeDropHint() {
+    const dropHint = this.container.querySelector(".dff-drop-hint");
+
+    if (dropHint) {
+      dropHint.remove();
+    }
+  }
 }
 
 class UploadFile {
-  constructor({ input, container, fieldName, formId, initial, multiple, skipRequired, translations, uploadUrl }) {
+  constructor({
+    input,
+    fieldName,
+    formId,
+    initial,
+    multiple,
+    parent,
+    skipRequired,
+    supportDropArea,
+    translations,
+    uploadUrl
+  }) {
     this.fieldName = fieldName;
     this.formId = formId;
     this.multiple = multiple;
+    this.supportDropArea = supportDropArea;
     this.uploadUrl = uploadUrl;
 
     this.uploadIndex = 0;
     this.uploads = [];
 
-    this.renderer = new RenderUploadFile({ container, input, skipRequired, translations });
+    this.renderer = new RenderUploadFile({ parent, input, skipRequired, translations });
+    const filesContainer = this.renderer.container;
+
+    if (supportDropArea) {
+      this.initDropArea(filesContainer);
+    }
 
     if (initial) {
       this.addInitialFiles(initial);
     }
 
+    this.checkDropHint();
+
     input.addEventListener("change", this.onChange);
-    container.addEventListener("click", this.onClick);
+    filesContainer.addEventListener("click", this.onClick);
   }
 
   addInitialFiles(initialFiles) {
@@ -194,9 +232,7 @@ class UploadFile {
     }
   }
 
-  onChange = e => {
-    const files = [...e.target.files];
-
+  uploadFiles = files => {
     if (files.length === 0) {
       return;
     }
@@ -224,6 +260,12 @@ class UploadFile {
 
       this.uploads.push(upload);
     });
+
+    this.checkDropHint();
+  };
+
+  onChange = e => {
+    this.uploadFiles([...e.target.files]);
   };
 
   onClick = e => {
@@ -232,9 +274,13 @@ class UploadFile {
     if (target.classList.contains("dff-delete")) {
       const uploadIndex = parseInt(target.getAttribute("data-index"), 10);
       this.handleDelete(uploadIndex);
+
+      e.preventDefault();
     } else if (target.classList.contains("dff-cancel")) {
       const uploadIndex = parseInt(target.getAttribute("data-index"), 10);
       this.handleCancel(uploadIndex);
+
+      e.preventDefault();
     }
   };
 
@@ -264,6 +310,8 @@ class UploadFile {
     xhr.onload = () => {
       if (xhr.status === 204) {
         this.renderer.deleteFile(uploadIndex);
+        delete this.uploads[uploadIndex];
+        this.checkDropHint();
       } else {
         this.renderer.setDeleteFailed(uploadIndex);
       }
@@ -277,7 +325,57 @@ class UploadFile {
     upload.abort(true);
 
     this.renderer.deleteFile(uploadIndex);
+    delete this.uploads[uploadIndex];
+    this.checkDropHint();
   }
+
+  initDropArea(container) {
+    new DropArea({
+      container,
+      onUploadFiles: this.uploadFiles
+    });
+  }
+
+  checkDropHint() {
+    if (!this.supportDropArea) {
+      return;
+    }
+
+    const nonEmptyUploads = this.uploads.filter(e => e);
+
+    if (nonEmptyUploads.length === 0) {
+      this.renderer.renderDropHint();
+    } else {
+      this.renderer.removeDropHint();
+    }
+  }
+}
+
+class DropArea {
+  constructor({ container, onUploadFiles }) {
+    this.container = container;
+    this.onUploadFiles = onUploadFiles;
+
+    container.addEventListener("dragenter", () => {
+      container.classList.add("dff-dropping");
+    });
+    container.addEventListener("dragleave", () => {
+      container.classList.remove("dff-dropping");
+    });
+    container.addEventListener("dragover", e => {
+      container.classList.add("dff-dropping");
+      e.preventDefault();
+    });
+    container.addEventListener("drop", this.onDrop);
+  }
+
+  onDrop = e => {
+    this.container.classList.remove("dff-dropping");
+    e.preventDefault();
+    e.stopPropagation();
+
+    this.onUploadFiles([...e.dataTransfer.files]);
+  };
 }
 
 const getInputNameWithPrefix = (fieldName, prefix) => (prefix ? `${prefix}-${fieldName}` : fieldName);
@@ -294,12 +392,25 @@ const getInputValueForFormAndPrefix = (form, fieldName, prefix) => {
   return input.value;
 };
 
-const initFormSet = (form, prefix) => {
+const initFormSet = (form, optionsParam) => {
+  let options;
+
+  if (typeof optionsParam === "string") {
+    options = { prefix: optionsParam };
+  } else {
+    options = optionsParam;
+  }
+
+  const prefix = options.prefix || "form";
+
   const formCount = parseInt(getInputValueForFormAndPrefix(form, "TOTAL_FORMS", prefix), 10);
 
   for (let i = 0; i < formCount; i += 1) {
     const subFormPrefix = getInputNameWithPrefix(`${i}`);
-    initUploadFields(form, { prefix: `${prefix}-${subFormPrefix}` });
+    initUploadFields(form, {
+      ...options,
+      prefix: `${prefix}-${subFormPrefix}`
+    });
   }
 };
 
@@ -334,14 +445,14 @@ const initUploadFields = (form, options = {}) => {
     return;
   }
 
-  form.querySelectorAll(".dff-uploader").forEach(container => {
-    const element = container.querySelector(".dff-container");
+  form.querySelectorAll(".dff-uploader").forEach(uploaderDiv => {
+    const container = uploaderDiv.querySelector(".dff-container");
 
-    if (!element) {
+    if (!container) {
       return;
     }
 
-    const input = element.querySelector("input[type=file]");
+    const input = container.querySelector("input[type=file]");
 
     if (!(input && matchesPrefix(input.name))) {
       return;
@@ -349,17 +460,19 @@ const initUploadFields = (form, options = {}) => {
 
     const fieldName = input.name;
     const { multiple } = input;
-    const initial = getInitialFiles(element);
-    const translations = JSON.parse(element.getAttribute("data-translations"));
+    const initial = getInitialFiles(container);
+    const translations = JSON.parse(container.getAttribute("data-translations"));
+    const supportDropArea = !(options.supportDropArea === false);
 
     new UploadFile({
-      container,
       fieldName,
       formId,
       initial,
       input,
       multiple,
+      parent: container,
       skipRequired,
+      supportDropArea,
       translations,
       uploadUrl
     });
