@@ -22,9 +22,9 @@ class RenderUploadFile {
     return div;
   };
 
-  addUploadedFile(filename, uploadIndex) {
+  addUploadedFile(filename, uploadIndex, filesize) {
     this.addFile(filename, uploadIndex);
-    this.setSuccess(uploadIndex);
+    this.setSuccess(uploadIndex, filesize);
   }
 
   addNewUpload(filename, uploadIndex) {
@@ -95,11 +95,18 @@ class RenderUploadFile {
     return this.container.querySelector(`.dff-file-id-${index}`);
   }
 
-  setSuccess(index) {
+  setSuccess(index, size) {
     const { translations } = this;
 
     const el = this.findFileDiv(index);
     el.classList.add("dff-upload-success");
+
+    const fileSizeInfo = document.createElement("span");
+    fileSizeInfo.innerHTML = size;
+    fileSizeInfo.className = "dff-filesize";
+    fileSizeInfo.setAttribute("data-index", index);
+
+    el.appendChild(fileSizeInfo);
 
     const deleteLink = document.createElement("a");
     deleteLink.innerHTML = translations.Delete;
@@ -216,7 +223,7 @@ class UploadFile {
     const { multiple, renderer } = this;
 
     const addInitialFile = (file, i) => {
-      renderer.addUploadedFile(file.name, i);
+      renderer.addUploadedFile(file.name, i, file.size);
       this.uploads.push({ url: `${this.uploadUrl}${file.id}` });
     };
 
@@ -252,7 +259,7 @@ class UploadFile {
         metadata: { fieldName, filename, formId },
         onError: () => this.handleError(uploadIndex),
         onProgress: (bytesUploaded, bytesTotal) => this.handleProgress(uploadIndex, bytesUploaded, bytesTotal),
-        onSuccess: () => this.handleSuccess(uploadIndex)
+        onSuccess: () => this.handleSuccess(uploadIndex, upload.file.size)
       });
 
       upload.start();
@@ -294,11 +301,11 @@ class UploadFile {
     this.renderer.setError(uploadIndex);
   };
 
-  handleSuccess = uploadIndex => {
+  handleSuccess = (uploadIndex, uploadedSize) => {
     const { renderer } = this;
 
     renderer.clearInput();
-    renderer.setSuccess(uploadIndex);
+    renderer.setSuccess(uploadIndex, uploadedSize);
   };
 
   handleDelete(uploadIndex) {
