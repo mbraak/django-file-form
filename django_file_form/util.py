@@ -1,11 +1,7 @@
-import os
 from pathlib import Path
-from django.core.exceptions import ImproperlyConfigured, PermissionDenied
+from django.core.exceptions import PermissionDenied
 from django.db import models
-from django.utils.module_loading import import_string
 from django.conf import settings
-
-from . import conf
 
 
 class ModelManager(models.Manager):
@@ -22,17 +18,6 @@ def get_list(v):
         return v
     else:
         return [v]
-
-
-def load_class(setting_string, conf_module=conf):
-    class_name = getattr(conf_module, setting_string)
-
-    try:
-        return import_string(class_name)
-    except ImportError:
-        raise ImproperlyConfigured(
-            f"{setting_string} refers to a class '{class_name}' that is not available"
-        )
 
 
 def check_permission(request):
