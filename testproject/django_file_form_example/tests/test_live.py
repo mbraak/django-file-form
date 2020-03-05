@@ -91,6 +91,21 @@ class LiveTestCase(BaseLiveTestCase):
         self.assertEqual(UploadedFile.objects.count(), 0)
         self.assertFalse(Path(uploaded_file.uploaded_file.path).exists())
 
+    def test_upload_binary_file(self):
+        content = Path(__file__).parent.joinpath('test_data/wikipedia.png').read_bytes()
+
+        page = self.page
+        temp_file = page.create_temp_file(content, binary=True)
+        page.open('/')
+        page.selenium.find_element_by_css_selector('.dff-files')
+        page.upload_using_js(temp_file)
+
+        page.find_upload_success(temp_file)
+        self.assertEqual(UploadedFile.objects.count(), 1)
+
+        uploaded_file = UploadedFile.objects.first()
+        self.assertEqual(read_file(uploaded_file.uploaded_file), content)
+
     def test_upload_multiple(self):
         page = self.page
 
