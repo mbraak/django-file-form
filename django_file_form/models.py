@@ -4,6 +4,7 @@ from pathlib import Path
 
 from django.conf import settings
 from django.core.files import uploadedfile
+import uuid
 from django.db import models
 from django.utils import timezone
 from . import conf
@@ -95,3 +96,18 @@ class UploadedFileWithId(uploadedfile.UploadedFile):
 
     def get_values(self):
         return dict(id=self.file_id, name=self.name)
+
+
+class PlaceholderUploadedFile(object):
+
+    def __init__(self, filename, filesize=None):
+        self.name = filename
+        self.file_id = uuid.uuid4().hex + '.placeholder'
+        self.placeholder = True
+        if filesize:
+            self.size = filesize
+        else:
+            self.size = os.path.getsize(self.name)
+
+    def get_values(self):
+        return dict(id=self.file_id, name=self.name, size=self.size)

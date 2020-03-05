@@ -6,6 +6,7 @@ from django.views import generic
 from django.urls import reverse
 from formtools.wizard.views import SessionWizardView
 from django_file_form.util import get_upload_path
+from django_file_form.models import UploadedFileWithId, PlaceholderUploadedFile
 
 from . import forms
 
@@ -14,6 +15,11 @@ class BaseFormView(generic.FormView):
     template_name = 'example_form.html'
     use_ajax = True
     custom_js_file = 'example_form.js'
+
+    def get_initial(self):
+        initial = super(BaseFormView, self).get_initial()
+        initial['input_file'] = [PlaceholderUploadedFile('manage.py')]
+        return initial
 
     def get_success_url(self):
         return reverse('example_success')

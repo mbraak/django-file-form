@@ -54,6 +54,8 @@ class MultipleFileExampleForm(BaseForm):
         )
 
         for f in self.cleaned_data['input_file']:
+            if hasattr(f, 'placeholder'):
+                continue
             ExampleFile.objects.create(
                 example=example,
                 input_file=f
