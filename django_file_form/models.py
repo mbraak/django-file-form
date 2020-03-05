@@ -95,17 +95,17 @@ class UploadedFileWithId(uploadedfile.UploadedFile):
         self.size = os.path.getsize(self.file.name)
 
     def get_values(self):
-        return dict(id=self.file_id, name=self.name)
+        return dict(id=self.file_id, name=self.name, size=self.size)
 
 
 class PlaceholderUploadedFile(object):
 
-    def __init__(self, filename, filesize=None):
-        self.name = filename
-        self.file_id = uuid.uuid4().hex + '.placeholder'
-        self.placeholder = True
-        if filesize:
-            self.size = filesize
+    def __init__(self, name, size=None, placeholder=None):
+        self.name = name
+        self.file_id = uuid.uuid4() + '.placeholder'
+        self.placeholder = placeholder
+        if size:
+            self.size = size
         else:
             self.size = os.path.getsize(self.name)
 

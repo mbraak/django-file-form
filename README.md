@@ -175,22 +175,25 @@ initial['your_field'] = [
 ]
 ```
 
-if the file exists, or
+You can also add options `size` and `placeholder` to specify file size if the file does not exist locally,
+and specify an ID of the file to be used later to identify the file as attribute `.placeholder`.
 
 ```
 initial['your_field'] = [
-  PlaceholderUploadedFile('manage.py', size=12394)
+  PlaceholderUploadedFile('manage.py', size=12394, placeholder=id_for_the_file)
 ]
 ```
-if the file does not exist locally but you have the size information.
+
 
 The placeholder file will be listed, and will either be kept intact, or be removed. When you save the form, you will have to handle such files
 
 ```
 for f in self.cleaned_data['input_file']:
     if hasattr(f, 'placeholder'):
+        # placeholder ID is available through f.placeholder
         continue
     # handle newly uploaded files
+
 # and remove existing files if the placeholder is deleted
 # ...
 ```
