@@ -163,6 +163,38 @@ if not os.path.exists(temp_upload_dir):
   os.mkdir(temp_upload_dir)
 ```
 
+**3 Adding placeholder files
+
+If you have used `django-file-form` to upload files for a model, potentially have saved the files elsewhere, but would like to use `django-file-form` to edit the original uploaded files and append new files, you can add the original uploaded files as placeholders to the file dialog. More specifically, you will need to initialize your field with one or more `PlaceholderUploadedFile` as follows:
+
+```
+from django_file_form.models import PlaceholderUploadedFile
+
+initial['your_field'] = [
+  PlaceholderUploadedFile('manage.py')
+]
+```
+
+if the file exists, or
+
+```
+initial['your_field'] = [
+  PlaceholderUploadedFile('manage.py', size=12394)
+]
+```
+if the file does not exist locally but you have the size information.
+
+The placeholder file will be listed, and will either be kept intact, or be removed. When you save the form, you will have to handle such files
+
+```
+for f in self.cleaned_data['input_file']:
+    if hasattr(f, 'placeholder'):
+        continue
+    # handle newly uploaded files
+# and remove existing files if the placeholder is deleted
+# ...
+```
+
 ## Upgrade from version 1.0 (to 2.0)
 
 * Add reference to file_form/file_form.css:
