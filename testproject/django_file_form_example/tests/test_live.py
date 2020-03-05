@@ -78,6 +78,7 @@ class LiveTestCase(BaseLiveTestCase):
 
         uploaded_file = UploadedFile.objects.first()
         self.assertEqual(read_file(uploaded_file.uploaded_file), b'content1')
+        self.assertEqual(Path(str(uploaded_file.uploaded_file)).parent, Path(settings.MEDIA_ROOT).joinpath('temp_uploads'))
 
         page.submit()
         page.assert_page_contains_text('Upload success')
