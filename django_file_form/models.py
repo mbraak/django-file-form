@@ -102,7 +102,7 @@ class PlaceholderUploadedFile(object):
 
     def __init__(self, name, size=None, placeholder=None):
         self.name = name
-        self.file_id = uuid.uuid4() + '.placeholder'
+        self.file_id = uuid.uuid4().hex + '.placeholder'
         self.placeholder = placeholder
         if size:
             self.size = size
