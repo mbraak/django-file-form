@@ -179,7 +179,7 @@ You can also add options `size` and `placeholder` to specify file size if the fi
 and an unique ID of the file, respectively.
 
 ```
-initial['your_field'] = [
+initial['my_field'] = [
   PlaceholderUploadedFile('manage.py', size=12394, placeholder=my_file.pk)
 ]
 ```
