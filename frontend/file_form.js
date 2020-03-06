@@ -3,6 +3,21 @@
 import { Upload } from "tus-js-client";
 import escape from "escape-html";
 
+function formatBytes(bytes, decimals) {
+  if (bytes === 0) {
+    return "0 Bytes";
+  }
+
+  const k = 1024;
+  const dm = decimals <= 0 ? 0 : decimals || 2;
+  const sizes = ["Bytes", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  const n = parseFloat((bytes / k ** i).toFixed(dm));
+  const size = sizes[i];
+
+  return `${n} ${size}`;
+}
+
 class RenderUploadFile {
   constructor({ parent, input, skipRequired, translations }) {
     this.container = this.createFilesContainer(parent);
@@ -22,9 +37,9 @@ class RenderUploadFile {
     return div;
   };
 
-  addUploadedFile(filename, uploadIndex) {
+  addUploadedFile(filename, uploadIndex, filesize) {
     this.addFile(filename, uploadIndex);
-    this.setSuccess(uploadIndex);
+    this.setSuccess(uploadIndex, filesize);
   }
 
   addNewUpload(filename, uploadIndex) {
@@ -95,11 +110,17 @@ class RenderUploadFile {
     return this.container.querySelector(`.dff-file-id-${index}`);
   }
 
-  setSuccess(index) {
+  setSuccess(index, size) {
     const { translations } = this;
 
     const el = this.findFileDiv(index);
     el.classList.add("dff-upload-success");
+
+    const fileSizeInfo = document.createElement("span");
+    fileSizeInfo.innerHTML = formatBytes(size, 2);
+    fileSizeInfo.className = "dff-filesize";
+
+    el.appendChild(fileSizeInfo);
 
     const deleteLink = document.createElement("a");
     deleteLink.innerHTML = translations.Delete;
@@ -216,7 +237,7 @@ class UploadFile {
     const { multiple, renderer } = this;
 
     const addInitialFile = (file, i) => {
-      renderer.addUploadedFile(file.name, i);
+      renderer.addUploadedFile(file.name, i, file.size);
       this.uploads.push({ url: `${this.uploadUrl}${file.id}` });
     };
 
@@ -252,7 +273,7 @@ class UploadFile {
         metadata: { fieldName, filename, formId },
         onError: () => this.handleError(uploadIndex),
         onProgress: (bytesUploaded, bytesTotal) => this.handleProgress(uploadIndex, bytesUploaded, bytesTotal),
-        onSuccess: () => this.handleSuccess(uploadIndex)
+        onSuccess: () => this.handleSuccess(uploadIndex, upload.file.size)
       });
 
       upload.start();
@@ -294,11 +315,11 @@ class UploadFile {
     this.renderer.setError(uploadIndex);
   };
 
-  handleSuccess = uploadIndex => {
+  handleSuccess = (uploadIndex, uploadedSize) => {
     const { renderer } = this;
 
     renderer.clearInput();
-    renderer.setSuccess(uploadIndex);
+    renderer.setSuccess(uploadIndex, uploadedSize);
   };
 
   handleDelete(uploadIndex) {

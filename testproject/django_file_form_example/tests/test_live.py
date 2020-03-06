@@ -74,6 +74,7 @@ class LiveTestCase(BaseLiveTestCase):
         page.upload_using_js(temp_file)
 
         page.find_upload_success(temp_file)
+        page.assert_page_contains_text('8 Bytes')
         self.assertEqual(UploadedFile.objects.count(), 1)
 
         uploaded_file = UploadedFile.objects.first()
@@ -218,6 +219,7 @@ class LiveTestCase(BaseLiveTestCase):
         page.submit()
 
         page.find_upload_success(temp_file)
+        page.assert_page_contains_text('8 Bytes')
         self.assertEqual(UploadedFile.objects.count(), 1)
 
         page.fill_title_field('abc')
