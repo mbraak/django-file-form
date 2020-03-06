@@ -165,36 +165,35 @@ if not os.path.exists(temp_upload_dir):
 
 **3 Adding placeholder files
 
-If you have used `django-file-form` to upload files for a model, potentially have saved the files elsewhere, but would like to use `django-file-form` to edit the original uploaded files and append new files, you can add the original uploaded files as placeholders to the file dialog. More specifically, you will need to initialize your field with one or more `PlaceholderUploadedFile` as follows:
+If you have used `django-file-form` to upload files, potentially have saved the files elsewhere, but would like to use `django-file-form` to edit (remove or replace) the original uploaded files and append new files, you can add information about the original uploaded files as placeholders to the `UploadedFileField`. More specifically, you can initialize your field with one or more `PlaceholderUploadedFile` as follows:
 
 ```
 from django_file_form.models import PlaceholderUploadedFile
 
-initial['your_field'] = [
+initial['my_field'] = [
   PlaceholderUploadedFile('manage.py')
 ]
 ```
 
 You can also add options `size` and `placeholder` to specify file size if the file does not exist locally,
-and specify an ID of the file to be used later to identify the file as attribute `.placeholder`.
+and an unique ID of the file, respectively.
 
 ```
-initial['your_field'] = [
-  PlaceholderUploadedFile('manage.py', size=12394, placeholder=id_for_the_file)
+initial['my_field'] = [
+  PlaceholderUploadedFile('manage.py', size=12394, placeholder=my_file.pk)
 ]
 ```
 
-
-The placeholder file will be listed, and will either be kept intact, or be removed. When you save the form, you will have to handle such files
+The placeholder file will be listed, and will either be kept intact, or be removed. When you save the form, you will have to handle the placeholders as follows:
 
 ```
-for f in self.cleaned_data['input_file']:
+for f in self.cleaned_data['my_field']:
     if hasattr(f, 'placeholder'):
-        # placeholder ID is available through f.placeholder
+        # do nothing, or something with f.name or f.placeholder (the ID)
         continue
-    # handle newly uploaded files
+    # handle newly uploaded files as usual
 
-# and remove existing files if the placeholder is deleted
+# remove existing files if the placeholder is deleted
 # ...
 ```
 
