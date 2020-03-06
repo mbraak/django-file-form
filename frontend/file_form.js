@@ -324,7 +324,13 @@ class UploadFile {
 
   handleDelete(uploadIndex) {
     const { url } = this.uploads[uploadIndex];
-
+    console.log(url);
+    if (url.endsWith('.placeholder')) {
+      this.renderer.deleteFile(uploadIndex);
+      delete this.uploads[uploadIndex];
+      this.checkDropHint();
+      return;
+    }
     const xhr = new window.XMLHttpRequest();
     xhr.open("DELETE", url);
 
