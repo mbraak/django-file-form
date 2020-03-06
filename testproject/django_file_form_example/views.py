@@ -18,7 +18,7 @@ class BaseFormView(generic.FormView):
 
     def get_initial(self):
         initial = super(BaseFormView, self).get_initial()
-        initial['input_file'] = [PlaceholderUploadedFile('manage.py')]
+        initial['input_file'] = [PlaceholderUploadedFile('test_placeholder.txt', size=1024)]
         return initial
 
     def get_success_url(self):
