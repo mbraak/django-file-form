@@ -11,13 +11,13 @@ class TempFile(object):
     def __init__(self):
         self.named_temporary_file = None
 
-    def create(self, content='abc', prefix=None):
+    def create(self, content='abc', prefix=None, binary=False):
         if self.named_temporary_file:
             raise Exception('Tempfile is already created')
 
         def create_named_temporary_file():
             f = NamedTemporaryFile(mode='w+b', prefix=prefix or 'tmp')
-            f.write(content.encode())
+            f.write(content if binary else content.encode())
             f.seek(0)
 
             return f

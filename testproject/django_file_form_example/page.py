@@ -12,9 +12,9 @@ class Page(object):
         self.live_server_url = live_server_url
         self.temp_files = []
 
-    def create_temp_file(self, content, prefix=None):
+    def create_temp_file(self, content, prefix=None, binary=False):
         temp_file = TempFile()
-        temp_file.create(content, prefix=prefix)
+        temp_file.create(content, prefix=prefix, binary=binary)
 
         self.temp_files.append(temp_file)
 

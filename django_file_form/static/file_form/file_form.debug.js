@@ -370,6 +370,20 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 
 
+function formatBytes(bytes, decimals) {
+  if (bytes === 0) {
+    return "0 Bytes";
+  }
+
+  var k = 1024;
+  var dm = decimals <= 0 ? 0 : decimals || 2;
+  var sizes = ["Bytes", "KB", "MB", "GB"];
+  var i = Math.floor(Math.log(bytes) / Math.log(k));
+  var n = parseFloat((bytes / Math.pow(k, i)).toFixed(dm));
+  var size = sizes[i];
+  return "".concat(n, " ").concat(size);
+}
+
 var RenderUploadFile =
 /*#__PURE__*/
 function () {
@@ -399,9 +413,9 @@ function () {
 
   _createClass(RenderUploadFile, [{
     key: "addUploadedFile",
-    value: function addUploadedFile(filename, uploadIndex) {
+    value: function addUploadedFile(filename, uploadIndex, filesize) {
       this.addFile(filename, uploadIndex);
-      this.setSuccess(uploadIndex);
+      this.setSuccess(uploadIndex, filesize);
     }
   }, {
     key: "addNewUpload",
@@ -468,10 +482,14 @@ function () {
     }
   }, {
     key: "setSuccess",
-    value: function setSuccess(index) {
+    value: function setSuccess(index, size) {
       var translations = this.translations;
       var el = this.findFileDiv(index);
       el.classList.add("dff-upload-success");
+      var fileSizeInfo = document.createElement("span");
+      fileSizeInfo.innerHTML = formatBytes(size, 2);
+      fileSizeInfo.className = "dff-filesize";
+      el.appendChild(fileSizeInfo);
       var deleteLink = document.createElement("a");
       deleteLink.innerHTML = translations.Delete;
       deleteLink.className = "dff-delete";
@@ -595,7 +613,7 @@ function () {
             return _this.handleProgress(uploadIndex, bytesUploaded, bytesTotal);
           },
           onSuccess: function onSuccess() {
-            return _this.handleSuccess(uploadIndex);
+            return _this.handleSuccess(uploadIndex, upload.file.size);
           }
         });
         upload.start();
@@ -639,10 +657,10 @@ function () {
       _this.renderer.setError(uploadIndex);
     });
 
-    _defineProperty(this, "handleSuccess", function (uploadIndex) {
+    _defineProperty(this, "handleSuccess", function (uploadIndex, uploadedSize) {
       var renderer = _this.renderer;
       renderer.clearInput();
-      renderer.setSuccess(uploadIndex);
+      renderer.setSuccess(uploadIndex, uploadedSize);
     });
 
     this.fieldName = _fieldName;
@@ -686,7 +704,7 @@ function () {
           renderer = this.renderer;
 
       var addInitialFile = function addInitialFile(file, i) {
-        renderer.addUploadedFile(file.name, i);
+        renderer.addUploadedFile(file.name, i, file.size);
 
         _this2.uploads.push({
           url: "".concat(_this2.uploadUrl).concat(file.id)
