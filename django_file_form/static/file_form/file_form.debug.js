@@ -727,6 +727,14 @@ function () {
       var _this3 = this;
 
       var url = this.uploads[uploadIndex].url;
+
+      if (url.endsWith(".placeholder")) {
+        this.renderer.deleteFile(uploadIndex);
+        delete this.uploads[uploadIndex];
+        this.checkDropHint();
+        return;
+      }
+
       var xhr = new window.XMLHttpRequest();
       xhr.open("DELETE", url);
 
