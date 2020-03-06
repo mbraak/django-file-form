@@ -104,10 +104,10 @@ class PlaceholderUploadedFile(object):
         self.name = name
         self.file_id = uuid.uuid4().hex + '.placeholder'
         self.placeholder = placeholder
-        if size:
-            self.size = size
-        else:
+        if size is None:
             self.size = os.path.getsize(self.name)
+        else:
+            self.size = size
 
     def get_values(self):
         return dict(id=self.file_id, name=self.name, size=self.size)
