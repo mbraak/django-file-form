@@ -94,4 +94,4 @@ class UploadedFileWithId(uploadedfile.UploadedFile):
         self.size = os.path.getsize(self.file.name)
 
     def get_values(self):
-        return dict(id=self.file_id, name=self.name)
+        return dict(id=self.file_id, name=self.name, size=self.size)
