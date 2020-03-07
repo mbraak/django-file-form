@@ -67,7 +67,7 @@ class FormSetExampleView(BaseFormView):
 class ExistingView(BaseFormView):
     def get_initial(self):
         initial = super(ExistingView, self).get_initial()
-        initial['input_file'] = [PlaceholderUploadedFile('example.txt')]
+        initial['input_file'] = [PlaceholderUploadedFile('test_placeholder.txt', size=1024)]
         return initial
 
 
