@@ -99,7 +99,6 @@ class UploadedFileWithId(uploadedfile.UploadedFile):
 
 
 class PlaceholderUploadedFile(object):
-
     def __init__(self, name, size=None, placeholder=None):
         self.name = name
         self.file_id = uuid.uuid4().hex + '.placeholder'

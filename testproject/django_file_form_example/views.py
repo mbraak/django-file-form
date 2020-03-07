@@ -16,11 +16,6 @@ class BaseFormView(generic.FormView):
     use_ajax = True
     custom_js_file = 'example_form.js'
 
-    def get_initial(self):
-        initial = super(BaseFormView, self).get_initial()
-        initial['input_file'] = [PlaceholderUploadedFile('manage.py')]
-        return initial
-
     def get_success_url(self):
         return reverse('example_success')
 
@@ -67,6 +62,13 @@ class WizardExampleview(SessionWizardView):
 class FormSetExampleView(BaseFormView):
     form_class = forms.ExampleFormSet
     template_name = 'form_set.html'
+
+
+class ExistingView(BaseFormView):
+    def get_initial(self):
+        initial = super(ExistingView, self).get_initial()
+        initial['input_file'] = [PlaceholderUploadedFile('example.txt')]
+        return initial
 
 
 def permission_denied(request, exception):
