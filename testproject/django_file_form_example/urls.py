@@ -13,5 +13,5 @@ urlpatterns = (
     url(r'^multiple_without_js$', views.MultipleWithoutJsExampleView.as_view(), name='multiple_without_js_example'),
     url(r'^wizard$', views.WizardExampleview.as_view(), name='wizard_example'),
     url(r'^login/$', LoginView.as_view(template_name='admin/login.html')),
-    url(r'^existing$', views.ExistingView.as_view(), name='existing_example'),
+    url(r'^placeholder', views.PlaceholderView.as_view(), name='placeholder_example'),
 )

@@ -64,9 +64,11 @@ class FormSetExampleView(BaseFormView):
     template_name = 'form_set.html'
 
 
-class ExistingView(BaseFormView):
+class PlaceholderView(BaseFormView):
+    form_class = forms.PlaceholderExampleForm
+
     def get_initial(self):
-        initial = super(ExistingView, self).get_initial()
+        initial = super(PlaceholderView, self).get_initial()
         initial['input_file'] = [PlaceholderUploadedFile('test_placeholder.txt', size=1024)]
         return initial
 
