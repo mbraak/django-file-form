@@ -238,7 +238,13 @@ class UploadFile {
 
     const addInitialFile = (file, i) => {
       renderer.addUploadedFile(file.name, i, file.size);
-      this.uploads.push({ url: `${this.uploadUrl}${file.id}` });
+
+      if (file.placeholder) {
+        this.uploads.push({ placeholder: true });
+      } else {
+        const url = `${this.uploadUrl}${file.id}`;
+        this.uploads.push({ placeholder: false, url });
+      }
     };
 
     if (multiple) {
@@ -323,22 +329,28 @@ class UploadFile {
   };
 
   handleDelete(uploadIndex) {
+    const { placeholder } = this.uploads[uploadIndex];
+
+    if (placeholder) {
+      this.deleteUpload(uploadIndex);
+    }
+  }
+
+  deleteUpload(uploadIndex) {
+    this.renderer.deleteFile(uploadIndex);
+    delete this.uploads[uploadIndex];
+    this.checkDropHint();
+  }
+
+  deleteFromServer(uploadIndex) {
     const { url } = this.uploads[uploadIndex];
 
-    if (url.endsWith(".placeholder")) {
-      this.renderer.deleteFile(uploadIndex);
-      delete this.uploads[uploadIndex];
-      this.checkDropHint();
-      return;
-    }
     const xhr = new window.XMLHttpRequest();
     xhr.open("DELETE", url);
 
     xhr.onload = () => {
       if (xhr.status === 204) {
-        this.renderer.deleteFile(uploadIndex);
-        delete this.uploads[uploadIndex];
-        this.checkDropHint();
+        this.deleteUpload(uploadIndex);
       } else {
         this.renderer.setDeleteFailed(uploadIndex);
       }
@@ -351,9 +363,7 @@ class UploadFile {
     const upload = this.uploads[uploadIndex];
     upload.abort(true);
 
-    this.renderer.deleteFile(uploadIndex);
-    delete this.uploads[uploadIndex];
-    this.checkDropHint();
+    this.deleteUpload(uploadIndex);
   }
 
   initDropArea(container) {
