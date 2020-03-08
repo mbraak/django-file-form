@@ -706,9 +706,18 @@ function () {
       var addInitialFile = function addInitialFile(file, i) {
         renderer.addUploadedFile(file.name, i, file.size);
 
-        _this2.uploads.push({
-          url: "".concat(_this2.uploadUrl).concat(file.id)
-        });
+        if (file.placeholder) {
+          _this2.uploads.push({
+            placeholder: true
+          });
+        } else {
+          var url = "".concat(_this2.uploadUrl).concat(file.id);
+
+          _this2.uploads.push({
+            placeholder: false,
+            url: url
+          });
+        }
       };
 
       if (multiple) {
@@ -724,27 +733,31 @@ function () {
   }, {
     key: "handleDelete",
     value: function handleDelete(uploadIndex) {
+      var placeholder = this.uploads[uploadIndex].placeholder;
+
+      if (placeholder) {
+        this.deleteUpload(uploadIndex);
+      }
+    }
+  }, {
+    key: "deleteUpload",
+    value: function deleteUpload(uploadIndex) {
+      this.renderer.deleteFile(uploadIndex);
+      delete this.uploads[uploadIndex];
+      this.checkDropHint();
+    }
+  }, {
+    key: "deleteFromServer",
+    value: function deleteFromServer(uploadIndex) {
       var _this3 = this;
 
       var url = this.uploads[uploadIndex].url;
-
-      if (url.endsWith(".placeholder")) {
-        this.renderer.deleteFile(uploadIndex);
-        delete this.uploads[uploadIndex];
-        this.checkDropHint();
-        return;
-      }
-
       var xhr = new window.XMLHttpRequest();
       xhr.open("DELETE", url);
 
       xhr.onload = function () {
         if (xhr.status === 204) {
-          _this3.renderer.deleteFile(uploadIndex);
-
-          delete _this3.uploads[uploadIndex];
-
-          _this3.checkDropHint();
+          _this3.deleteUpload(uploadIndex);
         } else {
           _this3.renderer.setDeleteFailed(uploadIndex);
         }
@@ -758,9 +771,7 @@ function () {
     value: function handleCancel(uploadIndex) {
       var upload = this.uploads[uploadIndex];
       upload.abort(true);
-      this.renderer.deleteFile(uploadIndex);
-      delete this.uploads[uploadIndex];
-      this.checkDropHint();
+      this.deleteUpload(uploadIndex);
     }
   }, {
     key: "initDropArea",
