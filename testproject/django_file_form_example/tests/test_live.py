@@ -481,3 +481,24 @@ class LiveTestCase(BaseLiveTestCase):
         self.assertEqual(read_file(example2.input_file), b'content2')
 
         self.assertEqual(UploadedFile.objects.count(), 0)
+
+    def test_placeholder_file(self):
+        page = self.page
+
+        page.open('/placeholder')
+
+        # placeholder exists
+        el = page.selenium.find_element_by_css_selector('.dff-file-id-0.dff-upload-success')
+        el.find_element_by_xpath("//*[contains(text(), 'test_placeholder.txt')]")
+
+        self.assertEqual(len(page.selenium.find_elements_by_css_selector('.dff-files .dff-file')), 1)
+
+        # click 'delete'
+        page.delete_ajax_file()
+        page.wait_until_upload_is_removed()
+
+        # submit form
+        page.submit()
+        page.assert_page_contains_text('Title field is required')
+
+        self.assertEqual(len(page.selenium.find_elements_by_css_selector('.dff-files .dff-file')), 0)
