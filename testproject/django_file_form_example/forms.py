@@ -77,7 +77,7 @@ class PlaceholderExampleForm(BaseForm):
         )
 
         for f in self.cleaned_data['input_file']:
-            if hasattr(f, 'placeholder'):
+            if hasattr(f, 'is_placeholder'):
                 continue
 
             ExampleFile.objects.create(
