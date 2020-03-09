@@ -839,6 +839,10 @@ var getInputNameWithPrefix = function getInputNameWithPrefix(fieldName, prefix) 
   return prefix ? "".concat(prefix, "-").concat(fieldName) : fieldName;
 };
 
+var getInputNameWithoutPrefix = function getInputNameWithoutPrefix(fieldName, prefix) {
+  return prefix ? fieldName.slice(prefix.length + 1) : fieldName;
+};
+
 var getInputValueForFormAndPrefix = function getInputValueForFormAndPrefix(form, fieldName, prefix) {
   var inputNameWithPrefix = getInputNameWithPrefix(fieldName, prefix);
   var input = form.querySelector("[name=\"".concat(inputNameWithPrefix, "\"]"));
@@ -902,6 +906,10 @@ var initUploadFields = function initUploadFields(form) {
     return JSON.parse(filesData);
   };
 
+  var getPlaceholders = function getPlaceholders(fieldName) {
+    return JSON.parse(getInputValue("placeholder-".concat(getInputNameWithoutPrefix(fieldName, getPrefix()))));
+  };
+
   var uploadUrl = getInputValue("upload_url");
   var formId = getInputValue("form_id");
   var skipRequired = options.skipRequired || false;
@@ -925,7 +933,7 @@ var initUploadFields = function initUploadFields(form) {
 
     var fieldName = input.name;
     var multiple = input.multiple;
-    var initial = getInitialFiles(container);
+    var initial = getInitialFiles(container).concat(getPlaceholders(fieldName));
     var translations = JSON.parse(container.getAttribute("data-translations"));
     var supportDropArea = !(options.supportDropArea === false);
     new UploadFile({
