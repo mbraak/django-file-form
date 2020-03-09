@@ -69,7 +69,10 @@ class PlaceholderView(BaseFormView):
 
     def get_initial(self):
         initial = super(PlaceholderView, self).get_initial()
-        initial['input_file'] = [PlaceholderUploadedFile('test_placeholder.txt', size=1024)]
+
+        if self.request.method == 'GET':
+            initial['input_file'] = [PlaceholderUploadedFile('test_placeholder.txt', size=1024)]
+
         return initial
 
 
