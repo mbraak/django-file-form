@@ -416,6 +416,7 @@ class DropArea {
 }
 
 const getInputNameWithPrefix = (fieldName, prefix) => (prefix ? `${prefix}-${fieldName}` : fieldName);
+const getInputNameWithoutPrefix = (fieldName, prefix) => (prefix ? fieldName.slice(prefix.length + 1) : fieldName);
 
 const getInputValueForFormAndPrefix = (form, fieldName, prefix) => {
   const inputNameWithPrefix = getInputNameWithPrefix(fieldName, prefix);
@@ -474,6 +475,9 @@ const initUploadFields = (form, options = {}) => {
     return JSON.parse(filesData);
   };
 
+  const getPlaceholders = fieldName =>
+    JSON.parse(getInputValue(`placeholder-${getInputNameWithoutPrefix(fieldName, getPrefix())}`));
+
   const uploadUrl = getInputValue("upload_url");
   const formId = getInputValue("form_id");
   const skipRequired = options.skipRequired || false;
@@ -497,7 +501,7 @@ const initUploadFields = (form, options = {}) => {
 
     const fieldName = input.name;
     const { multiple } = input;
-    const initial = getInitialFiles(container);
+    const initial = getInitialFiles(container).concat(getPlaceholders(fieldName));
     const translations = JSON.parse(container.getAttribute("data-translations"));
     const supportDropArea = !(options.supportDropArea === false);
 
