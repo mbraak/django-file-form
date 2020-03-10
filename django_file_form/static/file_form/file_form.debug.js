@@ -569,10 +569,12 @@ function () {
 
     var input = _ref2.input,
         _fieldName = _ref2.fieldName,
+        form = _ref2.form,
         _formId = _ref2.formId,
         initial = _ref2.initial,
         multiple = _ref2.multiple,
         parent = _ref2.parent,
+        prefix = _ref2.prefix,
         skipRequired = _ref2.skipRequired,
         supportDropArea = _ref2.supportDropArea,
         translations = _ref2.translations,
@@ -664,8 +666,10 @@ function () {
     });
 
     this.fieldName = _fieldName;
+    this.form = form;
     this.formId = _formId;
     this.multiple = multiple;
+    this.prefix = prefix;
     this.supportDropArea = supportDropArea;
     this.uploadUrl = _uploadUrl;
     this.uploadIndex = 0;
@@ -704,17 +708,26 @@ function () {
           renderer = this.renderer;
 
       var addInitialFile = function addInitialFile(file, i) {
-        renderer.addUploadedFile(file.name, i, file.size);
+        var id = file.id,
+            name = file.name,
+            size = file.size;
+        renderer.addUploadedFile(name, i, size);
 
         if (file.placeholder) {
           _this2.uploads.push({
-            placeholder: true
+            id: id,
+            name: name,
+            placeholder: true,
+            size: size
           });
         } else {
           var url = "".concat(_this2.uploadUrl).concat(file.id);
 
           _this2.uploads.push({
+            id: id,
+            name: name,
             placeholder: false,
+            size: size,
             url: url
           });
         }
@@ -736,7 +749,7 @@ function () {
       var placeholder = this.uploads[uploadIndex].placeholder;
 
       if (placeholder) {
-        this.deleteUpload(uploadIndex);
+        this.deletePlaceholder(uploadIndex);
       } else {
         this.deleteFromServer(uploadIndex);
       }
@@ -767,6 +780,12 @@ function () {
 
       xhr.setRequestHeader("Tus-Resumable", "1.0.0");
       xhr.send(null);
+    }
+  }, {
+    key: "deletePlaceholder",
+    value: function deletePlaceholder(uploadIndex) {
+      this.deleteUpload(uploadIndex);
+      this.updatePlaceholderInput();
     }
   }, {
     key: "handleCancel",
@@ -800,16 +819,34 @@ function () {
         this.renderer.removeDropHint();
       }
     }
+  }, {
+    key: "updatePlaceholderInput",
+    value: function updatePlaceholderInput() {
+      var placeholdersInfo = this.uploads.filter(function (upload) {
+        return upload.placeholder;
+      }).map(function (_ref3) {
+        var id = _ref3.id,
+            name = _ref3.name,
+            placeholder = _ref3.placeholder;
+        return {
+          id: id,
+          name: name,
+          placeholder: placeholder
+        };
+      });
+      var input = findInput(this.form, getPlaceholderFieldName(this.fieldName, this.prefix), this.prefix);
+      input.value = JSON.stringify(placeholdersInfo);
+    }
   }]);
 
   return UploadFile;
 }();
 
-var DropArea = function DropArea(_ref3) {
+var DropArea = function DropArea(_ref4) {
   var _this4 = this;
 
-  var container = _ref3.container,
-      onUploadFiles = _ref3.onUploadFiles;
+  var container = _ref4.container,
+      onUploadFiles = _ref4.onUploadFiles;
 
   _classCallCheck(this, DropArea);
 
@@ -845,7 +882,11 @@ var getInputNameWithoutPrefix = function getInputNameWithoutPrefix(fieldName, pr
   return prefix ? fieldName.slice(prefix.length + 1) : fieldName;
 };
 
-var getInputValueForFormAndPrefix = function getInputValueForFormAndPrefix(form, fieldName, prefix) {
+var getPlaceholderFieldName = function getPlaceholderFieldName(fieldName, prefix) {
+  return "placeholder-".concat(getInputNameWithoutPrefix(fieldName, prefix));
+};
+
+var findInput = function findInput(form, fieldName, prefix) {
   var inputNameWithPrefix = getInputNameWithPrefix(fieldName, prefix);
   var input = form.querySelector("[name=\"".concat(inputNameWithPrefix, "\"]"));
 
@@ -854,7 +895,11 @@ var getInputValueForFormAndPrefix = function getInputValueForFormAndPrefix(form,
     return null;
   }
 
-  return input.value;
+  return input;
+};
+
+var getInputValueForFormAndPrefix = function getInputValueForFormAndPrefix(form, fieldName, prefix) {
+  return findInput(form, fieldName, prefix).value;
 };
 
 var initFormSet = function initFormSet(form, optionsParam) {
@@ -908,17 +953,14 @@ var initUploadFields = function initUploadFields(form) {
     return JSON.parse(filesData);
   };
 
-  var getPlaceholderFieldName = function getPlaceholderFieldName(fieldName) {
-    return "placeholder-".concat(getInputNameWithoutPrefix(fieldName, getPrefix()));
-  };
-
   var getPlaceholders = function getPlaceholders(fieldName) {
-    return JSON.parse(getInputValue(getPlaceholderFieldName(fieldName)));
+    return JSON.parse(getInputValue(getPlaceholderFieldName(fieldName, getPrefix())));
   };
 
   var uploadUrl = getInputValue("upload_url");
   var formId = getInputValue("form_id");
   var skipRequired = options.skipRequired || false;
+  var prefix = getPrefix();
 
   if (!formId || !uploadUrl) {
     return;
@@ -944,11 +986,13 @@ var initUploadFields = function initUploadFields(form) {
     var supportDropArea = !(options.supportDropArea === false);
     new UploadFile({
       fieldName: fieldName,
+      form: form,
       formId: formId,
       initial: initial,
       input: input,
       multiple: multiple,
       parent: container,
+      prefix: prefix,
       skipRequired: skipRequired,
       supportDropArea: supportDropArea,
       translations: translations,
