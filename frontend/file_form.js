@@ -333,6 +333,8 @@ class UploadFile {
 
     if (placeholder) {
       this.deleteUpload(uploadIndex);
+    } else {
+      this.deleteFromServer(uploadIndex);
     }
   }
 
@@ -475,8 +477,9 @@ const initUploadFields = (form, options = {}) => {
     return JSON.parse(filesData);
   };
 
-  const getPlaceholders = fieldName =>
-    JSON.parse(getInputValue(`placeholder-${getInputNameWithoutPrefix(fieldName, getPrefix())}`));
+  const getPlaceholderFieldName = fieldName => `placeholder-${getInputNameWithoutPrefix(fieldName, getPrefix())}`;
+
+  const getPlaceholders = fieldName => JSON.parse(getInputValue(getPlaceholderFieldName(fieldName)));
 
   const uploadUrl = getInputValue("upload_url");
   const formId = getInputValue("form_id");

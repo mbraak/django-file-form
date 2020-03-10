@@ -24,7 +24,7 @@ def get_uploaded_files(value):
         file_info.get_values() if hasattr(file_info, 'file_id') else dict(name=file_info.name)
         for file_info in
         get_list(value)
-        if not getattr(file_info, 'is_placeholder')
+        if not getattr(file_info, 'is_placeholder', False)
     ]
 
 

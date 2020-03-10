@@ -737,6 +737,8 @@ function () {
 
       if (placeholder) {
         this.deleteUpload(uploadIndex);
+      } else {
+        this.deleteFromServer(uploadIndex);
       }
     }
   }, {
@@ -906,8 +908,12 @@ var initUploadFields = function initUploadFields(form) {
     return JSON.parse(filesData);
   };
 
+  var getPlaceholderFieldName = function getPlaceholderFieldName(fieldName) {
+    return "placeholder-".concat(getInputNameWithoutPrefix(fieldName, getPrefix()));
+  };
+
   var getPlaceholders = function getPlaceholders(fieldName) {
-    return JSON.parse(getInputValue("placeholder-".concat(getInputNameWithoutPrefix(fieldName, getPrefix()))));
+    return JSON.parse(getInputValue(getPlaceholderFieldName(fieldName)));
   };
 
   var uploadUrl = getInputValue("upload_url");
