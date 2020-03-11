@@ -827,11 +827,13 @@ function () {
       }).map(function (_ref3) {
         var id = _ref3.id,
             name = _ref3.name,
-            placeholder = _ref3.placeholder;
+            placeholder = _ref3.placeholder,
+            size = _ref3.size;
         return {
           id: id,
           name: name,
-          placeholder: placeholder
+          placeholder: placeholder,
+          size: size
         };
       });
       var input = findInput(this.form, getPlaceholderFieldName(this.fieldName, this.prefix), this.prefix);
