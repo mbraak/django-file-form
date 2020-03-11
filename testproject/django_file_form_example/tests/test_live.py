@@ -482,20 +482,31 @@ class LiveTestCase(BaseLiveTestCase):
 
         self.assertEqual(UploadedFile.objects.count(), 0)
 
-    def test_placeholder_file(self):
+    def test_placeholder_files(self):
         page = self.page
         page.open('/placeholder')
 
-        # placeholder exists
+        # placeholders exist
         el = page.selenium.find_element_by_css_selector('.dff-file-id-0.dff-upload-success')
-        el.find_element_by_xpath("//*[contains(text(), 'test_placeholder.txt')]")
+        el.find_element_by_xpath("//*[contains(text(), 'test_placeholder1.txt')]")
+        el.find_element_by_xpath("//*[contains(text(), '1 KB')]")
+
+        el = page.selenium.find_element_by_css_selector('.dff-file-id-1.dff-upload-success')
+        el.find_element_by_xpath("//*[contains(text(), 'test_placeholder2.txt')]")
+        el.find_element_by_xpath("//*[contains(text(), '2 KB')]")
+
+        # submit
+        page.fill_title_field('abc')
+        page.submit()
+
+        page.assert_page_contains_text('Upload success')
 
     def test_delete_placeholder_file(self):
         page = self.page
         page.open('/placeholder')
 
         page.selenium.find_element_by_css_selector('.dff-file-id-0.dff-upload-success')
-        self.assertEqual(len(page.selenium.find_elements_by_css_selector('.dff-files .dff-file')), 1)
+        self.assertEqual(len(page.selenium.find_elements_by_css_selector('.dff-files .dff-file')), 2)
 
         # click 'delete'
         page.delete_ajax_file()
@@ -505,19 +516,8 @@ class LiveTestCase(BaseLiveTestCase):
         page.submit()
         page.assert_page_contains_text('Title field is required')
 
-        self.assertEqual(len(page.selenium.find_elements_by_css_selector('.dff-files .dff-file')), 0)
-
-    def test_placeholder_submit_with_error(self):
-        page = self.page
-        page.open('/placeholder')
-
-        page.selenium.find_element_by_css_selector('.dff-file-id-0.dff-upload-success')
         self.assertEqual(len(page.selenium.find_elements_by_css_selector('.dff-files .dff-file')), 1)
-
-        # submit form
-        page.submit()
-        page.assert_page_contains_text('Title field is required')
 
         el = page.selenium.find_element_by_css_selector('.dff-file-id-0.dff-upload-success')
-        el.find_element_by_xpath("//*[contains(text(), 'test_placeholder.txt')]")
-        self.assertEqual(len(page.selenium.find_elements_by_css_selector('.dff-files .dff-file')), 1)
+        el.find_element_by_xpath("//*[contains(text(), 'test_placeholder2.txt')]")
+        el.find_element_by_xpath("//*[contains(text(), '2 KB')]")
