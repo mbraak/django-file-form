@@ -402,7 +402,7 @@ class UploadFile {
   updatePlaceholderInput() {
     const placeholdersInfo = this.uploads
       .filter(upload => upload.placeholder)
-      .map(({ id, name, placeholder }) => ({ id, name, placeholder }));
+      .map(({ id, name, placeholder, size }) => ({ id, name, placeholder, size }));
 
     const input = findInput(this.form, getPlaceholderFieldName(this.fieldName, this.prefix), this.prefix);
     input.value = JSON.stringify(placeholdersInfo);
