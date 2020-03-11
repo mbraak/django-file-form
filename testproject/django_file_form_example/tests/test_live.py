@@ -495,6 +495,12 @@ class LiveTestCase(BaseLiveTestCase):
         el.find_element_by_xpath("//*[contains(text(), 'test_placeholder2.txt')]")
         el.find_element_by_xpath("//*[contains(text(), '2 KB')]")
 
+        # submit
+        page.fill_title_field('abc')
+        page.submit()
+
+        page.assert_page_contains_text('Upload success')
+
     def test_delete_placeholder_file(self):
         page = self.page
         page.open('/placeholder')
