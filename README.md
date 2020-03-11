@@ -175,12 +175,11 @@ initial['my_field'] = [
 ]
 ```
 
-You can also add options `size` and `placeholder` to specify file size if the file does not exist locally,
-and an unique ID of the file, respectively.
+You can also add options `size` and `file_id` to specify file size if the file does not exist locally, and an unique ID of the file, respectively.
 
 ```
 initial['my_field'] = [
-  PlaceholderUploadedFile('manage.py', size=12394, placeholder=my_file.pk)
+  PlaceholderUploadedFile('manage.py', size=12394, file_id=my_file.pk)
 ]
 ```
 
@@ -189,11 +188,11 @@ The placeholder file will be listed, and will either be kept intact, or be remov
 ```
 for f in self.cleaned_data['my_field']:
     if hasattr(f, 'placeholder'):
-        # do nothing, or something with f.name or f.placeholder (the ID)
+        # do nothing, or something with f.name or f.file_id
         continue
     # handle newly uploaded files as usual
 
-# remove existing files if the placeholder is deleted
+# remove existing files if the placeholders are deleted
 # ...
 ```
 
