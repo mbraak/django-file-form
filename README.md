@@ -187,7 +187,7 @@ The placeholder file will be listed, and will either be kept intact, or be remov
 
 ```
 for f in self.cleaned_data['my_field']:
-    if hasattr(f, 'placeholder'):
+    if f.is_placeholder:
         # do nothing, or something with f.name or f.file_id
         continue
     # handle newly uploaded files as usual

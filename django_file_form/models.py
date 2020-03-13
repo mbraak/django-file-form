@@ -92,6 +92,8 @@ class UploadedFileWithId(uploadedfile.UploadedFile):
         self.file_id = file_id
         self.size = os.path.getsize(self.file.name)
 
+        self.is_placeholder = False
+
     def get_values(self):
         return dict(id=self.file_id, name=self.name, size=self.size)
 
