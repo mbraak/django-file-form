@@ -163,6 +163,39 @@ if not os.path.exists(temp_upload_dir):
   os.mkdir(temp_upload_dir)
 ```
 
+**3 Adding placeholder files
+
+If you have used `django-file-form` to upload files, potentially have saved the files elsewhere, but would like to use `django-file-form` to edit (remove or replace) the original uploaded files and append new files, you can add information about the original uploaded files as placeholders to the `UploadedFileField`. More specifically, you can initialize your field with one or more `PlaceholderUploadedFile` as follows:
+
+```
+from django_file_form.models import PlaceholderUploadedFile
+
+initial['my_field'] = [
+  PlaceholderUploadedFile('manage.py')
+]
+```
+
+You can also add options `size` and `file_id` to specify file size if the file does not exist locally, and an unique ID of the file, respectively.
+
+```
+initial['my_field'] = [
+  PlaceholderUploadedFile('manage.py', size=12394, file_id=my_file.pk)
+]
+```
+
+The placeholder file will be listed, and will either be kept intact, or be removed. When you save the form, you will have to handle the placeholders as follows:
+
+```
+for f in self.cleaned_data['my_field']:
+    if f.is_placeholder:
+        # do nothing, or something with f.name or f.file_id
+        continue
+    # handle newly uploaded files as usual
+
+# remove existing files if the placeholders are deleted
+# ...
+```
+
 ## Upgrade from version 1.0 (to 2.0)
 
 * Add reference to file_form/file_form.css:
@@ -254,6 +287,7 @@ initFormSet(
   * Issue #266: allow relative FILE_FORM_UPLOAD_DIR setting (thanks to Bo Peng)
   * Issue #267: add drop area (thanks to Bo Peng)
   * Issue #275: show size of uploaded files (thanks to Bo Peng)
+  * Issue #278: allow the addition of placeholder files (thanks to Bo Peng)
 
 * **2.0.3 (15 february 2020)**
   * Issue #237: using with form set (thanks to Juan Carlos Carvajal)

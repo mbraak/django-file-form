@@ -65,3 +65,25 @@ class MultipleFileExampleForm(BaseForm):
 
 class WizardStepForm(Form):
     name = CharField(required=False)
+
+
+class PlaceholderExampleForm(BaseForm):
+    prefix = 'example'
+    input_file = MultipleUploadedFileField()
+
+    def save(self):
+        example = Example2.objects.create(
+            title=self.cleaned_data['title']
+        )
+
+        for f in self.cleaned_data['input_file']:
+            if f.is_placeholder:
+                continue
+
+            ExampleFile.objects.create(
+                example=example,
+                input_file=f
+            )
+            f.close()
+
+        self.delete_temporary_files()
