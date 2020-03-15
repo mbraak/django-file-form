@@ -6,6 +6,7 @@ from django.views import generic
 from django.urls import reverse
 from formtools.wizard.views import SessionWizardView
 from django_file_form.util import get_upload_path
+from django_file_form.models import UploadedFileWithId, PlaceholderUploadedFile
 
 from . import forms
 
@@ -61,6 +62,21 @@ class WizardExampleview(SessionWizardView):
 class FormSetExampleView(BaseFormView):
     form_class = forms.ExampleFormSet
     template_name = 'form_set.html'
+
+
+class PlaceholderView(BaseFormView):
+    form_class = forms.PlaceholderExampleForm
+
+    def get_initial(self):
+        initial = super(PlaceholderView, self).get_initial()
+
+        if self.request.method == 'GET':
+            initial['input_file'] = [
+                PlaceholderUploadedFile('test_placeholder1.txt', size=1024),
+                PlaceholderUploadedFile('test_placeholder2.txt', size=2048)
+            ]
+
+        return initial
 
 
 def permission_denied(request, exception):

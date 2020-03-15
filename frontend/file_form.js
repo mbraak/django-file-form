@@ -194,18 +194,22 @@ class UploadFile {
   constructor({
     input,
     fieldName,
+    form,
     formId,
     initial,
     multiple,
     parent,
+    prefix,
     skipRequired,
     supportDropArea,
     translations,
     uploadUrl
   }) {
     this.fieldName = fieldName;
+    this.form = form;
     this.formId = formId;
     this.multiple = multiple;
+    this.prefix = prefix;
     this.supportDropArea = supportDropArea;
     this.uploadUrl = uploadUrl;
 
@@ -237,8 +241,15 @@ class UploadFile {
     const { multiple, renderer } = this;
 
     const addInitialFile = (file, i) => {
-      renderer.addUploadedFile(file.name, i, file.size);
-      this.uploads.push({ url: `${this.uploadUrl}${file.id}` });
+      const { id, name, size } = file;
+      renderer.addUploadedFile(name, i, size);
+
+      if (file.placeholder) {
+        this.uploads.push({ id, name, placeholder: true, size });
+      } else {
+        const url = `${this.uploadUrl}${file.id}`;
+        this.uploads.push({ id, name, placeholder: false, size, url });
+      }
     };
 
     if (multiple) {
@@ -323,6 +334,22 @@ class UploadFile {
   };
 
   handleDelete(uploadIndex) {
+    const { placeholder } = this.uploads[uploadIndex];
+
+    if (placeholder) {
+      this.deletePlaceholder(uploadIndex);
+    } else {
+      this.deleteFromServer(uploadIndex);
+    }
+  }
+
+  deleteUpload(uploadIndex) {
+    this.renderer.deleteFile(uploadIndex);
+    delete this.uploads[uploadIndex];
+    this.checkDropHint();
+  }
+
+  deleteFromServer(uploadIndex) {
     const { url } = this.uploads[uploadIndex];
 
     const xhr = new window.XMLHttpRequest();
@@ -330,9 +357,7 @@ class UploadFile {
 
     xhr.onload = () => {
       if (xhr.status === 204) {
-        this.renderer.deleteFile(uploadIndex);
-        delete this.uploads[uploadIndex];
-        this.checkDropHint();
+        this.deleteUpload(uploadIndex);
       } else {
         this.renderer.setDeleteFailed(uploadIndex);
       }
@@ -341,13 +366,16 @@ class UploadFile {
     xhr.send(null);
   }
 
+  deletePlaceholder(uploadIndex) {
+    this.deleteUpload(uploadIndex);
+    this.updatePlaceholderInput();
+  }
+
   handleCancel(uploadIndex) {
     const upload = this.uploads[uploadIndex];
     upload.abort(true);
 
-    this.renderer.deleteFile(uploadIndex);
-    delete this.uploads[uploadIndex];
-    this.checkDropHint();
+    this.deleteUpload(uploadIndex);
   }
 
   initDropArea(container) {
@@ -369,6 +397,15 @@ class UploadFile {
     } else {
       this.renderer.removeDropHint();
     }
+  }
+
+  updatePlaceholderInput() {
+    const placeholdersInfo = this.uploads
+      .filter(upload => upload.placeholder)
+      .map(({ id, name, placeholder, size }) => ({ id, name, placeholder, size }));
+
+    const input = findInput(this.form, getPlaceholderFieldName(this.fieldName, this.prefix), this.prefix);
+    input.value = JSON.stringify(placeholdersInfo);
   }
 }
 
@@ -400,8 +437,10 @@ class DropArea {
 }
 
 const getInputNameWithPrefix = (fieldName, prefix) => (prefix ? `${prefix}-${fieldName}` : fieldName);
+const getInputNameWithoutPrefix = (fieldName, prefix) => (prefix ? fieldName.slice(prefix.length + 1) : fieldName);
+const getPlaceholderFieldName = (fieldName, prefix) => `placeholder-${getInputNameWithoutPrefix(fieldName, prefix)}`;
 
-const getInputValueForFormAndPrefix = (form, fieldName, prefix) => {
+const findInput = (form, fieldName, prefix) => {
   const inputNameWithPrefix = getInputNameWithPrefix(fieldName, prefix);
   const input = form.querySelector(`[name="${inputNameWithPrefix}"]`);
 
@@ -410,8 +449,10 @@ const getInputValueForFormAndPrefix = (form, fieldName, prefix) => {
     return null;
   }
 
-  return input.value;
+  return input;
 };
+
+const getInputValueForFormAndPrefix = (form, fieldName, prefix) => findInput(form, fieldName, prefix).value;
 
 const initFormSet = (form, optionsParam) => {
   let options;
@@ -458,9 +499,12 @@ const initUploadFields = (form, options = {}) => {
     return JSON.parse(filesData);
   };
 
+  const getPlaceholders = fieldName => JSON.parse(getInputValue(getPlaceholderFieldName(fieldName, getPrefix())));
+
   const uploadUrl = getInputValue("upload_url");
   const formId = getInputValue("form_id");
   const skipRequired = options.skipRequired || false;
+  const prefix = getPrefix();
 
   if (!formId || !uploadUrl) {
     return;
@@ -481,17 +525,19 @@ const initUploadFields = (form, options = {}) => {
 
     const fieldName = input.name;
     const { multiple } = input;
-    const initial = getInitialFiles(container);
+    const initial = getInitialFiles(container).concat(getPlaceholders(fieldName));
     const translations = JSON.parse(container.getAttribute("data-translations"));
     const supportDropArea = !(options.supportDropArea === false);
 
     new UploadFile({
       fieldName,
+      form,
       formId,
       initial,
       input,
       multiple,
       parent: container,
+      prefix,
       skipRequired,
       supportDropArea,
       translations,
