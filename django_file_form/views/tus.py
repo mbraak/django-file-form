@@ -3,6 +3,7 @@ import logging
 import uuid
 from pathlib import Path
 
+from django.conf import settings
 from django.core.cache import cache
 from django.http import HttpResponse
 from django.utils.decorators import method_decorator
@@ -30,7 +31,7 @@ def create_uploaded_file_in_db(field_name, file_id, form_id, original_filename, 
     values = dict(
         file_id=file_id,
         form_id=form_id,
-        uploaded_file=str(uploaded_file),
+        uploaded_file=str(uploaded_file.relative_to(Path(settings.MEDIA_ROOT))),
         original_filename=original_filename
     )
 

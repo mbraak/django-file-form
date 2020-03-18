@@ -221,10 +221,6 @@ Settings in `settings.py`:
   * The setting is relative to `MEDIA_ROOT`.
   * The default is `temp_uploads`.
 
-* **FILE_FORM_FILE_STORAGE** (string):
-  * The class that is used to store the temporary uploads.
-  * The default is `django.core.files.storage.FileSystemStorage`.
-
 * **FILE_FORM_MAX_FILE_SIZE** (int)
   * Maximum upload size in bytes
   * Default is 4GB
@@ -288,6 +284,7 @@ initFormSet(
   * Issue #267: add drop area (thanks to Bo Peng)
   * Issue #275: show size of uploaded files (thanks to Bo Peng)
   * Issue #278: allow the addition of placeholder files (thanks to Bo Peng)
+  * Issue #280: remove option FILE_FORM_FILE_STORAGE
 
 * **2.0.3 (15 february 2020)**
   * Issue #237: using with form set (thanks to Juan Carlos Carvajal)

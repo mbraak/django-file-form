@@ -1,12 +1,14 @@
-import sys
 import os
+import uuid
 from pathlib import Path
 
+from django.conf import settings
 from django.core.files import uploadedfile
-import uuid
+from django.core.files.storage import FileSystemStorage
 from django.db import models
 from django.utils import timezone
-from .util import ModelManager, load_class, get_upload_path
+
+from .util import ModelManager, get_upload_path
 
 
 class UploadedFileManager(ModelManager):
@@ -38,20 +40,9 @@ class UploadedFileManager(ModelManager):
         return self.try_get(uploaded_file=path)
 
 
-def get_storage():
-    if 'makemigrations' in sys.argv or 'migrate' in sys.argv:
-        return "settings.FILE_FORM_FILE_STORAGE"
-    return load_class('FILE_STORAGE')()
-
-
-def upload_to(instance, filename):
-    return str(get_upload_path())
-
-
 class UploadedFile(models.Model):
     created = models.DateTimeField(default=timezone.now)
-    uploaded_file = models.FileField(max_length=255, upload_to=upload_to,
-                                     storage=get_storage())
+    uploaded_file = models.FileField(max_length=255, upload_to=getattr(settings, 'FILE_FORM_UPLOAD_DIR', 'temp_uploads'), storage=FileSystemStorage())
     original_filename = models.CharField(max_length=255)
     field_name = models.CharField(max_length=255, null=True, blank=True)
     file_id = models.CharField(max_length=40)
@@ -90,7 +81,7 @@ class UploadedFileWithId(uploadedfile.UploadedFile):
         super(UploadedFileWithId, self).__init__(**kwargs)
 
         self.file_id = file_id
-        self.size = os.path.getsize(self.file.name)
+        self.size = os.path.getsize(self.file.path)
 
         self.is_placeholder = False
 
