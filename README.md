@@ -73,8 +73,11 @@ class ExampleForm(FileFormMixin, forms.Form):
     input_file = UploadedFileField()
 ```
 
+Import and use `MultipleUploadedFileField` if you intent to add multiple files.
+
 **6 Include javascript and css in your template**
 
+```js
 <script src="{% static "file_form/file_form.js" %}"></script>
 <link rel="stylesheet" href="{% static "file_form/file_form.css" %}">
 ```
@@ -156,18 +159,18 @@ Also see the testproject in the repository.
 
 Make sure the `FILE_FORM_UPLOAD_DIR` directory exists.
 
-```
+```python
 temp_upload_dir = os.path.join(settings.MEDIA_ROOT,  settings.FILE_FORM_UPLOAD_DIR)
 
 if not os.path.exists(temp_upload_dir):
   os.mkdir(temp_upload_dir)
 ```
 
-**3 Adding placeholder files
+**3 Adding placeholder files**
 
 If you have used `django-file-form` to upload files, potentially have saved the files elsewhere, but would like to use `django-file-form` to edit (remove or replace) the original uploaded files and append new files, you can add information about the original uploaded files as placeholders to the `UploadedFileField`. More specifically, you can initialize your field with one or more `PlaceholderUploadedFile` as follows:
 
-```
+```python
 from django_file_form.models import PlaceholderUploadedFile
 
 initial['my_field'] = [
@@ -177,7 +180,7 @@ initial['my_field'] = [
 
 You can also add options `size` and `file_id` to specify file size if the file does not exist locally, and an unique ID of the file, respectively.
 
-```
+```python
 initial['my_field'] = [
   PlaceholderUploadedFile('manage.py', size=12394, file_id=my_file.pk)
 ]
@@ -185,7 +188,7 @@ initial['my_field'] = [
 
 The placeholder file will be listed, and will either be kept intact, or be removed. When you save the form, you will have to handle the placeholders as follows:
 
-```
+```python
 for f in self.cleaned_data['my_field']:
     if f.is_placeholder:
         # do nothing, or something with f.name or f.file_id
@@ -280,17 +283,17 @@ initFormSet(
 ## Changelog
 
 * **development**
-  * Issue #266: allow relative FILE_FORM_UPLOAD_DIR setting (thanks to Bo Peng)
+  * Issue #266: allow relative `FILE_FORM_UPLOAD_DIR` setting (thanks to Bo Peng)
   * Issue #267: add drop area (thanks to Bo Peng)
   * Issue #275: show size of uploaded files (thanks to Bo Peng)
   * Issue #278: allow the addition of placeholder files (thanks to Bo Peng)
-  * Issue #280: remove option FILE_FORM_FILE_STORAGE
+  * Issue #280: remove option `FILE_FORM_FILE_STORAGE`
 
 * **2.0.3 (15 february 2020)**
   * Issue #237: using with form set (thanks to Juan Carlos Carvajal)
   * Issue #259: include uncompressed js
   * Issue #260: correctly use formset prefix (thanks to Gzuba)
-  * Issue #261: fix default for FILE_FORM_UPLOAD_DIR (thanks to Gzuba)
+  * Issue #261: fix default for `FILE_FORM_UPLOAD_DIR` (thanks to Gzuba)
 
 * **2.0.2 (14 january 2020)**
   * Issue #247: support form wizard (thanks to Lionqueen94)
@@ -306,8 +309,8 @@ initFormSet(
 * **1.0 (5 december 2019)**
   * Drop support for Python 2 and Django < 2
   * Issue #217: update fine uploader
-  * Issue #219: use Selenium for all tests
-  * Issue #222: use pathlib2 (instead of pathlib)
+  * Issue #219: use `Selenium` for all tests
+  * Issue #222: use `pathlib2` (instead of pathlib)
   * Issue #235: support Django 3.0
 
 * **0.4.2 (3 March 2019)**
