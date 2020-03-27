@@ -567,11 +567,12 @@ function () {
   function UploadFile(_ref2) {
     var _this = this;
 
-    var input = _ref2.input,
+    var callbacks = _ref2.callbacks,
         _fieldName = _ref2.fieldName,
         form = _ref2.form,
         _formId = _ref2.formId,
         initial = _ref2.initial,
+        input = _ref2.input,
         multiple = _ref2.multiple,
         parent = _ref2.parent,
         prefix = _ref2.prefix,
@@ -608,8 +609,8 @@ function () {
             filename: filename,
             formId: formId
           },
-          onError: function onError() {
-            return _this.handleError(uploadIndex);
+          onError: function onError(error) {
+            return _this.handleError(uploadIndex, error);
           },
           onProgress: function onProgress(bytesUploaded, bytesTotal) {
             return _this.handleProgress(uploadIndex, bytesUploaded, bytesTotal);
@@ -653,18 +654,39 @@ function () {
       var percentage = (bytesUploaded / bytesTotal * 100).toFixed(2);
 
       _this.renderer.updateProgress(uploadIndex, percentage);
+
+      var onProgress = _this.callbacks.onProgress;
+
+      if (onProgress) {
+        var upload = _this.uploads[uploadIndex];
+        onProgress(bytesUploaded, bytesTotal, upload);
+      }
     });
 
-    _defineProperty(this, "handleError", function (uploadIndex) {
+    _defineProperty(this, "handleError", function (uploadIndex, error) {
       _this.renderer.setError(uploadIndex);
+
+      var onError = _this.callbacks.onError;
+
+      if (onError) {
+        var upload = _this.uploads[uploadIndex];
+        onError(error, upload);
+      }
     });
 
     _defineProperty(this, "handleSuccess", function (uploadIndex, uploadedSize) {
       var renderer = _this.renderer;
       renderer.clearInput();
       renderer.setSuccess(uploadIndex, uploadedSize);
+      var onSuccess = _this.callbacks.onSuccess;
+
+      if (onSuccess) {
+        var upload = _this.uploads[uploadIndex];
+        onSuccess(upload);
+      }
     });
 
+    this.callbacks = callbacks;
     this.fieldName = _fieldName;
     this.form = form;
     this.formId = _formId;
@@ -757,9 +779,15 @@ function () {
   }, {
     key: "deleteUpload",
     value: function deleteUpload(uploadIndex) {
+      var upload = this.uploads[uploadIndex];
       this.renderer.deleteFile(uploadIndex);
       delete this.uploads[uploadIndex];
       this.checkDropHint();
+      var onDelete = this.callbacks.onDelete;
+
+      if (onDelete) {
+        onDelete(upload);
+      }
     }
   }, {
     key: "deleteFromServer",
@@ -987,6 +1015,7 @@ var initUploadFields = function initUploadFields(form) {
     var translations = JSON.parse(container.getAttribute("data-translations"));
     var supportDropArea = !(options.supportDropArea === false);
     new UploadFile({
+      callbacks: options.callbacks || {},
       fieldName: fieldName,
       form: form,
       formId: formId,
