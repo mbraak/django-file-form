@@ -282,7 +282,7 @@ initFormSet(
 
 ## Changelog
 
-* **development**
+* **2.1.0 (28 march 2020)**
   * Issue #266: allow relative `FILE_FORM_UPLOAD_DIR` setting (thanks to Bo Peng)
   * Issue #267: add drop area (thanks to Bo Peng)
   * Issue #275: show size of uploaded files (thanks to Bo Peng)
