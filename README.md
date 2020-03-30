@@ -301,6 +301,7 @@ initFormSet(
 ## Changelog
 
 * **development**
+  * Issue #296: fix progress bar
   * Issue #290: add javascript callbacks (thanks to Peter Dekkers)
 
 * **2.1.0 (28 march 2020)**
