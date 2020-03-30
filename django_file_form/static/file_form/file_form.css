@@ -31,7 +31,8 @@
     height: 100%;
     display: inline-block;
     background-color: green;
-    position: absolute; }
+    position: absolute;
+    margin: 0; }
 
 .dff-uploader .dff-error {
   margin-left: 8px;
