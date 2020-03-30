@@ -284,6 +284,7 @@ initFormSet(
 
 * **development**
   * Issue #296: fix progress bar
+  * Issue #297: add retry delays
 
 * **2.1.0 (28 march 2020)**
   * Issue #266: allow relative `FILE_FORM_UPLOAD_DIR` setting (thanks to Bo Peng)
