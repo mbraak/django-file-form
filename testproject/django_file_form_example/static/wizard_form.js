@@ -3,7 +3,12 @@ const step = form.querySelector(`[name="wizard_exampleview-current_step"]`).valu
 
 if (step === "0") {
   initUploadFields(
-      form,
-      { prefix: step, skipRequired: true, supportDropArea: true }
+    form,
+    {
+      prefix: step,
+      retryDelays: [],
+      skipRequired: true,
+      supportDropArea: true
+    }
   );
 }
