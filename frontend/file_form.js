@@ -192,11 +192,12 @@ class RenderUploadFile {
 
 class UploadFile {
   constructor({
-    input,
+    callbacks,
     fieldName,
     form,
     formId,
     initial,
+    input,
     multiple,
     parent,
     prefix,
@@ -206,6 +207,7 @@ class UploadFile {
     translations,
     uploadUrl
   }) {
+    this.callbacks = callbacks;
     this.fieldName = fieldName;
     this.form = form;
     this.formId = formId;
@@ -284,7 +286,7 @@ class UploadFile {
       const upload = new Upload(file, {
         endpoint: uploadUrl,
         metadata: { fieldName, filename, formId },
-        onError: () => this.handleError(uploadIndex),
+        onError: error => this.handleError(uploadIndex, error),
         onProgress: (bytesUploaded, bytesTotal) => this.handleProgress(uploadIndex, bytesUploaded, bytesTotal),
         onSuccess: () => this.handleSuccess(uploadIndex, upload.file.size),
         retryDelays: this.retryDelays || [0, 1000, 3000, 5000]
@@ -323,10 +325,24 @@ class UploadFile {
     const percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2);
 
     this.renderer.updateProgress(uploadIndex, percentage);
+
+    const { onProgress } = this.callbacks;
+
+    if (onProgress) {
+      const upload = this.uploads[uploadIndex];
+      onProgress(bytesUploaded, bytesTotal, upload);
+    }
   };
 
-  handleError = uploadIndex => {
+  handleError = (uploadIndex, error) => {
     this.renderer.setError(uploadIndex);
+
+    const { onError } = this.callbacks;
+
+    if (onError) {
+      const upload = this.uploads[uploadIndex];
+      onError(error, upload);
+    }
   };
 
   handleSuccess = (uploadIndex, uploadedSize) => {
@@ -334,6 +350,13 @@ class UploadFile {
 
     renderer.clearInput();
     renderer.setSuccess(uploadIndex, uploadedSize);
+
+    const { onSuccess } = this.callbacks;
+
+    if (onSuccess) {
+      const upload = this.uploads[uploadIndex];
+      onSuccess(upload);
+    }
   };
 
   handleDelete(uploadIndex) {
@@ -347,9 +370,16 @@ class UploadFile {
   }
 
   deleteUpload(uploadIndex) {
+    const upload = this.uploads[uploadIndex];
+
     this.renderer.deleteFile(uploadIndex);
     delete this.uploads[uploadIndex];
     this.checkDropHint();
+
+    const { onDelete } = this.callbacks;
+    if (onDelete) {
+      onDelete(upload);
+    }
   }
 
   deleteFromServer(uploadIndex) {
@@ -533,6 +563,7 @@ const initUploadFields = (form, options = {}) => {
     const supportDropArea = !(options.supportDropArea === false);
 
     new UploadFile({
+      callbacks: options.callbacks || {},
       fieldName,
       form,
       formId,

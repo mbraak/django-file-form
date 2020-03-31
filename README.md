@@ -238,9 +238,27 @@ initUploadFields(formDomElement, options);
 
 * `formDomElement` (required); e.g. `document.getElementById("example-form")`
 * options (optional)
+  * `callbacks`: callbacks for things like upload progress and errors.
   * `prefix` : set this if the Django form has a prefix; default is empty
   * `skipRequired` : don't set the `required` field of the file input; default is `false`
   * `supportDropArea` : add a drop area; default is `true`
+
+The callbacks are:
+  * `onDelete`
+    * called when file is deleted
+    * Signature of callback is `function(upload)`
+  * `onError`:
+    * called when an upload error occurs
+    * Signature of callback is `function(error, upload)`
+      * `error`: javascript Error
+  * `onProgress`:
+    * Called each time when progress information is available.
+    * Signature of callback is `function(bytesUploaded, bytesTotal, upload)`
+  * `onSuccess`:
+    * Called when file upload is done.
+    * Signature of callback is `function(upload)`
+
+The callbacks receive an `upload` parameter which is [this class](https://github.com/tus/tus-js-client#new-tusuploadfile-options).
 
 Examples:
 
@@ -283,6 +301,7 @@ initFormSet(
 ## Changelog
 
 * **development**
+  * Issue #290: add javascript callbacks (thanks to Peter Dekkers)
   * Issue #296: fix progress bar
   * Issue #297: add retry delays
 
