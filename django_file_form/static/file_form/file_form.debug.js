@@ -350,13 +350,17 @@ function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (O
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
 
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 
-function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(n); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -576,6 +580,7 @@ function () {
         multiple = _ref2.multiple,
         parent = _ref2.parent,
         prefix = _ref2.prefix,
+        retryDelays = _ref2.retryDelays,
         skipRequired = _ref2.skipRequired,
         supportDropArea = _ref2.supportDropArea,
         translations = _ref2.translations,
@@ -617,7 +622,8 @@ function () {
           },
           onSuccess: function onSuccess() {
             return _this.handleSuccess(uploadIndex, upload.file.size);
-          }
+          },
+          retryDelays: _this.retryDelays || [0, 1000, 3000, 5000]
         });
         upload.start();
         renderer.addNewUpload(filename, uploadIndex);
@@ -692,6 +698,7 @@ function () {
     this.formId = _formId;
     this.multiple = multiple;
     this.prefix = prefix;
+    this.retryDelays = retryDelays;
     this.supportDropArea = supportDropArea;
     this.uploadUrl = _uploadUrl;
     this.uploadIndex = 0;
@@ -1024,6 +1031,7 @@ var initUploadFields = function initUploadFields(form) {
       multiple: multiple,
       parent: container,
       prefix: prefix,
+      retryDelays: options.retryDelays,
       skipRequired: skipRequired,
       supportDropArea: supportDropArea,
       translations: translations,

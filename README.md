@@ -240,6 +240,9 @@ initUploadFields(formDomElement, options);
 * options (optional)
   * `callbacks`: callbacks for things like upload progress and errors.
   * `prefix` : set this if the Django form has a prefix; default is empty
+  * `retryDelays`: set retry delays
+    * Also see `https://github.com/tus/tus-js-client#tusdefaultoptions`
+    * Default is `[0, 1000, 3000, 5000]`
   * `skipRequired` : don't set the `required` field of the file input; default is `false`
   * `supportDropArea` : add a drop area; default is `true`
 
@@ -301,8 +304,9 @@ initFormSet(
 ## Changelog
 
 * **development**
-  * Issue #296: fix progress bar
   * Issue #290: add javascript callbacks (thanks to Peter Dekkers)
+  * Issue #296: fix progress bar
+  * Issue #297: add retry delays
 
 * **2.1.0 (28 march 2020)**
   * Issue #266: allow relative `FILE_FORM_UPLOAD_DIR` setting (thanks to Bo Peng)

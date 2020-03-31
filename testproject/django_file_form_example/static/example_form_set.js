@@ -1,4 +1,9 @@
 initFormSet(
     document.getElementById("example-form-set"),
-    { prefix: "form", skipRequired: true, supportDropArea: true },
+    {
+      prefix: "form",
+      retryDelays: [],
+      skipRequired: true,
+      supportDropArea: true
+    },
 );

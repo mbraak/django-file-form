@@ -201,6 +201,7 @@ class UploadFile {
     multiple,
     parent,
     prefix,
+    retryDelays,
     skipRequired,
     supportDropArea,
     translations,
@@ -212,6 +213,7 @@ class UploadFile {
     this.formId = formId;
     this.multiple = multiple;
     this.prefix = prefix;
+    this.retryDelays = retryDelays;
     this.supportDropArea = supportDropArea;
     this.uploadUrl = uploadUrl;
 
@@ -286,7 +288,8 @@ class UploadFile {
         metadata: { fieldName, filename, formId },
         onError: error => this.handleError(uploadIndex, error),
         onProgress: (bytesUploaded, bytesTotal) => this.handleProgress(uploadIndex, bytesUploaded, bytesTotal),
-        onSuccess: () => this.handleSuccess(uploadIndex, upload.file.size)
+        onSuccess: () => this.handleSuccess(uploadIndex, upload.file.size),
+        retryDelays: this.retryDelays || [0, 1000, 3000, 5000]
       });
 
       upload.start();
@@ -569,6 +572,7 @@ const initUploadFields = (form, options = {}) => {
       multiple,
       parent: container,
       prefix,
+      retryDelays: options.retryDelays,
       skipRequired,
       supportDropArea,
       translations,
