@@ -442,6 +442,37 @@ class UploadFile {
   }
 }
 
+const getEntriesFromDirectory = async directoryEntry =>
+  new Promise(resolve => directoryEntry.createReader().readEntries(resolve));
+
+const getFileFromFileEntry = async fileEntry => new Promise(resolve => fileEntry.file(resolve));
+
+const getFilesFromFileSystemEntries = async entries => {
+  const result = [];
+
+  for await (const entry of entries) {
+    if (entry.isFile) {
+      const file = await getFileFromFileEntry(entry);
+      console.log("file", file);
+      result.push(file);
+    } else if (entry.isDirectory) {
+      const entriesFromDirectory = await getEntriesFromDirectory(entry);
+      const files = await getFilesFromFileSystemEntries(entriesFromDirectory);
+      files.forEach(file => result.push(file));
+    }
+  }
+
+  return result;
+};
+
+const getFilesFromDataTransfer = async dataTransfer => {
+  const entries = [...dataTransfer.items].map(item => item.webkitGetAsEntry());
+
+  const files = await getFilesFromFileSystemEntries(entries);
+  console.log("getFilesFromDataTransfer", files);
+  return files;
+};
+
 class DropArea {
   constructor({ container, onUploadFiles }) {
     this.container = container;
@@ -465,7 +496,12 @@ class DropArea {
     e.preventDefault();
     e.stopPropagation();
 
-    this.onUploadFiles([...e.dataTransfer.files]);
+    const uploadFiles = async () => {
+      const files = await getFilesFromDataTransfer(e.dataTransfer);
+      this.onUploadFiles(files);
+    };
+
+    uploadFiles();
   };
 }
 
