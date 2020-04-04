@@ -1111,14 +1111,14 @@ function () {
             _value = _context3.sent;
 
             if (_iteratorNormalCompletion) {
-              _context3.next = 33;
+              _context3.next = 32;
               break;
             }
 
             entry = _value;
 
             if (!entry.isFile) {
-              _context3.next = 22;
+              _context3.next = 21;
               break;
             }
 
@@ -1127,83 +1127,82 @@ function () {
 
           case 17:
             file = _context3.sent;
-            console.log("file", file);
             result.push(file);
-            _context3.next = 30;
+            _context3.next = 29;
             break;
 
-          case 22:
+          case 21:
             if (!entry.isDirectory) {
-              _context3.next = 30;
+              _context3.next = 29;
               break;
             }
 
-            _context3.next = 25;
+            _context3.next = 24;
             return getEntriesFromDirectory(entry);
 
-          case 25:
+          case 24:
             entriesFromDirectory = _context3.sent;
-            _context3.next = 28;
+            _context3.next = 27;
             return getFilesFromFileSystemEntries(entriesFromDirectory);
 
-          case 28:
+          case 27:
             files = _context3.sent;
             files.forEach(function (file) {
               return result.push(file);
             });
 
-          case 30:
+          case 29:
             _iteratorNormalCompletion = true;
             _context3.next = 5;
             break;
 
-          case 33:
-            _context3.next = 39;
+          case 32:
+            _context3.next = 38;
             break;
 
-          case 35:
-            _context3.prev = 35;
+          case 34:
+            _context3.prev = 34;
             _context3.t0 = _context3["catch"](3);
             _didIteratorError = true;
             _iteratorError = _context3.t0;
 
-          case 39:
+          case 38:
+            _context3.prev = 38;
             _context3.prev = 39;
-            _context3.prev = 40;
 
             if (!(!_iteratorNormalCompletion && _iterator["return"] != null)) {
-              _context3.next = 44;
+              _context3.next = 43;
               break;
             }
 
-            _context3.next = 44;
+            _context3.next = 43;
             return _iterator["return"]();
 
-          case 44:
-            _context3.prev = 44;
+          case 43:
+            _context3.prev = 43;
 
             if (!_didIteratorError) {
-              _context3.next = 47;
+              _context3.next = 46;
               break;
             }
 
             throw _iteratorError;
 
+          case 46:
+            return _context3.finish(43);
+
           case 47:
-            return _context3.finish(44);
+            return _context3.finish(38);
 
           case 48:
-            return _context3.finish(39);
-
-          case 49:
             return _context3.abrupt("return", result);
 
-          case 50:
+          case 49:
           case "end":
             return _context3.stop();
         }
       }
-    }, _callee3, null, [[3, 35, 39, 49], [40,, 44, 48]]);
+    }, _callee3, null, [[3, 34, 38, 48], [39,, 43, 47]]);
   }));
 
   return function getFilesFromFileSystemEntries(_x3) {
@@ -1230,10 +1229,9 @@ function () {
 
           case 3:
             files = _context4.sent;
-            console.log("getFilesFromDataTransfer", files);
             return _context4.abrupt("return", files);
 
-          case 6:
+          case 5:
           case "end":
             return _context4.stop();
         }
