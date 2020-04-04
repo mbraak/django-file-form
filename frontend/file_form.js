@@ -453,7 +453,6 @@ const getFilesFromFileSystemEntries = async entries => {
   for await (const entry of entries) {
     if (entry.isFile) {
       const file = await getFileFromFileEntry(entry);
-      console.log("file", file);
       result.push(file);
     } else if (entry.isDirectory) {
       const entriesFromDirectory = await getEntriesFromDirectory(entry);
@@ -469,7 +468,6 @@ const getFilesFromDataTransfer = async dataTransfer => {
   const entries = [...dataTransfer.items].map(item => item.webkitGetAsEntry());
 
   const files = await getFilesFromFileSystemEntries(entries);
-  console.log("getFilesFromDataTransfer", files);
   return files;
 };
 
