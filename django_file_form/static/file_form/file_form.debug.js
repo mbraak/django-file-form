@@ -1035,8 +1035,8 @@ function () {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            return _context.abrupt("return", new Promise(function (resolve) {
-              return directoryEntry.createReader().readEntries(resolve);
+            return _context.abrupt("return", new Promise(function (resolve, reject) {
+              return directoryEntry.createReader().readEntries(resolve, reject);
             }));
 
           case 1:
@@ -1062,8 +1062,8 @@ function () {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
-            return _context2.abrupt("return", new Promise(function (resolve) {
-              return fileEntry.file(resolve);
+            return _context2.abrupt("return", new Promise(function (resolve, reject) {
+              return fileEntry.file(resolve, reject);
             }));
 
           case 1:
