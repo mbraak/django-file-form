@@ -220,7 +220,12 @@ class UploadFile {
     this.uploadIndex = 0;
     this.uploads = [];
 
-    this.renderer = new RenderUploadFile({ parent, input, skipRequired, translations });
+    this.renderer = new RenderUploadFile({
+      parent,
+      input,
+      skipRequired,
+      translations
+    });
     const filesContainer = this.renderer.container;
 
     if (supportDropArea) {
@@ -287,7 +292,8 @@ class UploadFile {
         endpoint: uploadUrl,
         metadata: { fieldName, filename, formId },
         onError: error => this.handleError(uploadIndex, error),
-        onProgress: (bytesUploaded, bytesTotal) => this.handleProgress(uploadIndex, bytesUploaded, bytesTotal),
+        onProgress: (bytesUploaded, bytesTotal) =>
+          this.handleProgress(uploadIndex, bytesUploaded, bytesTotal),
         onSuccess: () => this.handleSuccess(uploadIndex, upload.file.size),
         retryDelays: this.retryDelays || [0, 1000, 3000, 5000]
       });
@@ -435,17 +441,29 @@ class UploadFile {
   updatePlaceholderInput() {
     const placeholdersInfo = this.uploads
       .filter(upload => upload.placeholder)
-      .map(({ id, name, placeholder, size }) => ({ id, name, placeholder, size }));
+      .map(({ id, name, placeholder, size }) => ({
+        id,
+        name,
+        placeholder,
+        size
+      }));
 
-    const input = findInput(this.form, getPlaceholderFieldName(this.fieldName, this.prefix), this.prefix);
+    const input = findInput(
+      this.form,
+      getPlaceholderFieldName(this.fieldName, this.prefix),
+      this.prefix
+    );
     input.value = JSON.stringify(placeholdersInfo);
   }
 }
 
 const getEntriesFromDirectory = async directoryEntry =>
-  new Promise(resolve => directoryEntry.createReader().readEntries(resolve));
+  new Promise((resolve, reject) =>
+    directoryEntry.createReader().readEntries(resolve, reject)
+  );
 
-const getFileFromFileEntry = async fileEntry => new Promise(resolve => fileEntry.file(resolve));
+const getFileFromFileEntry = async fileEntry =>
+  new Promise((resolve, reject) => fileEntry.file(resolve, reject));
 
 const getFilesFromFileSystemEntries = async entries => {
   const result = [];
@@ -503,9 +521,12 @@ class DropArea {
   };
 }
 
-const getInputNameWithPrefix = (fieldName, prefix) => (prefix ? `${prefix}-${fieldName}` : fieldName);
-const getInputNameWithoutPrefix = (fieldName, prefix) => (prefix ? fieldName.slice(prefix.length + 1) : fieldName);
-const getPlaceholderFieldName = (fieldName, prefix) => `placeholder-${getInputNameWithoutPrefix(fieldName, prefix)}`;
+const getInputNameWithPrefix = (fieldName, prefix) =>
+  prefix ? `${prefix}-${fieldName}` : fieldName;
+const getInputNameWithoutPrefix = (fieldName, prefix) =>
+  prefix ? fieldName.slice(prefix.length + 1) : fieldName;
+const getPlaceholderFieldName = (fieldName, prefix) =>
+  `placeholder-${getInputNameWithoutPrefix(fieldName, prefix)}`;
 
 const findInput = (form, fieldName, prefix) => {
   const inputNameWithPrefix = getInputNameWithPrefix(fieldName, prefix);
@@ -519,7 +540,8 @@ const findInput = (form, fieldName, prefix) => {
   return input;
 };
 
-const getInputValueForFormAndPrefix = (form, fieldName, prefix) => findInput(form, fieldName, prefix).value;
+const getInputValueForFormAndPrefix = (form, fieldName, prefix) =>
+  findInput(form, fieldName, prefix).value;
 
 const initFormSet = (form, optionsParam) => {
   let options;
@@ -532,7 +554,10 @@ const initFormSet = (form, optionsParam) => {
 
   const prefix = options.prefix || "form";
 
-  const formCount = parseInt(getInputValueForFormAndPrefix(form, "TOTAL_FORMS", prefix), 10);
+  const formCount = parseInt(
+    getInputValueForFormAndPrefix(form, "TOTAL_FORMS", prefix),
+    10
+  );
 
   for (let i = 0; i < formCount; i += 1) {
     const subFormPrefix = getInputNameWithPrefix(`${i}`);
@@ -554,7 +579,8 @@ const initUploadFields = (form, options = {}) => {
 
   const getPrefix = () => (options && options.prefix ? options.prefix : null);
 
-  const getInputValue = fieldName => getInputValueForFormAndPrefix(form, fieldName, getPrefix());
+  const getInputValue = fieldName =>
+    getInputValueForFormAndPrefix(form, fieldName, getPrefix());
 
   const getInitialFiles = element => {
     const filesData = element.dataset.files;
@@ -566,7 +592,8 @@ const initUploadFields = (form, options = {}) => {
     return JSON.parse(filesData);
   };
 
-  const getPlaceholders = fieldName => JSON.parse(getInputValue(getPlaceholderFieldName(fieldName, getPrefix())));
+  const getPlaceholders = fieldName =>
+    JSON.parse(getInputValue(getPlaceholderFieldName(fieldName, getPrefix())));
 
   const uploadUrl = getInputValue("upload_url");
   const formId = getInputValue("form_id");
@@ -592,8 +619,12 @@ const initUploadFields = (form, options = {}) => {
 
     const fieldName = input.name;
     const { multiple } = input;
-    const initial = getInitialFiles(container).concat(getPlaceholders(fieldName));
-    const translations = JSON.parse(container.getAttribute("data-translations"));
+    const initial = getInitialFiles(container).concat(
+      getPlaceholders(fieldName)
+    );
+    const translations = JSON.parse(
+      container.getAttribute("data-translations")
+    );
     const supportDropArea = !(options.supportDropArea === false);
 
     new UploadFile({
