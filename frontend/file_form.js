@@ -483,10 +483,17 @@ const getFilesFromFileSystemEntries = async entries => {
 };
 
 const getFilesFromDataTransfer = async dataTransfer => {
-  const entries = [...dataTransfer.items].map(item => item.webkitGetAsEntry());
+  if (dataTransfer.items) {
+    const entries = [...dataTransfer.items].map(item =>
+      item.webkitGetAsEntry()
+    );
 
-  const files = await getFilesFromFileSystemEntries(entries);
-  return files;
+    const files = await getFilesFromFileSystemEntries(entries);
+    return files;
+  } else {
+    // backwards compatibility
+    return [...dataTransfer.files];
+  }
 };
 
 class DropArea {
