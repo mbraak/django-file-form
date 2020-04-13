@@ -156,6 +156,22 @@ module.exports = _asyncToGenerator;
 
 /***/ }),
 /* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var arrayWithoutHoles = __webpack_require__(15);
+
+var iterableToArray = __webpack_require__(16);
+
+var nonIterableSpread = __webpack_require__(17);
+
+function _toConsumableArray(arr) {
+  return arrayWithoutHoles(arr) || iterableToArray(arr) || nonIterableSpread();
+}
+
+module.exports = _toConsumableArray;
+
+/***/ }),
+/* 4 */
 /***/ (function(module, exports) {
 
 function _classCallCheck(instance, Constructor) {
@@ -167,7 +183,7 @@ function _classCallCheck(instance, Constructor) {
 module.exports = _classCallCheck;
 
 /***/ }),
-/* 4 */
+/* 5 */
 /***/ (function(module, exports) {
 
 var g;
@@ -191,22 +207,6 @@ try {
 
 module.exports = g;
 
-
-/***/ }),
-/* 5 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var arrayWithoutHoles = __webpack_require__(15);
-
-var iterableToArray = __webpack_require__(16);
-
-var nonIterableSpread = __webpack_require__(17);
-
-function _toConsumableArray(arr) {
-  return arrayWithoutHoles(arr) || iterableToArray(arr) || nonIterableSpread();
-}
-
-module.exports = _toConsumableArray;
 
 /***/ }),
 /* 6 */
@@ -490,9 +490,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(2);
 /* harmony import */ var _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _babel_runtime_helpers_toConsumableArray__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(5);
+/* harmony import */ var _babel_runtime_helpers_toConsumableArray__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(3);
 /* harmony import */ var _babel_runtime_helpers_toConsumableArray__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_toConsumableArray__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _babel_runtime_helpers_classCallCheck__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(3);
+/* harmony import */ var _babel_runtime_helpers_classCallCheck__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(4);
 /* harmony import */ var _babel_runtime_helpers_classCallCheck__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_classCallCheck__WEBPACK_IMPORTED_MODULE_3__);
 /* harmony import */ var _babel_runtime_helpers_createClass__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(6);
 /* harmony import */ var _babel_runtime_helpers_createClass__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_createClass__WEBPACK_IMPORTED_MODULE_4__);
@@ -1221,17 +1221,25 @@ function () {
       while (1) {
         switch (_context4.prev = _context4.next) {
           case 0:
+            if (!dataTransfer.items) {
+              _context4.next = 8;
+              break;
+            }
+
             entries = _babel_runtime_helpers_toConsumableArray__WEBPACK_IMPORTED_MODULE_2___default()(dataTransfer.items).map(function (item) {
               return item.webkitGetAsEntry();
             });
-            _context4.next = 3;
+            _context4.next = 4;
             return getFilesFromFileSystemEntries(entries);
 
-          case 3:
+          case 4:
             files = _context4.sent;
             return _context4.abrupt("return", files);
 
-          case 5:
+          case 8:
+            return _context4.abrupt("return", _babel_runtime_helpers_toConsumableArray__WEBPACK_IMPORTED_MODULE_2___default()(dataTransfer.files));
+
+          case 9:
           case "end":
             return _context4.stop();
         }
@@ -1439,7 +1447,7 @@ var initUploadFields = function initUploadFields(form) {
 
 global.initFormSet = initFormSet;
 global.initUploadFields = initUploadFields;
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(4)))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(5)))
 
 /***/ }),
 /* 14 */
@@ -3377,7 +3385,7 @@ module.exports = function extend() {
     return {Base64: global.Base64}
 }));
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(4)))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(5)))
 
 /***/ }),
 /* 22 */
@@ -3861,7 +3869,7 @@ Url.qs = qs;
 
 module.exports = Url;
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(4)))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(5)))
 
 /***/ }),
 /* 24 */
