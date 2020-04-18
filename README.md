@@ -304,6 +304,9 @@ initFormSet(
 ## Changelog
 
 * **development**
+  * Issue #300: add migration so makemigrations will not create one (thanks to Lionqueen94)
+
+* **2.1.1 (7 april 2020)**
   * Issue #290: add javascript callbacks (thanks to Peter Dekkers)
   * Issue #296: fix progress bar
   * Issue #297: add retry delays
