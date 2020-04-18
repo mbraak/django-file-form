@@ -520,8 +520,12 @@ class DropArea {
     e.stopPropagation();
 
     const uploadFiles = async () => {
-      const files = await getFilesFromDataTransfer(e.dataTransfer);
-      this.onUploadFiles(files);
+      try {
+        const files = await getFilesFromDataTransfer(e.dataTransfer);
+        this.onUploadFiles(files);
+      } catch (error) {
+        console.error(error);
+      }
     };
 
     uploadFiles();
