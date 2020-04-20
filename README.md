@@ -303,7 +303,7 @@ initFormSet(
 
 ## Changelog
 
-* **development**
+* **2.1.2 (20 april 2020)**
   * Issue #298: directory support for drop area
   * Issue #300: add migration so makemigrations will not create one (thanks to Lionqueen94)
 
