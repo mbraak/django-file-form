@@ -4,9 +4,9 @@
   "description": "Frontend code for django-file-form",
   "main": "index.js",
   "scripts": {
-    "lint": "eslint file_form.js",
+    "lint": "eslint src/",
     "build": "webpack --mode production; SKIP_COMPRESS_JS=true webpack --mode production",
-    "sass": "node-sass file_form.scss -o ../django_file_form/static/file_form/",
+    "sass": "node-sass style/file_form.scss -o ../django_file_form/static/file_form/",
     "watch": "webpack --mode development --watch"
   },
   "repository": {

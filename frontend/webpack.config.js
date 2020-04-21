@@ -7,7 +7,7 @@ const outputFilename = skipCompressJs ? "file_form.debug.js" : "file_form.js";
 
 module.exports = {
   entry: {
-    file_form: ["./file_form.js"]
+    file_form: ["./src/file_form.js"]
   },
   output: {
     path: path.resolve(__dirname, "../django_file_form/static/file_form/"),
@@ -26,7 +26,7 @@ module.exports = {
   },
   devtool: "source-map",
   optimization: {
-    minimize,
+    minimize
   },
   externals: {
     jquery: "jQuery"
