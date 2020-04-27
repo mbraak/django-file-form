@@ -1,20 +1,28 @@
-const getEntriesFromDirectory = async directoryEntry =>
+const getEntriesFromDirectory = async (
+  directoryEntry: FileSystemDirectoryEntry
+): Promise<FileSystemEntry[]> =>
   new Promise((resolve, reject) =>
     directoryEntry.createReader().readEntries(resolve, reject)
   );
 
-const getFileFromFileEntry = async fileEntry =>
+const getFileFromFileEntry = async (
+  fileEntry: FileSystemFileEntry
+): Promise<File> =>
   new Promise((resolve, reject) => fileEntry.file(resolve, reject));
 
-const getFilesFromFileSystemEntries = async entries => {
+const getFilesFromFileSystemEntries = async (
+  entries: FileSystemEntry[]
+): Promise<File[]> => {
   const result = [];
 
   for await (const entry of entries) {
     if (entry.isFile) {
-      const file = await getFileFromFileEntry(entry);
+      const file = await getFileFromFileEntry(entry as FileSystemFileEntry);
       result.push(file);
     } else if (entry.isDirectory) {
-      const entriesFromDirectory = await getEntriesFromDirectory(entry);
+      const entriesFromDirectory = await getEntriesFromDirectory(
+        entry as FileSystemDirectoryEntry
+      );
       const files = await getFilesFromFileSystemEntries(entriesFromDirectory);
       files.forEach(file => result.push(file));
     }
@@ -23,7 +31,9 @@ const getFilesFromFileSystemEntries = async entries => {
   return result;
 };
 
-const getFilesFromDataTransfer = async dataTransfer => {
+const getFilesFromDataTransfer = async (
+  dataTransfer: DataTransfer
+): Promise<File[]> => {
   if (dataTransfer.items) {
     const entries = [...dataTransfer.items].map(item =>
       item.webkitGetAsEntry()
@@ -38,7 +48,16 @@ const getFilesFromDataTransfer = async dataTransfer => {
 };
 
 class DropArea {
-  constructor({ container, onUploadFiles }) {
+  container: Element;
+  onUploadFiles: (files: File[]) => void;
+
+  constructor({
+    container,
+    onUploadFiles
+  }: {
+    container: Element;
+    onUploadFiles: (files: File[]) => void;
+  }) {
     this.container = container;
     this.onUploadFiles = onUploadFiles;
 
@@ -55,15 +74,18 @@ class DropArea {
     container.addEventListener("drop", this.onDrop);
   }
 
-  onDrop = e => {
+  onDrop = (e: Event): void => {
+    const dragEvent = e as DragEvent;
     this.container.classList.remove("dff-dropping");
-    e.preventDefault();
-    e.stopPropagation();
+    dragEvent.preventDefault();
+    dragEvent.stopPropagation();
 
-    const uploadFiles = async () => {
+    const uploadFiles = async (): Promise<void> => {
       try {
-        const files = await getFilesFromDataTransfer(e.dataTransfer);
-        this.onUploadFiles(files);
+        if (dragEvent.dataTransfer) {
+          const files = await getFilesFromDataTransfer(dragEvent.dataTransfer);
+          this.onUploadFiles(files);
+        }
       } catch (error) {
         console.error(error);
       }

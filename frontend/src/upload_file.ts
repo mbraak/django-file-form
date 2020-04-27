@@ -3,8 +3,49 @@
 import { Upload } from "tus-js-client";
 import { findInput, getPlaceholderFieldName } from "./util";
 import RenderUploadFile from "./render_upload_file";
+import DropArea from "./drop_area";
+
+export interface InitialFile {
+  id: string;
+  name: string;
+  placeholder?: boolean;
+  size: number;
+}
+
+export interface UploadedFile {
+  id: string;
+  name: string;
+  placeholder: boolean;
+  size: number;
+}
+
+export type Translations = { [key: string]: string };
+
+export interface Callbacks {
+  onDelete?: (upload: Upload | UploadedFile) => void;
+  onError?: (error: Error, upload: Upload) => void;
+  onProgress?: (
+    bytesUploaded: number,
+    bytesTotal: number,
+    upload: Upload
+  ) => void;
+  onSuccess?: (upload: Upload) => void;
+}
 
 class UploadFile {
+  callbacks: Callbacks;
+  fieldName: string;
+  form: Element;
+  formId: string;
+  multiple: boolean;
+  prefix: string | null;
+  renderer: RenderUploadFile;
+  retryDelays: number[] | null;
+  supportDropArea: boolean;
+  uploadIndex: number;
+  uploadUrl: string;
+  uploads: (Upload | UploadedFile)[];
+
   constructor({
     callbacks,
     fieldName,
@@ -20,6 +61,21 @@ class UploadFile {
     supportDropArea,
     translations,
     uploadUrl
+  }: {
+    callbacks: Callbacks;
+    fieldName: string;
+    form: Element;
+    formId: string;
+    initial: InitialFile[];
+    input: HTMLInputElement;
+    multiple: boolean;
+    parent: Element;
+    prefix: string | null;
+    retryDelays: number[] | null;
+    skipRequired: boolean;
+    supportDropArea: boolean;
+    translations: Translations;
+    uploadUrl: string;
   }) {
     this.callbacks = callbacks;
     this.fieldName = fieldName;
@@ -56,14 +112,14 @@ class UploadFile {
     filesContainer.addEventListener("click", this.onClick);
   }
 
-  addInitialFiles(initialFiles) {
+  addInitialFiles(initialFiles: InitialFile[]): void {
     if (initialFiles.length === 0) {
       return;
     }
 
     const { multiple, renderer } = this;
 
-    const addInitialFile = (file, i) => {
+    const addInitialFile = (file: InitialFile, i: number): void => {
       const { id, name, size } = file;
       renderer.addUploadedFile(name, i, size);
 
@@ -78,7 +134,7 @@ class UploadFile {
     if (multiple) {
       let uploadIndex = 0;
 
-      initialFiles.forEach(file => {
+      initialFiles.forEach((file: InitialFile): void => {
         addInitialFile(file, uploadIndex);
         uploadIndex += 1;
       });
@@ -87,7 +143,7 @@ class UploadFile {
     }
   }
 
-  uploadFiles = files => {
+  uploadFiles = (files: File[]): void => {
     if (files.length === 0) {
       return;
     }
@@ -105,10 +161,11 @@ class UploadFile {
       const upload = new Upload(file, {
         endpoint: uploadUrl,
         metadata: { fieldName, filename, formId },
-        onError: error => this.handleError(uploadIndex, error),
-        onProgress: (bytesUploaded, bytesTotal) =>
+        onError: (error: Error): void => this.handleError(uploadIndex, error),
+        onProgress: (bytesUploaded: number, bytesTotal: number): void =>
           this.handleProgress(uploadIndex, bytesUploaded, bytesTotal),
-        onSuccess: () => this.handleSuccess(uploadIndex, upload.file.size),
+        onSuccess: (): void =>
+          this.handleSuccess(uploadIndex, (upload.file as File).size),
         retryDelays: this.retryDelays || [0, 1000, 3000, 5000]
       });
 
@@ -121,27 +178,47 @@ class UploadFile {
     this.checkDropHint();
   };
 
-  onChange = e => {
-    this.uploadFiles([...e.target.files]);
+  onChange = (e: Event): void => {
+    this.uploadFiles([...(e.target as HTMLInputElement).files]);
   };
 
-  onClick = e => {
-    const { target } = e;
+  onClick = (e: Event): void => {
+    const target = e.target as HTMLInputElement;
+
+    const getUploadIndex = (): number | null => {
+      const dataIndex = target.getAttribute("data-index");
+
+      if (!dataIndex) {
+        return null;
+      }
+
+      return parseInt(dataIndex, 10);
+    };
 
     if (target.classList.contains("dff-delete")) {
-      const uploadIndex = parseInt(target.getAttribute("data-index"), 10);
-      this.handleDelete(uploadIndex);
+      const uploadIndex = getUploadIndex();
+
+      if (uploadIndex !== null) {
+        this.handleDelete(uploadIndex);
+      }
 
       e.preventDefault();
     } else if (target.classList.contains("dff-cancel")) {
-      const uploadIndex = parseInt(target.getAttribute("data-index"), 10);
-      this.handleCancel(uploadIndex);
+      const uploadIndex = getUploadIndex();
+
+      if (uploadIndex !== null) {
+        this.handleCancel(uploadIndex);
+      }
 
       e.preventDefault();
     }
   };
 
-  handleProgress = (uploadIndex, bytesUploaded, bytesTotal) => {
+  handleProgress = (
+    uploadIndex: number,
+    bytesUploaded: number,
+    bytesTotal: number
+  ): void => {
     const percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2);
 
     this.renderer.updateProgress(uploadIndex, percentage);
@@ -150,22 +227,28 @@ class UploadFile {
 
     if (onProgress) {
       const upload = this.uploads[uploadIndex];
-      onProgress(bytesUploaded, bytesTotal, upload);
+
+      if (upload instanceof Upload) {
+        onProgress(bytesUploaded, bytesTotal, upload);
+      }
     }
   };
 
-  handleError = (uploadIndex, error) => {
+  handleError = (uploadIndex: number, error: Error): void => {
     this.renderer.setError(uploadIndex);
 
     const { onError } = this.callbacks;
 
     if (onError) {
       const upload = this.uploads[uploadIndex];
-      onError(error, upload);
+
+      if (upload instanceof Upload) {
+        onError(error, upload);
+      }
     }
   };
 
-  handleSuccess = (uploadIndex, uploadedSize) => {
+  handleSuccess = (uploadIndex: number, uploadedSize: number): void => {
     const { renderer } = this;
 
     renderer.clearInput();
@@ -175,21 +258,24 @@ class UploadFile {
 
     if (onSuccess) {
       const upload = this.uploads[uploadIndex];
-      onSuccess(upload);
+
+      if (upload instanceof Upload) {
+        onSuccess(upload);
+      }
     }
   };
 
-  handleDelete(uploadIndex) {
-    const { placeholder } = this.uploads[uploadIndex];
+  handleDelete(uploadIndex: number): void {
+    const upload = this.uploads[uploadIndex];
 
-    if (placeholder) {
-      this.deletePlaceholder(uploadIndex);
-    } else {
+    if (upload instanceof Upload) {
       this.deleteFromServer(uploadIndex);
+    } else {
+      this.deletePlaceholder(uploadIndex);
     }
   }
 
-  deleteUpload(uploadIndex) {
+  deleteUpload(uploadIndex: number): void {
     const upload = this.uploads[uploadIndex];
 
     this.renderer.deleteFile(uploadIndex);
@@ -202,13 +288,23 @@ class UploadFile {
     }
   }
 
-  deleteFromServer(uploadIndex) {
-    const { url } = this.uploads[uploadIndex];
+  deleteFromServer(uploadIndex: number): void {
+    const upload = this.uploads[uploadIndex];
+
+    if (!(upload instanceof Upload)) {
+      return;
+    }
+
+    const { url } = upload;
+
+    if (!url) {
+      return;
+    }
 
     const xhr = new window.XMLHttpRequest();
     xhr.open("DELETE", url);
 
-    xhr.onload = () => {
+    xhr.onload = (): void => {
       if (xhr.status === 204) {
         this.deleteUpload(uploadIndex);
       } else {
@@ -219,26 +315,29 @@ class UploadFile {
     xhr.send(null);
   }
 
-  deletePlaceholder(uploadIndex) {
+  deletePlaceholder(uploadIndex: number): void {
     this.deleteUpload(uploadIndex);
     this.updatePlaceholderInput();
   }
 
-  handleCancel(uploadIndex) {
+  handleCancel(uploadIndex: number): void {
     const upload = this.uploads[uploadIndex];
-    upload.abort(true);
 
-    this.deleteUpload(uploadIndex);
+    if (upload instanceof Upload) {
+      upload.abort(true);
+
+      this.deleteUpload(uploadIndex);
+    }
   }
 
-  initDropArea(container) {
+  initDropArea(container: Element): void {
     new DropArea({
       container,
       onUploadFiles: this.uploadFiles
     });
   }
 
-  checkDropHint() {
+  checkDropHint(): void {
     if (!this.supportDropArea) {
       return;
     }
@@ -252,22 +351,19 @@ class UploadFile {
     }
   }
 
-  updatePlaceholderInput() {
-    const placeholdersInfo = this.uploads
-      .filter(upload => upload.placeholder)
-      .map(({ id, name, placeholder, size }) => ({
-        id,
-        name,
-        placeholder,
-        size
-      }));
+  updatePlaceholderInput(): void {
+    const placeholdersInfo = this.uploads.filter(
+      upload => !(upload instanceof Upload) && upload.placeholder
+    ) as UploadedFile[];
 
     const input = findInput(
       this.form,
       getPlaceholderFieldName(this.fieldName, this.prefix),
       this.prefix
     );
-    input.value = JSON.stringify(placeholdersInfo);
+    if (input) {
+      input.value = JSON.stringify(placeholdersInfo);
+    }
   }
 }
 

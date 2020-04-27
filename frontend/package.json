@@ -4,9 +4,10 @@
   "description": "Frontend code for django-file-form",
   "main": "index.js",
   "scripts": {
-    "lint": "eslint src/",
+    "lint": "eslint src/**/*.ts",
     "build": "webpack --mode production; SKIP_COMPRESS_JS=true webpack --mode production",
     "sass": "node-sass style/file_form.scss -o ../django_file_form/static/file_form/",
+    "tsc": "tsc --noEmit",
     "watch": "webpack --mode development --watch"
   },
   "repository": {
@@ -24,14 +25,19 @@
     "@babel/plugin-proposal-class-properties": "^7.8.3",
     "@babel/plugin-transform-runtime": "^7.9.0",
     "@babel/preset-env": "^7.8.4",
+    "@babel/preset-typescript": "^7.9.0",
+    "@types/escape-html": "^0.0.20",
+    "@types/tus-js-client": "^1.8.0",
+    "@typescript-eslint/eslint-plugin": "^2.29.0",
+    "@typescript-eslint/parser": "^2.29.0",
     "babel-eslint": "^10.0.3",
     "babel-loader": "^8.0.6",
     "eslint": "^6.7.2",
-    "eslint-config-airbnb": "^18.0.1",
     "eslint-plugin-import": "^2.20.1",
     "eslint-plugin-jsx-a11y": "^6.2.3",
     "eslint-plugin-react": "^7.18.3",
     "node-sass": "^4.13.1",
+    "typescript": "^3.8.3",
     "webpack": "^4.41.6",
     "webpack-cli": "^3.3.11"
   },

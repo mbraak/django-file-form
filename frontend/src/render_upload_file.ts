@@ -4,7 +4,21 @@ import escape from "escape-html";
 import { formatBytes } from "./util";
 
 class RenderUploadFile {
-  constructor({ parent, input, skipRequired, translations }) {
+  container: Element;
+  input: HTMLInputElement;
+  translations: { [key: string]: string };
+
+  constructor({
+    parent,
+    input,
+    skipRequired,
+    translations
+  }: {
+    parent: Element;
+    input: HTMLInputElement;
+    skipRequired: boolean;
+    translations: { [key: string]: string };
+  }) {
     this.container = this.createFilesContainer(parent);
     this.input = input;
     this.translations = translations;
@@ -14,7 +28,7 @@ class RenderUploadFile {
     }
   }
 
-  createFilesContainer = parent => {
+  createFilesContainer = (parent: Element): Element => {
     const div = document.createElement("div");
     div.className = "dff-files";
     parent.appendChild(div);
@@ -22,12 +36,16 @@ class RenderUploadFile {
     return div;
   };
 
-  addUploadedFile(filename, uploadIndex, filesize) {
+  addUploadedFile(
+    filename: string,
+    uploadIndex: number,
+    filesize: number
+  ): void {
     this.addFile(filename, uploadIndex);
     this.setSuccess(uploadIndex, filesize);
   }
 
-  addNewUpload(filename, uploadIndex) {
+  addNewUpload(filename: string, uploadIndex: number): void {
     const div = this.addFile(filename, uploadIndex);
 
     const progressSpan = document.createElement("span");
@@ -42,12 +60,12 @@ class RenderUploadFile {
     const cancelLink = document.createElement("a");
     cancelLink.className = "dff-cancel";
     cancelLink.innerHTML = this.translations.Cancel;
-    cancelLink.setAttribute("data-index", uploadIndex);
+    cancelLink.setAttribute("data-index", `${uploadIndex}`);
     cancelLink.href = "#";
     div.appendChild(cancelLink);
   }
 
-  addFile(filename, uploadIndex) {
+  addFile(filename: string, uploadIndex: number): Element {
     const div = document.createElement("div");
     div.className = `dff-file dff-file-id-${uploadIndex}`;
 
@@ -61,7 +79,7 @@ class RenderUploadFile {
     return div;
   }
 
-  deleteFile(index) {
+  deleteFile(index: number): void {
     const div = this.findFileDiv(index);
 
     if (div) {
@@ -69,92 +87,104 @@ class RenderUploadFile {
     }
   }
 
-  setError(index) {
+  setError(index: number): void {
     const span = document.createElement("span");
     span.classList.add("dff-error");
     span.innerHTML = this.translations["Upload failed"];
 
     const el = this.findFileDiv(index);
-    el.appendChild(span);
-    el.classList.add("dff-upload-fail");
+    if (el) {
+      el.appendChild(span);
+      el.classList.add("dff-upload-fail");
+    }
 
     this.removeProgress(index);
     this.removeCancel(index);
   }
 
-  setDeleteFailed(index) {
+  setDeleteFailed(index: number): void {
     const el = this.findFileDiv(index);
 
-    const span = document.createElement("span");
-    span.innerHTML = this.translations["Delete failed"];
+    if (el) {
+      const span = document.createElement("span");
+      span.innerHTML = this.translations["Delete failed"];
 
-    el.appendChild(span);
+      el.appendChild(span);
+    }
   }
 
-  findFileDiv(index) {
+  findFileDiv(index: number): Element | null {
     return this.container.querySelector(`.dff-file-id-${index}`);
   }
 
-  setSuccess(index, size) {
+  setSuccess(index: number, size: number): void {
     const { translations } = this;
 
     const el = this.findFileDiv(index);
-    el.classList.add("dff-upload-success");
+    if (el) {
+      el.classList.add("dff-upload-success");
 
-    const fileSizeInfo = document.createElement("span");
-    fileSizeInfo.innerHTML = formatBytes(size, 2);
-    fileSizeInfo.className = "dff-filesize";
+      const fileSizeInfo = document.createElement("span");
+      fileSizeInfo.innerHTML = formatBytes(size, 2);
+      fileSizeInfo.className = "dff-filesize";
 
-    el.appendChild(fileSizeInfo);
+      el.appendChild(fileSizeInfo);
 
-    const deleteLink = document.createElement("a");
-    deleteLink.innerHTML = translations.Delete;
-    deleteLink.className = "dff-delete";
-    deleteLink.setAttribute("data-index", index);
-    deleteLink.href = "#";
+      const deleteLink = document.createElement("a");
+      deleteLink.innerHTML = translations.Delete;
+      deleteLink.className = "dff-delete";
+      deleteLink.setAttribute("data-index", `${index}`);
+      deleteLink.href = "#";
 
-    el.appendChild(deleteLink);
+      el.appendChild(deleteLink);
+    }
 
     this.removeProgress(index);
     this.removeCancel(index);
   }
 
-  removeProgress(index) {
+  removeProgress(index: number): void {
     const el = this.findFileDiv(index);
 
-    const progressSpan = el.querySelector(".dff-progress");
+    if (el) {
+      const progressSpan = el.querySelector(".dff-progress");
 
-    if (progressSpan) {
-      progressSpan.remove();
+      if (progressSpan) {
+        progressSpan.remove();
+      }
     }
   }
 
-  removeCancel(index) {
+  removeCancel(index: number): void {
     const el = this.findFileDiv(index);
 
-    const cancelSpan = el.querySelector(".dff-cancel");
+    if (el) {
+      const cancelSpan = el.querySelector(".dff-cancel");
 
-    if (cancelSpan) {
-      cancelSpan.remove();
+      if (cancelSpan) {
+        cancelSpan.remove();
+      }
     }
   }
 
-  clearInput() {
+  clearInput(): void {
     const { input } = this;
 
     input.value = "";
   }
 
-  updateProgress(index, percentage) {
+  updateProgress(index: number, percentage: string): void {
     const el = this.container.querySelector(`.dff-file-id-${index}`);
-    const innerProgressSpan = el.querySelector(".dff-progress-inner");
+    if (el) {
+      const innerProgressSpan = el.querySelector(".dff-progress-inner");
 
-    if (innerProgressSpan) {
-      innerProgressSpan.style.width = `${percentage}%`;
+      if (innerProgressSpan) {
+        (innerProgressSpan as HTMLElement).style.width = `${percentage}%`;
+      }
     }
   }
 
-  renderDropHint() {
+  renderDropHint(): void {
     if (this.container.querySelector(".dff-drop-hint")) {
       return;
     }
@@ -166,7 +196,7 @@ class RenderUploadFile {
     this.container.appendChild(dropHint);
   }
 
-  removeDropHint() {
+  removeDropHint(): void {
     const dropHint = this.container.querySelector(".dff-drop-hint");
 
     if (dropHint) {
