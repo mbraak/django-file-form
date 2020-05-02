@@ -305,6 +305,7 @@ initFormSet(
 
 * **development**
   * Issue #304: rewrite frontend in typescript
+  * Issue #305: don't change migration when setting changes (thanks to Lionqueen94)
 
 * **2.1.2 (20 april 2020)**
   * Issue #298: directory support for drop area
