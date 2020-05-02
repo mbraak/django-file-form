@@ -40,9 +40,13 @@ class UploadedFileManager(ModelManager):
         return self.try_get(uploaded_file=path)
 
 
+def get_upload_to(*args):
+    return getattr(settings, 'FILE_FORM_UPLOAD_DIR', 'temp_uploads')
+
+
 class UploadedFile(models.Model):
     created = models.DateTimeField(default=timezone.now)
-    uploaded_file = models.FileField(max_length=255, upload_to=getattr(settings, 'FILE_FORM_UPLOAD_DIR', 'temp_uploads'), storage=FileSystemStorage())
+    uploaded_file = models.FileField(max_length=255, storage=FileSystemStorage(), upload_to=get_upload_to)
     original_filename = models.CharField(max_length=255)
     field_name = models.CharField(max_length=255, null=True, blank=True)
     file_id = models.CharField(max_length=40)
