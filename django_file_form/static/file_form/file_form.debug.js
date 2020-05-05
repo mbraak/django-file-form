@@ -109,7 +109,7 @@ module.exports = _defineProperty;
 /* 1 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(32);
+module.exports = __webpack_require__(22);
 
 
 /***/ }),
@@ -165,55 +165,6 @@ var getInputValueForFormAndPrefix = function getInputValueForFormAndPrefix(form,
 
 /***/ }),
 /* 3 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var _upload = __webpack_require__(19);
-
-var _upload2 = _interopRequireDefault(_upload);
-
-var _storage = __webpack_require__(10);
-
-var storage = _interopRequireWildcard(_storage);
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/* global window */
-var defaultOptions = _upload2.default.defaultOptions;
-
-
-var moduleExport = {
-  Upload: _upload2.default,
-  canStoreURLs: storage.canStoreURLs,
-  defaultOptions: defaultOptions
-};
-
-if (typeof window !== "undefined") {
-  // Browser environment using XMLHttpRequest
-  var _window = window,
-      XMLHttpRequest = _window.XMLHttpRequest,
-      Blob = _window.Blob;
-
-
-  moduleExport.isSupported = XMLHttpRequest && Blob && typeof Blob.prototype.slice === "function";
-} else {
-  // Node.js environment using http module
-  moduleExport.isSupported = true;
-  // make FileStorage module available as it will not be set by default.
-  moduleExport.FileStorage = storage.FileStorage;
-}
-
-// The usage of the commonjs exporting syntax instead of the new ECMAScript
-// one is actually inteded and prevents weird behaviour if we are trying to
-// import this module in another module using Babel.
-module.exports = moduleExport;
-
-/***/ }),
-/* 4 */
 /***/ (function(module, exports) {
 
 function _classCallCheck(instance, Constructor) {
@@ -225,7 +176,7 @@ function _classCallCheck(instance, Constructor) {
 module.exports = _classCallCheck;
 
 /***/ }),
-/* 5 */
+/* 4 */
 /***/ (function(module, exports) {
 
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
@@ -267,23 +218,25 @@ function _asyncToGenerator(fn) {
 module.exports = _asyncToGenerator;
 
 /***/ }),
-/* 6 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var arrayWithoutHoles = __webpack_require__(16);
 
 var iterableToArray = __webpack_require__(17);
 
-var nonIterableSpread = __webpack_require__(18);
+var unsupportedIterableToArray = __webpack_require__(18);
+
+var nonIterableSpread = __webpack_require__(19);
 
 function _toConsumableArray(arr) {
-  return arrayWithoutHoles(arr) || iterableToArray(arr) || nonIterableSpread();
+  return arrayWithoutHoles(arr) || iterableToArray(arr) || unsupportedIterableToArray(arr) || nonIterableSpread();
 }
 
 module.exports = _toConsumableArray;
 
 /***/ }),
-/* 7 */
+/* 6 */
 /***/ (function(module, exports) {
 
 function _defineProperties(target, props) {
@@ -305,7 +258,7 @@ function _createClass(Constructor, protoProps, staticProps) {
 module.exports = _createClass;
 
 /***/ }),
-/* 8 */
+/* 7 */
 /***/ (function(module, exports) {
 
 var g;
@@ -331,2273 +284,23 @@ module.exports = g;
 
 
 /***/ }),
+/* 8 */
+/***/ (function(module, exports) {
+
+function _arrayLikeToArray(arr, len) {
+  if (len == null || len > arr.length) len = arr.length;
+
+  for (var i = 0, arr2 = new Array(len); i < len; i++) {
+    arr2[i] = arr[i];
+  }
+
+  return arr2;
+}
+
+module.exports = _arrayLikeToArray;
+
+/***/ }),
 /* 9 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-var isReactNative = function isReactNative() {
-  return typeof navigator !== "undefined" && typeof navigator.product === "string" && navigator.product.toLowerCase() === "reactnative";
-};
-
-exports.default = isReactNative;
-
-/***/ }),
-/* 10 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-exports.getStorage = getStorage;
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-/* global window, localStorage */
-
-var hasStorage = false;
-try {
-  hasStorage = "localStorage" in window;
-
-  // Attempt to store and read entries from the local storage to detect Private
-  // Mode on Safari on iOS (see #49)
-  var key = "tusSupport";
-  localStorage.setItem(key, localStorage.getItem(key));
-} catch (e) {
-  // If we try to access localStorage inside a sandboxed iframe, a SecurityError
-  // is thrown. When in private mode on iOS Safari, a QuotaExceededError is
-  // thrown (see #49)
-  if (e.code === e.SECURITY_ERR || e.code === e.QUOTA_EXCEEDED_ERR) {
-    hasStorage = false;
-  } else {
-    throw e;
-  }
-}
-
-var canStoreURLs = exports.canStoreURLs = hasStorage;
-
-var LocalStorage = function () {
-  function LocalStorage() {
-    _classCallCheck(this, LocalStorage);
-  }
-
-  _createClass(LocalStorage, [{
-    key: "setItem",
-    value: function setItem(key, value, cb) {
-      cb(null, localStorage.setItem(key, value));
-    }
-  }, {
-    key: "getItem",
-    value: function getItem(key, cb) {
-      cb(null, localStorage.getItem(key));
-    }
-  }, {
-    key: "removeItem",
-    value: function removeItem(key, cb) {
-      cb(null, localStorage.removeItem(key));
-    }
-  }]);
-
-  return LocalStorage;
-}();
-
-function getStorage() {
-  return hasStorage ? new LocalStorage() : null;
-}
-
-/***/ }),
-/* 11 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/*!
- * escape-html
- * Copyright(c) 2012-2013 TJ Holowaychuk
- * Copyright(c) 2015 Andreas Lubbe
- * Copyright(c) 2015 Tiancheng "Timothy" Gu
- * MIT Licensed
- */
-
-
-
-/**
- * Module variables.
- * @private
- */
-
-var matchHtmlRegExp = /["'&<>]/;
-
-/**
- * Module exports.
- * @public
- */
-
-module.exports = escapeHtml;
-
-/**
- * Escape special characters in the given string of html.
- *
- * @param  {string} string The string to escape for inserting into HTML
- * @return {string}
- * @public
- */
-
-function escapeHtml(string) {
-  var str = '' + string;
-  var match = matchHtmlRegExp.exec(str);
-
-  if (!match) {
-    return str;
-  }
-
-  var escape;
-  var html = '';
-  var index = 0;
-  var lastIndex = 0;
-
-  for (index = match.index; index < str.length; index++) {
-    switch (str.charCodeAt(index)) {
-      case 34: // "
-        escape = '&quot;';
-        break;
-      case 38: // &
-        escape = '&amp;';
-        break;
-      case 39: // '
-        escape = '&#39;';
-        break;
-      case 60: // <
-        escape = '&lt;';
-        break;
-      case 62: // >
-        escape = '&gt;';
-        break;
-      default:
-        continue;
-    }
-
-    if (lastIndex !== index) {
-      html += str.substring(lastIndex, index);
-    }
-
-    lastIndex = index + 1;
-    html += escape;
-  }
-
-  return lastIndex !== index
-    ? html + str.substring(lastIndex, index)
-    : html;
-}
-
-
-/***/ }),
-/* 12 */
-/***/ (function(module, exports) {
-
-function _asyncIterator(iterable) {
-  var method;
-
-  if (typeof Symbol !== "undefined") {
-    if (Symbol.asyncIterator) {
-      method = iterable[Symbol.asyncIterator];
-      if (method != null) return method.call(iterable);
-    }
-
-    if (Symbol.iterator) {
-      method = iterable[Symbol.iterator];
-      if (method != null) return method.call(iterable);
-    }
-  }
-
-  throw new TypeError("Object is not async iterable");
-}
-
-module.exports = _asyncIterator;
-
-/***/ }),
-/* 13 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-
-// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/toConsumableArray.js
-var toConsumableArray = __webpack_require__(6);
-var toConsumableArray_default = /*#__PURE__*/__webpack_require__.n(toConsumableArray);
-
-// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/classCallCheck.js
-var classCallCheck = __webpack_require__(4);
-var classCallCheck_default = /*#__PURE__*/__webpack_require__.n(classCallCheck);
-
-// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/createClass.js
-var createClass = __webpack_require__(7);
-var createClass_default = /*#__PURE__*/__webpack_require__.n(createClass);
-
-// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/defineProperty.js
-var defineProperty = __webpack_require__(0);
-var defineProperty_default = /*#__PURE__*/__webpack_require__.n(defineProperty);
-
-// EXTERNAL MODULE: ./node_modules/tus-js-client/lib.es5/index.js
-var lib_es5 = __webpack_require__(3);
-
-// EXTERNAL MODULE: ./src/util.ts
-var util = __webpack_require__(2);
-
-// EXTERNAL MODULE: ./node_modules/escape-html/index.js
-var escape_html = __webpack_require__(11);
-var escape_html_default = /*#__PURE__*/__webpack_require__.n(escape_html);
-
-// CONCATENATED MODULE: ./src/render_upload_file.ts
-
-
-
-
-/* global document */
-
-
-
-var render_upload_file_RenderUploadFile =
-/*#__PURE__*/
-function () {
-  function RenderUploadFile(_ref) {
-    var _parent = _ref.parent,
-        input = _ref.input,
-        skipRequired = _ref.skipRequired,
-        translations = _ref.translations;
-
-    classCallCheck_default()(this, RenderUploadFile);
-
-    defineProperty_default()(this, "container", void 0);
-
-    defineProperty_default()(this, "input", void 0);
-
-    defineProperty_default()(this, "translations", void 0);
-
-    defineProperty_default()(this, "createFilesContainer", function (parent) {
-      var div = document.createElement("div");
-      div.className = "dff-files";
-      parent.appendChild(div);
-      return div;
-    });
-
-    this.container = this.createFilesContainer(_parent);
-    this.input = input;
-    this.translations = translations;
-
-    if (skipRequired) {
-      this.input.required = false;
-    }
-  }
-
-  createClass_default()(RenderUploadFile, [{
-    key: "addUploadedFile",
-    value: function addUploadedFile(filename, uploadIndex, filesize) {
-      this.addFile(filename, uploadIndex);
-      this.setSuccess(uploadIndex, filesize);
-    }
-  }, {
-    key: "addNewUpload",
-    value: function addNewUpload(filename, uploadIndex) {
-      var div = this.addFile(filename, uploadIndex);
-      var progressSpan = document.createElement("span");
-      progressSpan.className = "dff-progress";
-      var innerSpan = document.createElement("span");
-      innerSpan.className = "dff-progress-inner";
-      progressSpan.appendChild(innerSpan);
-      div.appendChild(progressSpan);
-      var cancelLink = document.createElement("a");
-      cancelLink.className = "dff-cancel";
-      cancelLink.innerHTML = this.translations.Cancel;
-      cancelLink.setAttribute("data-index", "".concat(uploadIndex));
-      cancelLink.href = "#";
-      div.appendChild(cancelLink);
-    }
-  }, {
-    key: "addFile",
-    value: function addFile(filename, uploadIndex) {
-      var div = document.createElement("div");
-      div.className = "dff-file dff-file-id-".concat(uploadIndex);
-      var nameSpan = document.createElement("span");
-      nameSpan.innerHTML = escape_html_default()(filename);
-      div.appendChild(nameSpan);
-      this.container.appendChild(div);
-      this.input.required = false;
-      return div;
-    }
-  }, {
-    key: "deleteFile",
-    value: function deleteFile(index) {
-      var div = this.findFileDiv(index);
-
-      if (div) {
-        div.remove();
-      }
-    }
-  }, {
-    key: "setError",
-    value: function setError(index) {
-      var span = document.createElement("span");
-      span.classList.add("dff-error");
-      span.innerHTML = this.translations["Upload failed"];
-      var el = this.findFileDiv(index);
-
-      if (el) {
-        el.appendChild(span);
-        el.classList.add("dff-upload-fail");
-      }
-
-      this.removeProgress(index);
-      this.removeCancel(index);
-    }
-  }, {
-    key: "setDeleteFailed",
-    value: function setDeleteFailed(index) {
-      var el = this.findFileDiv(index);
-
-      if (el) {
-        var span = document.createElement("span");
-        span.innerHTML = this.translations["Delete failed"];
-        el.appendChild(span);
-      }
-    }
-  }, {
-    key: "findFileDiv",
-    value: function findFileDiv(index) {
-      return this.container.querySelector(".dff-file-id-".concat(index));
-    }
-  }, {
-    key: "setSuccess",
-    value: function setSuccess(index, size) {
-      var translations = this.translations;
-      var el = this.findFileDiv(index);
-
-      if (el) {
-        el.classList.add("dff-upload-success");
-        var fileSizeInfo = document.createElement("span");
-        fileSizeInfo.innerHTML = Object(util["b" /* formatBytes */])(size, 2);
-        fileSizeInfo.className = "dff-filesize";
-        el.appendChild(fileSizeInfo);
-        var deleteLink = document.createElement("a");
-        deleteLink.innerHTML = translations.Delete;
-        deleteLink.className = "dff-delete";
-        deleteLink.setAttribute("data-index", "".concat(index));
-        deleteLink.href = "#";
-        el.appendChild(deleteLink);
-      }
-
-      this.removeProgress(index);
-      this.removeCancel(index);
-    }
-  }, {
-    key: "removeProgress",
-    value: function removeProgress(index) {
-      var el = this.findFileDiv(index);
-
-      if (el) {
-        var progressSpan = el.querySelector(".dff-progress");
-
-        if (progressSpan) {
-          progressSpan.remove();
-        }
-      }
-    }
-  }, {
-    key: "removeCancel",
-    value: function removeCancel(index) {
-      var el = this.findFileDiv(index);
-
-      if (el) {
-        var cancelSpan = el.querySelector(".dff-cancel");
-
-        if (cancelSpan) {
-          cancelSpan.remove();
-        }
-      }
-    }
-  }, {
-    key: "clearInput",
-    value: function clearInput() {
-      var input = this.input;
-      input.value = "";
-    }
-  }, {
-    key: "updateProgress",
-    value: function updateProgress(index, percentage) {
-      var el = this.container.querySelector(".dff-file-id-".concat(index));
-
-      if (el) {
-        var innerProgressSpan = el.querySelector(".dff-progress-inner");
-
-        if (innerProgressSpan) {
-          innerProgressSpan.style.width = "".concat(percentage, "%");
-        }
-      }
-    }
-  }, {
-    key: "renderDropHint",
-    value: function renderDropHint() {
-      if (this.container.querySelector(".dff-drop-hint")) {
-        return;
-      }
-
-      var dropHint = document.createElement("div");
-      dropHint.className = "dff-drop-hint";
-      dropHint.innerHTML = this.translations["Drop your files here"];
-      this.container.appendChild(dropHint);
-    }
-  }, {
-    key: "removeDropHint",
-    value: function removeDropHint() {
-      var dropHint = this.container.querySelector(".dff-drop-hint");
-
-      if (dropHint) {
-        dropHint.remove();
-      }
-    }
-  }]);
-
-  return RenderUploadFile;
-}();
-
-/* harmony default export */ var render_upload_file = (render_upload_file_RenderUploadFile);
-// EXTERNAL MODULE: ./node_modules/@babel/runtime/regenerator/index.js
-var regenerator = __webpack_require__(1);
-var regenerator_default = /*#__PURE__*/__webpack_require__.n(regenerator);
-
-// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/asyncToGenerator.js
-var asyncToGenerator = __webpack_require__(5);
-var asyncToGenerator_default = /*#__PURE__*/__webpack_require__.n(asyncToGenerator);
-
-// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/asyncIterator.js
-var asyncIterator = __webpack_require__(12);
-var asyncIterator_default = /*#__PURE__*/__webpack_require__.n(asyncIterator);
-
-// CONCATENATED MODULE: ./src/drop_area.ts
-
-
-
-
-
-
-
-var getEntriesFromDirectory =
-/*#__PURE__*/
-function () {
-  var _ref = asyncToGenerator_default()(
-  /*#__PURE__*/
-  regenerator_default.a.mark(function _callee(directoryEntry) {
-    return regenerator_default.a.wrap(function _callee$(_context) {
-      while (1) {
-        switch (_context.prev = _context.next) {
-          case 0:
-            return _context.abrupt("return", new Promise(function (resolve, reject) {
-              return directoryEntry.createReader().readEntries(resolve, reject);
-            }));
-
-          case 1:
-          case "end":
-            return _context.stop();
-        }
-      }
-    }, _callee);
-  }));
-
-  return function getEntriesFromDirectory(_x) {
-    return _ref.apply(this, arguments);
-  };
-}();
-
-var getFileFromFileEntry =
-/*#__PURE__*/
-function () {
-  var _ref2 = asyncToGenerator_default()(
-  /*#__PURE__*/
-  regenerator_default.a.mark(function _callee2(fileEntry) {
-    return regenerator_default.a.wrap(function _callee2$(_context2) {
-      while (1) {
-        switch (_context2.prev = _context2.next) {
-          case 0:
-            return _context2.abrupt("return", new Promise(function (resolve, reject) {
-              return fileEntry.file(resolve, reject);
-            }));
-
-          case 1:
-          case "end":
-            return _context2.stop();
-        }
-      }
-    }, _callee2);
-  }));
-
-  return function getFileFromFileEntry(_x2) {
-    return _ref2.apply(this, arguments);
-  };
-}();
-
-var getFilesFromFileSystemEntries =
-/*#__PURE__*/
-function () {
-  var _ref3 = asyncToGenerator_default()(
-  /*#__PURE__*/
-  regenerator_default.a.mark(function _callee3(entries) {
-    var result, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, _value, entry, file, entriesFromDirectory, _files;
-
-    return regenerator_default.a.wrap(function _callee3$(_context3) {
-      while (1) {
-        switch (_context3.prev = _context3.next) {
-          case 0:
-            result = [];
-            _iteratorNormalCompletion = true;
-            _didIteratorError = false;
-            _context3.prev = 3;
-            _iterator = asyncIterator_default()(entries);
-
-          case 5:
-            _context3.next = 7;
-            return _iterator.next();
-
-          case 7:
-            _step = _context3.sent;
-            _iteratorNormalCompletion = _step.done;
-            _context3.next = 11;
-            return _step.value;
-
-          case 11:
-            _value = _context3.sent;
-
-            if (_iteratorNormalCompletion) {
-              _context3.next = 32;
-              break;
-            }
-
-            entry = _value;
-
-            if (!entry.isFile) {
-              _context3.next = 21;
-              break;
-            }
-
-            _context3.next = 17;
-            return getFileFromFileEntry(entry);
-
-          case 17:
-            file = _context3.sent;
-            result.push(file);
-            _context3.next = 29;
-            break;
-
-          case 21:
-            if (!entry.isDirectory) {
-              _context3.next = 29;
-              break;
-            }
-
-            _context3.next = 24;
-            return getEntriesFromDirectory(entry);
-
-          case 24:
-            entriesFromDirectory = _context3.sent;
-            _context3.next = 27;
-            return getFilesFromFileSystemEntries(entriesFromDirectory);
-
-          case 27:
-            _files = _context3.sent;
-
-            _files.forEach(function (file) {
-              return result.push(file);
-            });
-
-          case 29:
-            _iteratorNormalCompletion = true;
-            _context3.next = 5;
-            break;
-
-          case 32:
-            _context3.next = 38;
-            break;
-
-          case 34:
-            _context3.prev = 34;
-            _context3.t0 = _context3["catch"](3);
-            _didIteratorError = true;
-            _iteratorError = _context3.t0;
-
-          case 38:
-            _context3.prev = 38;
-            _context3.prev = 39;
-
-            if (!(!_iteratorNormalCompletion && _iterator["return"] != null)) {
-              _context3.next = 43;
-              break;
-            }
-
-            _context3.next = 43;
-            return _iterator["return"]();
-
-          case 43:
-            _context3.prev = 43;
-
-            if (!_didIteratorError) {
-              _context3.next = 46;
-              break;
-            }
-
-            throw _iteratorError;
-
-          case 46:
-            return _context3.finish(43);
-
-          case 47:
-            return _context3.finish(38);
-
-          case 48:
-            return _context3.abrupt("return", result);
-
-          case 49:
-          case "end":
-            return _context3.stop();
-        }
-      }
-    }, _callee3, null, [[3, 34, 38, 48], [39,, 43, 47]]);
-  }));
-
-  return function getFilesFromFileSystemEntries(_x3) {
-    return _ref3.apply(this, arguments);
-  };
-}();
-
-var getFilesFromDataTransfer =
-/*#__PURE__*/
-function () {
-  var _ref4 = asyncToGenerator_default()(
-  /*#__PURE__*/
-  regenerator_default.a.mark(function _callee4(dataTransfer) {
-    var entries, _files2;
-
-    return regenerator_default.a.wrap(function _callee4$(_context4) {
-      while (1) {
-        switch (_context4.prev = _context4.next) {
-          case 0:
-            if (!dataTransfer.items) {
-              _context4.next = 8;
-              break;
-            }
-
-            entries = toConsumableArray_default()(dataTransfer.items).map(function (item) {
-              return item.webkitGetAsEntry();
-            });
-            _context4.next = 4;
-            return getFilesFromFileSystemEntries(entries);
-
-          case 4:
-            _files2 = _context4.sent;
-            return _context4.abrupt("return", _files2);
-
-          case 8:
-            return _context4.abrupt("return", toConsumableArray_default()(dataTransfer.files));
-
-          case 9:
-          case "end":
-            return _context4.stop();
-        }
-      }
-    }, _callee4);
-  }));
-
-  return function getFilesFromDataTransfer(_x4) {
-    return _ref4.apply(this, arguments);
-  };
-}();
-
-var drop_area_DropArea = function DropArea(_ref5) {
-  var _this = this;
-
-  var container = _ref5.container,
-      onUploadFiles = _ref5.onUploadFiles;
-
-  classCallCheck_default()(this, DropArea);
-
-  defineProperty_default()(this, "container", void 0);
-
-  defineProperty_default()(this, "onUploadFiles", void 0);
-
-  defineProperty_default()(this, "onDrop", function (e) {
-    var dragEvent = e;
-
-    _this.container.classList.remove("dff-dropping");
-
-    dragEvent.preventDefault();
-    dragEvent.stopPropagation();
-
-    var uploadFiles =
-    /*#__PURE__*/
-    function () {
-      var _ref6 = asyncToGenerator_default()(
-      /*#__PURE__*/
-      regenerator_default.a.mark(function _callee5() {
-        var _files3;
-
-        return regenerator_default.a.wrap(function _callee5$(_context5) {
-          while (1) {
-            switch (_context5.prev = _context5.next) {
-              case 0:
-                _context5.prev = 0;
-
-                if (!dragEvent.dataTransfer) {
-                  _context5.next = 6;
-                  break;
-                }
-
-                _context5.next = 4;
-                return getFilesFromDataTransfer(dragEvent.dataTransfer);
-
-              case 4:
-                _files3 = _context5.sent;
-
-                _this.onUploadFiles(_files3);
-
-              case 6:
-                _context5.next = 11;
-                break;
-
-              case 8:
-                _context5.prev = 8;
-                _context5.t0 = _context5["catch"](0);
-                console.error(_context5.t0);
-
-              case 11:
-              case "end":
-                return _context5.stop();
-            }
-          }
-        }, _callee5, null, [[0, 8]]);
-      }));
-
-      return function uploadFiles() {
-        return _ref6.apply(this, arguments);
-      };
-    }();
-
-    uploadFiles();
-  });
-
-  this.container = container;
-  this.onUploadFiles = onUploadFiles;
-  container.addEventListener("dragenter", function () {
-    container.classList.add("dff-dropping");
-  });
-  container.addEventListener("dragleave", function () {
-    container.classList.remove("dff-dropping");
-  });
-  container.addEventListener("dragover", function (e) {
-    container.classList.add("dff-dropping");
-    e.preventDefault();
-  });
-  container.addEventListener("drop", this.onDrop);
-};
-
-/* harmony default export */ var drop_area = (drop_area_DropArea);
-// CONCATENATED MODULE: ./src/upload_file.ts
-
-
-
-
-
-/* global window */
-
-
-
-
-
-var upload_file_UploadFile =
-/*#__PURE__*/
-function () {
-  function UploadFile(_ref) {
-    var _this = this;
-
-    var callbacks = _ref.callbacks,
-        _fieldName = _ref.fieldName,
-        form = _ref.form,
-        _formId = _ref.formId,
-        initial = _ref.initial,
-        input = _ref.input,
-        multiple = _ref.multiple,
-        parent = _ref.parent,
-        prefix = _ref.prefix,
-        retryDelays = _ref.retryDelays,
-        skipRequired = _ref.skipRequired,
-        supportDropArea = _ref.supportDropArea,
-        translations = _ref.translations,
-        _uploadUrl = _ref.uploadUrl;
-
-    classCallCheck_default()(this, UploadFile);
-
-    defineProperty_default()(this, "callbacks", void 0);
-
-    defineProperty_default()(this, "fieldName", void 0);
-
-    defineProperty_default()(this, "form", void 0);
-
-    defineProperty_default()(this, "formId", void 0);
-
-    defineProperty_default()(this, "multiple", void 0);
-
-    defineProperty_default()(this, "prefix", void 0);
-
-    defineProperty_default()(this, "renderer", void 0);
-
-    defineProperty_default()(this, "retryDelays", void 0);
-
-    defineProperty_default()(this, "supportDropArea", void 0);
-
-    defineProperty_default()(this, "uploadIndex", void 0);
-
-    defineProperty_default()(this, "uploadUrl", void 0);
-
-    defineProperty_default()(this, "uploads", void 0);
-
-    defineProperty_default()(this, "uploadFiles", function (files) {
-      if (files.length === 0) {
-        return;
-      }
-
-      if (!_this.multiple && _this.uploads.length !== 0) {
-        _this.renderer.deleteFile(0);
-
-        _this.uploads = [];
-      }
-
-      files.forEach(function (file) {
-        var fieldName = _this.fieldName,
-            formId = _this.formId,
-            renderer = _this.renderer,
-            uploads = _this.uploads,
-            uploadUrl = _this.uploadUrl;
-        var filename = file.name;
-        var uploadIndex = uploads.length;
-        var upload = new lib_es5["Upload"](file, {
-          endpoint: uploadUrl,
-          metadata: {
-            fieldName: fieldName,
-            filename: filename,
-            formId: formId
-          },
-          onError: function onError(error) {
-            return _this.handleError(uploadIndex, error);
-          },
-          onProgress: function onProgress(bytesUploaded, bytesTotal) {
-            return _this.handleProgress(uploadIndex, bytesUploaded, bytesTotal);
-          },
-          onSuccess: function onSuccess() {
-            return _this.handleSuccess(uploadIndex, upload.file.size);
-          },
-          retryDelays: _this.retryDelays || [0, 1000, 3000, 5000]
-        });
-        upload.start();
-        renderer.addNewUpload(filename, uploadIndex);
-
-        _this.uploads.push(upload);
-      });
-
-      _this.checkDropHint();
-    });
-
-    defineProperty_default()(this, "onChange", function (e) {
-      _this.uploadFiles(toConsumableArray_default()(e.target.files));
-    });
-
-    defineProperty_default()(this, "onClick", function (e) {
-      var target = e.target;
-
-      var getUploadIndex = function getUploadIndex() {
-        var dataIndex = target.getAttribute("data-index");
-
-        if (!dataIndex) {
-          return null;
-        }
-
-        return parseInt(dataIndex, 10);
-      };
-
-      if (target.classList.contains("dff-delete")) {
-        var uploadIndex = getUploadIndex();
-
-        if (uploadIndex !== null) {
-          _this.handleDelete(uploadIndex);
-        }
-
-        e.preventDefault();
-      } else if (target.classList.contains("dff-cancel")) {
-        var _uploadIndex = getUploadIndex();
-
-        if (_uploadIndex !== null) {
-          _this.handleCancel(_uploadIndex);
-        }
-
-        e.preventDefault();
-      }
-    });
-
-    defineProperty_default()(this, "handleProgress", function (uploadIndex, bytesUploaded, bytesTotal) {
-      var percentage = (bytesUploaded / bytesTotal * 100).toFixed(2);
-
-      _this.renderer.updateProgress(uploadIndex, percentage);
-
-      var onProgress = _this.callbacks.onProgress;
-
-      if (onProgress) {
-        var _upload = _this.uploads[uploadIndex];
-
-        if (_upload instanceof lib_es5["Upload"]) {
-          onProgress(bytesUploaded, bytesTotal, _upload);
-        }
-      }
-    });
-
-    defineProperty_default()(this, "handleError", function (uploadIndex, error) {
-      _this.renderer.setError(uploadIndex);
-
-      var onError = _this.callbacks.onError;
-
-      if (onError) {
-        var _upload2 = _this.uploads[uploadIndex];
-
-        if (_upload2 instanceof lib_es5["Upload"]) {
-          onError(error, _upload2);
-        }
-      }
-    });
-
-    defineProperty_default()(this, "handleSuccess", function (uploadIndex, uploadedSize) {
-      var renderer = _this.renderer;
-      renderer.clearInput();
-      renderer.setSuccess(uploadIndex, uploadedSize);
-      var onSuccess = _this.callbacks.onSuccess;
-
-      if (onSuccess) {
-        var _upload3 = _this.uploads[uploadIndex];
-
-        if (_upload3 instanceof lib_es5["Upload"]) {
-          onSuccess(_upload3);
-        }
-      }
-    });
-
-    this.callbacks = callbacks;
-    this.fieldName = _fieldName;
-    this.form = form;
-    this.formId = _formId;
-    this.multiple = multiple;
-    this.prefix = prefix;
-    this.retryDelays = retryDelays;
-    this.supportDropArea = supportDropArea;
-    this.uploadUrl = _uploadUrl;
-    this.uploadIndex = 0;
-    this.uploads = [];
-    this.renderer = new render_upload_file({
-      parent: parent,
-      input: input,
-      skipRequired: skipRequired,
-      translations: translations
-    });
-    var filesContainer = this.renderer.container;
-
-    if (supportDropArea) {
-      this.initDropArea(filesContainer);
-    }
-
-    if (initial) {
-      this.addInitialFiles(initial);
-    }
-
-    this.checkDropHint();
-    input.addEventListener("change", this.onChange);
-    filesContainer.addEventListener("click", this.onClick);
-  }
-
-  createClass_default()(UploadFile, [{
-    key: "addInitialFiles",
-    value: function addInitialFiles(initialFiles) {
-      var _this2 = this;
-
-      if (initialFiles.length === 0) {
-        return;
-      }
-
-      var multiple = this.multiple,
-          renderer = this.renderer;
-
-      var addInitialFile = function addInitialFile(file, i) {
-        var id = file.id,
-            name = file.name,
-            size = file.size;
-        renderer.addUploadedFile(name, i, size);
-
-        if (file.placeholder) {
-          _this2.uploads.push({
-            id: id,
-            name: name,
-            placeholder: true,
-            size: size
-          });
-        } else {
-          var url = "".concat(_this2.uploadUrl).concat(file.id);
-
-          _this2.uploads.push({
-            id: id,
-            name: name,
-            placeholder: false,
-            size: size,
-            url: url
-          });
-        }
-      };
-
-      if (multiple) {
-        var uploadIndex = 0;
-        initialFiles.forEach(function (file) {
-          addInitialFile(file, uploadIndex);
-          uploadIndex += 1;
-        });
-      } else {
-        addInitialFile(initialFiles[0], 0);
-      }
-    }
-  }, {
-    key: "handleDelete",
-    value: function handleDelete(uploadIndex) {
-      var upload = this.uploads[uploadIndex];
-
-      if (upload instanceof lib_es5["Upload"]) {
-        this.deleteFromServer(uploadIndex);
-      } else {
-        this.deletePlaceholder(uploadIndex);
-      }
-    }
-  }, {
-    key: "deleteUpload",
-    value: function deleteUpload(uploadIndex) {
-      var upload = this.uploads[uploadIndex];
-      this.renderer.deleteFile(uploadIndex);
-      delete this.uploads[uploadIndex];
-      this.checkDropHint();
-      var onDelete = this.callbacks.onDelete;
-
-      if (onDelete) {
-        onDelete(upload);
-      }
-    }
-  }, {
-    key: "deleteFromServer",
-    value: function deleteFromServer(uploadIndex) {
-      var _this3 = this;
-
-      var upload = this.uploads[uploadIndex];
-
-      if (!(upload instanceof lib_es5["Upload"])) {
-        return;
-      }
-
-      var url = upload.url;
-
-      if (!url) {
-        return;
-      }
-
-      var xhr = new window.XMLHttpRequest();
-      xhr.open("DELETE", url);
-
-      xhr.onload = function () {
-        if (xhr.status === 204) {
-          _this3.deleteUpload(uploadIndex);
-        } else {
-          _this3.renderer.setDeleteFailed(uploadIndex);
-        }
-      };
-
-      xhr.setRequestHeader("Tus-Resumable", "1.0.0");
-      xhr.send(null);
-    }
-  }, {
-    key: "deletePlaceholder",
-    value: function deletePlaceholder(uploadIndex) {
-      this.deleteUpload(uploadIndex);
-      this.updatePlaceholderInput();
-    }
-  }, {
-    key: "handleCancel",
-    value: function handleCancel(uploadIndex) {
-      var upload = this.uploads[uploadIndex];
-
-      if (upload instanceof lib_es5["Upload"]) {
-        upload.abort(true);
-        this.deleteUpload(uploadIndex);
-      }
-    }
-  }, {
-    key: "initDropArea",
-    value: function initDropArea(container) {
-      new drop_area({
-        container: container,
-        onUploadFiles: this.uploadFiles
-      });
-    }
-  }, {
-    key: "checkDropHint",
-    value: function checkDropHint() {
-      if (!this.supportDropArea) {
-        return;
-      }
-
-      var nonEmptyUploads = this.uploads.filter(function (e) {
-        return e;
-      });
-
-      if (nonEmptyUploads.length === 0) {
-        this.renderer.renderDropHint();
-      } else {
-        this.renderer.removeDropHint();
-      }
-    }
-  }, {
-    key: "updatePlaceholderInput",
-    value: function updatePlaceholderInput() {
-      var placeholdersInfo = this.uploads.filter(function (upload) {
-        return !(upload instanceof lib_es5["Upload"]) && upload.placeholder;
-      });
-      var input = Object(util["a" /* findInput */])(this.form, Object(util["e" /* getPlaceholderFieldName */])(this.fieldName, this.prefix), this.prefix);
-
-      if (input) {
-        input.value = JSON.stringify(placeholdersInfo);
-      }
-    }
-  }]);
-
-  return UploadFile;
-}();
-
-/* harmony default export */ var upload_file = __webpack_exports__["a"] = (upload_file_UploadFile);
-
-/***/ }),
-/* 14 */
-/***/ (function(module, exports, __webpack_require__) {
-
-module.exports = __webpack_require__(15);
-
-
-/***/ }),
-/* 15 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* WEBPACK VAR INJECTION */(function(global) {/* harmony import */ var _babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(0);
-/* harmony import */ var _babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _upload_file__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(13);
-/* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(2);
-
-
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
-
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0___default()(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
-
-
-
-
-var initUploadFields = function initUploadFields(form) {
-  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-  var matchesPrefix = function matchesPrefix(fieldName) {
-    if (!(options && options.prefix)) {
-      return true;
-    }
-
-    return fieldName.startsWith("".concat(options.prefix, "-"));
-  };
-
-  var getPrefix = function getPrefix() {
-    return options && options.prefix ? options.prefix : null;
-  };
-
-  var getInputValue = function getInputValue(fieldName) {
-    return Object(_util__WEBPACK_IMPORTED_MODULE_2__[/* getInputValueForFormAndPrefix */ "d"])(form, fieldName, getPrefix());
-  };
-
-  var getInitialFiles = function getInitialFiles(element) {
-    var filesData = element.dataset.files;
-
-    if (!filesData) {
-      return [];
-    }
-
-    return JSON.parse(filesData);
-  };
-
-  var getPlaceholders = function getPlaceholders(fieldName) {
-    var data = getInputValue(Object(_util__WEBPACK_IMPORTED_MODULE_2__[/* getPlaceholderFieldName */ "e"])(fieldName, getPrefix()));
-
-    if (!data) {
-      return [];
-    }
-
-    return JSON.parse(data);
-  };
-
-  var uploadUrl = getInputValue("upload_url");
-  var formId = getInputValue("form_id");
-  var skipRequired = options.skipRequired || false;
-  var prefix = getPrefix();
-
-  if (!formId || !uploadUrl) {
-    return;
-  }
-
-  form.querySelectorAll(".dff-uploader").forEach(function (uploaderDiv) {
-    var container = uploaderDiv.querySelector(".dff-container");
-
-    if (!container) {
-      return;
-    }
-
-    var input = container.querySelector("input[type=file]");
-
-    if (!(input && matchesPrefix(input.name))) {
-      return;
-    }
-
-    var fieldName = input.name;
-    var multiple = input.multiple;
-    var initial = getInitialFiles(container).concat(getPlaceholders(fieldName));
-    var dataTranslations = container.getAttribute("data-translations");
-    var translations = dataTranslations ? JSON.parse(dataTranslations) : {};
-    var supportDropArea = !(options.supportDropArea === false);
-    new _upload_file__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"]({
-      callbacks: options.callbacks || {},
-      fieldName: fieldName,
-      form: form,
-      formId: formId,
-      initial: initial,
-      input: input,
-      multiple: multiple,
-      parent: container,
-      prefix: prefix,
-      retryDelays: options.retryDelays || null,
-      skipRequired: skipRequired,
-      supportDropArea: supportDropArea,
-      translations: translations,
-      uploadUrl: uploadUrl
-    });
-  });
-};
-
-var initFormSet = function initFormSet(form, optionsParam) {
-  var options;
-
-  if (typeof optionsParam === "string") {
-    options = {
-      prefix: optionsParam
-    };
-  } else {
-    options = optionsParam;
-  }
-
-  var prefix = options.prefix || "form";
-  var totalFormsValue = Object(_util__WEBPACK_IMPORTED_MODULE_2__[/* getInputValueForFormAndPrefix */ "d"])(form, "TOTAL_FORMS", prefix);
-
-  if (!totalFormsValue) {
-    return;
-  }
-
-  var formCount = parseInt(totalFormsValue, 10);
-
-  for (var i = 0; i < formCount; i += 1) {
-    var subFormPrefix = Object(_util__WEBPACK_IMPORTED_MODULE_2__[/* getInputNameWithPrefix */ "c"])("".concat(i), null);
-    initUploadFields(form, _objectSpread({}, options, {
-      prefix: "".concat(prefix, "-").concat(subFormPrefix)
-    }));
-  }
-};
-
-// eslint-disable-line @typescript-eslint/no-explicit-any
-global.initFormSet = initFormSet;
-global.initUploadFields = initUploadFields;
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(8)))
-
-/***/ }),
-/* 16 */
-/***/ (function(module, exports) {
-
-function _arrayWithoutHoles(arr) {
-  if (Array.isArray(arr)) {
-    for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) {
-      arr2[i] = arr[i];
-    }
-
-    return arr2;
-  }
-}
-
-module.exports = _arrayWithoutHoles;
-
-/***/ }),
-/* 17 */
-/***/ (function(module, exports) {
-
-function _iterableToArray(iter) {
-  if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter);
-}
-
-module.exports = _iterableToArray;
-
-/***/ }),
-/* 18 */
-/***/ (function(module, exports) {
-
-function _nonIterableSpread() {
-  throw new TypeError("Invalid attempt to spread non-iterable instance");
-}
-
-module.exports = _nonIterableSpread;
-
-/***/ }),
-/* 19 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /* global window */
-
-
-// We import the files used inside the Node environment which are rewritten
-// for browsers using the rules defined in the package.json
-
-
-var _error = __webpack_require__(20);
-
-var _error2 = _interopRequireDefault(_error);
-
-var _extend = __webpack_require__(21);
-
-var _extend2 = _interopRequireDefault(_extend);
-
-var _jsBase = __webpack_require__(22);
-
-var _request = __webpack_require__(23);
-
-var _source = __webpack_require__(27);
-
-var _storage = __webpack_require__(10);
-
-var _fingerprint = __webpack_require__(31);
-
-var _fingerprint2 = _interopRequireDefault(_fingerprint);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var defaultOptions = {
-  endpoint: null,
-  fingerprint: _fingerprint2.default,
-  resume: true,
-  onProgress: null,
-  onChunkComplete: null,
-  onSuccess: null,
-  onError: null,
-  headers: {},
-  chunkSize: Infinity,
-  withCredentials: false,
-  uploadUrl: null,
-  uploadSize: null,
-  overridePatchMethod: false,
-  retryDelays: null,
-  removeFingerprintOnSuccess: false,
-  uploadLengthDeferred: false,
-  urlStorage: null,
-  fileReader: null,
-  uploadDataDuringCreation: false
-};
-
-var Upload = function () {
-  function Upload(file, options) {
-    _classCallCheck(this, Upload);
-
-    this.options = (0, _extend2.default)(true, {}, defaultOptions, options);
-
-    // The storage module used to store URLs
-    this._storage = this.options.urlStorage;
-
-    // The underlying File/Blob object
-    this.file = file;
-
-    // The URL against which the file will be uploaded
-    this.url = null;
-
-    // The underlying XHR object for the current PATCH request
-    this._xhr = null;
-
-    // The fingerpinrt for the current file (set after start())
-    this._fingerprint = null;
-
-    // The offset used in the current PATCH request
-    this._offset = null;
-
-    // True if the current PATCH request has been aborted
-    this._aborted = false;
-
-    // The file's size in bytes
-    this._size = null;
-
-    // The Source object which will wrap around the given file and provides us
-    // with a unified interface for getting its size and slice chunks from its
-    // content allowing us to easily handle Files, Blobs, Buffers and Streams.
-    this._source = null;
-
-    // The current count of attempts which have been made. Null indicates none.
-    this._retryAttempt = 0;
-
-    // The timeout's ID which is used to delay the next retry
-    this._retryTimeout = null;
-
-    // The offset of the remote upload before the latest attempt was started.
-    this._offsetBeforeRetry = 0;
-  }
-
-  _createClass(Upload, [{
-    key: "start",
-    value: function start() {
-      var _this = this;
-
-      var file = this.file;
-
-      if (!file) {
-        this._emitError(new Error("tus: no file or stream to upload provided"));
-        return;
-      }
-
-      if (!this.options.endpoint && !this.options.uploadUrl) {
-        this._emitError(new Error("tus: neither an endpoint or an upload URL is provided"));
-        return;
-      }
-
-      if (this.options.resume && this._storage == null) {
-        this._storage = (0, _storage.getStorage)();
-      }
-
-      if (this._source) {
-        this._start(this._source);
-      } else {
-        var fileReader = this.options.fileReader || _source.getSource;
-        fileReader(file, this.options.chunkSize, function (err, source) {
-          if (err) {
-            _this._emitError(err);
-            return;
-          }
-
-          _this._source = source;
-          _this._start(source);
-        });
-      }
-    }
-  }, {
-    key: "_start",
-    value: function _start(source) {
-      var _this2 = this;
-
-      var file = this.file;
-
-      // First, we look at the uploadLengthDeferred option.
-      // Next, we check if the caller has supplied a manual upload size.
-      // Finally, we try to use the calculated size from the source object.
-      if (this.options.uploadLengthDeferred) {
-        this._size = null;
-      } else if (this.options.uploadSize != null) {
-        this._size = +this.options.uploadSize;
-        if (isNaN(this._size)) {
-          this._emitError(new Error("tus: cannot convert `uploadSize` option into a number"));
-          return;
-        }
-      } else {
-        this._size = source.size;
-        if (this._size == null) {
-          this._emitError(new Error("tus: cannot automatically derive upload's size from input and must be specified manually using the `uploadSize` option"));
-          return;
-        }
-      }
-
-      var retryDelays = this.options.retryDelays;
-      if (retryDelays != null) {
-        if (Object.prototype.toString.call(retryDelays) !== "[object Array]") {
-          this._emitError(new Error("tus: the `retryDelays` option must either be an array or null"));
-          return;
-        } else {
-          var errorCallback = this.options.onError;
-          this.options.onError = function (err) {
-            // Restore the original error callback which may have been set.
-            _this2.options.onError = errorCallback;
-
-            // We will reset the attempt counter if
-            // - we were already able to connect to the server (offset != null) and
-            // - we were able to upload a small chunk of data to the server
-            var shouldResetDelays = _this2._offset != null && _this2._offset > _this2._offsetBeforeRetry;
-            if (shouldResetDelays) {
-              _this2._retryAttempt = 0;
-            }
-
-            var isOnline = true;
-            if (typeof window !== "undefined" && "navigator" in window && window.navigator.onLine === false) {
-              isOnline = false;
-            }
-
-            // We only attempt a retry if
-            // - we didn't exceed the maxium number of retries, yet, and
-            // - this error was caused by a request or it's response and
-            // - the error is server error (i.e. no a status 4xx or a 409 or 423) and
-            // - the browser does not indicate that we are offline
-            var status = err.originalRequest ? err.originalRequest.status : 0;
-            var isServerError = !inStatusCategory(status, 400) || status === 409 || status === 423;
-            var shouldRetry = _this2._retryAttempt < retryDelays.length && err.originalRequest != null && isServerError && isOnline;
-
-            if (!shouldRetry) {
-              _this2._emitError(err);
-              return;
-            }
-
-            var delay = retryDelays[_this2._retryAttempt++];
-
-            _this2._offsetBeforeRetry = _this2._offset;
-            _this2.options.uploadUrl = _this2.url;
-
-            _this2._retryTimeout = setTimeout(function () {
-              _this2.start();
-            }, delay);
-          };
-        }
-      }
-
-      // Reset the aborted flag when the upload is started or else the
-      // _startUpload will stop before sending a request if the upload has been
-      // aborted previously.
-      this._aborted = false;
-
-      // The upload had been started previously and we should reuse this URL.
-      if (this.url != null) {
-        this._resumeUpload();
-        return;
-      }
-
-      // A URL has manually been specified, so we try to resume
-      if (this.options.uploadUrl != null) {
-        this.url = this.options.uploadUrl;
-        this._resumeUpload();
-        return;
-      }
-
-      // Try to find the endpoint for the file in the storage
-      if (this._hasStorage()) {
-        this.options.fingerprint(file, this.options, function (err, fingerprintValue) {
-          if (err) {
-            _this2._emitError(err);
-            return;
-          }
-
-          _this2._fingerprint = fingerprintValue;
-          _this2._storage.getItem(_this2._fingerprint, function (err, resumedUrl) {
-            if (err) {
-              _this2._emitError(err);
-              return;
-            }
-
-            if (resumedUrl != null) {
-              _this2.url = resumedUrl;
-              _this2._resumeUpload();
-            } else {
-              _this2._createUpload();
-            }
-          });
-        });
-      } else {
-        // An upload has not started for the file yet, so we start a new one
-        this._createUpload();
-      }
-    }
-  }, {
-    key: "abort",
-    value: function abort(shouldTerminate, cb) {
-      var _this3 = this;
-
-      if (this._xhr !== null) {
-        this._xhr.abort();
-        this._source.close();
-      }
-      this._aborted = true;
-
-      if (this._retryTimeout != null) {
-        clearTimeout(this._retryTimeout);
-        this._retryTimeout = null;
-      }
-
-      cb = cb || function () {};
-      if (shouldTerminate) {
-        Upload.terminate(this.url, this.options, function (err, xhr) {
-          if (err) {
-            return cb(err, xhr);
-          }
-
-          _this3._hasStorage() ? _this3._storage.removeItem(_this3._fingerprint, cb) : cb();
-        });
-      } else {
-        cb();
-      }
-    }
-  }, {
-    key: "_hasStorage",
-    value: function _hasStorage() {
-      return this.options.resume && this._storage;
-    }
-  }, {
-    key: "_emitXhrError",
-    value: function _emitXhrError(xhr, err, causingErr) {
-      this._emitError(new _error2.default(err, causingErr, xhr));
-    }
-  }, {
-    key: "_emitError",
-    value: function _emitError(err) {
-      if (typeof this.options.onError === "function") {
-        this.options.onError(err);
-      } else {
-        throw err;
-      }
-    }
-  }, {
-    key: "_emitSuccess",
-    value: function _emitSuccess() {
-      if (typeof this.options.onSuccess === "function") {
-        this.options.onSuccess();
-      }
-    }
-
-    /**
-     * Publishes notification when data has been sent to the server. This
-     * data may not have been accepted by the server yet.
-     * @param  {number} bytesSent  Number of bytes sent to the server.
-     * @param  {number} bytesTotal Total number of bytes to be sent to the server.
-     */
-
-  }, {
-    key: "_emitProgress",
-    value: function _emitProgress(bytesSent, bytesTotal) {
-      if (typeof this.options.onProgress === "function") {
-        this.options.onProgress(bytesSent, bytesTotal);
-      }
-    }
-
-    /**
-     * Publishes notification when a chunk of data has been sent to the server
-     * and accepted by the server.
-     * @param  {number} chunkSize  Size of the chunk that was accepted by the
-     *                             server.
-     * @param  {number} bytesAccepted Total number of bytes that have been
-     *                                accepted by the server.
-     * @param  {number} bytesTotal Total number of bytes to be sent to the server.
-     */
-
-  }, {
-    key: "_emitChunkComplete",
-    value: function _emitChunkComplete(chunkSize, bytesAccepted, bytesTotal) {
-      if (typeof this.options.onChunkComplete === "function") {
-        this.options.onChunkComplete(chunkSize, bytesAccepted, bytesTotal);
-      }
-    }
-
-    /**
-     * Set the headers used in the request and the withCredentials property
-     * as defined in the options
-     *
-     * @param {XMLHttpRequest} xhr
-     */
-
-  }, {
-    key: "_setupXHR",
-    value: function _setupXHR(xhr) {
-      this._xhr = xhr;
-      setupXHR(xhr, this.options);
-    }
-
-    /**
-     * Create a new upload using the creation extension by sending a POST
-     * request to the endpoint. After successful creation the file will be
-     * uploaded
-     *
-     * @api private
-     */
-
-  }, {
-    key: "_createUpload",
-    value: function _createUpload() {
-      var _this4 = this;
-
-      if (!this.options.endpoint) {
-        this._emitError(new Error("tus: unable to create upload because no endpoint is provided"));
-        return;
-      }
-
-      var xhr = (0, _request.newRequest)();
-      xhr.open("POST", this.options.endpoint, true);
-
-      xhr.onload = function () {
-        if (!inStatusCategory(xhr.status, 200)) {
-          _this4._emitXhrError(xhr, new Error("tus: unexpected response while creating upload"));
-          return;
-        }
-
-        var location = xhr.getResponseHeader("Location");
-        if (location == null) {
-          _this4._emitXhrError(xhr, new Error("tus: invalid or missing Location header"));
-          return;
-        }
-
-        _this4.url = (0, _request.resolveUrl)(_this4.options.endpoint, location);
-
-        if (_this4._size === 0) {
-          // Nothing to upload and file was successfully created
-          _this4._emitSuccess();
-          _this4._source.close();
-          return;
-        }
-
-        if (_this4._hasStorage()) {
-          _this4._storage.setItem(_this4._fingerprint, _this4.url, function (err) {
-            if (err) {
-              _this4._emitError(err);
-            }
-          });
-        }
-
-        if (_this4.options.uploadDataDuringCreation) {
-          _this4._handleUploadResponse(xhr);
-        } else {
-          _this4._offset = 0;
-          _this4._startUpload();
-        }
-      };
-
-      xhr.onerror = function (err) {
-        _this4._emitXhrError(xhr, new Error("tus: failed to create upload"), err);
-      };
-
-      this._setupXHR(xhr);
-      if (this.options.uploadLengthDeferred) {
-        xhr.setRequestHeader("Upload-Defer-Length", 1);
-      } else {
-        xhr.setRequestHeader("Upload-Length", this._size);
-      }
-
-      // Add metadata if values have been added
-      var metadata = encodeMetadata(this.options.metadata);
-      if (metadata !== "") {
-        xhr.setRequestHeader("Upload-Metadata", metadata);
-      }
-
-      if (this.options.uploadDataDuringCreation && !this.options.uploadLengthDeferred) {
-        this._offset = 0;
-        this._addChunkToRequest(xhr);
-      } else {
-        xhr.send(null);
-      }
-    }
-
-    /*
-     * Try to resume an existing upload. First a HEAD request will be sent
-     * to retrieve the offset. If the request fails a new upload will be
-     * created. In the case of a successful response the file will be uploaded.
-     *
-     * @api private
-     */
-
-  }, {
-    key: "_resumeUpload",
-    value: function _resumeUpload() {
-      var _this5 = this;
-
-      var xhr = (0, _request.newRequest)();
-      xhr.open("HEAD", this.url, true);
-
-      xhr.onload = function () {
-        if (!inStatusCategory(xhr.status, 200)) {
-          if (_this5._hasStorage() && inStatusCategory(xhr.status, 400)) {
-            // Remove stored fingerprint and corresponding endpoint,
-            // on client errors since the file can not be found
-            _this5._storage.removeItem(_this5._fingerprint, function (err) {
-              if (err) {
-                _this5._emitError(err);
-              }
-            });
-          }
-
-          // If the upload is locked (indicated by the 423 Locked status code), we
-          // emit an error instead of directly starting a new upload. This way the
-          // retry logic can catch the error and will retry the upload. An upload
-          // is usually locked for a short period of time and will be available
-          // afterwards.
-          if (xhr.status === 423) {
-            _this5._emitXhrError(xhr, new Error("tus: upload is currently locked; retry later"));
-            return;
-          }
-
-          if (!_this5.options.endpoint) {
-            // Don't attempt to create a new upload if no endpoint is provided.
-            _this5._emitXhrError(xhr, new Error("tus: unable to resume upload (new upload cannot be created without an endpoint)"));
-            return;
-          }
-
-          // Try to create a new upload
-          _this5.url = null;
-          _this5._createUpload();
-          return;
-        }
-
-        var offset = parseInt(xhr.getResponseHeader("Upload-Offset"), 10);
-        if (isNaN(offset)) {
-          _this5._emitXhrError(xhr, new Error("tus: invalid or missing offset value"));
-          return;
-        }
-
-        var length = parseInt(xhr.getResponseHeader("Upload-Length"), 10);
-        if (isNaN(length) && !_this5.options.uploadLengthDeferred) {
-          _this5._emitXhrError(xhr, new Error("tus: invalid or missing length value"));
-          return;
-        }
-
-        // Upload has already been completed and we do not need to send additional
-        // data to the server
-        if (offset === length) {
-          _this5._emitProgress(length, length);
-          _this5._emitSuccess();
-          return;
-        }
-
-        _this5._offset = offset;
-        _this5._startUpload();
-      };
-
-      xhr.onerror = function (err) {
-        _this5._emitXhrError(xhr, new Error("tus: failed to resume upload"), err);
-      };
-
-      this._setupXHR(xhr);
-      xhr.send(null);
-    }
-
-    /**
-     * Start uploading the file using PATCH requests. The file will be divided
-     * into chunks as specified in the chunkSize option. During the upload
-     * the onProgress event handler may be invoked multiple times.
-     *
-     * @api private
-     */
-
-  }, {
-    key: "_startUpload",
-    value: function _startUpload() {
-      var _this6 = this;
-
-      // If the upload has been aborted, we will not send the next PATCH request.
-      // This is important if the abort method was called during a callback, such
-      // as onChunkComplete or onProgress.
-      if (this._aborted) {
-        return;
-      }
-
-      var xhr = (0, _request.newRequest)();
-
-      // Some browser and servers may not support the PATCH method. For those
-      // cases, you can tell tus-js-client to use a POST request with the
-      // X-HTTP-Method-Override header for simulating a PATCH request.
-      if (this.options.overridePatchMethod) {
-        xhr.open("POST", this.url, true);
-        xhr.setRequestHeader("X-HTTP-Method-Override", "PATCH");
-      } else {
-        xhr.open("PATCH", this.url, true);
-      }
-
-      xhr.onload = function () {
-        if (!inStatusCategory(xhr.status, 200)) {
-          _this6._emitXhrError(xhr, new Error("tus: unexpected response while uploading chunk"));
-          return;
-        }
-
-        _this6._handleUploadResponse(xhr);
-      };
-
-      xhr.onerror = function (err) {
-        // Don't emit an error if the upload was aborted manually
-        if (_this6._aborted) {
-          return;
-        }
-
-        _this6._emitXhrError(xhr, new Error("tus: failed to upload chunk at offset " + _this6._offset), err);
-      };
-
-      this._setupXHR(xhr);
-
-      xhr.setRequestHeader("Upload-Offset", this._offset);
-      this._addChunkToRequest(xhr);
-    }
-
-    /**
-     * _addChunktoRequest reads a chunk from the source and sends it using the
-     * supplied XHR object. It will not handle the response.
-     */
-
-  }, {
-    key: "_addChunkToRequest",
-    value: function _addChunkToRequest(xhr) {
-      var _this7 = this;
-
-      // Test support for progress events before attaching an event listener
-      if ("upload" in xhr) {
-        xhr.upload.onprogress = function (e) {
-          if (!e.lengthComputable) {
-            return;
-          }
-
-          _this7._emitProgress(start + e.loaded, _this7._size);
-        };
-      }
-
-      xhr.setRequestHeader("Content-Type", "application/offset+octet-stream");
-
-      var start = this._offset;
-      var end = this._offset + this.options.chunkSize;
-
-      // The specified chunkSize may be Infinity or the calcluated end position
-      // may exceed the file's size. In both cases, we limit the end position to
-      // the input's total size for simpler calculations and correctness.
-      if ((end === Infinity || end > this._size) && !this.options.uploadLengthDeferred) {
-        end = this._size;
-      }
-
-      this._source.slice(start, end, function (err, value, complete) {
-        if (err) {
-          _this7._emitError(err);
-          return;
-        }
-
-        if (_this7.options.uploadLengthDeferred) {
-          if (complete) {
-            _this7._size = _this7._offset + (value && value.size ? value.size : 0);
-            xhr.setRequestHeader("Upload-Length", _this7._size);
-          }
-        }
-
-        if (value === null) {
-          xhr.send();
-        } else {
-          xhr.send(value);
-          _this7._emitProgress(_this7._offset, _this7._size);
-        }
-      });
-    }
-
-    /**
-     * _handleUploadResponse is used by requests that haven been sent using _addChunkToRequest
-     * and already have received a response.
-     */
-
-  }, {
-    key: "_handleUploadResponse",
-    value: function _handleUploadResponse(xhr) {
-      var _this8 = this;
-
-      var offset = parseInt(xhr.getResponseHeader("Upload-Offset"), 10);
-      if (isNaN(offset)) {
-        this._emitXhrError(xhr, new Error("tus: invalid or missing offset value"));
-        return;
-      }
-
-      this._emitProgress(offset, this._size);
-      this._emitChunkComplete(offset - this._offset, offset, this._size);
-
-      this._offset = offset;
-
-      if (offset == this._size) {
-        if (this.options.removeFingerprintOnSuccess && this.options.resume) {
-          // Remove stored fingerprint and corresponding endpoint. This causes
-          // new upload of the same file must be treated as a different file.
-          this._storage.removeItem(this._fingerprint, function (err) {
-            if (err) {
-              _this8._emitError(err);
-            }
-          });
-        }
-
-        // Yay, finally done :)
-        this._emitSuccess();
-        this._source.close();
-        return;
-      }
-
-      this._startUpload();
-    }
-  }], [{
-    key: "terminate",
-    value: function terminate(url, options, cb) {
-      if (typeof options !== "function" && typeof cb !== "function") {
-        throw new Error("tus: a callback function must be specified");
-      }
-
-      if (typeof options === "function") {
-        cb = options;
-        options = {};
-      }
-
-      var xhr = (0, _request.newRequest)();
-      xhr.open("DELETE", url, true);
-
-      xhr.onload = function () {
-        if (xhr.status !== 204) {
-          cb(new _error2.default(new Error("tus: unexpected response while terminating upload"), null, xhr));
-          return;
-        }
-
-        cb();
-      };
-
-      xhr.onerror = function (err) {
-        cb(new _error2.default(err, new Error("tus: failed to terminate upload"), xhr));
-      };
-
-      setupXHR(xhr, options);
-      xhr.send(null);
-    }
-  }]);
-
-  return Upload;
-}();
-
-function encodeMetadata(metadata) {
-  var encoded = [];
-
-  for (var key in metadata) {
-    encoded.push(key + " " + _jsBase.Base64.encode(metadata[key]));
-  }
-
-  return encoded.join(",");
-}
-
-/**
- * Checks whether a given status is in the range of the expected category.
- * For example, only a status between 200 and 299 will satisfy the category 200.
- *
- * @api private
- */
-function inStatusCategory(status, category) {
-  return status >= category && status < category + 100;
-}
-
-function setupXHR(xhr, options) {
-  xhr.setRequestHeader("Tus-Resumable", "1.0.0");
-  var headers = options.headers || {};
-
-  for (var name in headers) {
-    xhr.setRequestHeader(name, headers[name]);
-  }
-
-  xhr.withCredentials = options.withCredentials;
-}
-
-Upload.defaultOptions = defaultOptions;
-
-exports.default = Upload;
-
-/***/ }),
-/* 20 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var DetailedError = function (_Error) {
-  _inherits(DetailedError, _Error);
-
-  function DetailedError(error) {
-    var causingErr = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-    var xhr = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
-
-    _classCallCheck(this, DetailedError);
-
-    var _this = _possibleConstructorReturn(this, (DetailedError.__proto__ || Object.getPrototypeOf(DetailedError)).call(this, error.message));
-
-    _this.originalRequest = xhr;
-    _this.causingError = causingErr;
-
-    var message = error.message;
-    if (causingErr != null) {
-      message += ", caused by " + causingErr.toString();
-    }
-    if (xhr != null) {
-      message += ", originated from request (response code: " + xhr.status + ", response text: " + xhr.responseText + ")";
-    }
-    _this.message = message;
-    return _this;
-  }
-
-  return DetailedError;
-}(Error);
-
-exports.default = DetailedError;
-
-/***/ }),
-/* 21 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var hasOwn = Object.prototype.hasOwnProperty;
-var toStr = Object.prototype.toString;
-var defineProperty = Object.defineProperty;
-var gOPD = Object.getOwnPropertyDescriptor;
-
-var isArray = function isArray(arr) {
-	if (typeof Array.isArray === 'function') {
-		return Array.isArray(arr);
-	}
-
-	return toStr.call(arr) === '[object Array]';
-};
-
-var isPlainObject = function isPlainObject(obj) {
-	if (!obj || toStr.call(obj) !== '[object Object]') {
-		return false;
-	}
-
-	var hasOwnConstructor = hasOwn.call(obj, 'constructor');
-	var hasIsPrototypeOf = obj.constructor && obj.constructor.prototype && hasOwn.call(obj.constructor.prototype, 'isPrototypeOf');
-	// Not own constructor property must be Object
-	if (obj.constructor && !hasOwnConstructor && !hasIsPrototypeOf) {
-		return false;
-	}
-
-	// Own properties are enumerated firstly, so to speed up,
-	// if last one is own, then all properties are own.
-	var key;
-	for (key in obj) { /**/ }
-
-	return typeof key === 'undefined' || hasOwn.call(obj, key);
-};
-
-// If name is '__proto__', and Object.defineProperty is available, define __proto__ as an own property on target
-var setProperty = function setProperty(target, options) {
-	if (defineProperty && options.name === '__proto__') {
-		defineProperty(target, options.name, {
-			enumerable: true,
-			configurable: true,
-			value: options.newValue,
-			writable: true
-		});
-	} else {
-		target[options.name] = options.newValue;
-	}
-};
-
-// Return undefined instead of __proto__ if '__proto__' is not an own property
-var getProperty = function getProperty(obj, name) {
-	if (name === '__proto__') {
-		if (!hasOwn.call(obj, name)) {
-			return void 0;
-		} else if (gOPD) {
-			// In early versions of node, obj['__proto__'] is buggy when obj has
-			// __proto__ as an own property. Object.getOwnPropertyDescriptor() works.
-			return gOPD(obj, name).value;
-		}
-	}
-
-	return obj[name];
-};
-
-module.exports = function extend() {
-	var options, name, src, copy, copyIsArray, clone;
-	var target = arguments[0];
-	var i = 1;
-	var length = arguments.length;
-	var deep = false;
-
-	// Handle a deep copy situation
-	if (typeof target === 'boolean') {
-		deep = target;
-		target = arguments[1] || {};
-		// skip the boolean and the target
-		i = 2;
-	}
-	if (target == null || (typeof target !== 'object' && typeof target !== 'function')) {
-		target = {};
-	}
-
-	for (; i < length; ++i) {
-		options = arguments[i];
-		// Only deal with non-null/undefined values
-		if (options != null) {
-			// Extend the base object
-			for (name in options) {
-				src = getProperty(target, name);
-				copy = getProperty(options, name);
-
-				// Prevent never-ending loop
-				if (target !== copy) {
-					// Recurse if we're merging plain objects or arrays
-					if (deep && copy && (isPlainObject(copy) || (copyIsArray = isArray(copy)))) {
-						if (copyIsArray) {
-							copyIsArray = false;
-							clone = src && isArray(src) ? src : [];
-						} else {
-							clone = src && isPlainObject(src) ? src : {};
-						}
-
-						// Never move original objects, clone them
-						setProperty(target, { name: name, newValue: extend(deep, clone, copy) });
-
-					// Don't bring in undefined values
-					} else if (typeof copy !== 'undefined') {
-						setProperty(target, { name: name, newValue: copy });
-					}
-				}
-			}
-		}
-	}
-
-	// Return the modified object
-	return target;
-};
-
-
-/***/ }),
-/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*
@@ -2623,7 +326,7 @@ module.exports = function extend() {
     // existing version for noConflict()
     global = global || {};
     var _Base64 = global.Base64;
-    var version = "2.5.1";
+    var version = "2.5.2";
     // if node.js and NOT React Native, we use Buffer
     var buffer;
     if ( true && module.exports) {
@@ -2650,8 +353,8 @@ module.exports = function extend() {
                 : cc < 0x800 ? (fromCharCode(0xc0 | (cc >>> 6))
                                 + fromCharCode(0x80 | (cc & 0x3f)))
                 : (fromCharCode(0xe0 | ((cc >>> 12) & 0x0f))
-                   + fromCharCode(0x80 | ((cc >>>  6) & 0x3f))
-                   + fromCharCode(0x80 | ( cc         & 0x3f)));
+                    + fromCharCode(0x80 | ((cc >>>  6) & 0x3f))
+                    + fromCharCode(0x80 | ( cc         & 0x3f)));
         } else {
             var cc = 0x10000
                 + (c.charCodeAt(0) - 0xD800) * 0x400
@@ -2684,32 +387,21 @@ module.exports = function extend() {
     } : function(b) {
         return b.replace(/[\s\S]{1,3}/g, cb_encode);
     };
-    var _encode = buffer ?
-        buffer.from && Uint8Array && buffer.from !== Uint8Array.from
-        ? function (u) {
-            return (u.constructor === buffer.constructor ? u : buffer.from(u))
-                .toString('base64')
-        }
-        :  function (u) {
-            return (u.constructor === buffer.constructor ? u : new  buffer(u))
-                .toString('base64')
-        }
-        : function (u) { return btoa(utob(u)) }
-    ;
+    var _encode = function(u) {
+        var isUint8Array = Object.prototype.toString.call(u) === '[object Uint8Array]';
+        return isUint8Array ? u.toString('base64')
+            : btoa(utob(String(u)));
+    }
     var encode = function(u, urisafe) {
         return !urisafe
-            ? _encode(String(u))
+            ? _encode(u)
             : _encode(String(u)).replace(/[+\/]/g, function(m0) {
                 return m0 == '+' ? '-' : '_';
             }).replace(/=/g, '');
     };
     var encodeURI = function(u) { return encode(u, true) };
     // decoder stuff
-    var re_btou = new RegExp([
-        '[\xC0-\xDF][\x80-\xBF]',
-        '[\xE0-\xEF][\x80-\xBF]{2}',
-        '[\xF0-\xF7][\x80-\xBF]{3}'
-    ].join('|'), 'g');
+    var re_btou = /[\xC0-\xDF][\x80-\xBF]|[\xE0-\xEF][\x80-\xBF]{2}|[\xF0-\xF7][\x80-\xBF]{3}/g;
     var cb_btou = function(cccc) {
         switch(cccc.length) {
         case 4:
@@ -2836,43 +528,18 @@ module.exports = function extend() {
     return {Base64: global.Base64}
 }));
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(8)))
+
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(7)))
 
 /***/ }),
-/* 23 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.newRequest = newRequest;
-exports.resolveUrl = resolveUrl;
-
-var _urlParse = __webpack_require__(24);
-
-var _urlParse2 = _interopRequireDefault(_urlParse);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function newRequest() {
-  return new window.XMLHttpRequest();
-} /* global window */
-function resolveUrl(origin, link) {
-  return new _urlParse2.default(link, origin).toString();
-}
-
-/***/ }),
-/* 24 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(global) {
 
-var required = __webpack_require__(25)
-  , qs = __webpack_require__(26)
+var required = __webpack_require__(20)
+  , qs = __webpack_require__(21)
   , slashes = /^[A-Za-z][A-Za-z0-9+-.]*:\/\//
   , protocolre = /^([a-z][a-z0-9.+-]*:)?(\/\/)?([\S\s]*)/i
   , whitespace = '[\\x09\\x0A\\x0B\\x0C\\x0D\\x20\\xA0\\u1680\\u180E\\u2000\\u2001\\u2002\\u2003\\u2004\\u2005\\u2006\\u2007\\u2008\\u2009\\u200A\\u202F\\u205F\\u3000\\u2028\\u2029\\uFEFF]'
@@ -3320,10 +987,2807 @@ Url.qs = qs;
 
 module.exports = Url;
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(8)))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(7)))
 
 /***/ }),
-/* 25 */
+/* 11 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/*!
+ * escape-html
+ * Copyright(c) 2012-2013 TJ Holowaychuk
+ * Copyright(c) 2015 Andreas Lubbe
+ * Copyright(c) 2015 Tiancheng "Timothy" Gu
+ * MIT Licensed
+ */
+
+
+
+/**
+ * Module variables.
+ * @private
+ */
+
+var matchHtmlRegExp = /["'&<>]/;
+
+/**
+ * Module exports.
+ * @public
+ */
+
+module.exports = escapeHtml;
+
+/**
+ * Escape special characters in the given string of html.
+ *
+ * @param  {string} string The string to escape for inserting into HTML
+ * @return {string}
+ * @public
+ */
+
+function escapeHtml(string) {
+  var str = '' + string;
+  var match = matchHtmlRegExp.exec(str);
+
+  if (!match) {
+    return str;
+  }
+
+  var escape;
+  var html = '';
+  var index = 0;
+  var lastIndex = 0;
+
+  for (index = match.index; index < str.length; index++) {
+    switch (str.charCodeAt(index)) {
+      case 34: // "
+        escape = '&quot;';
+        break;
+      case 38: // &
+        escape = '&amp;';
+        break;
+      case 39: // '
+        escape = '&#39;';
+        break;
+      case 60: // <
+        escape = '&lt;';
+        break;
+      case 62: // >
+        escape = '&gt;';
+        break;
+      default:
+        continue;
+    }
+
+    if (lastIndex !== index) {
+      html += str.substring(lastIndex, index);
+    }
+
+    lastIndex = index + 1;
+    html += escape;
+  }
+
+  return lastIndex !== index
+    ? html + str.substring(lastIndex, index)
+    : html;
+}
+
+
+/***/ }),
+/* 12 */
+/***/ (function(module, exports) {
+
+function _asyncIterator(iterable) {
+  var method;
+
+  if (typeof Symbol !== "undefined") {
+    if (Symbol.asyncIterator) {
+      method = iterable[Symbol.asyncIterator];
+      if (method != null) return method.call(iterable);
+    }
+
+    if (Symbol.iterator) {
+      method = iterable[Symbol.iterator];
+      if (method != null) return method.call(iterable);
+    }
+  }
+
+  throw new TypeError("Object is not async iterable");
+}
+
+module.exports = _asyncIterator;
+
+/***/ }),
+/* 13 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/toConsumableArray.js
+var toConsumableArray = __webpack_require__(5);
+var toConsumableArray_default = /*#__PURE__*/__webpack_require__.n(toConsumableArray);
+
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/classCallCheck.js
+var classCallCheck = __webpack_require__(3);
+var classCallCheck_default = /*#__PURE__*/__webpack_require__.n(classCallCheck);
+
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/createClass.js
+var createClass = __webpack_require__(6);
+var createClass_default = /*#__PURE__*/__webpack_require__.n(createClass);
+
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/defineProperty.js
+var defineProperty = __webpack_require__(0);
+var defineProperty_default = /*#__PURE__*/__webpack_require__.n(defineProperty);
+
+// CONCATENATED MODULE: ./node_modules/tus-js-client/lib/error.js
+class DetailedError extends Error {
+  constructor(message, causingErr = null, req = null, res = null) {
+    super(message);
+
+    this.originalRequest = req;
+    this.originalResponse = res;
+    this.causingError = causingErr;
+
+    if (causingErr != null) {
+      message += `, caused by ${causingErr.toString()}`;
+    }
+
+    if (req != null) {
+      const requestId = req.getHeader("X-Request-ID") || "n/a";
+      const method = req.getMethod();
+      const url = req.getURL();
+      const status = res ? res.getStatus() : "n/a";
+      const body = res ? (res.getBody() || "") : "n/a";
+      message += `, originated from request (method: ${method}, url: ${url}, response code: ${status}, response text: ${body}, request id: ${requestId})`;
+    }
+    this.message = message;
+  }
+}
+
+/* harmony default export */ var lib_error = (DetailedError);
+
+// CONCATENATED MODULE: ./node_modules/tus-js-client/lib/uuid.js
+/**
+ * Generate a UUID v4 based on random numbers. We intentioanlly use the less
+ * secure Math.random function here since the more secure crypto.getRandomNumbers
+ * is not available on all platforms.
+ * This is not a problem for us since we use the UUID only for generating a
+ * request ID, so we can correlate server logs to client errors.
+ *
+ * This function is taken from following site:
+ * https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
+ *
+ * @return {string} The generate UUID
+ */
+function uuid() {
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+    var r = Math.random() * 16 | 0, v = c == "x" ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+// EXTERNAL MODULE: ./node_modules/js-base64/base64.js
+var base64 = __webpack_require__(9);
+
+// EXTERNAL MODULE: ./node_modules/url-parse/index.js
+var url_parse = __webpack_require__(10);
+var url_parse_default = /*#__PURE__*/__webpack_require__.n(url_parse);
+
+// CONCATENATED MODULE: ./node_modules/tus-js-client/lib/logger.js
+/* eslint no-console: "off" */
+
+let isEnabled = false;
+
+function enableDebugLog() {
+  isEnabled = true;
+}
+
+function log(msg) {
+  if (!isEnabled) return;
+  console.log(msg);
+}
+
+// CONCATENATED MODULE: ./node_modules/tus-js-client/lib/upload.js
+/* global window */
+
+
+
+
+
+
+const defaultOptions = {
+  endpoint: null,
+
+  uploadUrl: null,
+  metadata: {},
+  fingerprint: null,
+  uploadSize: null,
+
+  onProgress: null,
+  onChunkComplete: null,
+  onSuccess: null,
+  onError: null,
+  _onUploadUrlAvailable: null,
+
+  overridePatchMethod: false,
+  headers: {},
+  addRequestId: false,
+
+  chunkSize: Infinity,
+  retryDelays: [0, 1000, 3000, 5000],
+  parallelUploads: 1,
+  storeFingerprintForResuming: true,
+  removeFingerprintOnSuccess: false,
+  uploadLengthDeferred: false,
+  uploadDataDuringCreation: false,
+
+  urlStorage: null,
+  fileReader: null,
+  httpStack: null
+};
+
+class upload_BaseUpload {
+  constructor(file, options) {
+    // Warn about removed options from previous versions
+    if ("resume" in options) {
+      console.log("tus: The `resume` option has been removed in tus-js-client v2. Please use the URL storage API instead."); // eslint-disable-line no-console
+    }
+
+    // The default options will already be added from the wrapper classes.
+    this.options = options;
+
+    // The storage module used to store URLs
+    this._urlStorage = this.options.urlStorage;
+
+    // The underlying File/Blob object
+    this.file = file;
+
+    // The URL against which the file will be uploaded
+    this.url = null;
+
+    // The underlying request object for the current PATCH request
+    this._req = null;
+
+    // The fingerpinrt for the current file (set after start())
+    this._fingerprint = null;
+
+    // The key that the URL storage returned when saving an URL with a fingerprint,
+    this._urlStorageKey = null;
+
+    // The offset used in the current PATCH request
+    this._offset = null;
+
+    // True if the current PATCH request has been aborted
+    this._aborted = false;
+
+    // The file's size in bytes
+    this._size = null;
+
+    // The Source object which will wrap around the given file and provides us
+    // with a unified interface for getting its size and slice chunks from its
+    // content allowing us to easily handle Files, Blobs, Buffers and Streams.
+    this._source = null;
+
+    // The current count of attempts which have been made. Zero indicates none.
+    this._retryAttempt = 0;
+
+    // The timeout's ID which is used to delay the next retry
+    this._retryTimeout = null;
+
+    // The offset of the remote upload before the latest attempt was started.
+    this._offsetBeforeRetry = 0;
+
+    // An array of BaseUpload instances which are used for uploading the different
+    // parts, if the parallelUploads option is used.
+    this._parallelUploads = null;
+
+    // An array of upload URLs which are used for uploading the different
+    // parts, if the parallelUploads option is used.
+    this._parallelUploadUrls = null;
+  }
+
+  /**
+   * Use the Termination extension to delete an upload from the server by sending a DELETE
+   * request to the specified upload URL. This is only possible if the server supports the
+   * Termination extension. If the `options.retryDelays` property is set, the method will
+   * also retry if an error ocurrs.
+   *
+   * @param {String} url The upload's URL which will be terminated.
+   * @param {object} options Optional options for influencing HTTP requests.
+   * @return {Promise} The Promise will be resolved/rejected when the requests finish.
+   */
+  static terminate(url, options = {}, cb) {
+    if (typeof options === "function" || typeof cb === "function") {
+      throw new Error("tus: the terminate function does not accept a callback since v2 anymore; please use the returned Promise instead");
+    }
+
+    const req = openRequest("DELETE", url, options);
+    const promise = req.send();
+
+    return promise.then((res) => {
+      // A 204 response indicates a successfull request
+      if (res.getStatus() === 204) {
+        return;
+      }
+
+      throw new lib_error("tus: unexpected response while terminating upload", null, req, res);
+    }).catch((err) => {
+      if (!(err instanceof lib_error)) {
+        err = new lib_error("tus: failed to terminate upload", err, req, null);
+      }
+
+      if (!shouldRetry(err, 0, options)) {
+        throw err;
+      }
+
+      // Instead of keeping track of the retry attempts, we remove the first element from the delays
+      // array. If the array is empty, all retry attempts are used up and we will bubble up the error.
+      // We recursively call the terminate function will removing elements from the retryDelays array.
+      const delay = options.retryDelays[0];
+      const remainingDelays = options.retryDelays.slice(1);
+      const newOptions = {
+        ...options,
+        retryDelays: remainingDelays
+      };
+      return new Promise((resolve) => setTimeout(resolve, delay))
+        .then(() => upload_BaseUpload.terminate(url, newOptions));
+    });
+  }
+
+  findPreviousUploads() {
+    return this.options.fingerprint(this.file, this.options)
+      .then((fingerprint) => this._urlStorage.findUploadsByFingerprint(fingerprint));
+  }
+
+  resumeFromPreviousUpload(previousUpload) {
+    this.url = previousUpload.uploadUrl || null;
+    this._parallelUploadUrls = previousUpload.parallelUploadUrls || null;
+    this._urlStorageKey = previousUpload.urlStorageKey;
+  }
+
+  start() {
+    let file = this.file;
+
+    if (!file) {
+      this._emitError(new Error("tus: no file or stream to upload provided"));
+      return;
+    }
+
+    if (!this.options.endpoint && !this.options.uploadUrl) {
+      this._emitError(new Error("tus: neither an endpoint or an upload URL is provided"));
+      return;
+    }
+
+    const retryDelays = this.options.retryDelays;
+    if (retryDelays != null && Object.prototype.toString.call(retryDelays) !== "[object Array]") {
+      this._emitError(new Error("tus: the `retryDelays` option must either be an array or null"));
+      return;
+    }
+
+    if (this.options.parallelUploads > 1) {
+      // Test which options are incompatible with parallel uploads.
+      ["uploadUrl", "uploadSize", "uploadLengthDeferred"].forEach((optionName) => {
+        if (this.options[optionName]) {
+          this._emitError(new Error(`tus: cannot use the ${optionName} option when parallelUploads is enabled`));
+        }
+      });
+    }
+
+    this.options.fingerprint(file, this.options)
+      .then((fingerprint) => {
+        if (fingerprint == null) {
+          log("No fingerprint was calculated meaning that the upload cannot be stored in the URL storage.");
+        } else {
+          log(`Calculated fingerprint: ${fingerprint}`);
+        }
+
+        this._fingerprint = fingerprint;
+
+        if (this._source) {
+          return this._source;
+        } else {
+          return this.options.fileReader.openFile(file, this.options.chunkSize);
+        }
+      })
+      .then((source) => {
+        this._source = source;
+
+        // If the upload was configured to use multiple requests or if we resume from
+        // an upload which used multiple requests, we start a parallel upload.
+        if (this.options.parallelUploads > 1 || this._parallelUploadUrls != null) {
+          this._startParallelUpload();
+        } else {
+          this._startSingleUpload();
+        }
+      })
+      .catch((err) => {
+        this._emitError(err);
+      });
+  }
+
+  /**
+   * Initiate the uploading procedure for a parallelized upload, where one file is split into
+   * multiple request which are run in parallel.
+   *
+   * @api private
+   */
+  _startParallelUpload() {
+    const totalSize = this._size = this._source.size;
+    let totalProgress = 0;
+    this._parallelUploads = [];
+
+    const partCount = this._parallelUploadUrls != null ? this._parallelUploadUrls.length : this.options.parallelUploads;
+
+    // The input file will be split into multiple slices which are uploaded in separate
+    // requests. Here we generate the start and end position for the slices.
+    const parts = splitSizeIntoParts(this._source.size, partCount, this._parallelUploadUrls);
+
+    // Create an empty list for storing the upload URLs
+    this._parallelUploadUrls = new Array(parts.length);
+
+    // Generate a promise for each slice that will be resolve if the respective
+    // upload is completed.
+    const uploads = parts.map((part, index) => {
+      let lastPartProgress = 0;
+
+      return this._source.slice(part.start, part.end)
+        .then(({ value }) => new Promise((resolve, reject) => {
+          // Merge with the user supplied options but overwrite some values.
+          const options = {
+            ...this.options,
+            // If available, the partial upload should be resumed from a previous URL.
+            uploadUrl: part.uploadUrl || null,
+            // We take manually care of resuming for partial uploads, so they should
+            // not be stored in the URL storage.
+            storeFingerprintForResuming: false,
+            removeFingerprintOnSuccess: false,
+            // Reset the parallelUploads option to not cause recursion.
+            parallelUploads: 1,
+            metadata: {},
+            // Add the header to indicate the this is a partial upload.
+            headers: {
+              ...this.options.headers,
+              "Upload-Concat": "partial"
+            },
+            // Reject or resolve the promise if the upload errors or completes.
+            onSuccess: resolve,
+            onError: reject,
+            // Based in the progress for this partial upload, calculate the progress
+            // for the entire final upload.
+            onProgress: (newPartProgress) => {
+              totalProgress = totalProgress - lastPartProgress + newPartProgress;
+              lastPartProgress = newPartProgress;
+              this._emitProgress(totalProgress, totalSize);
+            },
+            // Wait until every partial upload has an upload URL, so we can add
+            // them to the URL storage.
+            _onUploadUrlAvailable: () => {
+              this._parallelUploadUrls[index] = upload.url;
+              // Test if all uploads have received an URL
+              if (this._parallelUploadUrls.filter(u => !!u).length === parts.length) {
+                this._saveUploadInUrlStorage();
+              }
+            }
+          };
+
+          const upload = new upload_BaseUpload(value, options);
+          upload.start();
+
+          // Store the upload in an array, so we can later abort them if necessary.
+          this._parallelUploads.push(upload);
+        })
+        );
+    });
+
+    let req;
+    // Wait until all partial uploads are finished and we can send the POST request for
+    // creating the final upload.
+    Promise.all(uploads).then(() => {
+      req = this._openRequest("POST", this.options.endpoint);
+      req.setHeader("Upload-Concat", `final;${this._parallelUploadUrls.join(" ")}`);
+
+      // Add metadata if values have been added
+      var metadata = encodeMetadata(this.options.metadata);
+      if (metadata !== "") {
+        req.setHeader("Upload-Metadata", metadata);
+      }
+
+      return req.send(null);
+    }).then((res) => {
+      if (!inStatusCategory(res.getStatus(), 200)) {
+        this._emitHttpError(req, res, "tus: unexpected response while creating upload");
+        return;
+      }
+
+      const location = res.getHeader("Location");
+      if (location == null) {
+        this._emitHttpError(req, res, "tus: invalid or missing Location header");
+        return;
+      }
+
+      this.url = resolveUrl(this.options.endpoint, location);
+      log(`Created upload at ${this.url}`);
+
+      this._emitSuccess();
+    }).catch((err) => {
+      this._emitError(err);
+    });
+  }
+
+  /**
+   * Initiate the uploading procedure for a non-parallel upload. Here the entire file is
+   * uploaded in a sequential matter.
+   *
+   * @api private
+   */
+  _startSingleUpload() {
+    // First, we look at the uploadLengthDeferred option.
+    // Next, we check if the caller has supplied a manual upload size.
+    // Finally, we try to use the calculated size from the source object.
+    if (this.options.uploadLengthDeferred) {
+      this._size = null;
+    } else if (this.options.uploadSize != null) {
+      this._size = +this.options.uploadSize;
+      if (isNaN(this._size)) {
+        this._emitError(new Error("tus: cannot convert `uploadSize` option into a number"));
+        return;
+      }
+    } else {
+      this._size = this._source.size;
+      if (this._size == null) {
+        this._emitError(new Error("tus: cannot automatically derive upload's size from input and must be specified manually using the `uploadSize` option"));
+        return;
+      }
+    }
+
+    // Reset the aborted flag when the upload is started or else the
+    // _performUpload will stop before sending a request if the upload has been
+    // aborted previously.
+    this._aborted = false;
+
+    // The upload had been started previously and we should reuse this URL.
+    if (this.url != null) {
+      log(`Resuming upload from previous URL: ${this.url}`);
+      this._resumeUpload();
+      return;
+    }
+
+    // A URL has manually been specified, so we try to resume
+    if (this.options.uploadUrl != null) {
+      log(`Resuming upload from provided URL: ${this.options.url}`);
+      this.url = this.options.uploadUrl;
+      this._resumeUpload();
+      return;
+    }
+
+    // An upload has not started for the file yet, so we start a new one
+    log("Creating a new upload");
+    this._createUpload();
+  }
+
+  /**
+   * Abort any running request and stop the current upload. After abort is called, no event
+   * handler will be invoked anymore. You can use the `start` method to resume the upload
+   * again.
+   * If `shouldTerminate` is true, the `terminate` function will be called to remove the
+   * current upload from the server.
+   *
+   * @param {boolean} shouldTerminate True if the upload should be deleted from the server.
+   * @return {Promise} The Promise will be resolved/rejected when the requests finish.
+   */
+  abort(shouldTerminate, cb) {
+    if (typeof cb === "function") {
+      throw new Error("tus: the abort function does not accept a callback since v2 anymore; please use the returned Promise instead");
+    }
+
+    // Stop any parallel partial uploads, that have been started in _startParallelUploads.
+    if (this._parallelUploads != null) {
+      this._parallelUploads.forEach((upload) => {
+        upload.abort(shouldTerminate);
+      });
+    }
+
+    // Stop any current running request.
+    if (this._req !== null) {
+      this._req.abort();
+      this._source.close();
+    }
+    this._aborted = true;
+
+    // Stop any timeout used for initiating a retry.
+    if (this._retryTimeout != null) {
+      clearTimeout(this._retryTimeout);
+      this._retryTimeout = null;
+    }
+
+    if (!shouldTerminate || this.url == null) {
+      return Promise.resolve();
+    }
+
+    return upload_BaseUpload.terminate(this.url, this.options)
+      // Remove entry from the URL storage since the upload URL is no longer valid.
+      .then(() => this._removeFromUrlStorage());
+  }
+
+  _emitHttpError(req, res, message, causingErr) {
+    this._emitError(new lib_error(message, causingErr, req, res));
+  }
+
+  _emitError(err) {
+    // Do not emit errors, e.g. from aborted HTTP requests, if the upload has been stopped.
+    if (this._aborted) return;
+
+    // Check if we should retry, when enabled, before sending the error to the user.
+    if (this.options.retryDelays != null) {
+      // We will reset the attempt counter if
+      // - we were already able to connect to the server (offset != null) and
+      // - we were able to upload a small chunk of data to the server
+      let shouldResetDelays = this._offset != null && (this._offset > this._offsetBeforeRetry);
+      if (shouldResetDelays) {
+        this._retryAttempt = 0;
+      }
+
+      if (shouldRetry(err, this._retryAttempt, this.options)) {
+        let delay = this.options.retryDelays[this._retryAttempt++];
+
+        this._offsetBeforeRetry = this._offset;
+
+        this._retryTimeout = setTimeout(() => {
+          this.start();
+        }, delay);
+        return;
+      }
+    }
+
+    if (typeof this.options.onError === "function") {
+      this.options.onError(err);
+    } else {
+      throw err;
+    }
+  }
+
+  /**
+   * Publishes notification if the upload has been successfully completed.
+   *
+   * @api private
+   */
+  _emitSuccess() {
+    if (this.options.removeFingerprintOnSuccess) {
+      // Remove stored fingerprint and corresponding endpoint. This causes
+      // new uploads of the same file to be treated as a different file.
+      this._removeFromUrlStorage();
+    }
+
+    if (typeof this.options.onSuccess === "function") {
+      this.options.onSuccess();
+    }
+  }
+
+  /**
+   * Publishes notification when data has been sent to the server. This
+   * data may not have been accepted by the server yet.
+   *
+   * @param {number} bytesSent  Number of bytes sent to the server.
+   * @param {number} bytesTotal Total number of bytes to be sent to the server.
+   * @api private
+   */
+  _emitProgress(bytesSent, bytesTotal) {
+    if (typeof this.options.onProgress === "function") {
+      this.options.onProgress(bytesSent, bytesTotal);
+    }
+  }
+
+  /**
+   * Publishes notification when a chunk of data has been sent to the server
+   * and accepted by the server.
+   * @param {number} chunkSize  Size of the chunk that was accepted by the server.
+   * @param {number} bytesAccepted Total number of bytes that have been
+   *                                accepted by the server.
+   * @param {number} bytesTotal Total number of bytes to be sent to the server.
+   * @api private
+   */
+  _emitChunkComplete(chunkSize, bytesAccepted, bytesTotal) {
+    if (typeof this.options.onChunkComplete === "function") {
+      this.options.onChunkComplete(chunkSize, bytesAccepted, bytesTotal);
+    }
+  }
+
+  /**
+   * Create a new upload using the creation extension by sending a POST
+   * request to the endpoint. After successful creation the file will be
+   * uploaded
+   *
+   * @api private
+   */
+  _createUpload() {
+    if (!this.options.endpoint) {
+      this._emitError(new Error("tus: unable to create upload because no endpoint is provided"));
+      return;
+    }
+
+    let req = this._openRequest("POST", this.options.endpoint);
+
+    if (this.options.uploadLengthDeferred) {
+      req.setHeader("Upload-Defer-Length", 1);
+    } else {
+      req.setHeader("Upload-Length", this._size);
+    }
+
+    // Add metadata if values have been added
+    var metadata = encodeMetadata(this.options.metadata);
+    if (metadata !== "") {
+      req.setHeader("Upload-Metadata", metadata);
+    }
+
+    let promise;
+    if (this.options.uploadDataDuringCreation && !this.options.uploadLengthDeferred) {
+      this._offset = 0;
+      promise = this._addChunkToRequest(req);
+    } else {
+      promise = req.send(null);
+    }
+
+    promise.then((res) => {
+      if (!inStatusCategory(res.getStatus(), 200)) {
+        this._emitHttpError(req, res, "tus: unexpected response while creating upload");
+        return;
+      }
+
+      const location = res.getHeader("Location");
+      if (location == null) {
+        this._emitHttpError(req, res, "tus: invalid or missing Location header");
+        return;
+      }
+
+      this.url = resolveUrl(this.options.endpoint, location);
+      log(`Created upload at ${this.url}`);
+
+      if (typeof this.options._onUploadUrlAvailable === "function") {
+        this.options._onUploadUrlAvailable();
+      }
+
+      if (this._size === 0) {
+        // Nothing to upload and file was successfully created
+        this._emitSuccess();
+        this._source.close();
+        return;
+      }
+
+      this._saveUploadInUrlStorage();
+
+      if (this.options.uploadDataDuringCreation) {
+        this._handleUploadResponse(req, res);
+      } else {
+        this._offset = 0;
+        this._performUpload();
+      }
+    }).catch((err) => {
+      this._emitHttpError(req, null, "tus: failed to create upload", err);
+    });
+  }
+
+  /*
+   * Try to resume an existing upload. First a HEAD request will be sent
+   * to retrieve the offset. If the request fails a new upload will be
+   * created. In the case of a successful response the file will be uploaded.
+   *
+   * @api private
+   */
+  _resumeUpload() {
+    const req = this._openRequest("HEAD", this.url);
+    const promise = req.send(null);
+
+    promise.then((res) => {
+      const status = res.getStatus();
+      if (!inStatusCategory(status, 200)) {
+        if (inStatusCategory(status, 400)) {
+          // Remove stored fingerprint and corresponding endpoint,
+          // on client errors since the file can not be found
+          this._removeFromUrlStorage();
+        }
+
+        // If the upload is locked (indicated by the 423 Locked status code), we
+        // emit an error instead of directly starting a new upload. This way the
+        // retry logic can catch the error and will retry the upload. An upload
+        // is usually locked for a short period of time and will be available
+        // afterwards.
+        if (status === 423) {
+          this._emitHttpError(req, res, "tus: upload is currently locked; retry later");
+          return;
+        }
+
+        if (!this.options.endpoint) {
+          // Don't attempt to create a new upload if no endpoint is provided.
+          this._emitHttpError(req, res, "tus: unable to resume upload (new upload cannot be created without an endpoint)");
+          return;
+        }
+
+        // Try to create a new upload
+        this.url = null;
+        this._createUpload();
+        return;
+      }
+
+      let offset = parseInt(res.getHeader("Upload-Offset"), 10);
+      if (isNaN(offset)) {
+        this._emitHttpError(req, res, "tus: invalid or missing offset value");
+        return;
+      }
+
+      let length = parseInt(res.getHeader("Upload-Length"), 10);
+      if (isNaN(length) && !this.options.uploadLengthDeferred) {
+        this._emitHttpError(req, res, "tus: invalid or missing length value");
+        return;
+      }
+
+      if (typeof this.options._onUploadUrlAvailable === "function") {
+        this.options._onUploadUrlAvailable();
+      }
+
+      // Upload has already been completed and we do not need to send additional
+      // data to the server
+      if (offset === length) {
+        this._emitProgress(length, length);
+        this._emitSuccess();
+        return;
+      }
+
+      this._offset = offset;
+      this._performUpload();
+    }).catch((err) => {
+      this._emitHttpError(req, null, "tus: failed to resume upload", err);
+    });
+
+  }
+
+  /**
+   * Start uploading the file using PATCH requests. The file will be divided
+   * into chunks as specified in the chunkSize option. During the upload
+   * the onProgress event handler may be invoked multiple times.
+   *
+   * @api private
+   */
+  _performUpload() {
+    // If the upload has been aborted, we will not send the next PATCH request.
+    // This is important if the abort method was called during a callback, such
+    // as onChunkComplete or onProgress.
+    if (this._aborted) {
+      return;
+    }
+
+    let req;
+
+    // Some browser and servers may not support the PATCH method. For those
+    // cases, you can tell tus-js-client to use a POST request with the
+    // X-HTTP-Method-Override header for simulating a PATCH request.
+    if (this.options.overridePatchMethod) {
+      req = this._openRequest("POST", this.url);
+      req.setHeader("X-HTTP-Method-Override", "PATCH");
+    } else {
+      req = this._openRequest("PATCH", this.url);
+    }
+
+    req.setHeader("Upload-Offset", this._offset);
+    const promise = this._addChunkToRequest(req);
+
+    promise.then((res) => {
+      if (!inStatusCategory(res.getStatus(), 200)) {
+        this._emitHttpError(req, res, "tus: unexpected response while uploading chunk");
+        return;
+      }
+
+      this._handleUploadResponse(req, res);
+    }).catch((err) => {
+      // Don't emit an error if the upload was aborted manually
+      if (this._aborted) {
+        return;
+      }
+
+      this._emitHttpError(req, null, "tus: failed to upload chunk at offset " + this._offset, err);
+    });
+  }
+
+  /**
+   * _addChunktoRequest reads a chunk from the source and sends it using the
+   * supplied request object. It will not handle the response.
+   *
+   * @api private
+   */
+  _addChunkToRequest(req) {
+    let start = this._offset;
+    let end = this._offset + this.options.chunkSize;
+
+    req.setProgressHandler((bytesSent) => {
+      this._emitProgress(start + bytesSent, this._size);
+    });
+
+    req.setHeader("Content-Type", "application/offset+octet-stream");
+
+    // The specified chunkSize may be Infinity or the calcluated end position
+    // may exceed the file's size. In both cases, we limit the end position to
+    // the input's total size for simpler calculations and correctness.
+    if ((end === Infinity || end > this._size) && !this.options.uploadLengthDeferred) {
+      end = this._size;
+    }
+
+    return this._source.slice(start, end)
+      .then(({ value, done }) => {
+        // If the upload length is deferred, the upload size was not specified during
+        // upload creation. So, if the file reader is done reading, we know the total
+        // upload size and can tell the tus server.
+        if (this.options.uploadLengthDeferred && done) {
+          this._size = this._offset + (value && value.size ? value.size : 0);
+          req.setHeader("Upload-Length", this._size);
+        }
+
+        if (value === null) {
+          return req.send();
+        } else {
+          this._emitProgress(this._offset, this._size);
+          return req.send(value);
+        }
+      });
+  }
+
+  /**
+   * _handleUploadResponse is used by requests that haven been sent using _addChunkToRequest
+   * and already have received a response.
+   *
+   * @api private
+   */
+  _handleUploadResponse(req, res) {
+    let offset = parseInt(res.getHeader("Upload-Offset"), 10);
+    if (isNaN(offset)) {
+      this._emitHttpError(req, res, "tus: invalid or missing offset value");
+      return;
+    }
+
+    this._emitProgress(offset, this._size);
+    this._emitChunkComplete(offset - this._offset, offset, this._size);
+
+    this._offset = offset;
+
+    if (offset == this._size) {
+      // Yay, finally done :)
+      this._emitSuccess();
+      this._source.close();
+      return;
+    }
+
+    this._performUpload();
+  }
+
+  /**
+   * Create a new HTTP request object with the given method and URL.
+   *
+   * @api private
+   */
+  _openRequest(method, url) {
+    const req = openRequest(method, url, this.options);
+    this._req = req;
+    return req;
+  }
+
+  /**
+   * Remove the entry in the URL storage, if it has been saved before.
+   *
+   * @api private
+   */
+  _removeFromUrlStorage() {
+    if (!this._urlStorageKey) return;
+
+    this._urlStorage.removeUpload(this._urlStorageKey).catch((err) => {
+      this._emitError(err);
+    });
+    this._urlStorageKey = null;
+  }
+
+  /**
+   * Add the upload URL to the URL storage, if possible.
+   *
+   * @api private
+   */
+  _saveUploadInUrlStorage() {
+    // Only if a fingerprint was calculated for the input (i.e. not a stream), we can store the upload URL.
+    if (!this.options.storeFingerprintForResuming || !this._fingerprint) {
+      return;
+    }
+
+    const storedUpload = {
+      size: this._size,
+      metadata: this.options.metadata,
+      creationTime: new Date().toString()
+    };
+
+    if (this._parallelUploads) {
+      // Save multiple URLs if the parallelUploads option is used ...
+      storedUpload.parallelUploadUrls = this._parallelUploadUrls;
+    } else {
+      // ... otherwise we just save the one available URL.
+      storedUpload.uploadUrl = this.url;
+    }
+
+    this._urlStorage.addUpload(this._fingerprint, storedUpload)
+      .then((urlStorageKey) => this._urlStorageKey = urlStorageKey)
+      .catch((err) => {
+        this._emitError(err);
+      });
+  }
+}
+
+function encodeMetadata(metadata) {
+  var encoded = [];
+
+  for (var key in metadata) {
+    encoded.push(key + " " + base64["Base64"].encode(metadata[key]));
+  }
+
+  return encoded.join(",");
+}
+
+/**
+ * Checks whether a given status is in the range of the expected category.
+ * For example, only a status between 200 and 299 will satisfy the category 200.
+ *
+ * @api private
+ */
+function inStatusCategory(status, category) {
+  return (status >= category && status < (category + 100));
+}
+
+/**
+ * Create a new HTTP request with the specified method and URL.
+ * The necessary headers that are included in every request
+ * will be added, including the request ID.
+ *
+ * @api private
+ */
+function openRequest(method, url, options) {
+  const req = options.httpStack.createRequest(method, url);
+
+  req.setHeader("Tus-Resumable", "1.0.0");
+  let headers = options.headers || {};
+
+  for (let name in headers) {
+    req.setHeader(name, headers[name]);
+  }
+
+  if (options.addRequestId) {
+    const requestId =  uuid();
+    req.setHeader("X-Request-ID", requestId);
+  }
+
+  return req;
+}
+
+/**
+ * Checks whether the browser running this code has internet access.
+ * This function will always return true in the node.js environment
+ *
+ * @api private
+ */
+function isOnline() {
+  let online = true;
+  if (typeof window !== "undefined" &&
+        "navigator" in window &&
+        window.navigator.onLine === false) {
+    online = false;
+  }
+
+  return online;
+}
+
+/**
+ * Checks whether or not it is ok to retry a request.
+ * @param {Error} err the error returned from the last request
+ * @param {number} retryAttempt the number of times the request has already been retried
+ * @param {object} options tus Upload options
+ *
+ * @api private
+ */
+function shouldRetry(err, retryAttempt, options) {
+  // We only attempt a retry if
+  // - retryDelays option is set
+  // - we didn't exceed the maxium number of retries, yet, and
+  // - this error was caused by a request or it's response and
+  // - the error is server error (i.e. no a status 4xx or a 409 or 423) and
+  // - the browser does not indicate that we are offline
+  let status = err.originalResponse ? err.originalResponse.getStatus() : 0;
+  let isServerError = !inStatusCategory(status, 400) || status === 409 || status === 423;
+  return options.retryDelays != null &&
+         retryAttempt < options.retryDelays.length &&
+         err.originalRequest != null &&
+         isServerError &&
+         isOnline();
+}
+
+/**
+ * Resolve a relative link given the origin as source. For example,
+ * if a HTTP request to http://example.com/files/ returns a Location
+ * header with the value /upload/abc, the resolved URL will be:
+ * http://example.com/upload/abc
+ */
+function resolveUrl(origin, link) {
+  return new url_parse_default.a(link, origin).toString();
+}
+
+/**
+ * Calculate the start and end positions for the parts if an upload
+ * is split into multiple parallel requests.
+ *
+ * @param {number} totalSize The byte size of the upload, which will be split.
+ * @param {number} partCount The number in how many parts the upload will be split.
+ * @param {string[]} previousUrls The upload URLs for previous parts.
+ * @return {object[]}
+ * @api private
+ */
+function splitSizeIntoParts(totalSize, partCount, previousUrls) {
+  const partSize = Math.floor(totalSize / partCount);
+  const parts = [];
+
+  for (let i = 0; i < partCount; i++) {
+    parts.push({
+      start: partSize * i,
+      end: partSize * (i + 1)
+    });
+  }
+
+  parts[partCount - 1].end = totalSize;
+
+  // Attach URLs from previous uploads, if available.
+  if (previousUrls) {
+    parts.forEach((part, index) => {
+      part.uploadUrl = previousUrls[index] || null;
+    });
+  }
+
+  return parts;
+}
+
+upload_BaseUpload.defaultOptions = defaultOptions;
+
+/* harmony default export */ var lib_upload = (upload_BaseUpload);
+
+// CONCATENATED MODULE: ./node_modules/tus-js-client/lib/noopUrlStorage.js
+/* eslint no-unused-vars: "off" */
+
+class NoopUrlStorage {
+  listAllUploads() {
+    return Promise.resolve([]);
+  }
+
+  findUploadsByFingerprint(fingerprint) {
+    return Promise.resolve([]);
+  }
+
+  removeUpload(urlStorageKey) {
+    return Promise.resolve();
+  }
+
+  addUpload(fingerprint, upload) {
+    return Promise.resolve(null);
+  }
+}
+
+// CONCATENATED MODULE: ./node_modules/tus-js-client/lib/browser/urlStorage.js
+/* global window, localStorage */
+
+let hasStorage = false;
+try {
+  hasStorage = "localStorage" in window;
+
+  // Attempt to store and read entries from the local storage to detect Private
+  // Mode on Safari on iOS (see #49)
+  var urlStorage_key = "tusSupport";
+  localStorage.setItem(urlStorage_key, localStorage.getItem(urlStorage_key));
+
+} catch (e) {
+  // If we try to access localStorage inside a sandboxed iframe, a SecurityError
+  // is thrown. When in private mode on iOS Safari, a QuotaExceededError is
+  // thrown (see #49)
+  if (e.code === e.SECURITY_ERR || e.code === e.QUOTA_EXCEEDED_ERR) {
+    hasStorage = false;
+  } else {
+    throw e;
+  }
+}
+
+const canStoreURLs = hasStorage;
+
+class WebStorageUrlStorage {
+  findAllUploads() {
+    const results = this._findEntries("tus::");
+    return Promise.resolve(results);
+  }
+
+  findUploadsByFingerprint(fingerprint) {
+    const results = this._findEntries(`tus::${fingerprint}::`);
+    return Promise.resolve(results);
+  }
+
+  removeUpload(urlStorageKey) {
+    localStorage.removeItem(urlStorageKey);
+    return Promise.resolve();
+  }
+
+  addUpload(fingerprint, upload) {
+    const id = Math.round(Math.random() * 1e12);
+    const key = `tus::${fingerprint}::${id}`;
+
+    localStorage.setItem(key, JSON.stringify(upload));
+    return Promise.resolve(key);
+  }
+
+  _findEntries(prefix) {
+    const results = [];
+
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key.indexOf(prefix) !== 0) continue;
+
+      try {
+        let upload = JSON.parse(localStorage.getItem(key));
+        upload.urlStorageKey = key;
+
+        results.push(upload);
+      } catch (e) {
+        // The JSON parse error is intentionally ignored here, so a malformed
+        // entry in the storage cannot prevent an upload.
+      }
+    }
+
+    return results;
+  }
+}
+
+// CONCATENATED MODULE: ./node_modules/tus-js-client/lib/browser/httpStack.js
+/* global window */
+
+class XHRHttpStack {
+  createRequest(method, url) {
+    return new Request(method, url);
+  }
+
+  getName() {
+    return "XHRHttpStack";
+  }
+}
+
+class Request {
+  constructor(method, url) {
+    this._xhr = new XMLHttpRequest();
+    this._xhr.open(method, url, true);
+
+    this._method = method;
+    this._url = url;
+    this._headers = {};
+  }
+
+  getMethod() {
+    return this._method;
+  }
+
+  getURL() {
+    return this._url;
+  }
+
+  setHeader(header, value) {
+    this._xhr.setRequestHeader(header, value);
+    this._headers[header] = value;
+  }
+
+  getHeader(header) {
+    return this._headers[header];
+  }
+
+  setProgressHandler(progressHandler) {
+    // Test support for progress events before attaching an event listener
+    if (!("upload" in this._xhr)) {
+      return;
+    }
+
+    this._xhr.upload.onprogress = (e) => {
+      if (!e.lengthComputable) {
+        return;
+      }
+
+      progressHandler(e.loaded);
+    };
+  }
+
+  send(body = null) {
+    return new Promise((resolve, reject) => {
+      this._xhr.onload = () => {
+        resolve(new Response(this._xhr));
+      };
+
+      this._xhr.onerror = (err) => {
+        reject(err);
+      };
+
+      this._xhr.send(body);
+    });
+  }
+
+  abort() {
+    this._xhr.abort();
+    return Promise.resolve();
+  }
+
+  getUnderlyingObject() {
+    return this._xhr;
+  }
+}
+
+class Response {
+  constructor(xhr) {
+    this._xhr = xhr;
+  }
+
+  getStatus() {
+    return this._xhr.status;
+  }
+
+  getHeader(header) {
+    return this._xhr.getResponseHeader(header);
+  }
+
+  getBody() {
+    return this._xhr.responseText;
+  }
+
+  getUnderlyingObject() {
+    return this._xhr;
+  }
+}
+
+/*
+interface HttpStack {
+  createRequest(method: string, url: string): HttpRequest;
+  resolveUrl(origin: string, link: string): string;
+  getName(): string;
+}
+
+interface HttpRequest {
+	constructor(method: string, url: string);
+	getMethod(): string;
+	getURL(): string;
+
+	setHeader(header: string, value: string);
+	getHeader(header: string);
+
+	setProgressHandler((bytesSent: number): void): void;
+	send(body: any): Promise<HttpResponse>;
+	abort(): Promise<void>;
+
+	getUnderlyingObject(): any;
+}
+
+interface HttpResponse {
+	getStatusCode(): number;
+	getStatus(): string;
+	getHeader(header: string): string;
+	getBody(): Promise<string>;
+
+	getUnderlyingObject(): any;
+}*/
+
+// CONCATENATED MODULE: ./node_modules/tus-js-client/lib/browser/isReactNative.js
+const isReactNative = () => (typeof navigator !== "undefined" &&
+  typeof navigator.product === "string" &&
+  navigator.product.toLowerCase() === "reactnative");
+
+/* harmony default export */ var browser_isReactNative = (isReactNative);
+
+// CONCATENATED MODULE: ./node_modules/tus-js-client/lib/browser/uriToBlob.js
+/**
+ * uriToBlob resolves a URI to a Blob object. This is used for
+ * React Native to retrieve a file (identified by a file://
+ * URI) as a blob.
+ */
+function uriToBlob(uri) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.responseType = "blob";
+    xhr.onload = () => {
+      const blob = xhr.response;
+      resolve(blob);
+    };
+    xhr.onerror = (err) => {
+      reject(err);
+    };
+    xhr.open("GET", uri);
+    xhr.send();
+  });
+}
+
+// CONCATENATED MODULE: ./node_modules/tus-js-client/lib/browser/isCordova.js
+const isCordova = () => typeof window != "undefined" && (
+  typeof window.PhoneGap != "undefined" ||
+    typeof window.Cordova != "undefined" ||
+    typeof window.cordova != "undefined");
+
+/* harmony default export */ var browser_isCordova = (isCordova);
+
+// CONCATENATED MODULE: ./node_modules/tus-js-client/lib/browser/readAsByteArray.js
+/**
+ * readAsByteArray converts a File object to a Uint8Array.
+ * This function is only used on the Apache Cordova platform.
+ * See https://cordova.apache.org/docs/en/latest/reference/cordova-plugin-file/index.html#read-a-file
+ */
+function readAsByteArray(chunk) {
+  return new Promise((resolve, reject) => {
+    let reader = new FileReader();
+    reader.onload = () => {
+      const value = new Uint8Array(reader.result);
+      resolve({ value });
+    };
+    reader.onerror = (err) => {
+      reject(err);
+    };
+    reader.readAsArrayBuffer(chunk);
+  });
+
+}
+
+// CONCATENATED MODULE: ./node_modules/tus-js-client/lib/browser/fileReader.js
+
+
+
+
+
+class fileReader_FileSource {
+  // Make this.size a method
+  constructor(file) {
+    this._file = file;
+    this.size = file.size;
+  }
+
+  slice(start, end) {
+    // In Apache Cordova applications, a File must be resolved using
+    // FileReader instances, see
+    // https://cordova.apache.org/docs/en/8.x/reference/cordova-plugin-file/index.html#read-a-file
+    if (browser_isCordova()) {
+      return readAsByteArray(this._file.slice(start, end));
+    }
+
+    const value = this._file.slice(start, end);
+    return Promise.resolve({ value });
+  }
+
+  close() {
+    // Nothing to do here since we don't need to release any resources.
+  }
+}
+
+class StreamSource {
+  constructor(reader, chunkSize) {
+    this._chunkSize = chunkSize;
+    this._buffer = undefined;
+    this._bufferOffset = 0;
+    this._reader = reader;
+    this._done = false;
+  }
+
+  slice(start, end) {
+    if (start < this._bufferOffset) {
+      return Promise.reject(new Error("Requested data is before the reader's current offset"));
+    }
+
+    return this._readUntilEnoughDataOrDone(start, end);
+  }
+
+  _readUntilEnoughDataOrDone(start, end) {
+    const hasEnoughData = end <= this._bufferOffset + len(this._buffer);
+    if (this._done || hasEnoughData) {
+      var value = this._getDataFromBuffer(start, end);
+      var done = value == null ? this._done : false;
+      return Promise.resolve({ value, done });
+    }
+
+    return this._reader.read().then(({ value, done }) => {
+      if (done) {
+        this._done = true;
+      } else if (this._buffer === undefined) {
+        this._buffer = value;
+      } else {
+        this._buffer = concat(this._buffer, value);
+      }
+
+      return this._readUntilEnoughDataOrDone(start, end);
+    });
+  }
+
+  _getDataFromBuffer(start, end) {
+    // Remove data from buffer before `start`.
+    // Data might be reread from the buffer if an upload fails, so we can only
+    // safely delete data when it comes *before* what is currently being read.
+    if (start > this._bufferOffset) {
+      this._buffer = this._buffer.slice(start - this._bufferOffset);
+      this._bufferOffset = start;
+    }
+    // If the buffer is empty after removing old data, all data has been read.
+    const hasAllDataBeenRead = len(this._buffer) === 0;
+    if (this._done && hasAllDataBeenRead) {
+      return null;
+    }
+    // We already removed data before `start`, so we just return the first
+    // chunk from the buffer.
+    return this._buffer.slice(0, end - start);
+  }
+
+  close() {
+    if (this._reader.cancel) {
+      this._reader.cancel();
+    }
+  }
+}
+
+function len(blobOrArray) {
+  if (blobOrArray === undefined) return 0;
+  if (blobOrArray.size !== undefined) return blobOrArray.size;
+  return blobOrArray.length;
+}
+
+/*
+  Typed arrays and blobs don't have a concat method.
+  This function helps StreamSource accumulate data to reach chunkSize.
+*/
+function concat(a, b) {
+  if (a.concat) { // Is `a` an Array?
+    return a.concat(b);
+  }
+  if (a instanceof Blob) {
+    return new Blob([a,b], {type: a.type});
+  }
+  if (a.set) { // Is `a` a typed array?
+    var c = new a.constructor(a.length + b.length);
+    c.set(a);
+    c.set(b, a.length);
+    return c;
+  }
+  throw new Error("Unknown data type");
+}
+
+class fileReader_FileReader {
+  openFile(input, chunkSize) {
+    // In React Native, when user selects a file, instead of a File or Blob,
+    // you usually get a file object {} with a uri property that contains
+    // a local path to the file. We use XMLHttpRequest to fetch
+    // the file blob, before uploading with tus.
+    if (browser_isReactNative() && input && typeof input.uri !== "undefined") {
+      return uriToBlob(input.uri)
+        .then((blob) => new fileReader_FileSource(blob))
+        .catch((err) => {
+          throw new Error("tus: cannot fetch `file.uri` as Blob, make sure the uri is correct and accessible. " + err);
+        });
+    }
+
+    // Since we emulate the Blob type in our tests (not all target browsers
+    // support it), we cannot use `instanceof` for testing whether the input value
+    // can be handled. Instead, we simply check is the slice() function and the
+    // size property are available.
+    if (typeof input.slice === "function" && typeof input.size !== "undefined") {
+      return Promise.resolve(new fileReader_FileSource(input));
+    }
+
+    if (typeof input.read === "function") {
+      chunkSize = +chunkSize;
+      if (!isFinite(chunkSize)) {
+        return Promise.reject(new Error("cannot create source for stream without a finite value for the `chunkSize` option"));
+      }
+
+      return Promise.resolve(new StreamSource(input, chunkSize));
+    }
+
+    return Promise.reject(new Error("source object may only be an instance of File, Blob, or Reader in this environment"));
+  }
+}
+
+// CONCATENATED MODULE: ./node_modules/tus-js-client/lib/browser/fingerprint.js
+
+
+// TODO: Differenciate between input types
+
+/**
+ * Generate a fingerprint for a file which will be used the store the endpoint
+ *
+ * @param {File} file
+ * @param {Object} options
+ * @param {Function} callback
+ */
+function fingerprint_fingerprint(file, options) {
+  if (browser_isReactNative()) {
+    return Promise.resolve(reactNativeFingerprint(file, options));
+  }
+
+  return Promise.resolve([
+    "tus-br",
+    file.name,
+    file.type,
+    file.size,
+    file.lastModified,
+    options.endpoint
+  ].join("-"));
+}
+
+function reactNativeFingerprint(file, options) {
+  let exifHash = file.exif ? hashCode(JSON.stringify(file.exif)) : "noexif";
+  return [
+    "tus-rn",
+    file.name || "noname",
+    file.size || "nosize",
+    exifHash,
+    options.endpoint
+  ].join("/");
+}
+
+function hashCode(str) {
+  // from https://stackoverflow.com/a/8831937/151666
+  var hash = 0;
+  if (str.length === 0) {
+    return hash;
+  }
+  for (var i = 0; i < str.length; i++) {
+    var char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return hash;
+}
+
+// CONCATENATED MODULE: ./node_modules/tus-js-client/lib/browser/index.js
+/* global window */
+
+
+
+
+
+
+
+
+
+const browser_defaultOptions = {
+  ...lib_upload.defaultOptions,
+  httpStack: new XHRHttpStack(),
+  fileReader: new fileReader_FileReader(),
+  urlStorage: (canStoreURLs ? new WebStorageUrlStorage() : new NoopUrlStorage()),
+  fingerprint: fingerprint_fingerprint
+};
+
+class browser_Upload extends lib_upload {
+  constructor(file = null, options = {}) {
+    options = { ...browser_defaultOptions, ...options };
+    super(file, options);
+  }
+
+  static terminate(url, options, cb) {
+    options = { ...browser_defaultOptions, ...options };
+    return lib_upload.terminate(url, options, cb);
+  }
+}
+
+const {XMLHttpRequest: browser_XMLHttpRequest, Blob: browser_Blob} = window;
+
+const isSupported = (
+  browser_XMLHttpRequest &&
+  browser_Blob &&
+  typeof browser_Blob.prototype.slice === "function"
+);
+
+
+
+// EXTERNAL MODULE: ./src/util.ts
+var util = __webpack_require__(2);
+
+// EXTERNAL MODULE: ./node_modules/escape-html/index.js
+var escape_html = __webpack_require__(11);
+var escape_html_default = /*#__PURE__*/__webpack_require__.n(escape_html);
+
+// CONCATENATED MODULE: ./src/render_upload_file.ts
+
+
+
+
+/* global document */
+
+
+
+var render_upload_file_RenderUploadFile = /*#__PURE__*/function () {
+  function RenderUploadFile(_ref) {
+    var _parent = _ref.parent,
+        input = _ref.input,
+        skipRequired = _ref.skipRequired,
+        translations = _ref.translations;
+
+    classCallCheck_default()(this, RenderUploadFile);
+
+    defineProperty_default()(this, "container", void 0);
+
+    defineProperty_default()(this, "input", void 0);
+
+    defineProperty_default()(this, "translations", void 0);
+
+    defineProperty_default()(this, "createFilesContainer", function (parent) {
+      var div = document.createElement("div");
+      div.className = "dff-files";
+      parent.appendChild(div);
+      return div;
+    });
+
+    this.container = this.createFilesContainer(_parent);
+    this.input = input;
+    this.translations = translations;
+
+    if (skipRequired) {
+      this.input.required = false;
+    }
+  }
+
+  createClass_default()(RenderUploadFile, [{
+    key: "addUploadedFile",
+    value: function addUploadedFile(filename, uploadIndex, filesize) {
+      this.addFile(filename, uploadIndex);
+      this.setSuccess(uploadIndex, filesize);
+    }
+  }, {
+    key: "addNewUpload",
+    value: function addNewUpload(filename, uploadIndex) {
+      var div = this.addFile(filename, uploadIndex);
+      var progressSpan = document.createElement("span");
+      progressSpan.className = "dff-progress";
+      var innerSpan = document.createElement("span");
+      innerSpan.className = "dff-progress-inner";
+      progressSpan.appendChild(innerSpan);
+      div.appendChild(progressSpan);
+      var cancelLink = document.createElement("a");
+      cancelLink.className = "dff-cancel";
+      cancelLink.innerHTML = this.translations.Cancel;
+      cancelLink.setAttribute("data-index", "".concat(uploadIndex));
+      cancelLink.href = "#";
+      div.appendChild(cancelLink);
+    }
+  }, {
+    key: "addFile",
+    value: function addFile(filename, uploadIndex) {
+      var div = document.createElement("div");
+      div.className = "dff-file dff-file-id-".concat(uploadIndex);
+      var nameSpan = document.createElement("span");
+      nameSpan.innerHTML = escape_html_default()(filename);
+      div.appendChild(nameSpan);
+      this.container.appendChild(div);
+      this.input.required = false;
+      return div;
+    }
+  }, {
+    key: "deleteFile",
+    value: function deleteFile(index) {
+      var div = this.findFileDiv(index);
+
+      if (div) {
+        div.remove();
+      }
+    }
+  }, {
+    key: "setError",
+    value: function setError(index) {
+      var span = document.createElement("span");
+      span.classList.add("dff-error");
+      span.innerHTML = this.translations["Upload failed"];
+      var el = this.findFileDiv(index);
+
+      if (el) {
+        el.appendChild(span);
+        el.classList.add("dff-upload-fail");
+      }
+
+      this.removeProgress(index);
+      this.removeCancel(index);
+    }
+  }, {
+    key: "setDeleteFailed",
+    value: function setDeleteFailed(index) {
+      var el = this.findFileDiv(index);
+
+      if (el) {
+        var span = document.createElement("span");
+        span.innerHTML = this.translations["Delete failed"];
+        el.appendChild(span);
+      }
+    }
+  }, {
+    key: "findFileDiv",
+    value: function findFileDiv(index) {
+      return this.container.querySelector(".dff-file-id-".concat(index));
+    }
+  }, {
+    key: "setSuccess",
+    value: function setSuccess(index, size) {
+      var translations = this.translations;
+      var el = this.findFileDiv(index);
+
+      if (el) {
+        el.classList.add("dff-upload-success");
+        var fileSizeInfo = document.createElement("span");
+        fileSizeInfo.innerHTML = Object(util["b" /* formatBytes */])(size, 2);
+        fileSizeInfo.className = "dff-filesize";
+        el.appendChild(fileSizeInfo);
+        var deleteLink = document.createElement("a");
+        deleteLink.innerHTML = translations.Delete;
+        deleteLink.className = "dff-delete";
+        deleteLink.setAttribute("data-index", "".concat(index));
+        deleteLink.href = "#";
+        el.appendChild(deleteLink);
+      }
+
+      this.removeProgress(index);
+      this.removeCancel(index);
+    }
+  }, {
+    key: "removeProgress",
+    value: function removeProgress(index) {
+      var el = this.findFileDiv(index);
+
+      if (el) {
+        var progressSpan = el.querySelector(".dff-progress");
+
+        if (progressSpan) {
+          progressSpan.remove();
+        }
+      }
+    }
+  }, {
+    key: "removeCancel",
+    value: function removeCancel(index) {
+      var el = this.findFileDiv(index);
+
+      if (el) {
+        var cancelSpan = el.querySelector(".dff-cancel");
+
+        if (cancelSpan) {
+          cancelSpan.remove();
+        }
+      }
+    }
+  }, {
+    key: "clearInput",
+    value: function clearInput() {
+      var input = this.input;
+      input.value = "";
+    }
+  }, {
+    key: "updateProgress",
+    value: function updateProgress(index, percentage) {
+      var el = this.container.querySelector(".dff-file-id-".concat(index));
+
+      if (el) {
+        var innerProgressSpan = el.querySelector(".dff-progress-inner");
+
+        if (innerProgressSpan) {
+          innerProgressSpan.style.width = "".concat(percentage, "%");
+        }
+      }
+    }
+  }, {
+    key: "renderDropHint",
+    value: function renderDropHint() {
+      if (this.container.querySelector(".dff-drop-hint")) {
+        return;
+      }
+
+      var dropHint = document.createElement("div");
+      dropHint.className = "dff-drop-hint";
+      dropHint.innerHTML = this.translations["Drop your files here"];
+      this.container.appendChild(dropHint);
+    }
+  }, {
+    key: "removeDropHint",
+    value: function removeDropHint() {
+      var dropHint = this.container.querySelector(".dff-drop-hint");
+
+      if (dropHint) {
+        dropHint.remove();
+      }
+    }
+  }]);
+
+  return RenderUploadFile;
+}();
+
+/* harmony default export */ var render_upload_file = (render_upload_file_RenderUploadFile);
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/regenerator/index.js
+var regenerator = __webpack_require__(1);
+var regenerator_default = /*#__PURE__*/__webpack_require__.n(regenerator);
+
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/asyncToGenerator.js
+var asyncToGenerator = __webpack_require__(4);
+var asyncToGenerator_default = /*#__PURE__*/__webpack_require__.n(asyncToGenerator);
+
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/asyncIterator.js
+var asyncIterator = __webpack_require__(12);
+var asyncIterator_default = /*#__PURE__*/__webpack_require__.n(asyncIterator);
+
+// CONCATENATED MODULE: ./src/drop_area.ts
+
+
+
+
+
+
+
+var getEntriesFromDirectory = /*#__PURE__*/function () {
+  var _ref = asyncToGenerator_default()( /*#__PURE__*/regenerator_default.a.mark(function _callee(directoryEntry) {
+    return regenerator_default.a.wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            return _context.abrupt("return", new Promise(function (resolve, reject) {
+              return directoryEntry.createReader().readEntries(resolve, reject);
+            }));
+
+          case 1:
+          case "end":
+            return _context.stop();
+        }
+      }
+    }, _callee);
+  }));
+
+  return function getEntriesFromDirectory(_x) {
+    return _ref.apply(this, arguments);
+  };
+}();
+
+var getFileFromFileEntry = /*#__PURE__*/function () {
+  var _ref2 = asyncToGenerator_default()( /*#__PURE__*/regenerator_default.a.mark(function _callee2(fileEntry) {
+    return regenerator_default.a.wrap(function _callee2$(_context2) {
+      while (1) {
+        switch (_context2.prev = _context2.next) {
+          case 0:
+            return _context2.abrupt("return", new Promise(function (resolve, reject) {
+              return fileEntry.file(resolve, reject);
+            }));
+
+          case 1:
+          case "end":
+            return _context2.stop();
+        }
+      }
+    }, _callee2);
+  }));
+
+  return function getFileFromFileEntry(_x2) {
+    return _ref2.apply(this, arguments);
+  };
+}();
+
+var getFilesFromFileSystemEntries = /*#__PURE__*/function () {
+  var _ref3 = asyncToGenerator_default()( /*#__PURE__*/regenerator_default.a.mark(function _callee3(entries) {
+    var result, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, _value, entry, file, entriesFromDirectory, _files;
+
+    return regenerator_default.a.wrap(function _callee3$(_context3) {
+      while (1) {
+        switch (_context3.prev = _context3.next) {
+          case 0:
+            result = [];
+            _iteratorNormalCompletion = true;
+            _didIteratorError = false;
+            _context3.prev = 3;
+            _iterator = asyncIterator_default()(entries);
+
+          case 5:
+            _context3.next = 7;
+            return _iterator.next();
+
+          case 7:
+            _step = _context3.sent;
+            _iteratorNormalCompletion = _step.done;
+            _context3.next = 11;
+            return _step.value;
+
+          case 11:
+            _value = _context3.sent;
+
+            if (_iteratorNormalCompletion) {
+              _context3.next = 32;
+              break;
+            }
+
+            entry = _value;
+
+            if (!entry.isFile) {
+              _context3.next = 21;
+              break;
+            }
+
+            _context3.next = 17;
+            return getFileFromFileEntry(entry);
+
+          case 17:
+            file = _context3.sent;
+            result.push(file);
+            _context3.next = 29;
+            break;
+
+          case 21:
+            if (!entry.isDirectory) {
+              _context3.next = 29;
+              break;
+            }
+
+            _context3.next = 24;
+            return getEntriesFromDirectory(entry);
+
+          case 24:
+            entriesFromDirectory = _context3.sent;
+            _context3.next = 27;
+            return getFilesFromFileSystemEntries(entriesFromDirectory);
+
+          case 27:
+            _files = _context3.sent;
+
+            _files.forEach(function (file) {
+              return result.push(file);
+            });
+
+          case 29:
+            _iteratorNormalCompletion = true;
+            _context3.next = 5;
+            break;
+
+          case 32:
+            _context3.next = 38;
+            break;
+
+          case 34:
+            _context3.prev = 34;
+            _context3.t0 = _context3["catch"](3);
+            _didIteratorError = true;
+            _iteratorError = _context3.t0;
+
+          case 38:
+            _context3.prev = 38;
+            _context3.prev = 39;
+
+            if (!(!_iteratorNormalCompletion && _iterator["return"] != null)) {
+              _context3.next = 43;
+              break;
+            }
+
+            _context3.next = 43;
+            return _iterator["return"]();
+
+          case 43:
+            _context3.prev = 43;
+
+            if (!_didIteratorError) {
+              _context3.next = 46;
+              break;
+            }
+
+            throw _iteratorError;
+
+          case 46:
+            return _context3.finish(43);
+
+          case 47:
+            return _context3.finish(38);
+
+          case 48:
+            return _context3.abrupt("return", result);
+
+          case 49:
+          case "end":
+            return _context3.stop();
+        }
+      }
+    }, _callee3, null, [[3, 34, 38, 48], [39,, 43, 47]]);
+  }));
+
+  return function getFilesFromFileSystemEntries(_x3) {
+    return _ref3.apply(this, arguments);
+  };
+}();
+
+var getFilesFromDataTransfer = /*#__PURE__*/function () {
+  var _ref4 = asyncToGenerator_default()( /*#__PURE__*/regenerator_default.a.mark(function _callee4(dataTransfer) {
+    var entries, _files2;
+
+    return regenerator_default.a.wrap(function _callee4$(_context4) {
+      while (1) {
+        switch (_context4.prev = _context4.next) {
+          case 0:
+            if (!dataTransfer.items) {
+              _context4.next = 8;
+              break;
+            }
+
+            entries = toConsumableArray_default()(dataTransfer.items).map(function (item) {
+              return item.webkitGetAsEntry();
+            });
+            _context4.next = 4;
+            return getFilesFromFileSystemEntries(entries);
+
+          case 4:
+            _files2 = _context4.sent;
+            return _context4.abrupt("return", _files2);
+
+          case 8:
+            return _context4.abrupt("return", toConsumableArray_default()(dataTransfer.files));
+
+          case 9:
+          case "end":
+            return _context4.stop();
+        }
+      }
+    }, _callee4);
+  }));
+
+  return function getFilesFromDataTransfer(_x4) {
+    return _ref4.apply(this, arguments);
+  };
+}();
+
+var drop_area_DropArea = function DropArea(_ref5) {
+  var _this = this;
+
+  var container = _ref5.container,
+      onUploadFiles = _ref5.onUploadFiles;
+
+  classCallCheck_default()(this, DropArea);
+
+  defineProperty_default()(this, "container", void 0);
+
+  defineProperty_default()(this, "onUploadFiles", void 0);
+
+  defineProperty_default()(this, "onDrop", function (e) {
+    var dragEvent = e;
+
+    _this.container.classList.remove("dff-dropping");
+
+    dragEvent.preventDefault();
+    dragEvent.stopPropagation();
+
+    var uploadFiles = /*#__PURE__*/function () {
+      var _ref6 = asyncToGenerator_default()( /*#__PURE__*/regenerator_default.a.mark(function _callee5() {
+        var _files3;
+
+        return regenerator_default.a.wrap(function _callee5$(_context5) {
+          while (1) {
+            switch (_context5.prev = _context5.next) {
+              case 0:
+                _context5.prev = 0;
+
+                if (!dragEvent.dataTransfer) {
+                  _context5.next = 6;
+                  break;
+                }
+
+                _context5.next = 4;
+                return getFilesFromDataTransfer(dragEvent.dataTransfer);
+
+              case 4:
+                _files3 = _context5.sent;
+
+                _this.onUploadFiles(_files3);
+
+              case 6:
+                _context5.next = 11;
+                break;
+
+              case 8:
+                _context5.prev = 8;
+                _context5.t0 = _context5["catch"](0);
+                console.error(_context5.t0);
+
+              case 11:
+              case "end":
+                return _context5.stop();
+            }
+          }
+        }, _callee5, null, [[0, 8]]);
+      }));
+
+      return function uploadFiles() {
+        return _ref6.apply(this, arguments);
+      };
+    }();
+
+    uploadFiles();
+  });
+
+  this.container = container;
+  this.onUploadFiles = onUploadFiles;
+  container.addEventListener("dragenter", function () {
+    container.classList.add("dff-dropping");
+  });
+  container.addEventListener("dragleave", function () {
+    container.classList.remove("dff-dropping");
+  });
+  container.addEventListener("dragover", function (e) {
+    container.classList.add("dff-dropping");
+    e.preventDefault();
+  });
+  container.addEventListener("drop", this.onDrop);
+};
+
+/* harmony default export */ var drop_area = (drop_area_DropArea);
+// CONCATENATED MODULE: ./src/upload_file.ts
+
+
+
+
+
+/* global window */
+
+
+
+
+
+var upload_file_UploadFile = /*#__PURE__*/function () {
+  function UploadFile(_ref) {
+    var _this = this;
+
+    var callbacks = _ref.callbacks,
+        _fieldName = _ref.fieldName,
+        form = _ref.form,
+        _formId = _ref.formId,
+        initial = _ref.initial,
+        input = _ref.input,
+        multiple = _ref.multiple,
+        parent = _ref.parent,
+        prefix = _ref.prefix,
+        retryDelays = _ref.retryDelays,
+        skipRequired = _ref.skipRequired,
+        supportDropArea = _ref.supportDropArea,
+        translations = _ref.translations,
+        _uploadUrl = _ref.uploadUrl;
+
+    classCallCheck_default()(this, UploadFile);
+
+    defineProperty_default()(this, "callbacks", void 0);
+
+    defineProperty_default()(this, "fieldName", void 0);
+
+    defineProperty_default()(this, "form", void 0);
+
+    defineProperty_default()(this, "formId", void 0);
+
+    defineProperty_default()(this, "multiple", void 0);
+
+    defineProperty_default()(this, "prefix", void 0);
+
+    defineProperty_default()(this, "renderer", void 0);
+
+    defineProperty_default()(this, "retryDelays", void 0);
+
+    defineProperty_default()(this, "supportDropArea", void 0);
+
+    defineProperty_default()(this, "uploadIndex", void 0);
+
+    defineProperty_default()(this, "uploadUrl", void 0);
+
+    defineProperty_default()(this, "uploads", void 0);
+
+    defineProperty_default()(this, "uploadFiles", function (files) {
+      if (files.length === 0) {
+        return;
+      }
+
+      if (!_this.multiple && _this.uploads.length !== 0) {
+        _this.renderer.deleteFile(0);
+
+        _this.uploads = [];
+      }
+
+      files.forEach(function (file) {
+        var fieldName = _this.fieldName,
+            formId = _this.formId,
+            renderer = _this.renderer,
+            uploads = _this.uploads,
+            uploadUrl = _this.uploadUrl;
+        var filename = file.name;
+        var uploadIndex = uploads.length;
+        var upload = new browser_Upload(file, {
+          endpoint: uploadUrl,
+          metadata: {
+            fieldName: fieldName,
+            filename: filename,
+            formId: formId
+          },
+          onError: function onError(error) {
+            return _this.handleError(uploadIndex, error);
+          },
+          onProgress: function onProgress(bytesUploaded, bytesTotal) {
+            return _this.handleProgress(uploadIndex, bytesUploaded, bytesTotal);
+          },
+          onSuccess: function onSuccess() {
+            return _this.handleSuccess(uploadIndex, upload.file.size);
+          },
+          retryDelays: _this.retryDelays || [0, 1000, 3000, 5000]
+        });
+        upload.start();
+        renderer.addNewUpload(filename, uploadIndex);
+
+        _this.uploads.push(upload);
+      });
+
+      _this.checkDropHint();
+    });
+
+    defineProperty_default()(this, "onChange", function (e) {
+      _this.uploadFiles(toConsumableArray_default()(e.target.files));
+    });
+
+    defineProperty_default()(this, "onClick", function (e) {
+      var target = e.target;
+
+      var getUploadIndex = function getUploadIndex() {
+        var dataIndex = target.getAttribute("data-index");
+
+        if (!dataIndex) {
+          return null;
+        }
+
+        return parseInt(dataIndex, 10);
+      };
+
+      if (target.classList.contains("dff-delete")) {
+        var uploadIndex = getUploadIndex();
+
+        if (uploadIndex !== null) {
+          _this.handleDelete(uploadIndex);
+        }
+
+        e.preventDefault();
+      } else if (target.classList.contains("dff-cancel")) {
+        var _uploadIndex = getUploadIndex();
+
+        if (_uploadIndex !== null) {
+          _this.handleCancel(_uploadIndex);
+        }
+
+        e.preventDefault();
+      }
+    });
+
+    defineProperty_default()(this, "handleProgress", function (uploadIndex, bytesUploaded, bytesTotal) {
+      var percentage = (bytesUploaded / bytesTotal * 100).toFixed(2);
+
+      _this.renderer.updateProgress(uploadIndex, percentage);
+
+      var onProgress = _this.callbacks.onProgress;
+
+      if (onProgress) {
+        var _upload = _this.uploads[uploadIndex];
+
+        if (_upload instanceof browser_Upload) {
+          onProgress(bytesUploaded, bytesTotal, _upload);
+        }
+      }
+    });
+
+    defineProperty_default()(this, "handleError", function (uploadIndex, error) {
+      _this.renderer.setError(uploadIndex);
+
+      var onError = _this.callbacks.onError;
+
+      if (onError) {
+        var _upload2 = _this.uploads[uploadIndex];
+
+        if (_upload2 instanceof browser_Upload) {
+          onError(error, _upload2);
+        }
+      }
+    });
+
+    defineProperty_default()(this, "handleSuccess", function (uploadIndex, uploadedSize) {
+      var renderer = _this.renderer;
+      renderer.clearInput();
+      renderer.setSuccess(uploadIndex, uploadedSize);
+      var onSuccess = _this.callbacks.onSuccess;
+
+      if (onSuccess) {
+        var _upload3 = _this.uploads[uploadIndex];
+
+        if (_upload3 instanceof browser_Upload) {
+          onSuccess(_upload3);
+        }
+      }
+    });
+
+    this.callbacks = callbacks;
+    this.fieldName = _fieldName;
+    this.form = form;
+    this.formId = _formId;
+    this.multiple = multiple;
+    this.prefix = prefix;
+    this.retryDelays = retryDelays;
+    this.supportDropArea = supportDropArea;
+    this.uploadUrl = _uploadUrl;
+    this.uploadIndex = 0;
+    this.uploads = [];
+    this.renderer = new render_upload_file({
+      parent: parent,
+      input: input,
+      skipRequired: skipRequired,
+      translations: translations
+    });
+    var filesContainer = this.renderer.container;
+
+    if (supportDropArea) {
+      this.initDropArea(filesContainer);
+    }
+
+    if (initial) {
+      this.addInitialFiles(initial);
+    }
+
+    this.checkDropHint();
+    input.addEventListener("change", this.onChange);
+    filesContainer.addEventListener("click", this.onClick);
+  }
+
+  createClass_default()(UploadFile, [{
+    key: "addInitialFiles",
+    value: function addInitialFiles(initialFiles) {
+      var _this2 = this;
+
+      if (initialFiles.length === 0) {
+        return;
+      }
+
+      var multiple = this.multiple,
+          renderer = this.renderer;
+
+      var addInitialFile = function addInitialFile(file, i) {
+        var id = file.id,
+            name = file.name,
+            size = file.size;
+        renderer.addUploadedFile(name, i, size);
+
+        if (file.placeholder) {
+          _this2.uploads.push({
+            id: id,
+            name: name,
+            placeholder: true,
+            size: size
+          });
+        } else {
+          var url = "".concat(_this2.uploadUrl).concat(file.id);
+
+          _this2.uploads.push({
+            id: id,
+            name: name,
+            placeholder: false,
+            size: size,
+            url: url
+          });
+        }
+      };
+
+      if (multiple) {
+        var uploadIndex = 0;
+        initialFiles.forEach(function (file) {
+          addInitialFile(file, uploadIndex);
+          uploadIndex += 1;
+        });
+      } else {
+        addInitialFile(initialFiles[0], 0);
+      }
+    }
+  }, {
+    key: "handleDelete",
+    value: function handleDelete(uploadIndex) {
+      var upload = this.uploads[uploadIndex];
+
+      if (upload instanceof browser_Upload) {
+        this.deleteFromServer(uploadIndex);
+      } else {
+        this.deletePlaceholder(uploadIndex);
+      }
+    }
+  }, {
+    key: "deleteUpload",
+    value: function deleteUpload(uploadIndex) {
+      var upload = this.uploads[uploadIndex];
+      this.renderer.deleteFile(uploadIndex);
+      delete this.uploads[uploadIndex];
+      this.checkDropHint();
+      var onDelete = this.callbacks.onDelete;
+
+      if (onDelete) {
+        onDelete(upload);
+      }
+    }
+  }, {
+    key: "deleteFromServer",
+    value: function deleteFromServer(uploadIndex) {
+      var _this3 = this;
+
+      var upload = this.uploads[uploadIndex];
+
+      if (!(upload instanceof browser_Upload)) {
+        return;
+      }
+
+      var url = upload.url;
+
+      if (!url) {
+        return;
+      }
+
+      var xhr = new window.XMLHttpRequest();
+      xhr.open("DELETE", url);
+
+      xhr.onload = function () {
+        if (xhr.status === 204) {
+          _this3.deleteUpload(uploadIndex);
+        } else {
+          _this3.renderer.setDeleteFailed(uploadIndex);
+        }
+      };
+
+      xhr.setRequestHeader("Tus-Resumable", "1.0.0");
+      xhr.send(null);
+    }
+  }, {
+    key: "deletePlaceholder",
+    value: function deletePlaceholder(uploadIndex) {
+      this.deleteUpload(uploadIndex);
+      this.updatePlaceholderInput();
+    }
+  }, {
+    key: "handleCancel",
+    value: function handleCancel(uploadIndex) {
+      var upload = this.uploads[uploadIndex];
+
+      if (upload instanceof browser_Upload) {
+        upload.abort(true);
+        this.deleteUpload(uploadIndex);
+      }
+    }
+  }, {
+    key: "initDropArea",
+    value: function initDropArea(container) {
+      new drop_area({
+        container: container,
+        onUploadFiles: this.uploadFiles
+      });
+    }
+  }, {
+    key: "checkDropHint",
+    value: function checkDropHint() {
+      if (!this.supportDropArea) {
+        return;
+      }
+
+      var nonEmptyUploads = this.uploads.filter(function (e) {
+        return e;
+      });
+
+      if (nonEmptyUploads.length === 0) {
+        this.renderer.renderDropHint();
+      } else {
+        this.renderer.removeDropHint();
+      }
+    }
+  }, {
+    key: "updatePlaceholderInput",
+    value: function updatePlaceholderInput() {
+      var placeholdersInfo = this.uploads.filter(function (upload) {
+        return !(upload instanceof browser_Upload) && upload.placeholder;
+      });
+      var input = Object(util["a" /* findInput */])(this.form, Object(util["e" /* getPlaceholderFieldName */])(this.fieldName, this.prefix), this.prefix);
+
+      if (input) {
+        input.value = JSON.stringify(placeholdersInfo);
+      }
+    }
+  }]);
+
+  return UploadFile;
+}();
+
+/* harmony default export */ var upload_file = __webpack_exports__["a"] = (upload_file_UploadFile);
+
+/***/ }),
+/* 14 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__(15);
+
+
+/***/ }),
+/* 15 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* WEBPACK VAR INJECTION */(function(global) {/* harmony import */ var _babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(0);
+/* harmony import */ var _babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _upload_file__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(13);
+/* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(2);
+
+
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0___default()(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+
+
+
+var initUploadFields = function initUploadFields(form) {
+  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+  var matchesPrefix = function matchesPrefix(fieldName) {
+    if (!(options && options.prefix)) {
+      return true;
+    }
+
+    return fieldName.startsWith("".concat(options.prefix, "-"));
+  };
+
+  var getPrefix = function getPrefix() {
+    return options && options.prefix ? options.prefix : null;
+  };
+
+  var getInputValue = function getInputValue(fieldName) {
+    return Object(_util__WEBPACK_IMPORTED_MODULE_2__[/* getInputValueForFormAndPrefix */ "d"])(form, fieldName, getPrefix());
+  };
+
+  var getInitialFiles = function getInitialFiles(element) {
+    var filesData = element.dataset.files;
+
+    if (!filesData) {
+      return [];
+    }
+
+    return JSON.parse(filesData);
+  };
+
+  var getPlaceholders = function getPlaceholders(fieldName) {
+    var data = getInputValue(Object(_util__WEBPACK_IMPORTED_MODULE_2__[/* getPlaceholderFieldName */ "e"])(fieldName, getPrefix()));
+
+    if (!data) {
+      return [];
+    }
+
+    return JSON.parse(data);
+  };
+
+  var uploadUrl = getInputValue("upload_url");
+  var formId = getInputValue("form_id");
+  var skipRequired = options.skipRequired || false;
+  var prefix = getPrefix();
+
+  if (!formId || !uploadUrl) {
+    return;
+  }
+
+  form.querySelectorAll(".dff-uploader").forEach(function (uploaderDiv) {
+    var container = uploaderDiv.querySelector(".dff-container");
+
+    if (!container) {
+      return;
+    }
+
+    var input = container.querySelector("input[type=file]");
+
+    if (!(input && matchesPrefix(input.name))) {
+      return;
+    }
+
+    var fieldName = input.name;
+    var multiple = input.multiple;
+    var initial = getInitialFiles(container).concat(getPlaceholders(fieldName));
+    var dataTranslations = container.getAttribute("data-translations");
+    var translations = dataTranslations ? JSON.parse(dataTranslations) : {};
+    var supportDropArea = !(options.supportDropArea === false);
+    new _upload_file__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"]({
+      callbacks: options.callbacks || {},
+      fieldName: fieldName,
+      form: form,
+      formId: formId,
+      initial: initial,
+      input: input,
+      multiple: multiple,
+      parent: container,
+      prefix: prefix,
+      retryDelays: options.retryDelays || null,
+      skipRequired: skipRequired,
+      supportDropArea: supportDropArea,
+      translations: translations,
+      uploadUrl: uploadUrl
+    });
+  });
+};
+
+var initFormSet = function initFormSet(form, optionsParam) {
+  var options;
+
+  if (typeof optionsParam === "string") {
+    options = {
+      prefix: optionsParam
+    };
+  } else {
+    options = optionsParam;
+  }
+
+  var prefix = options.prefix || "form";
+  var totalFormsValue = Object(_util__WEBPACK_IMPORTED_MODULE_2__[/* getInputValueForFormAndPrefix */ "d"])(form, "TOTAL_FORMS", prefix);
+
+  if (!totalFormsValue) {
+    return;
+  }
+
+  var formCount = parseInt(totalFormsValue, 10);
+
+  for (var i = 0; i < formCount; i += 1) {
+    var subFormPrefix = Object(_util__WEBPACK_IMPORTED_MODULE_2__[/* getInputNameWithPrefix */ "c"])("".concat(i), null);
+    initUploadFields(form, _objectSpread(_objectSpread({}, options), {}, {
+      prefix: "".concat(prefix, "-").concat(subFormPrefix)
+    }));
+  }
+};
+
+// eslint-disable-line @typescript-eslint/no-explicit-any
+global.initFormSet = initFormSet;
+global.initUploadFields = initUploadFields;
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(7)))
+
+/***/ }),
+/* 16 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var arrayLikeToArray = __webpack_require__(8);
+
+function _arrayWithoutHoles(arr) {
+  if (Array.isArray(arr)) return arrayLikeToArray(arr);
+}
+
+module.exports = _arrayWithoutHoles;
+
+/***/ }),
+/* 17 */
+/***/ (function(module, exports) {
+
+function _iterableToArray(iter) {
+  if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter);
+}
+
+module.exports = _iterableToArray;
+
+/***/ }),
+/* 18 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var arrayLikeToArray = __webpack_require__(8);
+
+function _unsupportedIterableToArray(o, minLen) {
+  if (!o) return;
+  if (typeof o === "string") return arrayLikeToArray(o, minLen);
+  var n = Object.prototype.toString.call(o).slice(8, -1);
+  if (n === "Object" && o.constructor) n = o.constructor.name;
+  if (n === "Map" || n === "Set") return Array.from(o);
+  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return arrayLikeToArray(o, minLen);
+}
+
+module.exports = _unsupportedIterableToArray;
+
+/***/ }),
+/* 19 */
+/***/ (function(module, exports) {
+
+function _nonIterableSpread() {
+  throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+
+module.exports = _nonIterableSpread;
+
+/***/ }),
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3368,7 +3832,7 @@ module.exports = function required(port, protocol) {
 
 
 /***/ }),
-/* 26 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3493,347 +3957,7 @@ exports.parse = querystring;
 
 
 /***/ }),
-/* 27 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-exports.getSource = getSource;
-
-var _isReactNative = __webpack_require__(9);
-
-var _isReactNative2 = _interopRequireDefault(_isReactNative);
-
-var _uriToBlob = __webpack_require__(28);
-
-var _uriToBlob2 = _interopRequireDefault(_uriToBlob);
-
-var _isCordova = __webpack_require__(29);
-
-var _isCordova2 = _interopRequireDefault(_isCordova);
-
-var _readAsByteArray = __webpack_require__(30);
-
-var _readAsByteArray2 = _interopRequireDefault(_readAsByteArray);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var FileSource = function () {
-  function FileSource(file) {
-    _classCallCheck(this, FileSource);
-
-    this._file = file;
-    this.size = file.size;
-  }
-
-  _createClass(FileSource, [{
-    key: "slice",
-    value: function slice(start, end, callback) {
-      // In Apache Cordova applications, a File must be resolved using
-      // FileReader instances, see
-      // https://cordova.apache.org/docs/en/8.x/reference/cordova-plugin-file/index.html#read-a-file
-      if ((0, _isCordova2.default)()) {
-        (0, _readAsByteArray2.default)(this._file.slice(start, end), function (err, chunk) {
-          if (err) return callback(err);
-
-          callback(null, chunk);
-        });
-        return;
-      }
-
-      callback(null, this._file.slice(start, end));
-    }
-  }, {
-    key: "close",
-    value: function close() {}
-  }]);
-
-  return FileSource;
-}();
-
-var StreamSource = function () {
-  function StreamSource(reader, chunkSize) {
-    _classCallCheck(this, StreamSource);
-
-    this._chunkSize = chunkSize;
-    this._buffer = undefined;
-    this._bufferOffset = 0;
-    this._reader = reader;
-    this._done = false;
-  }
-
-  _createClass(StreamSource, [{
-    key: "slice",
-    value: function slice(start, end, callback) {
-      if (start < this._bufferOffset) {
-        callback(new Error("Requested data is before the reader's current offset"));
-        return;
-      }
-
-      return this._readUntilEnoughDataOrDone(start, end, callback);
-    }
-  }, {
-    key: "_readUntilEnoughDataOrDone",
-    value: function _readUntilEnoughDataOrDone(start, end, callback) {
-      var _this = this;
-
-      var hasEnoughData = end <= this._bufferOffset + len(this._buffer);
-      if (this._done || hasEnoughData) {
-        var value = this._getDataFromBuffer(start, end);
-        callback(null, value, value == null ? this._done : false);
-        return;
-      }
-      this._reader.read().then(function (_ref) {
-        var value = _ref.value,
-            done = _ref.done;
-
-        if (done) {
-          _this._done = true;
-        } else if (_this._buffer === undefined) {
-          _this._buffer = value;
-        } else {
-          _this._buffer = concat(_this._buffer, value);
-        }
-
-        _this._readUntilEnoughDataOrDone(start, end, callback);
-      }).catch(function (err) {
-        callback(new Error("Error during read: " + err));
-      });
-    }
-  }, {
-    key: "_getDataFromBuffer",
-    value: function _getDataFromBuffer(start, end) {
-      // Remove data from buffer before `start`.
-      // Data might be reread from the buffer if an upload fails, so we can only
-      // safely delete data when it comes *before* what is currently being read.
-      if (start > this._bufferOffset) {
-        this._buffer = this._buffer.slice(start - this._bufferOffset);
-        this._bufferOffset = start;
-      }
-      // If the buffer is empty after removing old data, all data has been read.
-      var hasAllDataBeenRead = len(this._buffer) === 0;
-      if (this._done && hasAllDataBeenRead) {
-        return null;
-      }
-      // We already removed data before `start`, so we just return the first
-      // chunk from the buffer.
-      return this._buffer.slice(0, end - start);
-    }
-  }, {
-    key: "close",
-    value: function close() {
-      if (this._reader.cancel) {
-        this._reader.cancel();
-      }
-    }
-  }]);
-
-  return StreamSource;
-}();
-
-function len(blobOrArray) {
-  if (blobOrArray === undefined) return 0;
-  if (blobOrArray.size !== undefined) return blobOrArray.size;
-  return blobOrArray.length;
-}
-
-/*
-  Typed arrays and blobs don't have a concat method.
-  This function helps StreamSource accumulate data to reach chunkSize.
-*/
-function concat(a, b) {
-  if (a.concat) {
-    // Is `a` an Array?
-    return a.concat(b);
-  }
-  if (a instanceof Blob) {
-    return new Blob([a, b], { type: a.type });
-  }
-  if (a.set) {
-    // Is `a` a typed array?
-    var c = new a.constructor(a.length + b.length);
-    c.set(a);
-    c.set(b, a.length);
-    return c;
-  }
-  throw new Error("Unknown data type");
-}
-
-function getSource(input, chunkSize, callback) {
-  // In React Native, when user selects a file, instead of a File or Blob,
-  // you usually get a file object {} with a uri property that contains
-  // a local path to the file. We use XMLHttpRequest to fetch
-  // the file blob, before uploading with tus.
-  if ((0, _isReactNative2.default)() && input && typeof input.uri !== "undefined") {
-    (0, _uriToBlob2.default)(input.uri, function (err, blob) {
-      if (err) {
-        return callback(new Error("tus: cannot fetch `file.uri` as Blob, make sure the uri is correct and accessible. " + err));
-      }
-      callback(null, new FileSource(blob));
-    });
-    return;
-  }
-
-  // Since we emulate the Blob type in our tests (not all target browsers
-  // support it), we cannot use `instanceof` for testing whether the input value
-  // can be handled. Instead, we simply check is the slice() function and the
-  // size property are available.
-  if (typeof input.slice === "function" && typeof input.size !== "undefined") {
-    callback(null, new FileSource(input));
-    return;
-  }
-
-  if (typeof input.read === "function") {
-    chunkSize = +chunkSize;
-    if (!isFinite(chunkSize)) {
-      callback(new Error("cannot create source for stream without a finite value for the `chunkSize` option"));
-      return;
-    }
-    callback(null, new StreamSource(input, chunkSize));
-    return;
-  }
-
-  callback(new Error("source object may only be an instance of File, Blob, or Reader in this environment"));
-}
-
-/***/ }),
-/* 28 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-/**
- * uriToBlob resolves a URI to a Blob object. This is used for
- * React Native to retrieve a file (identified by a file://
- * URI) as a blob.
- */
-function uriToBlob(uri, done) {
-  var xhr = new XMLHttpRequest();
-  xhr.responseType = "blob";
-  xhr.onload = function () {
-    var blob = xhr.response;
-    done(null, blob);
-  };
-  xhr.onerror = function (err) {
-    done(err);
-  };
-  xhr.open("GET", uri);
-  xhr.send();
-}
-
-exports.default = uriToBlob;
-
-/***/ }),
-/* 29 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-var isCordova = function isCordova() {
-  return typeof window != "undefined" && (typeof window.PhoneGap != "undefined" || typeof window.Cordova != "undefined" || typeof window.cordova != "undefined");
-};
-
-exports.default = isCordova;
-
-/***/ }),
-/* 30 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-/**
- * readAsByteArray converts a File object to a Uint8Array.
- * This function is only used on the Apache Cordova platform.
- * See https://cordova.apache.org/docs/en/latest/reference/cordova-plugin-file/index.html#read-a-file
- */
-function readAsByteArray(chunk, callback) {
-  var reader = new FileReader();
-  reader.onload = function () {
-    callback(null, new Uint8Array(reader.result));
-  };
-  reader.onerror = function (err) {
-    callback(err);
-  };
-  reader.readAsArrayBuffer(chunk);
-}
-
-exports.default = readAsByteArray;
-
-/***/ }),
-/* 31 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = fingerprint;
-
-var _isReactNative = __webpack_require__(9);
-
-var _isReactNative2 = _interopRequireDefault(_isReactNative);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * Generate a fingerprint for a file which will be used the store the endpoint
- *
- * @param {File} file
- * @param {Object} options
- * @param {Function} callback
- */
-function fingerprint(file, options, callback) {
-  if ((0, _isReactNative2.default)()) {
-    return callback(null, reactNativeFingerprint(file, options));
-  }
-
-  return callback(null, ["tus-br", file.name, file.type, file.size, file.lastModified, options.endpoint].join("-"));
-}
-
-function reactNativeFingerprint(file, options) {
-  var exifHash = file.exif ? hashCode(JSON.stringify(file.exif)) : "noexif";
-  return ["tus-rn", file.name || "noname", file.size || "nosize", exifHash, options.endpoint].join("/");
-}
-
-function hashCode(str) {
-  // from https://stackoverflow.com/a/8831937/151666
-  var hash = 0;
-  if (str.length === 0) {
-    return hash;
-  }
-  for (var i = 0; i < str.length; i++) {
-    var char = str.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash = hash & hash; // Convert to 32bit integer
-  }
-  return hash;
-}
-
-/***/ }),
-/* 32 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -3968,7 +4092,7 @@ var runtime = (function (exports) {
     return { __await: arg };
   };
 
-  function AsyncIterator(generator) {
+  function AsyncIterator(generator, PromiseImpl) {
     function invoke(method, arg, resolve, reject) {
       var record = tryCatch(generator[method], generator, arg);
       if (record.type === "throw") {
@@ -3979,14 +4103,14 @@ var runtime = (function (exports) {
         if (value &&
             typeof value === "object" &&
             hasOwn.call(value, "__await")) {
-          return Promise.resolve(value.__await).then(function(value) {
+          return PromiseImpl.resolve(value.__await).then(function(value) {
             invoke("next", value, resolve, reject);
           }, function(err) {
             invoke("throw", err, resolve, reject);
           });
         }
 
-        return Promise.resolve(value).then(function(unwrapped) {
+        return PromiseImpl.resolve(value).then(function(unwrapped) {
           // When a yielded Promise is resolved, its final value becomes
           // the .value of the Promise<{value,done}> result for the
           // current iteration.
@@ -4004,7 +4128,7 @@ var runtime = (function (exports) {
 
     function enqueue(method, arg) {
       function callInvokeWithMethodAndArg() {
-        return new Promise(function(resolve, reject) {
+        return new PromiseImpl(function(resolve, reject) {
           invoke(method, arg, resolve, reject);
         });
       }
@@ -4044,9 +4168,12 @@ var runtime = (function (exports) {
   // Note that simple async functions are implemented on top of
   // AsyncIterator objects; they just return a Promise for the value of
   // the final result produced by the iterator.
-  exports.async = function(innerFn, outerFn, self, tryLocsList) {
+  exports.async = function(innerFn, outerFn, self, tryLocsList, PromiseImpl) {
+    if (PromiseImpl === void 0) PromiseImpl = Promise;
+
     var iter = new AsyncIterator(
-      wrap(innerFn, outerFn, self, tryLocsList)
+      wrap(innerFn, outerFn, self, tryLocsList),
+      PromiseImpl
     );
 
     return exports.isGeneratorFunction(outerFn)
