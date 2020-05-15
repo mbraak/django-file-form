@@ -43,6 +43,6 @@
   },
   "dependencies": {
     "escape-html": "^1.0.3",
-    "tus-js-client": "^2.0.0-1"
+    "tus-js-client": "^2.1.1"
   }
 }
