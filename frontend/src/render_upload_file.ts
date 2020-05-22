@@ -1,5 +1,3 @@
-/* global document */
-
 import escape from "escape-html";
 import { formatBytes } from "./util";
 

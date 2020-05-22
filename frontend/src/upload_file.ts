@@ -1,5 +1,3 @@
-/* global window */
-
 import { Upload } from "tus-js-client";
 import { findInput, getPlaceholderFieldName } from "./util";
 import RenderUploadFile from "./render_upload_file";
