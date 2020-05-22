@@ -6,7 +6,9 @@
   ],
   "extends": [
     "eslint:recommended",
+    "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/recommended-requiring-type-checking",
     "plugin:import/errors",
     "plugin:import/warnings",
     "plugin:import/typescript"
@@ -14,5 +16,8 @@
   "env": {
     "browser": true,
     "es6": true
+  },
+  "parserOptions": {
+    "project": "./tsconfig.json"
   }
 }
