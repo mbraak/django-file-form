@@ -1,2 +1,2 @@
-pytz==2019.3
+pytz==2020.1
 django-csp==3.6
