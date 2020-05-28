@@ -27,7 +27,6 @@
     "@babel/preset-env": "^7.8.4",
     "@babel/preset-typescript": "^7.9.0",
     "@types/escape-html": "^1.0.0",
-    "@types/tus-js-client": "^1.8.0",
     "@typescript-eslint/eslint-plugin": "^2.33.0",
     "@typescript-eslint/parser": "^2.33.0",
     "babel-eslint": "^10.0.3",
