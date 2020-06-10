@@ -35,8 +35,8 @@ const getFilesFromDataTransfer = async (
   dataTransfer: DataTransfer
 ): Promise<File[]> => {
   if (dataTransfer.items) {
-    const entries = [...dataTransfer.items].map(item =>
-      item.webkitGetAsEntry()
+    const entries = [...dataTransfer.items].map(
+      item => item.webkitGetAsEntry() as FileSystemEntry
     );
 
     const files = await getFilesFromFileSystemEntries(entries);
@@ -91,7 +91,7 @@ class DropArea {
       }
     };
 
-    uploadFiles();
+    void uploadFiles();
   };
 }
 
