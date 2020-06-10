@@ -2976,8 +2976,6 @@ var escape_html_default = /*#__PURE__*/__webpack_require__.n(escape_html);
 
 
 
-/* global document */
-
 
 
 var render_upload_file_RenderUploadFile = /*#__PURE__*/function () {
@@ -3480,7 +3478,7 @@ var drop_area_DropArea = function DropArea(_ref5) {
       };
     }();
 
-    uploadFiles();
+    void uploadFiles();
   });
 
   this.container = container;
@@ -3504,8 +3502,6 @@ var drop_area_DropArea = function DropArea(_ref5) {
 
 
 
-
-/* global window */
 
 
 
@@ -3830,7 +3826,7 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
       var upload = this.uploads[uploadIndex];
 
       if (upload instanceof browser_Upload) {
-        upload.abort(true);
+        void upload.abort(true);
         this.deleteUpload(uploadIndex);
       }
     }
@@ -4019,8 +4015,9 @@ var initFormSet = function initFormSet(form, optionsParam) {
 };
 
 // eslint-disable-line @typescript-eslint/no-explicit-any
-global.initFormSet = initFormSet;
-global.initUploadFields = initUploadFields;
+global.initFormSet = initFormSet; // eslint-disable-line  @typescript-eslint/no-unsafe-member-access
+
+global.initUploadFields = initUploadFields; // eslint-disable-line  @typescript-eslint/no-unsafe-member-access
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(7)))
 
 /***/ }),
