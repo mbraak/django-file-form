@@ -378,18 +378,6 @@ class LiveTestCase(BaseLiveTestCase):
         page.delete_ajax_file()
         page.wait_until_upload_is_removed()
 
-    @override_settings(LANGUAGE_CODE='nl')
-    def test_translation_delete(self):
-        page = self.page
-
-        temp_file = page.create_temp_file('content1')
-
-        page.open('/')
-        page.upload_using_js(temp_file)
-
-        page.delete_ajax_file(text='Verwijderen')
-        page.wait_until_upload_is_removed()
-
     def test_escape_filename(self):
         page = self.page
 
