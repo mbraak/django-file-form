@@ -3,18 +3,17 @@ import json
 from django.forms import ClearableFileInput
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
-from django.utils import translation
+from django.utils.translation import gettext as _
 
 from django_file_form.util import get_list
 from django_file_form.models import PlaceholderUploadedFile
 
-def get_translations():
-    keys = ['Cancel', 'Delete', 'Delete failed', 'Upload failed', 'Drop your files here']
 
-    return {
-        key: translation.gettext(key) for key in keys
-    }
-
+TRANSLATIONS = {'Cancel': _('Cancel'),
+                'Delete': _('Delete'),
+                'Delete failed': _('Delete failed'),
+                'Upload failed': _('Upload failed'),
+                'Drop your files here': _('Drop your files here')}
 
 def get_uploaded_files(value):
     if not value:
@@ -37,7 +36,7 @@ class UploadWidgetMixin(ClearableFileInput):
                 'django_file_form/upload_widget.html',
                 dict(
                     input=upload_input,
-                    translations=json.dumps(get_translations()),
+                    translations=json.dumps(TRANSLATIONS),
                     uploaded_files=json.dumps(get_uploaded_files(value)),
                 )
             )

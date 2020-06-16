@@ -4,3 +4,5 @@ testproject/*.db
 testproject/*.log
 testproject/media
 testproject/t
+Pipfile
+Pipfile.lock
