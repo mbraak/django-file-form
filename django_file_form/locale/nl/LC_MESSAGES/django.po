@@ -1,11 +1,19 @@
+#: widgets.py:12
 msgid "Cancel"
 msgstr "Annuleren"
 
+#: widgets.py:13
+msgid "Delete"
+msgstr "Verwijderen"
+
+#: widgets.py:14
 msgid "Delete failed"
 msgstr "Verwijderen mislukt"
 
+#: widgets.py:15
 msgid "Upload failed"
 msgstr "Upload mislukt"
 
+#: widgets.py:16
 msgid "Drop your files here"
 msgstr "Sleep uw bestanden"

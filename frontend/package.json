@@ -26,23 +26,22 @@
     "@babel/plugin-transform-runtime": "^7.9.0",
     "@babel/preset-env": "^7.8.4",
     "@babel/preset-typescript": "^7.9.0",
-    "@types/escape-html": "^0.0.20",
-    "@types/tus-js-client": "^1.8.0",
-    "@typescript-eslint/eslint-plugin": "^2.29.0",
-    "@typescript-eslint/parser": "^2.29.0",
+    "@types/escape-html": "^1.0.0",
+    "@typescript-eslint/eslint-plugin": "^2.33.0",
+    "@typescript-eslint/parser": "^2.33.0",
     "babel-eslint": "^10.0.3",
     "babel-loader": "^8.0.6",
     "eslint": "^6.7.2",
     "eslint-plugin-import": "^2.20.1",
     "eslint-plugin-jsx-a11y": "^6.2.3",
-    "eslint-plugin-react": "^7.18.3",
+    "eslint-plugin-react": "^7.20.0",
     "node-sass": "^4.13.1",
-    "typescript": "^3.8.3",
+    "typescript": "^3.9.2",
     "webpack": "^4.41.6",
     "webpack-cli": "^3.3.11"
   },
   "dependencies": {
     "escape-html": "^1.0.3",
-    "tus-js-client": "^1.8.0"
+    "tus-js-client": "^2.1.1"
   }
 }
