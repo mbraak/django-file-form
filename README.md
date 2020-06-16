@@ -303,11 +303,11 @@ initFormSet(
 
 ## Translate
 
-To update a translation or add new language 
+To update a translation or add new language
 
 Fork this repo as usual
 
-```shell 
+```shell
 # enter in project folder
 cd django-file-form
 
@@ -329,6 +329,7 @@ You can now edit generated po file and commit your changes as usual
 * **development**
   * Issue #304: rewrite frontend in typescript
   * Issue #305: don't change migration when setting changes (thanks to Lionqueen94)
+  * Issue #307: add French translations; also make translations discoverable by makemessages (thanks to Simon Maillard)
 
 * **2.1.2 (20 april 2020)**
   * Issue #298: directory support for drop area
