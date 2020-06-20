@@ -326,7 +326,7 @@ You can now edit generated po file and commit your changes as usual
 
 ## Changelog
 
-* **development**
+* **2.1.3 (20 june 2020)**
   * Issue #304: rewrite frontend in typescript
   * Issue #305: don't change migration when setting changes (thanks to Lionqueen94)
   * Issue #307: add French translations; also make translations discoverable by makemessages (thanks to Simon Maillard)
