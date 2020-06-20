@@ -378,36 +378,6 @@ class LiveTestCase(BaseLiveTestCase):
         page.delete_ajax_file()
         page.wait_until_upload_is_removed()
 
-    @override_settings(LANGUAGE_CODE='nl')
-    def test_translation_delete(self):
-        page = self.page
-
-        temp_file = page.create_temp_file('content1')
-
-        page.open('/')
-        page.upload_using_js(temp_file)
-
-        page.delete_ajax_file(text='Verwijderen')
-        page.wait_until_upload_is_removed()
-
-    @override_settings(LANGUAGE_CODE='nl', FILE_FORM_MUST_LOGIN=True)
-    def test_translation_delete_failed(self):
-        page = self.page
-
-        page.create_user('test1', 'password')
-        page.login('test1', 'password')
-
-        temp_file = page.create_temp_file('content1')
-
-        page.open('/')
-
-        page.upload_using_js(temp_file)
-        page.find_upload_success(temp_file)
-
-        page.selenium.delete_cookie('sessionid')
-        page.delete_ajax_file(text='Verwijderen')
-        page.find_delete_failed(text='Verwijderen mislukt')
-
     def test_escape_filename(self):
         page = self.page
 
