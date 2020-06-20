@@ -322,7 +322,7 @@ class UploadFile {
     const upload = this.uploads[uploadIndex];
 
     if (upload instanceof Upload) {
-      upload.abort(true);
+      void upload.abort(true);
 
       this.deleteUpload(uploadIndex);
     }
