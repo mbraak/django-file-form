@@ -49,18 +49,41 @@ class UploadWidget(UploadWidgetMixin, ClearableFileInput):
 
 class UploadMultipleWidget(UploadWidget):
     def get_place_holder_files_from(self, data):
+        #
+        # The field now holds information for both placeholder and
+        # none placeholder, which gives is_primary information that
+        # patches into FILES returned from form.
+        #
         for field, value in data.items():
             # if we have two fields A, placeholder-A, or prefix-A, prefix-placeholder-A
             # then placeholder-A is a placeholder hidden field
-            if 'placeholder-' in field and field.replace('placeholder-', '') in data.keys():
+            if 'placeholder-' in field and field.replace('placeholder-',
+                                                         '') in data.keys():
+                files = json.loads(value)
                 return [
-                    PlaceholderUploadedFile(name=x['name'], size=x['size'], file_id=x['id'])
-                    for x in json.loads(value)]
-        return []
+                    PlaceholderUploadedFile(
+                        name=x['name'],
+                        size=x['size'],
+                        file_id=x['id'],
+                        is_primary=x['primary'])
+                    for x in files
+                    if x['placeholder']
+                ], [
+                    x['name']
+                    for x in files
+                    if not x['placeholder'] and x.get('primary', False)
+                ]
+        return [], []
 
     def value_from_datadict(self, data, files, name):
         if hasattr(files, 'getlist'):
-            return files.getlist(name) + self.get_place_holder_files_from(data)
+            filelist = files.getlist(name)
+            placeholder, primary_meta = self.get_place_holder_files_from(data)
+            if primary_meta:
+                for f in filelist:
+                    if f.name == primary_meta[0]:
+                        f.is_primary = True
+            return filelist + placeholder
         else:
             # NB: django-formtools wizard uses dict instead of MultiValueDict
             return super(UploadMultipleWidget, self).value_from_datadict(data, files, name)

@@ -88,13 +88,16 @@ class UploadedFileWithId(uploadedfile.UploadedFile):
         self.size = os.path.getsize(self.file.path)
 
         self.is_placeholder = False
+        # this will be externally modified in value_from_datadict with
+        # data returned from form
+        self.is_primary = False
 
     def get_values(self):
-        return dict(id=self.file_id, name=self.name, size=self.size)
+        return dict(id=self.file_id, name=self.name, size=self.size, primary=self.is_primary)
 
 
 class PlaceholderUploadedFile(object):
-    def __init__(self, name, file_id=None, size=None):
+    def __init__(self, name, file_id=None, size=None, is_primary=False):
         self.name = name
         self.file_id = file_id or uuid.uuid4().hex
         if size is None:
@@ -103,6 +106,7 @@ class PlaceholderUploadedFile(object):
             self.size = size
 
         self.is_placeholder = True
+        self.is_primary = is_primary
 
     def get_values(self):
-        return dict(id=self.file_id, placeholder=True, name=self.name, size=self.size)
+        return dict(id=self.file_id, placeholder=True, name=self.name, size=self.size, primary=self.is_primary)

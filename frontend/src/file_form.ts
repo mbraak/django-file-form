@@ -49,7 +49,15 @@ const initUploadFields = (form: Element, options: Options = {}): void => {
       return [];
     }
 
-    return JSON.parse(data) as InitialFile[];
+    /* The init list when the form is created should have all placeholders.
+     * However, when the form fails and the form is recreated, the data might
+     * have the primary information for the real uploaded files. In this case
+     * the information is simply ignored, although it should be used to set
+     * primary infrmation for these files.
+    */
+    return JSON.parse(data).filter(function (init_file) {
+      return init_file.placeholder;
+    }) as InitialFile[];
   };
 
   const uploadUrl = getInputValue("upload_url");
