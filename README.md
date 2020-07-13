@@ -228,6 +228,11 @@ Settings in `settings.py`:
   * Maximum upload size in bytes
   * Default is 4GB
 
+* **FILE_FORM_FILE_STORAGE** (string):
+  * Dotted path to the class that is used to store temporary uploads.
+  * The default is `django.core.files.storage.FileSystemStorage`.
+  * Note that files will be uploaded to the local file system first regardless. This storage backend will be used only for fully uploaded files that are then passed back to the form when it's submitted.
+
 ## initUploadFields
 
 Signature of `initUploadFields` is:
