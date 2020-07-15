@@ -3,6 +3,21 @@ import { findInput, getPlaceholderFieldName } from "./util";
 import RenderUploadFile from "./render_upload_file";
 import DropArea from "./drop_area";
 
+
+const { Plugin } = require('@uppy/core')
+const { Socket, Provider, RequestClient } = require('@uppy/companion-client')
+// const EventTracker = require('@uppy/utils/lib/EventTracker')
+// const emitSocketProgress = require('@uppy/utils/lib/emitSocketProgress')
+// const getSocketHost = require('@uppy/utils/lib/getSocketHost')
+// const RateLimitedQueue = require('@uppy/utils/lib/RateLimitedQueue')
+const Uploader = require('./MultipartUploader')
+// const AwsS3Multipart = require('@uppy/aws-s3-multipart')
+
+
+     
+
+
+
 export interface InitialFile {
   id: string;
   name: string;
@@ -110,6 +125,98 @@ class UploadFile {
     filesContainer.addEventListener("click", this.onClick);
   }
 
+  createMultipartUpload(file){
+      // var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+      var csrftoken = document.getElementsByName('csrfmiddlewaretoken')[0].value;
+      return fetch('/s3/multipart', {
+      method: 'post',
+      headers: {
+        accept: 'application/json',
+        'content-type': 'application/json',
+        "X-CSRFToken": csrftoken
+      },
+      body: JSON.stringify({
+        filename: file.name,
+        contentType: file.type
+      })
+    }).then((response) => {
+      return response.json()
+    }).then((data)=>{
+      console.log("createMultipartUpload ",data)
+      return data
+    })
+   }
+
+   listParts(file, {key,uploadId}){
+            const filename=encodeURIComponent(key)
+            const uploadIdEnc = encodeURIComponent(uploadId)
+              return fetch('/s3/multipart/'+uploadIdEnc+"?key="+filename,{
+                method: 'get'
+              }).then((response)=>{
+              return response.json()
+            }).then((data)=>{
+              console.log("listParts ",data)
+              return data["parts"]
+            })               
+          }
+
+   prepareUploadPart(file,{key,uploadId,number}){
+            const filename = encodeURIComponent(key)
+             // var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+             var csrftoken = document.getElementsByName('csrfmiddlewaretoken')[0].value;
+            return fetch('/s3/multipart/'+uploadId+"/"+parseInt(number)+"?key="+filename,{
+                method: 'get',
+                headers: {
+                    "X-CSRFToken": csrftoken
+                }
+            }).then((response)=>{
+              return response.json()
+            }).then((data)=>{
+              console.log("prepareUploadPart ",data)
+              return data
+            })   
+
+          }
+
+    completeMultipartUpload(file, { key, uploadId, parts }){
+              const filename = encodeURIComponent(key)
+              const uploadIdEnc = encodeURIComponent(uploadId)
+              // var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+              var csrftoken = document.getElementsByName('csrfmiddlewaretoken')[0].value;
+              return fetch('/s3/multipart/'+uploadIdEnc+"/complete?key="+filename,{
+                    method: 'post',
+                    headers: {
+                        "X-CSRFToken": csrftoken
+                    },
+                    body: JSON.stringify({
+                      parts: parts
+                   })
+                }).then((response)=>{
+                  return response.json()
+                }).then((data)=>{
+                  console.log("Complete multi upload ",data)
+                  return data
+                })   
+
+              }
+
+    abortMultipartUpload(file, {key, uploadId}){
+              // const filename = encodeURIComponent(key)
+              const uploadIdEnc = encodeURIComponent(uploadId)
+                // var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+              var csrftoken = document.getElementsByName('csrfmiddlewaretoken')[0].value;
+              return fetch('/s3/multipart/'+uploadIdEnc+"/",{
+                    method: 'delete',
+                    headers: {
+                        "X-CSRFToken": csrftoken
+                    }
+                }).then((response)=>{
+                  return response.json()
+                }).then((data)=>{
+                  return data
+                })   
+            }
+
   addInitialFiles(initialFiles: InitialFile[]): void {
     if (initialFiles.length === 0) {
       return;
@@ -155,19 +262,43 @@ class UploadFile {
       const { fieldName, formId, renderer, uploads, uploadUrl } = this;
       const filename = file.name;
       const uploadIndex = uploads.length;
+      console.log(file, fieldName,formId,uploadUrl)
 
-      const upload = new Upload(file, {
-        endpoint: uploadUrl,
-        metadata: { fieldName, filename, formId },
-        onError: (error: Error): void => this.handleError(uploadIndex, error),
-        onProgress: (bytesUploaded: number, bytesTotal: number): void =>
-          this.handleProgress(uploadIndex, bytesUploaded, bytesTotal),
-        onSuccess: (): void =>
-          this.handleSuccess(uploadIndex, (upload.file as File).size),
-        retryDelays: this.retryDelays || [0, 1000, 3000, 5000]
-      });
 
+      const upload = new Uploader(file, {
+          // .bind to pass the file object to each handler.
+          createMultipartUpload: this.createMultipartUpload.bind(this,file) ,
+          listParts: this.listParts.bind(this,file) ,
+          prepareUploadPart: this.prepareUploadPart.bind(this,file) ,
+          completeMultipartUpload: this.completeMultipartUpload.bind(this,file),
+          abortMultipartUpload: this.abortMultipartUpload.bind(this,file),
+          getChunkSize: null
+          // onStart,
+          // onProgress,
+          // onError,
+          // onSuccess,
+          // onPartComplete,
+
+        })
       upload.start();
+
+
+
+
+
+      // const upload = new Upload(file, {
+      //   endpoint: uploadUrl,
+      //   metadata: { fieldName, filename, formId },
+      //   onError: (error: Error): void => this.handleError(uploadIndex, error),
+      //   onProgress: (bytesUploaded: number, bytesTotal: number): void =>
+      //     this.handleProgress(uploadIndex, bytesUploaded, bytesTotal),
+      //   onSuccess: (): void =>
+      //     this.handleSuccess(uploadIndex, (upload.file as File).size),
+      //   retryDelays: this.retryDelays || [0, 1000, 3000, 5000]
+      // });
+      // console.log("start upload")
+
+      // upload.start();
       renderer.addNewUpload(filename, uploadIndex);
 
       this.uploads.push(upload);

@@ -7,6 +7,8 @@
     {{ block.super }}
     <link rel="stylesheet" href="{% static "file_form/file_form.css" %}">
     <link rel="stylesheet" href="{% static "example.css" %}">
+    <meta  http-equiv="Content-Security-Policy" content="connect-src https://s3.us-west-1.amazonaws.com/ 'self';">
+
 {% endblock %}
 
 {% block body %}

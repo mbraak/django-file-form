@@ -33,5 +33,9 @@ module.exports = {
   },
   externals: {
     jquery: "jQuery"
+  },
+  performance: {
+    maxEntrypointSize: 512000,
+    maxAssetSize: 512000
   }
 };

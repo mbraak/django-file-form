@@ -6,3 +6,10 @@ testproject/media
 testproject/t
 Pipfile
 Pipfile.lock
+frontend/node_modules/
+build/
+dist/
+frontend/package-lock.json
+testproject/example
+.DS_Store
+django_file_form/.DS_Store
