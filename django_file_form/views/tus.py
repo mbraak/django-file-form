@@ -5,7 +5,7 @@ import uuid
 from pathlib import Path
 
 from django.conf import settings
-from django.core.cache import cache
+from django.core.cache import caches
 from django.core.files import File
 from django.http import HttpResponse
 from django.utils.decorators import method_decorator
@@ -18,6 +18,9 @@ from django_file_form.util import check_permission, get_upload_path
 
 
 logger = logging.getLogger(__name__)
+
+
+cache = caches[getattr(settings, 'FILE_FORM_CACHE', 'default')]
 
 
 def remove_resource_from_cache(resource_id):
