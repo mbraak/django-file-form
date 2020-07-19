@@ -325,6 +325,8 @@ You can now edit generated po file and commit your changes as usual
 
 
 ## Changelog
+* **development**
+  * Issue #315: file is not removed after form error
 
 * **2.1.3 (20 june 2020)**
   * Issue #304: rewrite frontend in typescript
