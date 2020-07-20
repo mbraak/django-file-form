@@ -7,6 +7,7 @@ from django.core.files import uploadedfile
 from django.core.files.storage import FileSystemStorage
 from django.db import models
 from django.utils import timezone
+from django.utils.module_loading import import_string
 
 from .util import ModelManager, get_upload_path
 
@@ -40,13 +41,21 @@ class UploadedFileManager(ModelManager):
         return self.try_get(uploaded_file=path)
 
 
-def get_upload_to(*args):
-    return getattr(settings, 'FILE_FORM_UPLOAD_DIR', 'temp_uploads')
+def get_upload_to(instance, filename):
+    # Full path including filename is needed for custom storage backends.
+    path = getattr(settings, 'FILE_FORM_UPLOAD_DIR', 'temp_uploads')
+    return os.path.join(path, filename)
+
+
+if hasattr(settings, 'FILE_FORM_TEMP_STORAGE'):
+    storage_class = import_string(settings.FILE_FORM_TEMP_STORAGE)
+else:
+    storage_class = FileSystemStorage
 
 
 class UploadedFile(models.Model):
     created = models.DateTimeField(default=timezone.now)
-    uploaded_file = models.FileField(max_length=255, storage=FileSystemStorage(), upload_to=get_upload_to)
+    uploaded_file = models.FileField(max_length=255, storage=storage_class(), upload_to=get_upload_to)
     original_filename = models.CharField(max_length=255)
     field_name = models.CharField(max_length=255, null=True, blank=True)
     file_id = models.CharField(max_length=40)
@@ -85,7 +94,7 @@ class UploadedFileWithId(uploadedfile.UploadedFile):
         super(UploadedFileWithId, self).__init__(**kwargs)
 
         self.file_id = file_id
-        self.size = os.path.getsize(self.file.path)
+        self.size = self.file.size
 
         self.is_placeholder = False
 

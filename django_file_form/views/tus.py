@@ -1,10 +1,12 @@
 import base64
 import logging
+import os
 import uuid
 from pathlib import Path
 
 from django.conf import settings
-from django.core.cache import cache
+from django.core.cache import caches
+from django.core.files import File
 from django.http import HttpResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
@@ -18,6 +20,9 @@ from django_file_form.util import check_permission, get_upload_path
 logger = logging.getLogger(__name__)
 
 
+cache = caches[getattr(settings, 'FILE_FORM_CACHE', 'default')]
+
+
 def remove_resource_from_cache(resource_id):
     cache.delete_many([
         "tus-uploads/{}/file_size".format(resource_id),
@@ -28,17 +33,21 @@ def remove_resource_from_cache(resource_id):
 
 
 def create_uploaded_file_in_db(field_name, file_id, form_id, original_filename, uploaded_file):
-    values = dict(
-        file_id=file_id,
-        form_id=form_id,
-        uploaded_file=str(uploaded_file.relative_to(Path(settings.MEDIA_ROOT))),
-        original_filename=original_filename
-    )
+    with open(uploaded_file, 'rb') as fh:
+        values = dict(
+            file_id=file_id,
+            form_id=form_id,
+            uploaded_file=File(file=fh, name=uploaded_file.name),
+            original_filename=original_filename
+        )
 
-    if field_name:
-        values['field_name'] = field_name
+        if field_name:
+            values['field_name'] = field_name
 
-    UploadedFile.objects.create(**values)
+        UploadedFile.objects.create(**values)
+
+    if hasattr(settings, 'FILE_FORM_TEMP_STORAGE'):
+        os.remove(uploaded_file)
 
 
 class TusUpload(View):
