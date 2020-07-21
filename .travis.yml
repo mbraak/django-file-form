@@ -11,7 +11,7 @@ matrix:
     - python: 3.8
       env: DJANGO="Django==3.0.8"
     - python: 3.8
-      env: DJANGO="Django==3.1b1"
+      env: DJANGO="Django==3.1rc1"
 before_install:
   - CHROME_VERSION="$(google-chrome --version)"
   - export CHROMEDRIVER_RELEASE="$(echo $CHROME_VERSION | sed 's/^Google Chrome //')" && export CHROMEDRIVER_RELEASE=${CHROMEDRIVER_RELEASE%%.*}
