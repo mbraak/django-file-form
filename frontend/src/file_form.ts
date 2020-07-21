@@ -39,7 +39,7 @@ const initUploadFields = (form: Element, options: Options = {}): void => {
       return [];
     }
 
-    return JSON.parse(filesData);
+    return JSON.parse(filesData) as InitialFile[];
   };
 
   const getPlaceholders = (fieldName: string): InitialFile[] => {
@@ -49,7 +49,7 @@ const initUploadFields = (form: Element, options: Options = {}): void => {
       return [];
     }
 
-    return JSON.parse(data);
+    return JSON.parse(data) as InitialFile[];
   };
 
   const uploadUrl = getInputValue("upload_url");
@@ -85,7 +85,7 @@ const initUploadFields = (form: Element, options: Options = {}): void => {
     );
     const dataTranslations = container.getAttribute("data-translations");
     const translations: Translations = dataTranslations
-      ? JSON.parse(dataTranslations)
+      ? (JSON.parse(dataTranslations) as Translations)
       : {};
     const supportDropArea = !(options.supportDropArea === false);
 
@@ -142,5 +142,5 @@ const initFormSet = (form: Element, optionsParam: Options | string): void => {
 
 declare const global: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
-global.initFormSet = initFormSet;
-global.initUploadFields = initUploadFields;
+global.initFormSet = initFormSet; // eslint-disable-line  @typescript-eslint/no-unsafe-member-access
+global.initUploadFields = initUploadFields; // eslint-disable-line  @typescript-eslint/no-unsafe-member-access

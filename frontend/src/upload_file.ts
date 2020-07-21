@@ -15,6 +15,7 @@ export interface UploadedFile {
   name: string;
   placeholder: boolean;
   size: number;
+  url?: string;
 }
 
 export type Translations = { [key: string]: string };
@@ -266,7 +267,7 @@ class UploadFile {
   handleDelete(uploadIndex: number): void {
     const upload = this.uploads[uploadIndex];
 
-    if (upload instanceof Upload) {
+    if (upload instanceof Upload || upload.url) {
       this.deleteFromServer(uploadIndex);
     } else {
       this.deletePlaceholder(uploadIndex);
@@ -288,10 +289,6 @@ class UploadFile {
 
   deleteFromServer(uploadIndex: number): void {
     const upload = this.uploads[uploadIndex];
-
-    if (!(upload instanceof Upload)) {
-      return;
-    }
 
     const { url } = upload;
 
@@ -322,7 +319,7 @@ class UploadFile {
     const upload = this.uploads[uploadIndex];
 
     if (upload instanceof Upload) {
-      upload.abort(true);
+      void upload.abort(true);
 
       this.deleteUpload(uploadIndex);
     }

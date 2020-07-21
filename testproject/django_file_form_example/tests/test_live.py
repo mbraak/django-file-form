@@ -249,6 +249,11 @@ class LiveTestCase(BaseLiveTestCase):
         page.delete_ajax_file()
         page.wait_until_upload_is_removed()
 
+        page.submit()
+        page.assert_page_contains_text('Title field is required')
+
+        self.assertEqual(page.get_upload_count(), 0)
+
     def test_delete(self):
         page = self.page
 
