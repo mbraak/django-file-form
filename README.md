@@ -335,7 +335,7 @@ You can now edit generated po file and commit your changes as usual
 
 
 ## Changelog
-* **development**
+* **2.2.0 (july 22 2020)**
   * Issue #315: file is not removed after form error
   * Issue #313: allow using custom storage and custom cache (thanks to Balazs Endresz)
 
