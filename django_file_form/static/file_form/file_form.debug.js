@@ -3592,11 +3592,18 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
           prepareUploadPart: _this.prepareUploadPart.bind(_this, file),
           completeMultipartUpload: _this.completeMultipartUpload.bind(_this, file),
           abortMultipartUpload: _this.abortMultipartUpload.bind(_this, file),
-          getChunkSize: null // onStart,
-          // onProgress,
-          // onError,
-          // onSuccess,
-          // onPartComplete,
+          getChunkSize: null,
+          // onStart,
+          onProgress: function onProgress(bytesUploaded, bytesTotal) {
+            return _this.handleProgress(uploadIndex, bytesUploaded, bytesTotal);
+          },
+          onError: function onError(error) {
+            return _this.handleError(uploadIndex, error);
+          },
+          onSuccess: function onSuccess() {
+            return _this.handleSuccess(uploadIndex, upload.file.size);
+          },
+          retryDelays: _this.retryDelays || [0, 1000, 3000, 5000] // onPartComplete,
 
         });
         upload.start(); // const upload = new Upload(file, {
@@ -3688,6 +3695,7 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
 
     defineProperty_default()(this, "handleSuccess", function (uploadIndex, uploadedSize) {
       var renderer = _this.renderer;
+      console.log("sucess");
       renderer.clearInput();
       renderer.setSuccess(uploadIndex, uploadedSize);
       var onSuccess = _this.callbacks.onSuccess;
@@ -5289,6 +5297,7 @@ class MultipartUploader {
     this.chunkState[index].uploaded = sent
 
     const totalUploaded = this.chunkState.reduce((n, c) => n + c.uploaded, 0)
+    console.log(totalUploaded,this.file.size)
     this.options.onProgress(totalUploaded, this.file.size)
   }
 
