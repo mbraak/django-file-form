@@ -3016,9 +3016,9 @@ var render_upload_file_RenderUploadFile = /*#__PURE__*/function () {
 
   createClass_default()(RenderUploadFile, [{
     key: "addUploadedFile",
-    value: function addUploadedFile(filename, uploadIndex, filesize) {
+    value: function addUploadedFile(filename, uploadIndex, filesize, primary) {
       this.addFile(filename, uploadIndex);
-      this.setSuccess(uploadIndex, filesize);
+      this.setSuccess(uploadIndex, filesize, primary);
     }
   }, {
     key: "addNewUpload",
@@ -3092,12 +3092,19 @@ var render_upload_file_RenderUploadFile = /*#__PURE__*/function () {
     }
   }, {
     key: "setSuccess",
-    value: function setSuccess(index, size) {
+    value: function setSuccess(index, size, primary) {
       var translations = this.translations;
       var el = this.findFileDiv(index);
 
       if (el) {
         el.classList.add("dff-upload-success");
+        var isPrimaryBox = document.createElement("input");
+        isPrimaryBox.type = 'checkbox';
+        isPrimaryBox.value = '';
+        isPrimaryBox.className = "dff-checkbox";
+        isPrimaryBox.checked = primary;
+        isPrimaryBox.setAttribute("data-index", "".concat(index));
+        el.insertBefore(isPrimaryBox, el.firstChild);
         var fileSizeInfo = document.createElement("span");
         fileSizeInfo.innerHTML = Object(util["b" /* formatBytes */])(size, 2);
         fileSizeInfo.className = "dff-filesize";
@@ -3112,6 +3119,15 @@ var render_upload_file_RenderUploadFile = /*#__PURE__*/function () {
 
       this.removeProgress(index);
       this.removeCancel(index);
+    }
+  }, {
+    key: "togglePrimary",
+    value: function togglePrimary(index, status) {
+      var el = this.findFileDiv(index);
+
+      if (el) {
+        el.firstChild.checked = status;
+      }
     }
   }, {
     key: "removeProgress",
@@ -3660,6 +3676,13 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
         }
 
         e.preventDefault();
+      } else if (target.classList.contains("dff-checkbox")) {
+        var _uploadIndex2 = getUploadIndex();
+
+        if (_uploadIndex2 !== null) {
+          _this.handleToggle(_uploadIndex2);
+        } // do not preventDefault and let the event toggle itself
+
       }
     });
 
@@ -3695,7 +3718,6 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
 
     defineProperty_default()(this, "handleSuccess", function (uploadIndex, uploadedSize) {
       var renderer = _this.renderer;
-      console.log("sucess");
       renderer.clearInput();
       renderer.setSuccess(uploadIndex, uploadedSize);
       var onSuccess = _this.callbacks.onSuccess;
@@ -3861,15 +3883,17 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
       var addInitialFile = function addInitialFile(file, i) {
         var id = file.id,
             name = file.name,
-            size = file.size;
-        renderer.addUploadedFile(name, i, size);
+            size = file.size,
+            primary = file.primary;
+        renderer.addUploadedFile(name, i, size, primary);
 
         if (file.placeholder) {
           _this2.uploads.push({
             id: id,
             name: name,
             placeholder: true,
-            size: size
+            size: size,
+            primary: primary
           });
         } else {
           var url = "".concat(_this2.uploadUrl).concat(file.id);
@@ -3879,7 +3903,8 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
             name: name,
             placeholder: false,
             size: size,
-            url: url
+            url: url,
+            primary: primary
           });
         }
       };
@@ -3966,6 +3991,23 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
       }
     }
   }, {
+    key: "handleToggle",
+    value: function handleToggle(uploadIndex) {
+      var upload = this.uploads[uploadIndex];
+      upload.primary = !upload.primary;
+
+      if (upload.primary) {
+        for (var i = 0; i < this.uploads.length; ++i) {
+          if (i != uploadIndex && this.uploads[i].primary == true) {
+            this.uploads[i].primary = false;
+            this.renderer.togglePrimary(i, false);
+          }
+        }
+      }
+
+      this.updatePlaceholderInput();
+    }
+  }, {
     key: "initDropArea",
     value: function initDropArea(container) {
       new drop_area({
@@ -3993,9 +4035,22 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
   }, {
     key: "updatePlaceholderInput",
     value: function updatePlaceholderInput() {
-      var placeholdersInfo = this.uploads.filter(function (upload) {
-        return !(upload instanceof browser_Upload) && upload.placeholder;
-      });
+      var placeholdersInfo = [];
+
+      for (var i = 0; i < this.uploads.length; ++i) {
+        var _upload4 = this.uploads[i];
+
+        if (!(_upload4 instanceof browser_Upload) && _upload4.placeholder) {
+          placeholdersInfo.push(_upload4);
+        } else {
+          placeholdersInfo.push({
+            name: _upload4.file.name,
+            placeholder: false,
+            primary: _upload4.primary
+          });
+        }
+      }
+
       var input = Object(util["a" /* findInput */])(this.form, Object(util["e" /* getPlaceholderFieldName */])(this.fieldName, this.prefix), this.prefix);
 
       if (input) {
@@ -4070,8 +4125,17 @@ var initUploadFields = function initUploadFields(form) {
     if (!data) {
       return [];
     }
+    /* The init list when the form is created should have all placeholders.
+     * However, when the form fails and the form is recreated, the data might
+     * have the primary information for the real uploaded files. In this case
+     * the information is simply ignored, although it should be used to set
+     * primary infrmation for these files.
+    */
 
-    return JSON.parse(data);
+
+    return JSON.parse(data).filter(function (init_file) {
+      return init_file.placeholder;
+    });
   };
 
   var uploadUrl = getInputValue("upload_url");
@@ -5297,7 +5361,6 @@ class MultipartUploader {
     this.chunkState[index].uploaded = sent
 
     const totalUploaded = this.chunkState.reduce((n, c) => n + c.uploaded, 0)
-    console.log(totalUploaded,this.file.size)
     this.options.onProgress(totalUploaded, this.file.size)
   }
 

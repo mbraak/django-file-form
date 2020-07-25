@@ -72,7 +72,8 @@ class PlaceholderView(BaseFormView):
 
         if self.request.method == 'GET':
             initial['input_file'] = [
-                PlaceholderUploadedFile('test_placeholder1.txt', size=1024),
+                PlaceholderUploadedFile(
+                    'test_placeholder1.txt', size=1024, is_primary=True),
                 PlaceholderUploadedFile('test_placeholder2.txt', size=2048)
             ]
 

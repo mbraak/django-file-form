@@ -23,6 +23,7 @@ export interface InitialFile {
   name: string;
   placeholder?: boolean;
   size: number;
+  primary?: boolean;
 }
 
 export interface UploadedFile {
@@ -30,6 +31,7 @@ export interface UploadedFile {
   name: string;
   placeholder: boolean;
   size: number;
+  primary: boolean;
 }
 
 export type Translations = { [key: string]: string };
@@ -225,14 +227,14 @@ class UploadFile {
     const { multiple, renderer } = this;
 
     const addInitialFile = (file: InitialFile, i: number): void => {
-      const { id, name, size } = file;
-      renderer.addUploadedFile(name, i, size);
+      const { id, name, size, primary } = file;
+      renderer.addUploadedFile(name, i, size, primary);
 
       if (file.placeholder) {
-        this.uploads.push({ id, name, placeholder: true, size });
+        this.uploads.push({ id, name, placeholder: true, size, primary: primary });
       } else {
         const url = `${this.uploadUrl}${file.id}`;
-        this.uploads.push({ id, name, placeholder: false, size, url });
+        this.uploads.push({ id, name, placeholder: false, size, url, primary: primary });
       }
     };
 
@@ -343,6 +345,13 @@ class UploadFile {
       }
 
       e.preventDefault();
+    } else if (target.classList.contains("dff-checkbox")) {
+      const uploadIndex = getUploadIndex();
+
+      if (uploadIndex !== null) {
+        this.handleToggle(uploadIndex);
+      }
+      // do not preventDefault and let the event toggle itself
     }
   };
 
@@ -461,6 +470,23 @@ class UploadFile {
     }
   }
 
+
+  handleToggle(uploadIndex: number): void {
+    const upload = this.uploads[uploadIndex];
+
+    upload.primary = !upload.primary;
+
+    if (upload.primary) {
+      for (var i = 0; i < this.uploads.length; ++i) {
+        if (i != uploadIndex && this.uploads[i].primary == true) {
+          this.uploads[i].primary = false;
+          this.renderer.togglePrimary(i, false);
+        }
+      }
+    }
+    this.updatePlaceholderInput();
+  }
+
   initDropArea(container: Element): void {
     new DropArea({
       container,
@@ -483,9 +509,20 @@ class UploadFile {
   }
 
   updatePlaceholderInput(): void {
-    const placeholdersInfo = this.uploads.filter(
-      upload => !(upload instanceof Upload) && upload.placeholder
-    ) as UploadedFile[];
+    const placeholdersInfo = [];
+
+    for (var i = 0; i < this.uploads.length; ++i) {
+      let upload = this.uploads[i];
+      if (!(upload instanceof Upload) && upload.placeholder) {
+        placeholdersInfo.push(upload);
+      } else {
+        placeholdersInfo.push({
+          name: upload.file.name,
+          placeholder: false,
+          primary: upload.primary
+        })
+      }
+    }
 
     const input = findInput(
       this.form,

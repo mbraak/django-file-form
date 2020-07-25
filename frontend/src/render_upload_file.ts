@@ -37,10 +37,11 @@ class RenderUploadFile {
   addUploadedFile(
     filename: string,
     uploadIndex: number,
-    filesize: number
+    filesize: number,
+    primary: boolean
   ): void {
     this.addFile(filename, uploadIndex);
-    this.setSuccess(uploadIndex, filesize);
+    this.setSuccess(uploadIndex, filesize, primary);
   }
 
   addNewUpload(filename: string, uploadIndex: number): void {
@@ -115,12 +116,21 @@ class RenderUploadFile {
     return this.container.querySelector(`.dff-file-id-${index}`);
   }
 
-  setSuccess(index: number, size: number): void {
+  setSuccess(index: number, size: number, primary: boolean): void {
     const { translations } = this;
 
     const el = this.findFileDiv(index);
     if (el) {
       el.classList.add("dff-upload-success");
+
+      const isPrimaryBox = document.createElement("input");
+      isPrimaryBox.type = 'checkbox';
+      isPrimaryBox.value = '';
+      isPrimaryBox.className = "dff-checkbox";
+      isPrimaryBox.checked = primary;
+      isPrimaryBox.setAttribute("data-index", `${index}`);
+
+      el.insertBefore(isPrimaryBox, el.firstChild);
 
       const fileSizeInfo = document.createElement("span");
       fileSizeInfo.innerHTML = formatBytes(size, 2);
@@ -139,6 +149,13 @@ class RenderUploadFile {
 
     this.removeProgress(index);
     this.removeCancel(index);
+  }
+
+  togglePrimary(index: number, status: boolean): void {
+    const el = this.findFileDiv(index);
+    if (el) {
+      el.firstChild.checked = status;
+    }
   }
 
   removeProgress(index: number): void {
