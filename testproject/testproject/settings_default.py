@@ -89,4 +89,12 @@ TEMPLATES = [
 
 ALLOWED_HOSTS = ['*']
 
+CSP_DEFAULT_SRC = ("'none'",)
+CSP_STYLE_SRC = ("'self'")
+CSP_SCRIPT_SRC = ("'self'",)
+CSP_FONT_SRC = ("'self'")
+CSP_IMG_SRC = ("'self'",)
+CSP_CONNECT_SRC = ("'self'", 'https://s3.us-west-1.amazonaws.com/')
+
+
 logging.basicConfig(level='INFO')

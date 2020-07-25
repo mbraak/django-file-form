@@ -43,8 +43,6 @@
     "webpack-dev-server": "^3.11.0"
   },
   "dependencies": {
-    "@uppy/companion-client": "^1.5.0",
-    "@uppy/core": "^1.11.0",
     "escape-html": "^1.0.3",
     "expect-html-equal": "^1.1.0",
     "tus-js-client": "^2.1.1"

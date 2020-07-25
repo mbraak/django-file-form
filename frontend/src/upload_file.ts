@@ -4,8 +4,8 @@ import RenderUploadFile from "./render_upload_file";
 import DropArea from "./drop_area";
 
 
-const { Plugin } = require('@uppy/core')
-const { Socket, Provider, RequestClient } = require('@uppy/companion-client')
+// const { Plugin } = require('@uppy/core')
+// const { Socket, Provider, RequestClient } = require('@uppy/companion-client')
 // const EventTracker = require('@uppy/utils/lib/EventTracker')
 // const emitSocketProgress = require('@uppy/utils/lib/emitSocketProgress')
 // const getSocketHost = require('@uppy/utils/lib/getSocketHost')
