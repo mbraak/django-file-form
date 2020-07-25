@@ -272,11 +272,14 @@ class UploadFile {
           prepareUploadPart: this.prepareUploadPart.bind(this,file) ,
           completeMultipartUpload: this.completeMultipartUpload.bind(this,file),
           abortMultipartUpload: this.abortMultipartUpload.bind(this,file),
-          getChunkSize: null
+          getChunkSize: null,
           // onStart,
-          // onProgress,
-          // onError,
-          // onSuccess,
+          onProgress: (bytesUploaded: number, bytesTotal: number): void =>
+          this.handleProgress(uploadIndex, bytesUploaded, bytesTotal),
+          onError: (error: Error): void => this.handleError(uploadIndex, error),
+          onSuccess: (): void =>
+           this.handleSuccess(uploadIndex, (upload.file as File).size),
+           retryDelays: this.retryDelays || [0, 1000, 3000, 5000]
           // onPartComplete,
 
         })
@@ -349,7 +352,6 @@ class UploadFile {
     bytesTotal: number
   ): void => {
     const percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2);
-
     this.renderer.updateProgress(uploadIndex, percentage);
 
     const { onProgress } = this.callbacks;
