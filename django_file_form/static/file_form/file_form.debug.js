@@ -3768,7 +3768,7 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
     value: function createMultipartUpload(file) {
       // var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
       var csrftoken = document.getElementsByName('csrfmiddlewaretoken')[0].value;
-      return fetch('/s3/multipart', {
+      return fetch('/s3/multipart/', {
         method: 'post',
         headers: {
           accept: 'application/json',
