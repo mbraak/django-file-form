@@ -48,11 +48,11 @@ class UploadWidget(UploadWidgetMixin, ClearableFileInput):
 
 
 class UploadMultipleWidget(UploadWidget):
-    def get_place_holder_files_from(self, data):
+    def get_place_holder_files_from(self, data, name):
         for field, value in data.items():
             # if we have two fields A, placeholder-A, or prefix-A, prefix-placeholder-A
             # then placeholder-A is a placeholder hidden field
-            if 'placeholder-' in field and field.replace('placeholder-', '') in data.keys():
+            if 'placeholder-' in field and field.replace('placeholder-', '') == name:
                 return [
                     PlaceholderUploadedFile(name=x['name'], size=x['size'], file_id=x['id'])
                     for x in json.loads(value)]
@@ -60,7 +60,7 @@ class UploadMultipleWidget(UploadWidget):
 
     def value_from_datadict(self, data, files, name):
         if hasattr(files, 'getlist'):
-            return files.getlist(name) + self.get_place_holder_files_from(data)
+            return files.getlist(name) + self.get_place_holder_files_from(data, name)
         else:
             # NB: django-formtools wizard uses dict instead of MultiValueDict
             return super(UploadMultipleWidget, self).value_from_datadict(data, files, name)
