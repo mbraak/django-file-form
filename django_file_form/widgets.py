@@ -30,7 +30,7 @@ def get_uploaded_files(value):
 class UploadWidgetMixin(ClearableFileInput):
     def render(self, name, value, attrs=None, renderer=None):
         upload_input = super(UploadWidgetMixin, self).render(name, value, attrs, renderer)
-
+        print("UploadWidgetMixin", name, value,attrs,renderer)
         return mark_safe(
             render_to_string(
                 'django_file_form/upload_widget.html',
@@ -54,6 +54,7 @@ class UploadMultipleWidget(UploadWidget):
         # none placeholder, which gives is_primary information that
         # patches into FILES returned from form.
         #
+        print("UploadMultipleWidget", data)
         for field, value in data.items():
             # if we have two fields A, placeholder-A, or prefix-A, prefix-placeholder-A
             # then placeholder-A is a placeholder hidden field
