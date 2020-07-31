@@ -407,11 +407,11 @@ class UploadFile {
 
   handleDelete(uploadIndex: number): void {
     const upload = this.uploads[uploadIndex];
-
     if (upload instanceof Upload) {
       this.deleteFromServer(uploadIndex);
     } else {
       this.deletePlaceholder(uploadIndex);
+      this.deleteUploaded(uploadIndex)
     }
   }
 
@@ -419,7 +419,8 @@ class UploadFile {
     const upload = this.uploads[uploadIndex];
 
     this.renderer.deleteFile(uploadIndex);
-    delete this.uploads[uploadIndex];
+    // delete this.uploads[uploadIndex];
+    this.uploads.splice(uploadIndex,1)
     this.checkDropHint();
 
     const { onDelete } = this.callbacks;
@@ -458,6 +459,10 @@ class UploadFile {
   deletePlaceholder(uploadIndex: number): void {
     this.deleteUpload(uploadIndex);
     this.updatePlaceholderInput();
+  }
+
+  deleteUploaded(uploadIndex: number): void {
+    this.updateUploadedInput();
   }
 
   handleCancel(uploadIndex: number): void {
@@ -510,10 +515,9 @@ class UploadFile {
 
   updatePlaceholderInput(): void {
     const placeholdersInfo = [];
-
     for (var i = 0; i < this.uploads.length; ++i) {
       let upload = this.uploads[i];
-      if (!(upload instanceof Upload) && upload.placeholder) {
+      if (!(upload instanceof Upload)  && upload.placeholder) {
         placeholdersInfo.push(upload);
       } else {
         placeholdersInfo.push({

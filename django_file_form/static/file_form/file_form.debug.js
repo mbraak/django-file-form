@@ -3936,14 +3936,16 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
         this.deleteFromServer(uploadIndex);
       } else {
         this.deletePlaceholder(uploadIndex);
+        this.deleteUploaded(uploadIndex);
       }
     }
   }, {
     key: "deleteUpload",
     value: function deleteUpload(uploadIndex) {
       var upload = this.uploads[uploadIndex];
-      this.renderer.deleteFile(uploadIndex);
-      delete this.uploads[uploadIndex];
+      this.renderer.deleteFile(uploadIndex); // delete this.uploads[uploadIndex];
+
+      this.uploads.splice(uploadIndex, 1);
       this.checkDropHint();
       var onDelete = this.callbacks.onDelete;
 
@@ -3987,6 +3989,11 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
     value: function deletePlaceholder(uploadIndex) {
       this.deleteUpload(uploadIndex);
       this.updatePlaceholderInput();
+    }
+  }, {
+    key: "deleteUploaded",
+    value: function deleteUploaded(uploadIndex) {
+      this.updateUploadedInput();
     }
   }, {
     key: "handleCancel",
