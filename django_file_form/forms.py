@@ -15,7 +15,7 @@ class FileFormMixin(object):
 
         self.add_hidden_field('form_id', uuid.uuid4())
         self.add_hidden_field('upload_url', self.get_upload_url())
-
+        self.add_uploadedFiles()
         self.add_placeholder_inputs()
 
     def add_hidden_field(self, name, initial):
@@ -66,6 +66,14 @@ class FileFormMixin(object):
                     prefixed_field_name = self.add_prefix(field_name)
                     field.delete_file_data(prefixed_field_name, form_id)
 
+    def add_uploadedFiles(self):
+        for field_name in self.file_form_field_names():
+            uploaded_field_name = f'uploaded-{field_name}'
+            self.add_hidden_field(
+                uploaded_field_name,
+                json.dumps(self.get_uploaded_for_field(field_name))
+            )
+
     def add_placeholder_inputs(self):
         for field_name in self.file_form_field_names():
             placeholder_field_name = f'placeholder-{field_name}'
@@ -76,5 +84,8 @@ class FileFormMixin(object):
 
     def get_placesholders_for_field(self, field_name):
         initial_values = get_list(self.initial.get(field_name, []))
-
         return [value.get_values() for value in initial_values if getattr(value, 'is_placeholder')]
+
+    def get_uploaded_for_field(self, field_name):
+        initial_values = get_list(self.initial.get(field_name, []))
+        return [value.get_values() for value in initial_values]

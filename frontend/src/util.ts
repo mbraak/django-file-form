@@ -44,6 +44,12 @@ export const getPlaceholderFieldName = (
   prefix: string | null
 ): string => `placeholder-${getInputNameWithoutPrefix(fieldName, prefix)}`;
 
+export const getUploadedFieldName = (
+  fieldName: string,
+  prefix: string | null
+): string => `uploaded-${getInputNameWithoutPrefix(fieldName, prefix)}`;
+
+
 export const getInputValueForFormAndPrefix = (
   form: Element,
   fieldName: string,

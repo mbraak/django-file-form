@@ -1,5 +1,5 @@
 import { Upload } from "tus-js-client";
-import { findInput, getPlaceholderFieldName } from "./util";
+import { findInput, getPlaceholderFieldName, getUploadedFieldName } from "./util";
 import RenderUploadFile from "./render_upload_file";
 import DropArea from "./drop_area";
 
@@ -7,7 +7,7 @@ import DropArea from "./drop_area";
 // const { Plugin } = require('@uppy/core')
 // const { Socket, Provider, RequestClient } = require('@uppy/companion-client')
 // const EventTracker = require('@uppy/utils/lib/EventTracker')
-// const emitSocketProgress = require('@uppy/utils/lib/emitSocketProgress')
+// const emitSocketProgreƒƒss = require('@uppy/utils/lib/emitSocketProgress')
 // const getSocketHost = require('@uppy/utils/lib/getSocketHost')
 // const RateLimitedQueue = require('@uppy/utils/lib/RateLimitedQueue')
 const Uploader = require('./MultipartUploader')
@@ -197,6 +197,7 @@ class UploadFile {
                   return response.json()
                 }).then((data)=>{
                   console.log("Complete multi upload ",data)
+                  this.updateUploadedInput()
                   return data
                 })   
 
@@ -251,6 +252,7 @@ class UploadFile {
   }
 
   uploadFiles = (files: File[]): void => {
+
     if (files.length === 0) {
       return;
     }
@@ -264,8 +266,6 @@ class UploadFile {
       const { fieldName, formId, renderer, uploads, uploadUrl } = this;
       const filename = file.name;
       const uploadIndex = uploads.length;
-      console.log(file, fieldName,formId,uploadUrl)
-
 
       const upload = new Uploader(file, {
           // .bind to pass the file object to each handler.
@@ -523,7 +523,6 @@ class UploadFile {
         })
       }
     }
-
     const input = findInput(
       this.form,
       getPlaceholderFieldName(this.fieldName, this.prefix),
@@ -531,6 +530,25 @@ class UploadFile {
     );
     if (input) {
       input.value = JSON.stringify(placeholdersInfo);
+    }
+  }
+
+   updateUploadedInput(): void {
+    const uploadedInfo = [];
+
+    for (var i = 0; i < this.uploads.length; ++i) {
+      let upload = this.uploads[i];
+        uploadedInfo.push({
+          name: upload.file.name,
+        })
+    }
+    const input = findInput(
+      this.form,
+      getUploadedFieldName(this.fieldName, this.prefix),
+      this.prefix
+    );
+    if (input) {
+      input.value = JSON.stringify(uploadedInfo);
     }
   }
 }

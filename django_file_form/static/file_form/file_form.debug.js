@@ -107,13 +107,6 @@ module.exports = _defineProperty;
 
 /***/ }),
 /* 1 */
-/***/ (function(module, exports, __webpack_require__) {
-
-module.exports = __webpack_require__(22);
-
-
-/***/ }),
-/* 2 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -121,6 +114,7 @@ module.exports = __webpack_require__(22);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return getInputNameWithPrefix; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return findInput; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "e", function() { return getPlaceholderFieldName; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "f", function() { return getUploadedFieldName; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return getInputValueForFormAndPrefix; });
 var formatBytes = function formatBytes(bytes, decimals) {
   if (bytes === 0) {
@@ -157,11 +151,21 @@ var findInput = function findInput(form, fieldName, prefix) {
 var getPlaceholderFieldName = function getPlaceholderFieldName(fieldName, prefix) {
   return "placeholder-".concat(getInputNameWithoutPrefix(fieldName, prefix));
 };
+var getUploadedFieldName = function getUploadedFieldName(fieldName, prefix) {
+  return "uploaded-".concat(getInputNameWithoutPrefix(fieldName, prefix));
+};
 var getInputValueForFormAndPrefix = function getInputValueForFormAndPrefix(form, fieldName, prefix) {
   var _findInput;
 
   return (_findInput = findInput(form, fieldName, prefix)) === null || _findInput === void 0 ? void 0 : _findInput.value;
 };
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__(22);
+
 
 /***/ }),
 /* 3 */
@@ -2970,7 +2974,7 @@ var _window = window,
 var isSupported = browser_XMLHttpRequest && browser_Blob && typeof browser_Blob.prototype.slice === "function";
 
 // EXTERNAL MODULE: ./src/util.ts
-var util = __webpack_require__(2);
+var util = __webpack_require__(1);
 
 // EXTERNAL MODULE: ./node_modules/escape-html/index.js
 var escape_html = __webpack_require__(11);
@@ -3202,7 +3206,7 @@ var render_upload_file_RenderUploadFile = /*#__PURE__*/function () {
 
 /* harmony default export */ var render_upload_file = (render_upload_file_RenderUploadFile);
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/regenerator/index.js
-var regenerator = __webpack_require__(1);
+var regenerator = __webpack_require__(2);
 var regenerator_default = /*#__PURE__*/__webpack_require__.n(regenerator);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/asyncToGenerator.js
@@ -3529,7 +3533,7 @@ var drop_area_DropArea = function DropArea(_ref5) {
  // const { Plugin } = require('@uppy/core')
 // const { Socket, Provider, RequestClient } = require('@uppy/companion-client')
 // const EventTracker = require('@uppy/utils/lib/EventTracker')
-// const emitSocketProgress = require('@uppy/utils/lib/emitSocketProgress')
+// const emitSocketProgreƒƒss = require('@uppy/utils/lib/emitSocketProgress')
 // const getSocketHost = require('@uppy/utils/lib/getSocketHost')
 // const RateLimitedQueue = require('@uppy/utils/lib/RateLimitedQueue')
 
@@ -3541,9 +3545,9 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
     var _this = this;
 
     var callbacks = _ref.callbacks,
-        _fieldName = _ref.fieldName,
+        fieldName = _ref.fieldName,
         form = _ref.form,
-        _formId = _ref.formId,
+        formId = _ref.formId,
         initial = _ref.initial,
         input = _ref.input,
         multiple = _ref.multiple,
@@ -3553,7 +3557,7 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
         skipRequired = _ref.skipRequired,
         supportDropArea = _ref.supportDropArea,
         translations = _ref.translations,
-        _uploadUrl = _ref.uploadUrl;
+        uploadUrl = _ref.uploadUrl;
 
     classCallCheck_default()(this, UploadFile);
 
@@ -3600,7 +3604,6 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
             uploadUrl = _this.uploadUrl;
         var filename = file.name;
         var uploadIndex = uploads.length;
-        console.log(file, fieldName, formId, uploadUrl);
         var upload = new Uploader(file, {
           // .bind to pass the file object to each handler.
           createMultipartUpload: _this.createMultipartUpload.bind(_this, file),
@@ -3732,14 +3735,14 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
     });
 
     this.callbacks = callbacks;
-    this.fieldName = _fieldName;
+    this.fieldName = fieldName;
     this.form = form;
-    this.formId = _formId;
+    this.formId = formId;
     this.multiple = multiple;
     this.prefix = prefix;
     this.retryDelays = retryDelays;
     this.supportDropArea = supportDropArea;
-    this.uploadUrl = _uploadUrl;
+    this.uploadUrl = uploadUrl;
     this.uploadIndex = 0;
     this.uploads = [];
     this.renderer = new render_upload_file({
@@ -3826,6 +3829,8 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
   }, {
     key: "completeMultipartUpload",
     value: function completeMultipartUpload(file, _ref4) {
+      var _this2 = this;
+
       var key = _ref4.key,
           uploadId = _ref4.uploadId,
           parts = _ref4.parts;
@@ -3845,6 +3850,9 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
         return response.json();
       }).then(function (data) {
         console.log("Complete multi upload ", data);
+
+        _this2.updateUploadedInput();
+
         return data;
       });
     }
@@ -3871,7 +3879,7 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
   }, {
     key: "addInitialFiles",
     value: function addInitialFiles(initialFiles) {
-      var _this2 = this;
+      var _this3 = this;
 
       if (initialFiles.length === 0) {
         return;
@@ -3888,7 +3896,7 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
         renderer.addUploadedFile(name, i, size, primary);
 
         if (file.placeholder) {
-          _this2.uploads.push({
+          _this3.uploads.push({
             id: id,
             name: name,
             placeholder: true,
@@ -3896,9 +3904,9 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
             primary: primary
           });
         } else {
-          var url = "".concat(_this2.uploadUrl).concat(file.id);
+          var url = "".concat(_this3.uploadUrl).concat(file.id);
 
-          _this2.uploads.push({
+          _this3.uploads.push({
             id: id,
             name: name,
             placeholder: false,
@@ -3946,7 +3954,7 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
   }, {
     key: "deleteFromServer",
     value: function deleteFromServer(uploadIndex) {
-      var _this3 = this;
+      var _this4 = this;
 
       var upload = this.uploads[uploadIndex];
 
@@ -3965,9 +3973,9 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
 
       xhr.onload = function () {
         if (xhr.status === 204) {
-          _this3.deleteUpload(uploadIndex);
+          _this4.deleteUpload(uploadIndex);
         } else {
-          _this3.renderer.setDeleteFailed(uploadIndex);
+          _this4.renderer.setDeleteFailed(uploadIndex);
         }
       };
 
@@ -4057,6 +4065,24 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
         input.value = JSON.stringify(placeholdersInfo);
       }
     }
+  }, {
+    key: "updateUploadedInput",
+    value: function updateUploadedInput() {
+      var uploadedInfo = [];
+
+      for (var i = 0; i < this.uploads.length; ++i) {
+        var _upload5 = this.uploads[i];
+        uploadedInfo.push({
+          name: _upload5.file.name
+        });
+      }
+
+      var input = Object(util["a" /* findInput */])(this.form, Object(util["f" /* getUploadedFieldName */])(this.fieldName, this.prefix), this.prefix);
+
+      if (input) {
+        input.value = JSON.stringify(uploadedInfo);
+      }
+    }
   }]);
 
   return UploadFile;
@@ -4080,7 +4106,7 @@ __webpack_require__.r(__webpack_exports__);
 /* WEBPACK VAR INJECTION */(function(global) {/* harmony import */ var _babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(0);
 /* harmony import */ var _babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _upload_file__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(13);
-/* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(2);
+/* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(1);
 
 
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
