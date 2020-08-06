@@ -42,7 +42,7 @@ export const findInput = (
 export const getPlaceholderFieldName = (
   fieldName: string,
   prefix: string | null
-): string => `placeholder-${getInputNameWithoutPrefix(fieldName, prefix)}`;
+): string => `${getInputNameWithoutPrefix(fieldName, prefix)}-placeholder`;
 
 export const getInputValueForFormAndPrefix = (
   form: Element,
