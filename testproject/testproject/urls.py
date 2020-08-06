@@ -1,11 +1,11 @@
-from django.conf.urls import url, include
+from django.urls import path, include
 from django.contrib import admin
 
 
 handler403 = 'django_file_form_example.views.permission_denied'
 
 urlpatterns = (
-    url(r'^admin/', admin.site.urls),
-    url(r'', include('django_file_form.urls')),
-    url(r'', include('django_file_form_example.urls')),
+    path('admin/', admin.site.urls),
+    path('', include('django_file_form.urls')),
+    path('', include('django_file_form_example.urls')),
 )
