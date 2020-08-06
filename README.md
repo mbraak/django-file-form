@@ -21,7 +21,7 @@ The project is hosted on [github](https://github.com/mbraak/django-file-form).
 Works with Django 2.2 - 3.1. Also with Python 3.6 - 3.8
 
 Older versions:
-* 2.1 supports Django 2.0 and 2.2
+* 2.2 supports Django 2.0 and 2.2
 * 1.0.1 uses fine uploader for the javascript part
 * 0.5.0 supports Django 1.11 and Python 2.
 
@@ -336,8 +336,9 @@ You can now edit generated po file and commit your changes as usual
 
 
 ## Changelog
-* **development**
+* **3.0.0 (6 august 2020)**
   * Issue #320: fix UploadMultipleWidget to return correct placeholder files (thanks to Shrikrishna Singh)
+  * Issue #325: support Django 3.1
 
 * **2.2.0 (22 july 2020)**
   * Issue #315: file is not removed after form error
