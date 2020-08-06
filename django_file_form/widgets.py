@@ -15,6 +15,7 @@ TRANSLATIONS = {'Cancel': _('Cancel'),
                 'Upload failed': _('Upload failed'),
                 'Drop your files here': _('Drop your files here')}
 
+
 def get_uploaded_files(value):
     if not value:
         return []
@@ -48,15 +49,18 @@ class UploadWidget(UploadWidgetMixin, ClearableFileInput):
 
 
 class UploadMultipleWidget(UploadWidget):
-    def get_place_holder_files_from(self, data, name):
-        for field, value in data.items():
-            # if we have two fields A, placeholder-A, or prefix-A, prefix-placeholder-A
-            # then placeholder-A is a placeholder hidden field
-            if 'placeholder-' in field and field.replace('placeholder-', '') == name:
-                return [
-                    PlaceholderUploadedFile(name=x['name'], size=x['size'], file_id=x['id'])
-                    for x in json.loads(value)]
-        return []
+    def get_place_holder_files_from(self, data, field_name):
+        placeholder_field_name = field_name + '-placeholder'
+
+        value = data.get(placeholder_field_name)
+
+        if not value:
+            return []
+        else:
+            return [
+                PlaceholderUploadedFile(name=placeholder['name'], size=placeholder['size'], file_id=placeholder['id'])
+                for placeholder in json.loads(value)
+            ]
 
     def value_from_datadict(self, data, files, name):
         if hasattr(files, 'getlist'):
