@@ -155,7 +155,7 @@ var findInput = function findInput(form, fieldName, prefix) {
   return input;
 };
 var getPlaceholderFieldName = function getPlaceholderFieldName(fieldName, prefix) {
-  return "placeholder-".concat(getInputNameWithoutPrefix(fieldName, prefix));
+  return "".concat(getInputNameWithoutPrefix(fieldName, prefix), "-placeholder");
 };
 var getInputValueForFormAndPrefix = function getInputValueForFormAndPrefix(form, fieldName, prefix) {
   var _findInput;
