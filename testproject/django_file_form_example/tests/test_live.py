@@ -506,12 +506,12 @@ class LiveTestCase(BaseLiveTestCase):
         page = self.page
         page.open('/placeholder')
 
-        page.selenium.find_element_by_css_selector('.dff-file-id-0.dff-upload-success')
-        self.assertEqual(len(page.selenium.find_elements_by_css_selector('.dff-files .dff-file')), 2)
+        page.selenium.find_element_by_css_selector('#row-example-input_file .dff-file-id-0.dff-upload-success')
+        self.assertEqual(len(page.selenium.find_elements_by_css_selector('#row-example-input_file .dff-files .dff-file')), 2)
 
         # click 'delete'
         page.delete_ajax_file()
-        page.wait_until_upload_is_removed()
+        page.wait_until_upload_is_removed(0, '#row-example-input_file')
 
         # upload file
         temp_file = page.create_temp_file('content1')
@@ -522,11 +522,12 @@ class LiveTestCase(BaseLiveTestCase):
         page.submit()
         page.assert_page_contains_text('Title field is required')
 
-        self.assertEqual(len(page.selenium.find_elements_by_css_selector('.dff-files .dff-file')), 2)
+        self.assertEqual(len(page.selenium.find_elements_by_css_selector('#row-example-input_file .dff-files .dff-file')), 2)
+        self.assertEqual(len(page.selenium.find_elements_by_css_selector('#row-example-input_file .dff-files .dff-file')), 2)
 
-        el = page.selenium.find_element_by_css_selector('.dff-file-id-0.dff-upload-success')
+        el = page.selenium.find_element_by_css_selector('#row-example-input_file .dff-file-id-0.dff-upload-success')
         el.find_element_by_xpath("//*[contains(text(), 'test_placeholder2.txt')]")
         el.find_element_by_xpath("//*[contains(text(), '2 KB')]")
 
-        el = page.selenium.find_element_by_css_selector('.dff-file-id-1.dff-upload-success')
+        el = page.selenium.find_element_by_css_selector('#row-example-input_file .dff-file-id-1.dff-upload-success')
         el.find_element_by_xpath(f"//*[contains(text(), '{temp_file.base_name()}')]")

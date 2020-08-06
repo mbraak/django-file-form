@@ -82,9 +82,9 @@ class Page(object):
 
         return self.selenium.find_element_by_css_selector(to_class_string(classes))
 
-    def wait_until_upload_is_removed(self, upload_index=0):
+    def wait_until_upload_is_removed(self, upload_index=0, field_selector=None):
         WebDriverWait(self.selenium, timeout=10).until_not(
-            lambda selenium: selenium.find_element_by_css_selector('.dff-file-id-%d.dff-upload-success' % upload_index)
+            lambda selenium: selenium.find_element_by_css_selector('%s .dff-file-id-%d.dff-upload-success' % (field_selector or '', upload_index))
         )
 
     def find_delete_failed(self, upload_index=0, text='Delete failed'):
@@ -97,8 +97,8 @@ class Page(object):
     def assert_page_contains_text(self, text):
         self.selenium.find_element_by_xpath("//*[contains(text(), '%s')]" % text)
 
-    def delete_ajax_file(self, upload_index=0, text='Delete'):
-        el = self.selenium.find_element_by_css_selector('.dff-file-id-%d.dff-upload-success' % upload_index)
+    def delete_ajax_file(self, upload_index=0, text='Delete', field_selector=None):
+        el = self.selenium.find_element_by_css_selector('%s .dff-file-id-%d.dff-upload-success' % (field_selector or '', upload_index))
         el.find_element_by_link_text(text).click()
 
     def create_user(self, username, password):
