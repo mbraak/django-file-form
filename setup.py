@@ -7,7 +7,7 @@ this_directory = path.abspath(path.dirname(__file__))
 with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
-version = '3.0.0'
+version = '2.2.0'
 
 setup(
     name='django-file-form',
@@ -25,6 +25,8 @@ setup(
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Framework :: Django",
+        "Framework :: Django :: 2.0",
+        "Framework :: Django :: 2.1",
         "Framework :: Django :: 2.2",
         "Framework :: Django :: 3.0",
         "Intended Audience :: Developers",
@@ -32,6 +34,7 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: Implementation :: CPython"
+        "Programming Language :: Python :: Implementation :: CPython",
+        "Programming Language :: Python :: Implementation :: PyPy"
     ]
 )
