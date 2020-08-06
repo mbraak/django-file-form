@@ -29,6 +29,8 @@
             {{ form.input_file.errors }}
             {{ form.input_file }}
         </div>
+        {% block extra_fields %}
+        {% endblock %}
         <input type="submit" value="Save" />
     </form>
 

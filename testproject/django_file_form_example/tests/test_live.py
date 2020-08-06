@@ -491,6 +491,17 @@ class LiveTestCase(BaseLiveTestCase):
 
         self.assertEqual(UploadedFile.objects.count(), 0)
 
+    def test_placeholders_submit(self):
+        page = self.page
+        page.open('/placeholder')
+
+        page.fill_title_field('abc')
+        page.submit()
+
+        page.assert_page_contains_text('Upload success')
+        page.assert_page_contains_text('Input file: test_placeholder1.txt, test_placeholder2.txt')
+        page.assert_page_contains_text('Other input file: test_placeholder3.txt')
+
     def test_delete_placeholder_file(self):
         page = self.page
         page.open('/placeholder')
