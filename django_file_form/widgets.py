@@ -49,12 +49,13 @@ class UploadWidget(UploadWidgetMixin, ClearableFileInput):
         for field, value in data.items():
             # if we have two fields A, placeholder-A, or prefix-A, prefix-placeholder-A
             # then placeholder-A is a placeholder hidden field
-            if 'placeholder-' in field and field.replace('placeholder-', '') == name:
-                placeholder_file = [
+            if '-placeholder' in field and field.replace('-placeholder', '') == name:
+                placeholder_files = [
                     PlaceholderUploadedFile(name=x['name'], size=x['size'], file_id=x['id'])
                     for x in json.loads(value)
                 ]
-                return placeholder_file[0] if placeholder_file else None
+
+                return placeholder_files[0] if placeholder_files else None
         return
 
     def value_from_datadict(self, data, files, name):
