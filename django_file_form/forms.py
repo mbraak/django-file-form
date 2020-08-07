@@ -68,7 +68,7 @@ class FileFormMixin(object):
 
     def add_placeholder_inputs(self):
         for field_name in self.file_form_field_names():
-            placeholder_field_name = f'placeholder-{field_name}'
+            placeholder_field_name = f'{field_name}-placeholder'
             self.add_hidden_field(
                 placeholder_field_name,
                 json.dumps(self.get_placesholders_for_field(field_name))

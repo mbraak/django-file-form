@@ -1,0 +1,25 @@
+{% extends 'example_form.html' %}
+{% load static %}
+
+{% block title %}Placeholder example{% endblock %}
+
+{% block body %}
+    {% if finished %}
+        <h3>Upload success</h3>
+        <div>
+            Input file: {{ input_files|join:", " }}
+        </div>
+        <div>
+            Other input file: {{ other_input_file }}
+        </div>
+    {% else %}
+        {{ block.super }}
+    {% endif %}
+{% endblock %}
+
+{% block extra_fields %}
+    <div id="row-example-other-input_file" {% if form.other_input_file.errors %} class="has-error" {% endif %}>
+        {{ form.other_input_file.errors }}
+        {{ form.other_input_file }}
+    </div>
+{% endblock %}

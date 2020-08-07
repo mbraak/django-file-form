@@ -15,6 +15,7 @@ TRANSLATIONS = {'Cancel': _('Cancel'),
                 'Upload failed': _('Upload failed'),
                 'Drop your files here': _('Drop your files here')}
 
+
 def get_uploaded_files(value):
     if not value:
         return []
@@ -25,6 +26,19 @@ def get_uploaded_files(value):
         get_list(value)
         if not getattr(file_info, 'is_placeholder', False)
     ]
+
+
+def get_placeholder_files(data, field_name):
+    placeholder_field_name = field_name + '-placeholder'
+    value = data.get(placeholder_field_name)
+
+    if not value:
+        return []
+    else:
+        return [
+            PlaceholderUploadedFile(name=placeholder['name'], size=placeholder['size'], file_id=placeholder['id'])
+            for placeholder in json.loads(value)
+        ]
 
 
 class UploadWidgetMixin(ClearableFileInput):
@@ -44,39 +58,20 @@ class UploadWidgetMixin(ClearableFileInput):
 
 
 class UploadWidget(UploadWidgetMixin, ClearableFileInput):
-    def get_place_holder_file_from(self, data, name):
-        for field, value in data.items():
-            # if we have two fields A, placeholder-A, or prefix-A, prefix-placeholder-A
-            # then placeholder-A is a placeholder hidden field
-            if 'placeholder-' in field and field.replace('placeholder-', '') == name:
-                placeholder_file = [
-                    PlaceholderUploadedFile(name=x['name'], size=x['size'], file_id=x['id'])
-                    for x in json.loads(value)
-                ]
-                return placeholder_file[0] if placeholder_file else None
-        return
-
     def value_from_datadict(self, data, files, name):
         upload = super().value_from_datadict(data, files, name)
-        if not upload:
-            return self.get_place_holder_file_from(data, name)
-        return upload
+
+        if upload:
+            return upload
+        else:
+            placeholders = get_placeholder_files(data, name)
+            return placeholders[0] if placeholders else None
 
 
-class UploadMultipleWidget(UploadWidgetMixin, ClearableFileInput):
-    def get_place_holder_files_from(self, data, name):
-        for field, value in data.items():
-            # if we have two fields A, placeholder-A, or prefix-A, prefix-placeholder-A
-            # then placeholder-A is a placeholder hidden field
-            if 'placeholder-' in field and field.replace('placeholder-', '') == name:
-                return [
-                    PlaceholderUploadedFile(name=x['name'], size=x['size'], file_id=x['id'])
-                    for x in json.loads(value)]
-        return []
-
+class UploadMultipleWidget(UploadWidget):
     def value_from_datadict(self, data, files, name):
         if hasattr(files, 'getlist'):
-            return files.getlist(name) + self.get_place_holder_files_from(data, name)
+            return files.getlist(name) + get_placeholder_files(data, name)
         else:
             # NB: django-formtools wizard uses dict instead of MultiValueDict
             return super(UploadMultipleWidget, self).value_from_datadict(data, files, name)
