@@ -76,20 +76,20 @@ class PlaceholderView(BaseFormView):
                 PlaceholderUploadedFile('test_placeholder1.txt', size=1024),
                 PlaceholderUploadedFile('test_placeholder2.txt', size=2048)
             ]
-            initial['other_input_file'] = [
-                PlaceholderUploadedFile('test_placeholder3.txt', size=512),
-            ]
+            initial['other_input_file'] = PlaceholderUploadedFile('test_placeholder3.txt', size=512)
 
         return initial
 
     def form_valid(self, form):
         form.save()
 
+        other_input_file_value = form['other_input_file'].value()
+
         return self.render_to_response(
             self.get_context_data(
                 finished=True,
                 input_files=[f.name for f in form['input_file'].value()],
-                other_input_files=[f.name for f in form['other_input_file'].value()],
+                other_input_file=other_input_file_value.name if other_input_file_value else ''
             )
         )
 

@@ -70,7 +70,7 @@ class WizardStepForm(Form):
 class PlaceholderExampleForm(BaseForm):
     prefix = 'example'
     input_file = MultipleUploadedFileField()
-    other_input_file = MultipleUploadedFileField()
+    other_input_file = UploadedFileField()
 
     def save(self):
         example = Example2.objects.create(
