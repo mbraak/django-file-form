@@ -336,6 +336,9 @@ You can now edit generated po file and commit your changes as usual
 
 
 ## Changelog
+* development version
+  * Issue #324: get placeholder file for UploadWidget (thanks to Shrikrishna Singh)
+
 * **3.0.0 (6 august 2020)**
   * Issue #320: fix UploadMultipleWidget to return correct placeholder files (thanks to Shrikrishna Singh)
   * Issue #325: support Django 3.1

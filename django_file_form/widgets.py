@@ -45,7 +45,23 @@ class UploadWidgetMixin(ClearableFileInput):
 
 
 class UploadWidget(UploadWidgetMixin, ClearableFileInput):
-    pass
+    def get_place_holder_file_from(self, data, name):
+        for field, value in data.items():
+            # if we have two fields A, placeholder-A, or prefix-A, prefix-placeholder-A
+            # then placeholder-A is a placeholder hidden field
+            if 'placeholder-' in field and field.replace('placeholder-', '') == name:
+                placeholder_file = [
+                    PlaceholderUploadedFile(name=x['name'], size=x['size'], file_id=x['id'])
+                    for x in json.loads(value)
+                ]
+                return placeholder_file[0] if placeholder_file else None
+        return
+
+    def value_from_datadict(self, data, files, name):
+        upload = super().value_from_datadict(data, files, name)
+        if not upload:
+            return self.get_place_holder_file_from(data, name)
+        return upload
 
 
 class UploadMultipleWidget(UploadWidget):
