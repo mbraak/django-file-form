@@ -15,6 +15,8 @@ Features:
 * The ajax upload works the same as an html upload.
     * This means that you don't have to change your code to support ajax upload.
 * Supports single and multiple file upload.
+* Supports edition of uploaded files.
+* Supports upload directly to AWS S3 compatible storages.
 
 The project is hosted on [github](https://github.com/mbraak/django-file-form).
 
@@ -199,6 +201,39 @@ for f in self.cleaned_data['my_field']:
 # remove existing files if the placeholders are deleted
 # ...
 ```
+
+**4 Upload directly to AWS S3**
+
+`django-file-form` supports upload directly to AWS S3 compatible storages. The files will be uploaded
+by clients directly to S3 through AJAX operations and returns to the backend as `S3Boto3StorageFile`
+with [`S3Boto3Storage`](https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html).
+
+To use this method, you will first need to define the following variables in `settings`
+
+```
+AWS_ACCESS_KEY_ID
+AWS_SECRET_ACCESS_KEY
+AWS_STORAGE_BUCKET_NAME
+AWS_S3_REGION_NAME
+AWS_S3_ENDPOINT_URL
+```
+
+or through environment variables with the same names as described
+in [`django-storage` documentation](https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html).
+
+Then, in the View class, you will need to set
+
+  ```
+  direct_to_s3 = True
+  ```
+
+to inform the frontend to use the AJAX uploader for S3.
+
+The files will be uploaded to `FILE_FORM_UPLOAD_DIR` of the specified bucket,
+and returned as `S3Boto3StorageFile` with `S3Boto3Storage` as its underlying
+storage, and attribute `is_s3direct=True` and `is_placeholder=False` for you
+to check the type of files. Reading from these objects will download the files
+from S3.
 
 ## Upgrade from version 1.0 (to 2.0)
 

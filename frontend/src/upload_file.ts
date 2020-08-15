@@ -1,13 +1,17 @@
 import { Upload } from "tus-js-client";
-import { findInput, getPlaceholderFieldName } from "./util";
+import { findInput, getPlaceholderFieldName, getS3UploadedFieldName } from "./util";
 import RenderUploadFile from "./render_upload_file";
 import DropArea from "./drop_area";
+
+import S3Uploader from "./s3_uploader"
+
 
 export interface InitialFile {
   id: string;
   name: string;
   placeholder?: boolean;
   size: number;
+  url?: string;
 }
 
 export interface UploadedFile {
@@ -15,7 +19,6 @@ export interface UploadedFile {
   name: string;
   placeholder: boolean;
   size: number;
-  url?: string;
 }
 
 export type Translations = { [key: string]: string };
@@ -122,8 +125,8 @@ class UploadFile {
       const { id, name, size } = file;
       renderer.addUploadedFile(name, i, size);
 
-      if (file.placeholder) {
-        this.uploads.push({ id, name, placeholder: true, size });
+      if (! (file instanceof Upload) && !(file instanceof S3Uploader)) {
+        this.uploads.push({ id, name, placeholder: file.placeholder, size });
       } else {
         const url = `${this.uploadUrl}${file.id}`;
         this.uploads.push({ id, name, placeholder: false, size, url });
@@ -156,24 +159,42 @@ class UploadFile {
       const { fieldName, formId, renderer, uploads, uploadUrl } = this;
       const filename = file.name;
       const uploadIndex = uploads.length;
-
-      const upload = new Upload(file, {
-        endpoint: uploadUrl,
-        metadata: { fieldName, filename, formId },
-        onError: (error: Error): void => this.handleError(uploadIndex, error),
-        onProgress: (bytesUploaded: number, bytesTotal: number): void =>
-          this.handleProgress(uploadIndex, bytesUploaded, bytesTotal),
-        onSuccess: (): void =>
-          this.handleSuccess(uploadIndex, (upload.file as File).size),
-        retryDelays: this.retryDelays || [0, 1000, 3000, 5000]
-      });
-
+      let upload = null;
+      let uploadMethod = document.getElementById("uploadMethod");
+      if (uploadMethod != null && uploadMethod.value == 's3direct') {
+        upload = new S3Uploader(file, {
+          // .bind to pass the file object to each handler.
+          // createMultipartUpload: this.createMultipartUpload.bind(this,file) ,
+          // listParts: this.listParts.bind(this,file) ,
+          // prepareUploadPart: this.prepareUploadPart.bind(this,file) ,
+          // completeMultipartUpload: this.completeMultipartUpload.bind(this,file),
+          // abortMultipartUpload: this.abortMultipartUpload.bind(this,file),
+          getChunkSize: null,
+          // onStart,
+          onProgress: (bytesUploaded: number, bytesTotal: number): void =>
+            this.handleProgress(uploadIndex, bytesUploaded, bytesTotal),
+          onError: (error: Error): void => this.handleError(uploadIndex, error),
+          onSuccess: (): void =>
+            this.handleSuccess(uploadIndex, (upload.file as File).size),
+          retryDelays: this.retryDelays || [0, 1000, 3000, 5000]
+          // onPartComplete,
+        })
+      } else {
+        upload = new Upload(file, {
+          endpoint: uploadUrl,
+          metadata: { fieldName, filename, formId },
+          onError: (error: Error): void => this.handleError(uploadIndex, error),
+          onProgress: (bytesUploaded: number, bytesTotal: number): void =>
+            this.handleProgress(uploadIndex, bytesUploaded, bytesTotal),
+          onSuccess: (): void =>
+            this.handleSuccess(uploadIndex, (upload.file as File).size),
+          retryDelays: this.retryDelays || [0, 1000, 3000, 5000]
+        });
+      }
       upload.start();
       renderer.addNewUpload(filename, uploadIndex);
-
       this.uploads.push(upload);
     });
-
     this.checkDropHint();
   };
 
@@ -249,7 +270,7 @@ class UploadFile {
 
   handleSuccess = (uploadIndex: number, uploadedSize: number): void => {
     const { renderer } = this;
-
+    this.updateS3UploadedInput()
     renderer.clearInput();
     renderer.setSuccess(uploadIndex, uploadedSize);
 
@@ -266,9 +287,12 @@ class UploadFile {
 
   handleDelete(uploadIndex: number): void {
     const upload = this.uploads[uploadIndex];
-
-    if (upload instanceof Upload || upload.url) {
+    if (upload instanceof Upload) {
       this.deleteFromServer(uploadIndex);
+    } else if (upload instanceof S3Uploader || !upload.placeholder) {
+      // upload could be a S3Uploader object, or a UploadedFile
+      // with placeholder set to false after form reload
+      this.deleteS3Uploaded(uploadIndex);
     } else {
       this.deletePlaceholder(uploadIndex);
     }
@@ -278,7 +302,8 @@ class UploadFile {
     const upload = this.uploads[uploadIndex];
 
     this.renderer.deleteFile(uploadIndex);
-    delete this.uploads[uploadIndex];
+    // delete this.uploads[uploadIndex];
+    this.uploads.splice(uploadIndex, 1)
     this.checkDropHint();
 
     const { onDelete } = this.callbacks;
@@ -315,6 +340,11 @@ class UploadFile {
     this.updatePlaceholderInput();
   }
 
+  deleteS3Uploaded(uploadIndex: number): void {
+    this.deleteUpload(uploadIndex);
+    this.updateS3UploadedInput();
+  }
+
   handleCancel(uploadIndex: number): void {
     const upload = this.uploads[uploadIndex];
 
@@ -348,7 +378,7 @@ class UploadFile {
 
   updatePlaceholderInput(): void {
     const placeholdersInfo = this.uploads.filter(
-      upload => !(upload instanceof Upload) && upload.placeholder
+      upload => !(upload instanceof Upload) && !(upload instanceof S3Uploader) && upload.placeholder
     ) as UploadedFile[];
 
     const input = findInput(
@@ -358,6 +388,36 @@ class UploadFile {
     );
     if (input) {
       input.value = JSON.stringify(placeholdersInfo);
+    }
+  }
+
+  updateS3UploadedInput(): void {
+    // upload could be
+    // 1. A regular Upload object
+    // 2. A map object with .placeholder == true
+    // 3. A map object with .placeholder == false, created when the form is reloaded
+    // 4. A S3Uploader object that will need to be saved as UploadedFuke
+    //
+    const uploadedInfo = this.uploads.filter(
+      upload => !(upload instanceof Upload) && !(upload instanceof S3Uploader) && !upload.placeholder
+    ).concat(
+      this.uploads.filter(
+        upload => upload instanceof S3Uploader
+      ).map(upload =>  {
+        return {
+          id: upload.uploadId,
+          name: upload.file.name,
+          placeholder: false,
+          size: upload.file.size
+      }} )) as UploadedFile[];
+
+    const input = findInput(
+      this.form,
+      getS3UploadedFieldName(this.fieldName, this.prefix),
+      this.prefix
+    );
+    if (input) {
+      input.value = JSON.stringify(uploadedInfo);
     }
   }
 }

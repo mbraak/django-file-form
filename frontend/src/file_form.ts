@@ -6,7 +6,8 @@ import UploadFile, {
 import {
   getInputNameWithPrefix,
   getInputValueForFormAndPrefix,
-  getPlaceholderFieldName
+  getPlaceholderFieldName,
+  getS3UploadedFieldName
 } from "./util";
 
 interface Options {
@@ -52,6 +53,16 @@ const initUploadFields = (form: Element, options: Options = {}): void => {
     return JSON.parse(data) as InitialFile[];
   };
 
+  const getS3Uploads = (fieldName: string): InitialFile[] => {
+    const data = getInputValue(getS3UploadedFieldName(fieldName, getPrefix()));
+
+    if (!data) {
+      return [];
+    }
+
+    return JSON.parse(data) as InitialFile[];
+  };
+
   const uploadUrl = getInputValue("upload_url");
   const formId = getInputValue("form_id");
   const skipRequired = options.skipRequired || false;
@@ -82,6 +93,8 @@ const initUploadFields = (form: Element, options: Options = {}): void => {
     const { multiple } = input;
     const initial = getInitialFiles(container).concat(
       getPlaceholders(fieldName)
+    ).concat(
+      getS3Uploads(fieldName)
     );
     const dataTranslations = container.getAttribute("data-translations");
     const translations: Translations = dataTranslations

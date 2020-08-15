@@ -3,6 +3,7 @@ import uuid
 from pathlib import Path
 
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 from django.core.files import uploadedfile
 from django.core.files.storage import FileSystemStorage
 from django.db import models
@@ -97,6 +98,7 @@ class UploadedFileWithId(uploadedfile.UploadedFile):
         self.size = self.file.size
 
         self.is_placeholder = False
+        self.is_s3direct = False
 
     def get_values(self):
         return dict(id=self.file_id, name=self.name, size=self.size)
@@ -112,6 +114,30 @@ class PlaceholderUploadedFile(object):
             self.size = size
 
         self.is_placeholder = True
+        self.is_s3direct = False
 
     def get_values(self):
         return dict(id=self.file_id, placeholder=True, name=self.name, size=self.size)
+
+try:
+    from storages.backends.s3boto3 import S3Boto3Storage, S3Boto3StorageFile
+
+    class S3UploadedFileWithId(S3Boto3StorageFile):
+        def __init__(self, file_id, name, size, **kwargs):
+            super(S3UploadedFileWithId, self).__init__(
+                name=get_upload_to(None, filename=name), mode='rb',
+                storage=S3Boto3Storage(), **kwargs)
+
+            self.file_id = file_id
+            # self.size is derived from S3boto3StorageFile
+            # but size is passed for consistency, and potentially
+            # for validation
+            self.is_placeholder = False
+            self.is_s3direct = True
+
+        def get_values(self):
+            return dict(id=self.file_id, placeholder=False, name=self.name, size=self.size)
+
+except ImproperlyConfigured:
+    # S3 is an optional feature
+    pass

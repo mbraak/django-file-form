@@ -4,9 +4,9 @@ from django.forms import ClearableFileInput
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
-
 from django_file_form.util import get_list
-from django_file_form.models import PlaceholderUploadedFile
+
+from django_file_form.models import PlaceholderUploadedFile, S3UploadedFileWithId
 
 
 TRANSLATIONS = {'Cancel': _('Cancel'),
@@ -40,6 +40,17 @@ def get_placeholder_files(data, field_name):
             for placeholder in json.loads(value)
         ]
 
+def get_s3_uploaded_files(data, field_name):
+    s3uploaded_field_name = field_name + '-s3direct'
+    value = data.get(s3uploaded_field_name)
+
+    if not value:
+        return []
+    else:
+        return [
+            S3UploadedFileWithId(name=s3uploaded['name'], size=s3uploaded['size'], file_id=s3uploaded['id'])
+            for s3uploaded in json.loads(value)
+        ]
 
 class UploadWidgetMixin(ClearableFileInput):
     def render(self, name, value, attrs=None, renderer=None):
@@ -65,13 +76,13 @@ class UploadWidget(UploadWidgetMixin, ClearableFileInput):
             return upload
         else:
             placeholders = get_placeholder_files(data, name)
-            return placeholders[0] if placeholders else None
-
+            s3uploaded = get_s3_uploaded_files(data, name)
+            return placeholders[0] if placeholders else (s3uploaded[0] if s3uploaded else None)
 
 class UploadMultipleWidget(UploadWidget):
     def value_from_datadict(self, data, files, name):
         if hasattr(files, 'getlist'):
-            return files.getlist(name) + get_placeholder_files(data, name)
+            return files.getlist(name) + get_placeholder_files(data, name) + get_s3_uploaded_files(data, name)
         else:
             # NB: django-formtools wizard uses dict instead of MultiValueDict
             return super(UploadMultipleWidget, self).value_from_datadict(data, files, name)
