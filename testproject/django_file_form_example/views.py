@@ -14,6 +14,7 @@ from . import forms
 class BaseFormView(generic.FormView):
     template_name = 'example_form.html'
     use_ajax = True
+    direct_to_s3 = False
     custom_js_file = 'example_form.js'
 
     def get_success_url(self):
@@ -26,6 +27,7 @@ class BaseFormView(generic.FormView):
     def get_context_data(self, **kwargs):
         kwargs['use_ajax'] = self.use_ajax
         kwargs['custom_js_file'] = self.custom_js_file
+        kwargs['direct_to_s3'] = self.direct_to_s3
 
         return super(BaseFormView, self).get_context_data(**kwargs)
 
@@ -92,6 +94,14 @@ class PlaceholderView(BaseFormView):
                 other_input_file=other_input_file_value.name if other_input_file_value else ''
             )
         )
+
+
+class S3ExampleView(BaseFormView):
+    form_class = forms.S3ExampleForm
+    direct_to_s3 = True
+
+class S3PlaceholderExampleView(PlaceholderView):
+    direct_to_s3 = True
 
 
 def permission_denied(request, exception):

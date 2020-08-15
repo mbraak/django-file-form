@@ -63,6 +63,23 @@ class MultipleFileExampleForm(BaseForm):
         self.delete_temporary_files()
 
 
+class S3ExampleForm(BaseForm):
+    prefix = 'example'
+    input_file = MultipleUploadedFileField()
+
+    def save(self):
+        example = Example2.objects.create(
+            title=self.cleaned_data['title']
+        )
+        for f in self.cleaned_data['input_file']:
+            assert f.is_s3direct
+            # download from S23
+            ExampleFile.objects.create(
+                example=example,
+                input_file=f
+            )
+            f.close()
+
 class WizardStepForm(Form):
     name = CharField(required=False)
 
