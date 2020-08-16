@@ -5,6 +5,7 @@ from storages.utils import setting, lookup_env
 
 import boto3
 import os
+import time
 
 
 class s3multipart:
@@ -17,18 +18,27 @@ class s3multipart:
     file_form_upload_dir = setting('FILE_FORM_UPLOAD_DIR', 'temp_uploads')
 
     @classmethod
+    def get_client(cls):
+        while True:
+            try:
+                # https://github.com/boto/boto3/issues/801
+                return boto3.client(
+                    's3',
+                    endpoint_url=cls.endpoint_url or
+                    lookup_env(['AWS_S3_ENDPOINT_URL', 'AWS_ENDPOINT_URL']),
+                    aws_access_key_id=cls.aws_access_key_id or
+                    lookup_env(['AWS_S3_ACCESS_KEY_ID', 'AWS_ACCESS_KEY_ID']),
+                    aws_secret_access_key=cls.aws_secret_access_key or
+                    lookup_env(
+                        ['AWS_S3_SECRET_ACCESS_KEY', 'AWS_SECRET_ACCESS_KEY']))
+            except:
+                time.sleep(0.01)
+
+    @classmethod
     def get_presigned_url(cls, request):
         if request.method == 'POST':
             # check if the post request has the file part
-            client = boto3.client(
-                's3',
-                endpoint_url=cls.endpoint_url or
-                lookup_env(['AWS_S3_ENDPOINT_URL', 'AWS_ENDPOINT_URL']),
-                aws_access_key_id=cls.aws_access_key_id or
-                lookup_env(['AWS_S3_ACCESS_KEY_ID', 'AWS_ACCESS_KEY_ID']),
-                aws_secret_access_key=cls.aws_secret_access_key or lookup_env(
-                    ['AWS_S3_SECRET_ACCESS_KEY', 'AWS_SECRET_ACCESS_KEY']))
-
+            client = cls.get_client()
             json_body = json.loads(request.body)
             fileName = json_body["filename"]
             contentType = json_body["contentType"]
@@ -59,15 +69,7 @@ class s3multipart:
     @classmethod
     def createMultipartUpload(cls, request):
         if request.method == 'POST':
-            client = boto3.client(
-                's3',
-                endpoint_url=cls.endpoint_url or
-                lookup_env(['AWS_S3_ENDPOINT_URL', 'AWS_ENDPOINT_URL']),
-                aws_access_key_id=cls.aws_access_key_id or
-                lookup_env(['AWS_S3_ACCESS_KEY_ID', 'AWS_ACCESS_KEY_ID']),
-                aws_secret_access_key=cls.aws_secret_access_key or lookup_env(
-                    ['AWS_S3_SECRET_ACCESS_KEY', 'AWS_SECRET_ACCESS_KEY']))
-
+            client = cls.get_client()
             json_body = json.loads(request.body)
             fileName = json_body["filename"]
             key = cls.file_form_upload_dir + "/" + fileName
@@ -88,14 +90,7 @@ class s3multipart:
     @classmethod
     def getUploadedParts(cls, request, uploadId):
         if request.method == 'GET':
-            client = boto3.client(
-                's3',
-                endpoint_url=cls.endpoint_url or
-                lookup_env(['AWS_S3_ENDPOINT_URL', 'AWS_ENDPOINT_URL']),
-                aws_access_key_id=cls.aws_access_key_id or
-                lookup_env(['AWS_S3_ACCESS_KEY_ID', 'AWS_ACCESS_KEY_ID']),
-                aws_secret_access_key=cls.aws_secret_access_key or lookup_env(
-                    ['AWS_S3_SECRET_ACCESS_KEY', 'AWS_SECRET_ACCESS_KEY']))
+            client = cls.get_client()
             key = request.GET['key']
 
             response = client.list_parts(
@@ -112,14 +107,7 @@ class s3multipart:
     @classmethod
     def signPartUpload(cls, request, uploadId, partNumber):
         if request.method == 'GET':
-            client = boto3.client(
-                's3',
-                endpoint_url=cls.endpoint_url or
-                lookup_env(['AWS_S3_ENDPOINT_URL', 'AWS_ENDPOINT_URL']),
-                aws_access_key_id=cls.aws_access_key_id or
-                lookup_env(['AWS_S3_ACCESS_KEY_ID', 'AWS_ACCESS_KEY_ID']),
-                aws_secret_access_key=cls.aws_secret_access_key or lookup_env(
-                    ['AWS_S3_SECRET_ACCESS_KEY', 'AWS_SECRET_ACCESS_KEY']))
+            client = cls.get_client()
             key = request.GET['key']
             response = client.generate_presigned_url(
                 ClientMethod='upload_part',
@@ -144,14 +132,7 @@ class s3multipart:
     @classmethod
     def abortMultipartUpload(cls, request, uploadId):
         if request.method == 'DELETE':
-            client = boto3.client(
-                's3',
-                endpoint_url=cls.endpoint_url or
-                lookup_env(['AWS_S3_ENDPOINT_URL', 'AWS_ENDPOINT_URL']),
-                aws_access_key_id=cls.aws_access_key_id or
-                lookup_env(['AWS_S3_ACCESS_KEY_ID', 'AWS_ACCESS_KEY_ID']),
-                aws_secret_access_key=cls.aws_secret_access_key or lookup_env(
-                    ['AWS_S3_SECRET_ACCESS_KEY', 'AWS_SECRET_ACCESS_KEY']))
+            client = cls.get_client()
             key = request.GET['key']
             client.abort_multipart_upload(
                 Bucket=cls.aws_storage_bucket_name or
@@ -165,14 +146,7 @@ class s3multipart:
     @classmethod
     def completeMultipartUpload(cls, request, uploadId):
         if request.method == 'POST':
-            client = boto3.client(
-                's3',
-                endpoint_url=cls.endpoint_url or
-                lookup_env(['AWS_S3_ENDPOINT_URL', 'AWS_ENDPOINT_URL']),
-                aws_access_key_id=cls.aws_access_key_id or
-                lookup_env(['AWS_S3_ACCESS_KEY_ID', 'AWS_ACCESS_KEY_ID']),
-                aws_secret_access_key=cls.aws_secret_access_key or lookup_env(
-                    ['AWS_S3_SECRET_ACCESS_KEY', 'AWS_SECRET_ACCESS_KEY']))
+            client = cls.get_client()
             json_body = json.loads(request.body)
             key = request.GET['key']
             parts = json_body["parts"]
