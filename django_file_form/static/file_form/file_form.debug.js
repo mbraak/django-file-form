@@ -3897,6 +3897,8 @@ var render_upload_file_RenderUploadFile = /*#__PURE__*/function () {
         span.innerHTML = this.translations["Delete failed"];
         el.appendChild(span);
       }
+
+      this.enableDelete(index);
     }
   }, {
     key: "findFileDiv",
@@ -3991,6 +3993,35 @@ var render_upload_file_RenderUploadFile = /*#__PURE__*/function () {
       if (dropHint) {
         dropHint.remove();
       }
+    }
+  }, {
+    key: "disableDelete",
+    value: function disableDelete(index) {
+      var deleteLink = this.findDeleteLink(index);
+
+      if (deleteLink) {
+        deleteLink.classList.add("dff-disabled");
+      }
+    }
+  }, {
+    key: "enableDelete",
+    value: function enableDelete(index) {
+      var deleteLink = this.findDeleteLink(index);
+
+      if (deleteLink) {
+        deleteLink.classList.remove("dff-disabled");
+      }
+    }
+  }, {
+    key: "findDeleteLink",
+    value: function findDeleteLink(index) {
+      var div = this.findFileDiv(index);
+
+      if (!div) {
+        return div;
+      }
+
+      return div.querySelector(".dff-delete");
     }
   }]);
 
@@ -4526,7 +4557,7 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
         return parseInt(dataIndex, 10);
       };
 
-      if (target.classList.contains("dff-delete")) {
+      if (target.classList.contains("dff-delete") && !target.classList.contains("dff-disabled")) {
         var uploadIndex = getUploadIndex();
 
         if (uploadIndex !== null) {
@@ -4706,6 +4737,7 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
         return;
       }
 
+      this.renderer.disableDelete(uploadIndex);
       var xhr = new window.XMLHttpRequest();
       xhr.open("DELETE", url);
 
