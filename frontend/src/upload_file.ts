@@ -165,14 +165,11 @@ class UploadFile {
             uploadIndex = index;
             const el = this.renderer.findFileDiv(index);
             if (el && el.classList.contains('dff-upload-fail')) {
-              // a failed one, will try to resume
               this.deleteUpload(index);
-              break;
             } else {
-              // a successful upload
               this.deleteFromServer(index);
-              break;
             }
+            break;
           }
         } else if (existing_upload) {
           if (existing_upload.name === filename) {
