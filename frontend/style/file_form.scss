@@ -26,6 +26,11 @@
 
     .dff-delete {
       margin-left: 8px;
+
+      &.dff-disabled {
+        color: #aaa;
+        pointer-events: none;
+      }
     }
 
     span {
