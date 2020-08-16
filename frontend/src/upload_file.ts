@@ -194,7 +194,10 @@ class UploadFile {
       return parseInt(dataIndex, 10);
     };
 
-    if (target.classList.contains("dff-delete")) {
+    if (
+      target.classList.contains("dff-delete") &&
+      !target.classList.contains("dff-disabled")
+    ) {
       const uploadIndex = getUploadIndex();
 
       if (uploadIndex !== null) {
@@ -295,6 +298,8 @@ class UploadFile {
     if (!url) {
       return;
     }
+
+    this.renderer.disableDelete(uploadIndex);
 
     const xhr = new window.XMLHttpRequest();
     xhr.open("DELETE", url);
