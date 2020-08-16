@@ -81,7 +81,7 @@
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 15);
+/******/ 	return __webpack_require__(__webpack_require__.s = 14);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -107,6 +107,13 @@ module.exports = _defineProperty;
 
 /***/ }),
 /* 1 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__(22);
+
+
+/***/ }),
+/* 2 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -114,7 +121,6 @@ module.exports = _defineProperty;
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return getInputNameWithPrefix; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return findInput; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "e", function() { return getPlaceholderFieldName; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "f", function() { return getS3UploadedFieldName; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return getInputValueForFormAndPrefix; });
 var formatBytes = function formatBytes(bytes, decimals) {
   if (bytes === 0) {
@@ -151,21 +157,11 @@ var findInput = function findInput(form, fieldName, prefix) {
 var getPlaceholderFieldName = function getPlaceholderFieldName(fieldName, prefix) {
   return "".concat(getInputNameWithoutPrefix(fieldName, prefix), "-placeholder");
 };
-var getS3UploadedFieldName = function getS3UploadedFieldName(fieldName, prefix) {
-  return "".concat(getInputNameWithoutPrefix(fieldName, prefix), "-s3direct");
-};
 var getInputValueForFormAndPrefix = function getInputValueForFormAndPrefix(form, fieldName, prefix) {
   var _findInput;
 
   return (_findInput = findInput(form, fieldName, prefix)) === null || _findInput === void 0 ? void 0 : _findInput.value;
 };
-
-/***/ }),
-/* 2 */
-/***/ (function(module, exports, __webpack_require__) {
-
-module.exports = __webpack_require__(23);
-
 
 /***/ }),
 /* 3 */
@@ -181,28 +177,6 @@ module.exports = _classCallCheck;
 
 /***/ }),
 /* 4 */
-/***/ (function(module, exports) {
-
-function _defineProperties(target, props) {
-  for (var i = 0; i < props.length; i++) {
-    var descriptor = props[i];
-    descriptor.enumerable = descriptor.enumerable || false;
-    descriptor.configurable = true;
-    if ("value" in descriptor) descriptor.writable = true;
-    Object.defineProperty(target, descriptor.key, descriptor);
-  }
-}
-
-function _createClass(Constructor, protoProps, staticProps) {
-  if (protoProps) _defineProperties(Constructor.prototype, protoProps);
-  if (staticProps) _defineProperties(Constructor, staticProps);
-  return Constructor;
-}
-
-module.exports = _createClass;
-
-/***/ }),
-/* 5 */
 /***/ (function(module, exports) {
 
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
@@ -244,22 +218,44 @@ function _asyncToGenerator(fn) {
 module.exports = _asyncToGenerator;
 
 /***/ }),
-/* 6 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var arrayWithoutHoles = __webpack_require__(17);
+var arrayWithoutHoles = __webpack_require__(16);
 
-var iterableToArray = __webpack_require__(18);
+var iterableToArray = __webpack_require__(17);
 
-var unsupportedIterableToArray = __webpack_require__(19);
+var unsupportedIterableToArray = __webpack_require__(18);
 
-var nonIterableSpread = __webpack_require__(20);
+var nonIterableSpread = __webpack_require__(19);
 
 function _toConsumableArray(arr) {
   return arrayWithoutHoles(arr) || iterableToArray(arr) || unsupportedIterableToArray(arr) || nonIterableSpread();
 }
 
 module.exports = _toConsumableArray;
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports) {
+
+function _defineProperties(target, props) {
+  for (var i = 0; i < props.length; i++) {
+    var descriptor = props[i];
+    descriptor.enumerable = descriptor.enumerable || false;
+    descriptor.configurable = true;
+    if ("value" in descriptor) descriptor.writable = true;
+    Object.defineProperty(target, descriptor.key, descriptor);
+  }
+}
+
+function _createClass(Constructor, protoProps, staticProps) {
+  if (protoProps) _defineProperties(Constructor.prototype, protoProps);
+  if (staticProps) _defineProperties(Constructor, staticProps);
+  return Constructor;
+}
+
+module.exports = _createClass;
 
 /***/ }),
 /* 7 */
@@ -291,28 +287,6 @@ module.exports = g;
 /* 8 */
 /***/ (function(module, exports) {
 
-function _typeof(obj) {
-  "@babel/helpers - typeof";
-
-  if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-    module.exports = _typeof = function _typeof(obj) {
-      return typeof obj;
-    };
-  } else {
-    module.exports = _typeof = function _typeof(obj) {
-      return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-    };
-  }
-
-  return _typeof(obj);
-}
-
-module.exports = _typeof;
-
-/***/ }),
-/* 9 */
-/***/ (function(module, exports) {
-
 function _arrayLikeToArray(arr, len) {
   if (len == null || len > arr.length) len = arr.length;
 
@@ -326,7 +300,7 @@ function _arrayLikeToArray(arr, len) {
 module.exports = _arrayLikeToArray;
 
 /***/ }),
-/* 10 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*
@@ -352,7 +326,7 @@ module.exports = _arrayLikeToArray;
     // existing version for noConflict()
     global = global || {};
     var _Base64 = global.Base64;
-    var version = "2.6.2";
+    var version = "2.6.4";
     // constants
     var b64chars
         = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
@@ -485,16 +459,17 @@ module.exports = _arrayLikeToArray;
         return _atob(String(a).replace(/[^A-Za-z0-9\+\/]/g, ''));
     };
     var _decode = function(a) { return btou(_atob(a)) };
+    var _fromURI = function(a) {
+        return String(a).replace(/[-_]/g, function(m0) {
+            return m0 == '-' ? '+' : '/'
+        }).replace(/[^A-Za-z0-9\+\/]/g, '');
+    };
     var decode = function(a){
-        return _decode(
-            String(a).replace(/[-_]/g, function(m0) {
-                return m0 == '-' ? '+' : '/'
-            }).replace(/[^A-Za-z0-9\+\/]/g, '')
-        );
+        return _decode(_fromURI(a));
     };
     var toUint8Array;
     if (global.Uint8Array) toUint8Array = function(a) {
-        return Uint8Array.from(atob(a), function(c) {
+        return Uint8Array.from(atob(_fromURI(a)), function(c) {
             return c.charCodeAt(0);
         });
     };
@@ -562,14 +537,14 @@ module.exports = _arrayLikeToArray;
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(7)))
 
 /***/ }),
-/* 11 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(global) {
 
-var required = __webpack_require__(21)
-  , qs = __webpack_require__(22)
+var required = __webpack_require__(20)
+  , qs = __webpack_require__(21)
   , slashes = /^[A-Za-z][A-Za-z0-9+-.]*:\/\//
   , protocolre = /^([a-z][a-z0-9.+-]*:)?(\/\/)?([\S\s]*)/i
   , whitespace = '[\\x09\\x0A\\x0B\\x0C\\x0D\\x20\\xA0\\u1680\\u180E\\u2000\\u2001\\u2002\\u2003\\u2004\\u2005\\u2006\\u2007\\u2008\\u2009\\u200A\\u202F\\u205F\\u3000\\u2028\\u2029\\uFEFF]'
@@ -1020,7 +995,7 @@ module.exports = Url;
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(7)))
 
 /***/ }),
-/* 12 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1105,7 +1080,7 @@ function escapeHtml(string) {
 
 
 /***/ }),
-/* 13 */
+/* 12 */
 /***/ (function(module, exports) {
 
 function _asyncIterator(iterable) {
@@ -1129,13 +1104,13 @@ function _asyncIterator(iterable) {
 module.exports = _asyncIterator;
 
 /***/ }),
-/* 14 */
+/* 13 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/toConsumableArray.js
-var toConsumableArray = __webpack_require__(6);
+var toConsumableArray = __webpack_require__(5);
 var toConsumableArray_default = /*#__PURE__*/__webpack_require__.n(toConsumableArray);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/classCallCheck.js
@@ -1143,7 +1118,7 @@ var classCallCheck = __webpack_require__(3);
 var classCallCheck_default = /*#__PURE__*/__webpack_require__.n(classCallCheck);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/createClass.js
-var createClass = __webpack_require__(4);
+var createClass = __webpack_require__(6);
 var createClass_default = /*#__PURE__*/__webpack_require__.n(createClass);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/defineProperty.js
@@ -1236,10 +1211,10 @@ function uuid() {
   });
 }
 // EXTERNAL MODULE: ./node_modules/js-base64/base64.js
-var base64 = __webpack_require__(10);
+var base64 = __webpack_require__(9);
 
 // EXTERNAL MODULE: ./node_modules/url-parse/index.js
-var url_parse = __webpack_require__(11);
+var url_parse = __webpack_require__(10);
 var url_parse_default = /*#__PURE__*/__webpack_require__.n(url_parse);
 
 // CONCATENATED MODULE: ./node_modules/tus-js-client/lib.esm/logger.js
@@ -2995,10 +2970,10 @@ var _window = window,
 var isSupported = browser_XMLHttpRequest && browser_Blob && typeof browser_Blob.prototype.slice === "function";
 
 // EXTERNAL MODULE: ./src/util.ts
-var util = __webpack_require__(1);
+var util = __webpack_require__(2);
 
 // EXTERNAL MODULE: ./node_modules/escape-html/index.js
-var escape_html = __webpack_require__(12);
+var escape_html = __webpack_require__(11);
 var escape_html_default = /*#__PURE__*/__webpack_require__.n(escape_html);
 
 // CONCATENATED MODULE: ./src/render_upload_file.ts
@@ -3109,6 +3084,8 @@ var render_upload_file_RenderUploadFile = /*#__PURE__*/function () {
         span.innerHTML = this.translations["Delete failed"];
         el.appendChild(span);
       }
+
+      this.enableDelete(index);
     }
   }, {
     key: "findFileDiv",
@@ -3204,6 +3181,35 @@ var render_upload_file_RenderUploadFile = /*#__PURE__*/function () {
         dropHint.remove();
       }
     }
+  }, {
+    key: "disableDelete",
+    value: function disableDelete(index) {
+      var deleteLink = this.findDeleteLink(index);
+
+      if (deleteLink) {
+        deleteLink.classList.add("dff-disabled");
+      }
+    }
+  }, {
+    key: "enableDelete",
+    value: function enableDelete(index) {
+      var deleteLink = this.findDeleteLink(index);
+
+      if (deleteLink) {
+        deleteLink.classList.remove("dff-disabled");
+      }
+    }
+  }, {
+    key: "findDeleteLink",
+    value: function findDeleteLink(index) {
+      var div = this.findFileDiv(index);
+
+      if (!div) {
+        return div;
+      }
+
+      return div.querySelector(".dff-delete");
+    }
   }]);
 
   return RenderUploadFile;
@@ -3211,15 +3217,15 @@ var render_upload_file_RenderUploadFile = /*#__PURE__*/function () {
 
 /* harmony default export */ var render_upload_file = (render_upload_file_RenderUploadFile);
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/regenerator/index.js
-var regenerator = __webpack_require__(2);
+var regenerator = __webpack_require__(1);
 var regenerator_default = /*#__PURE__*/__webpack_require__.n(regenerator);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/asyncToGenerator.js
-var asyncToGenerator = __webpack_require__(5);
+var asyncToGenerator = __webpack_require__(4);
 var asyncToGenerator_default = /*#__PURE__*/__webpack_require__.n(asyncToGenerator);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/asyncIterator.js
-var asyncIterator = __webpack_require__(13);
+var asyncIterator = __webpack_require__(12);
 var asyncIterator_default = /*#__PURE__*/__webpack_require__.n(asyncIterator);
 
 // CONCATENATED MODULE: ./src/drop_area.ts
@@ -3527,478 +3533,7 @@ var drop_area_DropArea = function DropArea(_ref5) {
 };
 
 /* harmony default export */ var drop_area = (drop_area_DropArea);
-// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/typeof.js
-var helpers_typeof = __webpack_require__(8);
-var typeof_default = /*#__PURE__*/__webpack_require__.n(helpers_typeof);
-
-// CONCATENATED MODULE: ./src/s3_uploader.ts
-
-
-
-
-
-function s3_uploader_ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
-
-function s3_uploader_objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { s3_uploader_ownKeys(Object(source), true).forEach(function (key) { defineProperty_default()(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { s3_uploader_ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
-
-// The following code is adpated from https://github.com/transloadit/uppy/blob/master/packages/%40uppy/aws-s3-multipart/src/MultipartUploader.js
-// which is released under a MIT License (https://github.com/transloadit/uppy/blob/master/LICENSE)
-var MB = 1024 * 1024;
-var s3_uploader_defaultOptions = {
-  limit: 1,
-  getChunkSize: function getChunkSize(file) {
-    return Math.ceil(file.size / 10000);
-  },
-  onStart: function onStart() {},
-  onProgress: function onProgress() {},
-  onPartComplete: function onPartComplete() {},
-  onSuccess: function onSuccess() {},
-  onError: function onError(err) {
-    throw err;
-  },
-  createMultipartUpload: function createMultipartUpload(file) {
-    // var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
-    var csrftoken = document.getElementsByName('csrfmiddlewaretoken')[0].value;
-    return fetch('s3upload/', {
-      method: 'post',
-      headers: {
-        accept: 'application/json',
-        'content-type': 'application/json',
-        "X-CSRFToken": csrftoken
-      },
-      body: JSON.stringify({
-        filename: file.name,
-        contentType: file.type
-      })
-    }).then(function (response) {
-      return response.json();
-    }).then(function (data) {
-      console.log("createMultipartUpload ", data);
-      return data;
-    });
-  },
-  listParts: function listParts(file, _ref) {
-    var key = _ref.key,
-        uploadId = _ref.uploadId;
-    var filename = encodeURIComponent(key);
-    var uploadIdEnc = encodeURIComponent(uploadId);
-    return fetch('s3upload/' + uploadIdEnc + "?key=" + filename, {
-      method: 'get'
-    }).then(function (response) {
-      return response.json();
-    }).then(function (data) {
-      console.log("listParts ", data);
-      return data["parts"];
-    });
-  },
-  prepareUploadPart: function prepareUploadPart(file, _ref2) {
-    var key = _ref2.key,
-        uploadId = _ref2.uploadId,
-        number = _ref2.number;
-    var filename = encodeURIComponent(key); // var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
-
-    var csrftoken = document.getElementsByName('csrfmiddlewaretoken')[0].value;
-    return fetch('s3upload/' + uploadId + "/" + parseInt(number) + "?key=" + filename, {
-      method: 'get',
-      headers: {
-        "X-CSRFToken": csrftoken
-      }
-    }).then(function (response) {
-      return response.json();
-    }).then(function (data) {
-      console.log("prepareUploadPart ", data);
-      return data;
-    });
-  },
-  completeMultipartUpload: function completeMultipartUpload(file, _ref3) {
-    var key = _ref3.key,
-        uploadId = _ref3.uploadId,
-        parts = _ref3.parts;
-    var filename = encodeURIComponent(key);
-    var uploadIdEnc = encodeURIComponent(uploadId); // var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
-
-    var csrftoken = document.getElementsByName('csrfmiddlewaretoken')[0].value;
-    return fetch('s3upload/' + uploadIdEnc + "/complete?key=" + filename, {
-      method: 'post',
-      headers: {
-        "X-CSRFToken": csrftoken
-      },
-      body: JSON.stringify({
-        parts: parts
-      })
-    }).then(function (response) {
-      return response.json();
-    }).then(function (data) {
-      console.log("Complete multi upload ", data);
-      return data;
-    });
-  },
-  abortMultipartUpload: function abortMultipartUpload(file, _ref4) {
-    var key = _ref4.key,
-        uploadId = _ref4.uploadId;
-    // const filename = encodeURIComponent(key)
-    var uploadIdEnc = encodeURIComponent(uploadId); // var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
-
-    var csrftoken = document.getElementsByName('csrfmiddlewaretoken')[0].value;
-    return fetch('s3upload/' + uploadIdEnc + "/", {
-      method: 'delete',
-      headers: {
-        "X-CSRFToken": csrftoken
-      }
-    }).then(function (response) {
-      return response.json();
-    }).then(function (data) {
-      return data;
-    });
-  }
-};
-
-function remove(arr, el) {
-  var i = arr.indexOf(el);
-  if (i !== -1) arr.splice(i, 1);
-}
-
-var s3_uploader_S3Uploader = /*#__PURE__*/function () {
-  function S3Uploader(file, options) {
-    classCallCheck_default()(this, S3Uploader);
-
-    this.options = s3_uploader_objectSpread(s3_uploader_objectSpread({}, s3_uploader_defaultOptions), options); // Use default `getChunkSize` if it was null or something
-
-    if (!this.options.getChunkSize) {
-      this.options.getChunkSize = s3_uploader_defaultOptions.getChunkSize;
-    }
-
-    this.file = file;
-    this.key = this.options.key || null;
-    this.uploadId = this.options.uploadId || null;
-    this.parts = []; // Do `this.createdPromise.then(OP)` to execute an operation `OP` _only_ if the
-    // upload was created already. That also ensures that the sequencing is right
-    // (so the `OP` definitely happens if the upload is created).
-    //
-    // This mostly exists to make `_abortUpload` work well: only sending the abort request if
-    // the upload was already created, and if the createMultipartUpload request is still in flight,
-    // aborting it immediately after it finishes.
-
-    this.createdPromise = Promise.reject(); // eslint-disable-line prefer-promise-reject-errors
-
-    this.isPaused = false;
-    this.chunks = null;
-    this.chunkState = null;
-    this.uploading = [];
-
-    this._initChunks();
-
-    this.createdPromise["catch"](function () {}); // silence uncaught rejection warning
-  }
-
-  createClass_default()(S3Uploader, [{
-    key: "_initChunks",
-    value: function _initChunks() {
-      var chunks = [];
-      var desiredChunkSize = this.options.getChunkSize(this.file); // at least 5MB per request, at most 10k requests
-
-      var minChunkSize = Math.max(5 * MB, Math.ceil(this.file.size / 10000));
-      var chunkSize = Math.max(desiredChunkSize, minChunkSize);
-
-      for (var i = 0; i < this.file.size; i += chunkSize) {
-        var end = Math.min(this.file.size, i + chunkSize);
-        chunks.push(this.file.slice(i, end));
-      }
-
-      this.chunks = chunks;
-      this.chunkState = chunks.map(function () {
-        return {
-          uploaded: 0,
-          busy: false,
-          done: false
-        };
-      });
-    }
-  }, {
-    key: "_createUpload",
-    value: function _createUpload() {
-      var _this = this;
-
-      this.createdPromise = Promise.resolve().then(function () {
-        return _this.options.createMultipartUpload(_this.file);
-      });
-      return this.createdPromise.then(function (result) {
-        var valid = typeof_default()(result) === 'object' && result && typeof result.uploadId === 'string' && typeof result.key === 'string';
-
-        if (!valid) {
-          throw new TypeError('AwsS3/Multipart: Got incorrect result from `createMultipartUpload()`, expected an object `{ uploadId, key }`.');
-        }
-
-        _this.key = result.key;
-        _this.uploadId = result.uploadId;
-
-        _this.options.onStart(result);
-
-        _this._uploadParts();
-      })["catch"](function (err) {
-        _this._onError(err);
-      });
-    }
-  }, {
-    key: "_resumeUpload",
-    value: function _resumeUpload() {
-      var _this2 = this;
-
-      return Promise.resolve().then(function () {
-        return _this2.options.listParts(_this2.file, {
-          uploadId: _this2.uploadId,
-          key: _this2.key
-        });
-      }).then(function (parts) {
-        parts.forEach(function (part) {
-          var i = part.PartNumber - 1;
-          _this2.chunkState[i] = {
-            uploaded: part.Size,
-            etag: part.ETag,
-            done: true
-          }; // Only add if we did not yet know about this part.
-
-          if (!_this2.parts.some(function (p) {
-            return p.PartNumber === part.PartNumber;
-          })) {
-            _this2.parts.push({
-              PartNumber: part.PartNumber,
-              ETag: part.ETag
-            });
-          }
-        });
-
-        _this2._uploadParts();
-      })["catch"](function (err) {
-        _this2._onError(err);
-      });
-    }
-  }, {
-    key: "_uploadParts",
-    value: function _uploadParts() {
-      var _this3 = this;
-
-      if (this.isPaused) return;
-      var need = this.options.limit - this.uploading.length;
-      if (need === 0) return; // All parts are uploaded.
-
-      if (this.chunkState.every(function (state) {
-        return state.done;
-      })) {
-        this._completeUpload();
-
-        return;
-      }
-
-      var candidates = [];
-
-      for (var i = 0; i < this.chunkState.length; i++) {
-        var state = this.chunkState[i];
-        if (state.done || state.busy) continue;
-        candidates.push(i);
-
-        if (candidates.length >= need) {
-          break;
-        }
-      }
-
-      candidates.forEach(function (index) {
-        _this3._uploadPart(index);
-      });
-    }
-  }, {
-    key: "_uploadPart",
-    value: function _uploadPart(index) {
-      var _this4 = this;
-
-      var body = this.chunks[index];
-      this.chunkState[index].busy = true;
-      return Promise.resolve().then(function () {
-        return _this4.options.prepareUploadPart(_this4.file, {
-          key: _this4.key,
-          uploadId: _this4.uploadId,
-          body: body,
-          number: index + 1
-        });
-      }).then(function (result) {
-        var valid = typeof_default()(result) === 'object' && result && typeof result.url === 'string';
-
-        if (!valid) {
-          throw new TypeError('AwsS3/Multipart: Got incorrect result from `prepareUploadPart()`, expected an object `{ url }`.');
-        }
-
-        return result;
-      }).then(function (_ref5) {
-        var url = _ref5.url,
-            headers = _ref5.headers;
-
-        _this4._uploadPartBytes(index, url, headers);
-      }, function (err) {
-        _this4._onError(err);
-      });
-    }
-  }, {
-    key: "_onPartProgress",
-    value: function _onPartProgress(index, sent, total) {
-      this.chunkState[index].uploaded = sent;
-      var totalUploaded = this.chunkState.reduce(function (n, c) {
-        return n + c.uploaded;
-      }, 0);
-      this.options.onProgress(totalUploaded, this.file.size);
-    }
-  }, {
-    key: "_onPartComplete",
-    value: function _onPartComplete(index, etag) {
-      this.chunkState[index].etag = etag;
-      this.chunkState[index].done = true;
-      var part = {
-        PartNumber: index + 1,
-        ETag: etag
-      };
-      this.parts.push(part);
-      this.options.onPartComplete(part);
-
-      this._uploadParts();
-    }
-  }, {
-    key: "_uploadPartBytes",
-    value: function _uploadPartBytes(index, url, headers) {
-      var _this5 = this;
-
-      var body = this.chunks[index];
-      var xhr = new XMLHttpRequest();
-      xhr.open('PUT', url, true);
-
-      if (headers) {
-        Object.keys(headers).map(function (key) {
-          xhr.setRequestHeader(key, headers[key]);
-        });
-      }
-
-      xhr.responseType = 'text';
-      this.uploading.push(xhr);
-      xhr.upload.addEventListener('progress', function (ev) {
-        if (!ev.lengthComputable) return;
-
-        _this5._onPartProgress(index, ev.loaded, ev.total);
-      });
-      xhr.addEventListener('abort', function (ev) {
-        remove(_this5.uploading, ev.target);
-        _this5.chunkState[index].busy = false;
-      });
-      xhr.addEventListener('load', function (ev) {
-        remove(_this5.uploading, ev.target);
-        _this5.chunkState[index].busy = false;
-
-        if (ev.target.status < 200 || ev.target.status >= 300) {
-          _this5._onError(new Error('Non 2xx'));
-
-          return;
-        }
-
-        _this5._onPartProgress(index, body.size, body.size); // NOTE This must be allowed by CORS.
-
-
-        var etag = ev.target.getResponseHeader('ETag');
-
-        if (etag === null) {
-          _this5._onError(new Error('AwsS3/Multipart: Could not read the ETag header. This likely means CORS is not configured correctly on the S3 Bucket. Seee https://uppy.io/docs/aws-s3-multipart#S3-Bucket-Configuration for instructions.'));
-
-          return;
-        }
-
-        _this5._onPartComplete(index, etag);
-      });
-      xhr.addEventListener('error', function (ev) {
-        remove(_this5.uploading, ev.target);
-        _this5.chunkState[index].busy = false;
-        var error = new Error('Unknown error');
-        error.source = ev.target;
-
-        _this5._onError(error);
-      });
-      xhr.send(body);
-    }
-  }, {
-    key: "_completeUpload",
-    value: function _completeUpload() {
-      var _this6 = this;
-
-      // Parts may not have completed uploading in sorted order, if limit > 1.
-      this.parts.sort(function (a, b) {
-        return a.PartNumber - b.PartNumber;
-      });
-      return Promise.resolve().then(function () {
-        return _this6.options.completeMultipartUpload(_this6.file, {
-          key: _this6.key,
-          uploadId: _this6.uploadId,
-          parts: _this6.parts
-        });
-      }).then(function (result) {
-        _this6.options.onSuccess(result);
-      }, function (err) {
-        _this6._onError(err);
-      });
-    }
-  }, {
-    key: "_abortUpload",
-    value: function _abortUpload() {
-      var _this7 = this;
-
-      this.uploading.slice().forEach(function (xhr) {
-        xhr.abort();
-      });
-      this.createdPromise.then(function () {
-        _this7.options.abortMultipartUpload(_this7.file, {
-          key: _this7.key,
-          uploadId: _this7.uploadId
-        });
-      }, function () {// if the creation failed we do not need to abort
-      });
-      this.uploading = [];
-    }
-  }, {
-    key: "_onError",
-    value: function _onError(err) {
-      this.options.onError(err);
-    }
-  }, {
-    key: "start",
-    value: function start() {
-      this.isPaused = false;
-
-      if (this.uploadId) {
-        this._resumeUpload();
-      } else {
-        this._createUpload();
-      }
-    }
-  }, {
-    key: "pause",
-    value: function pause() {
-      var inProgress = this.uploading.slice();
-      inProgress.forEach(function (xhr) {
-        xhr.abort();
-      });
-      this.isPaused = true;
-    }
-  }, {
-    key: "abort",
-    value: function abort() {
-      var opts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-      var really = opts.really || false;
-      if (!really) return this.pause();
-
-      this._abortUpload();
-    }
-  }]);
-
-  return S3Uploader;
-}();
-
-/* harmony default export */ var s3_uploader = (s3_uploader_S3Uploader);
 // CONCATENATED MODULE: ./src/upload_file.ts
-
 
 
 
@@ -4072,52 +3607,24 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
             uploadUrl = _this.uploadUrl;
         var filename = file.name;
         var uploadIndex = uploads.length;
-        var upload = null;
-        var uploadMethod = document.getElementById("uploadMethod");
-
-        if (uploadMethod != null && uploadMethod.value == 's3direct') {
-          upload = new s3_uploader(file, {
-            // .bind to pass the file object to each handler.
-            // createMultipartUpload: this.createMultipartUpload.bind(this,file) ,
-            // listParts: this.listParts.bind(this,file) ,
-            // prepareUploadPart: this.prepareUploadPart.bind(this,file) ,
-            // completeMultipartUpload: this.completeMultipartUpload.bind(this,file),
-            // abortMultipartUpload: this.abortMultipartUpload.bind(this,file),
-            getChunkSize: null,
-            // onStart,
-            onProgress: function onProgress(bytesUploaded, bytesTotal) {
-              return _this.handleProgress(uploadIndex, bytesUploaded, bytesTotal);
-            },
-            onError: function onError(error) {
-              return _this.handleError(uploadIndex, error);
-            },
-            onSuccess: function onSuccess() {
-              return _this.handleSuccess(uploadIndex, upload.file.size);
-            },
-            retryDelays: _this.retryDelays || [0, 1000, 3000, 5000] // onPartComplete,
-
-          });
-        } else {
-          upload = new browser_Upload(file, {
-            endpoint: uploadUrl,
-            metadata: {
-              fieldName: fieldName,
-              filename: filename,
-              formId: formId
-            },
-            onError: function onError(error) {
-              return _this.handleError(uploadIndex, error);
-            },
-            onProgress: function onProgress(bytesUploaded, bytesTotal) {
-              return _this.handleProgress(uploadIndex, bytesUploaded, bytesTotal);
-            },
-            onSuccess: function onSuccess() {
-              return _this.handleSuccess(uploadIndex, upload.file.size);
-            },
-            retryDelays: _this.retryDelays || [0, 1000, 3000, 5000]
-          });
-        }
-
+        var upload = new browser_Upload(file, {
+          endpoint: uploadUrl,
+          metadata: {
+            fieldName: fieldName,
+            filename: filename,
+            formId: formId
+          },
+          onError: function onError(error) {
+            return _this.handleError(uploadIndex, error);
+          },
+          onProgress: function onProgress(bytesUploaded, bytesTotal) {
+            return _this.handleProgress(uploadIndex, bytesUploaded, bytesTotal);
+          },
+          onSuccess: function onSuccess() {
+            return _this.handleSuccess(uploadIndex, upload.file.size);
+          },
+          retryDelays: _this.retryDelays || [0, 1000, 3000, 5000]
+        });
         upload.start();
         renderer.addNewUpload(filename, uploadIndex);
 
@@ -4144,7 +3651,7 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
         return parseInt(dataIndex, 10);
       };
 
-      if (target.classList.contains("dff-delete")) {
+      if (target.classList.contains("dff-delete") && !target.classList.contains("dff-disabled")) {
         var uploadIndex = getUploadIndex();
 
         if (uploadIndex !== null) {
@@ -4195,9 +3702,6 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
 
     defineProperty_default()(this, "handleSuccess", function (uploadIndex, uploadedSize) {
       var renderer = _this.renderer;
-
-      _this.updateS3UploadedInput();
-
       renderer.clearInput();
       renderer.setSuccess(uploadIndex, uploadedSize);
       var onSuccess = _this.callbacks.onSuccess;
@@ -4261,11 +3765,11 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
             size = file.size;
         renderer.addUploadedFile(name, i, size);
 
-        if (!(file instanceof browser_Upload) && !(file instanceof s3_uploader)) {
+        if (file.placeholder) {
           _this2.uploads.push({
             id: id,
             name: name,
-            placeholder: file.placeholder,
+            placeholder: true,
             size: size
           });
         } else {
@@ -4296,12 +3800,8 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
     value: function handleDelete(uploadIndex) {
       var upload = this.uploads[uploadIndex];
 
-      if (upload instanceof browser_Upload) {
+      if (upload instanceof browser_Upload || upload.url) {
         this.deleteFromServer(uploadIndex);
-      } else if (upload instanceof s3_uploader || !upload.placeholder) {
-        // upload could be a S3Uploader object, or a UploadedFile
-        // with placeholder set to false after form reload
-        this.deleteS3Uploaded(uploadIndex);
       } else {
         this.deletePlaceholder(uploadIndex);
       }
@@ -4310,9 +3810,8 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
     key: "deleteUpload",
     value: function deleteUpload(uploadIndex) {
       var upload = this.uploads[uploadIndex];
-      this.renderer.deleteFile(uploadIndex); // delete this.uploads[uploadIndex];
-
-      this.uploads.splice(uploadIndex, 1);
+      this.renderer.deleteFile(uploadIndex);
+      delete this.uploads[uploadIndex];
       this.checkDropHint();
       var onDelete = this.callbacks.onDelete;
 
@@ -4332,6 +3831,7 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
         return;
       }
 
+      this.renderer.disableDelete(uploadIndex);
       var xhr = new window.XMLHttpRequest();
       xhr.open("DELETE", url);
 
@@ -4351,12 +3851,6 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
     value: function deletePlaceholder(uploadIndex) {
       this.deleteUpload(uploadIndex);
       this.updatePlaceholderInput();
-    }
-  }, {
-    key: "deleteS3Uploaded",
-    value: function deleteS3Uploaded(uploadIndex) {
-      this.deleteUpload(uploadIndex);
-      this.updateS3UploadedInput();
     }
   }, {
     key: "handleCancel",
@@ -4397,39 +3891,12 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
     key: "updatePlaceholderInput",
     value: function updatePlaceholderInput() {
       var placeholdersInfo = this.uploads.filter(function (upload) {
-        return !(upload instanceof browser_Upload) && !(upload instanceof s3_uploader) && upload.placeholder;
+        return !(upload instanceof browser_Upload) && upload.placeholder;
       });
       var input = Object(util["a" /* findInput */])(this.form, Object(util["e" /* getPlaceholderFieldName */])(this.fieldName, this.prefix), this.prefix);
 
       if (input) {
         input.value = JSON.stringify(placeholdersInfo);
-      }
-    }
-  }, {
-    key: "updateS3UploadedInput",
-    value: function updateS3UploadedInput() {
-      // upload could be
-      // 1. A regular Upload object
-      // 2. A map object with .placeholder == true
-      // 3. A map object with .placeholder == false, created when the form is reloaded
-      // 4. A S3Uploader object that will need to be saved as UploadedFuke
-      //
-      var uploadedInfo = this.uploads.filter(function (upload) {
-        return !(upload instanceof browser_Upload) && !(upload instanceof s3_uploader) && !upload.placeholder;
-      }).concat(this.uploads.filter(function (upload) {
-        return upload instanceof s3_uploader;
-      }).map(function (upload) {
-        return {
-          id: upload.uploadId,
-          name: upload.file.name,
-          placeholder: false,
-          size: upload.file.size
-        };
-      }));
-      var input = Object(util["a" /* findInput */])(this.form, Object(util["f" /* getS3UploadedFieldName */])(this.fieldName, this.prefix), this.prefix);
-
-      if (input) {
-        input.value = JSON.stringify(uploadedInfo);
       }
     }
   }]);
@@ -4440,22 +3907,22 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
 /* harmony default export */ var upload_file = __webpack_exports__["a"] = (upload_file_UploadFile);
 
 /***/ }),
-/* 15 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(16);
+module.exports = __webpack_require__(15);
 
 
 /***/ }),
-/* 16 */
+/* 15 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* WEBPACK VAR INJECTION */(function(global) {/* harmony import */ var _babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(0);
 /* harmony import */ var _babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _upload_file__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(14);
-/* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(1);
+/* harmony import */ var _upload_file__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(13);
+/* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(2);
 
 
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
@@ -4504,16 +3971,6 @@ var initUploadFields = function initUploadFields(form) {
     return JSON.parse(data);
   };
 
-  var getS3Uploads = function getS3Uploads(fieldName) {
-    var data = getInputValue(Object(_util__WEBPACK_IMPORTED_MODULE_2__[/* getS3UploadedFieldName */ "f"])(fieldName, getPrefix()));
-
-    if (!data) {
-      return [];
-    }
-
-    return JSON.parse(data);
-  };
-
   var uploadUrl = getInputValue("upload_url");
   var formId = getInputValue("form_id");
   var skipRequired = options.skipRequired || false;
@@ -4538,7 +3995,7 @@ var initUploadFields = function initUploadFields(form) {
 
     var fieldName = input.name;
     var multiple = input.multiple;
-    var initial = getInitialFiles(container).concat(getPlaceholders(fieldName)).concat(getS3Uploads(fieldName));
+    var initial = getInitialFiles(container).concat(getPlaceholders(fieldName));
     var dataTranslations = container.getAttribute("data-translations");
     var translations = dataTranslations ? JSON.parse(dataTranslations) : {};
     var supportDropArea = !(options.supportDropArea === false);
@@ -4596,10 +4053,10 @@ global.initUploadFields = initUploadFields; // eslint-disable-line  @typescript-
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(7)))
 
 /***/ }),
-/* 17 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var arrayLikeToArray = __webpack_require__(9);
+var arrayLikeToArray = __webpack_require__(8);
 
 function _arrayWithoutHoles(arr) {
   if (Array.isArray(arr)) return arrayLikeToArray(arr);
@@ -4608,7 +4065,7 @@ function _arrayWithoutHoles(arr) {
 module.exports = _arrayWithoutHoles;
 
 /***/ }),
-/* 18 */
+/* 17 */
 /***/ (function(module, exports) {
 
 function _iterableToArray(iter) {
@@ -4618,10 +4075,10 @@ function _iterableToArray(iter) {
 module.exports = _iterableToArray;
 
 /***/ }),
-/* 19 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var arrayLikeToArray = __webpack_require__(9);
+var arrayLikeToArray = __webpack_require__(8);
 
 function _unsupportedIterableToArray(o, minLen) {
   if (!o) return;
@@ -4635,7 +4092,7 @@ function _unsupportedIterableToArray(o, minLen) {
 module.exports = _unsupportedIterableToArray;
 
 /***/ }),
-/* 20 */
+/* 19 */
 /***/ (function(module, exports) {
 
 function _nonIterableSpread() {
@@ -4645,7 +4102,7 @@ function _nonIterableSpread() {
 module.exports = _nonIterableSpread;
 
 /***/ }),
-/* 21 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4690,7 +4147,7 @@ module.exports = function required(port, protocol) {
 
 
 /***/ }),
-/* 22 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4815,7 +4272,7 @@ exports.parse = querystring;
 
 
 /***/ }),
-/* 23 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -4835,6 +4292,24 @@ var runtime = (function (exports) {
   var iteratorSymbol = $Symbol.iterator || "@@iterator";
   var asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator";
   var toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
+
+  function define(obj, key, value) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+    return obj[key];
+  }
+  try {
+    // IE 8 has a broken Object.defineProperty that only works on DOM objects.
+    define({}, "");
+  } catch (err) {
+    define = function(obj, key, value) {
+      return obj[key] = value;
+    };
+  }
 
   function wrap(innerFn, outerFn, self, tryLocsList) {
     // If outerFn provided and outerFn.prototype is a Generator, then outerFn.prototype instanceof Generator.
@@ -4906,16 +4381,19 @@ var runtime = (function (exports) {
     Generator.prototype = Object.create(IteratorPrototype);
   GeneratorFunction.prototype = Gp.constructor = GeneratorFunctionPrototype;
   GeneratorFunctionPrototype.constructor = GeneratorFunction;
-  GeneratorFunctionPrototype[toStringTagSymbol] =
-    GeneratorFunction.displayName = "GeneratorFunction";
+  GeneratorFunction.displayName = define(
+    GeneratorFunctionPrototype,
+    toStringTagSymbol,
+    "GeneratorFunction"
+  );
 
   // Helper for defining the .next, .throw, and .return methods of the
   // Iterator interface in terms of a single ._invoke method.
   function defineIteratorMethods(prototype) {
     ["next", "throw", "return"].forEach(function(method) {
-      prototype[method] = function(arg) {
+      define(prototype, method, function(arg) {
         return this._invoke(method, arg);
-      };
+      });
     });
   }
 
@@ -4934,9 +4412,7 @@ var runtime = (function (exports) {
       Object.setPrototypeOf(genFun, GeneratorFunctionPrototype);
     } else {
       genFun.__proto__ = GeneratorFunctionPrototype;
-      if (!(toStringTagSymbol in genFun)) {
-        genFun[toStringTagSymbol] = "GeneratorFunction";
-      }
+      define(genFun, toStringTagSymbol, "GeneratorFunction");
     }
     genFun.prototype = Object.create(Gp);
     return genFun;
@@ -5206,7 +4682,7 @@ var runtime = (function (exports) {
   // unified ._invoke helper method.
   defineIteratorMethods(Gp);
 
-  Gp[toStringTagSymbol] = "Generator";
+  define(Gp, toStringTagSymbol, "Generator");
 
   // A Generator should always return itself as the iterator object when the
   // @@iterator function is called on it. Some browsers' implementations of the

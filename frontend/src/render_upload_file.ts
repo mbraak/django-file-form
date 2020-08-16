@@ -109,6 +109,8 @@ class RenderUploadFile {
 
       el.appendChild(span);
     }
+
+    this.enableDelete(index);
   }
 
   findFileDiv(index: number): Element | null {
@@ -200,6 +202,31 @@ class RenderUploadFile {
     if (dropHint) {
       dropHint.remove();
     }
+  }
+
+  disableDelete(index: number): void {
+    const deleteLink = this.findDeleteLink(index);
+
+    if (deleteLink) {
+      deleteLink.classList.add("dff-disabled");
+    }
+  }
+
+  enableDelete(index: number): void {
+    const deleteLink = this.findDeleteLink(index);
+
+    if (deleteLink) {
+      deleteLink.classList.remove("dff-disabled");
+    }
+  }
+
+  findDeleteLink(index: number): HTMLElement | null {
+    const div = this.findFileDiv(index);
+    if (!div) {
+      return div;
+    }
+
+    return div.querySelector(".dff-delete");
   }
 }
 
