@@ -307,8 +307,7 @@ class UploadFile {
     const upload = this.uploads[uploadIndex];
 
     this.renderer.deleteFile(uploadIndex);
-    // delete this.uploads[uploadIndex];
-    this.uploads.splice(uploadIndex, 1)
+    delete this.uploads[uploadIndex];
     this.checkDropHint();
 
     const { onDelete } = this.callbacks;
