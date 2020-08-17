@@ -5,38 +5,39 @@ const MB = 1024 * 1024
 
 const defaultOptions = {
   limit: 1,
-  getChunkSize (file) {
+  getChunkSize (file:any) {
     return Math.ceil(file.size / 10000)
   },
   onStart () {},
   onProgress () {},
   onPartComplete () {},
   onSuccess () {},
-  onError (err) {
+  onError (err:any) {
     throw err
   },
-  createMultipartUpload(file){
+  createMultipartUpload(file:any){
       // var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
-      var csrftoken = document.getElementsByName('csrfmiddlewaretoken')[0].value;
-      return fetch('s3upload/', {
+    var csrftoken = (<HTMLInputElement>document.getElementsByName('csrfmiddlewaretoken')[0]).value;
+    var headers = new Headers({
+      accept: 'application/json',
+      'content-type': 'application/json',
+      "X-CSRFToken": csrftoken
+    })
+    return fetch('s3upload/', {
       method: 'post',
-      headers: {
-        accept: 'application/json',
-        'content-type': 'application/json',
-        "X-CSRFToken": csrftoken
-      },
+      headers: headers,
       body: JSON.stringify({
         filename: file.name,
         contentType: file.type
       })
-    }).then((response) => {
+    } ).then((response) => {
       return response.json()
     }).then((data)=>{
       console.log("createMultipartUpload ",data)
       return data
     })
    },
-   listParts(file, {key,uploadId}){
+  listParts(file: any, { key, uploadId }:{key:any,uploadId:any}){
         const filename=encodeURIComponent(key)
         const uploadIdEnc = encodeURIComponent(uploadId)
           return fetch('s3upload/'+uploadIdEnc+"?key="+filename,{
@@ -48,15 +49,14 @@ const defaultOptions = {
           return data["parts"]
         })
       },
-   prepareUploadPart(file, {key,uploadId,number}){
+  prepareUploadPart(file:any, { key, uploadId, number }:{key:any,uploadId:any,number:any}){
         const filename = encodeURIComponent(key)
          // var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
-         var csrftoken = document.getElementsByName('csrfmiddlewaretoken')[0].value;
+     var csrftoken = (<HTMLInputElement>document.getElementsByName('csrfmiddlewaretoken')[0]).value;
+     var headers = new Headers({ "X-CSRFToken": csrftoken})
         return fetch('s3upload/'+uploadId+"/"+parseInt(number)+"?key="+filename,{
             method: 'get',
-            headers: {
-                "X-CSRFToken": csrftoken
-            }
+            headers: headers
         }).then((response)=>{
           return response.json()
         }).then((data)=>{
@@ -65,16 +65,17 @@ const defaultOptions = {
         })
 
       },
-    completeMultipartUpload(file, { key, uploadId, parts }){
+  completeMultipartUpload(file:any, { key, uploadId, parts }:{ key:any, uploadId:any, parts:any }){
       const filename = encodeURIComponent(key)
       const uploadIdEnc = encodeURIComponent(uploadId)
       // var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
-      var csrftoken = document.getElementsByName('csrfmiddlewaretoken')[0].value;
+      var csrftoken = (<HTMLInputElement>document.getElementsByName('csrfmiddlewaretoken')[0]).value;
+      var headers = new Headers({
+        "X-CSRFToken": csrftoken
+      })
       return fetch('s3upload/'+uploadIdEnc+"/complete?key="+filename,{
             method: 'post',
-            headers: {
-                "X-CSRFToken": csrftoken
-            },
+            headers: headers,
             body: JSON.stringify({
               parts: parts
            })
@@ -86,16 +87,17 @@ const defaultOptions = {
         })
 
       },
-    abortMultipartUpload(file, {key, uploadId}){
+  abortMultipartUpload(file:any, { key, uploadId }:{key:any, uploadId:any}){
       // const filename = encodeURIComponent(key)
       const uploadIdEnc = encodeURIComponent(uploadId)
         // var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
-      var csrftoken = document.getElementsByName('csrfmiddlewaretoken')[0].value;
+      var csrftoken = (<HTMLInputElement>document.getElementsByName('csrfmiddlewaretoken')[0]).value;
+      var headers = new Headers({
+        "X-CSRFToken": csrftoken
+      })
       return fetch('s3upload/'+uploadIdEnc+"/",{
             method: 'delete',
-            headers: {
-                "X-CSRFToken": csrftoken
-            }
+            headers: headers,
         }).then((response)=>{
           return response.json()
         }).then((data)=>{
@@ -104,13 +106,23 @@ const defaultOptions = {
     }
 }
 
-function remove (arr, el) {
+function remove (arr:any, el:any) {
   const i = arr.indexOf(el)
   if (i !== -1) arr.splice(i, 1)
 }
 
 class S3Uploader {
-  constructor (file, options) {
+  createdPromise: any;
+  uploading: any[];
+  chunkState: any[];
+  chunks: any[];
+  isPaused: boolean;
+  parts: any[];
+  uploadId: any;
+  key: any;
+  file: any;
+  options: any;
+  constructor (file:any, options:any) {
     this.options = {
       ...defaultOptions,
       ...options
@@ -119,7 +131,7 @@ class S3Uploader {
     if (!this.options.getChunkSize) {
       this.options.getChunkSize = defaultOptions.getChunkSize
     }
-
+   
     this.file = file
 
     this.key = this.options.key || null
@@ -135,14 +147,16 @@ class S3Uploader {
     // aborting it immediately after it finishes.
     this.createdPromise = Promise.reject() // eslint-disable-line prefer-promise-reject-errors
     this.isPaused = false
-    this.chunks = null
-    this.chunkState = null
+    this.chunks = []
+    this.chunkState = []
     this.uploading = []
 
     this._initChunks()
 
     this.createdPromise.catch(() => {}) // silence uncaught rejection warning
   }
+
+  
 
   _initChunks () {
     const chunks = []
@@ -165,10 +179,10 @@ class S3Uploader {
   }
 
   _createUpload () {
-    this.createdPromise = Promise.resolve().then(() =>
+    this.createdPromise = new Promise((resolve)=>resolve()).then(() =>
       this.options.createMultipartUpload(this.file)
     )
-    return this.createdPromise.then((result) => {
+    return this.createdPromise.then((result:any) => {
       const valid = typeof result === 'object' && result &&
         typeof result.uploadId === 'string' &&
         typeof result.key === 'string'
@@ -181,7 +195,7 @@ class S3Uploader {
 
       this.options.onStart(result)
       this._uploadParts()
-    }).catch((err) => {
+    }).catch((err:any) => {
       this._onError(err)
     })
   }
@@ -193,7 +207,7 @@ class S3Uploader {
         key: this.key
       })
     ).then((parts) => {
-      parts.forEach((part) => {
+      parts.forEach((part:any) => {
         const i = part.PartNumber - 1
         this.chunkState[i] = {
           uploaded: part.Size,
@@ -243,7 +257,7 @@ class S3Uploader {
     })
   }
 
-  _uploadPart (index) {
+  _uploadPart (index:number) {
     const body = this.chunks[index]
     this.chunkState[index].busy = true
 
@@ -268,14 +282,14 @@ class S3Uploader {
     })
   }
 
-  _onPartProgress (index, sent, total) {
+  _onPartProgress (index:number, sent:any, total:any) {
     this.chunkState[index].uploaded = sent
 
     const totalUploaded = this.chunkState.reduce((n, c) => n + c.uploaded, 0)
     this.options.onProgress(totalUploaded, this.file.size)
   }
 
-  _onPartComplete (index, etag) {
+  _onPartComplete (index:number, etag:string) {
     this.chunkState[index].etag = etag
     this.chunkState[index].done = true
 
@@ -290,12 +304,12 @@ class S3Uploader {
     this._uploadParts()
   }
 
-  _uploadPartBytes (index, url, headers) {
+  _uploadPartBytes (index:number, url:string, headers:any[]) {
     const body = this.chunks[index]
     const xhr = new XMLHttpRequest()
     xhr.open('PUT', url, true)
     if (headers) {
-      Object.keys(headers).map((key) => {
+      Object.keys(headers).map((key:any) => {
         xhr.setRequestHeader(key, headers[key])
       })
     }
@@ -314,7 +328,7 @@ class S3Uploader {
       this.chunkState[index].busy = false
     })
 
-    xhr.addEventListener('load', (ev) => {
+    xhr.addEventListener('load', (ev:any) => {
       remove(this.uploading, ev.target)
       this.chunkState[index].busy = false
 
@@ -339,7 +353,7 @@ class S3Uploader {
       remove(this.uploading, ev.target)
       this.chunkState[index].busy = false
       const error = new Error('Unknown error')
-      error.source = ev.target
+      // error.source = ev.target
       this._onError(error)
     })
     xhr.send(body)
@@ -377,7 +391,7 @@ class S3Uploader {
     this.uploading = []
   }
 
-  _onError (err) {
+  _onError (err:any) {
     this.options.onError(err)
   }
 
@@ -398,7 +412,7 @@ class S3Uploader {
     this.isPaused = true
   }
 
-  abort (opts = {}) {
+  abort (opts:any = {}) {
     const really = opts.really || false
 
     if (!really) return this.pause()

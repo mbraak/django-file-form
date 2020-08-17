@@ -9,7 +9,7 @@ import S3Uploader from "./s3_uploader"
 export interface InitialFile {
   id: string;
   name: string;
-  placeholder?: boolean;
+  placeholder?: boolean | undefined;
   size: number;
   url?: string;
 }
@@ -17,14 +17,14 @@ export interface InitialFile {
 export interface UploadedFile {
   id: string;
   name: string;
-  placeholder: boolean;
+  placeholder: boolean | undefined;
   size: number;
 }
 
 export type Translations = { [key: string]: string };
 
 export interface Callbacks {
-  onDelete?: (upload: Upload | UploadedFile) => void;
+  onDelete?: (upload: Upload | UploadedFile | S3Uploader) => void;
   onError?: (error: Error, upload: Upload) => void;
   onProgress?: (
     bytesUploaded: number,
@@ -46,7 +46,7 @@ class UploadFile {
   supportDropArea: boolean;
   uploadIndex: number;
   uploadUrl: string;
-  uploads: (Upload | UploadedFile)[];
+  uploads: (Upload | UploadedFile | S3Uploader)[];
 
   constructor({
     callbacks,
@@ -159,8 +159,8 @@ class UploadFile {
       const { fieldName, formId, renderer, uploads, uploadUrl } = this;
       const filename = file.name;
       const uploadIndex = uploads.length;
-      let upload = null;
-      let uploadMethod = document.getElementById("uploadMethod");
+      let upload:any = null;
+      let uploadMethod = (<HTMLInputElement>document.getElementById("uploadMethod"));
       if (uploadMethod != null && uploadMethod.value == 's3direct') {
         upload = new S3Uploader(file, {
           // .bind to pass the file object to each handler.
@@ -409,6 +409,7 @@ class UploadFile {
       this.uploads.filter(
         upload => upload instanceof S3Uploader
       ).map(upload =>  {
+        upload=<S3Uploader>upload
         return {
           id: upload.uploadId,
           name: upload.file.name,
