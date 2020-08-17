@@ -221,19 +221,39 @@ AWS_S3_ENDPOINT_URL
 or through environment variables with the same names as described
 in [`django-storage` documentation](https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html).
 
+The following CORS settings are also needed in `settings`
+```
+CSP_DEFAULT_SRC = ("'none'",)
+CSP_STYLE_SRC = ("'self'")
+CSP_SCRIPT_SRC = ("'self'",)
+CSP_FONT_SRC = ("'self'")
+CSP_IMG_SRC = ("'self'",)
+CSP_CONNECT_SRC = ("'self'", AWS_S3_ENDPOINT_URL)
+```
+where `AWS_S3_ENDPOINT_URL` is the AWS endpoint defined above.
+
 Then, in the View class, you will need to set
 
   ```
-  direct_to_s3 = True
+  s3_upload_dir = "user_or_form_specific_id"
   ```
 
 to inform the frontend to use the AJAX uploader for S3.
 
-The files will be uploaded to `FILE_FORM_UPLOAD_DIR` of the specified bucket,
-and returned as `S3Boto3StorageFile` with `S3Boto3Storage` as its underlying
-storage, and attribute `is_s3direct=True` and `is_placeholder=False` for you
-to check the type of files. Reading from these objects will download the files
-from S3.
+The files will be uploaded to
+
+```
+${FILE_FORM_UPLOAD_DIR}/${s3_upload_dir}/
+````
+
+FIXME: `s3_upload_dir` is only a flag now, the folder is not used.
+
+in the specified S3 bucket, where `s3_upload_dir` can be empty or a directory
+specific to user or form to avoid conflicts on the AWS side. After form submission,
+the files will be returned as `S3Boto3StorageFile` with `S3Boto3Storage`
+as its underlying storage with attributes `is_s3direct=True` and `is_placeholder=False`
+to determine the type of returned objects. Reading from these objects will
+download the files from S3.
 
 ## Upgrade from version 1.0 (to 2.0)
 

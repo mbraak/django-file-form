@@ -73,7 +73,7 @@ class S3ExampleForm(BaseForm):
         )
         for f in self.cleaned_data['input_file']:
             assert f.is_s3direct
-            # download from S23
+            # download from S3
             ExampleFile.objects.create(
                 example=example,
                 input_file=f

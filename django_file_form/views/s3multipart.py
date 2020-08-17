@@ -36,124 +36,130 @@ class s3multipart:
 
     @classmethod
     def get_presigned_url(cls, request):
-        if request.method == 'POST':
-            # check if the post request has the file part
-            client = cls.get_client()
-            json_body = json.loads(request.body)
-            fileName = json_body["filename"]
-            contentType = json_body["contentType"]
-            key = cls.file_form_upload_dir + "/" + fileName
+        if request.method != 'POST':
+            return
+        # check if the post request has the file part
+        client = cls.get_client()
+        json_body = json.loads(request.body)
+        fileName = json_body["filename"]
+        contentType = json_body["contentType"]
+        key = cls.file_form_upload_dir + "/" + fileName
 
-            response = client.generate_presigned_url(
-                ClientMethod='put_object',
-                Params={
-                    'Bucket':
-                        cls.aws_storage_bucket_name
-                        or lookup_env(['DJANGO_AWS_STORAGE_BUCKET_NAME']),
-                    'Key':
-                        key,
-                    'ContentType':
-                        contentType,
-                    "Body":
-                        ''
-                },
-                ExpiresIn=3600,
-            )
-            return JsonResponse({
-                'method': 'PUT',
-                'url': response,
-                'fields': [],
-                'header': contentType
-            })
+        response = client.generate_presigned_url(
+            ClientMethod='put_object',
+            Params={
+                'Bucket':
+                    cls.aws_storage_bucket_name
+                    or lookup_env(['DJANGO_AWS_STORAGE_BUCKET_NAME']),
+                'Key':
+                    key,
+                'ContentType':
+                    contentType,
+                "Body":
+                    ''
+            },
+            ExpiresIn=3600,
+        )
+        return JsonResponse({
+            'method': 'PUT',
+            'url': response,
+            'fields': [],
+            'header': contentType
+        })
 
     @classmethod
     def createMultipartUpload(cls, request):
-        if request.method == 'POST':
-            client = cls.get_client()
-            json_body = json.loads(request.body)
-            fileName = json_body["filename"]
-            key = cls.file_form_upload_dir + "/" + fileName
-            contentType = json_body["contentType"]
+        if request.method != 'POST':
+            return
+        client = cls.get_client()
+        json_body = json.loads(request.body)
+        fileName = json_body["filename"]
+        key = cls.file_form_upload_dir + "/" + fileName
+        contentType = json_body["contentType"]
 
-            response = client.create_multipart_upload(
-                Bucket=cls.aws_storage_bucket_name or
-                lookup_env(['DJANGO_AWS_STORAGE_BUCKET_NAME']),
-                Key=key,
-                ContentType=contentType,
-            )
-            print("Create Multipart ", response)
-            return JsonResponse({
-                'key': response["Key"],
-                'uploadId': response["UploadId"]
-            })
+        response = client.create_multipart_upload(
+            Bucket=cls.aws_storage_bucket_name or
+            lookup_env(['DJANGO_AWS_STORAGE_BUCKET_NAME']),
+            Key=key,
+            ContentType=contentType,
+        )
+        print("Create Multipart ", response)
+        return JsonResponse({
+            'key': response["Key"],
+            'uploadId': response["UploadId"]
+        })
 
     @classmethod
     def getUploadedParts(cls, request, uploadId):
-        if request.method == 'GET':
-            client = cls.get_client()
-            key = request.GET['key']
+        if request.method != 'GET':
+            return
+        client = cls.get_client()
+        key = request.GET['key']
 
-            response = client.list_parts(
-                Bucket=cls.aws_storage_bucket_name or
-                lookup_env(['DJANGO_AWS_STORAGE_BUCKET_NAME']),
-                Key=key,
-                UploadId=uploadId)
-            if ("Parts" in response):
-                print("GetUploadedParts ", response["Parts"])
-                return JsonResponse({'parts': response["Parts"]})
-            else:
-                return JsonResponse({'parts': []})
+        response = client.list_parts(
+            Bucket=cls.aws_storage_bucket_name or
+            lookup_env(['DJANGO_AWS_STORAGE_BUCKET_NAME']),
+            Key=key,
+            UploadId=uploadId)
+        if ("Parts" in response):
+            print("GetUploadedParts ", response["Parts"])
+            return JsonResponse({'parts': response["Parts"]})
+        else:
+            return JsonResponse({'parts': []})
 
     @classmethod
     def signPartUpload(cls, request, uploadId, partNumber):
-        if request.method == 'GET':
-            client = cls.get_client()
-            key = request.GET['key']
-            response = client.generate_presigned_url(
-                ClientMethod='upload_part',
-                Params={
-                    'Bucket':
-                        cls.aws_storage_bucket_name
-                        or lookup_env(['DJANGO_AWS_STORAGE_BUCKET_NAME']),
-                    'Key':
-                        key,
-                    'UploadId':
-                        uploadId,
-                    'Body':
-                        '',
-                    'PartNumber':
-                        partNumber
-                },
-                ExpiresIn=3600,
-            )
-            print('singPartUpload ', response)
-            return JsonResponse({'url': response})
+        if request.method != 'GET':
+            return
+        client = cls.get_client()
+        key = request.GET['key']
+        response = client.generate_presigned_url(
+            ClientMethod='upload_part',
+            Params={
+                'Bucket':
+                    cls.aws_storage_bucket_name
+                    or lookup_env(['DJANGO_AWS_STORAGE_BUCKET_NAME']),
+                'Key':
+                    key,
+                'UploadId':
+                    uploadId,
+                'Body':
+                    '',
+                'PartNumber':
+                    partNumber
+            },
+            ExpiresIn=3600,
+        )
+        print('singPartUpload ', response)
+        return JsonResponse({'url': response})
 
     @classmethod
     def abortMultipartUpload(cls, request, uploadId):
-        if request.method == 'DELETE':
-            client = cls.get_client()
-            key = request.GET['key']
-            client.abort_multipart_upload(
-                Bucket=cls.aws_storage_bucket_name or
-                lookup_env(['DJANGO_AWS_STORAGE_BUCKET_NAME']),
-                Key=key,
-                UploadId=uploadId,
-            )
-            # print("Abort ",reponse)
-            return JsonResponse({})
+        if request.method != 'DELETE':
+            return
+        client = cls.get_client()
+        key = request.GET['key']
+        client.abort_multipart_upload(
+            Bucket=cls.aws_storage_bucket_name or
+            lookup_env(['DJANGO_AWS_STORAGE_BUCKET_NAME']),
+            Key=key,
+            UploadId=uploadId,
+        )
+        # print("Abort ",reponse)
+        return JsonResponse({})
 
     @classmethod
     def completeMultipartUpload(cls, request, uploadId):
-        if request.method == 'POST':
-            client = cls.get_client()
-            json_body = json.loads(request.body)
-            key = request.GET['key']
-            parts = json_body["parts"]
-            response = client.complete_multipart_upload(
-                Bucket=cls.aws_storage_bucket_name or
-                lookup_env(['DJANGO_AWS_STORAGE_BUCKET_NAME']),
-                Key=key,
-                UploadId=uploadId,
-                MultipartUpload={'Parts': parts})
-            return JsonResponse({"location": response["Location"]})
+        if request.method != 'POST':
+            return
+        client = cls.get_client()
+        json_body = json.loads(request.body)
+        key = request.GET['key']
+        parts = json_body["parts"]
+        response = client.complete_multipart_upload(
+            Bucket=cls.aws_storage_bucket_name or
+            lookup_env(['DJANGO_AWS_STORAGE_BUCKET_NAME']),
+            Key=key,
+            UploadId=uploadId,
+            MultipartUpload={'Parts': parts})
+        return JsonResponse({"location": response["Location"]})

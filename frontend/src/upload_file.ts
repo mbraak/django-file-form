@@ -160,8 +160,8 @@ class UploadFile {
       const filename = file.name;
       const uploadIndex = uploads.length;
       let upload:any = null;
-      let uploadMethod = (<HTMLInputElement>document.getElementById("uploadMethod"));
-      if (uploadMethod != null && uploadMethod.value == 's3direct') {
+      let s3UploadDir = (<HTMLInputElement>document.getElementById("s3_upload_dir"));
+      if (s3UploadDir != null) {
         upload = new S3Uploader(file, {
           // .bind to pass the file object to each handler.
           // createMultipartUpload: this.createMultipartUpload.bind(this,file) ,
@@ -193,8 +193,10 @@ class UploadFile {
       }
       upload.start();
       renderer.addNewUpload(filename, uploadIndex);
+
       this.uploads.push(upload);
     });
+
     this.checkDropHint();
   };
 
