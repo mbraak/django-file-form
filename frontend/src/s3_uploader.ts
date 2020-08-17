@@ -37,7 +37,7 @@ const defaultOptions = {
       return data
     })
    },
-  listParts(file: any, { key, uploadId }:{key:any,uploadId:any}){
+  listParts({ key, uploadId }:{key:any,uploadId:any}){
         const filename=encodeURIComponent(key)
         const uploadIdEnc = encodeURIComponent(uploadId)
           return fetch('s3upload/'+uploadIdEnc+"?key="+filename,{
@@ -49,7 +49,7 @@ const defaultOptions = {
           return data["parts"]
         })
       },
-  prepareUploadPart(file:any, { key, uploadId, number }:{key:any,uploadId:any,number:any}){
+  prepareUploadPart({ key, uploadId, number }:{key:any,uploadId:any,number:any}){
         const filename = encodeURIComponent(key)
          // var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
      var csrftoken = (<HTMLInputElement>document.getElementsByName('csrfmiddlewaretoken')[0]).value;
@@ -65,7 +65,7 @@ const defaultOptions = {
         })
 
       },
-  completeMultipartUpload(file:any, { key, uploadId, parts }:{ key:any, uploadId:any, parts:any }){
+  completeMultipartUpload({ key, uploadId, parts }:{ key:any, uploadId:any, parts:any }){
       const filename = encodeURIComponent(key)
       const uploadIdEnc = encodeURIComponent(uploadId)
       // var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
@@ -87,7 +87,7 @@ const defaultOptions = {
         })
 
       },
-  abortMultipartUpload(file:any, { key, uploadId }:{key:any, uploadId:any}){
+  abortMultipartUpload({key, uploadId }:{key:any, uploadId:any}){
       // const filename = encodeURIComponent(key)
       const uploadIdEnc = encodeURIComponent(uploadId)
         // var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
@@ -202,7 +202,7 @@ class S3Uploader {
 
   _resumeUpload () {
     return Promise.resolve().then(() =>
-      this.options.listParts(this.file,{
+      this.options.listParts({
         uploadId: this.uploadId,
         key: this.key
       })
@@ -262,7 +262,7 @@ class S3Uploader {
     this.chunkState[index].busy = true
 
     return Promise.resolve().then(() =>
-      this.options.prepareUploadPart(this.file,{
+      this.options.prepareUploadPart({
         key: this.key,
         uploadId: this.uploadId,
         body,
@@ -282,7 +282,7 @@ class S3Uploader {
     })
   }
 
-  _onPartProgress (index:number, sent:any, total:any) {
+  _onPartProgress (index:number, sent:any) {
     this.chunkState[index].uploaded = sent
 
     const totalUploaded = this.chunkState.reduce((n, c) => n + c.uploaded, 0)
@@ -320,7 +320,7 @@ class S3Uploader {
     xhr.upload.addEventListener('progress', (ev) => {
       if (!ev.lengthComputable) return
 
-      this._onPartProgress(index, ev.loaded, ev.total)
+      this._onPartProgress(index, ev.loaded)
     })
 
     xhr.addEventListener('abort', (ev) => {
@@ -337,7 +337,7 @@ class S3Uploader {
         return
       }
 
-      this._onPartProgress(index, body.size, body.size)
+      this._onPartProgress(index, body.size)
 
       // NOTE This must be allowed by CORS.
       const etag = ev.target.getResponseHeader('ETag')
@@ -364,7 +364,7 @@ class S3Uploader {
     this.parts.sort((a, b) => a.PartNumber - b.PartNumber)
 
     return Promise.resolve().then(() =>
-      this.options.completeMultipartUpload(this.file,{
+      this.options.completeMultipartUpload({
         key: this.key,
         uploadId: this.uploadId,
         parts: this.parts
@@ -381,7 +381,7 @@ class S3Uploader {
       xhr.abort()
     })
     this.createdPromise.then(() => {
-      this.options.abortMultipartUpload(this.file,{
+      this.options.abortMultipartUpload({
         key: this.key,
         uploadId: this.uploadId
       })
