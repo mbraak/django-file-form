@@ -46,8 +46,7 @@ def create_uploaded_file_in_db(field_name, file_id, form_id, original_filename, 
 
         UploadedFile.objects.create(**values)
 
-    if hasattr(settings, 'FILE_FORM_TEMP_STORAGE'):
-        os.remove(uploaded_file)
+    os.remove(uploaded_file)
 
 
 class TusUpload(View):
