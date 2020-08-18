@@ -1,11 +1,13 @@
-import json
-
-from django.http import JsonResponse
-from storages.utils import setting, lookup_env
-
 import boto3
+import json
 import os
 import time
+
+from django.core.exceptions import SuspiciousFileOperation
+from django.http import JsonResponse
+from django.utils.crypto import get_random_string
+from storages.utils import setting, lookup_env
+from botocore.exceptions import ClientError
 
 
 class s3multipart:
@@ -35,37 +37,63 @@ class s3multipart:
                 time.sleep(0.01)
 
     @classmethod
-    def get_presigned_url(cls, request):
-        if request.method != 'POST':
-            return
-        # check if the post request has the file part
-        client = cls.get_client()
-        json_body = json.loads(request.body)
-        fileName = json_body["filename"]
-        contentType = json_body["contentType"]
-        s3UploadDir = json_body["s3UploadDir"]
-        key = cls.file_form_upload_dir +  "/" + s3UploadDir + "/" + fileName
-        response = client.generate_presigned_url(
-            ClientMethod='put_object',
-            Params={
-                'Bucket':
-                    cls.aws_storage_bucket_name
-                    or lookup_env(['DJANGO_AWS_STORAGE_BUCKET_NAME']),
-                'Key':
-                    key,
-                'ContentType':
-                    contentType,
-                "Body":
-                    ''
-            },
-            ExpiresIn=3600,
-        )
-        return JsonResponse({
-            'method': 'PUT',
-            'url': response,
-            'fields': [],
-            'header': contentType
-        })
+    def exists(cls, client, bucket_name, name):
+        """
+        Check if key already exists bucket,
+
+        Code adapted from storage.backends.s3boto3
+        """
+        try:
+            client.head_object(Bucket=bucket_name, Key=name)
+            return True
+        except ClientError:
+            return False
+
+    @classmethod
+    def get_alternative_name(cls, file_root, file_ext):
+        """
+        Return an alternative filename, by adding an underscore and a random 7
+        character alphanumeric string (before the file extension, if one
+        exists) to the filename.
+
+        Code adapted from django.storage.get_alternative_name
+        """
+        return f'{file_root}_{get_random_string(7)}{file_ext}'
+
+    @classmethod
+    def get_available_name(cls, client, bucket_name, name, max_length=None):
+        """
+        Return a filename that's free on the target storage system and
+        available for new content to be written to.
+
+        Code adapted from django.storage.get_available_name
+        """
+        dir_name, file_name = os.path.split(name)
+        file_root, file_ext = os.path.splitext(file_name)
+        # If the filename already exists, generate an alternative filename
+        # until it doesn't exist.
+        # Truncate original name if required, so the new filename does not
+        # exceed the max_length.
+        while cls.exists(client, bucket_name, name) or (max_length and
+                                                        len(name) > max_length):
+            # file_ext includes the dot.
+            name = os.path.join(dir_name,
+                                cls.get_alternative_name(file_root, file_ext))
+            if max_length is None:
+                continue
+            # Truncate file_root if max_length exceeded.
+            truncation = len(name) - max_length
+            if truncation > 0:
+                file_root = file_root[:-truncation]
+                # Entire file_root was truncated in attempt to find an available filename.
+                if not file_root:
+                    raise SuspiciousFileOperation(
+                        'Storage can not find an available filename for "%s". '
+                        'Please make sure that the corresponding file field '
+                        'allows sufficient "max_length".' % name)
+                name = os.path.join(
+                    dir_name, cls.get_alternative_name(file_root, file_ext))
+        return name
 
     @classmethod
     def createMultipartUpload(cls, request):
@@ -75,11 +103,14 @@ class s3multipart:
         json_body = json.loads(request.body)
         fileName = json_body["filename"]
         s3UploadDir = json_body["s3UploadDir"]
-        key = cls.file_form_upload_dir +  "/" + s3UploadDir + "/" + fileName
+        bucket_name = cls.aws_storage_bucket_name or lookup_env(
+            ['DJANGO_AWS_STORAGE_BUCKET_NAME'])
+        key = cls.get_available_name(
+            client, bucket_name,
+            cls.file_form_upload_dir + "/" + s3UploadDir + "/" + fileName)
         contentType = json_body["contentType"]
         response = client.create_multipart_upload(
-            Bucket=cls.aws_storage_bucket_name or
-            lookup_env(['DJANGO_AWS_STORAGE_BUCKET_NAME']),
+            Bucket=bucket_name,
             Key=key,
             ContentType=contentType,
         )
@@ -99,7 +130,6 @@ class s3multipart:
                 Key=key,
                 UploadId=uploadId)
             if ("Parts" in response):
-                print("GetUploadedParts ", response["Parts"])
                 return JsonResponse({'parts': response["Parts"]})
             else:
                 return JsonResponse({'parts': []})
@@ -135,7 +165,6 @@ class s3multipart:
             },
             ExpiresIn=3600,
         )
-        print('singPartUpload ', response)
         return JsonResponse({'url': response})
 
     @classmethod
