@@ -90,22 +90,28 @@ class s3multipart:
         })
 
     @classmethod
-    def getUploadedParts(cls, request, uploadId):
-        if request.method != 'GET':
-            return
+    def getPartsOrAbortUpload(cls, request, uploadId):
         client = cls.get_client()
         key = request.GET['key']
-
-        response = client.list_parts(
-            Bucket=cls.aws_storage_bucket_name or
-            lookup_env(['DJANGO_AWS_STORAGE_BUCKET_NAME']),
-            Key=key,
-            UploadId=uploadId)
-        if ("Parts" in response):
-            print("GetUploadedParts ", response["Parts"])
-            return JsonResponse({'parts': response["Parts"]})
-        else:
-            return JsonResponse({'parts': []})
+        if request.method == 'GET':
+            response = client.list_parts(
+                Bucket=cls.aws_storage_bucket_name or
+                lookup_env(['DJANGO_AWS_STORAGE_BUCKET_NAME']),
+                Key=key,
+                UploadId=uploadId)
+            if ("Parts" in response):
+                print("GetUploadedParts ", response["Parts"])
+                return JsonResponse({'parts': response["Parts"]})
+            else:
+                return JsonResponse({'parts': []})
+        elif request.method == 'DELETE':
+            client.abort_multipart_upload(
+                Bucket=cls.aws_storage_bucket_name or
+                lookup_env(['DJANGO_AWS_STORAGE_BUCKET_NAME']),
+                Key=key,
+                UploadId=uploadId,
+            )
+            return JsonResponse({})
 
     @classmethod
     def signPartUpload(cls, request, uploadId, partNumber):
@@ -132,21 +138,6 @@ class s3multipart:
         )
         print('singPartUpload ', response)
         return JsonResponse({'url': response})
-
-    @classmethod
-    def abortMultipartUpload(cls, request, uploadId):
-        if request.method != 'DELETE':
-            return
-        client = cls.get_client()
-        key = request.GET['key']
-        client.abort_multipart_upload(
-            Bucket=cls.aws_storage_bucket_name or
-            lookup_env(['DJANGO_AWS_STORAGE_BUCKET_NAME']),
-            Key=key,
-            UploadId=uploadId,
-        )
-        # print("Abort ",reponse)
-        return JsonResponse({})
 
     @classmethod
     def completeMultipartUpload(cls, request, uploadId):
