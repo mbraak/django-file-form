@@ -15,7 +15,7 @@ const defaultOptions = {
   onError (err:any) {
     throw err
   },
-  createMultipartUpload(file:any){
+  createMultipartUpload(file:any, s3UploadDir:string){
       // var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
     var csrftoken = (<HTMLInputElement>document.getElementsByName('csrfmiddlewaretoken')[0]).value;
     var headers = new Headers({
@@ -28,7 +28,8 @@ const defaultOptions = {
       headers: headers,
       body: JSON.stringify({
         filename: file.name,
-        contentType: file.type
+        contentType: file.type,
+        s3UploadDir: s3UploadDir
       })
     } ).then((response) => {
       return response.json()
@@ -122,6 +123,7 @@ class S3Uploader {
   key: any;
   file: any;
   options: any;
+  s3UploadDir: string;
   constructor (file:any, options:any) {
     this.options = {
       ...defaultOptions,
@@ -137,6 +139,7 @@ class S3Uploader {
     this.key = this.options.key || null
     this.uploadId = this.options.uploadId || null
     this.parts = []
+    this.s3UploadDir = this.options.s3UploadDir
 
     // Do `this.createdPromise.then(OP)` to execute an operation `OP` _only_ if the
     // upload was created already. That also ensures that the sequencing is right
@@ -180,7 +183,7 @@ class S3Uploader {
 
   _createUpload () {
     this.createdPromise = new Promise((resolve)=>resolve()).then(() =>
-      this.options.createMultipartUpload(this.file)
+      this.options.createMultipartUpload(this.file, this.s3UploadDir)
     )
     return this.createdPromise.then((result:any) => {
       const valid = typeof result === 'object' && result &&

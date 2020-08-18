@@ -173,6 +173,7 @@ class UploadFile {
           // completeMultipartUpload: this.completeMultipartUpload.bind(this,file),
           // abortMultipartUpload: this.abortMultipartUpload.bind(this,file),
           getChunkSize: null,
+          s3UploadDir: s3UploadDir,
           // onStart,
           onProgress: (bytesUploaded: number, bytesTotal: number): void =>
             this.handleProgress(uploadIndex, bytesUploaded, bytesTotal),
