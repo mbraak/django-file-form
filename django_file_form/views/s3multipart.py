@@ -43,8 +43,8 @@ class s3multipart:
         json_body = json.loads(request.body)
         fileName = json_body["filename"]
         contentType = json_body["contentType"]
-        key = cls.file_form_upload_dir + "/" + fileName
-
+        s3UploadDir = json_body["s3UploadDir"]
+        key = cls.file_form_upload_dir +  "/" + s3UploadDir + "/" + fileName
         response = client.generate_presigned_url(
             ClientMethod='put_object',
             Params={
@@ -83,7 +83,6 @@ class s3multipart:
             Key=key,
             ContentType=contentType,
         )
-        print("Create Multipart ", response)
         return JsonResponse({
             'key': response["Key"],
             'uploadId': response["UploadId"]
