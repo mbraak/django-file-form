@@ -9,6 +9,11 @@ from .util import get_list
 class UploadedFileField(FileField):
     widget = UploadWidget
 
+    def __init__(self, *, accept=None, **kwargs):
+        self.accept = accept
+
+        super().__init__(**kwargs)
+
     def get_file_data(self, field_name, form_id):
         try:
             return self._get_file_qs(field_name, form_id)\
@@ -22,6 +27,12 @@ class UploadedFileField(FileField):
 
         for f in qs:
             f.delete()
+
+    def widget_attrs(self, widget):
+        if self.accept:
+            return dict(accept=self.accept)
+        else:
+            return dict()
 
     def _get_file_qs(self, field_name, form_id):
         return UploadedFile.objects.filter(
