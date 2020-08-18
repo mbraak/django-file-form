@@ -200,6 +200,14 @@ for f in self.cleaned_data['my_field']:
 # ...
 ```
 
+**4 Accept attribute**
+
+You can add an accept attribute to the file input using the `accept` parameter on `UploadedFileField`:
+
+```
+file = UploadedFileField(accept='image/*,.pdf')
+```
+
 ## Upgrade from version 1.0 (to 2.0)
 
 * Add reference to file_form/file_form.css:
