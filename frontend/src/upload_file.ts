@@ -170,7 +170,7 @@ class UploadFile {
               this.deleteFromServer(index);
             } else {
               void existingUpload.abort(true);
-              this.deleteUpload(uploadIndex);
+              this.deleteUpload(index);
             }
             break;
           }
