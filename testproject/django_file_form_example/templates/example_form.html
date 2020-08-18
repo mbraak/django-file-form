@@ -27,10 +27,6 @@
             {{ form.title }}
         </div>
 
-        {% if s3_upload_dir %}
-            <input type="hidden" id="s3_upload_dir" name="s3_upload_dir" value="{{ s3_upload_dir }}">
-        {% endif %}
-
         <div id="row-example-input_file" {% if form.input_file.errors %} class="has-error" {% endif %}>
             {{ form.input_file.errors }}
             {{ form.input_file }}

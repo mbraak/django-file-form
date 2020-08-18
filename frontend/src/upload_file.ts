@@ -39,6 +39,7 @@ class UploadFile {
   fieldName: string;
   form: Element;
   formId: string;
+  s3UploadDir: string | null;
   multiple: boolean;
   prefix: string | null;
   renderer: RenderUploadFile;
@@ -53,6 +54,7 @@ class UploadFile {
     fieldName,
     form,
     formId,
+    s3UploadDir,
     initial,
     input,
     multiple,
@@ -68,6 +70,7 @@ class UploadFile {
     fieldName: string;
     form: Element;
     formId: string;
+    s3UploadDir: string | null;
     initial: InitialFile[];
     input: HTMLInputElement;
     multiple: boolean;
@@ -83,6 +86,7 @@ class UploadFile {
     this.fieldName = fieldName;
     this.form = form;
     this.formId = formId;
+    this.s3UploadDir = s3UploadDir;
     this.multiple = multiple;
     this.prefix = prefix;
     this.retryDelays = retryDelays;
@@ -156,11 +160,10 @@ class UploadFile {
     }
 
     files.forEach(file => {
-      const { fieldName, formId, renderer, uploads, uploadUrl } = this;
+      const { fieldName, formId, s3UploadDir, renderer, uploads, uploadUrl } = this;
       const filename = file.name;
       const uploadIndex = uploads.length;
       let upload:any = null;
-      let s3UploadDir = (<HTMLInputElement>document.getElementById("s3_upload_dir"));
       if (s3UploadDir != null) {
         upload = new S3Uploader(file, {
           // .bind to pass the file object to each handler.

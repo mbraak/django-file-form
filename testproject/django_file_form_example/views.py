@@ -17,6 +17,13 @@ class BaseFormView(generic.FormView):
     s3_upload_dir = 'test_form'
     custom_js_file = 'example_form.js'
 
+    def get_form_kwargs(self):
+        # pass s3_upload_dir from view to form
+        kwargs = super(BaseFormView, self).get_form_kwargs()
+        if hasattr(self, 's3_upload_dir'):
+            kwargs.update({'s3_upload_dir': self.s3_upload_dir})
+        return kwargs
+
     def get_success_url(self):
         return reverse('example_success')
 

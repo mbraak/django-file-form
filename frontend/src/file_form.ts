@@ -65,6 +65,7 @@ const initUploadFields = (form: Element, options: Options = {}): void => {
 
   const uploadUrl = getInputValue("upload_url");
   const formId = getInputValue("form_id");
+  const s3UploadDir = getInputValue("s3_upload_dir");
   const skipRequired = options.skipRequired || false;
   const prefix = getPrefix();
 
@@ -107,6 +108,7 @@ const initUploadFields = (form: Element, options: Options = {}): void => {
       fieldName,
       form,
       formId,
+      s3UploadDir: s3UploadDir || null,
       initial,
       input,
       multiple,
