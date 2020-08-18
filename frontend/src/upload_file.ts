@@ -159,9 +159,9 @@ class UploadFile {
 
       // #323 remove existing file
       for (let index = 0; index < this.uploads.length; ++index) {
-        let existing_upload = this.uploads[index];
+        const existing_upload = this.uploads[index];
         if (existing_upload instanceof Upload) {
-          if (existing_upload.file.name == filename) {
+          if ((existing_upload.file as File).name == filename) {
             uploadIndex = index;
             const el = this.renderer.findFileDiv(index);
             if (el && el.classList.contains('dff-upload-fail')) {
