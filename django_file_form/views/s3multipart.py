@@ -106,8 +106,8 @@ class s3multipart:
         bucket_name = cls.aws_storage_bucket_name or lookup_env(
             ['DJANGO_AWS_STORAGE_BUCKET_NAME'])
         key = cls.get_available_name(
-            client, bucket_name,
-            cls.file_form_upload_dir + "/" + s3UploadDir + "/" + fileName)
+            client, bucket_name, cls.file_form_upload_dir +
+            ("/" + s3UploadDir if s3UploadDir else "") + "/" + fileName)
         contentType = json_body["contentType"]
         response = client.create_multipart_upload(
             Bucket=bucket_name,

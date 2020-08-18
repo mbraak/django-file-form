@@ -245,14 +245,16 @@ The files will be uploaded to
 ${FILE_FORM_UPLOAD_DIR}/${s3_upload_dir}/
 ````
 
-FIXME: `s3_upload_dir` is only a flag now, the folder is not used.
-
 in the specified S3 bucket, where `s3_upload_dir` can be empty or a directory
-specific to user or form to avoid conflicts on the AWS side. After form submission,
-the files will be returned as `S3Boto3StorageFile` with `S3Boto3Storage`
-as its underlying storage with attributes `is_s3direct=True` and `is_placeholder=False`
-to determine the type of returned objects. Reading from these objects will
-download the files from S3.
+specific to user or form to avoid conflicts on the AWS side. If the object
+already exists in the S3 bucket, a random string will be added to filename.
+
+After form submission, the files will be returned as `S3Boto3StorageFile` with
+`S3Boto3Storage` as its underlying storage. The objects will have attributes
+`is_s3direct=True`,  `is_placeholder=False`, and `original_filename` which is
+the name of the file that was uploaded, which can be different from the name
+on S3 (`f.file.name`) if an object with `original_filename` already exists.
+Reading from these objects will download the files from S3.
 
 ## Upgrade from version 1.0 (to 2.0)
 
