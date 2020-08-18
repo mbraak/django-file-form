@@ -232,14 +232,13 @@ CSP_CONNECT_SRC = ("'self'", AWS_S3_ENDPOINT_URL)
 ```
 where `AWS_S3_ENDPOINT_URL` is the AWS endpoint defined above.
 
-Then, in the View class, you will need to set
+Then, you will need to pass
 
   ```
   s3_upload_dir = "user_or_form_specific_id"
   ```
 
-to inform the frontend to use the AJAX uploader for S3.
-
+to the constructor of the form to inform the frontend to use the AJAX uploader for S3.
 The files will be uploaded to
 
 ```
