@@ -417,11 +417,11 @@ class UploadFile {
         upload=<S3Uploader>upload
         return {
           id: upload.uploadId,
-          name: upload.s3UploadDir + "/" + upload.file.name,
+          name: upload.key,
           placeholder: false,
-          size: upload.file.size
+          size: upload.file.size,
+          original_name: upload.file.name
       }} )) as UploadedFile[];
-
     const input = findInput(
       this.form,
       getS3UploadedFieldName(this.fieldName, this.prefix),
