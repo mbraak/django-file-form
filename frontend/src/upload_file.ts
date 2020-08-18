@@ -417,7 +417,7 @@ class UploadFile {
         upload=<S3Uploader>upload
         return {
           id: upload.uploadId,
-          name: upload.file.name,
+          name: upload.s3UploadDir + "/" + upload.file.name,
           placeholder: false,
           size: upload.file.size
       }} )) as UploadedFile[];
