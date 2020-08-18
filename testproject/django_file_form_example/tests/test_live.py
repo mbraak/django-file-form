@@ -65,6 +65,8 @@ class LiveTestCase(BaseLiveTestCase):
         page = self.page
 
         temp_file = page.create_temp_file('content1')
+        temp_uploads_path = Path(settings.MEDIA_ROOT).joinpath('temp_uploads')
+        original_temp_file_count = len(list(temp_uploads_path.iterdir()))
 
         page.open('/')
 
@@ -80,7 +82,8 @@ class LiveTestCase(BaseLiveTestCase):
         uploaded_file = UploadedFile.objects.first()
         self.assertEqual(read_file(uploaded_file.uploaded_file), b'content1')
         self.assertTrue(uploaded_file.uploaded_file.name.startswith('temp_uploads/'))
-        self.assertEqual(Path(str(uploaded_file.uploaded_file.path)).parent, Path(settings.MEDIA_ROOT).joinpath('temp_uploads'))
+        self.assertEqual(Path(str(uploaded_file.uploaded_file.path)).parent, temp_uploads_path)
+        self.assertEqual(len(list(temp_uploads_path.iterdir())), original_temp_file_count + 1)
 
         page.submit()
         page.assert_page_contains_text('Upload success')

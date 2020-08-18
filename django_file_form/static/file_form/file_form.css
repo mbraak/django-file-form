@@ -16,6 +16,9 @@
       margin-bottom: 0; }
   .dff-uploader .dff-files .dff-delete {
     margin-left: 8px; }
+    .dff-uploader .dff-files .dff-delete.dff-disabled {
+      color: #aaa;
+      pointer-events: none; }
   .dff-uploader .dff-files span {
     margin-left: 8px; }
 
