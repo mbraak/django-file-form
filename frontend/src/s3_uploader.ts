@@ -5,7 +5,7 @@ const MB = 1024 * 1024
 
 const defaultOptions = {
   limit: 1,
-  getChunkSize (file:any) {
+  getChunkSize (file:File) {
     return Math.ceil(file.size / 10000)
   },
   onStart () {},
@@ -17,8 +17,8 @@ const defaultOptions = {
   },
   createMultipartUpload(file: File, s3UploadDir:string){
       // var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
-    var csrftoken = (<HTMLInputElement>document.getElementsByName('csrfmiddlewaretoken')[0]).value;
-    var headers = new Headers({
+    const csrftoken = (<HTMLInputElement>document.getElementsByName('csrfmiddlewaretoken')[0]).value;
+    let headers = new Headers({
       accept: 'application/json',
       'content-type': 'application/json',
       "X-CSRFToken": csrftoken
