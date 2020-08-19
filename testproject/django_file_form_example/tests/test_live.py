@@ -531,3 +531,10 @@ class LiveTestCase(BaseLiveTestCase):
 
         el = page.selenium.find_element_by_css_selector('#row-example-input_file .dff-file-id-1.dff-upload-success')
         el.find_element_by_xpath(f"//*[contains(text(), '{temp_file.base_name()}')]")
+
+    def test_accept_attribute(self):
+        page = self.page
+        page.open('/accept')
+
+        file_input = page.selenium.find_element_by_css_selector('#row-example-input_file input[type=file]')
+        self.assertEqual(file_input.get_attribute('accept'), 'image/*')
