@@ -3670,15 +3670,16 @@ var s3_uploader_defaultOptions = {
     });
   },
   abortMultipartUpload: function abortMultipartUpload(_ref4) {
-    var uploadId = _ref4.uploadId;
-    // const filename = encodeURIComponent(key)
+    var key = _ref4.key,
+        uploadId = _ref4.uploadId;
+    var filename = encodeURIComponent(key);
     var uploadIdEnc = encodeURIComponent(uploadId); // var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
 
     var csrftoken = document.getElementsByName('csrfmiddlewaretoken')[0].value;
     var headers = new Headers({
       "X-CSRFToken": csrftoken
     });
-    return fetch('s3upload/' + uploadIdEnc + "/", {
+    return fetch('s3upload/' + uploadIdEnc + "?key=" + filename, {
       method: 'delete',
       headers: headers
     }).then(function (response) {
@@ -4010,6 +4011,7 @@ var s3_uploader_S3Uploader = /*#__PURE__*/function () {
       });
       this.createdPromise.then(function () {
         _this7.options.abortMultipartUpload({
+          key: _this7.key,
           uploadId: _this7.uploadId
         });
       }, function () {// if the creation failed we do not need to abort
@@ -4431,6 +4433,10 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
 
       if (upload instanceof browser_Upload) {
         void upload.abort(true);
+        this.deleteUpload(uploadIndex);
+      } else if (upload instanceof s3_uploader) {
+        upload._abortUpload();
+
         this.deleteUpload(uploadIndex);
       }
     }
