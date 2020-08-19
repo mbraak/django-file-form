@@ -88,3 +88,8 @@ class PlaceholderExampleForm(BaseForm):
             f.close()
 
         self.delete_temporary_files()
+
+
+class WithAcceptExampleForm(BaseForm):
+    prefix = 'example'
+    input_file = MultipleUploadedFileField(accept='image/*')

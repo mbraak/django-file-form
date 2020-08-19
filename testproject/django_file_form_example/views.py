@@ -94,6 +94,10 @@ class PlaceholderView(BaseFormView):
         )
 
 
+class WithAcceptExample(BaseFormView):
+    form_class = forms.WithAcceptExampleForm
+
+
 def permission_denied(request, exception):
     return HttpResponseForbidden(
         json.dumps(dict(status='permission denied')),
