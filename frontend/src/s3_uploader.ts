@@ -15,7 +15,7 @@ const defaultOptions = {
   onError (err:any) {
     throw err
   },
-  createMultipartUpload(file:any, s3UploadDir:string){
+  createMultipartUpload(file: File, s3UploadDir:string){
       // var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
     var csrftoken = (<HTMLInputElement>document.getElementsByName('csrfmiddlewaretoken')[0]).value;
     var headers = new Headers({
@@ -119,9 +119,9 @@ class S3Uploader {
   chunks: any[];
   isPaused: boolean;
   parts: any[];
-  uploadId: any;
-  key: any;
-  file: any;
+  uploadId: string;
+  key: string;
+  file: File;
   options: any;
   s3UploadDir: string;
   constructor (file:any, options:any) {
@@ -133,7 +133,7 @@ class S3Uploader {
     if (!this.options.getChunkSize) {
       this.options.getChunkSize = defaultOptions.getChunkSize
     }
-   
+
     this.file = file
 
     this.key = this.options.key || null
@@ -159,7 +159,7 @@ class S3Uploader {
     this.createdPromise.catch(() => {}) // silence uncaught rejection warning
   }
 
-  
+
 
   _initChunks () {
     const chunks = []
