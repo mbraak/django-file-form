@@ -161,12 +161,12 @@ class UploadFile {
       for (let index = 0; index < this.uploads.length; ++index) {
         const existingUpload = this.uploads[index];
         if (existingUpload instanceof Upload) {
-          if ((existingUpload.options as any).metadata.filename === filename) {
+          if (existingUpload.options?.metadata?.filename === filename) {
             uploadIndex = index;
             const el = this.renderer.findFileDiv(index) as HTMLDivElement;
-            if (el.classList.contains('dff-upload-fail')) {
+            if (el.classList.contains("dff-upload-fail")) {
               this.deleteUpload(index);
-            } else if (el.classList.contains('dff-upload-success')) {
+            } else if (el.classList.contains("dff-upload-success")) {
               this.deleteFromServer(index);
             } else {
               void existingUpload.abort(true);
