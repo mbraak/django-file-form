@@ -197,7 +197,7 @@ class UploadFile {
       upload.start();
       renderer.addNewUpload(filename, uploadIndex);
 
-      if (uploadIndex == this.uploads.length) {
+      if (uploadIndex === this.uploads.length) {
         this.uploads.push(upload);
       } else {
         this.uploads[uploadIndex] = upload;
