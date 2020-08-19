@@ -361,7 +361,9 @@ class UploadFile {
 
     if (upload instanceof Upload) {
       void upload.abort(true);
-
+      this.deleteUpload(uploadIndex);
+    }else if (upload instanceof S3Uploader){
+      upload._abortUpload()
       this.deleteUpload(uploadIndex);
     }
   }

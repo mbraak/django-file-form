@@ -88,15 +88,15 @@ const defaultOptions = {
         })
 
       },
-  abortMultipartUpload({uploadId}:{uploadId:any}){
-      // const filename = encodeURIComponent(key)
+  abortMultipartUpload({key,uploadId}:{key:any,uploadId:any}){
+      const filename = encodeURIComponent(key)
       const uploadIdEnc = encodeURIComponent(uploadId)
         // var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
       var csrftoken = (<HTMLInputElement>document.getElementsByName('csrfmiddlewaretoken')[0]).value;
       var headers = new Headers({
         "X-CSRFToken": csrftoken
       })
-      return fetch('s3upload/'+uploadIdEnc+"/",{
+      return fetch('s3upload/'+uploadIdEnc+"?key="+filename,{
             method: 'delete',
             headers: headers,
         }).then((response)=>{
@@ -385,6 +385,7 @@ class S3Uploader {
     })
     this.createdPromise.then(() => {
       this.options.abortMultipartUpload({
+        key: this.key,
         uploadId: this.uploadId
       })
     }, () => {
