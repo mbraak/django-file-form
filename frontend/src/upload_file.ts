@@ -1,5 +1,5 @@
 import { Upload } from "tus-js-client";
-import { findInput, getPlaceholderFieldName, getS3UploadedFieldName } from "./util";
+import { findInput, getPlaceholderFieldName, getS3UploadedFieldName, parseInputAccept } from "./util";
 import RenderUploadFile from "./render_upload_file";
 import DropArea from "./drop_area";
 
@@ -107,7 +107,7 @@ class UploadFile {
     const filesContainer = this.renderer.container;
 
     if (supportDropArea) {
-      this.initDropArea(filesContainer);
+      this.initDropArea(filesContainer, input.accept);
     }
 
     if (initial) {
@@ -368,9 +368,10 @@ class UploadFile {
     }
   }
 
-  initDropArea(container: Element): void {
+  initDropArea(container: Element, inputAccept: string): void {
     new DropArea({
       container,
+      inputAccept,
       onUploadFiles: this.uploadFiles
     });
   }

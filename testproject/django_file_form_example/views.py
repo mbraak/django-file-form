@@ -104,8 +104,13 @@ class S3ExampleView(BaseFormView):
     form_class = forms.S3ExampleForm
     s3_upload_dir = 's3_example'
 
+
 class S3PlaceholderExampleView(PlaceholderView):
     s3_upload_dir = 's3_placeholder_example'
+
+
+class WithAcceptExample(BaseFormView):
+    form_class = forms.WithAcceptExampleForm
 
 
 def permission_denied(request, exception):

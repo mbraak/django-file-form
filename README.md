@@ -256,6 +256,14 @@ name of the file that was uploaded, which can be different from the basename
 of the object on S3 (`f.name`). Reading from these objects will download the files
 from S3.
 
+**5 Accept attribute**
+
+You can add an accept attribute to the file input using the `accept` parameter on `UploadedFileField`:
+
+```
+file = UploadedFileField(accept='image/*,.pdf')
+```
+
 ## Upgrade from version 1.0 (to 2.0)
 
 * Add reference to file_form/file_form.css:
