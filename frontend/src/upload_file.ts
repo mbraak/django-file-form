@@ -410,8 +410,8 @@ class UploadFile {
     // 1. A regular Upload object
     // 2. A map object with .placeholder == true
     // 3. A map object with .placeholder == false, created when the form is reloaded
-    // 4. A S3Uploader object that will need to be saved as UploadedFuke
-    //
+    // 4. An S3Uploader object that will need to be saved as UploadedFile
+    // the latter two cases are handled here
 
     const uploadedInfo = this.uploads.filter(
       upload => !(upload instanceof Upload) && !(upload instanceof S3Uploader) && !upload.placeholder
