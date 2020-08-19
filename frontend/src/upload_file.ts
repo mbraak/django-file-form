@@ -165,7 +165,7 @@ class UploadFile {
       const { fieldName, formId, s3UploadDir, renderer, uploads, uploadUrl } = this;
       const filename = file.name;
       const uploadIndex = uploads.length;
-      let upload:any = null;
+      let upload: S3Uploader | Upload | null = null;
       if (s3UploadDir != null) {
         upload = new S3Uploader(file, {
           // .bind to pass the file object to each handler.
@@ -181,7 +181,7 @@ class UploadFile {
             this.handleProgress(uploadIndex, bytesUploaded, bytesTotal),
           onError: (error: Error): void => this.handleError(uploadIndex, error),
           onSuccess: (): void =>
-            this.handleSuccess(uploadIndex, (upload.file as File).size),
+            this.handleSuccess(uploadIndex, ((upload as S3Uploader).file as File).size),
           retryDelays: this.retryDelays || [0, 1000, 3000, 5000]
           // onPartComplete,
         })
@@ -193,7 +193,7 @@ class UploadFile {
           onProgress: (bytesUploaded: number, bytesTotal: number): void =>
             this.handleProgress(uploadIndex, bytesUploaded, bytesTotal),
           onSuccess: (): void =>
-            this.handleSuccess(uploadIndex, (upload.file as File).size),
+            this.handleSuccess(uploadIndex, ((upload as Upload).file as File).size),
           retryDelays: this.retryDelays || [0, 1000, 3000, 5000]
         });
       }
@@ -409,7 +409,7 @@ class UploadFile {
     // 3. A map object with .placeholder == false, created when the form is reloaded
     // 4. A S3Uploader object that will need to be saved as UploadedFuke
     //
-   
+
     const uploadedInfo = this.uploads.filter(
       upload => !(upload instanceof Upload) && !(upload instanceof S3Uploader) && !upload.placeholder
     ).concat(
