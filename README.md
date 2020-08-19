@@ -205,7 +205,7 @@ for f in self.cleaned_data['my_field']:
 **4 Upload directly to AWS S3**
 
 `django-file-form` supports upload directly to AWS S3 compatible storages. The files will be uploaded
-by clients directly to S3 through AJAX operations and returns to the backend as `S3Boto3StorageFile`
+by clients directly to S3 through AJAX operations and return to the backend as `File` objects
 with [`S3Boto3Storage`](https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html).
 
 To use this method, you will first need to define the following variables in `settings`
@@ -249,10 +249,10 @@ in the specified S3 bucket, where `s3_upload_dir` can be empty or a directory
 specific to user or form to avoid conflicts on the AWS side. If the object
 already exists in the S3 bucket, a random string will be added to filename.
 
-After form submission, the files will be returned as `S3Boto3StorageFile` with
-`S3Boto3Storage` as its underlying storage. The objects will have attributes
+After form submission, the files will be returned as customized `S3Boto3StorageFile`
+objects  with `S3Boto3Storage` as its underlying storage. The objects will have attributes
 `is_s3direct=True`,  `is_placeholder=False`, and `original_name` which is the
-name of the file that was uploaded, which can be different from the basename
+name of the file that was uploaded that can be different from the basename
 of the object on S3 (`f.name`). Reading from these objects will download the files
 from S3.
 
