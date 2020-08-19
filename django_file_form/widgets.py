@@ -48,7 +48,8 @@ def get_s3_uploaded_files(data, field_name):
         return []
     else:
         return [
-            S3UploadedFileWithId(name=s3uploaded['name'], size=s3uploaded['size'], file_id=s3uploaded['id'])
+            S3UploadedFileWithId(name=s3uploaded['name'], original_name=s3uploaded['original_name'],
+                size=s3uploaded['size'], file_id=s3uploaded['id'])
             for s3uploaded in json.loads(value)
         ]
 

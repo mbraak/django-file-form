@@ -1,3 +1,5 @@
+import os
+
 from django.core.exceptions import ValidationError
 from django.forms import formset_factory, BaseFormSet, Form, CharField
 
@@ -73,6 +75,11 @@ class S3ExampleForm(BaseForm):
         )
         for f in self.cleaned_data['input_file']:
             assert f.is_s3direct
+            # FILE_FORM_UPLOAD_DIR/s3_upload_dir/basename_RANDOM.ext
+            basename = os.path.splitext(os.path.basename(f.name))[0]
+            # basename.ext
+            original_basename = os.path.splitext(f.original_name)[0]
+            assert basename.startswith(original_basename)
             # download from S3
             ExampleFile.objects.create(
                 example=example,

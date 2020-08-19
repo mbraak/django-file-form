@@ -251,10 +251,10 @@ already exists in the S3 bucket, a random string will be added to filename.
 
 After form submission, the files will be returned as `S3Boto3StorageFile` with
 `S3Boto3Storage` as its underlying storage. The objects will have attributes
-`is_s3direct=True`,  `is_placeholder=False`, and `original_filename` which is
-the name of the file that was uploaded, which can be different from the name
-on S3 (`f.file.name`) if an object with `original_filename` already exists.
-Reading from these objects will download the files from S3.
+`is_s3direct=True`,  `is_placeholder=False`, and `original_name` which is the
+name of the file that was uploaded, which can be different from the basename
+of the object on S3 (`f.name`). Reading from these objects will download the files
+from S3.
 
 ## Upgrade from version 1.0 (to 2.0)
 

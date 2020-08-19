@@ -123,12 +123,11 @@ try:
     from storages.backends.s3boto3 import S3Boto3Storage, S3Boto3StorageFile
 
     class S3UploadedFileWithId(S3Boto3StorageFile):
-        def __init__(self, file_id, name, size, **kwargs):
-            super(S3UploadedFileWithId, self).__init__(
-                name=get_upload_to(None, filename=name), mode='rb',
+        def __init__(self, file_id, name, original_name, size, **kwargs):
+            super(S3UploadedFileWithId, self).__init__(name=name, mode='rb',
                 storage=S3Boto3Storage(), **kwargs)
-
             self.file_id = file_id
+            self.original_name = original_name
             # self.size is derived from S3boto3StorageFile
             # but size is passed for consistency, and potentially
             # for validation
