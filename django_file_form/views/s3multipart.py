@@ -101,18 +101,18 @@ class s3multipart:
             return
         client = cls.get_client()
         json_body = json.loads(request.body)
-        fileName = json_body["filename"]
-        s3UploadDir = json_body["s3UploadDir"]
+        filename = json_body["filename"]
+        s3_upload_dir = json_body["s3UploadDir"]
         bucket_name = cls.aws_storage_bucket_name or lookup_env(
             ['DJANGO_AWS_STORAGE_BUCKET_NAME'])
         key = cls.get_available_name(
             client, bucket_name, cls.file_form_upload_dir +
-            ("/" + s3UploadDir if s3UploadDir else "") + "/" + fileName)
-        contentType = json_body["contentType"]
+            ("/" + s3_upload_dir if s3_upload_dir else "") + "/" + filename)
+        content_type = json_body["contentType"]
         response = client.create_multipart_upload(
             Bucket=bucket_name,
             Key=key,
-            ContentType=contentType,
+            ContentType=content_type,
         )
         return JsonResponse({
             'key': response["Key"],
@@ -123,20 +123,18 @@ class s3multipart:
     def get_parts_or_abort_upload(cls, request, upload_id):
         client = cls.get_client()
         key = request.GET['key']
+        bucket_name = cls.aws_storage_bucket_name or lookup_env(
+            ['DJANGO_AWS_STORAGE_BUCKET_NAME'])
         if request.method == 'GET':
             response = client.list_parts(
-                Bucket=cls.aws_storage_bucket_name or
-                lookup_env(['DJANGO_AWS_STORAGE_BUCKET_NAME']),
-                Key=key,
-                UploadId=upload_id)
+                Bucket=bucket_name, Key=key, UploadId=upload_id)
             if ("Parts" in response):
                 return JsonResponse({'parts': response["Parts"]})
             else:
                 return JsonResponse({'parts': []})
         elif request.method == 'DELETE':
             client.abort_multipart_upload(
-                Bucket=cls.aws_storage_bucket_name or
-                lookup_env(['DJANGO_AWS_STORAGE_BUCKET_NAME']),
+                Bucket=bucket_name,
                 Key=key,
                 UploadId=upload_id,
             )
@@ -148,20 +146,16 @@ class s3multipart:
             return
         client = cls.get_client()
         key = request.GET['key']
+        bucket_name = cls.aws_storage_bucket_name or lookup_env(
+            ['DJANGO_AWS_STORAGE_BUCKET_NAME'])
         response = client.generate_presigned_url(
             ClientMethod='upload_part',
             Params={
-                'Bucket':
-                    cls.aws_storage_bucket_name
-                    or lookup_env(['DJANGO_AWS_STORAGE_BUCKET_NAME']),
-                'Key':
-                    key,
-                'UploadId':
-                    upload_id,
-                'Body':
-                    '',
-                'PartNumber':
-                    part_number
+                'Bucket': bucket_name,
+                'Key': key,
+                'UploadId': upload_id,
+                'Body': '',
+                'PartNumber': part_number
             },
             ExpiresIn=3600,
         )
@@ -175,9 +169,10 @@ class s3multipart:
         json_body = json.loads(request.body)
         key = request.GET['key']
         parts = json_body["parts"]
+        bucket_name = cls.aws_storage_bucket_name or lookup_env(
+            ['DJANGO_AWS_STORAGE_BUCKET_NAME'])
         response = client.complete_multipart_upload(
-            Bucket=cls.aws_storage_bucket_name or
-            lookup_env(['DJANGO_AWS_STORAGE_BUCKET_NAME']),
+            Bucket=bucket_name,
             Key=key,
             UploadId=upload_id,
             MultipartUpload={'Parts': parts})
