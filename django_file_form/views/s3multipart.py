@@ -96,7 +96,7 @@ class s3multipart:
         return name
 
     @classmethod
-    def createMultipartUpload(cls, request):
+    def create_multipart_upload(cls, request):
         if request.method != 'POST':
             return
         client = cls.get_client()
@@ -120,7 +120,7 @@ class s3multipart:
         })
 
     @classmethod
-    def getPartsOrAbortUpload(cls, request, uploadId):
+    def get_parts_or_abort_upload(cls, request, upload_id):
         client = cls.get_client()
         key = request.GET['key']
         if request.method == 'GET':
@@ -128,7 +128,7 @@ class s3multipart:
                 Bucket=cls.aws_storage_bucket_name or
                 lookup_env(['DJANGO_AWS_STORAGE_BUCKET_NAME']),
                 Key=key,
-                UploadId=uploadId)
+                UploadId=upload_id)
             if ("Parts" in response):
                 return JsonResponse({'parts': response["Parts"]})
             else:
@@ -138,12 +138,12 @@ class s3multipart:
                 Bucket=cls.aws_storage_bucket_name or
                 lookup_env(['DJANGO_AWS_STORAGE_BUCKET_NAME']),
                 Key=key,
-                UploadId=uploadId,
+                UploadId=upload_id,
             )
             return JsonResponse({})
 
     @classmethod
-    def signPartUpload(cls, request, uploadId, partNumber):
+    def sign_part_upload(cls, request, upload_id, part_number):
         if request.method != 'GET':
             return
         client = cls.get_client()
@@ -157,18 +157,18 @@ class s3multipart:
                 'Key':
                     key,
                 'UploadId':
-                    uploadId,
+                    upload_id,
                 'Body':
                     '',
                 'PartNumber':
-                    partNumber
+                    part_number
             },
             ExpiresIn=3600,
         )
         return JsonResponse({'url': response})
 
     @classmethod
-    def completeMultipartUpload(cls, request, uploadId):
+    def complete_multipart_upload(cls, request, upload_id):
         if request.method != 'POST':
             return
         client = cls.get_client()
@@ -179,6 +179,6 @@ class s3multipart:
             Bucket=cls.aws_storage_bucket_name or
             lookup_env(['DJANGO_AWS_STORAGE_BUCKET_NAME']),
             Key=key,
-            UploadId=uploadId,
+            UploadId=upload_id,
             MultipartUpload={'Parts': parts})
         return JsonResponse({"location": response["Location"]})
