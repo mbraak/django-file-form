@@ -1,5 +1,5 @@
 import { Upload } from "tus-js-client";
-import { findInput, getPlaceholderFieldName, getS3UploadedFieldName, parseInputAccept } from "./util";
+import { findInput, getPlaceholderFieldName, getS3UploadedFieldName } from "./util";
 import RenderUploadFile from "./render_upload_file";
 import DropArea from "./drop_area";
 
