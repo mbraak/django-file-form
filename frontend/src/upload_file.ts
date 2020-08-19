@@ -12,6 +12,7 @@ export interface InitialFile {
   placeholder?: boolean | undefined;
   size: number;
   url?: string;
+  original_name: string;
 }
 
 export interface UploadedFile {
@@ -19,6 +20,7 @@ export interface UploadedFile {
   name: string;
   placeholder: boolean | undefined;
   size: number;
+  original_name: string;
 }
 
 export type Translations = { [key: string]: string };
@@ -130,10 +132,10 @@ class UploadFile {
       renderer.addUploadedFile(name, i, size);
 
       if (! (file instanceof Upload) && !(file instanceof S3Uploader)) {
-        this.uploads.push({ id, name, placeholder: file.placeholder, size });
+        this.uploads.push({ id, name, placeholder: file.placeholder, size, original_name: file.original_name });
       } else {
         const url = `${this.uploadUrl}${file.id}`;
-        this.uploads.push({ id, name, placeholder: false, size, url });
+        this.uploads.push({ id, name, placeholder: false, size, url, original_name:name});
       }
     };
 
@@ -321,8 +323,7 @@ class UploadFile {
   }
 
   deleteFromServer(uploadIndex: number): void {
-    const upload = this.uploads[uploadIndex];
-
+    const upload = <Upload>this.uploads[uploadIndex];
     const { url } = upload;
 
     if (!url) {
@@ -408,6 +409,7 @@ class UploadFile {
     // 3. A map object with .placeholder == false, created when the form is reloaded
     // 4. A S3Uploader object that will need to be saved as UploadedFuke
     //
+   
     const uploadedInfo = this.uploads.filter(
       upload => !(upload instanceof Upload) && !(upload instanceof S3Uploader) && !upload.placeholder
     ).concat(

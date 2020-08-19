@@ -88,7 +88,7 @@ const defaultOptions = {
         })
 
       },
-  abortMultipartUpload({key, uploadId }:{key:any, uploadId:any}){
+  abortMultipartUpload({uploadId}:{uploadId:any}){
       // const filename = encodeURIComponent(key)
       const uploadIdEnc = encodeURIComponent(uploadId)
         // var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
@@ -385,7 +385,6 @@ class S3Uploader {
     })
     this.createdPromise.then(() => {
       this.options.abortMultipartUpload({
-        key: this.key,
         uploadId: this.uploadId
       })
     }, () => {
