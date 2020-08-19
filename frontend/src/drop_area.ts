@@ -1,3 +1,5 @@
+import AcceptedFileTypes from "./accepted_file_types";
+
 const getEntriesFromDirectory = async (
   directoryEntry: FileSystemDirectoryEntry
 ): Promise<FileSystemEntry[]> =>
@@ -48,18 +50,22 @@ const getFilesFromDataTransfer = async (
 };
 
 class DropArea {
+  acceptedFileTypes: AcceptedFileTypes;
   container: Element;
   onUploadFiles: (files: File[]) => void;
 
   constructor({
     container,
+    inputAccept,
     onUploadFiles
   }: {
     container: Element;
+    inputAccept: string;
     onUploadFiles: (files: File[]) => void;
   }) {
     this.container = container;
     this.onUploadFiles = onUploadFiles;
+    this.acceptedFileTypes = new AcceptedFileTypes(inputAccept);
 
     container.addEventListener("dragenter", () => {
       container.classList.add("dff-dropping");
@@ -84,7 +90,11 @@ class DropArea {
       try {
         if (dragEvent.dataTransfer) {
           const files = await getFilesFromDataTransfer(dragEvent.dataTransfer);
-          this.onUploadFiles(files);
+          const acceptedFiles = files.filter(file =>
+            this.acceptedFileTypes.isAccepted(file.name)
+          );
+
+          this.onUploadFiles(acceptedFiles);
         }
       } catch (error) {
         console.error(error);

@@ -14,4 +14,5 @@ urlpatterns = (
     path('wizard', views.WizardExampleview.as_view(), name='wizard_example'),
     path('login/', LoginView.as_view(template_name='admin/login.html')),
     path('placeholder', views.PlaceholderView.as_view(), name='placeholder_example'),
+    path('accept', views.WithAcceptExample.as_view(), name='with_accept_example'),
 )
