@@ -5049,8 +5049,6 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
             var _existingUpload$optio, _existingUpload$optio2;
 
             if (((_existingUpload$optio = existingUpload.options) === null || _existingUpload$optio === void 0 ? void 0 : (_existingUpload$optio2 = _existingUpload$optio.metadata) === null || _existingUpload$optio2 === void 0 ? void 0 : _existingUpload$optio2.filename) === filename) {
-              uploadIndex = index;
-
               var el = _this.renderer.findFileDiv(index);
 
               if (el.classList.contains("dff-upload-fail")) {
@@ -5067,8 +5065,6 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
             }
           } else if (existingUpload instanceof s3_uploader) {
             if (existingUpload.file.name === filename) {
-              uploadIndex = index;
-
               var _el = _this.renderer.findFileDiv(index);
 
               if (_el.classList.contains("dff-upload-fail")) {
@@ -5087,7 +5083,6 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
             if (existingUpload.name === filename) {
               _this.deletePlaceholder(index);
 
-              uploadIndex = index;
               break;
             }
           }
@@ -5132,11 +5127,7 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
         upload.start();
         renderer.addNewUpload(filename, uploadIndex);
 
-        if (uploadIndex === _this.uploads.length) {
-          _this.uploads.push(upload);
-        } else {
-          _this.uploads[uploadIndex] = upload;
-        }
+        _this.uploads.push(upload);
       });
 
       _this.checkDropHint();
