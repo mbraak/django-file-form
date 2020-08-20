@@ -4474,165 +4474,148 @@ var typeof_default = /*#__PURE__*/__webpack_require__.n(helpers_typeof);
 
 
 
-
-function s3_uploader_ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
-
-function s3_uploader_objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { s3_uploader_ownKeys(Object(source), true).forEach(function (key) { defineProperty_default()(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { s3_uploader_ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
-
 // The following code is adpated from https://github.com/transloadit/uppy/blob/master/packages/%40uppy/aws-s3-multipart/src/MultipartUploader.js
 // which is released under a MIT License (https://github.com/transloadit/uppy/blob/master/LICENSE)
 var MB = 1024 * 1024;
-var s3_uploader_defaultOptions = {
-  limit: 1,
-  getChunkSize: function getChunkSize(file) {
-    return Math.ceil(file.size / 10000);
-  },
-  onStart: function onStart() {},
-  onProgress: function onProgress() {},
-  onPartComplete: function onPartComplete() {},
-  onSuccess: function onSuccess() {},
-  onError: function onError(err) {
-    throw err;
-  },
-  createMultipartUpload: function createMultipartUpload(file, s3UploadDir) {
-    // var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
-    var csrftoken = document.getElementsByName('csrfmiddlewaretoken')[0].value;
-    var headers = new Headers({
-      accept: 'application/json',
-      'content-type': 'application/json',
-      "X-CSRFToken": csrftoken
-    });
-    return fetch('s3upload/', {
-      method: 'post',
-      headers: headers,
-      body: JSON.stringify({
-        filename: file.name,
-        contentType: file.type,
-        s3UploadDir: s3UploadDir
-      })
-    }).then(function (response) {
-      return response.json();
-    }).then(function (data) {
-      console.log("createMultipartUpload ", data);
-      return data;
-    });
-  },
-  listParts: function listParts(_ref) {
-    var key = _ref.key,
-        uploadId = _ref.uploadId;
-    var filename = encodeURIComponent(key);
-    var uploadIdEnc = encodeURIComponent(uploadId);
-    return fetch('s3upload/' + uploadIdEnc + "?key=" + filename, {
-      method: 'get'
-    }).then(function (response) {
-      return response.json();
-    }).then(function (data) {
-      console.log("listParts ", data);
-      return data["parts"];
-    });
-  },
-  prepareUploadPart: function prepareUploadPart(_ref2) {
-    var key = _ref2.key,
-        uploadId = _ref2.uploadId,
-        number = _ref2.number;
-    var filename = encodeURIComponent(key); // var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
 
-    var csrftoken = document.getElementsByName('csrfmiddlewaretoken')[0].value;
-    var headers = new Headers({
-      "X-CSRFToken": csrftoken
-    });
-    return fetch('s3upload/' + uploadId + "/" + parseInt(number) + "?key=" + filename, {
-      method: 'get',
-      headers: headers
-    }).then(function (response) {
-      return response.json();
-    }).then(function (data) {
-      console.log("prepareUploadPart ", data);
-      return data;
-    });
-  },
-  completeMultipartUpload: function completeMultipartUpload(_ref3) {
-    var key = _ref3.key,
-        uploadId = _ref3.uploadId,
-        parts = _ref3.parts;
-    var filename = encodeURIComponent(key);
-    var uploadIdEnc = encodeURIComponent(uploadId); // var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+var getChunkSize = function getChunkSize(file) {
+  return Math.ceil(file.size / 10000);
+};
 
-    var csrftoken = document.getElementsByName('csrfmiddlewaretoken')[0].value;
-    var headers = new Headers({
-      "X-CSRFToken": csrftoken
-    });
-    return fetch('s3upload/' + uploadIdEnc + "/complete?key=" + filename, {
-      method: 'post',
-      headers: headers,
-      body: JSON.stringify({
-        parts: parts
-      })
-    }).then(function (response) {
-      return response.json();
-    }).then(function (data) {
-      console.log("Complete multi upload ", data);
-      return data;
-    });
-  },
-  abortMultipartUpload: function abortMultipartUpload(_ref4) {
-    var key = _ref4.key,
-        uploadId = _ref4.uploadId;
-    var filename = encodeURIComponent(key);
-    var uploadIdEnc = encodeURIComponent(uploadId); // var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+var createMultipartUpload = function createMultipartUpload(file, s3UploadDir) {
+  var csrftoken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
+  var headers = new Headers({
+    accept: "application/json",
+    "content-type": "application/json",
+    "X-CSRFToken": csrftoken
+  });
+  return fetch("s3upload/", {
+    method: "post",
+    headers: headers,
+    body: JSON.stringify({
+      filename: file.name,
+      contentType: file.type,
+      s3UploadDir: s3UploadDir
+    })
+  }).then(function (response) {
+    return response.json();
+  }).then(function (data) {
+    console.log("createMultipartUpload ", data);
+    return data;
+  });
+};
 
-    var csrftoken = document.getElementsByName('csrfmiddlewaretoken')[0].value;
-    var headers = new Headers({
-      "X-CSRFToken": csrftoken
-    });
-    return fetch('s3upload/' + uploadIdEnc + "?key=" + filename, {
-      method: 'delete',
-      headers: headers
-    }).then(function (response) {
-      return response.json();
-    }).then(function (data) {
-      return data;
-    });
-  }
+var listParts = function listParts(_ref) {
+  var key = _ref.key,
+      uploadId = _ref.uploadId;
+  var filename = encodeURIComponent(key);
+  var uploadIdEnc = encodeURIComponent(uploadId);
+  return fetch("s3upload/".concat(uploadIdEnc, "?key=").concat(filename), {
+    method: "get"
+  }).then(function (response) {
+    return response.json();
+  }).then(function (data) {
+    console.log("listParts ", data);
+    return data["parts"];
+  });
+};
+
+var abortMultipartUpload = function abortMultipartUpload(_ref2) {
+  var key = _ref2.key,
+      uploadId = _ref2.uploadId;
+  var filename = encodeURIComponent(key);
+  var uploadIdEnc = encodeURIComponent(uploadId);
+  var csrftoken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
+  var headers = new Headers({
+    "X-CSRFToken": csrftoken
+  });
+  return fetch("s3upload/".concat(uploadIdEnc, "?key=").concat(filename), {
+    method: "delete",
+    headers: headers
+  }).then(function (response) {
+    return response.json();
+  });
+};
+
+var prepareUploadPart = function prepareUploadPart(_ref3) {
+  var key = _ref3.key,
+      uploadId = _ref3.uploadId,
+      number = _ref3.number;
+  var filename = encodeURIComponent(key);
+  var csrftoken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
+  var headers = new Headers({
+    "X-CSRFToken": csrftoken
+  });
+  return fetch("s3upload/".concat(uploadId, "/").concat(number, "?key=").concat(filename), {
+    method: "get",
+    headers: headers
+  }).then(function (response) {
+    return response.json();
+  }).then(function (data) {
+    console.log("prepareUploadPart ", data);
+    return data;
+  });
+};
+
+var completeMultipartUpload = function completeMultipartUpload(_ref4) {
+  var key = _ref4.key,
+      uploadId = _ref4.uploadId,
+      parts = _ref4.parts;
+  var filename = encodeURIComponent(key);
+  var uploadIdEnc = encodeURIComponent(uploadId);
+  var csrftoken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
+  var headers = new Headers({
+    "X-CSRFToken": csrftoken
+  });
+  return fetch("s3upload/" + uploadIdEnc + "/complete?key=" + filename, {
+    method: "post",
+    headers: headers,
+    body: JSON.stringify({
+      parts: parts
+    })
+  }).then(function (response) {
+    return response.json();
+  }).then(function (data) {
+    console.log("Complete multi upload ", data);
+    return data;
+  });
 };
 
 function remove(arr, el) {
   var i = arr.indexOf(el);
-  if (i !== -1) arr.splice(i, 1);
+
+  if (i !== -1) {
+    arr.splice(i, 1);
+  }
 }
 
 var s3_uploader_S3Uploader = /*#__PURE__*/function () {
   function S3Uploader(file, options) {
     classCallCheck_default()(this, S3Uploader);
 
-    defineProperty_default()(this, "createdPromise", void 0);
-
-    defineProperty_default()(this, "uploading", void 0);
-
     defineProperty_default()(this, "chunkState", void 0);
 
     defineProperty_default()(this, "chunks", void 0);
 
-    defineProperty_default()(this, "isPaused", void 0);
-
-    defineProperty_default()(this, "parts", void 0);
-
-    defineProperty_default()(this, "uploadId", void 0);
-
-    defineProperty_default()(this, "key", void 0);
+    defineProperty_default()(this, "createdPromise", void 0);
 
     defineProperty_default()(this, "file", void 0);
 
+    defineProperty_default()(this, "isPaused", void 0);
+
+    defineProperty_default()(this, "key", void 0);
+
     defineProperty_default()(this, "options", void 0);
+
+    defineProperty_default()(this, "parts", void 0);
 
     defineProperty_default()(this, "s3UploadDir", void 0);
 
-    this.options = s3_uploader_objectSpread(s3_uploader_objectSpread({}, s3_uploader_defaultOptions), options); // Use default `getChunkSize` if it was null or something
+    defineProperty_default()(this, "uploadId", void 0);
 
-    if (!this.options.getChunkSize) {
-      this.options.getChunkSize = s3_uploader_defaultOptions.getChunkSize;
-    }
+    defineProperty_default()(this, "uploading", void 0);
 
+    this.options = options;
     this.file = file;
     this.key = this.options.key || null;
     this.uploadId = this.options.uploadId || null;
@@ -4654,14 +4637,16 @@ var s3_uploader_S3Uploader = /*#__PURE__*/function () {
 
     this._initChunks();
 
-    this.createdPromise["catch"](function () {}); // silence uncaught rejection warning
+    this.createdPromise["catch"](function () {
+      return {};
+    }); // silence uncaught rejection warning
   }
 
   createClass_default()(S3Uploader, [{
     key: "_initChunks",
     value: function _initChunks() {
       var chunks = [];
-      var desiredChunkSize = this.options.getChunkSize(this.file); // at least 5MB per request, at most 10k requests
+      var desiredChunkSize = getChunkSize(this.file); // at least 5MB per request, at most 10k requests
 
       var minChunkSize = Math.max(5 * MB, Math.ceil(this.file.size / 10000));
       var chunkSize = Math.max(desiredChunkSize, minChunkSize);
@@ -4688,19 +4673,21 @@ var s3_uploader_S3Uploader = /*#__PURE__*/function () {
       this.createdPromise = new Promise(function (resolve) {
         return resolve();
       }).then(function () {
-        return _this.options.createMultipartUpload(_this.file, _this.s3UploadDir);
+        return createMultipartUpload(_this.file, _this.s3UploadDir);
       });
       return this.createdPromise.then(function (result) {
-        var valid = typeof_default()(result) === 'object' && result && typeof result.uploadId === 'string' && typeof result.key === 'string';
+        var valid = typeof_default()(result) === "object" && result && typeof result.uploadId === "string" && typeof result.key === "string";
 
         if (!valid) {
-          throw new TypeError('AwsS3/Multipart: Got incorrect result from `createMultipartUpload()`, expected an object `{ uploadId, key }`.');
+          throw new TypeError("AwsS3/Multipart: Got incorrect result from `createMultipartUpload()`, expected an object `{ uploadId, key }`.");
         }
 
         _this.key = result.key;
         _this.uploadId = result.uploadId;
 
-        _this.options.onStart(result);
+        if (_this.options.onStart) {
+          _this.options.onStart(result);
+        }
 
         _this._uploadParts();
       })["catch"](function (err) {
@@ -4712,26 +4699,29 @@ var s3_uploader_S3Uploader = /*#__PURE__*/function () {
     value: function _resumeUpload() {
       var _this2 = this;
 
-      return Promise.resolve().then(function () {
-        return _this2.options.listParts({
-          uploadId: _this2.uploadId,
-          key: _this2.key
-        });
+      if (!this.key || !this.uploadId) {
+        return Promise.resolve();
+      }
+
+      return listParts({
+        uploadId: this.uploadId,
+        key: this.key
       }).then(function (parts) {
         parts.forEach(function (part) {
           var i = part.PartNumber - 1;
           _this2.chunkState[i] = {
             uploaded: part.Size,
             etag: part.ETag,
-            done: true
+            done: true,
+            busy: false
           }; // Only add if we did not yet know about this part.
 
           if (!_this2.parts.some(function (p) {
             return p.PartNumber === part.PartNumber;
           })) {
             _this2.parts.push({
-              PartNumber: part.PartNumber,
-              ETag: part.ETag
+              ETag: part.ETag,
+              PartNumber: part.PartNumber
             });
           }
         });
@@ -4746,15 +4736,21 @@ var s3_uploader_S3Uploader = /*#__PURE__*/function () {
     value: function _uploadParts() {
       var _this3 = this;
 
-      if (this.isPaused) return;
-      var need = this.options.limit - this.uploading.length;
-      if (need === 0) return; // All parts are uploaded.
+      if (this.isPaused) {
+        return;
+      }
+
+      var need = (this.options.limit || 1) - this.uploading.length;
+
+      if (need === 0) {
+        return;
+      } // All parts are uploaded.
+
 
       if (this.chunkState.every(function (state) {
         return state.done;
       })) {
-        this._completeUpload();
-
+        void this._completeUpload();
         return;
       }
 
@@ -4771,7 +4767,7 @@ var s3_uploader_S3Uploader = /*#__PURE__*/function () {
       }
 
       candidates.forEach(function (index) {
-        _this3._uploadPart(index);
+        void _this3._uploadPart(index);
       });
     }
   }, {
@@ -4779,28 +4775,28 @@ var s3_uploader_S3Uploader = /*#__PURE__*/function () {
     value: function _uploadPart(index) {
       var _this4 = this;
 
-      var body = this.chunks[index];
       this.chunkState[index].busy = true;
-      return Promise.resolve().then(function () {
-        return _this4.options.prepareUploadPart({
-          key: _this4.key,
-          uploadId: _this4.uploadId,
-          body: body,
-          number: index + 1
-        });
+
+      if (!this.key || !this.uploadId) {
+        return Promise.resolve();
+      }
+
+      return prepareUploadPart({
+        key: this.key,
+        uploadId: this.uploadId,
+        number: index + 1
       }).then(function (result) {
-        var valid = typeof_default()(result) === 'object' && result && typeof result.url === 'string';
+        var valid = typeof_default()(result) === "object" && result && typeof result.url === "string";
 
         if (!valid) {
-          throw new TypeError('AwsS3/Multipart: Got incorrect result from `prepareUploadPart()`, expected an object `{ url }`.');
+          throw new TypeError("AwsS3/Multipart: Got incorrect result from `prepareUploadPart()`, expected an object `{ url }`.");
         }
 
         return result;
       }).then(function (_ref5) {
-        var url = _ref5.url,
-            headers = _ref5.headers;
+        var url = _ref5.url;
 
-        _this4._uploadPartBytes(index, url, headers);
+        _this4._uploadPartBytes(index, url);
       }, function (err) {
         _this4._onError(err);
       });
@@ -4809,10 +4805,13 @@ var s3_uploader_S3Uploader = /*#__PURE__*/function () {
     key: "_onPartProgress",
     value: function _onPartProgress(index, sent) {
       this.chunkState[index].uploaded = sent;
-      var totalUploaded = this.chunkState.reduce(function (n, c) {
-        return n + c.uploaded;
-      }, 0);
-      this.options.onProgress(totalUploaded, this.file.size);
+
+      if (this.options.onProgress) {
+        var totalUploaded = this.chunkState.reduce(function (n, c) {
+          return n + c.uploaded;
+        }, 0);
+        this.options.onProgress(totalUploaded, this.file.size);
+      }
     }
   }, {
     key: "_onPartComplete",
@@ -4824,42 +4823,39 @@ var s3_uploader_S3Uploader = /*#__PURE__*/function () {
         ETag: etag
       };
       this.parts.push(part);
-      this.options.onPartComplete(part);
+
+      if (this.options.onPartComplete) {
+        this.options.onPartComplete(part);
+      }
 
       this._uploadParts();
     }
   }, {
     key: "_uploadPartBytes",
-    value: function _uploadPartBytes(index, url, headers) {
+    value: function _uploadPartBytes(index, url) {
       var _this5 = this;
 
       var body = this.chunks[index];
       var xhr = new XMLHttpRequest();
-      xhr.open('PUT', url, true);
-
-      if (headers) {
-        Object.keys(headers).map(function (key) {
-          xhr.setRequestHeader(key, headers[key]);
-        });
-      }
-
-      xhr.responseType = 'text';
+      xhr.open("PUT", url, true);
+      xhr.responseType = "text";
       this.uploading.push(xhr);
-      xhr.upload.addEventListener('progress', function (ev) {
+      xhr.upload.addEventListener("progress", function (ev) {
         if (!ev.lengthComputable) return;
 
         _this5._onPartProgress(index, ev.loaded);
       });
-      xhr.addEventListener('abort', function (ev) {
+      xhr.addEventListener("abort", function (ev) {
         remove(_this5.uploading, ev.target);
         _this5.chunkState[index].busy = false;
       });
-      xhr.addEventListener('load', function (ev) {
-        remove(_this5.uploading, ev.target);
+      xhr.addEventListener("load", function (ev) {
+        var target = ev.target;
+        remove(_this5.uploading, target);
         _this5.chunkState[index].busy = false;
 
-        if (ev.target.status < 200 || ev.target.status >= 300) {
-          _this5._onError(new Error('Non 2xx'));
+        if (target.status < 200 || target.status >= 300) {
+          _this5._onError(new Error("Non 2xx"));
 
           return;
         }
@@ -4867,20 +4863,20 @@ var s3_uploader_S3Uploader = /*#__PURE__*/function () {
         _this5._onPartProgress(index, body.size); // NOTE This must be allowed by CORS.
 
 
-        var etag = ev.target.getResponseHeader('ETag');
+        var etag = target.getResponseHeader("ETag");
 
         if (etag === null) {
-          _this5._onError(new Error('AwsS3/Multipart: Could not read the ETag header. This likely means CORS is not configured correctly on the S3 Bucket. Seee https://uppy.io/docs/aws-s3-multipart#S3-Bucket-Configuration for instructions.'));
+          _this5._onError(new Error("AwsS3/Multipart: Could not read the ETag header. This likely means CORS is not configured correctly on the S3 Bucket. Seee https://uppy.io/docs/aws-s3-multipart#S3-Bucket-Configuration for instructions."));
 
           return;
         }
 
         _this5._onPartComplete(index, etag);
       });
-      xhr.addEventListener('error', function (ev) {
+      xhr.addEventListener("error", function (ev) {
         remove(_this5.uploading, ev.target);
         _this5.chunkState[index].busy = false;
-        var error = new Error('Unknown error'); // error.source = ev.target
+        var error = new Error("Unknown error"); // error.source = ev.target
 
         _this5._onError(error);
       });
@@ -4895,39 +4891,31 @@ var s3_uploader_S3Uploader = /*#__PURE__*/function () {
       this.parts.sort(function (a, b) {
         return a.PartNumber - b.PartNumber;
       });
-      return Promise.resolve().then(function () {
-        return _this6.options.completeMultipartUpload({
-          key: _this6.key,
-          uploadId: _this6.uploadId,
-          parts: _this6.parts
-        });
+
+      if (!this.uploadId || !this.key) {
+        return Promise.resolve();
+      }
+
+      return completeMultipartUpload({
+        key: this.key,
+        uploadId: this.uploadId,
+        parts: this.parts
       }).then(function (result) {
-        _this6.options.onSuccess(result);
+        if (_this6.options.onSuccess) {
+          _this6.options.onSuccess(result);
+        }
       }, function (err) {
         _this6._onError(err);
       });
     }
   }, {
-    key: "_abortUpload",
-    value: function _abortUpload() {
-      var _this7 = this;
-
-      this.uploading.slice().forEach(function (xhr) {
-        xhr.abort();
-      });
-      this.createdPromise.then(function () {
-        _this7.options.abortMultipartUpload({
-          key: _this7.key,
-          uploadId: _this7.uploadId
-        });
-      }, function () {// if the creation failed we do not need to abort
-      });
-      this.uploading = [];
-    }
-  }, {
     key: "_onError",
-    value: function _onError(err) {
-      this.options.onError(err);
+    value: function _onError(error) {
+      if (this.options.onError) {
+        this.options.onError(error);
+      } else {
+        throw error;
+      }
     }
   }, {
     key: "start",
@@ -4935,9 +4923,9 @@ var s3_uploader_S3Uploader = /*#__PURE__*/function () {
       this.isPaused = false;
 
       if (this.uploadId) {
-        this._resumeUpload();
+        void this._resumeUpload();
       } else {
-        this._createUpload();
+        void this._createUpload();
       }
     }
   }, {
@@ -4952,11 +4940,21 @@ var s3_uploader_S3Uploader = /*#__PURE__*/function () {
   }, {
     key: "abort",
     value: function abort() {
-      var opts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-      var really = opts.really || false;
-      if (!really) return this.pause();
+      var _this7 = this;
 
-      this._abortUpload();
+      this.uploading.slice().forEach(function (xhr) {
+        xhr.abort();
+      });
+      this.createdPromise.then(function () {
+        if (_this7.key && _this7.uploadId) {
+          void abortMultipartUpload({
+            key: _this7.key,
+            uploadId: _this7.uploadId
+          });
+        }
+      }, function () {// if the creation failed we do not need to abort
+      });
+      this.uploading = [];
     }
   }]);
 
@@ -5067,6 +5065,22 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
 
               break;
             }
+          } else if (existingUpload instanceof s3_uploader) {
+            uploadIndex = index;
+
+            var _el = _this.renderer.findFileDiv(index);
+
+            if (_el.classList.contains("dff-upload-fail")) {
+              _this.deleteUpload(index);
+            } else if (_el.classList.contains("dff-upload-success")) {
+              _this.deleteS3Uploaded(index);
+            } else {
+              void existingUpload.abort();
+
+              _this.deleteUpload(index);
+            }
+
+            break;
           } else if (existingUpload) {
             if (existingUpload.name === filename) {
               _this.deletePlaceholder(index);
@@ -5081,15 +5095,7 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
 
         if (s3UploadDir != null) {
           upload = new s3_uploader(file, {
-            // .bind to pass the file object to each handler.
-            // createMultipartUpload: this.createMultipartUpload.bind(this,file) ,
-            // listParts: this.listParts.bind(this,file) ,
-            // prepareUploadPart: this.prepareUploadPart.bind(this,file) ,
-            // completeMultipartUpload: this.completeMultipartUpload.bind(this,file),
-            // abortMultipartUpload: this.abortMultipartUpload.bind(this,file),
-            getChunkSize: null,
             s3UploadDir: s3UploadDir,
-            // onStart,
             onProgress: function onProgress(bytesUploaded, bytesTotal) {
               return _this.handleProgress(uploadIndex, bytesUploaded, bytesTotal);
             },
@@ -5098,9 +5104,7 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
             },
             onSuccess: function onSuccess() {
               return _this.handleSuccess(uploadIndex, upload.file.size);
-            },
-            retryDelays: _this.retryDelays || [0, 1000, 3000, 5000] // onPartComplete,
-
+            }
           });
         } else {
           upload = new browser_Upload(file, {
@@ -5308,7 +5312,7 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
     value: function handleDelete(uploadIndex) {
       var upload = this.uploads[uploadIndex];
 
-      if (upload instanceof browser_Upload) {
+      if (upload instanceof browser_Upload || upload.url) {
         this.deleteFromServer(uploadIndex);
       } else if (upload instanceof s3_uploader || !upload.placeholder) {
         // upload could be a S3Uploader object, or a UploadedFile
@@ -5337,7 +5341,8 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
       var _this3 = this;
 
       var upload = this.uploads[uploadIndex];
-      var url = upload.url;
+      var _ref2 = upload,
+          url = _ref2.url;
 
       if (!url) {
         return;
@@ -5379,8 +5384,7 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
         void upload.abort(true);
         this.deleteUpload(uploadIndex);
       } else if (upload instanceof s3_uploader) {
-        upload._abortUpload();
-
+        upload.abort();
         this.deleteUpload(uploadIndex);
       }
     }
@@ -5431,20 +5435,21 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
       // 3. A map object with .placeholder == false, created when the form is reloaded
       // 4. An S3Uploader object that will need to be saved as UploadedFile
       // the latter two cases are handled here
-      var uploadedInfo = this.uploads.filter(function (upload) {
-        return !(upload instanceof browser_Upload) && !(upload instanceof s3_uploader) && !upload.placeholder;
-      }).concat(this.uploads.filter(function (upload) {
+      var s3Uploads = this.uploads.filter(function (upload) {
         return upload instanceof s3_uploader;
       }).map(function (upload) {
-        upload = upload;
+        var s3Upload = upload;
         return {
-          id: upload.uploadId,
-          name: upload.key,
+          id: s3Upload.uploadId,
+          name: s3Upload.key,
           placeholder: false,
-          size: upload.file.size,
-          original_name: upload.file.name
+          size: s3Upload.file.size,
+          original_name: s3Upload.file.name
         };
-      }));
+      });
+      var uploadedInfo = this.uploads.filter(function (upload) {
+        return !(upload instanceof browser_Upload) && !(upload instanceof s3_uploader) && !upload.placeholder;
+      }).concat(s3Uploads);
       var input = Object(util["a" /* findInput */])(this.form, Object(util["f" /* getS3UploadedFieldName */])(this.fieldName, this.prefix), this.prefix);
 
       if (input) {

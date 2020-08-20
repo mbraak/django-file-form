@@ -16,9 +16,10 @@ class FileFormMixin(object):
 
         if s3_upload_dir is not None:
             self.add_hidden_field('s3_upload_dir', s3_upload_dir)
+            self.add_s3_uploaded_files()
+
         self.add_hidden_field('form_id', uuid.uuid4())
         self.add_hidden_field('upload_url', self.get_upload_url())
-        self.add_s3_uploaded_files()
         self.add_placeholder_inputs()
 
     def add_hidden_field(self, name, initial):

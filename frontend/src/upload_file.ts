@@ -23,6 +23,7 @@ export interface UploadedFile {
   name: string;
   placeholder: boolean | undefined;
   size: number;
+  url?: string;
   original_name: string;
 }
 
@@ -207,6 +208,18 @@ class UploadFile {
             }
             break;
           }
+        } else if (existingUpload instanceof S3Uploader) {
+          uploadIndex = index;
+          const el = this.renderer.findFileDiv(index) as HTMLDivElement;
+          if (el.classList.contains("dff-upload-fail")) {
+            this.deleteUpload(index);
+          } else if (el.classList.contains("dff-upload-success")) {
+            this.deleteS3Uploaded(index);
+          } else {
+            void existingUpload.abort();
+            this.deleteUpload(index);
+          }
+          break;
         } else if (existingUpload) {
           if (existingUpload.name === filename) {
             this.deletePlaceholder(index);
@@ -347,7 +360,7 @@ class UploadFile {
 
   handleDelete(uploadIndex: number): void {
     const upload = this.uploads[uploadIndex];
-    if (upload instanceof Upload) {
+    if (upload instanceof Upload || (upload as UploadedFile).url) {
       this.deleteFromServer(uploadIndex);
     } else if (upload instanceof S3Uploader || !upload.placeholder) {
       // upload could be a S3Uploader object, or a UploadedFile
@@ -372,8 +385,8 @@ class UploadFile {
   }
 
   deleteFromServer(uploadIndex: number): void {
-    const upload = <Upload>this.uploads[uploadIndex];
-    const { url } = upload;
+    const upload = this.uploads[uploadIndex];
+    const { url } = upload as Upload | UploadedFile;
 
     if (!url) {
       return;
