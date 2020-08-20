@@ -5066,21 +5066,23 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
               break;
             }
           } else if (existingUpload instanceof s3_uploader) {
-            uploadIndex = index;
+            if (existingUpload.file.name === filename) {
+              uploadIndex = index;
 
-            var _el = _this.renderer.findFileDiv(index);
+              var _el = _this.renderer.findFileDiv(index);
 
-            if (_el.classList.contains("dff-upload-fail")) {
-              _this.deleteUpload(index);
-            } else if (_el.classList.contains("dff-upload-success")) {
-              _this.deleteS3Uploaded(index);
-            } else {
-              void existingUpload.abort();
+              if (_el.classList.contains("dff-upload-fail")) {
+                _this.deleteUpload(index);
+              } else if (_el.classList.contains("dff-upload-success")) {
+                _this.deleteS3Uploaded(index);
+              } else {
+                void existingUpload.abort();
 
-              _this.deleteUpload(index);
+                _this.deleteUpload(index);
+              }
+
+              break;
             }
-
-            break;
           } else if (existingUpload) {
             if (existingUpload.name === filename) {
               _this.deletePlaceholder(index);
@@ -5273,26 +5275,34 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
         var id = file.id,
             name = file.name,
             size = file.size;
-        renderer.addUploadedFile(name, i, size);
+        renderer.addUploadedFile(file.original_name ? file.original_name : name, i, size);
 
-        if (!(file instanceof browser_Upload) && !(file instanceof s3_uploader)) {
+        if (file.placeholder === true) {
+          // in case of placeholder
           _this2.uploads.push({
             id: id,
             name: name,
-            placeholder: file.placeholder,
-            size: size,
-            original_name: file.original_name
+            placeholder: true,
+            size: size
           });
-        } else {
-          var url = "".concat(_this2.uploadUrl).concat(file.id);
-
+        } else if (file.placeholder === false) {
+          // in case of S3
           _this2.uploads.push({
             id: id,
             name: name,
             placeholder: false,
             size: size,
-            url: url,
-            original_name: name
+            original_name: file.original_name
+          });
+        } else {
+          // in case of regular UploadedFile
+          var url = "".concat(_this2.uploadUrl).concat(file.id);
+
+          _this2.uploads.push({
+            id: id,
+            name: name,
+            size: size,
+            url: url
           });
         }
       };
@@ -5448,7 +5458,7 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
         };
       });
       var uploadedInfo = this.uploads.filter(function (upload) {
-        return !(upload instanceof browser_Upload) && !(upload instanceof s3_uploader) && !upload.placeholder;
+        return !(upload instanceof browser_Upload) && !(upload instanceof s3_uploader) && upload.placeholder === false;
       }).concat(s3Uploads);
       var input = Object(util["a" /* findInput */])(this.form, Object(util["f" /* getS3UploadedFieldName */])(this.fieldName, this.prefix), this.prefix);
 

@@ -15,16 +15,18 @@ export interface InitialFile {
   placeholder?: boolean | undefined;
   size: number;
   url?: string;
-  original_name: string;
+  original_name?: string;
 }
 
 export interface UploadedFile {
   id: string;
   name: string;
-  placeholder: boolean | undefined;
+  // true for placeholder, false for S3, undefined for regular files
+  placeholder?: boolean | undefined;
   size: number;
   url?: string;
-  original_name: string;
+  // available only for S3 uploaded file
+  original_name?: string;
 }
 
 export type Translations = { [key: string]: string };
@@ -133,26 +135,18 @@ class UploadFile {
 
     const addInitialFile = (file: InitialFile, i: number): void => {
       const { id, name, size } = file;
-      renderer.addUploadedFile(name, i, size);
+      renderer.addUploadedFile(file.original_name ? file.original_name : name, i, size);
 
-      if (!(file instanceof Upload) && !(file instanceof S3Uploader)) {
-        this.uploads.push({
-          id,
-          name,
-          placeholder: file.placeholder,
-          size,
-          original_name: file.original_name
-        });
+      if (file.placeholder === true) {
+        // in case of placeholder
+        this.uploads.push({ id, name, placeholder: true, size });
+      } else if (file.placeholder === false) {
+        // in case of S3
+        this.uploads.push({ id, name, placeholder: false, size, original_name: file.original_name });
       } else {
+        // in case of regular UploadedFile
         const url = `${this.uploadUrl}${file.id}`;
-        this.uploads.push({
-          id,
-          name,
-          placeholder: false,
-          size,
-          url,
-          original_name: name
-        });
+        this.uploads.push({ id, name, size, url });
       }
     };
 
@@ -209,17 +203,19 @@ class UploadFile {
             break;
           }
         } else if (existingUpload instanceof S3Uploader) {
-          uploadIndex = index;
-          const el = this.renderer.findFileDiv(index) as HTMLDivElement;
-          if (el.classList.contains("dff-upload-fail")) {
-            this.deleteUpload(index);
-          } else if (el.classList.contains("dff-upload-success")) {
-            this.deleteS3Uploaded(index);
-          } else {
-            void existingUpload.abort();
-            this.deleteUpload(index);
+          if (existingUpload.file.name === filename) {
+            uploadIndex = index;
+            const el = this.renderer.findFileDiv(index) as HTMLDivElement;
+            if (el.classList.contains("dff-upload-fail")) {
+              this.deleteUpload(index);
+            } else if (el.classList.contains("dff-upload-success")) {
+              this.deleteS3Uploaded(index);
+            } else {
+              void existingUpload.abort();
+              this.deleteUpload(index);
+            }
+            break;
           }
-          break;
         } else if (existingUpload) {
           if (existingUpload.name === filename) {
             this.deletePlaceholder(index);
@@ -496,7 +492,7 @@ class UploadFile {
         upload =>
           !(upload instanceof Upload) &&
           !(upload instanceof S3Uploader) &&
-          !upload.placeholder
+          upload.placeholder === false
       )
       .concat(s3Uploads);
 

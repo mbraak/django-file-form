@@ -24,7 +24,8 @@ def get_uploaded_files(value):
         file_info.get_values() if hasattr(file_info, 'file_id') else dict(name=file_info.name)
         for file_info in
         get_list(value)
-        if not getattr(file_info, 'is_placeholder', False)
+        if not getattr(file_info, 'is_placeholder', False) and
+            not getattr(file_info, 'is_s3direct', False)
     ]
 
 
@@ -56,7 +57,6 @@ def get_s3_uploaded_files(data, field_name):
 class UploadWidgetMixin(ClearableFileInput):
     def render(self, name, value, attrs=None, renderer=None):
         upload_input = super(UploadWidgetMixin, self).render(name, value, attrs, renderer)
-
         return mark_safe(
             render_to_string(
                 'django_file_form/upload_widget.html',

@@ -24,7 +24,7 @@ DEBUG = True
 
 DATABASES = dict(
     default=dict(
-        ENGINE='django.db.backends.sqlite3',
+        ENGINE='django.db.backends.postgresql',
         NAME='example',
         USER='postgres',
         PASSWORD='',
