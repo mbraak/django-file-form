@@ -155,7 +155,33 @@ class UploadFile {
     files.forEach(file => {
       const { fieldName, formId, renderer, uploads, uploadUrl } = this;
       const filename = file.name;
-      const uploadIndex = uploads.length;
+      let uploadIndex = uploads.length;
+
+      // #323 remove existing file
+      for (let index = 0; index < this.uploads.length; ++index) {
+        const existingUpload = this.uploads[index];
+        if (existingUpload instanceof Upload) {
+          if (existingUpload.options?.metadata?.filename === filename) {
+            uploadIndex = index;
+            const el = this.renderer.findFileDiv(index) as HTMLDivElement;
+            if (el.classList.contains("dff-upload-fail")) {
+              this.deleteUpload(index);
+            } else if (el.classList.contains("dff-upload-success")) {
+              this.deleteFromServer(index);
+            } else {
+              void existingUpload.abort(true);
+              this.deleteUpload(index);
+            }
+            break;
+          }
+        } else if (existingUpload) {
+          if (existingUpload.name === filename) {
+            this.deletePlaceholder(index);
+            uploadIndex = index;
+            break;
+          }
+        }
+      }
 
       const upload = new Upload(file, {
         endpoint: uploadUrl,
@@ -171,7 +197,11 @@ class UploadFile {
       upload.start();
       renderer.addNewUpload(filename, uploadIndex);
 
-      this.uploads.push(upload);
+      if (uploadIndex === this.uploads.length) {
+        this.uploads.push(upload);
+      } else {
+        this.uploads[uploadIndex] = upload;
+      }
     });
 
     this.checkDropHint();

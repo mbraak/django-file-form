@@ -4512,7 +4512,41 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
             uploads = _this.uploads,
             uploadUrl = _this.uploadUrl;
         var filename = file.name;
-        var uploadIndex = uploads.length;
+        var uploadIndex = uploads.length; // #323 remove existing file
+
+        for (var index = 0; index < _this.uploads.length; ++index) {
+          var existingUpload = _this.uploads[index];
+
+          if (existingUpload instanceof browser_Upload) {
+            var _existingUpload$optio, _existingUpload$optio2;
+
+            if (((_existingUpload$optio = existingUpload.options) === null || _existingUpload$optio === void 0 ? void 0 : (_existingUpload$optio2 = _existingUpload$optio.metadata) === null || _existingUpload$optio2 === void 0 ? void 0 : _existingUpload$optio2.filename) === filename) {
+              uploadIndex = index;
+
+              var el = _this.renderer.findFileDiv(index);
+
+              if (el.classList.contains("dff-upload-fail")) {
+                _this.deleteUpload(index);
+              } else if (el.classList.contains("dff-upload-success")) {
+                _this.deleteFromServer(index);
+              } else {
+                void existingUpload.abort(true);
+
+                _this.deleteUpload(index);
+              }
+
+              break;
+            }
+          } else if (existingUpload) {
+            if (existingUpload.name === filename) {
+              _this.deletePlaceholder(index);
+
+              uploadIndex = index;
+              break;
+            }
+          }
+        }
+
         var upload = new browser_Upload(file, {
           endpoint: uploadUrl,
           metadata: {
@@ -4534,7 +4568,11 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
         upload.start();
         renderer.addNewUpload(filename, uploadIndex);
 
-        _this.uploads.push(upload);
+        if (uploadIndex == _this.uploads.length) {
+          _this.uploads.push(upload);
+        } else {
+          _this.uploads[uploadIndex] = upload;
+        }
       });
 
       _this.checkDropHint();
@@ -5084,7 +5122,7 @@ function encode(input) {
  * @api public
  */
 function querystring(query) {
-  var parser = /([^=?&]+)=?([^&]*)/g
+  var parser = /([^=?#&]+)=?([^&]*)/g
     , result = {}
     , part;
 
@@ -5139,8 +5177,8 @@ function querystringify(obj, prefix) {
         value = '';
       }
 
-      key = encodeURIComponent(key);
-      value = encodeURIComponent(value);
+      key = encode(key);
+      value = encode(value);
 
       //
       // If we failed to encode the strings, we should bail out as we don't
