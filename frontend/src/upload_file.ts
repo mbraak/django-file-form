@@ -164,7 +164,35 @@ class UploadFile {
     files.forEach(file => {
       const { fieldName, formId, s3UploadDir, renderer, uploads, uploadUrl } = this;
       const filename = file.name;
-      const uploadIndex = uploads.length;
+
+      let uploadIndex = uploads.length;
+
+      // #323 remove existing file
+      for (let index = 0; index < this.uploads.length; ++index) {
+        const existingUpload = this.uploads[index];
+        if (existingUpload instanceof Upload) {
+          if (existingUpload.options?.metadata?.filename === filename) {
+            uploadIndex = index;
+            const el = this.renderer.findFileDiv(index) as HTMLDivElement;
+            if (el.classList.contains("dff-upload-fail")) {
+              this.deleteUpload(index);
+            } else if (el.classList.contains("dff-upload-success")) {
+              this.deleteFromServer(index);
+            } else {
+              void existingUpload.abort(true);
+              this.deleteUpload(index);
+            }
+            break;
+          }
+        } else if (existingUpload) {
+          if (existingUpload.name === filename) {
+            this.deletePlaceholder(index);
+            uploadIndex = index;
+            break;
+          }
+        }
+      }
+
       let upload: S3Uploader | Upload | null = null;
       if (s3UploadDir != null) {
         upload = new S3Uploader(file, {
@@ -197,10 +225,15 @@ class UploadFile {
           retryDelays: this.retryDelays || [0, 1000, 3000, 5000]
         });
       }
+
       upload.start();
       renderer.addNewUpload(filename, uploadIndex);
 
-      this.uploads.push(upload);
+      if (uploadIndex === this.uploads.length) {
+        this.uploads.push(upload);
+      } else {
+        this.uploads[uploadIndex] = upload;
+      }
     });
 
     this.checkDropHint();

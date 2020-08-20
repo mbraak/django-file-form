@@ -5042,7 +5042,41 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
             uploads = _this.uploads,
             uploadUrl = _this.uploadUrl;
         var filename = file.name;
-        var uploadIndex = uploads.length;
+        var uploadIndex = uploads.length; // #323 remove existing file
+
+        for (var index = 0; index < _this.uploads.length; ++index) {
+          var existingUpload = _this.uploads[index];
+
+          if (existingUpload instanceof browser_Upload) {
+            var _existingUpload$optio, _existingUpload$optio2;
+
+            if (((_existingUpload$optio = existingUpload.options) === null || _existingUpload$optio === void 0 ? void 0 : (_existingUpload$optio2 = _existingUpload$optio.metadata) === null || _existingUpload$optio2 === void 0 ? void 0 : _existingUpload$optio2.filename) === filename) {
+              uploadIndex = index;
+
+              var el = _this.renderer.findFileDiv(index);
+
+              if (el.classList.contains("dff-upload-fail")) {
+                _this.deleteUpload(index);
+              } else if (el.classList.contains("dff-upload-success")) {
+                _this.deleteFromServer(index);
+              } else {
+                void existingUpload.abort(true);
+
+                _this.deleteUpload(index);
+              }
+
+              break;
+            }
+          } else if (existingUpload) {
+            if (existingUpload.name === filename) {
+              _this.deletePlaceholder(index);
+
+              uploadIndex = index;
+              break;
+            }
+          }
+        }
+
         var upload = null;
 
         if (s3UploadDir != null) {
@@ -5092,7 +5126,11 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
         upload.start();
         renderer.addNewUpload(filename, uploadIndex);
 
-        _this.uploads.push(upload);
+        if (uploadIndex === _this.uploads.length) {
+          _this.uploads.push(upload);
+        } else {
+          _this.uploads[uploadIndex] = upload;
+        }
       });
 
       _this.checkDropHint();
@@ -5391,8 +5429,8 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
       // 1. A regular Upload object
       // 2. A map object with .placeholder == true
       // 3. A map object with .placeholder == false, created when the form is reloaded
-      // 4. A S3Uploader object that will need to be saved as UploadedFuke
-      //
+      // 4. An S3Uploader object that will need to be saved as UploadedFile
+      // the latter two cases are handled here
       var uploadedInfo = this.uploads.filter(function (upload) {
         return !(upload instanceof browser_Upload) && !(upload instanceof s3_uploader) && !upload.placeholder;
       }).concat(this.uploads.filter(function (upload) {
