@@ -347,6 +347,7 @@ You can now edit generated po file and commit your changes as usual
 * development version
   * Issue #324: get placeholder file for UploadWidget (thanks to Shrikrishna Singh)
   * Issue #331: fix error in deleting files (thanks to Bo Peng)
+  * Issue #333: replace existing uploaded file with the same name (thanks to Bo Peng)
 
 * **3.0.0 (6 august 2020)**
   * Issue #320: fix UploadMultipleWidget to return correct placeholder files (thanks to Shrikrishna Singh)
