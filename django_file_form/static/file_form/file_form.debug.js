@@ -142,7 +142,6 @@ var findInput = function findInput(form, fieldName, prefix) {
   var input = form.querySelector("[name=\"".concat(inputNameWithPrefix, "\"]"));
 
   if (!input) {
-    console.error("Cannot find input with name '".concat(inputNameWithPrefix, "'"));
     return null;
   }
 
@@ -4500,7 +4499,6 @@ var createMultipartUpload = function createMultipartUpload(file, s3UploadDir) {
   }).then(function (response) {
     return response.json();
   }).then(function (data) {
-    console.log("createMultipartUpload ", data);
     return data;
   });
 };
@@ -4515,7 +4513,6 @@ var listParts = function listParts(_ref) {
   }).then(function (response) {
     return response.json();
   }).then(function (data) {
-    console.log("listParts ", data);
     return data["parts"];
   });
 };
@@ -4552,7 +4549,6 @@ var prepareUploadPart = function prepareUploadPart(_ref3) {
   }).then(function (response) {
     return response.json();
   }).then(function (data) {
-    console.log("prepareUploadPart ", data);
     return data;
   });
 };
@@ -4576,7 +4572,6 @@ var completeMultipartUpload = function completeMultipartUpload(_ref4) {
   }).then(function (response) {
     return response.json();
   }).then(function (data) {
-    console.log("Complete multi upload ", data);
     return data;
   });
 };
