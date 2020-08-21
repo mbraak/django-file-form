@@ -91,6 +91,7 @@ class UploadFile {
 
     this.uploadIndex = 0;
     this.uploads = [];
+    this.uploadStatuses = [];
 
     this.renderer = new RenderUploadFile({
       parent,
@@ -131,6 +132,8 @@ class UploadFile {
         const url = `${this.uploadUrl}${file.id}`;
         this.uploads.push({ id, name, placeholder: false, size, url });
       }
+
+      this.uploadStatuses.push("done");
     };
 
     if (multiple) {
@@ -206,7 +209,7 @@ class UploadFile {
   }
 
   removeExistingUpload(uploadIndex: number): void {
-    const uploadStatus = "uploading";
+    const uploadStatus = this.uploadStatuses[uploadIndex];
 
     if (uploadStatus === "uploading") {
       const upload = this.uploads[uploadIndex] as Upload;
