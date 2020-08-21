@@ -73,7 +73,6 @@ const createMultipartUpload = (
       return response.json();
     })
     .then(data => {
-      console.log("createMultipartUpload ", data);
       return data as MultipartUpload;
     });
 };
@@ -91,7 +90,6 @@ const listParts = ({
       return response.json();
     })
     .then(data => {
-      console.log("listParts ", data);
       return (data as Record<string, unknown>)["parts"] as ServerPart[];
     });
 };
@@ -135,7 +133,6 @@ const prepareUploadPart = ({
       return response.json();
     })
     .then(data => {
-      console.log("prepareUploadPart ", data);
       return data as UrlInfo;
     });
 };
@@ -168,7 +165,6 @@ const completeMultipartUpload = ({
       return response.json();
     })
     .then(data => {
-      console.log("Complete multi upload ", data);
       return data as LocationInfo;
     });
 };

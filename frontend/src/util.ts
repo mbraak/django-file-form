@@ -32,7 +32,6 @@ export const findInput = (
   const input = form.querySelector(`[name="${inputNameWithPrefix}"]`);
 
   if (!input) {
-    console.error(`Cannot find input with name '${inputNameWithPrefix}'`);
     return null;
   }
 
@@ -48,7 +47,6 @@ export const getS3UploadedFieldName = (
   fieldName: string,
   prefix: string | null
 ): string => `${getInputNameWithoutPrefix(fieldName, prefix)}-s3direct`;
-
 
 export const getInputValueForFormAndPrefix = (
   form: Element,
