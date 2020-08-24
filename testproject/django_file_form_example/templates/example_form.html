@@ -7,6 +7,7 @@
     {{ block.super }}
     <link rel="stylesheet" href="{% static "file_form/file_form.css" %}">
     <link rel="stylesheet" href="{% static "example.css" %}">
+
 {% endblock %}
 
 {% block body %}
@@ -25,6 +26,7 @@
             <label for="{{ form.title.id_for_label }}">Title</label>
             {{ form.title }}
         </div>
+
         <div id="row-example-input_file" {% if form.input_file.errors %} class="has-error" {% endif %}>
             {{ form.input_file.errors }}
             {{ form.input_file }}

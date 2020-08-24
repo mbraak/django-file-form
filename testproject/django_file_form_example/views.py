@@ -16,6 +16,13 @@ class BaseFormView(generic.FormView):
     use_ajax = True
     custom_js_file = 'example_form.js'
 
+    def get_form_kwargs(self):
+        # pass s3_upload_dir from view to form
+        kwargs = super(BaseFormView, self).get_form_kwargs()
+        if hasattr(self, 's3_upload_dir'):
+            kwargs.update({'s3_upload_dir': self.s3_upload_dir})
+        return kwargs
+
     def get_success_url(self):
         return reverse('example_success')
 
@@ -26,7 +33,6 @@ class BaseFormView(generic.FormView):
     def get_context_data(self, **kwargs):
         kwargs['use_ajax'] = self.use_ajax
         kwargs['custom_js_file'] = self.custom_js_file
-
         return super(BaseFormView, self).get_context_data(**kwargs)
 
 
@@ -92,6 +98,15 @@ class PlaceholderView(BaseFormView):
                 other_input_file=other_input_file_value.name if other_input_file_value else ''
             )
         )
+
+
+class S3ExampleView(BaseFormView):
+    form_class = forms.S3ExampleForm
+    s3_upload_dir = 's3_example'
+
+
+class S3PlaceholderExampleView(PlaceholderView):
+    s3_upload_dir = 's3_placeholder_example'
 
 
 class WithAcceptExample(BaseFormView):
