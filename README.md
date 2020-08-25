@@ -15,6 +15,8 @@ Features:
 * The ajax upload works the same as an html upload.
     * This means that you don't have to change your code to support ajax upload.
 * Supports single and multiple file upload.
+* Supports edition of uploaded files.
+* Supports upload directly to AWS S3 compatible storages.
 
 The project is hosted on [github](https://github.com/mbraak/django-file-form).
 
@@ -200,7 +202,61 @@ for f in self.cleaned_data['my_field']:
 # ...
 ```
 
-**4 Accept attribute**
+**4 Upload directly to AWS S3**
+
+`django-file-form` supports upload directly to AWS S3 compatible storages. The files will be uploaded
+by clients directly to S3 through AJAX operations and return to the backend as `File` objects
+with [`S3Boto3Storage`](https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html).
+
+To use this method, you will first need to define the following variables in `settings`
+
+```
+AWS_ACCESS_KEY_ID
+AWS_SECRET_ACCESS_KEY
+AWS_STORAGE_BUCKET_NAME
+AWS_S3_REGION_NAME
+AWS_S3_ENDPOINT_URL
+```
+
+or through environment variables with the same names as described
+in [`django-storage` documentation](https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html).
+
+The following CORS settings are also needed in `settings`
+```
+CSP_DEFAULT_SRC = ("'none'",)
+CSP_STYLE_SRC = ("'self'")
+CSP_SCRIPT_SRC = ("'self'",)
+CSP_FONT_SRC = ("'self'")
+CSP_IMG_SRC = ("'self'",)
+CSP_CONNECT_SRC = ("'self'", AWS_S3_ENDPOINT_URL)
+```
+where `AWS_S3_ENDPOINT_URL` is the AWS endpoint defined above.
+
+Then, you will need to pass
+
+  ```
+  s3_upload_dir = "user_or_form_specific_id"
+  ```
+
+to the constructor of the form to inform the frontend to use the AJAX uploader for S3.
+The files will be uploaded to
+
+```
+${FILE_FORM_UPLOAD_DIR}/${s3_upload_dir}/
+````
+
+in the specified S3 bucket, where `s3_upload_dir` can be empty or a directory
+specific to user or form to avoid conflicts on the AWS side. If the object
+already exists in the S3 bucket, a random string will be added to filename.
+
+After form submission, the files will be returned as customized `S3Boto3StorageFile`
+objects  with `S3Boto3Storage` as its underlying storage. The objects will have attributes
+`is_s3direct=True`,  `is_placeholder=False`, and `original_name` which is the
+name of the file that was uploaded that can be different from the basename
+of the object on S3 (`f.name`). Reading from these objects will download the files
+from S3.
+
+**5 Accept attribute**
 
 You can add an accept attribute to the file input using the `accept` parameter on `UploadedFileField`:
 
@@ -347,6 +403,7 @@ You can now edit generated po file and commit your changes as usual
 * development version
   * Issue #324: get placeholder file for UploadWidget (thanks to Shrikrishna Singh)
   * Issue #331: fix error in deleting files (thanks to Bo Peng)
+  * Issue #333: replace existing uploaded file with the same name (thanks to Bo Peng)
 
 * **3.0.0 (6 august 2020)**
   * Issue #320: fix UploadMultipleWidget to return correct placeholder files (thanks to Shrikrishna Singh)

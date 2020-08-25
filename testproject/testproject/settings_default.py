@@ -1,6 +1,7 @@
 from pathlib import Path
 import logging
 
+import os
 
 def mkdir_p(path):
     if not path.exists():
@@ -88,5 +89,19 @@ TEMPLATES = [
 ]
 
 ALLOWED_HOSTS = ['*']
+
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID', '')
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY', '')
+AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', '')
+AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', '')
+AWS_S3_ENDPOINT_URL = os.environ.get('AWS_S3_ENDPOINT_URL', '')
+
+CSP_DEFAULT_SRC = ("'none'",)
+CSP_STYLE_SRC = ("'self'")
+CSP_SCRIPT_SRC = ("'self'",)
+CSP_FONT_SRC = ("'self'")
+CSP_IMG_SRC = ("'self'",)
+CSP_CONNECT_SRC = ("'self'", AWS_S3_ENDPOINT_URL)
+
 
 logging.basicConfig(level='INFO')
