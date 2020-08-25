@@ -58,7 +58,7 @@ class UploadFile {
   uploadIndex: number;
   uploadUrl: string;
   uploads: (Upload | UploadedFile | S3Uploader | undefined)[];
-  uploadStatuses: UploadStatus[];
+  uploadStatuses: (UploadStatus | undefined)[];
 
   constructor({
     callbacks,
@@ -294,13 +294,14 @@ class UploadFile {
         }
 
         case "error": {
-          this.deleteUpload(uploadIndex);
+          this.removeUploadFromList(uploadIndex);
           break;
         }
 
         case "uploading": {
           const upload = this.uploads[uploadIndex] as Upload;
           void upload.abort(true);
+          this.removeUploadFromList(uploadIndex);
           break;
         }
       }
@@ -401,7 +402,7 @@ class UploadFile {
     }
   };
 
-  deleteUpload(uploadIndex: number): void {
+  removeUploadFromList(uploadIndex: number): void {
     const upload = this.uploads[uploadIndex];
 
     if (!upload) {
@@ -410,6 +411,8 @@ class UploadFile {
 
     this.renderer.deleteFile(uploadIndex);
     delete this.uploads[uploadIndex];
+    delete this.uploadStatuses[uploadIndex];
+
     this.checkDropHint();
 
     const { onDelete } = this.callbacks;
@@ -439,7 +442,7 @@ class UploadFile {
 
     xhr.onload = (): void => {
       if (xhr.status === 204) {
-        this.deleteUpload(uploadIndex);
+        this.removeUploadFromList(uploadIndex);
       } else {
         this.renderer.setDeleteFailed(uploadIndex);
       }
@@ -449,12 +452,12 @@ class UploadFile {
   }
 
   deletePlaceholder(uploadIndex: number): void {
-    this.deleteUpload(uploadIndex);
+    this.removeUploadFromList(uploadIndex);
     this.updatePlaceholderInput();
   }
 
   deleteS3Uploaded(uploadIndex: number): void {
-    this.deleteUpload(uploadIndex);
+    this.removeUploadFromList(uploadIndex);
     this.updateS3UploadedInput();
   }
 
@@ -463,10 +466,10 @@ class UploadFile {
 
     if (upload instanceof Upload) {
       void upload.abort(true);
-      this.deleteUpload(uploadIndex);
+      this.removeUploadFromList(uploadIndex);
     } else if (upload instanceof S3Uploader) {
       upload.abort();
-      this.deleteUpload(uploadIndex);
+      this.removeUploadFromList(uploadIndex);
     }
   }
 
