@@ -5328,7 +5328,7 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
 
           case "error":
             {
-              this.deleteUpload(uploadIndex);
+              this.removeUploadFromList(uploadIndex);
               break;
             }
 
@@ -5336,6 +5336,7 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
             {
               var _upload5 = this.uploads[uploadIndex];
               void _upload5.abort(true);
+              this.removeUploadFromList(uploadIndex);
               break;
             }
         }
@@ -5344,8 +5345,8 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
       }
     }
   }, {
-    key: "deleteUpload",
-    value: function deleteUpload(uploadIndex) {
+    key: "removeUploadFromList",
+    value: function removeUploadFromList(uploadIndex) {
       var upload = this.uploads[uploadIndex];
 
       if (!upload) {
@@ -5354,6 +5355,7 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
 
       this.renderer.deleteFile(uploadIndex);
       delete this.uploads[uploadIndex];
+      delete this.uploadStatuses[uploadIndex];
       this.checkDropHint();
       var onDelete = this.callbacks.onDelete;
 
@@ -5385,7 +5387,7 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
 
       xhr.onload = function () {
         if (xhr.status === 204) {
-          _this4.deleteUpload(uploadIndex);
+          _this4.removeUploadFromList(uploadIndex);
         } else {
           _this4.renderer.setDeleteFailed(uploadIndex);
         }
@@ -5397,13 +5399,13 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
   }, {
     key: "deletePlaceholder",
     value: function deletePlaceholder(uploadIndex) {
-      this.deleteUpload(uploadIndex);
+      this.removeUploadFromList(uploadIndex);
       this.updatePlaceholderInput();
     }
   }, {
     key: "deleteS3Uploaded",
     value: function deleteS3Uploaded(uploadIndex) {
-      this.deleteUpload(uploadIndex);
+      this.removeUploadFromList(uploadIndex);
       this.updateS3UploadedInput();
     }
   }, {
@@ -5413,10 +5415,10 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
 
       if (upload instanceof browser_Upload) {
         void upload.abort(true);
-        this.deleteUpload(uploadIndex);
+        this.removeUploadFromList(uploadIndex);
       } else if (upload instanceof s3_uploader) {
         upload.abort();
-        this.deleteUpload(uploadIndex);
+        this.removeUploadFromList(uploadIndex);
       }
     }
   }, {
