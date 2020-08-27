@@ -1,5 +1,6 @@
 import threading
 
+from django.test import override_settings
 from flask_cors import CORS
 from moto.server import DomainDispatcherApplication, create_backend_app
 from werkzeug.serving import make_server
@@ -32,6 +33,13 @@ class S3ServerThread(threading.Thread):
         self.join()
 
 
+@override_settings(
+    AWS_STORAGE_BUCKET_NAME='MyBucket',
+    AWS_S3_ENDPOINT_URL='http://localhost:4566',
+    AWS_ACCESS_KEY_ID='access1',
+    AWS_SECRET_ACCESS_KEY='test1',
+    CSP_CONNECT_SRC=("'self'", 'http://localhost:4566')
+)
 class S3TestCase(BaseLiveTestCase):
     page_class = Page
 

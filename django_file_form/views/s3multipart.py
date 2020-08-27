@@ -11,13 +11,25 @@ from botocore.exceptions import ClientError
 
 
 class s3multipart:
-    endpoint_url = setting('AWS_S3_ENDPOINT_URL')
-    aws_access_key_id = setting('AWS_S3_ACCESS_KEY_ID',
-                                setting('AWS_ACCESS_KEY_ID'))
-    aws_secret_access_key = setting('AWS_S3_SECRET_ACCESS_KEY',
-                                    setting('AWS_SECRET_ACCESS_KEY'))
-    aws_storage_bucket_name = setting('AWS_STORAGE_BUCKET_NAME')
-    file_form_upload_dir = setting('FILE_FORM_UPLOAD_DIR', 'temp_uploads')
+    @classmethod
+    def get_bucket_name(cls):
+        return setting('AWS_STORAGE_BUCKET_NAME') or lookup_env(['DJANGO_AWS_STORAGE_BUCKET_NAME'])
+
+    @classmethod
+    def get_access_key_id(cls):
+        return setting('AWS_S3_ACCESS_KEY_ID', setting('AWS_ACCESS_KEY_ID')) or lookup_env(['AWS_S3_ACCESS_KEY_ID', 'AWS_ACCESS_KEY_ID'])
+
+    @classmethod
+    def get_secret_access_key(cls):
+        return setting('AWS_S3_SECRET_ACCESS_KEY', setting('AWS_SECRET_ACCESS_KEY')) or lookup_env(['AWS_S3_SECRET_ACCESS_KEY', 'AWS_SECRET_ACCESS_KEY'])
+
+    @classmethod
+    def get_endpoint_url(cls):
+        return setting('AWS_S3_ENDPOINT_URL') or lookup_env(['AWS_S3_ENDPOINT_URL', 'AWS_ENDPOINT_URL'])
+
+    @classmethod
+    def file_form_upload_dir(cls):
+        return setting('FILE_FORM_UPLOAD_DIR', 'temp_uploads')
 
     @classmethod
     def get_client(cls):
@@ -26,13 +38,10 @@ class s3multipart:
                 # https://github.com/boto/boto3/issues/801
                 return boto3.client(
                     's3',
-                    endpoint_url=cls.endpoint_url or
-                    lookup_env(['AWS_S3_ENDPOINT_URL', 'AWS_ENDPOINT_URL']),
-                    aws_access_key_id=cls.aws_access_key_id or
-                    lookup_env(['AWS_S3_ACCESS_KEY_ID', 'AWS_ACCESS_KEY_ID']),
-                    aws_secret_access_key=cls.aws_secret_access_key or
-                    lookup_env(
-                        ['AWS_S3_SECRET_ACCESS_KEY', 'AWS_SECRET_ACCESS_KEY']))
+                    endpoint_url=cls.get_endpoint_url(),
+                    aws_access_key_id=cls.get_access_key_id(),
+                    aws_secret_access_key=cls.get_secret_access_key()
+                )
             except:
                 time.sleep(0.01)
 
@@ -103,10 +112,9 @@ class s3multipart:
         json_body = json.loads(request.body)
         filename = json_body["filename"]
         s3_upload_dir = json_body["s3UploadDir"]
-        bucket_name = cls.aws_storage_bucket_name or lookup_env(
-            ['DJANGO_AWS_STORAGE_BUCKET_NAME'])
+        bucket_name = cls.get_bucket_name()
         key = cls.get_available_name(
-            client, bucket_name, cls.file_form_upload_dir +
+            client, bucket_name, cls.file_form_upload_dir() +
             ("/" + s3_upload_dir if s3_upload_dir else "") + "/" + filename)
         content_type = json_body["contentType"]
         response = client.create_multipart_upload(
@@ -123,8 +131,7 @@ class s3multipart:
     def get_parts_or_abort_upload(cls, request, upload_id):
         client = cls.get_client()
         key = request.GET['key']
-        bucket_name = cls.aws_storage_bucket_name or lookup_env(
-            ['DJANGO_AWS_STORAGE_BUCKET_NAME'])
+        bucket_name = cls.get_bucket_name()
         if request.method == 'GET':
             response = client.list_parts(
                 Bucket=bucket_name, Key=key, UploadId=upload_id)
@@ -146,8 +153,7 @@ class s3multipart:
             return
         client = cls.get_client()
         key = request.GET['key']
-        bucket_name = cls.aws_storage_bucket_name or lookup_env(
-            ['DJANGO_AWS_STORAGE_BUCKET_NAME'])
+        bucket_name = cls.get_bucket_name()
         response = client.generate_presigned_url(
             ClientMethod='upload_part',
             Params={
@@ -169,8 +175,7 @@ class s3multipart:
         json_body = json.loads(request.body)
         key = request.GET['key']
         parts = json_body["parts"]
-        bucket_name = cls.aws_storage_bucket_name or lookup_env(
-            ['DJANGO_AWS_STORAGE_BUCKET_NAME'])
+        bucket_name = cls.get_bucket_name()
         response = client.complete_multipart_upload(
             Bucket=bucket_name,
             Key=key,
