@@ -3855,8 +3855,9 @@ var render_upload_file_RenderUploadFile = /*#__PURE__*/function () {
   createClass_default()(RenderUploadFile, [{
     key: "addUploadedFile",
     value: function addUploadedFile(filename, uploadIndex, filesize) {
-      this.addFile(filename, uploadIndex);
+      var element = this.addFile(filename, uploadIndex);
       this.setSuccess(uploadIndex, filesize);
+      return element;
     }
   }, {
     key: "addNewUpload",
@@ -3874,6 +3875,7 @@ var render_upload_file_RenderUploadFile = /*#__PURE__*/function () {
       cancelLink.setAttribute("data-index", "".concat(uploadIndex));
       cancelLink.href = "#";
       div.appendChild(cancelLink);
+      return div;
     }
   }, {
     key: "addFile",
@@ -4973,6 +4975,7 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
     var _this = this;
 
     var callbacks = _ref.callbacks,
+        eventEmitter = _ref.eventEmitter,
         fieldName = _ref.fieldName,
         form = _ref.form,
         formId = _ref.formId,
@@ -4991,6 +4994,8 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
     classCallCheck_default()(this, UploadFile);
 
     defineProperty_default()(this, "callbacks", void 0);
+
+    defineProperty_default()(this, "eventEmitter", void 0);
 
     defineProperty_default()(this, "fieldName", void 0);
 
@@ -5123,6 +5128,7 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
     });
 
     this.callbacks = callbacks;
+    this.eventEmitter = eventEmitter;
     this.fieldName = fieldName;
     this.form = form;
     this.formId = formId;
@@ -5172,38 +5178,48 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
         var id = file.id,
             name = file.name,
             size = file.size;
-        renderer.addUploadedFile(file.original_name ? file.original_name : name, i, size);
+        var element = renderer.addUploadedFile(file.original_name ? file.original_name : name, i, size);
+        var upload;
 
         if (file.placeholder === true) {
           // in case of placeholder
-          _this2.uploads.push({
+          upload = {
             id: id,
             name: name,
             placeholder: true,
             size: size
-          });
+          };
         } else if (file.placeholder === false) {
           // in case of S3
-          _this2.uploads.push({
+          upload = {
             id: id,
             name: name,
             placeholder: false,
             size: size,
             original_name: file.original_name
-          });
+          };
         } else {
           // in case of regular UploadedFile
           var url = "".concat(_this2.uploadUrl).concat(file.id);
-
-          _this2.uploads.push({
+          upload = {
             id: id,
             name: name,
             size: size,
             url: url
-          });
+          };
         }
 
+        _this2.uploads.push(upload);
+
         _this2.uploadStatuses.push("done");
+
+        if (_this2.eventEmitter) {
+          _this2.eventEmitter.emit("addUpload", {
+            element: element,
+            fieldName: _this2.fieldName,
+            upload: upload
+          });
+        }
       };
 
       if (multiple) {
@@ -5272,9 +5288,17 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
       }
 
       upload.start();
-      renderer.addNewUpload(filename, uploadIndex);
+      var element = renderer.addNewUpload(filename, uploadIndex);
       this.uploads.push(upload);
       this.uploadStatuses.push("uploading");
+
+      if (this.eventEmitter) {
+        this.eventEmitter.emit("addUpload", {
+          element: element,
+          fieldName: this.fieldName,
+          upload: upload
+        });
+      }
     }
   }, {
     key: "findUpload",
@@ -5309,6 +5333,14 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
 
       if (!upload) {
         return;
+      }
+
+      if (this.eventEmitter) {
+        this.eventEmitter.emit("removeUpload", {
+          element: this.renderer.findFileDiv(uploadIndex),
+          fieldName: this.fieldName,
+          upload: upload
+        });
       }
 
       if (upload instanceof browser_Upload || upload instanceof s3_uploader || upload.url) {
@@ -5578,7 +5610,7 @@ var initUploadFields = function initUploadFields(form) {
   var prefix = getPrefix();
 
   if (!formId || !uploadUrl) {
-    return;
+    return null;
   }
 
   form.querySelectorAll(".dff-uploader").forEach(function (uploaderDiv) {
@@ -5602,6 +5634,7 @@ var initUploadFields = function initUploadFields(form) {
     var supportDropArea = !(options.supportDropArea === false);
     new _upload_file__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"]({
       callbacks: options.callbacks || {},
+      eventEmitter: options.eventEmitter,
       fieldName: fieldName,
       form: form,
       formId: formId,
@@ -5779,7 +5812,7 @@ function encode(input) {
  * @api public
  */
 function querystring(query) {
-  var parser = /([^=?&]+)=?([^&]*)/g
+  var parser = /([^=?#&]+)=?([^&]*)/g
     , result = {}
     , part;
 
@@ -5834,8 +5867,8 @@ function querystringify(obj, prefix) {
         value = '';
       }
 
-      key = encodeURIComponent(key);
-      value = encodeURIComponent(value);
+      key = encode(key);
+      value = encode(value);
 
       //
       // If we failed to encode the strings, we should bail out as we don't
