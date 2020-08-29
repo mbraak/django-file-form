@@ -13,16 +13,14 @@ import {
 
 interface Options {
   callbacks?: Callbacks;
+  eventEmitter?: EventEmitter;
   prefix?: string;
   retryDelays?: number[];
   skipRequired?: boolean;
   supportDropArea?: boolean;
 }
 
-const initUploadFields = (
-  form: Element,
-  options: Options = {}
-): EventEmitter | null => {
+const initUploadFields = (form: Element, options: Options = {}): void => {
   const matchesPrefix = (fieldName: string): boolean => {
     if (!(options && options.prefix)) {
       return true;
@@ -77,8 +75,6 @@ const initUploadFields = (
     return null;
   }
 
-  const eventEmitter = new EventEmitter();
-
   form.querySelectorAll(".dff-uploader").forEach(uploaderDiv => {
     const container = uploaderDiv.querySelector(
       ".dff-container"
@@ -109,7 +105,7 @@ const initUploadFields = (
 
     new UploadFile({
       callbacks: options.callbacks || {},
-      eventEmitter,
+      eventEmitter: options.eventEmitter,
       fieldName,
       form,
       formId,
@@ -126,8 +122,6 @@ const initUploadFields = (
       uploadUrl
     });
   });
-
-  return eventEmitter;
 };
 
 const initFormSet = (form: Element, optionsParam: Options | string): void => {

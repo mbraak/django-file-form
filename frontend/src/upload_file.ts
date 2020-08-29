@@ -47,7 +47,7 @@ export interface Callbacks {
 
 class UploadFile {
   callbacks: Callbacks;
-  eventEmitter: EventEmitter;
+  eventEmitter?: EventEmitter;
   fieldName: string;
   form: Element;
   formId: string;
@@ -81,7 +81,7 @@ class UploadFile {
     uploadUrl
   }: {
     callbacks: Callbacks;
-    eventEmitter: EventEmitter;
+    eventEmitter?: EventEmitter;
     fieldName: string;
     form: Element;
     formId: string;
@@ -144,31 +144,42 @@ class UploadFile {
 
     const addInitialFile = (file: InitialFile, i: number): void => {
       const { id, name, size } = file;
-      renderer.addUploadedFile(
+      const element = renderer.addUploadedFile(
         file.original_name ? file.original_name : name,
         i,
         size
       );
 
+      let upload: UploadedFile;
+
       if (file.placeholder === true) {
         // in case of placeholder
-        this.uploads.push({ id, name, placeholder: true, size });
+        upload = { id, name, placeholder: true, size };
       } else if (file.placeholder === false) {
         // in case of S3
-        this.uploads.push({
+        upload = {
           id,
           name,
           placeholder: false,
           size,
           original_name: file.original_name
-        });
+        };
       } else {
         // in case of regular UploadedFile
         const url = `${this.uploadUrl}${file.id}`;
-        this.uploads.push({ id, name, size, url });
+        upload = { id, name, size, url };
       }
 
+      this.uploads.push(upload);
       this.uploadStatuses.push("done");
+
+      if (this.eventEmitter) {
+        this.eventEmitter.emit("addUpload", {
+          element,
+          fieldName: this.fieldName,
+          upload
+        });
+      }
     };
 
     if (multiple) {
@@ -250,11 +261,13 @@ class UploadFile {
     this.uploads.push(upload);
     this.uploadStatuses.push("uploading");
 
-    this.eventEmitter.emit("addUpload", {
-      element,
-      fieldName: this.fieldName,
-      upload
-    });
+    if (this.eventEmitter) {
+      this.eventEmitter.emit("addUpload", {
+        element,
+        fieldName: this.fieldName,
+        upload
+      });
+    }
   }
 
   findUpload(filename: string): number | null {
@@ -288,11 +301,13 @@ class UploadFile {
       return;
     }
 
-    this.eventEmitter.emit("removeUpload", {
-      element: this.renderer.findFileDiv(uploadIndex),
-      fieldName: this.fieldName,
-      upload
-    });
+    if (this.eventEmitter) {
+      this.eventEmitter.emit("removeUpload", {
+        element: this.renderer.findFileDiv(uploadIndex),
+        fieldName: this.fieldName,
+        upload
+      });
+    }
 
     if (
       upload instanceof Upload ||

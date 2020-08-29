@@ -38,9 +38,10 @@ class RenderUploadFile {
     filename: string,
     uploadIndex: number,
     filesize: number
-  ): void {
-    this.addFile(filename, uploadIndex);
+  ): HTMLElement {
+    const element = this.addFile(filename, uploadIndex);
     this.setSuccess(uploadIndex, filesize);
+    return element;
   }
 
   addNewUpload(filename: string, uploadIndex: number): HTMLElement {
