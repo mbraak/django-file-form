@@ -288,6 +288,12 @@ class UploadFile {
       return;
     }
 
+    this.eventEmitter.emit("removeUpload", {
+      element: this.renderer.findFileDiv(uploadIndex),
+      fieldName: this.fieldName,
+      upload
+    });
+
     if (
       upload instanceof Upload ||
       upload instanceof S3Uploader ||

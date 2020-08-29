@@ -115,7 +115,7 @@ class RenderUploadFile {
     this.enableDelete(index);
   }
 
-  findFileDiv(index: number): Element | null {
+  findFileDiv(index: number): HTMLElement | null {
     return this.container.querySelector(`.dff-file-id-${index}`);
   }
 
