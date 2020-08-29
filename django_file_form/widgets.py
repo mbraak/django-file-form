@@ -55,15 +55,15 @@ def get_s3_uploaded_files(data, field_name):
         ]
 
 def get_file_meta(data, field_name):
-    meta_field_name = field_name + '-meta'
+    meta_field_name = field_name + '-metadata'
     value = data.get(meta_field_name)
-
     if not value:
         return {}
     try:
         res = json.loads(value)
         if not isinstance(res, dict):
             return {}
+        return res
     except Exception:
         return {}
 

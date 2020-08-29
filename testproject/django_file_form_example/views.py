@@ -113,9 +113,9 @@ class WithAcceptExample(BaseFormView):
     form_class = forms.WithAcceptExampleForm
 
 
-class WithCustomWidgetExample(BaseFormView):
+class WithCustomWidgetExample(PlaceholderView):
     custom_js_file = 'example_form_custom_widget.js'
-    form_class = forms.PlaceholderExampleForm
+    form_class = forms.PlaceholderWidgetExampleForm
 
     def get_initial(self):
         initial = super(WithCustomWidgetExample, self).get_initial()
