@@ -9,6 +9,7 @@ from django.core.files.storage import FileSystemStorage
 from django.db import models
 from django.utils import timezone
 from django.utils.module_loading import import_string
+from storages.utils import setting
 
 from .util import ModelManager, get_upload_path
 
@@ -119,13 +120,25 @@ class PlaceholderUploadedFile(object):
     def get_values(self):
         return dict(id=self.file_id, placeholder=True, name=self.name, size=self.size)
 
+
 try:
     from storages.backends.s3boto3 import S3Boto3Storage, S3Boto3StorageFile
 
     class S3UploadedFileWithId(S3Boto3StorageFile):
         def __init__(self, file_id, name, original_name, size, **kwargs):
-            super(S3UploadedFileWithId, self).__init__(name=name, mode='rb',
-                storage=S3Boto3Storage(), **kwargs)
+            boto_storage = S3Boto3Storage(
+                bucket_name=setting('AWS_STORAGE_BUCKET_NAME'),
+                endpoint_url=setting('AWS_S3_ENDPOINT_URL'),
+                access_key=setting('AWS_S3_ACCESS_KEY_ID', setting('AWS_ACCESS_KEY_ID')),
+                secret_key=setting('AWS_S3_SECRET_ACCESS_KEY', setting('AWS_SECRET_ACCESS_KEY'))
+            )
+
+            super(S3UploadedFileWithId, self).__init__(
+                name=name,
+                mode='rb',
+                storage=boto_storage,
+                **kwargs
+            )
             self.file_id = file_id
             self.original_name = original_name
             # self.size is derived from S3boto3StorageFile
