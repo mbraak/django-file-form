@@ -559,8 +559,11 @@ class LiveTestCase(BaseLiveTestCase):
         page.find_upload_success(temp_file, upload_index=1)
         page.assert_page_contains_text('14 Bytes')
 
+        self.assertEqual(page.get_upload_count(), 1)
+
         page.fill_title_field('abc')
         page.submit()
+        page.assert_page_contains_text('Upload success')
 
         self.assertEqual(Example2.objects.count(), 1)
         example2 = Example2.objects.first()
