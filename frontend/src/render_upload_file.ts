@@ -43,7 +43,7 @@ class RenderUploadFile {
     this.setSuccess(uploadIndex, filesize);
   }
 
-  addNewUpload(filename: string, uploadIndex: number): void {
+  addNewUpload(filename: string, uploadIndex: number): HTMLElement {
     const div = this.addFile(filename, uploadIndex);
 
     const progressSpan = document.createElement("span");
@@ -61,9 +61,11 @@ class RenderUploadFile {
     cancelLink.setAttribute("data-index", `${uploadIndex}`);
     cancelLink.href = "#";
     div.appendChild(cancelLink);
+
+    return div;
   }
 
-  addFile(filename: string, uploadIndex: number): Element {
+  addFile(filename: string, uploadIndex: number): HTMLElement {
     const div = document.createElement("div");
     div.className = `dff-file dff-file-id-${uploadIndex}`;
 

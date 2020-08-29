@@ -8,6 +8,7 @@ import RenderUploadFile from "./render_upload_file";
 import DropArea from "./drop_area";
 
 import S3Uploader from "./s3_uploader";
+import EventEmitter from "eventemitter3";
 
 export interface InitialFile {
   id: string;
@@ -46,6 +47,7 @@ export interface Callbacks {
 
 class UploadFile {
   callbacks: Callbacks;
+  eventEmitter: EventEmitter;
   fieldName: string;
   form: Element;
   formId: string;
@@ -62,6 +64,7 @@ class UploadFile {
 
   constructor({
     callbacks,
+    eventEmitter,
     fieldName,
     form,
     formId,
@@ -78,6 +81,7 @@ class UploadFile {
     uploadUrl
   }: {
     callbacks: Callbacks;
+    eventEmitter: EventEmitter;
     fieldName: string;
     form: Element;
     formId: string;
@@ -94,6 +98,7 @@ class UploadFile {
     uploadUrl: string;
   }) {
     this.callbacks = callbacks;
+    this.eventEmitter = eventEmitter;
     this.fieldName = fieldName;
     this.form = form;
     this.formId = formId;
@@ -240,9 +245,16 @@ class UploadFile {
     }
 
     upload.start();
-    renderer.addNewUpload(filename, uploadIndex);
+
+    const element = renderer.addNewUpload(filename, uploadIndex);
     this.uploads.push(upload);
     this.uploadStatuses.push("uploading");
+
+    this.eventEmitter.emit("addUpload", {
+      element,
+      fieldName: this.fieldName,
+      upload
+    });
   }
 
   findUpload(filename: string): number | null {

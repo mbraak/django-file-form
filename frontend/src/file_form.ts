@@ -1,3 +1,4 @@
+import EventEmitter from "eventemitter3";
 import UploadFile, {
   Callbacks,
   InitialFile,
@@ -18,7 +19,10 @@ interface Options {
   supportDropArea?: boolean;
 }
 
-const initUploadFields = (form: Element, options: Options = {}): void => {
+const initUploadFields = (
+  form: Element,
+  options: Options = {}
+): EventEmitter | null => {
   const matchesPrefix = (fieldName: string): boolean => {
     if (!(options && options.prefix)) {
       return true;
@@ -70,8 +74,10 @@ const initUploadFields = (form: Element, options: Options = {}): void => {
   const prefix = getPrefix();
 
   if (!formId || !uploadUrl) {
-    return;
+    return null;
   }
+
+  const eventEmitter = new EventEmitter();
 
   form.querySelectorAll(".dff-uploader").forEach(uploaderDiv => {
     const container = uploaderDiv.querySelector(
@@ -92,11 +98,9 @@ const initUploadFields = (form: Element, options: Options = {}): void => {
 
     const fieldName = input.name;
     const { multiple } = input;
-    const initial = getInitialFiles(container).concat(
-      getPlaceholders(fieldName)
-    ).concat(
-      getS3Uploads(fieldName)
-    );
+    const initial = getInitialFiles(container)
+      .concat(getPlaceholders(fieldName))
+      .concat(getS3Uploads(fieldName));
     const dataTranslations = container.getAttribute("data-translations");
     const translations: Translations = dataTranslations
       ? (JSON.parse(dataTranslations) as Translations)
@@ -105,6 +109,7 @@ const initUploadFields = (form: Element, options: Options = {}): void => {
 
     new UploadFile({
       callbacks: options.callbacks || {},
+      eventEmitter,
       fieldName,
       form,
       formId,
@@ -121,6 +126,8 @@ const initUploadFields = (form: Element, options: Options = {}): void => {
       uploadUrl
     });
   });
+
+  return eventEmitter;
 };
 
 const initFormSet = (form: Element, optionsParam: Options | string): void => {

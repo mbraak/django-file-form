@@ -43,6 +43,7 @@
   },
   "dependencies": {
     "escape-html": "^1.0.3",
+    "eventemitter3": "^4.0.7",
     "mime": "^2.4.6",
     "picomatch": "^2.2.2",
     "tus-js-client": "^2.1.1"
