@@ -541,3 +541,30 @@ class LiveTestCase(BaseLiveTestCase):
 
         file_input = page.selenium.find_element_by_css_selector('#row-example-input_file input[type=file]')
         self.assertEqual(file_input.get_attribute('accept'), 'image/*')
+
+    def test_replace_file_with_same_name(self):
+        page = self.page
+        page.open('/multiple')
+
+        temp_file = page.create_temp_file('content1')
+
+        page.upload_using_js(temp_file)
+        page.find_upload_success(temp_file, upload_index=0)
+        page.assert_page_contains_text('8 Bytes')
+
+        temp_file.named_temporary_file.write(b'test-test-test')
+        temp_file.named_temporary_file.seek(0)
+
+        page.upload_using_js(temp_file)
+        page.find_upload_success(temp_file, upload_index=1)
+        page.assert_page_contains_text('14 Bytes')
+
+        page.fill_title_field('abc')
+        page.submit()
+
+        self.assertEqual(Example2.objects.count(), 1)
+        example2 = Example2.objects.first()
+        self.assertEqual(example2.files.count(), 1)
+        example_file = example2.files.first()
+        self.assertEqual(example_file.input_file.name, f'example/{temp_file.base_name()}')
+        self.assertEqual(temp_file.uploaded_file().read_text(), "test-test-test")
