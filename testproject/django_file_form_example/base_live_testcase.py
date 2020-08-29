@@ -16,7 +16,7 @@ class BaseLiveTestCase(StaticLiveServerTestCase):
         super(BaseLiveTestCase, cls).setUpClass()
 
         options = Options()
-        options.headless = False
+        options.headless = True
         options.add_argument('--disable-dev-shm-usage')
 
         desired_capabilities = DesiredCapabilities.CHROME.copy()
