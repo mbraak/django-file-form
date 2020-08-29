@@ -21,6 +21,7 @@ class FileFormMixin(object):
         self.add_hidden_field('form_id', uuid.uuid4())
         self.add_hidden_field('upload_url', self.get_upload_url())
         self.add_placeholder_inputs()
+        self.add_metadata_inputs()
 
     def add_hidden_field(self, name, initial):
         self.fields[name] = CharField(widget=HiddenInput, initial=initial, required=False)
@@ -88,3 +89,16 @@ class FileFormMixin(object):
         initial_values = get_list(self.initial.get(field_name, []))
 
         return [value.get_values() for value in initial_values if getattr(value, 'is_placeholder')]
+
+
+    def add_metadata_inputs(self):
+        for field_name in self.file_form_field_names():
+            metadata_field_name = f'{field_name}-metadata'
+            self.add_hidden_field(
+                metadata_field_name,
+                json.dumps(self.get_metadata_for_field(field_name))
+            )
+
+    def get_metadata_for_field(self, field_name):
+        initial_values = get_list(self.initial.get(field_name, []))
+        return {value.name: value.metadata for value in initial_values}
