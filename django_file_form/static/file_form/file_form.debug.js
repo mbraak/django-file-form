@@ -4973,10 +4973,10 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
     var _this = this;
 
     var callbacks = _ref.callbacks,
-        _fieldName = _ref.fieldName,
+        fieldName = _ref.fieldName,
         form = _ref.form,
-        _formId = _ref.formId,
-        _s3UploadDir = _ref.s3UploadDir,
+        formId = _ref.formId,
+        s3UploadDir = _ref.s3UploadDir,
         initial = _ref.initial,
         input = _ref.input,
         multiple = _ref.multiple,
@@ -4986,7 +4986,7 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
         skipRequired = _ref.skipRequired,
         supportDropArea = _ref.supportDropArea,
         translations = _ref.translations,
-        _uploadUrl = _ref.uploadUrl;
+        uploadUrl = _ref.uploadUrl;
 
     classCallCheck_default()(this, UploadFile);
 
@@ -5016,6 +5016,8 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
 
     defineProperty_default()(this, "uploads", void 0);
 
+    defineProperty_default()(this, "uploadStatuses", void 0);
+
     defineProperty_default()(this, "uploadFiles", function (files) {
       if (files.length === 0) {
         return;
@@ -5028,101 +5030,7 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
       }
 
       files.forEach(function (file) {
-        var fieldName = _this.fieldName,
-            formId = _this.formId,
-            s3UploadDir = _this.s3UploadDir,
-            renderer = _this.renderer,
-            uploads = _this.uploads,
-            uploadUrl = _this.uploadUrl;
-        var filename = file.name;
-        var uploadIndex = uploads.length; // #323 remove existing file
-
-        for (var index = 0; index < _this.uploads.length; ++index) {
-          var existingUpload = _this.uploads[index];
-
-          if (existingUpload instanceof browser_Upload) {
-            var _existingUpload$optio, _existingUpload$optio2;
-
-            if (((_existingUpload$optio = existingUpload.options) === null || _existingUpload$optio === void 0 ? void 0 : (_existingUpload$optio2 = _existingUpload$optio.metadata) === null || _existingUpload$optio2 === void 0 ? void 0 : _existingUpload$optio2.filename) === filename) {
-              var el = _this.renderer.findFileDiv(index);
-
-              if (el.classList.contains("dff-upload-fail")) {
-                _this.deleteUpload(index);
-              } else if (el.classList.contains("dff-upload-success")) {
-                _this.deleteFromServer(index);
-              } else {
-                void existingUpload.abort(true);
-
-                _this.deleteUpload(index);
-              }
-
-              break;
-            }
-          } else if (existingUpload instanceof s3_uploader) {
-            if (existingUpload.file.name === filename) {
-              var _el = _this.renderer.findFileDiv(index);
-
-              if (_el.classList.contains("dff-upload-fail")) {
-                _this.deleteUpload(index);
-              } else if (_el.classList.contains("dff-upload-success")) {
-                _this.deleteS3Uploaded(index);
-              } else {
-                void existingUpload.abort();
-
-                _this.deleteUpload(index);
-              }
-
-              break;
-            }
-          } else if (existingUpload) {
-            if (existingUpload.name === filename) {
-              _this.deletePlaceholder(index);
-
-              break;
-            }
-          }
-        }
-
-        var upload = null;
-
-        if (s3UploadDir != null) {
-          upload = new s3_uploader(file, {
-            s3UploadDir: s3UploadDir,
-            onProgress: function onProgress(bytesUploaded, bytesTotal) {
-              return _this.handleProgress(uploadIndex, bytesUploaded, bytesTotal);
-            },
-            onError: function onError(error) {
-              return _this.handleError(uploadIndex, error);
-            },
-            onSuccess: function onSuccess() {
-              return _this.handleSuccess(uploadIndex, upload.file.size);
-            }
-          });
-        } else {
-          upload = new browser_Upload(file, {
-            endpoint: uploadUrl,
-            metadata: {
-              fieldName: fieldName,
-              filename: filename,
-              formId: formId
-            },
-            onError: function onError(error) {
-              return _this.handleError(uploadIndex, error);
-            },
-            onProgress: function onProgress(bytesUploaded, bytesTotal) {
-              return _this.handleProgress(uploadIndex, bytesUploaded, bytesTotal);
-            },
-            onSuccess: function onSuccess() {
-              return _this.handleSuccess(uploadIndex, upload.file.size);
-            },
-            retryDelays: _this.retryDelays || [0, 1000, 3000, 5000]
-          });
-        }
-
-        upload.start();
-        renderer.addNewUpload(filename, uploadIndex);
-
-        _this.uploads.push(upload);
+        _this.uploadFile(file);
       });
 
       _this.checkDropHint();
@@ -5149,7 +5057,7 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
         var uploadIndex = getUploadIndex();
 
         if (uploadIndex !== null) {
-          _this.handleDelete(uploadIndex);
+          _this.removeExistingUpload(uploadIndex);
         }
 
         e.preventDefault();
@@ -5183,6 +5091,7 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
     defineProperty_default()(this, "handleError", function (uploadIndex, error) {
       _this.renderer.setError(uploadIndex);
 
+      _this.uploadStatuses[uploadIndex] = "error";
       var onError = _this.callbacks.onError;
 
       if (onError) {
@@ -5201,6 +5110,7 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
 
       renderer.clearInput();
       renderer.setSuccess(uploadIndex, uploadedSize);
+      _this.uploadStatuses[uploadIndex] = "done";
       var onSuccess = _this.callbacks.onSuccess;
 
       if (onSuccess) {
@@ -5213,17 +5123,18 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
     });
 
     this.callbacks = callbacks;
-    this.fieldName = _fieldName;
+    this.fieldName = fieldName;
     this.form = form;
-    this.formId = _formId;
-    this.s3UploadDir = _s3UploadDir;
+    this.formId = formId;
+    this.s3UploadDir = s3UploadDir;
     this.multiple = multiple;
     this.prefix = prefix;
     this.retryDelays = retryDelays;
     this.supportDropArea = supportDropArea;
-    this.uploadUrl = _uploadUrl;
+    this.uploadUrl = uploadUrl;
     this.uploadIndex = 0;
     this.uploads = [];
+    this.uploadStatuses = [];
     this.renderer = new render_upload_file({
       parent: parent,
       input: input,
@@ -5291,6 +5202,8 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
             url: url
           });
         }
+
+        _this2.uploadStatuses.push("done");
       };
 
       if (multiple) {
@@ -5304,26 +5217,145 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
       }
     }
   }, {
-    key: "handleDelete",
-    value: function handleDelete(uploadIndex) {
+    key: "uploadFile",
+    value: function uploadFile(file) {
+      var _this3 = this;
+
+      var fieldName = this.fieldName,
+          formId = this.formId,
+          s3UploadDir = this.s3UploadDir,
+          renderer = this.renderer,
+          uploads = this.uploads,
+          uploadUrl = this.uploadUrl;
+      var filename = file.name;
+      var existingUploadIndex = this.findUpload(filename);
+
+      if (existingUploadIndex !== null) {
+        this.removeExistingUpload(existingUploadIndex);
+      }
+
+      var uploadIndex = uploads.length;
+      var upload = null;
+
+      if (s3UploadDir != null) {
+        upload = new s3_uploader(file, {
+          s3UploadDir: s3UploadDir,
+          onProgress: function onProgress(bytesUploaded, bytesTotal) {
+            return _this3.handleProgress(uploadIndex, bytesUploaded, bytesTotal);
+          },
+          onError: function onError(error) {
+            return _this3.handleError(uploadIndex, error);
+          },
+          onSuccess: function onSuccess() {
+            return _this3.handleSuccess(uploadIndex, upload.file.size);
+          }
+        });
+      } else {
+        upload = new browser_Upload(file, {
+          endpoint: uploadUrl,
+          metadata: {
+            fieldName: fieldName,
+            filename: filename,
+            formId: formId
+          },
+          onError: function onError(error) {
+            return _this3.handleError(uploadIndex, error);
+          },
+          onProgress: function onProgress(bytesUploaded, bytesTotal) {
+            return _this3.handleProgress(uploadIndex, bytesUploaded, bytesTotal);
+          },
+          onSuccess: function onSuccess() {
+            return _this3.handleSuccess(uploadIndex, upload.file.size);
+          },
+          retryDelays: this.retryDelays || [0, 1000, 3000, 5000]
+        });
+      }
+
+      upload.start();
+      renderer.addNewUpload(filename, uploadIndex);
+      this.uploads.push(upload);
+      this.uploadStatuses.push("uploading");
+    }
+  }, {
+    key: "findUpload",
+    value: function findUpload(filename) {
+      var upload = this.uploads.find(function (upload) {
+        if (upload instanceof browser_Upload) {
+          var _upload$options, _upload$options$metad;
+
+          return ((_upload$options = upload.options) === null || _upload$options === void 0 ? void 0 : (_upload$options$metad = _upload$options.metadata) === null || _upload$options$metad === void 0 ? void 0 : _upload$options$metad.filename) === filename;
+        } else if (upload instanceof s3_uploader) {
+          return upload.file.name === filename;
+        } else if (upload) {
+          return upload.name === filename;
+        } else {
+          return false;
+        }
+      });
+      var index = this.uploads.indexOf(upload);
+      return index >= 0 ? index : null;
+    }
+  }, {
+    key: "removeExistingUpload",
+    value: function removeExistingUpload(uploadIndex) {
+      var uploadStatus = this.uploadStatuses[uploadIndex];
+
+      if (uploadStatus === "uploading") {
+        var _upload4 = this.uploads[uploadIndex];
+        void _upload4.abort(true);
+      }
+
       var upload = this.uploads[uploadIndex];
 
-      if (upload instanceof browser_Upload || upload.url) {
-        this.deleteFromServer(uploadIndex);
-      } else if (upload instanceof s3_uploader || !upload.placeholder) {
-        // upload could be a S3Uploader object, or a UploadedFile
-        // with placeholder set to false after form reload
-        this.deleteS3Uploaded(uploadIndex);
-      } else {
+      if (!upload) {
+        return;
+      }
+
+      if (upload instanceof browser_Upload || upload instanceof s3_uploader || upload.url) {
+        var _uploadStatus = this.uploadStatuses[uploadIndex];
+
+        switch (_uploadStatus) {
+          case "done":
+            {
+              if (upload instanceof s3_uploader) {
+                this.deleteS3Uploaded(uploadIndex);
+              } else {
+                this.deleteFromServer(uploadIndex);
+              }
+
+              break;
+            }
+
+          case "error":
+            {
+              this.removeUploadFromList(uploadIndex);
+              break;
+            }
+
+          case "uploading":
+            {
+              var _upload5 = this.uploads[uploadIndex];
+              void _upload5.abort(true);
+              this.removeUploadFromList(uploadIndex);
+              break;
+            }
+        }
+      } else if (upload.placeholder) {
         this.deletePlaceholder(uploadIndex);
       }
     }
   }, {
-    key: "deleteUpload",
-    value: function deleteUpload(uploadIndex) {
+    key: "removeUploadFromList",
+    value: function removeUploadFromList(uploadIndex) {
       var upload = this.uploads[uploadIndex];
+
+      if (!upload) {
+        return;
+      }
+
       this.renderer.deleteFile(uploadIndex);
       delete this.uploads[uploadIndex];
+      delete this.uploadStatuses[uploadIndex];
       this.checkDropHint();
       var onDelete = this.callbacks.onDelete;
 
@@ -5334,9 +5366,14 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
   }, {
     key: "deleteFromServer",
     value: function deleteFromServer(uploadIndex) {
-      var _this3 = this;
+      var _this4 = this;
 
       var upload = this.uploads[uploadIndex];
+
+      if (!upload) {
+        return;
+      }
+
       var _ref2 = upload,
           url = _ref2.url;
 
@@ -5350,9 +5387,9 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
 
       xhr.onload = function () {
         if (xhr.status === 204) {
-          _this3.deleteUpload(uploadIndex);
+          _this4.removeUploadFromList(uploadIndex);
         } else {
-          _this3.renderer.setDeleteFailed(uploadIndex);
+          _this4.renderer.setDeleteFailed(uploadIndex);
         }
       };
 
@@ -5362,13 +5399,13 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
   }, {
     key: "deletePlaceholder",
     value: function deletePlaceholder(uploadIndex) {
-      this.deleteUpload(uploadIndex);
+      this.removeUploadFromList(uploadIndex);
       this.updatePlaceholderInput();
     }
   }, {
     key: "deleteS3Uploaded",
     value: function deleteS3Uploaded(uploadIndex) {
-      this.deleteUpload(uploadIndex);
+      this.removeUploadFromList(uploadIndex);
       this.updateS3UploadedInput();
     }
   }, {
@@ -5378,10 +5415,10 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
 
       if (upload instanceof browser_Upload) {
         void upload.abort(true);
-        this.deleteUpload(uploadIndex);
+        this.removeUploadFromList(uploadIndex);
       } else if (upload instanceof s3_uploader) {
         upload.abort();
-        this.deleteUpload(uploadIndex);
+        this.removeUploadFromList(uploadIndex);
       }
     }
   }, {
@@ -5414,7 +5451,7 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
     key: "updatePlaceholderInput",
     value: function updatePlaceholderInput() {
       var placeholdersInfo = this.uploads.filter(function (upload) {
-        return !(upload instanceof browser_Upload) && !(upload instanceof s3_uploader) && upload.placeholder;
+        return upload && !(upload instanceof browser_Upload) && !(upload instanceof s3_uploader) && upload.placeholder;
       });
       var input = Object(util["a" /* findInput */])(this.form, Object(util["e" /* getPlaceholderFieldName */])(this.fieldName, this.prefix), this.prefix);
 
@@ -5444,7 +5481,7 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
         };
       });
       var uploadedInfo = this.uploads.filter(function (upload) {
-        return !(upload instanceof browser_Upload) && !(upload instanceof s3_uploader) && upload.placeholder === false;
+        return upload && !(upload instanceof browser_Upload) && !(upload instanceof s3_uploader) && upload.placeholder === false;
       }).concat(s3Uploads);
       var input = Object(util["a" /* findInput */])(this.form, Object(util["f" /* getS3UploadedFieldName */])(this.fieldName, this.prefix), this.prefix);
 
@@ -5742,7 +5779,7 @@ function encode(input) {
  * @api public
  */
 function querystring(query) {
-  var parser = /([^=?#&]+)=?([^&]*)/g
+  var parser = /([^=?&]+)=?([^&]*)/g
     , result = {}
     , part;
 
@@ -5797,8 +5834,8 @@ function querystringify(obj, prefix) {
         value = '';
       }
 
-      key = encode(key);
-      value = encode(value);
+      key = encodeURIComponent(key);
+      value = encodeURIComponent(value);
 
       //
       // If we failed to encode the strings, we should bail out as we don't
