@@ -120,6 +120,7 @@ class PlaceholderUploadedFile(object):
     def get_values(self):
         return dict(id=self.file_id, placeholder=True, name=self.name, size=self.size)
 
+
 try:
     from storages.backends.s3boto3 import S3Boto3Storage, S3Boto3StorageFile
 

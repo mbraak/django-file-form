@@ -82,7 +82,7 @@ class S3TestCase(BaseLiveTestCase):
         example2 = Example2.objects.get(title='abc')
         self.assertEqual(example2.files.count(), 1)
 
-        #self.assertEqual(example2.files.all()[0].input_file.name, f'example/{temp_file.base_name()}')
+        self.assertEqual(example2.files.all()[0].input_file.name, f'example/{temp_file.base_name()}')
         self.assertEqual(
             read_file(example2.files.all()[0].input_file),
             b'content1'
