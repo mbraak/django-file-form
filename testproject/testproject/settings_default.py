@@ -98,7 +98,7 @@ AWS_S3_ENDPOINT_URL = os.environ.get('AWS_S3_ENDPOINT_URL', '')
 
 CSP_DEFAULT_SRC = ("'none'",)
 CSP_STYLE_SRC = ("'self'")
-CSP_SCRIPT_SRC = ("'self'",)
+CSP_SCRIPT_SRC = ("'self'", 'http://unpkg.com')
 CSP_FONT_SRC = ("'self'")
 CSP_IMG_SRC = ("'self'",)
 CSP_CONNECT_SRC = ("'self'", AWS_S3_ENDPOINT_URL)
