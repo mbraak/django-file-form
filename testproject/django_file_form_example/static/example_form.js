@@ -1,4 +1,4 @@
-initUploadFields(
+const fileForm = initUploadFields(
     document.getElementById("example-form"),
     {
       prefix: "example",
@@ -7,3 +7,7 @@ initUploadFields(
       supportDropArea: true
     }
 );
+
+fileForm.on('addUpload', ({ element, fieldName, upload }) => {
+  console.log('addUpload', element, fieldName, upload);
+});
