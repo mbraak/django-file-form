@@ -8,21 +8,17 @@ function getMetaDataField(fieldName) {
   return field = form.querySelector(`[name="${name}"]`);
 }
 
-function descriptionChanged(evt) {
-  let field = getMetaDataField(evt.target.getAttribute('fieldName'));
-  let descriptions = document.getElementsByClassName('dff-description');
-  let data = {}
-  for (let i = 0; i < descriptions.length; ++i) {
-    let desc = descriptions[i];
-    data[desc.getAttribute('fileName')] = {
-      'description': desc.value
-    }
-  }
-  field.value = JSON.stringify(data);
-}
-
 eventEmitter.on('addUpload', ({ element, fieldName, upload }) => {
-  // console.log('addUpload', element, fieldName, upload);
+  function descriptionChanged(evt) {
+    const metaDataField = getMetaDataField(fieldName);
+    const metaData = JSON.parse(metaDataField.value);
+
+    const inputValue = evt.target.value;
+    metaData[upload.name] = inputValue;
+
+    metaDataField.value = JSON.stringify(metaData);
+  }
+
   let field = getMetaDataField(fieldName);
   if (!field || !field.value) {
     return;
@@ -33,8 +29,6 @@ eventEmitter.on('addUpload', ({ element, fieldName, upload }) => {
   descElem.value = metadata[upload.name] ? metadata[upload.name]['description'] : '';
 
   descElem.className = 'dff-description';
-  descElem.setAttribute('fileName', upload.name);
-  descElem.setAttribute('fieldName', fieldName);
   descElem.addEventListener('change', descriptionChanged);
   element.appendChild(descElem);
 });
