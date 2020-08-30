@@ -72,7 +72,7 @@ const initUploadFields = (form: Element, options: Options = {}): void => {
   const prefix = getPrefix();
 
   if (!formId || !uploadUrl) {
-    return null;
+    return;
   }
 
   form.querySelectorAll(".dff-uploader").forEach(uploaderDiv => {
