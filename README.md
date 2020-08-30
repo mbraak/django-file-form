@@ -268,24 +268,24 @@ file = UploadedFileField(accept='image/*,.pdf')
 
 **6 Additional file metadata
 
-If you want to add and maitain additional metadata such as short descriptions and
+If you want to add and maintain additional metadata such as short descriptions and
 categories of uploaded files, you can use the `.metadata` field of uploaded files.
 More specifically,
 
-1. There is a hidden field called `meta` (with form specific prefix) with its `data`
+1. There is a hidden field called `metadata` (with form specific prefix) with its `data`
    being the `JSON.dump`ed meta data of all files. The data should be in the format of
    ```
    {
       'filename1': value1,
-      'filename2': value2,
+      'filename2': value2
    }
    ```
 
-2. Using the event mechanism of `django-file-form` to add your own widgets and functions
-   to update the `data` of this field.
+2. Listen to events triggered after the additional and removal of file list to add your
+  own widgets and functions to update the `data` of this hidden field.
 
-`django-file-form` retrieves the data and assign them to returned file objects (could be
-of placeholder and other types) as `f.meta`.
+`django-file-form` retrieves the data and assign them to returned file objects with matching
+filename (could be of placeholder and other types) as `f.metadata`.
 
 
 ## Upgrade from version 1.0 (to 2.0)
