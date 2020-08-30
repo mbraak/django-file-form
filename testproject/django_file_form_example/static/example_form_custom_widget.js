@@ -1,16 +1,7 @@
 const eventEmitter = new EventEmitter3();
 
-function getMetaDataField(fieldName) {
-  // no consideration of prefix??
-  // not sure how to use functions in .utils
-  const name = fieldName + '-metadata';
-  const form = document.getElementById("example-form");
-  return field = form.querySelector(`[name="${name}"]`);
-}
-
-eventEmitter.on('addUpload', ({ element, fieldName, upload }) => {
+eventEmitter.on('addUpload', ({ element, fieldName, metaDataField, upload }) => {
   function descriptionChanged(evt) {
-    const metaDataField = getMetaDataField(fieldName);
     const metaData = JSON.parse(metaDataField.value);
 
     const inputValue = evt.target.value;
@@ -19,11 +10,14 @@ eventEmitter.on('addUpload', ({ element, fieldName, upload }) => {
     metaDataField.value = JSON.stringify(metaData);
   }
 
-  let field = getMetaDataField(fieldName);
-  if (!field || !field.value) {
+  console.log(fieldName, metaDataField)
+
+  if (!metaDataField || !metaDataField.value) {
     return;
   }
-  let metadata = JSON.parse(field.value);
+
+  let metadata = JSON.parse(metaDataField.value);
+
   // add a widget
   let descElem = document.createElement('input');
   descElem.value = metadata[upload.name] ? metadata[upload.name]['description'] : '';
