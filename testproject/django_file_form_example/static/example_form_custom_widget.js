@@ -5,21 +5,19 @@ eventEmitter.on('addUpload', ({ element, fieldName, metaDataField, upload }) => 
     const metaData = JSON.parse(metaDataField.value);
 
     const inputValue = evt.target.value;
-    metaData[upload.name] = inputValue;
+    metaData[upload.name] = { description: inputValue };
 
     metaDataField.value = JSON.stringify(metaData);
   }
-
-  console.log(fieldName, metaDataField)
 
   if (!metaDataField || !metaDataField.value) {
     return;
   }
 
-  let metadata = JSON.parse(metaDataField.value);
+  const metadata = JSON.parse(metaDataField.value);
 
   // add a widget
-  let descElem = document.createElement('input');
+  const descElem = document.createElement('input');
   descElem.value = metadata[upload.name] ? metadata[upload.name]['description'] : '';
 
   descElem.className = 'dff-description';
