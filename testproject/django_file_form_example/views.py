@@ -113,6 +113,22 @@ class WithAcceptExample(BaseFormView):
     form_class = forms.WithAcceptExampleForm
 
 
+class WithCustomWidgetExample(PlaceholderView):
+    custom_js_file = 'example_form_custom_widget.js'
+    form_class = forms.PlaceholderWidgetExampleForm
+
+    def get_initial(self):
+        initial = super(WithCustomWidgetExample, self).get_initial()
+
+        if self.request.method == 'GET':
+            initial['input_file'] = [
+                PlaceholderUploadedFile('test_placeholder1.txt', size=1024, metadata={'description': 'placeholder 1'}),
+                PlaceholderUploadedFile('test_placeholder2.txt', size=2048, metadata={'description': 'placeholder 2'})
+            ]
+
+        return initial
+
+
 def permission_denied(request, exception):
     return HttpResponseForbidden(
         json.dumps(dict(status='permission denied')),

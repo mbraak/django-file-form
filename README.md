@@ -17,6 +17,8 @@ Features:
 * Supports single and multiple file upload.
 * Supports edition of uploaded files.
 * Supports upload directly to AWS S3 compatible storages.
+* Supports frontend events for the addition and removal of files.
+* Supports addition of arbitrary file meta data and related widgets.
 
 The project is hosted on [github](https://github.com/mbraak/django-file-form).
 
@@ -263,6 +265,28 @@ You can add an accept attribute to the file input using the `accept` parameter o
 ```
 file = UploadedFileField(accept='image/*,.pdf')
 ```
+
+**6 Additional file metadata
+
+If you want to add and maintain additional metadata such as short descriptions and
+categories of uploaded files, you can use the `.metadata` field of uploaded files.
+More specifically,
+
+1. There is a hidden field called `metadata` (with form specific prefix) with its `data`
+   being the `JSON.dump`ed meta data of all files. The data should be in the format of
+   ```
+   {
+      'filename1': value1,
+      'filename2': value2
+   }
+   ```
+
+2. Listen to events triggered after the additional and removal of file list to add your
+  own widgets and functions to update the `data` of this hidden field.
+
+`django-file-form` retrieves the data and assign them to returned file objects with matching
+filename (could be of placeholder and other types) as `f.metadata`.
+
 
 ## Upgrade from version 1.0 (to 2.0)
 

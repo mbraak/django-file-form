@@ -1,6 +1,7 @@
 import { Upload } from "tus-js-client";
 import {
   findInput,
+  getMetadataFieldName,
   getPlaceholderFieldName,
   getS3UploadedFieldName
 } from "./util";
@@ -177,6 +178,11 @@ class UploadFile {
         this.eventEmitter.emit("addUpload", {
           element,
           fieldName: this.fieldName,
+          metaDataField: findInput(
+            this.form,
+            getMetadataFieldName(this.fieldName, this.prefix),
+            this.prefix
+          ),
           upload
         });
       }

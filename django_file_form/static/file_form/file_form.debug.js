@@ -113,9 +113,10 @@ module.exports = _defineProperty;
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return formatBytes; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return getInputNameWithPrefix; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return findInput; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "e", function() { return getPlaceholderFieldName; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "f", function() { return getS3UploadedFieldName; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "f", function() { return getPlaceholderFieldName; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "g", function() { return getS3UploadedFieldName; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return getInputValueForFormAndPrefix; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "e", function() { return getMetadataFieldName; });
 var formatBytes = function formatBytes(bytes, decimals) {
   if (bytes === 0) {
     return "0 Bytes";
@@ -157,6 +158,9 @@ var getInputValueForFormAndPrefix = function getInputValueForFormAndPrefix(form,
   var _findInput;
 
   return (_findInput = findInput(form, fieldName, prefix)) === null || _findInput === void 0 ? void 0 : _findInput.value;
+};
+var getMetadataFieldName = function getMetadataFieldName(fieldName, prefix) {
+  return "".concat(getInputNameWithoutPrefix(fieldName, prefix), "-metadata");
 };
 
 /***/ }),
@@ -5217,6 +5221,7 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
           _this2.eventEmitter.emit("addUpload", {
             element: element,
             fieldName: _this2.fieldName,
+            metaDataField: Object(util["a" /* findInput */])(_this2.form, Object(util["e" /* getMetadataFieldName */])(_this2.fieldName, _this2.prefix), _this2.prefix),
             upload: upload
           });
         }
@@ -5485,7 +5490,7 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
       var placeholdersInfo = this.uploads.filter(function (upload) {
         return upload && !(upload instanceof browser_Upload) && !(upload instanceof s3_uploader) && upload.placeholder;
       });
-      var input = Object(util["a" /* findInput */])(this.form, Object(util["e" /* getPlaceholderFieldName */])(this.fieldName, this.prefix), this.prefix);
+      var input = Object(util["a" /* findInput */])(this.form, Object(util["f" /* getPlaceholderFieldName */])(this.fieldName, this.prefix), this.prefix);
 
       if (input) {
         input.value = JSON.stringify(placeholdersInfo);
@@ -5515,7 +5520,7 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
       var uploadedInfo = this.uploads.filter(function (upload) {
         return upload && !(upload instanceof browser_Upload) && !(upload instanceof s3_uploader) && upload.placeholder === false;
       }).concat(s3Uploads);
-      var input = Object(util["a" /* findInput */])(this.form, Object(util["f" /* getS3UploadedFieldName */])(this.fieldName, this.prefix), this.prefix);
+      var input = Object(util["a" /* findInput */])(this.form, Object(util["g" /* getS3UploadedFieldName */])(this.fieldName, this.prefix), this.prefix);
 
       if (input) {
         input.value = JSON.stringify(uploadedInfo);
@@ -5584,7 +5589,7 @@ var initUploadFields = function initUploadFields(form) {
   };
 
   var getPlaceholders = function getPlaceholders(fieldName) {
-    var data = getInputValue(Object(_util__WEBPACK_IMPORTED_MODULE_2__[/* getPlaceholderFieldName */ "e"])(fieldName, getPrefix()));
+    var data = getInputValue(Object(_util__WEBPACK_IMPORTED_MODULE_2__[/* getPlaceholderFieldName */ "f"])(fieldName, getPrefix()));
 
     if (!data) {
       return [];
@@ -5594,7 +5599,7 @@ var initUploadFields = function initUploadFields(form) {
   };
 
   var getS3Uploads = function getS3Uploads(fieldName) {
-    var data = getInputValue(Object(_util__WEBPACK_IMPORTED_MODULE_2__[/* getS3UploadedFieldName */ "f"])(fieldName, getPrefix()));
+    var data = getInputValue(Object(_util__WEBPACK_IMPORTED_MODULE_2__[/* getS3UploadedFieldName */ "g"])(fieldName, getPrefix()));
 
     if (!data) {
       return [];

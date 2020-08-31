@@ -41,6 +41,7 @@ def get_placeholder_files(data, field_name):
             for placeholder in json.loads(value)
         ]
 
+
 def get_s3_uploaded_files(data, field_name):
     s3uploaded_field_name = field_name + '-s3direct'
     value = data.get(s3uploaded_field_name)
@@ -53,6 +54,21 @@ def get_s3_uploaded_files(data, field_name):
                 size=s3uploaded['size'], file_id=s3uploaded['id'])
             for s3uploaded in json.loads(value)
         ]
+
+
+def get_file_meta(data, field_name):
+    meta_field_name = field_name + '-metadata'
+    value = data.get(meta_field_name)
+    if not value:
+        return {}
+    try:
+        res = json.loads(value)
+        if not isinstance(res, dict):
+            return {}
+        return res
+    except Exception:
+        return {}
+
 
 class UploadWidgetMixin(ClearableFileInput):
     def render(self, name, value, attrs=None, renderer=None):
@@ -78,12 +94,22 @@ class UploadWidget(UploadWidgetMixin, ClearableFileInput):
         else:
             placeholders = get_placeholder_files(data, name)
             s3uploaded = get_s3_uploaded_files(data, name)
-            return placeholders[0] if placeholders else (s3uploaded[0] if s3uploaded else None)
+            metadata = get_file_meta(data, name)
+            obj = placeholders[0] if placeholders else (s3uploaded[0] if s3uploaded else None)
+            if obj is not None and obj.name in metadata:
+                obj.metadata = metadata[obj.name]
+            return obj
+
 
 class UploadMultipleWidget(UploadWidget):
     def value_from_datadict(self, data, files, name):
         if hasattr(files, 'getlist'):
-            return files.getlist(name) + get_placeholder_files(data, name) + get_s3_uploaded_files(data, name)
+            metadata = get_file_meta(data, name)
+            objs = files.getlist(name) + get_placeholder_files(data, name) + get_s3_uploaded_files(data, name)
+            for obj in objs:
+                if obj.name in metadata:
+                    obj.metadata = metadata[obj.name]
+            return objs
         else:
             # NB: django-formtools wizard uses dict instead of MultiValueDict
             return super(UploadMultipleWidget, self).value_from_datadict(data, files, name)

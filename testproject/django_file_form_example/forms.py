@@ -87,6 +87,7 @@ class S3ExampleForm(BaseForm):
             )
             f.close()
 
+
 class WizardStepForm(Form):
     name = CharField(required=False)
 
@@ -110,6 +111,18 @@ class PlaceholderExampleForm(BaseForm):
                 input_file=f
             )
             f.close()
+
+        self.delete_temporary_files()
+
+
+class PlaceholderWidgetExampleForm(PlaceholderExampleForm):
+    def save(self):
+        example = Example2.objects.create(
+            title=self.cleaned_data['title']
+        )
+
+        for f in self.cleaned_data['input_file']:
+            assert f.metadata is not None
 
         self.delete_temporary_files()
 
