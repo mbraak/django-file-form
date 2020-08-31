@@ -90,7 +90,6 @@ class FileFormMixin(object):
 
         return [value.get_values() for value in initial_values if getattr(value, 'is_placeholder')]
 
-
     def add_metadata_inputs(self):
         for field_name in self.file_form_field_names():
             metadata_field_name = f'{field_name}-metadata'
@@ -101,4 +100,4 @@ class FileFormMixin(object):
 
     def get_metadata_for_field(self, field_name):
         initial_values = get_list(self.initial.get(field_name, []))
-        return {value.name: value.metadata for value in initial_values}
+        return {value.name: value.metadata for value in initial_values if value.metadata is not None}

@@ -41,6 +41,7 @@ def get_placeholder_files(data, field_name):
             for placeholder in json.loads(value)
         ]
 
+
 def get_s3_uploaded_files(data, field_name):
     s3uploaded_field_name = field_name + '-s3direct'
     value = data.get(s3uploaded_field_name)
@@ -54,6 +55,7 @@ def get_s3_uploaded_files(data, field_name):
             for s3uploaded in json.loads(value)
         ]
 
+
 def get_file_meta(data, field_name):
     meta_field_name = field_name + '-metadata'
     value = data.get(meta_field_name)
@@ -66,6 +68,7 @@ def get_file_meta(data, field_name):
         return res
     except Exception:
         return {}
+
 
 class UploadWidgetMixin(ClearableFileInput):
     def render(self, name, value, attrs=None, renderer=None):
@@ -96,6 +99,7 @@ class UploadWidget(UploadWidgetMixin, ClearableFileInput):
             if obj is not None and obj.name in metadata:
                 obj.metadata = metadata[obj.name]
             return obj
+
 
 class UploadMultipleWidget(UploadWidget):
     def value_from_datadict(self, data, files, name):
