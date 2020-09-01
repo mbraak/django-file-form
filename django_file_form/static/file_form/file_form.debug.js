@@ -5615,7 +5615,7 @@ var initUploadFields = function initUploadFields(form) {
   var prefix = getPrefix();
 
   if (!formId || !uploadUrl) {
-    return null;
+    return;
   }
 
   form.querySelectorAll(".dff-uploader").forEach(function (uploaderDiv) {
