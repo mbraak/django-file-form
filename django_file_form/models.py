@@ -150,6 +150,6 @@ try:
         def get_values(self):
             return dict(id=self.file_id, placeholder=False, name=self.name, size=self.size)
 
-except ImproperlyConfigured:
+except (ImportError, ImproperlyConfigured):
     # S3 is an optional feature
     pass
