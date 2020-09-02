@@ -25,7 +25,7 @@ eventEmitter.on('addUpload', ({ element, fieldName, metaDataField, upload }) => 
   element.appendChild(descElem);
 });
 
-eventEmitter.on('removeUpload', ({ element, fieldName, upload }) => {
+eventEmitter.on('removeUpload', ({ element, fieldName, metaDataField, upload }) => {
   // do not need to update hidden data since returned metadata will be ignored
 });
 
