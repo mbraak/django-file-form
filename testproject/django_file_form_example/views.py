@@ -102,7 +102,6 @@ class PlaceholderView(BaseFormView):
 
 class S3ExampleView(BaseFormView):
     form_class = forms.S3ExampleForm
-    s3_upload_dir = 's3_example'
 
 
 class S3PlaceholderExampleView(PlaceholderView):

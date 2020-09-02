@@ -15,6 +15,6 @@ urlpatterns = (
     path('login/', LoginView.as_view(template_name='admin/login.html')),
     path('placeholder', views.PlaceholderView.as_view(), name='placeholder_example'),
     path('s3multiple', views.S3ExampleView.as_view(), name='s3_example'),
-    path('s3placeholder', views.S3PlaceholderExampleView.as_view(), name='s3_example'),
+    path('s3placeholder', views.S3PlaceholderExampleView.as_view(), name='s3_placeholder_example'),
     path('accept', views.WithAcceptExample.as_view(), name='with_accept_example'),
 )
