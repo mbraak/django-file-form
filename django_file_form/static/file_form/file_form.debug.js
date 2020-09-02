@@ -5221,7 +5221,7 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
           _this2.eventEmitter.emit("addUpload", {
             element: element,
             fieldName: _this2.fieldName,
-            metaDataField: Object(util["a" /* findInput */])(_this2.form, Object(util["e" /* getMetadataFieldName */])(_this2.fieldName, _this2.prefix), _this2.prefix),
+            metaDataField: _this2.getMetaDataField(),
             upload: upload
           });
         }
@@ -5301,6 +5301,7 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
         this.eventEmitter.emit("addUpload", {
           element: element,
           fieldName: this.fieldName,
+          metaDataField: this.getMetaDataField(),
           upload: upload
         });
       }
@@ -5344,6 +5345,7 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
         this.eventEmitter.emit("removeUpload", {
           element: this.renderer.findFileDiv(uploadIndex),
           fieldName: this.fieldName,
+          metaDataField: this.getMetaDataField(),
           upload: upload
         });
       }
@@ -5525,6 +5527,11 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
       if (input) {
         input.value = JSON.stringify(uploadedInfo);
       }
+    }
+  }, {
+    key: "getMetaDataField",
+    value: function getMetaDataField() {
+      return Object(util["a" /* findInput */])(this.form, Object(util["e" /* getMetadataFieldName */])(this.fieldName, this.prefix), this.prefix);
     }
   }]);
 
