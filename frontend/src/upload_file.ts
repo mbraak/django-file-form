@@ -178,11 +178,7 @@ class UploadFile {
         this.eventEmitter.emit("addUpload", {
           element,
           fieldName: this.fieldName,
-          metaDataField: findInput(
-            this.form,
-            getMetadataFieldName(this.fieldName, this.prefix),
-            this.prefix
-          ),
+          metaDataField: this.getMetaDataField(),
           upload
         });
       }
@@ -271,6 +267,7 @@ class UploadFile {
       this.eventEmitter.emit("addUpload", {
         element,
         fieldName: this.fieldName,
+        metaDataField: this.getMetaDataField(),
         upload
       });
     }
@@ -311,6 +308,7 @@ class UploadFile {
       this.eventEmitter.emit("removeUpload", {
         element: this.renderer.findFileDiv(uploadIndex),
         fieldName: this.fieldName,
+        metaDataField: this.getMetaDataField(),
         upload
       });
     }
@@ -592,6 +590,14 @@ class UploadFile {
     if (input) {
       input.value = JSON.stringify(uploadedInfo);
     }
+  }
+
+  getMetaDataField(): HTMLElement | null {
+    return findInput(
+      this.form,
+      getMetadataFieldName(this.fieldName, this.prefix),
+      this.prefix
+    );
   }
 }
 
