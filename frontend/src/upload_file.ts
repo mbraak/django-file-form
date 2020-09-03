@@ -11,6 +11,8 @@ import DropArea from "./drop_area";
 import S3Uploader from "./s3_uploader";
 import EventEmitter from "eventemitter3";
 
+type UploadTypes = Upload | UploadedFile | S3Uploader;
+
 export interface InitialFile {
   id: string;
   name: string;
@@ -36,7 +38,7 @@ type UploadStatus = "done" | "error" | "uploading";
 export type Translations = { [key: string]: string };
 
 export interface Callbacks {
-  onDelete?: (upload: Upload | UploadedFile | S3Uploader) => void;
+  onDelete?: (upload: UploadTypes) => void;
   onError?: (error: Error, upload: Upload) => void;
   onProgress?: (
     bytesUploaded: number,
@@ -45,6 +47,16 @@ export interface Callbacks {
   ) => void;
   onSuccess?: (upload: Upload) => void;
 }
+
+const getFileNameFromUpload = (upload: UploadTypes): string => {
+  if (upload instanceof Upload) {
+    return (upload.file as File).name;
+  } else if (upload instanceof S3Uploader) {
+    return upload.file.name;
+  } else {
+    return upload.original_name || upload.name;
+  }
+};
 
 class UploadFile {
   callbacks: Callbacks;
@@ -60,7 +72,7 @@ class UploadFile {
   supportDropArea: boolean;
   uploadIndex: number;
   uploadUrl: string;
-  uploads: (Upload | UploadedFile | S3Uploader | undefined)[];
+  uploads: (UploadTypes | undefined)[];
   uploadStatuses: (UploadStatus | undefined)[];
 
   constructor({
@@ -586,12 +598,13 @@ class UploadFile {
   emitEvent(
     eventName: string,
     element: HTMLElement,
-    upload: Upload | UploadedFile | S3Uploader
+    upload: UploadTypes
   ): void {
     if (this.eventEmitter) {
       this.eventEmitter.emit(eventName, {
         element,
         fieldName: this.fieldName,
+        fileName: getFileNameFromUpload(upload),
         metaDataField: this.getMetaDataField(),
         upload
       });
