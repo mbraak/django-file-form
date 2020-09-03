@@ -326,7 +326,7 @@ module.exports = _arrayLikeToArray;
     // existing version for noConflict()
     global = global || {};
     var _Base64 = global.Base64;
-    var version = "2.6.3";
+    var version = "2.6.4";
     // constants
     var b64chars
         = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
@@ -3517,6 +3517,7 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
     var _this = this;
 
     var callbacks = _ref.callbacks,
+        chunkSize = _ref.chunkSize,
         _fieldName = _ref.fieldName,
         form = _ref.form,
         _formId = _ref.formId,
@@ -3534,6 +3535,8 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
     classCallCheck_default()(this, UploadFile);
 
     defineProperty_default()(this, "callbacks", void 0);
+
+    defineProperty_default()(this, "chunkSize", void 0);
 
     defineProperty_default()(this, "fieldName", void 0);
 
@@ -3577,6 +3580,7 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
         var filename = file.name;
         var uploadIndex = uploads.length;
         var upload = new browser_Upload(file, {
+          chunkSize: _this.chunkSize,
           endpoint: uploadUrl,
           metadata: {
             fieldName: fieldName,
@@ -3685,6 +3689,7 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
     });
 
     this.callbacks = callbacks;
+    this.chunkSize = chunkSize;
     this.fieldName = _fieldName;
     this.form = form;
     this.formId = _formId;
@@ -3969,6 +3974,7 @@ var initUploadFields = function initUploadFields(form) {
     var supportDropArea = !(options.supportDropArea === false);
     new _upload_file__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"]({
       callbacks: options.callbacks || {},
+      chunkSize: options.chunkSize || 2621440,
       fieldName: fieldName,
       form: form,
       formId: formId,
@@ -4162,7 +4168,7 @@ function encode(input) {
  * @api public
  */
 function querystring(query) {
-  var parser = /([^=?&]+)=?([^&]*)/g
+  var parser = /([^=?#&]+)=?([^&]*)/g
     , result = {}
     , part;
 
@@ -4217,8 +4223,8 @@ function querystringify(obj, prefix) {
         value = '';
       }
 
-      key = encodeURIComponent(key);
-      value = encodeURIComponent(value);
+      key = encode(key);
+      value = encode(value);
 
       //
       // If we failed to encode the strings, we should bail out as we don't
@@ -4260,6 +4266,24 @@ var runtime = (function (exports) {
   var iteratorSymbol = $Symbol.iterator || "@@iterator";
   var asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator";
   var toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
+
+  function define(obj, key, value) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+    return obj[key];
+  }
+  try {
+    // IE 8 has a broken Object.defineProperty that only works on DOM objects.
+    define({}, "");
+  } catch (err) {
+    define = function(obj, key, value) {
+      return obj[key] = value;
+    };
+  }
 
   function wrap(innerFn, outerFn, self, tryLocsList) {
     // If outerFn provided and outerFn.prototype is a Generator, then outerFn.prototype instanceof Generator.
@@ -4331,16 +4355,19 @@ var runtime = (function (exports) {
     Generator.prototype = Object.create(IteratorPrototype);
   GeneratorFunction.prototype = Gp.constructor = GeneratorFunctionPrototype;
   GeneratorFunctionPrototype.constructor = GeneratorFunction;
-  GeneratorFunctionPrototype[toStringTagSymbol] =
-    GeneratorFunction.displayName = "GeneratorFunction";
+  GeneratorFunction.displayName = define(
+    GeneratorFunctionPrototype,
+    toStringTagSymbol,
+    "GeneratorFunction"
+  );
 
   // Helper for defining the .next, .throw, and .return methods of the
   // Iterator interface in terms of a single ._invoke method.
   function defineIteratorMethods(prototype) {
     ["next", "throw", "return"].forEach(function(method) {
-      prototype[method] = function(arg) {
+      define(prototype, method, function(arg) {
         return this._invoke(method, arg);
-      };
+      });
     });
   }
 
@@ -4359,9 +4386,7 @@ var runtime = (function (exports) {
       Object.setPrototypeOf(genFun, GeneratorFunctionPrototype);
     } else {
       genFun.__proto__ = GeneratorFunctionPrototype;
-      if (!(toStringTagSymbol in genFun)) {
-        genFun[toStringTagSymbol] = "GeneratorFunction";
-      }
+      define(genFun, toStringTagSymbol, "GeneratorFunction");
     }
     genFun.prototype = Object.create(Gp);
     return genFun;
@@ -4631,7 +4656,7 @@ var runtime = (function (exports) {
   // unified ._invoke helper method.
   defineIteratorMethods(Gp);
 
-  Gp[toStringTagSymbol] = "Generator";
+  define(Gp, toStringTagSymbol, "Generator");
 
   // A Generator should always return itself as the iterator object when the
   // @@iterator function is called on it. Some browsers' implementations of the
