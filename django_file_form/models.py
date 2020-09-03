@@ -9,7 +9,6 @@ from django.core.files.storage import FileSystemStorage
 from django.db import models
 from django.utils import timezone
 from django.utils.module_loading import import_string
-from storages.utils import setting
 
 from .util import ModelManager, get_upload_path
 
@@ -123,6 +122,7 @@ class PlaceholderUploadedFile(object):
 
 try:
     from storages.backends.s3boto3 import S3Boto3Storage, S3Boto3StorageFile
+    from storages.utils import setting
 
     class S3UploadedFileWithId(S3Boto3StorageFile):
         def __init__(self, file_id, name, original_name, size, **kwargs):
@@ -150,6 +150,7 @@ try:
         def get_values(self):
             return dict(id=self.file_id, placeholder=False, name=self.name, size=self.size)
 
-except ImproperlyConfigured:
-    # S3 is an optional feature
-    pass
+except (ImportError, ImproperlyConfigured):
+    # S3 is an optional feature but we keep the symbol
+    class S3UploadedFileWithId(object):
+        pass
