@@ -174,14 +174,7 @@ class UploadFile {
       this.uploads.push(upload);
       this.uploadStatuses.push("done");
 
-      if (this.eventEmitter) {
-        this.eventEmitter.emit("addUpload", {
-          element,
-          fieldName: this.fieldName,
-          metaDataField: this.getMetaDataField(),
-          upload
-        });
-      }
+      this.emitEvent("addUpload", element, upload);
     };
 
     if (multiple) {
@@ -263,14 +256,7 @@ class UploadFile {
     this.uploads.push(upload);
     this.uploadStatuses.push("uploading");
 
-    if (this.eventEmitter) {
-      this.eventEmitter.emit("addUpload", {
-        element,
-        fieldName: this.fieldName,
-        metaDataField: this.getMetaDataField(),
-        upload
-      });
-    }
+    this.emitEvent("addUpload", element, upload);
   }
 
   findUpload(filename: string): number | null {
@@ -304,13 +290,10 @@ class UploadFile {
       return;
     }
 
-    if (this.eventEmitter) {
-      this.eventEmitter.emit("removeUpload", {
-        element: this.renderer.findFileDiv(uploadIndex),
-        fieldName: this.fieldName,
-        metaDataField: this.getMetaDataField(),
-        upload
-      });
+    const element = this.renderer.findFileDiv(uploadIndex);
+
+    if (element) {
+      this.emitEvent("removeUpload", element, upload);
     }
 
     if (
@@ -598,6 +581,21 @@ class UploadFile {
       getMetadataFieldName(this.fieldName, this.prefix),
       this.prefix
     );
+  }
+
+  emitEvent(
+    eventName: string,
+    element: HTMLElement,
+    upload: Upload | UploadedFile | S3Uploader
+  ): void {
+    if (this.eventEmitter) {
+      this.eventEmitter.emit(eventName, {
+        element,
+        fieldName: this.fieldName,
+        metaDataField: this.getMetaDataField(),
+        upload
+      });
+    }
   }
 }
 
