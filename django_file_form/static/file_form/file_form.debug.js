@@ -4974,6 +4974,16 @@ var s3_uploader_S3Uploader = /*#__PURE__*/function () {
 
 
 
+var upload_file_getFileNameFromUpload = function getFileNameFromUpload(upload) {
+  if (upload instanceof browser_Upload) {
+    return upload.file.name;
+  } else if (upload instanceof s3_uploader) {
+    return upload.file.name;
+  } else {
+    return upload.original_name || upload.name;
+  }
+};
+
 var upload_file_UploadFile = /*#__PURE__*/function () {
   function UploadFile(_ref) {
     var _this = this;
@@ -5217,14 +5227,7 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
 
         _this2.uploadStatuses.push("done");
 
-        if (_this2.eventEmitter) {
-          _this2.eventEmitter.emit("addUpload", {
-            element: element,
-            fieldName: _this2.fieldName,
-            metaDataField: _this2.getMetaDataField(),
-            upload: upload
-          });
-        }
+        _this2.emitEvent("addUpload", element, upload);
       };
 
       if (multiple) {
@@ -5296,15 +5299,7 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
       var element = renderer.addNewUpload(filename, uploadIndex);
       this.uploads.push(upload);
       this.uploadStatuses.push("uploading");
-
-      if (this.eventEmitter) {
-        this.eventEmitter.emit("addUpload", {
-          element: element,
-          fieldName: this.fieldName,
-          metaDataField: this.getMetaDataField(),
-          upload: upload
-        });
-      }
+      this.emitEvent("addUpload", element, upload);
     }
   }, {
     key: "findUpload",
@@ -5341,13 +5336,10 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
         return;
       }
 
-      if (this.eventEmitter) {
-        this.eventEmitter.emit("removeUpload", {
-          element: this.renderer.findFileDiv(uploadIndex),
-          fieldName: this.fieldName,
-          metaDataField: this.getMetaDataField(),
-          upload: upload
-        });
+      var element = this.renderer.findFileDiv(uploadIndex);
+
+      if (element) {
+        this.emitEvent("removeUpload", element, upload);
       }
 
       if (upload instanceof browser_Upload || upload instanceof s3_uploader || upload.url) {
@@ -5532,6 +5524,19 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
     key: "getMetaDataField",
     value: function getMetaDataField() {
       return Object(util["a" /* findInput */])(this.form, Object(util["e" /* getMetadataFieldName */])(this.fieldName, this.prefix), this.prefix);
+    }
+  }, {
+    key: "emitEvent",
+    value: function emitEvent(eventName, element, upload) {
+      if (this.eventEmitter) {
+        this.eventEmitter.emit(eventName, {
+          element: element,
+          fieldName: this.fieldName,
+          fileName: upload_file_getFileNameFromUpload(upload),
+          metaDataField: this.getMetaDataField(),
+          upload: upload
+        });
+      }
     }
   }]);
 
