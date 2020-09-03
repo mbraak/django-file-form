@@ -1,11 +1,11 @@
 const eventEmitter = new EventEmitter3();
 
-eventEmitter.on('addUpload', ({ element, fieldName, metaDataField, upload }) => {
+eventEmitter.on('addUpload', ({ element, fieldName, fileName, metaDataField, upload }) => {
   function descriptionChanged(evt) {
     const metaData = JSON.parse(metaDataField.value);
 
     const inputValue = evt.target.value;
-    metaData[upload.name] = { description: inputValue };
+    metaData[fileName] = { description: inputValue };
 
     metaDataField.value = JSON.stringify(metaData);
   }
@@ -18,14 +18,14 @@ eventEmitter.on('addUpload', ({ element, fieldName, metaDataField, upload }) => 
 
   // add a widget
   const descElem = document.createElement('input');
-  descElem.value = metadata[upload.name] ? metadata[upload.name]['description'] : '';
+  descElem.value = metadata[fileName] ? metadata[fileName]['description'] : '';
 
   descElem.className = 'dff-description';
   descElem.addEventListener('change', descriptionChanged);
   element.appendChild(descElem);
 });
 
-eventEmitter.on('removeUpload', ({ element, fieldName, metaDataField, upload }) => {
+eventEmitter.on('removeUpload', ({ element, fieldName, fileName, metaDataField, upload }) => {
   // do not need to update hidden data since returned metadata will be ignored
 });
 
