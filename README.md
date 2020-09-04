@@ -338,8 +338,8 @@ You can now edit generated po file and commit your changes as usual
 
 
 ## Changelog
-* **development**
-  * Issue #347: add chunkSize parameter to avoid request error in Django.
+* **3.0.1 (4 september 2020)**
+  * Issue #347: add chunkSize parameter to avoid request error in Django
 
 * **3.0.0 (6 august 2020)**
   * Issue #320: fix UploadMultipleWidget to return correct placeholder files (thanks to Shrikrishna Singh)
