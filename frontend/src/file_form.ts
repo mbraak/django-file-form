@@ -12,6 +12,7 @@ import {
 
 interface Options {
   callbacks?: Callbacks;
+  chunkSize?: number;
   prefix?: string;
   retryDelays?: number[];
   skipRequired?: boolean;
@@ -105,6 +106,7 @@ const initUploadFields = (form: Element, options: Options = {}): void => {
 
     new UploadFile({
       callbacks: options.callbacks || {},
+      chunkSize: options.chunkSize || 2621440,
       fieldName,
       form,
       formId,
