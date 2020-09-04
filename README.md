@@ -234,14 +234,15 @@ CSP_CONNECT_SRC = ("'self'", AWS_S3_ENDPOINT_URL)
 ```
 where `AWS_S3_ENDPOINT_URL` is the AWS endpoint defined above.
 
-Then, you will need to pass
+Then, you will need to define
 
   ```
   s3_upload_dir = "user_or_form_specific_id"
   ```
 
-to the constructor of the form to inform the frontend to use the AJAX uploader for S3.
-The files will be uploaded to
+in the form class or passed parameter `s3_upload_dir` to the constructor of the
+form to inform the frontend to use the AJAX uploader for S3. The files will be
+uploaded to
 
 ```
 ${FILE_FORM_UPLOAD_DIR}/${s3_upload_dir}/
@@ -338,6 +339,8 @@ initUploadFields(formDomElement, options);
 * `formDomElement` (required); e.g. `document.getElementById("example-form")`
 * options (optional)
   * `callbacks`: callbacks for things like upload progress and errors.
+  * `chunkSize`: the maximum size of an upload. Default is 2.5 MB.
+    * Note that Django limits the size of a request. See https://docs.djangoproject.com/en/3.1/ref/settings/#data-upload-max-memory-size.
   * `prefix` : set this if the Django form has a prefix; default is empty
   * `retryDelays`: set retry delays
     * Also see `https://github.com/tus/tus-js-client#tusdefaultoptions`
@@ -424,10 +427,15 @@ You can now edit generated po file and commit your changes as usual
 
 
 ## Changelog
-* development version
+* **development version**
   * Issue #324: get placeholder file for UploadWidget (thanks to Shrikrishna Singh)
+  * Issue #330: allow upload directly to S3 compatible storages (thanks to Bo Peng)
   * Issue #331: fix error in deleting files (thanks to Bo Peng)
   * Issue #333: replace existing uploaded file with the same name (thanks to Bo Peng)
+  * Issue #346: allow define s3_upload_dir in form class (thanks to Bo Peng)
+
+* **3.0.1 (4 september 2020)**
+  * Issue #347: add chunkSize parameter to avoid request error in Django
 
 * **3.0.0 (6 august 2020)**
   * Issue #320: fix UploadMultipleWidget to return correct placeholder files (thanks to Shrikrishna Singh)

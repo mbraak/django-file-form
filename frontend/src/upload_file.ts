@@ -60,6 +60,7 @@ const getFileNameFromUpload = (upload: UploadTypes): string => {
 
 class UploadFile {
   callbacks: Callbacks;
+  chunkSize: number;
   eventEmitter?: EventEmitter;
   fieldName: string;
   form: Element;
@@ -77,6 +78,7 @@ class UploadFile {
 
   constructor({
     callbacks,
+    chunkSize,
     eventEmitter,
     fieldName,
     form,
@@ -94,6 +96,7 @@ class UploadFile {
     uploadUrl
   }: {
     callbacks: Callbacks;
+    chunkSize: number;
     eventEmitter?: EventEmitter;
     fieldName: string;
     form: Element;
@@ -111,6 +114,7 @@ class UploadFile {
     uploadUrl: string;
   }) {
     this.callbacks = callbacks;
+    this.chunkSize = chunkSize;
     this.eventEmitter = eventEmitter;
     this.fieldName = fieldName;
     this.form = form;
@@ -248,6 +252,7 @@ class UploadFile {
       });
     } else {
       upload = new Upload(file, {
+        chunkSize: this.chunkSize,
         endpoint: uploadUrl,
         metadata: { fieldName, filename, formId },
         onError: (error: Error): void => this.handleError(uploadIndex, error),

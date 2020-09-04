@@ -4989,6 +4989,7 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
     var _this = this;
 
     var callbacks = _ref.callbacks,
+        chunkSize = _ref.chunkSize,
         eventEmitter = _ref.eventEmitter,
         fieldName = _ref.fieldName,
         form = _ref.form,
@@ -5008,6 +5009,8 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
     classCallCheck_default()(this, UploadFile);
 
     defineProperty_default()(this, "callbacks", void 0);
+
+    defineProperty_default()(this, "chunkSize", void 0);
 
     defineProperty_default()(this, "eventEmitter", void 0);
 
@@ -5142,6 +5145,7 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
     });
 
     this.callbacks = callbacks;
+    this.chunkSize = chunkSize;
     this.eventEmitter = eventEmitter;
     this.fieldName = fieldName;
     this.form = form;
@@ -5276,6 +5280,7 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
         });
       } else {
         upload = new browser_Upload(file, {
+          chunkSize: this.chunkSize,
           endpoint: uploadUrl,
           metadata: {
             fieldName: fieldName,
@@ -5651,6 +5656,7 @@ var initUploadFields = function initUploadFields(form) {
     var supportDropArea = !(options.supportDropArea === false);
     new _upload_file__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"]({
       callbacks: options.callbacks || {},
+      chunkSize: options.chunkSize || 2621440,
       eventEmitter: options.eventEmitter,
       fieldName: fieldName,
       form: form,

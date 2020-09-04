@@ -69,6 +69,7 @@ class MultipleFileExampleForm(BaseForm):
 class S3ExampleForm(BaseForm):
     prefix = 'example'
     input_file = MultipleUploadedFileField()
+    s3_upload_dir = 's3_example'
 
     def save(self):
         example = Example2.objects.create(
