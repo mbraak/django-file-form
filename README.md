@@ -250,6 +250,8 @@ initUploadFields(formDomElement, options);
 * `formDomElement` (required); e.g. `document.getElementById("example-form")`
 * options (optional)
   * `callbacks`: callbacks for things like upload progress and errors.
+  * `chunkSize`: the maximum size of an upload. Default is 2.5 MB.
+    * Note that Django limits the size of a request. See https://docs.djangoproject.com/en/3.1/ref/settings/#data-upload-max-memory-size.
   * `prefix` : set this if the Django form has a prefix; default is empty
   * `retryDelays`: set retry delays
     * Also see `https://github.com/tus/tus-js-client#tusdefaultoptions`
@@ -336,6 +338,9 @@ You can now edit generated po file and commit your changes as usual
 
 
 ## Changelog
+* **development**
+  * Issue #347: add chunkSize parameter to avoid request error in Django.
+
 * **3.0.0 (6 august 2020)**
   * Issue #320: fix UploadMultipleWidget to return correct placeholder files (thanks to Shrikrishna Singh)
   * Issue #325: support Django 3.1
