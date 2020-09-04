@@ -22,7 +22,7 @@ eventEmitter.on('addUpload', ({ element, fieldName, fileName, metaDataField, upl
 
   descElem.className = 'dff-description';
   descElem.addEventListener('change', descriptionChanged);
-  element.appendChild(descElem);
+  element.insertBefore(descElem, element.firstElementChild.nextElementSibling);
 });
 
 eventEmitter.on('removeUpload', ({ element, fieldName, fileName, metaDataField, upload }) => {
