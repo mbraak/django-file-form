@@ -22,6 +22,7 @@ interface ServerPart {
 interface MultipartUpload {
   key: string;
   uploadId: string;
+  s3endpoint: string;
 }
 
 interface UrlInfo {
@@ -41,6 +42,7 @@ interface Options {
   onStart?: (multipartUpload: MultipartUpload) => void;
   onSuccess?: (locationInfo: LocationInfo) => void;
   s3UploadDir: string;
+  s3endpoint: string;
   uploadId?: string;
 }
 
@@ -50,7 +52,8 @@ const getChunkSize = (file: File) => Math.ceil(file.size / 10000);
 
 const createMultipartUpload = (
   file: File,
-  s3UploadDir: string
+  s3UploadDir: string,
+  s3endpoint: string
 ): Promise<MultipartUpload> => {
   const csrftoken = (<HTMLInputElement>(
     document.getElementsByName("csrfmiddlewaretoken")[0]
@@ -60,7 +63,7 @@ const createMultipartUpload = (
     "content-type": "application/json",
     "X-CSRFToken": csrftoken
   });
-  return fetch("s3upload/", {
+  return fetch(`${s3endpoint}/`, {
     method: "post",
     headers: headers,
     body: JSON.stringify({
@@ -79,11 +82,12 @@ const createMultipartUpload = (
 
 const listParts = ({
   key,
-  uploadId
+  uploadId,
+  s3endpoint
 }: MultipartUpload): Promise<ServerPart[]> => {
   const filename = encodeURIComponent(key);
   const uploadIdEnc = encodeURIComponent(uploadId);
-  return fetch(`s3upload/${uploadIdEnc}?key=${filename}`, {
+  return fetch(`${s3endpoint}/${uploadIdEnc}?key=${filename}`, {
     method: "get"
   })
     .then(response => {
@@ -94,7 +98,7 @@ const listParts = ({
     });
 };
 
-const abortMultipartUpload = ({ key, uploadId }: MultipartUpload) => {
+const abortMultipartUpload = ({ key, uploadId, s3endpoint }: MultipartUpload) => {
   const filename = encodeURIComponent(key);
   const uploadIdEnc = encodeURIComponent(uploadId);
   const csrftoken = (<HTMLInputElement>(
@@ -103,7 +107,7 @@ const abortMultipartUpload = ({ key, uploadId }: MultipartUpload) => {
   const headers = new Headers({
     "X-CSRFToken": csrftoken
   });
-  return fetch(`s3upload/${uploadIdEnc}?key=${filename}`, {
+  return fetch(`${s3endpoint}/${uploadIdEnc}?key=${filename}`, {
     method: "delete",
     headers: headers
   }).then(response => {
@@ -114,18 +118,20 @@ const abortMultipartUpload = ({ key, uploadId }: MultipartUpload) => {
 const prepareUploadPart = ({
   key,
   uploadId,
-  number
+  number,
+  s3endpoint
 }: {
   key: string;
   uploadId: string;
   number: number;
+  s3endpoint: string;
 }) => {
   const filename = encodeURIComponent(key);
   const csrftoken = (<HTMLInputElement>(
     document.getElementsByName("csrfmiddlewaretoken")[0]
   )).value;
   const headers = new Headers({ "X-CSRFToken": csrftoken });
-  return fetch(`s3upload/${uploadId}/${number}?key=${filename}`, {
+  return fetch(`${s3endpoint}/${uploadId}/${number}?key=${filename}`, {
     method: "get",
     headers: headers
   })
@@ -140,11 +146,13 @@ const prepareUploadPart = ({
 const completeMultipartUpload = ({
   key,
   uploadId,
-  parts
+  parts,
+  s3endpoint
 }: {
   key: string;
   uploadId: string;
   parts: Part[];
+  s3endpoint: string;
 }): Promise<LocationInfo> => {
   const filename = encodeURIComponent(key);
   const uploadIdEnc = encodeURIComponent(uploadId);
@@ -154,7 +162,7 @@ const completeMultipartUpload = ({
   const headers = new Headers({
     "X-CSRFToken": csrftoken
   });
-  return fetch("s3upload/" + uploadIdEnc + "/complete?key=" + filename, {
+  return fetch(`${s3endpoint}/${uploadIdEnc}/complete?key=${filename}`, {
     method: "post",
     headers: headers,
     body: JSON.stringify({
@@ -186,6 +194,7 @@ class S3Uploader {
   options: Options;
   parts: Part[];
   s3UploadDir: string;
+  s3endpoint: string;
   uploadId: string | null;
   uploading: XMLHttpRequest[];
 
@@ -198,6 +207,7 @@ class S3Uploader {
     this.uploadId = this.options.uploadId || null;
     this.parts = [];
     this.s3UploadDir = this.options.s3UploadDir;
+    this.s3endpoint = this.options.s3endpoint;
 
     // Do `this.createdPromise.then(OP)` to execute an operation `OP` _only_ if the
     // upload was created already. That also ensures that the sequencing is right
@@ -239,7 +249,7 @@ class S3Uploader {
 
   _createUpload(): Promise<void> {
     this.createdPromise = new Promise(resolve => resolve()).then(() =>
-      createMultipartUpload(this.file, this.s3UploadDir)
+      createMultipartUpload(this.file, this.s3UploadDir, this.s3endpoint)
     );
     return this.createdPromise
       .then((result: MultipartUpload) => {
@@ -274,7 +284,8 @@ class S3Uploader {
 
     return listParts({
       uploadId: this.uploadId,
-      key: this.key
+      key: this.key,
+      s3endpoint: this.s3endpoint
     })
       .then(parts => {
         parts.forEach((part: ServerPart) => {
@@ -343,7 +354,8 @@ class S3Uploader {
     return prepareUploadPart({
       key: this.key,
       uploadId: this.uploadId,
-      number: index + 1
+      number: index + 1,
+      s3endpoint: this.s3endpoint
     })
       .then(result => {
         const valid =
@@ -429,7 +441,7 @@ class S3Uploader {
       if (etag === null) {
         this._onError(
           new Error(
-            "AwsS3/Multipart: Could not read the ETag header. This likely means CORS is not configured correctly on the S3 Bucket. Seee https://uppy.io/docs/aws-s3-multipart#S3-Bucket-Configuration for instructions."
+            "AwsS3/Multipart: Could not read the ETag header. This likely means CORS is not configured correctly on the S3 Bucket. See https://uppy.io/docs/aws-s3-multipart#S3-Bucket-Configuration for instructions."
           )
         );
         return;
@@ -459,7 +471,8 @@ class S3Uploader {
     return completeMultipartUpload({
       key: this.key,
       uploadId: this.uploadId,
-      parts: this.parts
+      parts: this.parts,
+      s3endpoint: this.s3endpoint
     }).then(
       result => {
         if (this.options.onSuccess) {
@@ -506,7 +519,8 @@ class S3Uploader {
         if (this.key && this.uploadId) {
           void abortMultipartUpload({
             key: this.key,
-            uploadId: this.uploadId
+            uploadId: this.uploadId,
+            s3endpoint: this.s3endpoint
           });
         }
       },
