@@ -81,7 +81,7 @@
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 23);
+/******/ 	return __webpack_require__(__webpack_require__.s = 24);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -163,7 +163,7 @@ var getInputValueForFormAndPrefix = function getInputValueForFormAndPrefix(form,
 /* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(30);
+module.exports = __webpack_require__(31);
 
 
 /***/ }),
@@ -246,13 +246,13 @@ module.exports = _asyncToGenerator;
 /* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var arrayWithoutHoles = __webpack_require__(25);
+var arrayWithoutHoles = __webpack_require__(26);
 
-var iterableToArray = __webpack_require__(26);
+var iterableToArray = __webpack_require__(27);
 
-var unsupportedIterableToArray = __webpack_require__(14);
+var unsupportedIterableToArray = __webpack_require__(15);
 
-var nonIterableSpread = __webpack_require__(27);
+var nonIterableSpread = __webpack_require__(28);
 
 function _toConsumableArray(arr) {
   return arrayWithoutHoles(arr) || iterableToArray(arr) || unsupportedIterableToArray(arr) || nonIterableSpread();
@@ -264,10 +264,98 @@ module.exports = _toConsumableArray;
 /* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
+var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (name, context, definition) {
+  if ( true && module.exports) module.exports = definition();
+  else if (true) !(__WEBPACK_AMD_DEFINE_FACTORY__ = (definition),
+				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
+				(__WEBPACK_AMD_DEFINE_FACTORY__.call(exports, __webpack_require__, exports, module)) :
+				__WEBPACK_AMD_DEFINE_FACTORY__),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+  else {}
+})('urljoin', this, function () {
+
+  function normalize (strArray) {
+    var resultArray = [];
+    if (strArray.length === 0) { return ''; }
+
+    if (typeof strArray[0] !== 'string') {
+      throw new TypeError('Url must be a string. Received ' + strArray[0]);
+    }
+
+    // If the first part is a plain protocol, we combine it with the next part.
+    if (strArray[0].match(/^[^/:]+:\/*$/) && strArray.length > 1) {
+      var first = strArray.shift();
+      strArray[0] = first + strArray[0];
+    }
+
+    // There must be two or three slashes in the file protocol, two slashes in anything else.
+    if (strArray[0].match(/^file:\/\/\//)) {
+      strArray[0] = strArray[0].replace(/^([^/:]+):\/*/, '$1:///');
+    } else {
+      strArray[0] = strArray[0].replace(/^([^/:]+):\/*/, '$1://');
+    }
+
+    for (var i = 0; i < strArray.length; i++) {
+      var component = strArray[i];
+
+      if (typeof component !== 'string') {
+        throw new TypeError('Url must be a string. Received ' + component);
+      }
+
+      if (component === '') { continue; }
+
+      if (i > 0) {
+        // Removing the starting slashes for each component but the first.
+        component = component.replace(/^[\/]+/, '');
+      }
+      if (i < strArray.length - 1) {
+        // Removing the ending slashes for each component but the last.
+        component = component.replace(/[\/]+$/, '');
+      } else {
+        // For the last component we will combine multiple slashes to a single one.
+        component = component.replace(/[\/]+$/, '/');
+      }
+
+      resultArray.push(component);
+
+    }
+
+    var str = resultArray.join('/');
+    // Each input component is now separated by a single slash except the possible first plain protocol part.
+
+    // remove trailing slash before parameters or hash
+    str = str.replace(/\/(\?|&|#[^!])/g, '$1');
+
+    // replace ? in parameters with &
+    var parts = str.split('?');
+    str = parts.shift() + (parts.length > 0 ? '?': '') + parts.join('&');
+
+    return str;
+  }
+
+  return function () {
+    var input;
+
+    if (typeof arguments[0] === 'object') {
+      input = arguments[0];
+    } else {
+      input = [].slice.call(arguments);
+    }
+
+    return normalize(input);
+  };
+
+});
+
+
+/***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
 "use strict";
 
 
-const path = __webpack_require__(9);
+const path = __webpack_require__(10);
 const WIN_SLASH = '\\\\/';
 const WIN_NO_SLASH = `[^${WIN_SLASH}]`;
 
@@ -447,7 +535,7 @@ module.exports = {
 
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, exports) {
 
 var g;
@@ -473,7 +561,7 @@ module.exports = g;
 
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(process) {// .dirname, .basename, and .extname methods are extracted from Node.js v8.11.1,
@@ -779,23 +867,23 @@ var substr = 'ab'.substr(-1) === 'b'
     }
 ;
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(15)))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(16)))
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(process) {
 
-const path = __webpack_require__(9);
+const path = __webpack_require__(10);
 const win32 = process.platform === 'win32';
 const {
   REGEX_BACKSLASH,
   REGEX_REMOVE_BACKSLASH,
   REGEX_SPECIAL_CHARS,
   REGEX_SPECIAL_CHARS_GLOBAL
-} = __webpack_require__(7);
+} = __webpack_require__(8);
 
 exports.isObject = val => val !== null && typeof val === 'object' && !Array.isArray(val);
 exports.hasRegexChars = str => REGEX_SPECIAL_CHARS.test(str);
@@ -851,20 +939,20 @@ exports.wrapOutput = (input, state = {}, options = {}) => {
   return output;
 };
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(15)))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(16)))
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-module.exports = __webpack_require__(36);
+module.exports = __webpack_require__(37);
 
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, exports) {
 
 function _typeof(obj) {
@@ -886,7 +974,7 @@ function _typeof(obj) {
 module.exports = _typeof;
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, exports) {
 
 function _arrayLikeToArray(arr, len) {
@@ -902,10 +990,10 @@ function _arrayLikeToArray(arr, len) {
 module.exports = _arrayLikeToArray;
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var arrayLikeToArray = __webpack_require__(13);
+var arrayLikeToArray = __webpack_require__(14);
 
 function _unsupportedIterableToArray(o, minLen) {
   if (!o) return;
@@ -919,7 +1007,7 @@ function _unsupportedIterableToArray(o, minLen) {
 module.exports = _unsupportedIterableToArray;
 
 /***/ }),
-/* 15 */
+/* 16 */
 /***/ (function(module, exports) {
 
 // shim for using process in browser
@@ -1109,7 +1197,7 @@ process.umask = function() { return 0; };
 
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*
@@ -1343,17 +1431,17 @@ process.umask = function() { return 0; };
     return {Base64: global.Base64}
 }));
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(8)))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(9)))
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(global) {
 
-var required = __webpack_require__(28)
-  , qs = __webpack_require__(29)
+var required = __webpack_require__(29)
+  , qs = __webpack_require__(30)
   , slashes = /^[A-Za-z][A-Za-z0-9+-.]*:\/\//
   , protocolre = /^([a-z][a-z0-9.+-]*:)?(\/\/)?([\S\s]*)/i
   , whitespace = '[\\x09\\x0A\\x0B\\x0C\\x0D\\x20\\xA0\\u1680\\u180E\\u2000\\u2001\\u2002\\u2003\\u2004\\u2005\\u2006\\u2007\\u2008\\u2009\\u200A\\u202F\\u205F\\u3000\\u2028\\u2029\\uFEFF]'
@@ -1801,10 +1889,10 @@ Url.qs = qs;
 
 module.exports = Url;
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(8)))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(9)))
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1889,7 +1977,7 @@ function escapeHtml(string) {
 
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports) {
 
 function _asyncIterator(iterable) {
@@ -1913,16 +2001,16 @@ function _asyncIterator(iterable) {
 module.exports = _asyncIterator;
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var arrayWithHoles = __webpack_require__(31);
+var arrayWithHoles = __webpack_require__(32);
 
-var iterableToArrayLimit = __webpack_require__(32);
+var iterableToArrayLimit = __webpack_require__(33);
 
-var unsupportedIterableToArray = __webpack_require__(14);
+var unsupportedIterableToArray = __webpack_require__(15);
 
-var nonIterableRest = __webpack_require__(33);
+var nonIterableRest = __webpack_require__(34);
 
 function _slicedToArray(arr, i) {
   return arrayWithHoles(arr) || iterableToArrayLimit(arr, i) || unsupportedIterableToArray(arr, i) || nonIterableRest();
@@ -1931,18 +2019,18 @@ function _slicedToArray(arr, i) {
 module.exports = _slicedToArray;
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var Mime = __webpack_require__(34);
-module.exports = new Mime(__webpack_require__(35));
+var Mime = __webpack_require__(35);
+module.exports = new Mime(__webpack_require__(36));
 
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1962,6 +2050,13 @@ var createClass_default = /*#__PURE__*/__webpack_require__.n(createClass);
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/defineProperty.js
 var defineProperty = __webpack_require__(0);
 var defineProperty_default = /*#__PURE__*/__webpack_require__.n(defineProperty);
+
+// EXTERNAL MODULE: ./node_modules/js-base64/base64.js
+var base64 = __webpack_require__(17);
+
+// EXTERNAL MODULE: ./node_modules/url-parse/index.js
+var url_parse = __webpack_require__(18);
+var url_parse_default = /*#__PURE__*/__webpack_require__.n(url_parse);
 
 // CONCATENATED MODULE: ./node_modules/tus-js-client/lib.esm/error.js
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -2028,6 +2123,16 @@ var DetailedError = /*#__PURE__*/function (_Error) {
 }( /*#__PURE__*/_wrapNativeSuper(Error));
 
 /* harmony default export */ var lib_esm_error = (DetailedError);
+// CONCATENATED MODULE: ./node_modules/tus-js-client/lib.esm/logger.js
+/* eslint no-console: "off" */
+var isEnabled = false;
+function enableDebugLog() {
+  isEnabled = true;
+}
+function log(msg) {
+  if (!isEnabled) return;
+  console.log(msg);
+}
 // CONCATENATED MODULE: ./node_modules/tus-js-client/lib.esm/uuid.js
 /**
  * Generate a UUID v4 based on random numbers. We intentioanlly use the less
@@ -2047,23 +2152,6 @@ function uuid() {
         v = c == "x" ? r : r & 0x3 | 0x8;
     return v.toString(16);
   });
-}
-// EXTERNAL MODULE: ./node_modules/js-base64/base64.js
-var base64 = __webpack_require__(16);
-
-// EXTERNAL MODULE: ./node_modules/url-parse/index.js
-var url_parse = __webpack_require__(17);
-var url_parse_default = /*#__PURE__*/__webpack_require__.n(url_parse);
-
-// CONCATENATED MODULE: ./node_modules/tus-js-client/lib.esm/logger.js
-/* eslint no-console: "off" */
-var isEnabled = false;
-function enableDebugLog() {
-  isEnabled = true;
-}
-function log(msg) {
-  if (!isEnabled) return;
-  console.log(msg);
 }
 // CONCATENATED MODULE: ./node_modules/tus-js-client/lib.esm/upload.js
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
@@ -2100,6 +2188,7 @@ var defaultOptions = {
   addRequestId: false,
   onBeforeRequest: null,
   onAfterResponse: null,
+  onShouldRetry: null,
   chunkSize: Infinity,
   retryDelays: [0, 1000, 3000, 5000],
   parallelUploads: 1,
@@ -2941,8 +3030,7 @@ var upload_BaseUpload = /*#__PURE__*/function () {
       });
     }
     /**
-     * Send a request with the provided body while invoking the onBeforeRequest
-     * and onAfterResponse callbacks.
+     * Send a request with the provided body.
      *
      * @api private
      */
@@ -2950,21 +3038,8 @@ var upload_BaseUpload = /*#__PURE__*/function () {
   }, {
     key: "_sendRequest",
     value: function _sendRequest(req) {
-      var _this12 = this;
-
       var body = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-
-      if (typeof this.options.onBeforeRequest === "function") {
-        this.options.onBeforeRequest(req);
-      }
-
-      return req.send(body).then(function (res) {
-        if (typeof _this12.options.onAfterResponse === "function") {
-          _this12.options.onAfterResponse(req, res);
-        }
-
-        return res;
-      });
+      return sendRequest(req, body, this.options);
     }
   }], [{
     key: "terminate",
@@ -2977,8 +3052,7 @@ var upload_BaseUpload = /*#__PURE__*/function () {
       }
 
       var req = openRequest("DELETE", url, options);
-      var promise = req.send();
-      return promise.then(function (res) {
+      return sendRequest(req, null, options).then(function (res) {
         // A 204 response indicates a successfull request
         if (res.getStatus() === 204) {
           return;
@@ -3062,6 +3136,25 @@ function openRequest(method, url, options) {
   return req;
 }
 /**
+ * Send a request with the provided body while invoking the onBeforeRequest
+ * and onAfterResponse callbacks.
+ *
+ * @api private
+ */
+
+
+function sendRequest(req, body, options) {
+  var onBeforeRequestPromise = typeof options.onBeforeRequest === "function" ? Promise.resolve(options.onBeforeRequest(req)) : Promise.resolve();
+  return onBeforeRequestPromise.then(function () {
+    return req.send(body).then(function (res) {
+      var onAfterResponsePromise = typeof options.onAfterResponse === "function" ? Promise.resolve(options.onAfterResponse(req, res)) : Promise.resolve();
+      return onAfterResponsePromise.then(function () {
+        return res;
+      });
+    });
+  });
+}
+/**
  * Checks whether the browser running this code has internet access.
  * This function will always return true in the node.js environment
  *
@@ -3093,11 +3186,19 @@ function shouldRetry(err, retryAttempt, options) {
   // - retryDelays option is set
   // - we didn't exceed the maxium number of retries, yet, and
   // - this error was caused by a request or it's response and
-  // - the error is server error (i.e. no a status 4xx or a 409 or 423) and
+  // - the error is server error (i.e. not a status 4xx except a 409 or 423) or
+  // a onShouldRetry is specified and returns true
   // - the browser does not indicate that we are offline
+  if (options.retryDelays == null || retryAttempt >= options.retryDelays.length || err.originalRequest == null) {
+    return false;
+  }
+
+  if (options && typeof options.onShouldRetry === "function") {
+    return options.onShouldRetry(err, retryAttempt, options);
+  }
+
   var status = err.originalResponse ? err.originalResponse.getStatus() : 0;
-  var isServerError = !inStatusCategory(status, 400) || status === 409 || status === 423;
-  return options.retryDelays != null && retryAttempt < options.retryDelays.length && err.originalRequest != null && isServerError && isOnline();
+  return (!inStatusCategory(status, 400) || status === 409 || status === 423) && isOnline();
 }
 /**
  * Resolve a relative link given the origin as source. For example,
@@ -3811,7 +3912,7 @@ var isSupported = browser_XMLHttpRequest && browser_Blob && typeof browser_Blob.
 var util = __webpack_require__(1);
 
 // EXTERNAL MODULE: ./node_modules/escape-html/index.js
-var escape_html = __webpack_require__(18);
+var escape_html = __webpack_require__(19);
 var escape_html_default = /*#__PURE__*/__webpack_require__.n(escape_html);
 
 // CONCATENATED MODULE: ./src/render_upload_file.ts
@@ -4063,19 +4164,19 @@ var asyncToGenerator = __webpack_require__(5);
 var asyncToGenerator_default = /*#__PURE__*/__webpack_require__.n(asyncToGenerator);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/asyncIterator.js
-var asyncIterator = __webpack_require__(19);
+var asyncIterator = __webpack_require__(20);
 var asyncIterator_default = /*#__PURE__*/__webpack_require__.n(asyncIterator);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/slicedToArray.js
-var slicedToArray = __webpack_require__(20);
+var slicedToArray = __webpack_require__(21);
 var slicedToArray_default = /*#__PURE__*/__webpack_require__.n(slicedToArray);
 
 // EXTERNAL MODULE: ./node_modules/mime/lite.js
-var lite = __webpack_require__(21);
+var lite = __webpack_require__(22);
 var lite_default = /*#__PURE__*/__webpack_require__.n(lite);
 
 // EXTERNAL MODULE: ./node_modules/picomatch/index.js
-var picomatch = __webpack_require__(11);
+var picomatch = __webpack_require__(12);
 var picomatch_default = /*#__PURE__*/__webpack_require__.n(picomatch);
 
 // CONCATENATED MODULE: ./src/accepted_file_types.ts
@@ -4465,8 +4566,12 @@ var drop_area_DropArea = function DropArea(_ref5) {
 
 /* harmony default export */ var drop_area = (drop_area_DropArea);
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/typeof.js
-var helpers_typeof = __webpack_require__(12);
+var helpers_typeof = __webpack_require__(13);
 var typeof_default = /*#__PURE__*/__webpack_require__.n(helpers_typeof);
+
+// EXTERNAL MODULE: ./node_modules/url-join/lib/url-join.js
+var url_join = __webpack_require__(7);
+var url_join_default = /*#__PURE__*/__webpack_require__.n(url_join);
 
 // CONCATENATED MODULE: ./src/s3_uploader.ts
 
@@ -4475,6 +4580,7 @@ var typeof_default = /*#__PURE__*/__webpack_require__.n(helpers_typeof);
 
 // The following code is adpated from https://github.com/transloadit/uppy/blob/master/packages/%40uppy/aws-s3-multipart/src/MultipartUploader.js
 // which is released under a MIT License (https://github.com/transloadit/uppy/blob/master/LICENSE)
+
 var MB = 1024 * 1024;
 
 var getChunkSize = function getChunkSize(file) {
@@ -4488,7 +4594,7 @@ var createMultipartUpload = function createMultipartUpload(file, s3UploadDir, en
     "content-type": "application/json",
     "X-CSRFToken": csrftoken
   });
-  return fetch("".concat(endpoint, "/"), {
+  return fetch(endpoint, {
     method: "post",
     headers: headers,
     body: JSON.stringify({
@@ -4503,13 +4609,14 @@ var createMultipartUpload = function createMultipartUpload(file, s3UploadDir, en
   });
 };
 
-var listParts = function listParts(_ref) {
+var s3_uploader_listParts = function listParts(_ref) {
   var key = _ref.key,
       uploadId = _ref.uploadId,
       endpoint = _ref.endpoint;
   var filename = encodeURIComponent(key);
   var uploadIdEnc = encodeURIComponent(uploadId);
-  return fetch("".concat(endpoint, "/").concat(uploadIdEnc, "?key=").concat(filename), {
+  var url = url_join_default()(endpoint, uploadIdEnc, "?key=".concat(filename));
+  return fetch(url, {
     method: "get"
   }).then(function (response) {
     return response.json();
@@ -4518,7 +4625,7 @@ var listParts = function listParts(_ref) {
   });
 };
 
-var abortMultipartUpload = function abortMultipartUpload(_ref2) {
+var s3_uploader_abortMultipartUpload = function abortMultipartUpload(_ref2) {
   var key = _ref2.key,
       uploadId = _ref2.uploadId,
       endpoint = _ref2.endpoint;
@@ -4528,7 +4635,8 @@ var abortMultipartUpload = function abortMultipartUpload(_ref2) {
   var headers = new Headers({
     "X-CSRFToken": csrftoken
   });
-  return fetch("".concat(endpoint, "/").concat(uploadIdEnc, "?key=").concat(filename), {
+  var url = url_join_default()(endpoint, uploadIdEnc, "?key=".concat(filename));
+  return fetch(url, {
     method: "delete",
     headers: headers
   }).then(function (response) {
@@ -4536,7 +4644,7 @@ var abortMultipartUpload = function abortMultipartUpload(_ref2) {
   });
 };
 
-var prepareUploadPart = function prepareUploadPart(_ref3) {
+var s3_uploader_prepareUploadPart = function prepareUploadPart(_ref3) {
   var key = _ref3.key,
       uploadId = _ref3.uploadId,
       number = _ref3.number,
@@ -4546,7 +4654,8 @@ var prepareUploadPart = function prepareUploadPart(_ref3) {
   var headers = new Headers({
     "X-CSRFToken": csrftoken
   });
-  return fetch("".concat(endpoint, "/").concat(uploadId, "/").concat(number, "?key=").concat(filename), {
+  var url = url_join_default()(endpoint, uploadId, "".concat(number), "?key=".concat(filename));
+  return fetch(url, {
     method: "get",
     headers: headers
   }).then(function (response) {
@@ -4556,7 +4665,7 @@ var prepareUploadPart = function prepareUploadPart(_ref3) {
   });
 };
 
-var completeMultipartUpload = function completeMultipartUpload(_ref4) {
+var s3_uploader_completeMultipartUpload = function completeMultipartUpload(_ref4) {
   var key = _ref4.key,
       uploadId = _ref4.uploadId,
       parts = _ref4.parts,
@@ -4567,7 +4676,8 @@ var completeMultipartUpload = function completeMultipartUpload(_ref4) {
   var headers = new Headers({
     "X-CSRFToken": csrftoken
   });
-  return fetch("".concat(endpoint, "/").concat(uploadIdEnc, "/complete?key=").concat(filename), {
+  var url = url_join_default()(endpoint, uploadIdEnc, "complete", "?key=".concat(filename));
+  return fetch(url, {
     method: "post",
     headers: headers,
     body: JSON.stringify({
@@ -4705,7 +4815,7 @@ var s3_uploader_S3Uploader = /*#__PURE__*/function () {
         return Promise.resolve();
       }
 
-      return listParts({
+      return s3_uploader_listParts({
         uploadId: this.uploadId,
         key: this.key,
         endpoint: this.endpoint
@@ -4784,7 +4894,7 @@ var s3_uploader_S3Uploader = /*#__PURE__*/function () {
         return Promise.resolve();
       }
 
-      return prepareUploadPart({
+      return s3_uploader_prepareUploadPart({
         key: this.key,
         uploadId: this.uploadId,
         number: index + 1,
@@ -4900,7 +5010,7 @@ var s3_uploader_S3Uploader = /*#__PURE__*/function () {
         return Promise.resolve();
       }
 
-      return completeMultipartUpload({
+      return s3_uploader_completeMultipartUpload({
         key: this.key,
         uploadId: this.uploadId,
         parts: this.parts,
@@ -4952,7 +5062,7 @@ var s3_uploader_S3Uploader = /*#__PURE__*/function () {
       });
       this.createdPromise.then(function () {
         if (_this7.key && _this7.uploadId) {
-          void abortMultipartUpload({
+          void s3_uploader_abortMultipartUpload({
             key: _this7.key,
             uploadId: _this7.uploadId,
             endpoint: _this7.endpoint
@@ -5514,21 +5624,21 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
 /* harmony default export */ var upload_file = __webpack_exports__["a"] = (upload_file_UploadFile);
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(24);
+module.exports = __webpack_require__(25);
 
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* WEBPACK VAR INJECTION */(function(global) {/* harmony import */ var _babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(0);
 /* harmony import */ var _babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _upload_file__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(22);
+/* harmony import */ var _upload_file__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(23);
 /* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(1);
 
 
@@ -5670,13 +5780,13 @@ var initFormSet = function initFormSet(form, optionsParam) {
 global.initFormSet = initFormSet; // eslint-disable-line  @typescript-eslint/no-unsafe-member-access
 
 global.initUploadFields = initUploadFields; // eslint-disable-line  @typescript-eslint/no-unsafe-member-access
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(8)))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(9)))
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var arrayLikeToArray = __webpack_require__(13);
+var arrayLikeToArray = __webpack_require__(14);
 
 function _arrayWithoutHoles(arr) {
   if (Array.isArray(arr)) return arrayLikeToArray(arr);
@@ -5685,7 +5795,7 @@ function _arrayWithoutHoles(arr) {
 module.exports = _arrayWithoutHoles;
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ (function(module, exports) {
 
 function _iterableToArray(iter) {
@@ -5695,7 +5805,7 @@ function _iterableToArray(iter) {
 module.exports = _iterableToArray;
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ (function(module, exports) {
 
 function _nonIterableSpread() {
@@ -5705,7 +5815,7 @@ function _nonIterableSpread() {
 module.exports = _nonIterableSpread;
 
 /***/ }),
-/* 28 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5750,7 +5860,7 @@ module.exports = function required(port, protocol) {
 
 
 /***/ }),
-/* 29 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5875,7 +5985,7 @@ exports.parse = querystring;
 
 
 /***/ }),
-/* 30 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -6629,7 +6739,7 @@ try {
 
 
 /***/ }),
-/* 31 */
+/* 32 */
 /***/ (function(module, exports) {
 
 function _arrayWithHoles(arr) {
@@ -6639,7 +6749,7 @@ function _arrayWithHoles(arr) {
 module.exports = _arrayWithHoles;
 
 /***/ }),
-/* 32 */
+/* 33 */
 /***/ (function(module, exports) {
 
 function _iterableToArrayLimit(arr, i) {
@@ -6672,7 +6782,7 @@ function _iterableToArrayLimit(arr, i) {
 module.exports = _iterableToArrayLimit;
 
 /***/ }),
-/* 33 */
+/* 34 */
 /***/ (function(module, exports) {
 
 function _nonIterableRest() {
@@ -6682,7 +6792,7 @@ function _nonIterableRest() {
 module.exports = _nonIterableRest;
 
 /***/ }),
-/* 34 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6784,23 +6894,23 @@ module.exports = Mime;
 
 
 /***/ }),
-/* 35 */
+/* 36 */
 /***/ (function(module, exports) {
 
 module.exports = {"application/andrew-inset":["ez"],"application/applixware":["aw"],"application/atom+xml":["atom"],"application/atomcat+xml":["atomcat"],"application/atomdeleted+xml":["atomdeleted"],"application/atomsvc+xml":["atomsvc"],"application/atsc-dwd+xml":["dwd"],"application/atsc-held+xml":["held"],"application/atsc-rsat+xml":["rsat"],"application/bdoc":["bdoc"],"application/calendar+xml":["xcs"],"application/ccxml+xml":["ccxml"],"application/cdfx+xml":["cdfx"],"application/cdmi-capability":["cdmia"],"application/cdmi-container":["cdmic"],"application/cdmi-domain":["cdmid"],"application/cdmi-object":["cdmio"],"application/cdmi-queue":["cdmiq"],"application/cu-seeme":["cu"],"application/dash+xml":["mpd"],"application/davmount+xml":["davmount"],"application/docbook+xml":["dbk"],"application/dssc+der":["dssc"],"application/dssc+xml":["xdssc"],"application/ecmascript":["ecma","es"],"application/emma+xml":["emma"],"application/emotionml+xml":["emotionml"],"application/epub+zip":["epub"],"application/exi":["exi"],"application/fdt+xml":["fdt"],"application/font-tdpfr":["pfr"],"application/geo+json":["geojson"],"application/gml+xml":["gml"],"application/gpx+xml":["gpx"],"application/gxf":["gxf"],"application/gzip":["gz"],"application/hjson":["hjson"],"application/hyperstudio":["stk"],"application/inkml+xml":["ink","inkml"],"application/ipfix":["ipfix"],"application/its+xml":["its"],"application/java-archive":["jar","war","ear"],"application/java-serialized-object":["ser"],"application/java-vm":["class"],"application/javascript":["js","mjs"],"application/json":["json","map"],"application/json5":["json5"],"application/jsonml+json":["jsonml"],"application/ld+json":["jsonld"],"application/lgr+xml":["lgr"],"application/lost+xml":["lostxml"],"application/mac-binhex40":["hqx"],"application/mac-compactpro":["cpt"],"application/mads+xml":["mads"],"application/manifest+json":["webmanifest"],"application/marc":["mrc"],"application/marcxml+xml":["mrcx"],"application/mathematica":["ma","nb","mb"],"application/mathml+xml":["mathml"],"application/mbox":["mbox"],"application/mediaservercontrol+xml":["mscml"],"application/metalink+xml":["metalink"],"application/metalink4+xml":["meta4"],"application/mets+xml":["mets"],"application/mmt-aei+xml":["maei"],"application/mmt-usd+xml":["musd"],"application/mods+xml":["mods"],"application/mp21":["m21","mp21"],"application/mp4":["mp4s","m4p"],"application/mrb-consumer+xml":["*xdf"],"application/mrb-publish+xml":["*xdf"],"application/msword":["doc","dot"],"application/mxf":["mxf"],"application/n-quads":["nq"],"application/n-triples":["nt"],"application/node":["cjs"],"application/octet-stream":["bin","dms","lrf","mar","so","dist","distz","pkg","bpk","dump","elc","deploy","exe","dll","deb","dmg","iso","img","msi","msp","msm","buffer"],"application/oda":["oda"],"application/oebps-package+xml":["opf"],"application/ogg":["ogx"],"application/omdoc+xml":["omdoc"],"application/onenote":["onetoc","onetoc2","onetmp","onepkg"],"application/oxps":["oxps"],"application/p2p-overlay+xml":["relo"],"application/patch-ops-error+xml":["*xer"],"application/pdf":["pdf"],"application/pgp-encrypted":["pgp"],"application/pgp-signature":["asc","sig"],"application/pics-rules":["prf"],"application/pkcs10":["p10"],"application/pkcs7-mime":["p7m","p7c"],"application/pkcs7-signature":["p7s"],"application/pkcs8":["p8"],"application/pkix-attr-cert":["ac"],"application/pkix-cert":["cer"],"application/pkix-crl":["crl"],"application/pkix-pkipath":["pkipath"],"application/pkixcmp":["pki"],"application/pls+xml":["pls"],"application/postscript":["ai","eps","ps"],"application/provenance+xml":["provx"],"application/pskc+xml":["pskcxml"],"application/raml+yaml":["raml"],"application/rdf+xml":["rdf","owl"],"application/reginfo+xml":["rif"],"application/relax-ng-compact-syntax":["rnc"],"application/resource-lists+xml":["rl"],"application/resource-lists-diff+xml":["rld"],"application/rls-services+xml":["rs"],"application/route-apd+xml":["rapd"],"application/route-s-tsid+xml":["sls"],"application/route-usd+xml":["rusd"],"application/rpki-ghostbusters":["gbr"],"application/rpki-manifest":["mft"],"application/rpki-roa":["roa"],"application/rsd+xml":["rsd"],"application/rss+xml":["rss"],"application/rtf":["rtf"],"application/sbml+xml":["sbml"],"application/scvp-cv-request":["scq"],"application/scvp-cv-response":["scs"],"application/scvp-vp-request":["spq"],"application/scvp-vp-response":["spp"],"application/sdp":["sdp"],"application/senml+xml":["senmlx"],"application/sensml+xml":["sensmlx"],"application/set-payment-initiation":["setpay"],"application/set-registration-initiation":["setreg"],"application/shf+xml":["shf"],"application/sieve":["siv","sieve"],"application/smil+xml":["smi","smil"],"application/sparql-query":["rq"],"application/sparql-results+xml":["srx"],"application/srgs":["gram"],"application/srgs+xml":["grxml"],"application/sru+xml":["sru"],"application/ssdl+xml":["ssdl"],"application/ssml+xml":["ssml"],"application/swid+xml":["swidtag"],"application/tei+xml":["tei","teicorpus"],"application/thraud+xml":["tfi"],"application/timestamped-data":["tsd"],"application/toml":["toml"],"application/ttml+xml":["ttml"],"application/urc-ressheet+xml":["rsheet"],"application/voicexml+xml":["vxml"],"application/wasm":["wasm"],"application/widget":["wgt"],"application/winhlp":["hlp"],"application/wsdl+xml":["wsdl"],"application/wspolicy+xml":["wspolicy"],"application/xaml+xml":["xaml"],"application/xcap-att+xml":["xav"],"application/xcap-caps+xml":["xca"],"application/xcap-diff+xml":["xdf"],"application/xcap-el+xml":["xel"],"application/xcap-error+xml":["xer"],"application/xcap-ns+xml":["xns"],"application/xenc+xml":["xenc"],"application/xhtml+xml":["xhtml","xht"],"application/xliff+xml":["xlf"],"application/xml":["xml","xsl","xsd","rng"],"application/xml-dtd":["dtd"],"application/xop+xml":["xop"],"application/xproc+xml":["xpl"],"application/xslt+xml":["xslt"],"application/xspf+xml":["xspf"],"application/xv+xml":["mxml","xhvml","xvml","xvm"],"application/yang":["yang"],"application/yin+xml":["yin"],"application/zip":["zip"],"audio/3gpp":["*3gpp"],"audio/adpcm":["adp"],"audio/basic":["au","snd"],"audio/midi":["mid","midi","kar","rmi"],"audio/mobile-xmf":["mxmf"],"audio/mp3":["*mp3"],"audio/mp4":["m4a","mp4a"],"audio/mpeg":["mpga","mp2","mp2a","mp3","m2a","m3a"],"audio/ogg":["oga","ogg","spx"],"audio/s3m":["s3m"],"audio/silk":["sil"],"audio/wav":["wav"],"audio/wave":["*wav"],"audio/webm":["weba"],"audio/xm":["xm"],"font/collection":["ttc"],"font/otf":["otf"],"font/ttf":["ttf"],"font/woff":["woff"],"font/woff2":["woff2"],"image/aces":["exr"],"image/apng":["apng"],"image/bmp":["bmp"],"image/cgm":["cgm"],"image/dicom-rle":["drle"],"image/emf":["emf"],"image/fits":["fits"],"image/g3fax":["g3"],"image/gif":["gif"],"image/heic":["heic"],"image/heic-sequence":["heics"],"image/heif":["heif"],"image/heif-sequence":["heifs"],"image/hej2k":["hej2"],"image/hsj2":["hsj2"],"image/ief":["ief"],"image/jls":["jls"],"image/jp2":["jp2","jpg2"],"image/jpeg":["jpeg","jpg","jpe"],"image/jph":["jph"],"image/jphc":["jhc"],"image/jpm":["jpm"],"image/jpx":["jpx","jpf"],"image/jxr":["jxr"],"image/jxra":["jxra"],"image/jxrs":["jxrs"],"image/jxs":["jxs"],"image/jxsc":["jxsc"],"image/jxsi":["jxsi"],"image/jxss":["jxss"],"image/ktx":["ktx"],"image/png":["png"],"image/sgi":["sgi"],"image/svg+xml":["svg","svgz"],"image/t38":["t38"],"image/tiff":["tif","tiff"],"image/tiff-fx":["tfx"],"image/webp":["webp"],"image/wmf":["wmf"],"message/disposition-notification":["disposition-notification"],"message/global":["u8msg"],"message/global-delivery-status":["u8dsn"],"message/global-disposition-notification":["u8mdn"],"message/global-headers":["u8hdr"],"message/rfc822":["eml","mime"],"model/3mf":["3mf"],"model/gltf+json":["gltf"],"model/gltf-binary":["glb"],"model/iges":["igs","iges"],"model/mesh":["msh","mesh","silo"],"model/mtl":["mtl"],"model/obj":["obj"],"model/stl":["stl"],"model/vrml":["wrl","vrml"],"model/x3d+binary":["*x3db","x3dbz"],"model/x3d+fastinfoset":["x3db"],"model/x3d+vrml":["*x3dv","x3dvz"],"model/x3d+xml":["x3d","x3dz"],"model/x3d-vrml":["x3dv"],"text/cache-manifest":["appcache","manifest"],"text/calendar":["ics","ifb"],"text/coffeescript":["coffee","litcoffee"],"text/css":["css"],"text/csv":["csv"],"text/html":["html","htm","shtml"],"text/jade":["jade"],"text/jsx":["jsx"],"text/less":["less"],"text/markdown":["markdown","md"],"text/mathml":["mml"],"text/mdx":["mdx"],"text/n3":["n3"],"text/plain":["txt","text","conf","def","list","log","in","ini"],"text/richtext":["rtx"],"text/rtf":["*rtf"],"text/sgml":["sgml","sgm"],"text/shex":["shex"],"text/slim":["slim","slm"],"text/stylus":["stylus","styl"],"text/tab-separated-values":["tsv"],"text/troff":["t","tr","roff","man","me","ms"],"text/turtle":["ttl"],"text/uri-list":["uri","uris","urls"],"text/vcard":["vcard"],"text/vtt":["vtt"],"text/xml":["*xml"],"text/yaml":["yaml","yml"],"video/3gpp":["3gp","3gpp"],"video/3gpp2":["3g2"],"video/h261":["h261"],"video/h263":["h263"],"video/h264":["h264"],"video/jpeg":["jpgv"],"video/jpm":["*jpm","jpgm"],"video/mj2":["mj2","mjp2"],"video/mp2t":["ts"],"video/mp4":["mp4","mp4v","mpg4"],"video/mpeg":["mpeg","mpg","mpe","m1v","m2v"],"video/ogg":["ogv"],"video/quicktime":["qt","mov"],"video/webm":["webm"]};
 
 /***/ }),
-/* 36 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-const path = __webpack_require__(9);
-const scan = __webpack_require__(37);
-const parse = __webpack_require__(38);
-const utils = __webpack_require__(10);
-const constants = __webpack_require__(7);
+const path = __webpack_require__(10);
+const scan = __webpack_require__(38);
+const parse = __webpack_require__(39);
+const utils = __webpack_require__(11);
+const constants = __webpack_require__(8);
 const isObject = val => val && typeof val === 'object' && !Array.isArray(val);
 
 /**
@@ -7136,13 +7246,13 @@ module.exports = picomatch;
 
 
 /***/ }),
-/* 37 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-const utils = __webpack_require__(10);
+const utils = __webpack_require__(11);
 const {
   CHAR_ASTERISK,             /* * */
   CHAR_AT,                   /* @ */
@@ -7159,7 +7269,7 @@ const {
   CHAR_RIGHT_CURLY_BRACE,    /* } */
   CHAR_RIGHT_PARENTHESES,    /* ) */
   CHAR_RIGHT_SQUARE_BRACKET  /* ] */
-} = __webpack_require__(7);
+} = __webpack_require__(8);
 
 const isPathSeparator = code => {
   return code === CHAR_FORWARD_SLASH || code === CHAR_BACKWARD_SLASH;
@@ -7526,14 +7636,14 @@ module.exports = scan;
 
 
 /***/ }),
-/* 38 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-const constants = __webpack_require__(7);
-const utils = __webpack_require__(10);
+const constants = __webpack_require__(8);
+const utils = __webpack_require__(11);
 
 /**
  * Constants
