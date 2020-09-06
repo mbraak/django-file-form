@@ -4481,14 +4481,14 @@ var getChunkSize = function getChunkSize(file) {
   return Math.ceil(file.size / 10000);
 };
 
-var createMultipartUpload = function createMultipartUpload(file, s3UploadDir, s3endpoint) {
+var createMultipartUpload = function createMultipartUpload(file, s3UploadDir, endpoint) {
   var csrftoken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
   var headers = new Headers({
     accept: "application/json",
     "content-type": "application/json",
     "X-CSRFToken": csrftoken
   });
-  return fetch("".concat(s3endpoint, "/"), {
+  return fetch("".concat(endpoint, "/"), {
     method: "post",
     headers: headers,
     body: JSON.stringify({
@@ -4506,10 +4506,10 @@ var createMultipartUpload = function createMultipartUpload(file, s3UploadDir, s3
 var listParts = function listParts(_ref) {
   var key = _ref.key,
       uploadId = _ref.uploadId,
-      s3endpoint = _ref.s3endpoint;
+      endpoint = _ref.endpoint;
   var filename = encodeURIComponent(key);
   var uploadIdEnc = encodeURIComponent(uploadId);
-  return fetch("".concat(s3endpoint, "/").concat(uploadIdEnc, "?key=").concat(filename), {
+  return fetch("".concat(endpoint, "/").concat(uploadIdEnc, "?key=").concat(filename), {
     method: "get"
   }).then(function (response) {
     return response.json();
@@ -4521,14 +4521,14 @@ var listParts = function listParts(_ref) {
 var abortMultipartUpload = function abortMultipartUpload(_ref2) {
   var key = _ref2.key,
       uploadId = _ref2.uploadId,
-      s3endpoint = _ref2.s3endpoint;
+      endpoint = _ref2.endpoint;
   var filename = encodeURIComponent(key);
   var uploadIdEnc = encodeURIComponent(uploadId);
   var csrftoken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
   var headers = new Headers({
     "X-CSRFToken": csrftoken
   });
-  return fetch("".concat(s3endpoint, "/").concat(uploadIdEnc, "?key=").concat(filename), {
+  return fetch("".concat(endpoint, "/").concat(uploadIdEnc, "?key=").concat(filename), {
     method: "delete",
     headers: headers
   }).then(function (response) {
@@ -4540,13 +4540,13 @@ var prepareUploadPart = function prepareUploadPart(_ref3) {
   var key = _ref3.key,
       uploadId = _ref3.uploadId,
       number = _ref3.number,
-      s3endpoint = _ref3.s3endpoint;
+      endpoint = _ref3.endpoint;
   var filename = encodeURIComponent(key);
   var csrftoken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
   var headers = new Headers({
     "X-CSRFToken": csrftoken
   });
-  return fetch("".concat(s3endpoint, "/").concat(uploadId, "/").concat(number, "?key=").concat(filename), {
+  return fetch("".concat(endpoint, "/").concat(uploadId, "/").concat(number, "?key=").concat(filename), {
     method: "get",
     headers: headers
   }).then(function (response) {
@@ -4560,14 +4560,14 @@ var completeMultipartUpload = function completeMultipartUpload(_ref4) {
   var key = _ref4.key,
       uploadId = _ref4.uploadId,
       parts = _ref4.parts,
-      s3endpoint = _ref4.s3endpoint;
+      endpoint = _ref4.endpoint;
   var filename = encodeURIComponent(key);
   var uploadIdEnc = encodeURIComponent(uploadId);
   var csrftoken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
   var headers = new Headers({
     "X-CSRFToken": csrftoken
   });
-  return fetch("".concat(s3endpoint, "/").concat(uploadIdEnc, "/complete?key=").concat(filename), {
+  return fetch("".concat(endpoint, "/").concat(uploadIdEnc, "/complete?key=").concat(filename), {
     method: "post",
     headers: headers,
     body: JSON.stringify({
@@ -4610,7 +4610,7 @@ var s3_uploader_S3Uploader = /*#__PURE__*/function () {
 
     defineProperty_default()(this, "s3UploadDir", void 0);
 
-    defineProperty_default()(this, "s3endpoint", void 0);
+    defineProperty_default()(this, "endpoint", void 0);
 
     defineProperty_default()(this, "uploadId", void 0);
 
@@ -4622,7 +4622,7 @@ var s3_uploader_S3Uploader = /*#__PURE__*/function () {
     this.uploadId = this.options.uploadId || null;
     this.parts = [];
     this.s3UploadDir = this.options.s3UploadDir;
-    this.s3endpoint = this.options.s3endpoint; // Do `this.createdPromise.then(OP)` to execute an operation `OP` _only_ if the
+    this.endpoint = this.options.endpoint; // Do `this.createdPromise.then(OP)` to execute an operation `OP` _only_ if the
     // upload was created already. That also ensures that the sequencing is right
     // (so the `OP` definitely happens if the upload is created).
     //
@@ -4675,7 +4675,7 @@ var s3_uploader_S3Uploader = /*#__PURE__*/function () {
       this.createdPromise = new Promise(function (resolve) {
         return resolve();
       }).then(function () {
-        return createMultipartUpload(_this.file, _this.s3UploadDir, _this.s3endpoint);
+        return createMultipartUpload(_this.file, _this.s3UploadDir, _this.endpoint);
       });
       return this.createdPromise.then(function (result) {
         var valid = typeof_default()(result) === "object" && result && typeof result.uploadId === "string" && typeof result.key === "string";
@@ -4708,7 +4708,7 @@ var s3_uploader_S3Uploader = /*#__PURE__*/function () {
       return listParts({
         uploadId: this.uploadId,
         key: this.key,
-        s3endpoint: this.s3endpoint
+        endpoint: this.endpoint
       }).then(function (parts) {
         parts.forEach(function (part) {
           var i = part.PartNumber - 1;
@@ -4788,7 +4788,7 @@ var s3_uploader_S3Uploader = /*#__PURE__*/function () {
         key: this.key,
         uploadId: this.uploadId,
         number: index + 1,
-        s3endpoint: this.s3endpoint
+        endpoint: this.endpoint
       }).then(function (result) {
         var valid = typeof_default()(result) === "object" && result && typeof result.url === "string";
 
@@ -4904,7 +4904,7 @@ var s3_uploader_S3Uploader = /*#__PURE__*/function () {
         key: this.key,
         uploadId: this.uploadId,
         parts: this.parts,
-        s3endpoint: this.s3endpoint
+        endpoint: this.endpoint
       }).then(function (result) {
         if (_this6.options.onSuccess) {
           _this6.options.onSuccess(result);
@@ -4955,7 +4955,7 @@ var s3_uploader_S3Uploader = /*#__PURE__*/function () {
           void abortMultipartUpload({
             key: _this7.key,
             uploadId: _this7.uploadId,
-            s3endpoint: _this7.s3endpoint
+            endpoint: _this7.endpoint
           });
         }
       }, function () {// if the creation failed we do not need to abort
@@ -5255,7 +5255,7 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
       if (s3UploadDir != null) {
         upload = new s3_uploader(file, {
           s3UploadDir: s3UploadDir,
-          s3endpoint: uploadUrl.slice(0, uploadUrl.lastIndexOf('upload')) + 's3upload',
+          endpoint: uploadUrl,
           onProgress: function onProgress(bytesUploaded, bytesTotal) {
             return _this3.handleProgress(uploadIndex, bytesUploaded, bytesTotal);
           },
