@@ -1,6 +1,8 @@
 // The following code is adpated from https://github.com/transloadit/uppy/blob/master/packages/%40uppy/aws-s3-multipart/src/MultipartUploader.js
 // which is released under a MIT License (https://github.com/transloadit/uppy/blob/master/LICENSE)
 
+import urljoin from "url-join";
+
 interface ChunkState {
   busy: boolean;
   done: boolean;
@@ -63,7 +65,7 @@ const createMultipartUpload = (
     "content-type": "application/json",
     "X-CSRFToken": csrftoken
   });
-  return fetch(`${endpoint}/`, {
+  return fetch(endpoint, {
     method: "post",
     headers: headers,
     body: JSON.stringify({
@@ -87,9 +89,9 @@ const listParts = ({
 }: MultipartUpload): Promise<ServerPart[]> => {
   const filename = encodeURIComponent(key);
   const uploadIdEnc = encodeURIComponent(uploadId);
-  return fetch(`${endpoint}/${uploadIdEnc}?key=${filename}`, {
-    method: "get"
-  })
+  const url = urljoin(endpoint, uploadIdEnc, `?key=${filename}`);
+
+  return fetch(url, { method: "get" })
     .then(response => {
       return response.json();
     })
@@ -107,7 +109,8 @@ const abortMultipartUpload = ({ key, uploadId, endpoint }: MultipartUpload) => {
   const headers = new Headers({
     "X-CSRFToken": csrftoken
   });
-  return fetch(`${endpoint}/${uploadIdEnc}?key=${filename}`, {
+  const url = urljoin(endpoint, uploadIdEnc, `?key=${filename}`);
+  return fetch(url, {
     method: "delete",
     headers: headers
   }).then(response => {
@@ -131,7 +134,8 @@ const prepareUploadPart = ({
     document.getElementsByName("csrfmiddlewaretoken")[0]
   )).value;
   const headers = new Headers({ "X-CSRFToken": csrftoken });
-  return fetch(`${endpoint}/${uploadId}/${number}?key=${filename}`, {
+  const url = urljoin(endpoint, uploadId, `${number}`, `?key=${filename}`);
+  return fetch(url, {
     method: "get",
     headers: headers
   })
@@ -162,7 +166,8 @@ const completeMultipartUpload = ({
   const headers = new Headers({
     "X-CSRFToken": csrftoken
   });
-  return fetch(`${endpoint}/${uploadIdEnc}/complete?key=${filename}`, {
+  const url = urljoin(endpoint, uploadIdEnc, "complete", `?key=${filename}`);
+  return fetch(url, {
     method: "post",
     headers: headers,
     body: JSON.stringify({
