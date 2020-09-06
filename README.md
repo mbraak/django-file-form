@@ -209,8 +209,8 @@ by clients directly to S3 through AJAX operations and return to the backend as `
 with [`S3Boto3Storage`](https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html).
 
 To use this method, you will first need to make sure your S3 bucket is configured
-to [allow upload to bucket directly](https://docs.aws.amazon.com/AmazonS3/latest/dev/cors.html), and
-[allows `PUT` method and expose `ETag` header](https://uppy.io/docs/aws-s3-multipart/#S3-Bucket-Configuration).
+to [allow upload to bucket directly](https://docs.aws.amazon.com/AmazonS3/latest/dev/cors.html),
+[allow `PUT` method, and expose `ETag` header](https://uppy.io/docs/aws-s3-multipart/#S3-Bucket-Configuration).
 You then need to define the following variables in `settings`
 
 ```
@@ -235,7 +235,7 @@ CSP_CONNECT_SRC = ("'self'", AWS_S3_ENDPOINT_URL)
 ```
 where `AWS_S3_ENDPOINT_URL` is the AWS endpoint defined above.
 
-Then, you will need to define
+Finally, you will need to define
 
   ```
   s3_upload_dir = "user_or_form_specific_id"
