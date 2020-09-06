@@ -46,6 +46,7 @@
     "eventemitter3": "^4.0.7",
     "mime": "^2.4.6",
     "picomatch": "^2.2.2",
-    "tus-js-client": "^2.1.1"
+    "tus-js-client": "^2.1.1",
+    "url-join": "^4.0.1"
   }
 }

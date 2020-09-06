@@ -244,6 +244,7 @@ class UploadFile {
     if (s3UploadDir != null) {
       upload = new S3Uploader(file, {
         s3UploadDir: s3UploadDir,
+        endpoint: uploadUrl,
         onProgress: (bytesUploaded: number, bytesTotal: number): void =>
           this.handleProgress(uploadIndex, bytesUploaded, bytesTotal),
         onError: (error: Error): void => this.handleError(uploadIndex, error),
