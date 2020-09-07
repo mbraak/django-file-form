@@ -4,6 +4,7 @@ interface FileSystemEntry {
   isFile: boolean;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface FileSystemEntryMetadata {
   modificationTime?: Date;
   size?: number;
@@ -21,6 +22,7 @@ interface FileSystemFlags {
   exclusive?: boolean;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface FileSystemDirectoryEntry extends FileSystemEntry {
   isDirectory: true;
   isFile: false;
