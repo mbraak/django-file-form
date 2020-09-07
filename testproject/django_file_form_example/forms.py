@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 from django.core.exceptions import ValidationError
 from django.forms import formset_factory, BaseFormSet, Form, CharField
@@ -68,6 +69,7 @@ class MultipleFileExampleForm(BaseForm):
 class S3ExampleForm(BaseForm):
     prefix = 'example'
     input_file = MultipleUploadedFileField()
+    s3_upload_dir = 's3_example'
 
     def save(self):
         example = Example2.objects.create(
@@ -75,17 +77,19 @@ class S3ExampleForm(BaseForm):
         )
         for f in self.cleaned_data['input_file']:
             assert f.is_s3direct
+
             # FILE_FORM_UPLOAD_DIR/s3_upload_dir/basename_RANDOM.ext
             basename = os.path.splitext(os.path.basename(f.name))[0]
             # basename.ext
             original_basename = os.path.splitext(f.original_name)[0]
             assert basename.startswith(original_basename)
             # download from S3
-            ExampleFile.objects.create(
-                example=example,
-                input_file=f
-            )
+
+            example_file = ExampleFile(example=example)
+            example_file.input_file.save(original_basename, f)
+            example_file.save()
             f.close()
+
 
 class WizardStepForm(Form):
     name = CharField(required=False)

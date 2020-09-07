@@ -11,22 +11,22 @@ from .util import get_list
 
 class FileFormMixin(object):
     def __init__(self, *args, **kwargs):
-        s3_upload_dir = kwargs.pop('s3_upload_dir', None)
+        s3_upload_dir = kwargs.pop('s3_upload_dir',
+            self.s3_upload_dir if hasattr(self, 's3_upload_dir') else None)
         super(FileFormMixin, self).__init__(*args, **kwargs)
 
         if s3_upload_dir is not None:
             self.add_hidden_field('s3_upload_dir', s3_upload_dir)
             self.add_s3_uploaded_files()
+            self.add_hidden_field('upload_url', reverse('s3_upload'))
+        else:
+            self.add_hidden_field('upload_url', reverse('tus_upload'))
 
         self.add_hidden_field('form_id', uuid.uuid4())
-        self.add_hidden_field('upload_url', self.get_upload_url())
         self.add_placeholder_inputs()
 
     def add_hidden_field(self, name, initial):
         self.fields[name] = CharField(widget=HiddenInput, initial=initial, required=False)
-
-    def get_upload_url(self):
-        return reverse('tus_upload')
 
     def full_clean(self):
         if not self.is_bound:
