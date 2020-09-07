@@ -177,7 +177,7 @@ If you have used `django-file-form` to upload files, potentially have saved the 
 from django_file_form.models import PlaceholderUploadedFile
 
 initial['my_field'] = [
-  PlaceholderUploadedFile('manage.py')
+  PlaceholderUploadedFile('testfile1.png')
 ]
 ```
 
@@ -185,7 +185,7 @@ You can also add options `size` and `file_id` to specify file size if the file d
 
 ```python
 initial['my_field'] = [
-  PlaceholderUploadedFile('manage.py', size=12394, file_id=my_file.pk)
+  PlaceholderUploadedFile('testfile1.png', size=12394, file_id=my_file.pk)
 ]
 ```
 
