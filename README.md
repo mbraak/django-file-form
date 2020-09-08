@@ -437,11 +437,11 @@ import EventEmitter from 'eventemitter3';
 
 const eventEmitter = new EventEmitter();
 
-eventEmitter.on('addUpload', ({ element, fieldName, fileName, upload }) => {
+eventEmitter.on('addUpload', ({ element, fieldName, fileName, metaDataField, upload }) => {
   //
 });
 
-eventEmitter.on('removeUpload', ({ element, fieldName, fileName, upload }) => {
+eventEmitter.on('removeUpload', ({ element, fieldName, fileName, metaDataField, upload }) => {
   //
 });
 
@@ -455,6 +455,7 @@ initUploadFields(
 ```
 
 * You need the `eventemitter3` package to use this.
+* The `metaDataField` is the metadata input. See 'Additional file metadata' in this document.
 * This api is experimental.
 
 ## Changelog
