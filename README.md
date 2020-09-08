@@ -428,6 +428,34 @@ django-admin makemessages -l fr
 
 You can now edit generated po file and commit your changes as usual
 
+## Javascript events
+
+There are javascript events for adding and removing an upload. The events are `addUpload` and `removeUpload`.
+
+```js
+import EventEmitter from 'eventemitter3';
+
+const eventEmitter = new EventEmitter();
+
+eventEmitter.on('addUpload', ({ element, fieldName, fileName, upload }) => {
+  //
+});
+
+eventEmitter.on('removeUpload', ({ element, fieldName, fileName, upload }) => {
+  //
+});
+
+
+initUploadFields(
+    document.getElementById("example-form"),
+    {
+      eventEmitter,
+    }
+);
+```
+
+* You need the `eventemitter3` package to use this.
+* This api is experimental.
 
 ## Changelog
 * **development version**
@@ -435,6 +463,7 @@ You can now edit generated po file and commit your changes as usual
   * Issue #330: allow upload directly to S3 compatible storages (thanks to Bo Peng)
   * Issue #331: fix error in deleting files (thanks to Bo Peng)
   * Issue #333: replace existing uploaded file with the same name (thanks to Bo Peng)
+  * Issue #341: add javascript events
   * Issue #346: allow define s3_upload_dir in form class (thanks to Bo Peng)
 
 * **3.0.1 (4 september 2020)**
