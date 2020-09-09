@@ -118,6 +118,18 @@ class PlaceholderExampleForm(BaseForm):
         self.delete_temporary_files()
 
 
+class PlaceholderWidgetExampleForm(PlaceholderExampleForm):
+    def save(self):
+        example = Example2.objects.create(
+            title=self.cleaned_data['title']
+        )
+
+        for f in self.cleaned_data['input_file']:
+            assert f.metadata is not None
+
+        self.delete_temporary_files()
+
+
 class WithAcceptExampleForm(BaseForm):
     prefix = 'example'
     input_file = MultipleUploadedFileField(accept='image/*')

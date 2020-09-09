@@ -17,6 +17,8 @@ Features:
 * Supports single and multiple file upload.
 * Supports edition of uploaded files.
 * Supports upload directly to AWS S3 compatible storages.
+* Supports frontend events for the addition and removal of files.
+* Supports addition of arbitrary file meta data and related widgets.
 
 The project is hosted on [github](https://github.com/mbraak/django-file-form).
 
@@ -268,6 +270,28 @@ You can add an accept attribute to the file input using the `accept` parameter o
 file = UploadedFileField(accept='image/*,.pdf')
 ```
 
+**6 Additional file metadata
+
+If you want to add and maintain additional metadata such as short descriptions and
+categories of uploaded files, you can use the `.metadata` field of uploaded files.
+More specifically,
+
+1. There is a hidden field called `metadata` (with form specific prefix) with its `data`
+   being the `JSON.dump`ed meta data of all files. The data should be in the format of
+   ```
+   {
+      'filename1': value1,
+      'filename2': value2
+   }
+   ```
+
+2. Listen to events triggered after the additional and removal of file list to add your
+  own widgets and functions to update the `data` of this hidden field.
+
+`django-file-form` retrieves the data and assign them to returned file objects with matching
+filename (could be of placeholder and other types) as `f.metadata`.
+
+
 ## Upgrade from version 1.0 (to 2.0)
 
 * Add reference to file_form/file_form.css:
@@ -404,6 +428,35 @@ django-admin makemessages -l fr
 
 You can now edit generated po file and commit your changes as usual
 
+## Javascript events
+
+There are javascript events for adding and removing an upload. The events are `addUpload` and `removeUpload`.
+
+```js
+import EventEmitter from 'eventemitter3';
+
+const eventEmitter = new EventEmitter();
+
+eventEmitter.on('addUpload', ({ element, fieldName, fileName, metaDataField, upload }) => {
+  //
+});
+
+eventEmitter.on('removeUpload', ({ element, fieldName, fileName, metaDataField, upload }) => {
+  //
+});
+
+
+initUploadFields(
+    document.getElementById("example-form"),
+    {
+      eventEmitter,
+    }
+);
+```
+
+* You need the `eventemitter3` package to use this.
+* The `metaDataField` is the metadata input. See 'Additional file metadata' in this document.
+* This api is experimental.
 
 ## Changelog
 * **development version**
@@ -411,6 +464,7 @@ You can now edit generated po file and commit your changes as usual
   * Issue #330: allow upload directly to S3 compatible storages (thanks to Bo Peng)
   * Issue #331: fix error in deleting files (thanks to Bo Peng)
   * Issue #333: replace existing uploaded file with the same name (thanks to Bo Peng)
+  * Issue #341: add javascript events
   * Issue #346: allow define s3_upload_dir in form class (thanks to Bo Peng)
 
 * **3.0.1 (4 september 2020)**

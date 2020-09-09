@@ -53,3 +53,8 @@ export const getInputValueForFormAndPrefix = (
   fieldName: string,
   prefix: string | null
 ): string | undefined => findInput(form, fieldName, prefix)?.value;
+
+export const getMetadataFieldName = (
+  fieldName: string,
+  prefix: string | null
+): string => `${getInputNameWithoutPrefix(fieldName, prefix)}-metadata`;

@@ -1,6 +1,7 @@
 import { Upload } from "tus-js-client";
 import {
   findInput,
+  getMetadataFieldName,
   getPlaceholderFieldName,
   getS3UploadedFieldName
 } from "./util";
@@ -8,6 +9,9 @@ import RenderUploadFile from "./render_upload_file";
 import DropArea from "./drop_area";
 
 import S3Uploader from "./s3_uploader";
+import EventEmitter from "eventemitter3";
+
+type UploadTypes = Upload | UploadedFile | S3Uploader;
 
 export interface InitialFile {
   id: string;
@@ -34,7 +38,7 @@ type UploadStatus = "done" | "error" | "uploading";
 export type Translations = { [key: string]: string };
 
 export interface Callbacks {
-  onDelete?: (upload: Upload | UploadedFile | S3Uploader) => void;
+  onDelete?: (upload: UploadTypes) => void;
   onError?: (error: Error, upload: Upload) => void;
   onProgress?: (
     bytesUploaded: number,
@@ -44,9 +48,20 @@ export interface Callbacks {
   onSuccess?: (upload: Upload) => void;
 }
 
+const getFileNameFromUpload = (upload: UploadTypes): string => {
+  if (upload instanceof Upload) {
+    return (upload.file as File).name;
+  } else if (upload instanceof S3Uploader) {
+    return upload.file.name;
+  } else {
+    return upload.original_name || upload.name;
+  }
+};
+
 class UploadFile {
   callbacks: Callbacks;
   chunkSize: number;
+  eventEmitter?: EventEmitter;
   fieldName: string;
   form: Element;
   formId: string;
@@ -58,12 +73,13 @@ class UploadFile {
   supportDropArea: boolean;
   uploadIndex: number;
   uploadUrl: string;
-  uploads: (Upload | UploadedFile | S3Uploader | undefined)[];
+  uploads: (UploadTypes | undefined)[];
   uploadStatuses: (UploadStatus | undefined)[];
 
   constructor({
     callbacks,
     chunkSize,
+    eventEmitter,
     fieldName,
     form,
     formId,
@@ -81,6 +97,7 @@ class UploadFile {
   }: {
     callbacks: Callbacks;
     chunkSize: number;
+    eventEmitter?: EventEmitter;
     fieldName: string;
     form: Element;
     formId: string;
@@ -98,6 +115,7 @@ class UploadFile {
   }) {
     this.callbacks = callbacks;
     this.chunkSize = chunkSize;
+    this.eventEmitter = eventEmitter;
     this.fieldName = fieldName;
     this.form = form;
     this.formId = formId;
@@ -143,31 +161,36 @@ class UploadFile {
 
     const addInitialFile = (file: InitialFile, i: number): void => {
       const { id, name, size } = file;
-      renderer.addUploadedFile(
+      const element = renderer.addUploadedFile(
         file.original_name ? file.original_name : name,
         i,
         size
       );
 
+      let upload: UploadedFile;
+
       if (file.placeholder === true) {
         // in case of placeholder
-        this.uploads.push({ id, name, placeholder: true, size });
+        upload = { id, name, placeholder: true, size };
       } else if (file.placeholder === false) {
         // in case of S3
-        this.uploads.push({
+        upload = {
           id,
           name,
           placeholder: false,
           size,
           original_name: file.original_name
-        });
+        };
       } else {
         // in case of regular UploadedFile
         const url = `${this.uploadUrl}${file.id}`;
-        this.uploads.push({ id, name, size, url });
+        upload = { id, name, size, url };
       }
 
+      this.uploads.push(upload);
       this.uploadStatuses.push("done");
+
+      this.emitEvent("addUpload", element, upload);
     };
 
     if (multiple) {
@@ -246,9 +269,12 @@ class UploadFile {
     }
 
     upload.start();
-    renderer.addNewUpload(filename, uploadIndex);
+
+    const element = renderer.addNewUpload(filename, uploadIndex);
     this.uploads.push(upload);
     this.uploadStatuses.push("uploading");
+
+    this.emitEvent("addUpload", element, upload);
   }
 
   findUpload(filename: string): number | null {
@@ -280,6 +306,12 @@ class UploadFile {
 
     if (!upload) {
       return;
+    }
+
+    const element = this.renderer.findFileDiv(uploadIndex);
+
+    if (element) {
+      this.emitEvent("removeUpload", element, upload);
     }
 
     if (
@@ -558,6 +590,30 @@ class UploadFile {
     );
     if (input) {
       input.value = JSON.stringify(uploadedInfo);
+    }
+  }
+
+  getMetaDataField(): HTMLElement | null {
+    return findInput(
+      this.form,
+      getMetadataFieldName(this.fieldName, this.prefix),
+      this.prefix
+    );
+  }
+
+  emitEvent(
+    eventName: string,
+    element: HTMLElement,
+    upload: UploadTypes
+  ): void {
+    if (this.eventEmitter) {
+      this.eventEmitter.emit(eventName, {
+        element,
+        fieldName: this.fieldName,
+        fileName: getFileNameFromUpload(upload),
+        metaDataField: this.getMetaDataField(),
+        upload
+      });
     }
   }
 }

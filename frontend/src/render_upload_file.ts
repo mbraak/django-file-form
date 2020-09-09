@@ -38,12 +38,13 @@ class RenderUploadFile {
     filename: string,
     uploadIndex: number,
     filesize: number
-  ): void {
-    this.addFile(filename, uploadIndex);
+  ): HTMLElement {
+    const element = this.addFile(filename, uploadIndex);
     this.setSuccess(uploadIndex, filesize);
+    return element;
   }
 
-  addNewUpload(filename: string, uploadIndex: number): void {
+  addNewUpload(filename: string, uploadIndex: number): HTMLElement {
     const div = this.addFile(filename, uploadIndex);
 
     const progressSpan = document.createElement("span");
@@ -61,9 +62,11 @@ class RenderUploadFile {
     cancelLink.setAttribute("data-index", `${uploadIndex}`);
     cancelLink.href = "#";
     div.appendChild(cancelLink);
+
+    return div;
   }
 
-  addFile(filename: string, uploadIndex: number): Element {
+  addFile(filename: string, uploadIndex: number): HTMLElement {
     const div = document.createElement("div");
     div.className = `dff-file dff-file-id-${uploadIndex}`;
 
@@ -113,7 +116,7 @@ class RenderUploadFile {
     this.enableDelete(index);
   }
 
-  findFileDiv(index: number): Element | null {
+  findFileDiv(index: number): HTMLElement | null {
     return this.container.querySelector(`.dff-file-id-${index}`);
   }
 

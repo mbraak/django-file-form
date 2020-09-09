@@ -91,7 +91,7 @@ class UploadedFile(models.Model):
 
 
 class UploadedFileWithId(uploadedfile.UploadedFile):
-    def __init__(self, file_id, **kwargs):
+    def __init__(self, file_id, metadata=None, **kwargs):
         super(UploadedFileWithId, self).__init__(**kwargs)
 
         self.file_id = file_id
@@ -99,13 +99,14 @@ class UploadedFileWithId(uploadedfile.UploadedFile):
 
         self.is_placeholder = False
         self.is_s3direct = False
+        self.metadata = metadata
 
     def get_values(self):
-        return dict(id=self.file_id, name=self.name, size=self.size)
+        return dict(id=self.file_id, name=self.name, size=self.size, metadata=self.metadata)
 
 
 class PlaceholderUploadedFile(object):
-    def __init__(self, name, file_id=None, size=None):
+    def __init__(self, name, file_id=None, size=None, metadata=None):
         self.name = name
         self.file_id = file_id or uuid.uuid4().hex
         if size is None:
@@ -115,9 +116,11 @@ class PlaceholderUploadedFile(object):
 
         self.is_placeholder = True
         self.is_s3direct = False
+        self.metadata = metadata
 
     def get_values(self):
-        return dict(id=self.file_id, placeholder=True, name=self.name, size=self.size)
+        return dict(id=self.file_id, placeholder=True, name=self.name,
+            size=self.size, metadata=self.metadata)
 
 
 try:
@@ -125,7 +128,7 @@ try:
     from storages.utils import setting
 
     class S3UploadedFileWithId(S3Boto3StorageFile):
-        def __init__(self, file_id, name, original_name, size, **kwargs):
+        def __init__(self, file_id, name, original_name, size, metadata=None, **kwargs):
             boto_storage = S3Boto3Storage(
                 bucket_name=setting('AWS_STORAGE_BUCKET_NAME'),
                 endpoint_url=setting('AWS_S3_ENDPOINT_URL'),
@@ -139,6 +142,7 @@ try:
                 storage=boto_storage,
                 **kwargs
             )
+
             self.file_id = file_id
             self.original_name = original_name
             # self.size is derived from S3boto3StorageFile
@@ -146,9 +150,11 @@ try:
             # for validation
             self.is_placeholder = False
             self.is_s3direct = True
+            self.metadata = metadata
 
         def get_values(self):
-            return dict(id=self.file_id, placeholder=False, name=self.name, size=self.size)
+            return dict(id=self.file_id, placeholder=False, name=self.name,
+                size=self.size, metadata=self.metadata)
 
 except (ImportError, ImproperlyConfigured):
     # S3 is an optional feature but we keep the symbol

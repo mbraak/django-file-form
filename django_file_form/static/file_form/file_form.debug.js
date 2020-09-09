@@ -113,9 +113,10 @@ module.exports = _defineProperty;
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return formatBytes; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return getInputNameWithPrefix; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return findInput; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "e", function() { return getPlaceholderFieldName; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "f", function() { return getS3UploadedFieldName; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "f", function() { return getPlaceholderFieldName; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "g", function() { return getS3UploadedFieldName; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return getInputValueForFormAndPrefix; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "e", function() { return getMetadataFieldName; });
 var formatBytes = function formatBytes(bytes, decimals) {
   if (bytes === 0) {
     return "0 Bytes";
@@ -157,6 +158,9 @@ var getInputValueForFormAndPrefix = function getInputValueForFormAndPrefix(form,
   var _findInput;
 
   return (_findInput = findInput(form, fieldName, prefix)) === null || _findInput === void 0 ? void 0 : _findInput.value;
+};
+var getMetadataFieldName = function getMetadataFieldName(fieldName, prefix) {
+  return "".concat(getInputNameWithoutPrefix(fieldName, prefix), "-metadata");
 };
 
 /***/ }),
@@ -3956,8 +3960,9 @@ var render_upload_file_RenderUploadFile = /*#__PURE__*/function () {
   createClass_default()(RenderUploadFile, [{
     key: "addUploadedFile",
     value: function addUploadedFile(filename, uploadIndex, filesize) {
-      this.addFile(filename, uploadIndex);
+      var element = this.addFile(filename, uploadIndex);
       this.setSuccess(uploadIndex, filesize);
+      return element;
     }
   }, {
     key: "addNewUpload",
@@ -3975,6 +3980,7 @@ var render_upload_file_RenderUploadFile = /*#__PURE__*/function () {
       cancelLink.setAttribute("data-index", "".concat(uploadIndex));
       cancelLink.href = "#";
       div.appendChild(cancelLink);
+      return div;
     }
   }, {
     key: "addFile",
@@ -5089,12 +5095,23 @@ var s3_uploader_S3Uploader = /*#__PURE__*/function () {
 
 
 
+var upload_file_getFileNameFromUpload = function getFileNameFromUpload(upload) {
+  if (upload instanceof browser_Upload) {
+    return upload.file.name;
+  } else if (upload instanceof s3_uploader) {
+    return upload.file.name;
+  } else {
+    return upload.original_name || upload.name;
+  }
+};
+
 var upload_file_UploadFile = /*#__PURE__*/function () {
   function UploadFile(_ref) {
     var _this = this;
 
     var callbacks = _ref.callbacks,
         chunkSize = _ref.chunkSize,
+        eventEmitter = _ref.eventEmitter,
         fieldName = _ref.fieldName,
         form = _ref.form,
         formId = _ref.formId,
@@ -5115,6 +5132,8 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
     defineProperty_default()(this, "callbacks", void 0);
 
     defineProperty_default()(this, "chunkSize", void 0);
+
+    defineProperty_default()(this, "eventEmitter", void 0);
 
     defineProperty_default()(this, "fieldName", void 0);
 
@@ -5248,6 +5267,7 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
 
     this.callbacks = callbacks;
     this.chunkSize = chunkSize;
+    this.eventEmitter = eventEmitter;
     this.fieldName = fieldName;
     this.form = form;
     this.formId = formId;
@@ -5297,38 +5317,42 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
         var id = file.id,
             name = file.name,
             size = file.size;
-        renderer.addUploadedFile(file.original_name ? file.original_name : name, i, size);
+        var element = renderer.addUploadedFile(file.original_name ? file.original_name : name, i, size);
+        var upload;
 
         if (file.placeholder === true) {
           // in case of placeholder
-          _this2.uploads.push({
+          upload = {
             id: id,
             name: name,
             placeholder: true,
             size: size
-          });
+          };
         } else if (file.placeholder === false) {
           // in case of S3
-          _this2.uploads.push({
+          upload = {
             id: id,
             name: name,
             placeholder: false,
             size: size,
             original_name: file.original_name
-          });
+          };
         } else {
           // in case of regular UploadedFile
           var url = "".concat(_this2.uploadUrl).concat(file.id);
-
-          _this2.uploads.push({
+          upload = {
             id: id,
             name: name,
             size: size,
             url: url
-          });
+          };
         }
 
+        _this2.uploads.push(upload);
+
         _this2.uploadStatuses.push("done");
+
+        _this2.emitEvent("addUpload", element, upload);
       };
 
       if (multiple) {
@@ -5399,9 +5423,10 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
       }
 
       upload.start();
-      renderer.addNewUpload(filename, uploadIndex);
+      var element = renderer.addNewUpload(filename, uploadIndex);
       this.uploads.push(upload);
       this.uploadStatuses.push("uploading");
+      this.emitEvent("addUpload", element, upload);
     }
   }, {
     key: "findUpload",
@@ -5436,6 +5461,12 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
 
       if (!upload) {
         return;
+      }
+
+      var element = this.renderer.findFileDiv(uploadIndex);
+
+      if (element) {
+        this.emitEvent("removeUpload", element, upload);
       }
 
       if (upload instanceof browser_Upload || upload instanceof s3_uploader || upload.url) {
@@ -5580,7 +5611,7 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
       var placeholdersInfo = this.uploads.filter(function (upload) {
         return upload && !(upload instanceof browser_Upload) && !(upload instanceof s3_uploader) && upload.placeholder;
       });
-      var input = Object(util["a" /* findInput */])(this.form, Object(util["e" /* getPlaceholderFieldName */])(this.fieldName, this.prefix), this.prefix);
+      var input = Object(util["a" /* findInput */])(this.form, Object(util["f" /* getPlaceholderFieldName */])(this.fieldName, this.prefix), this.prefix);
 
       if (input) {
         input.value = JSON.stringify(placeholdersInfo);
@@ -5610,10 +5641,28 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
       var uploadedInfo = this.uploads.filter(function (upload) {
         return upload && !(upload instanceof browser_Upload) && !(upload instanceof s3_uploader) && upload.placeholder === false;
       }).concat(s3Uploads);
-      var input = Object(util["a" /* findInput */])(this.form, Object(util["f" /* getS3UploadedFieldName */])(this.fieldName, this.prefix), this.prefix);
+      var input = Object(util["a" /* findInput */])(this.form, Object(util["g" /* getS3UploadedFieldName */])(this.fieldName, this.prefix), this.prefix);
 
       if (input) {
         input.value = JSON.stringify(uploadedInfo);
+      }
+    }
+  }, {
+    key: "getMetaDataField",
+    value: function getMetaDataField() {
+      return Object(util["a" /* findInput */])(this.form, Object(util["e" /* getMetadataFieldName */])(this.fieldName, this.prefix), this.prefix);
+    }
+  }, {
+    key: "emitEvent",
+    value: function emitEvent(eventName, element, upload) {
+      if (this.eventEmitter) {
+        this.eventEmitter.emit(eventName, {
+          element: element,
+          fieldName: this.fieldName,
+          fileName: upload_file_getFileNameFromUpload(upload),
+          metaDataField: this.getMetaDataField(),
+          upload: upload
+        });
       }
     }
   }]);
@@ -5679,7 +5728,7 @@ var initUploadFields = function initUploadFields(form) {
   };
 
   var getPlaceholders = function getPlaceholders(fieldName) {
-    var data = getInputValue(Object(_util__WEBPACK_IMPORTED_MODULE_2__[/* getPlaceholderFieldName */ "e"])(fieldName, getPrefix()));
+    var data = getInputValue(Object(_util__WEBPACK_IMPORTED_MODULE_2__[/* getPlaceholderFieldName */ "f"])(fieldName, getPrefix()));
 
     if (!data) {
       return [];
@@ -5689,7 +5738,7 @@ var initUploadFields = function initUploadFields(form) {
   };
 
   var getS3Uploads = function getS3Uploads(fieldName) {
-    var data = getInputValue(Object(_util__WEBPACK_IMPORTED_MODULE_2__[/* getS3UploadedFieldName */ "f"])(fieldName, getPrefix()));
+    var data = getInputValue(Object(_util__WEBPACK_IMPORTED_MODULE_2__[/* getS3UploadedFieldName */ "g"])(fieldName, getPrefix()));
 
     if (!data) {
       return [];
@@ -5730,6 +5779,7 @@ var initUploadFields = function initUploadFields(form) {
     new _upload_file__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"]({
       callbacks: options.callbacks || {},
       chunkSize: options.chunkSize || 2621440,
+      eventEmitter: options.eventEmitter,
       fieldName: fieldName,
       form: form,
       formId: formId,

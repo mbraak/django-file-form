@@ -17,4 +17,5 @@ urlpatterns = (
     path('s3multiple', views.S3ExampleView.as_view(), name='s3_example'),
     path('s3placeholder', views.S3PlaceholderExampleView.as_view(), name='s3_placeholder_example'),
     path('accept', views.WithAcceptExample.as_view(), name='with_accept_example'),
+    path('custom_widget', views.WithCustomWidgetExample.as_view(), name='with_custom_widget')
 )
