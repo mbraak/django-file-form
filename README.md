@@ -270,14 +270,14 @@ You can add an accept attribute to the file input using the `accept` parameter o
 file = UploadedFileField(accept='image/*,.pdf')
 ```
 
-**6 Additional file metadata
+**6 Additional file metadata**
 
 If you want to add and maintain additional metadata such as short descriptions and
 categories of uploaded files, you can use the `.metadata` field of uploaded files.
-More specifically,
+More specifically, the AJAX uploader has a hidden field called `metadata` (with form
+specific prefix) with its `data` being the `JSON.dump`ed meta data of all files. The
+data should be in the format of
 
-1. There is a hidden field called `metadata` (with form specific prefix) with its `data`
-   being the `JSON.dump`ed meta data of all files. The data should be in the format of
    ```
    {
       'filename1': value1,
@@ -285,11 +285,12 @@ More specifically,
    }
    ```
 
-2. Listen to events triggered after the additional and removal of file list to add your
-  own widgets and functions to update the `data` of this hidden field.
+To add metadata to uploaded files, you will need to listen to events triggered after the
+additional and removal of file list (see "Javascript events" for details) to add your own
+widgets and event handlers to update the `data` of this hidden field.
 
-`django-file-form` retrieves the data and assign them to returned file objects with matching
-filename (could be of placeholder and other types) as `f.metadata`.
+Upon form submission, `django-file-form` retrieves the data and assign them to returned file
+objects with matching filename (could be of placeholder and other types) as `f.metadata`.
 
 
 ## Upgrade from version 1.0 (to 2.0)
