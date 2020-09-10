@@ -7,7 +7,7 @@ from django.urls import reverse
 from django.conf import settings
 from formtools.wizard.views import SessionWizardView
 from django_file_form.util import get_upload_path
-from django_file_form.models import UploadedFileWithId, PlaceholderUploadedFile
+from django_file_form.models import PlaceholderUploadedFile
 
 from . import forms
 
@@ -38,7 +38,10 @@ class BaseFormView(generic.FormView):
         return super(BaseFormView, self).get_context_data(**kwargs)
 
     def file_form_js(self):
-        return 'file_form.coverage.js' if settings.DJANGO_FILE_FORM_COVERAGE_JS else 'file_form.js'
+        if settings.DJANGO_FILE_FORM_COVERAGE_JS:
+            return 'file_form/file_form.coverage.js'
+        else:
+            return 'file_form/file_form.js'
 
 
 class ExampleView(BaseFormView):

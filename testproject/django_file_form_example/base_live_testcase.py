@@ -2,12 +2,13 @@ from pathlib import Path
 from uuid import uuid4
 
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
+from django.conf import settings
 from selenium.webdriver import DesiredCapabilities
 
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.chrome.options import Options
 
-from .test_utils import read_testdata, write_json
+from .test_utils import write_json
 
 
 class BaseLiveTestCase(StaticLiveServerTestCase):
