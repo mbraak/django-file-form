@@ -4,6 +4,7 @@ from django.core.files.storage import FileSystemStorage
 from django.http import HttpResponseForbidden, HttpResponseRedirect
 from django.views import generic
 from django.urls import reverse
+from django.conf import settings
 from formtools.wizard.views import SessionWizardView
 from django_file_form.util import get_upload_path
 from django_file_form.models import UploadedFileWithId, PlaceholderUploadedFile
@@ -33,7 +34,11 @@ class BaseFormView(generic.FormView):
     def get_context_data(self, **kwargs):
         kwargs['use_ajax'] = self.use_ajax
         kwargs['custom_js_file'] = self.custom_js_file
+        kwargs['file_form_js'] = self.file_form_js()
         return super(BaseFormView, self).get_context_data(**kwargs)
+
+    def file_form_js(self):
+        return 'file_form.coverage.js' if settings.DJANGO_FILE_FORM_COVERAGE_JS else 'file_form.js'
 
 
 class ExampleView(BaseFormView):

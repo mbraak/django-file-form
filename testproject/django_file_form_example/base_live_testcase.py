@@ -1,10 +1,13 @@
 from pathlib import Path
+from uuid import uuid4
 
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium.webdriver import DesiredCapabilities
 
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.chrome.options import Options
+
+from .test_utils import read_testdata, write_json
 
 
 class BaseLiveTestCase(StaticLiveServerTestCase):
@@ -13,7 +16,7 @@ class BaseLiveTestCase(StaticLiveServerTestCase):
 
     @classmethod
     def setUpClass(cls):
-        super(BaseLiveTestCase, cls).setUpClass()
+        super().setUpClass()
 
         options = Options()
         options.headless = True
@@ -28,10 +31,23 @@ class BaseLiveTestCase(StaticLiveServerTestCase):
     @classmethod
     def tearDownClass(cls):
         cls.selenium.quit()
-        super(BaseLiveTestCase, cls).tearDownClass()
+        super().tearDownClass()
 
     def setUp(self):
         self.page = self.page_class(self.selenium, self.live_server_url)
+
+    def tearDown(self):
+        try:
+            if settings.DJANGO_FILE_FORM_COVERAGE_JS:
+                self.save_coverage()
+        finally:
+            super().tearDown()
+
+    def save_coverage(self):
+        coverage = self.selenium.execute_script('return window.__coverage__')
+
+        filename = uuid4().hex
+        write_json(f'js_coverage/{filename}.json', coverage)
 
     def didTestHaveErrors(self):
         return any(error for (_, error) in self._outcome.errors if error)

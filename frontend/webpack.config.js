@@ -1,9 +1,19 @@
 const path = require("path");
 
 const skipCompressJs = Boolean(process.env.SKIP_COMPRESS_JS);
+const coverage = Boolean(process.env.COVERAGE);
 
-const minimize = !skipCompressJs;
-const outputFilename = skipCompressJs ? "file_form.debug.js" : "file_form.js";
+const minimize = !skipCompressJs && !coverage;
+
+const getOutputFilename = () => {
+    if (coverage) {
+        return "file_form.coverage.js";
+    } else if (skipCompressJs) {
+        return "file_form.debug.js";
+    } else {
+        return "file_form.js";
+    }
+};
 
 module.exports = {
   entry: {
@@ -11,7 +21,7 @@ module.exports = {
   },
   output: {
     path: path.resolve(__dirname, "../django_file_form/static/file_form/"),
-    filename: outputFilename
+    filename: getOutputFilename(),
   },
   module: {
     rules: [
@@ -21,8 +31,17 @@ module.exports = {
         use: {
           loader: "babel-loader"
         }
-      }
-    ]
+      },
+      coverage && {
+          test: /\.ts$/,
+          exclude: /node_modules/,
+          use: {
+              loader: "@jsdevtools/coverage-istanbul-loader",
+              options: { esModules: true },
+          },
+          enforce: "post",
+      },
+    ].filter(Boolean),
   },
   resolve: {
     extensions: [".ts", ".js"]

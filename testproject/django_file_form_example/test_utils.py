@@ -1,5 +1,7 @@
 import uuid
 from datetime import datetime
+from json import dumps
+from pathlib import Path
 
 from django.utils import timezone
 from django.conf import settings
@@ -36,3 +38,9 @@ def read_file(file):
         return file.read()
     finally:
         file.close()
+
+
+def write_json(path, data):
+    json = dumps(data)
+
+    Path(path).write_text(json)

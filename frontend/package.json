@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "lint": "eslint src/**/*.ts",
-    "build": "webpack --mode production; SKIP_COMPRESS_JS=true webpack --mode production",
+    "build": "webpack --mode production; SKIP_COMPRESS_JS=true webpack --mode production; COVERAGE=true webpack --mode production",
     "sass": "node-sass style/file_form.scss -o ../django_file_form/static/file_form/",
     "tsc": "tsc --noEmit",
     "watch": "webpack --mode development --watch"
@@ -26,6 +26,7 @@
     "@babel/plugin-transform-runtime": "^7.10.3",
     "@babel/preset-env": "^7.10.3",
     "@babel/preset-typescript": "^7.9.0",
+    "@jsdevtools/coverage-istanbul-loader": "^3.0.5",
     "@types/escape-html": "^1.0.0",
     "@types/picomatch": "^2.2.1",
     "@typescript-eslint/eslint-plugin": "^4.0.1",

@@ -31,7 +31,14 @@ install:
   - pip install -e .
 script:
   - python -Wd testproject/manage.py test django_file_form_example -v 2
-  - coverage run --source=django_file_form,testproject/django_file_form_example testproject/manage.py test django_file_form_example -v 2
+  - cd frontend && yarn && yarn run build && cd ..
+  - mkdir js_coverage
+  - COVERAGE=true coverage run --source=django_file_form,testproject/django_file_form_example testproject/manage.py test django_file_form_example -v 2
+  - cd coveralls
+  - yarn && gem install coveralls-lcov
+  - yarn run merge_coverage
+  - coveralls-lcov -v -n coverage/lcov.info > coverage.json
+  - cd ..
   - coverage report
 after_success:
-  - coveralls
+  - coveralls --merge=coveralls/coverage.json
