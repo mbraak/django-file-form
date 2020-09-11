@@ -88,6 +88,8 @@ TEMPLATES = [
     ),
 ]
 
+DJANGO_FILE_FORM_COVERAGE_JS = 'COVERAGE' in os.environ
+
 ALLOWED_HOSTS = ['*']
 
 AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID', '')
@@ -97,11 +99,13 @@ AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', '')
 AWS_S3_ENDPOINT_URL = os.environ.get('AWS_S3_ENDPOINT_URL', '')
 
 CSP_DEFAULT_SRC = ("'none'",)
-CSP_STYLE_SRC = ("'self'")
-CSP_SCRIPT_SRC = ("'self'", 'http://unpkg.com')
-CSP_FONT_SRC = ("'self'")
+CSP_STYLE_SRC = ("'self'",)
+CSP_SCRIPT_SRC = ["'self'", 'http://unpkg.com']
+CSP_FONT_SRC = ("'self'",)
 CSP_IMG_SRC = ("'self'",)
 CSP_CONNECT_SRC = ("'self'", AWS_S3_ENDPOINT_URL)
 
+if DJANGO_FILE_FORM_COVERAGE_JS:
+    CSP_SCRIPT_SRC += ["'unsafe-eval'"]
 
 logging.basicConfig(level='INFO')
