@@ -8,6 +8,10 @@ eventEmitter.on('removeUpload', ({ element, fieldName, upload }) => {
   console.log('removeUpload', element, fieldName, upload);
 });
 
+eventEmitter.on('uploadComplete', ({ element, fieldName, upload }) => {
+  console.log('uploadComplete', element, fieldName, upload);
+});
+
 initUploadFields(
     document.getElementById("example-form"),
     {
