@@ -37,13 +37,6 @@ class BaseLiveTestCase(StaticLiveServerTestCase):
     def setUp(self):
         self.page = self.page_class(self.selenium, self.live_server_url)
 
-    def tearDown(self):
-        try:
-            if settings.DJANGO_FILE_FORM_COVERAGE_JS:
-                self.save_coverage()
-        finally:
-            super().tearDown()
-
     def save_coverage(self):
         coverage = self.selenium.execute_script('return window.__coverage__')
 
@@ -54,11 +47,19 @@ class BaseLiveTestCase(StaticLiveServerTestCase):
         return any(error for (_, error) in self._outcome.errors if error)
 
     def tearDown(self):
+        try:
+            if settings.DJANGO_FILE_FORM_COVERAGE_JS:
+                self.save_coverage()
+
+            self.handleErrors()
+            self.page.cleanup()
+        finally:
+            super().tearDown()
+
+    def handleErrors(self):
         if self.didTestHaveErrors(): # pragma: no cover
             self.save_screenshot(self.id())
             self.print_browser_log()
-
-        self.page.cleanup()
 
     @classmethod
     def save_screenshot(cls, method_name): # pragma: no cover
