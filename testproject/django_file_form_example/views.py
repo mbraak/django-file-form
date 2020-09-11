@@ -12,6 +12,13 @@ from django_file_form.models import PlaceholderUploadedFile
 from . import forms
 
 
+def file_form_js():
+    if settings.DJANGO_FILE_FORM_COVERAGE_JS:
+        return 'file_form/file_form.coverage.js'
+    else:
+        return 'file_form/file_form.js'
+
+
 class BaseFormView(generic.FormView):
     template_name = 'example_form.html'
     use_ajax = True
@@ -29,19 +36,13 @@ class BaseFormView(generic.FormView):
 
     def form_valid(self, form):
         form.save()
-        return super(BaseFormView, self).form_valid(form)
+        return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
         kwargs['use_ajax'] = self.use_ajax
         kwargs['custom_js_file'] = self.custom_js_file
-        kwargs['file_form_js'] = self.file_form_js()
-        return super(BaseFormView, self).get_context_data(**kwargs)
-
-    def file_form_js(self):
-        if settings.DJANGO_FILE_FORM_COVERAGE_JS:
-            return 'file_form/file_form.coverage.js'
-        else:
-            return 'file_form/file_form.js'
+        kwargs['file_form_js'] = file_form_js()
+        return super().get_context_data(**kwargs)
 
 
 class ExampleView(BaseFormView):
@@ -71,6 +72,10 @@ class WizardExampleview(SessionWizardView):
 
     def done(self, form_list, **kwargs):
         return HttpResponseRedirect('/wizard')
+
+    def get_context_data(self, **kwargs):
+        kwargs['file_form_js'] = file_form_js()
+        return super().get_context_data(**kwargs)
 
 
 class FormSetExampleView(BaseFormView):
