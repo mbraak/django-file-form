@@ -2055,13 +2055,6 @@ var createClass_default = /*#__PURE__*/__webpack_require__.n(createClass);
 var defineProperty = __webpack_require__(0);
 var defineProperty_default = /*#__PURE__*/__webpack_require__.n(defineProperty);
 
-// EXTERNAL MODULE: ./node_modules/js-base64/base64.js
-var base64 = __webpack_require__(17);
-
-// EXTERNAL MODULE: ./node_modules/url-parse/index.js
-var url_parse = __webpack_require__(18);
-var url_parse_default = /*#__PURE__*/__webpack_require__.n(url_parse);
-
 // CONCATENATED MODULE: ./node_modules/tus-js-client/lib.esm/error.js
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
@@ -2127,16 +2120,6 @@ var DetailedError = /*#__PURE__*/function (_Error) {
 }( /*#__PURE__*/_wrapNativeSuper(Error));
 
 /* harmony default export */ var lib_esm_error = (DetailedError);
-// CONCATENATED MODULE: ./node_modules/tus-js-client/lib.esm/logger.js
-/* eslint no-console: "off" */
-var isEnabled = false;
-function enableDebugLog() {
-  isEnabled = true;
-}
-function log(msg) {
-  if (!isEnabled) return;
-  console.log(msg);
-}
 // CONCATENATED MODULE: ./node_modules/tus-js-client/lib.esm/uuid.js
 /**
  * Generate a UUID v4 based on random numbers. We intentioanlly use the less
@@ -2156,6 +2139,23 @@ function uuid() {
         v = c == "x" ? r : r & 0x3 | 0x8;
     return v.toString(16);
   });
+}
+// EXTERNAL MODULE: ./node_modules/js-base64/base64.js
+var base64 = __webpack_require__(17);
+
+// EXTERNAL MODULE: ./node_modules/url-parse/index.js
+var url_parse = __webpack_require__(18);
+var url_parse_default = /*#__PURE__*/__webpack_require__.n(url_parse);
+
+// CONCATENATED MODULE: ./node_modules/tus-js-client/lib.esm/logger.js
+/* eslint no-console: "off" */
+var isEnabled = false;
+function enableDebugLog() {
+  isEnabled = true;
+}
+function log(msg) {
+  if (!isEnabled) return;
+  console.log(msg);
 }
 // CONCATENATED MODULE: ./node_modules/tus-js-client/lib.esm/upload.js
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
@@ -2192,7 +2192,6 @@ var defaultOptions = {
   addRequestId: false,
   onBeforeRequest: null,
   onAfterResponse: null,
-  onShouldRetry: null,
   chunkSize: Infinity,
   retryDelays: [0, 1000, 3000, 5000],
   parallelUploads: 1,
@@ -3034,7 +3033,8 @@ var upload_BaseUpload = /*#__PURE__*/function () {
       });
     }
     /**
-     * Send a request with the provided body.
+     * Send a request with the provided body while invoking the onBeforeRequest
+     * and onAfterResponse callbacks.
      *
      * @api private
      */
@@ -3042,8 +3042,21 @@ var upload_BaseUpload = /*#__PURE__*/function () {
   }, {
     key: "_sendRequest",
     value: function _sendRequest(req) {
+      var _this12 = this;
+
       var body = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-      return sendRequest(req, body, this.options);
+
+      if (typeof this.options.onBeforeRequest === "function") {
+        this.options.onBeforeRequest(req);
+      }
+
+      return req.send(body).then(function (res) {
+        if (typeof _this12.options.onAfterResponse === "function") {
+          _this12.options.onAfterResponse(req, res);
+        }
+
+        return res;
+      });
     }
   }], [{
     key: "terminate",
@@ -3056,7 +3069,8 @@ var upload_BaseUpload = /*#__PURE__*/function () {
       }
 
       var req = openRequest("DELETE", url, options);
-      return sendRequest(req, null, options).then(function (res) {
+      var promise = req.send();
+      return promise.then(function (res) {
         // A 204 response indicates a successfull request
         if (res.getStatus() === 204) {
           return;
@@ -3140,25 +3154,6 @@ function openRequest(method, url, options) {
   return req;
 }
 /**
- * Send a request with the provided body while invoking the onBeforeRequest
- * and onAfterResponse callbacks.
- *
- * @api private
- */
-
-
-function sendRequest(req, body, options) {
-  var onBeforeRequestPromise = typeof options.onBeforeRequest === "function" ? Promise.resolve(options.onBeforeRequest(req)) : Promise.resolve();
-  return onBeforeRequestPromise.then(function () {
-    return req.send(body).then(function (res) {
-      var onAfterResponsePromise = typeof options.onAfterResponse === "function" ? Promise.resolve(options.onAfterResponse(req, res)) : Promise.resolve();
-      return onAfterResponsePromise.then(function () {
-        return res;
-      });
-    });
-  });
-}
-/**
  * Checks whether the browser running this code has internet access.
  * This function will always return true in the node.js environment
  *
@@ -3190,19 +3185,11 @@ function shouldRetry(err, retryAttempt, options) {
   // - retryDelays option is set
   // - we didn't exceed the maxium number of retries, yet, and
   // - this error was caused by a request or it's response and
-  // - the error is server error (i.e. not a status 4xx except a 409 or 423) or
-  // a onShouldRetry is specified and returns true
+  // - the error is server error (i.e. no a status 4xx or a 409 or 423) and
   // - the browser does not indicate that we are offline
-  if (options.retryDelays == null || retryAttempt >= options.retryDelays.length || err.originalRequest == null) {
-    return false;
-  }
-
-  if (options && typeof options.onShouldRetry === "function") {
-    return options.onShouldRetry(err, retryAttempt, options);
-  }
-
   var status = err.originalResponse ? err.originalResponse.getStatus() : 0;
-  return (!inStatusCategory(status, 400) || status === 409 || status === 423) && isOnline();
+  var isServerError = !inStatusCategory(status, 400) || status === 409 || status === 423;
+  return options.retryDelays != null && retryAttempt < options.retryDelays.length && err.originalRequest != null && isServerError && isOnline();
 }
 /**
  * Resolve a relative link given the origin as source. For example,
@@ -5255,6 +5242,10 @@ var upload_file_UploadFile = /*#__PURE__*/function () {
       renderer.setSuccess(uploadIndex, uploadedSize);
       _this.uploadStatuses[uploadIndex] = "done";
       var onSuccess = _this.callbacks.onSuccess;
+      var upload = _this.uploads[uploadIndex];
+      var element = document.getElementsByClassName("dff-file-id-".concat(uploadIndex))[0];
+
+      _this.emitEvent("uploadComplete", element, upload);
 
       if (onSuccess) {
         var _upload3 = _this.uploads[uploadIndex];

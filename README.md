@@ -431,7 +431,8 @@ You can now edit generated po file and commit your changes as usual
 
 ## Javascript events
 
-There are javascript events for adding and removing an upload. The events are `addUpload` and `removeUpload`.
+There are javascript events for adding and removing an upload. The events are `addUpload`, `removeUpload`,
+and `uploadComplete`.
 
 ```js
 import EventEmitter from 'eventemitter3';
@@ -443,6 +444,10 @@ eventEmitter.on('addUpload', ({ element, fieldName, fileName, metaDataField, upl
 });
 
 eventEmitter.on('removeUpload', ({ element, fieldName, fileName, metaDataField, upload }) => {
+  //
+});
+
+eventEmitter.on('uploadComplete', ({ element, fieldName, fileName, metaDataField, upload }) => {
   //
 });
 
