@@ -7,9 +7,10 @@ from django_file_form_example.test_utils import to_class_string
 
 
 class Page(object):
-    def __init__(self, selenium, live_server_url):
+    def __init__(self, selenium, live_server_url, on_submit):
         self.selenium = selenium
         self.live_server_url = live_server_url
+        self.on_submit = on_submit
         self.temp_files = []
 
     def create_temp_file(self, content, prefix=None, binary=False):
@@ -92,6 +93,7 @@ class Page(object):
         el.find_element_by_xpath("//*[contains(text(), '%s')]" % text)
 
     def submit(self):
+        self.on_submit()
         self.selenium.find_element_by_css_selector('input[type=submit]').click()
 
     def assert_page_contains_text(self, text):
