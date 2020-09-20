@@ -45,7 +45,7 @@ class MultipleUploadedFileField(UploadedFileField):
     widget = UploadMultipleWidget
 
     def widget_attrs(self, widget):
-        attrs = super(MultipleUploadedFileField, self).widget_attrs(widget)
+        attrs = super().widget_attrs(widget)
 
         attrs['multiple'] = 'multiple'
         return attrs
@@ -62,7 +62,7 @@ class MultipleUploadedFileField(UploadedFileField):
             return None
         elif isinstance(data, list):
             return [
-                super(MultipleUploadedFileField, self).to_python(f)
+                super().to_python(f)
                 for f in data
             ]
         else:
