@@ -1,4 +1,3 @@
-# coding=utf-8
 from pathlib import Path
 
 from django.conf import settings
@@ -301,7 +300,7 @@ class LiveTestCase(BaseLiveTestCase):
 
     def test_unicode_filename(self):
         page = self.page
-        prefix = u'àęö'
+        prefix = 'àęö'
 
         temp_file = page.create_temp_file('content1', prefix=prefix)
 
