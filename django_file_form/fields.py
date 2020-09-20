@@ -62,7 +62,7 @@ class MultipleUploadedFileField(UploadedFileField):
             return None
         elif isinstance(data, list):
             return [
-                super().to_python(f)
+                super(MultipleUploadedFileField, self).to_python(f)
                 for f in data
             ]
         else:
