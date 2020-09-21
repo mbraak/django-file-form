@@ -4788,11 +4788,7 @@ var s3_uploader_S3Uploader = /*#__PURE__*/function () {
     value: function _createUpload() {
       var _this = this;
 
-      this.createdPromise = new Promise(function (resolve) {
-        return resolve();
-      }).then(function () {
-        return createMultipartUpload(_this.file, _this.s3UploadDir, _this.endpoint);
-      });
+      this.createdPromise = createMultipartUpload(this.file, this.s3UploadDir, this.endpoint);
       return this.createdPromise.then(function (result) {
         var valid = typeof_default()(result) === "object" && result && typeof result.uploadId === "string" && typeof result.key === "string";
 
