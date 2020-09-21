@@ -75,7 +75,7 @@ class UploadedFile(models.Model):
         if self.uploaded_file and self.uploaded_file.storage.exists(self.uploaded_file.name):
             self.uploaded_file.delete()
 
-        super(UploadedFile, self).delete(*args, **kwargs)
+        super().delete(*args, **kwargs)
 
     def must_be_deleted(self, now=None):
         now = now or timezone.now()
@@ -92,7 +92,7 @@ class UploadedFile(models.Model):
 
 class UploadedFileWithId(uploadedfile.UploadedFile):
     def __init__(self, file_id, metadata=None, **kwargs):
-        super(UploadedFileWithId, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
         self.file_id = file_id
         self.size = self.file.size
@@ -136,7 +136,7 @@ try:
                 secret_key=setting('AWS_S3_SECRET_ACCESS_KEY', setting('AWS_SECRET_ACCESS_KEY'))
             )
 
-            super(S3UploadedFileWithId, self).__init__(
+            super().__init__(
                 name=name,
                 mode='rb',
                 storage=boto_storage,

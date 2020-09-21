@@ -11,9 +11,11 @@ from .util import get_list
 
 class FileFormMixin(object):
     def __init__(self, *args, **kwargs):
-        s3_upload_dir = kwargs.pop('s3_upload_dir',
-            self.s3_upload_dir if hasattr(self, 's3_upload_dir') else None)
-        super(FileFormMixin, self).__init__(*args, **kwargs)
+        s3_upload_dir = kwargs.pop(
+            's3_upload_dir',
+            self.s3_upload_dir if hasattr(self, 's3_upload_dir') else None
+        )
+        super().__init__(*args, **kwargs)
 
         if s3_upload_dir is not None:
             self.add_hidden_field('s3_upload_dir', s3_upload_dir)
@@ -32,13 +34,13 @@ class FileFormMixin(object):
     def full_clean(self):
         if not self.is_bound:
             # Form is unbound; just call super
-            super(FileFormMixin, self).full_clean()
+            super().full_clean()
         else:
             # Update file data of the form
             self.update_files_data()
 
             # Call super
-            super(FileFormMixin, self).full_clean()
+            super().full_clean()
 
     def file_form_field_names(self):
         return [

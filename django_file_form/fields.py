@@ -45,7 +45,7 @@ class MultipleUploadedFileField(UploadedFileField):
     widget = UploadMultipleWidget
 
     def widget_attrs(self, widget):
-        attrs = super(MultipleUploadedFileField, self).widget_attrs(widget)
+        attrs = super().widget_attrs(widget)
 
         attrs['multiple'] = 'multiple'
         return attrs

@@ -1,4 +1,3 @@
-# coding=utf-8
 from pathlib import Path
 
 from django.test import TestCase
@@ -52,7 +51,7 @@ class ModelTests(TestCase):
         uploaded_file_path = self.temp_uploads_path.joinpath(filename)
         try:
             with uploaded_file_path.open('w') as f:
-                f.write(u'abc')
+                f.write('abc')
 
             UploadedFile.objects.create(created=encode_datetime(2010, 1, 1))
 

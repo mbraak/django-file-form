@@ -72,7 +72,7 @@ def get_file_meta(data, field_name):
 
 class UploadWidgetMixin(ClearableFileInput):
     def render(self, name, value, attrs=None, renderer=None):
-        upload_input = super(UploadWidgetMixin, self).render(name, value, attrs, renderer)
+        upload_input = super().render(name, value, attrs, renderer)
         return mark_safe(
             render_to_string(
                 'django_file_form/upload_widget.html',
@@ -112,4 +112,4 @@ class UploadMultipleWidget(UploadWidget):
             return objs
         else:
             # NB: django-formtools wizard uses dict instead of MultiValueDict
-            return super(UploadMultipleWidget, self).value_from_datadict(data, files, name)
+            return super().value_from_datadict(data, files, name)

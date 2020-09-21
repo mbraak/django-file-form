@@ -253,8 +253,10 @@ class S3Uploader {
   }
 
   _createUpload(): Promise<void> {
-    this.createdPromise = new Promise(resolve => resolve()).then(() =>
-      createMultipartUpload(this.file, this.s3UploadDir, this.endpoint)
+    this.createdPromise = createMultipartUpload(
+      this.file,
+      this.s3UploadDir,
+      this.endpoint
     );
     return this.createdPromise
       .then((result: MultipartUpload) => {
