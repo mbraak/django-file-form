@@ -58,7 +58,7 @@ const getFileNameFromUpload = (upload: UploadTypes): string => {
   }
 };
 
-class UploadFile {
+class FileField {
   callbacks: Callbacks;
   chunkSize: number;
   eventEmitter?: EventEmitter;
@@ -432,7 +432,9 @@ class UploadFile {
     const { onSuccess } = this.callbacks;
 
     const upload = this.uploads[uploadIndex] as UploadTypes;
-    const element = document.getElementsByClassName(`dff-file-id-${uploadIndex}`)[0] as HTMLElement;
+    const element = document.getElementsByClassName(
+      `dff-file-id-${uploadIndex}`
+    )[0] as HTMLElement;
     this.emitEvent("uploadComplete", element, upload);
 
     if (onSuccess) {
@@ -622,4 +624,4 @@ class UploadFile {
   }
 }
 
-export default UploadFile;
+export default FileField;
