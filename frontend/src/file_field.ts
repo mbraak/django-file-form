@@ -10,28 +10,13 @@ import DropArea from "./drop_area";
 
 import S3Uploader from "./s3_uploader";
 import EventEmitter from "eventemitter3";
+import {
+  createUploadedFile,
+  InitialFile,
+  BaseUploadedFile
+} from "./uploaded_file";
 
-type UploadTypes = Upload | UploadedFile | S3Uploader;
-
-export interface InitialFile {
-  id: string;
-  name: string;
-  placeholder?: boolean | undefined;
-  size: number;
-  url?: string;
-  original_name?: string;
-}
-
-export interface UploadedFile {
-  id: string;
-  name: string;
-  // true for placeholder, false for S3, undefined for regular files
-  placeholder?: boolean | undefined;
-  size: number;
-  url?: string;
-  // available only for S3 uploaded file
-  original_name?: string;
-}
+type UploadTypes = Upload | BaseUploadedFile | S3Uploader;
 
 type UploadStatus = "done" | "error" | "uploading";
 
@@ -159,33 +144,15 @@ class FileField {
 
     const { multiple, renderer } = this;
 
-    const addInitialFile = (file: InitialFile, i: number): void => {
-      const { id, name, size } = file;
+    const addInitialFile = (initialFile: InitialFile, i: number): void => {
+      const { name, size } = initialFile;
       const element = renderer.addUploadedFile(
-        file.original_name ? file.original_name : name,
+        initialFile.original_name ? initialFile.original_name : name,
         i,
         size
       );
 
-      let upload: UploadedFile;
-
-      if (file.placeholder === true) {
-        // in case of placeholder
-        upload = { id, name, placeholder: true, size };
-      } else if (file.placeholder === false) {
-        // in case of S3
-        upload = {
-          id,
-          name,
-          placeholder: false,
-          size,
-          original_name: file.original_name
-        };
-      } else {
-        // in case of regular UploadedFile
-        const url = `${this.uploadUrl}${file.id}`;
-        upload = { id, name, size, url };
-      }
+      const upload = createUploadedFile(initialFile, this.uploadUrl);
 
       this.uploads.push(upload);
       this.uploadStatuses.push("done");
@@ -473,7 +440,7 @@ class FileField {
       return;
     }
 
-    const { url } = upload as Upload | UploadedFile;
+    const { url } = upload as Upload | BaseUploadedFile;
 
     if (!url) {
       return;
@@ -546,7 +513,7 @@ class FileField {
         !(upload instanceof Upload) &&
         !(upload instanceof S3Uploader) &&
         upload.placeholder
-    ) as UploadedFile[];
+    ) as BaseUploadedFile[];
 
     const input = findInput(
       this.form,
@@ -576,7 +543,7 @@ class FileField {
           placeholder: false,
           size: s3Upload.file.size,
           original_name: s3Upload.file.name
-        } as UploadedFile;
+        } as BaseUploadedFile;
       });
 
     const uploadedInfo = this.uploads
