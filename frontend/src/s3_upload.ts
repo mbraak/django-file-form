@@ -189,7 +189,7 @@ function remove(arr: unknown[], el: unknown) {
   }
 }
 
-class S3Uploader {
+class S3Upload {
   chunkState: ChunkState[];
   chunks: Blob[];
   createdPromise: Promise<MultipartUpload>;
@@ -539,4 +539,4 @@ class S3Uploader {
   }
 }
 
-export default S3Uploader;
+export default S3Upload;
