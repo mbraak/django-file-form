@@ -1,4 +1,5 @@
 import { Upload } from "tus-js-client";
+import BaseUpload from "./base_upload";
 
 interface Options {
   chunkSize: number;
@@ -11,12 +12,14 @@ interface Options {
   uploadUrl: string;
 }
 
-export default class TusUpload {
+export default class TusUpload extends BaseUpload {
   fileName: string;
   onSuccess: (size: number) => void;
   upload: Upload;
 
   constructor(file: File, options: Options) {
+    super("uploading");
+
     this.fileName = file.name;
     this.onSuccess = options.onSuccess;
 

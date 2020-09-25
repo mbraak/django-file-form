@@ -19,8 +19,6 @@ import TusUpload from "./tus_upload";
 
 type UploadTypes = BaseUploadedFile | S3Upload | TusUpload;
 
-type UploadStatus = "done" | "error" | "uploading";
-
 export type Translations = { [key: string]: string };
 
 export interface Callbacks {
@@ -60,7 +58,6 @@ class FileField {
   uploadIndex: number;
   uploadUrl: string;
   uploads: (UploadTypes | undefined)[];
-  uploadStatuses: (UploadStatus | undefined)[];
 
   constructor({
     callbacks,
@@ -114,7 +111,6 @@ class FileField {
 
     this.uploadIndex = 0;
     this.uploads = [];
-    this.uploadStatuses = [];
 
     this.renderer = new RenderUploadFile({
       parent,
@@ -154,9 +150,7 @@ class FileField {
       );
 
       const upload = createUploadedFile(initialFile, this.uploadUrl);
-
       this.uploads.push(upload);
-      this.uploadStatuses.push("done");
 
       this.emitEvent("addUpload", element, upload);
     };
@@ -237,7 +231,6 @@ class FileField {
 
     const element = renderer.addNewUpload(fileName, uploadIndex);
     this.uploads.push(upload);
-    this.uploadStatuses.push("uploading");
 
     this.emitEvent("addUpload", element, upload);
   }
@@ -260,7 +253,7 @@ class FileField {
   }
 
   removeExistingUpload(uploadIndex: number): void {
-    const uploadStatus = this.uploadStatuses[uploadIndex];
+    const uploadStatus = this.uploads[uploadIndex]?.status;
 
     if (uploadStatus === "uploading") {
       const upload = this.uploads[uploadIndex] as TusUpload;
@@ -284,8 +277,6 @@ class FileField {
       upload instanceof S3Upload ||
       upload.url
     ) {
-      const uploadStatus = this.uploadStatuses[uploadIndex];
-
       switch (uploadStatus) {
         case "done": {
           if (upload instanceof S3Upload) {
@@ -373,8 +364,14 @@ class FileField {
   };
 
   handleError = (uploadIndex: number, error: Error): void => {
+    const upload = this.uploads[uploadIndex];
+
+    if (!upload) {
+      return;
+    }
+
     this.renderer.setError(uploadIndex);
-    this.uploadStatuses[uploadIndex] = "error";
+    upload.status = "error";
 
     const { onError } = this.callbacks;
 
@@ -388,23 +385,26 @@ class FileField {
   };
 
   handleSuccess = (uploadIndex: number, uploadedSize: number): void => {
+    const upload = this.uploads[uploadIndex];
+
+    if (!upload) {
+      return;
+    }
+
     const { renderer } = this;
     this.updateS3UploadedInput();
     renderer.clearInput();
     renderer.setSuccess(uploadIndex, uploadedSize);
-    this.uploadStatuses[uploadIndex] = "done";
+    upload.status = "done";
 
     const { onSuccess } = this.callbacks;
 
-    const upload = this.uploads[uploadIndex] as UploadTypes;
     const element = document.getElementsByClassName(
       `dff-file-id-${uploadIndex}`
     )[0] as HTMLElement;
     this.emitEvent("uploadComplete", element, upload);
 
     if (onSuccess) {
-      const upload = this.uploads[uploadIndex];
-
       if (upload instanceof Upload) {
         onSuccess(upload);
       }
@@ -420,7 +420,6 @@ class FileField {
 
     this.renderer.deleteFile(uploadIndex);
     delete this.uploads[uploadIndex];
-    delete this.uploadStatuses[uploadIndex];
 
     this.checkDropHint();
 

@@ -1,3 +1,5 @@
+import BaseUpload from "./base_upload";
+
 export interface InitialFile {
   id: string;
   name: string;
@@ -7,7 +9,7 @@ export interface InitialFile {
   original_name?: string;
 }
 
-export class BaseUploadedFile {
+export class BaseUploadedFile extends BaseUpload {
   id: string;
   name: string;
   // true for placeholder, false for S3, undefined for regular files
@@ -18,6 +20,8 @@ export class BaseUploadedFile {
   original_name?: string;
 
   constructor(initialFile: InitialFile) {
+    super("done");
+
     this.id = initialFile.id;
     this.name = initialFile.name;
     this.size = initialFile.size;

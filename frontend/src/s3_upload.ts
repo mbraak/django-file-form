@@ -1,7 +1,8 @@
-// The following code is adpated from https://github.com/transloadit/uppy/blob/master/packages/%40uppy/aws-s3-multipart/src/MultipartUploader.js
+// The following code is adapted from https://github.com/transloadit/uppy/blob/master/packages/%40uppy/aws-s3-multipart/src/MultipartUploader.js
 // which is released under a MIT License (https://github.com/transloadit/uppy/blob/master/LICENSE)
 
 import urljoin from "url-join";
+import BaseUpload from "./base_upload";
 
 interface ChunkState {
   busy: boolean;
@@ -189,7 +190,7 @@ function remove(arr: unknown[], el: unknown) {
   }
 }
 
-class S3Upload {
+class S3Upload extends BaseUpload {
   chunkState: ChunkState[];
   chunks: Blob[];
   createdPromise: Promise<MultipartUpload>;
@@ -204,6 +205,8 @@ class S3Upload {
   uploading: XMLHttpRequest[];
 
   constructor(file: File, options: Options) {
+    super("uploading");
+
     this.options = options;
 
     this.file = file;
