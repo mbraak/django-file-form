@@ -1,4 +1,3 @@
-//import { Upload } from "tus-js-client";
 import {
   findInput,
   getMetadataFieldName,
@@ -14,12 +13,11 @@ import {
   BaseUploadedFile,
   createUploadedFile,
   InitialFile,
+  UploadedFile,
   UploadedS3File
 } from "./uploaded_file";
 import TusUpload from "./tus_upload";
 import BaseUpload from "./base_upload";
-
-type UploadTypes = BaseUploadedFile | S3Upload | TusUpload;
 
 export type Translations = { [key: string]: string };
 
@@ -34,18 +32,6 @@ export interface Callbacks {
   onSuccess?: (upload: BaseUpload) => void;
 }
 
-const getFileNameFromUpload = (upload: BaseUpload): string => {
-  if (upload instanceof TusUpload) {
-    return upload.fileName;
-  } else if (upload instanceof S3Upload) {
-    return upload.file.name;
-  } else if (upload instanceof UploadedS3File) {
-    return upload.original_name;
-  } else {
-    return (upload as BaseUploadedFile).name;
-  }
-};
-
 class FileField {
   callbacks: Callbacks;
   chunkSize: number;
@@ -59,7 +45,7 @@ class FileField {
   retryDelays: number[] | null;
   s3UploadDir: string | null;
   supportDropArea: boolean;
-  uploads: (UploadTypes | undefined)[];
+  uploads: (BaseUpload | undefined)[];
   uploadUrl: string;
 
   constructor({
@@ -249,17 +235,9 @@ class FileField {
   }
 
   findUploadByName(fileName: string): number | null {
-    const upload = this.uploads.find(upload => {
-      if (upload instanceof TusUpload) {
-        return upload.fileName === fileName;
-      } else if (upload instanceof S3Upload) {
-        return upload.file.name === fileName;
-      } else if (upload) {
-        return upload.name === fileName;
-      } else {
-        return false;
-      }
-    });
+    const upload = this.uploads.find(
+      upload => upload && upload.name === fileName
+    );
 
     if (upload) {
       return upload.uploadIndex;
@@ -288,7 +266,7 @@ class FileField {
     if (
       upload instanceof TusUpload ||
       upload instanceof S3Upload ||
-      (upload as BaseUploadedFile).url
+      (upload as UploadedFile).url
     ) {
       switch (upload.status) {
         case "done": {
@@ -455,7 +433,7 @@ class FileField {
     if (upload instanceof TusUpload) {
       url = upload.getUrl();
     } else {
-      url = (upload as BaseUploadedFile).url;
+      url = (upload as UploadedFile).url;
     }
 
     if (!url) {
@@ -528,7 +506,7 @@ class FileField {
         upload &&
         !(upload instanceof TusUpload) &&
         !(upload instanceof S3Upload) &&
-        upload.placeholder
+        (upload as BaseUploadedFile).placeholder
     ) as BaseUploadedFile[];
 
     const input = findInput(
@@ -562,13 +540,19 @@ class FileField {
         };
       });
 
-    const uploadedInfo: InitialFile[] = (this.uploads.filter(
-      upload =>
-        upload &&
-        !(upload instanceof TusUpload) &&
-        !(upload instanceof S3Upload) &&
-        upload.placeholder === false
-    ) as InitialFile[]).concat(s3Uploads);
+    const uploadedInfo: InitialFile[] = this.uploads
+      .filter(upload => upload && upload instanceof UploadedS3File)
+      .map(upload => {
+        const uploadedS3File = upload as UploadedS3File;
+
+        return {
+          id: uploadedS3File.id,
+          name: uploadedS3File.key,
+          original_name: uploadedS3File.name,
+          size: uploadedS3File.size
+        } as InitialFile;
+      })
+      .concat(s3Uploads);
 
     const input = findInput(
       this.form,
@@ -593,7 +577,7 @@ class FileField {
       this.eventEmitter.emit(eventName, {
         element,
         fieldName: this.fieldName,
-        fileName: getFileNameFromUpload(upload),
+        fileName: upload.name,
         metaDataField: this.getMetaDataField(),
         upload
       });

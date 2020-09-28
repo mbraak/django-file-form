@@ -205,7 +205,7 @@ class S3Upload extends BaseUpload {
   uploading: XMLHttpRequest[];
 
   constructor(file: File, uploadIndex: number, options: Options) {
-    super("uploading", uploadIndex);
+    super({ name: file.name, status: "uploading", uploadIndex });
 
     this.options = options;
 

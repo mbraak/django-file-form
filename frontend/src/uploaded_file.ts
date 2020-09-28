@@ -9,49 +9,70 @@ export interface InitialFile {
   original_name?: string;
 }
 
-export class BaseUploadedFile extends BaseUpload {
+interface BaseUploadedFileParameters {
   id: string;
   name: string;
+  size: number;
+  uploadIndex: number;
+}
+
+export class BaseUploadedFile extends BaseUpload {
+  id: string;
   // true for placeholder, false for S3, undefined for regular files
   placeholder?: boolean | undefined;
   size: number;
-  url?: string;
 
-  constructor(initialFile: InitialFile, uploadIndex: number) {
-    super("done", uploadIndex);
+  constructor({ id, name, size, uploadIndex }: BaseUploadedFileParameters) {
+    super({ name, status: "done", uploadIndex });
 
-    this.id = initialFile.id;
-    this.name = initialFile.name;
-    this.size = initialFile.size;
+    this.id = id;
+    this.size = size;
   }
 }
 
 class PlaceholderFile extends BaseUploadedFile {
   constructor(initialFile: InitialFile, uploadIndex: number) {
-    super(initialFile, uploadIndex);
+    super({
+      id: initialFile.id,
+      name: initialFile.name,
+      size: initialFile.size,
+      uploadIndex
+    });
 
     this.placeholder = true;
   }
 }
 
 export class UploadedS3File extends BaseUploadedFile {
-  original_name: string;
+  key: string;
 
   constructor(initialFile: InitialFile, uploadIndex: number) {
-    super(initialFile, uploadIndex);
+    super({
+      id: initialFile.id,
+      name: initialFile.original_name || initialFile.name,
+      size: initialFile.size,
+      uploadIndex
+    });
 
-    this.original_name = initialFile.original_name || initialFile.name;
+    this.key = initialFile.name;
     this.placeholder = false;
   }
 }
 
-class UploadedFile extends BaseUploadedFile {
+export class UploadedFile extends BaseUploadedFile {
+  url: string;
+
   constructor(
     initialFile: InitialFile,
     uploadUrl: string,
     uploadIndex: number
   ) {
-    super(initialFile, uploadIndex);
+    super({
+      id: initialFile.id,
+      name: initialFile.name,
+      size: initialFile.size,
+      uploadIndex
+    });
 
     this.url = `${uploadUrl}${initialFile.id}`;
   }
