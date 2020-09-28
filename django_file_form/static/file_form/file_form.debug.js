@@ -193,7 +193,7 @@ var getMetadataFieldName = function getMetadataFieldName(fieldName, prefix) {
 /* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(35);
+module.exports = __webpack_require__(33);
 
 
 /***/ }),
@@ -222,7 +222,7 @@ module.exports = _createClass;
 /* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var setPrototypeOf = __webpack_require__(44);
+var setPrototypeOf = __webpack_require__(42);
 
 function _inherits(subClass, superClass) {
   if (typeof superClass !== "function" && superClass !== null) {
@@ -1042,7 +1042,7 @@ exports.wrapOutput = (input, state = {}, options = {}) => {
 "use strict";
 
 
-module.exports = __webpack_require__(41);
+module.exports = __webpack_require__(39);
 
 
 /***/ }),
@@ -1270,6 +1270,144 @@ process.umask = function() { return 0; };
 
 /***/ }),
 /* 21 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/*!
+ * escape-html
+ * Copyright(c) 2012-2013 TJ Holowaychuk
+ * Copyright(c) 2015 Andreas Lubbe
+ * Copyright(c) 2015 Tiancheng "Timothy" Gu
+ * MIT Licensed
+ */
+
+
+
+/**
+ * Module variables.
+ * @private
+ */
+
+var matchHtmlRegExp = /["'&<>]/;
+
+/**
+ * Module exports.
+ * @public
+ */
+
+module.exports = escapeHtml;
+
+/**
+ * Escape special characters in the given string of html.
+ *
+ * @param  {string} string The string to escape for inserting into HTML
+ * @return {string}
+ * @public
+ */
+
+function escapeHtml(string) {
+  var str = '' + string;
+  var match = matchHtmlRegExp.exec(str);
+
+  if (!match) {
+    return str;
+  }
+
+  var escape;
+  var html = '';
+  var index = 0;
+  var lastIndex = 0;
+
+  for (index = match.index; index < str.length; index++) {
+    switch (str.charCodeAt(index)) {
+      case 34: // "
+        escape = '&quot;';
+        break;
+      case 38: // &
+        escape = '&amp;';
+        break;
+      case 39: // '
+        escape = '&#39;';
+        break;
+      case 60: // <
+        escape = '&lt;';
+        break;
+      case 62: // >
+        escape = '&gt;';
+        break;
+      default:
+        continue;
+    }
+
+    if (lastIndex !== index) {
+      html += str.substring(lastIndex, index);
+    }
+
+    lastIndex = index + 1;
+    html += escape;
+  }
+
+  return lastIndex !== index
+    ? html + str.substring(lastIndex, index)
+    : html;
+}
+
+
+/***/ }),
+/* 22 */
+/***/ (function(module, exports) {
+
+function _asyncIterator(iterable) {
+  var method;
+
+  if (typeof Symbol !== "undefined") {
+    if (Symbol.asyncIterator) {
+      method = iterable[Symbol.asyncIterator];
+      if (method != null) return method.call(iterable);
+    }
+
+    if (Symbol.iterator) {
+      method = iterable[Symbol.iterator];
+      if (method != null) return method.call(iterable);
+    }
+  }
+
+  throw new TypeError("Object is not async iterable");
+}
+
+module.exports = _asyncIterator;
+
+/***/ }),
+/* 23 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var arrayWithHoles = __webpack_require__(34);
+
+var iterableToArrayLimit = __webpack_require__(35);
+
+var unsupportedIterableToArray = __webpack_require__(19);
+
+var nonIterableRest = __webpack_require__(36);
+
+function _slicedToArray(arr, i) {
+  return arrayWithHoles(arr) || iterableToArrayLimit(arr, i) || unsupportedIterableToArray(arr, i) || nonIterableRest();
+}
+
+module.exports = _slicedToArray;
+
+/***/ }),
+/* 24 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var Mime = __webpack_require__(37);
+module.exports = new Mime(__webpack_require__(38));
+
+
+/***/ }),
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*
@@ -1506,14 +1644,14 @@ process.umask = function() { return 0; };
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(14)))
 
 /***/ }),
-/* 22 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(global) {
 
-var required = __webpack_require__(33)
-  , qs = __webpack_require__(34)
+var required = __webpack_require__(43)
+  , qs = __webpack_require__(44)
   , slashes = /^[A-Za-z][A-Za-z0-9+-.]*:\/\//
   , protocolre = /^([a-z][a-z0-9.+-]*:)?(\/\/)?([\S\s]*)/i
   , whitespace = '[\\x09\\x0A\\x0B\\x0C\\x0D\\x20\\xA0\\u1680\\u180E\\u2000\\u2001\\u2002\\u2003\\u2004\\u2005\\u2006\\u2007\\u2008\\u2009\\u200A\\u202F\\u205F\\u3000\\u2028\\u2029\\uFEFF]'
@@ -1964,144 +2102,6 @@ module.exports = Url;
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(14)))
 
 /***/ }),
-/* 23 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/*!
- * escape-html
- * Copyright(c) 2012-2013 TJ Holowaychuk
- * Copyright(c) 2015 Andreas Lubbe
- * Copyright(c) 2015 Tiancheng "Timothy" Gu
- * MIT Licensed
- */
-
-
-
-/**
- * Module variables.
- * @private
- */
-
-var matchHtmlRegExp = /["'&<>]/;
-
-/**
- * Module exports.
- * @public
- */
-
-module.exports = escapeHtml;
-
-/**
- * Escape special characters in the given string of html.
- *
- * @param  {string} string The string to escape for inserting into HTML
- * @return {string}
- * @public
- */
-
-function escapeHtml(string) {
-  var str = '' + string;
-  var match = matchHtmlRegExp.exec(str);
-
-  if (!match) {
-    return str;
-  }
-
-  var escape;
-  var html = '';
-  var index = 0;
-  var lastIndex = 0;
-
-  for (index = match.index; index < str.length; index++) {
-    switch (str.charCodeAt(index)) {
-      case 34: // "
-        escape = '&quot;';
-        break;
-      case 38: // &
-        escape = '&amp;';
-        break;
-      case 39: // '
-        escape = '&#39;';
-        break;
-      case 60: // <
-        escape = '&lt;';
-        break;
-      case 62: // >
-        escape = '&gt;';
-        break;
-      default:
-        continue;
-    }
-
-    if (lastIndex !== index) {
-      html += str.substring(lastIndex, index);
-    }
-
-    lastIndex = index + 1;
-    html += escape;
-  }
-
-  return lastIndex !== index
-    ? html + str.substring(lastIndex, index)
-    : html;
-}
-
-
-/***/ }),
-/* 24 */
-/***/ (function(module, exports) {
-
-function _asyncIterator(iterable) {
-  var method;
-
-  if (typeof Symbol !== "undefined") {
-    if (Symbol.asyncIterator) {
-      method = iterable[Symbol.asyncIterator];
-      if (method != null) return method.call(iterable);
-    }
-
-    if (Symbol.iterator) {
-      method = iterable[Symbol.iterator];
-      if (method != null) return method.call(iterable);
-    }
-  }
-
-  throw new TypeError("Object is not async iterable");
-}
-
-module.exports = _asyncIterator;
-
-/***/ }),
-/* 25 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var arrayWithHoles = __webpack_require__(36);
-
-var iterableToArrayLimit = __webpack_require__(37);
-
-var unsupportedIterableToArray = __webpack_require__(19);
-
-var nonIterableRest = __webpack_require__(38);
-
-function _slicedToArray(arr, i) {
-  return arrayWithHoles(arr) || iterableToArrayLimit(arr, i) || unsupportedIterableToArray(arr, i) || nonIterableRest();
-}
-
-module.exports = _slicedToArray;
-
-/***/ }),
-/* 26 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var Mime = __webpack_require__(39);
-module.exports = new Mime(__webpack_require__(40));
-
-
-/***/ }),
 /* 27 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -2123,11 +2123,1344 @@ var createClass_default = /*#__PURE__*/__webpack_require__.n(createClass);
 var defineProperty = __webpack_require__(0);
 var defineProperty_default = /*#__PURE__*/__webpack_require__.n(defineProperty);
 
+// EXTERNAL MODULE: ./src/util.ts
+var util = __webpack_require__(3);
+
+// EXTERNAL MODULE: ./node_modules/escape-html/index.js
+var escape_html = __webpack_require__(21);
+var escape_html_default = /*#__PURE__*/__webpack_require__.n(escape_html);
+
+// CONCATENATED MODULE: ./src/render_upload_file.ts
+
+
+
+
+
+
+var render_upload_file_RenderUploadFile = /*#__PURE__*/function () {
+  function RenderUploadFile(_ref) {
+    var _parent = _ref.parent,
+        input = _ref.input,
+        skipRequired = _ref.skipRequired,
+        translations = _ref.translations;
+
+    classCallCheck_default()(this, RenderUploadFile);
+
+    defineProperty_default()(this, "container", void 0);
+
+    defineProperty_default()(this, "input", void 0);
+
+    defineProperty_default()(this, "translations", void 0);
+
+    defineProperty_default()(this, "createFilesContainer", function (parent) {
+      var div = document.createElement("div");
+      div.className = "dff-files";
+      parent.appendChild(div);
+      return div;
+    });
+
+    this.container = this.createFilesContainer(_parent);
+    this.input = input;
+    this.translations = translations;
+
+    if (skipRequired) {
+      this.input.required = false;
+    }
+  }
+
+  createClass_default()(RenderUploadFile, [{
+    key: "addUploadedFile",
+    value: function addUploadedFile(filename, uploadIndex, filesize) {
+      var element = this.addFile(filename, uploadIndex);
+      this.setSuccess(uploadIndex, filesize);
+      return element;
+    }
+  }, {
+    key: "addNewUpload",
+    value: function addNewUpload(filename, uploadIndex) {
+      var div = this.addFile(filename, uploadIndex);
+      var progressSpan = document.createElement("span");
+      progressSpan.className = "dff-progress";
+      var innerSpan = document.createElement("span");
+      innerSpan.className = "dff-progress-inner";
+      progressSpan.appendChild(innerSpan);
+      div.appendChild(progressSpan);
+      var cancelLink = document.createElement("a");
+      cancelLink.className = "dff-cancel";
+      cancelLink.innerHTML = this.translations.Cancel;
+      cancelLink.setAttribute("data-index", "".concat(uploadIndex));
+      cancelLink.href = "#";
+      div.appendChild(cancelLink);
+      return div;
+    }
+  }, {
+    key: "addFile",
+    value: function addFile(filename, uploadIndex) {
+      var div = document.createElement("div");
+      div.className = "dff-file dff-file-id-".concat(uploadIndex);
+      var nameSpan = document.createElement("span");
+      nameSpan.innerHTML = escape_html_default()(filename);
+      div.appendChild(nameSpan);
+      this.container.appendChild(div);
+      this.input.required = false;
+      return div;
+    }
+  }, {
+    key: "deleteFile",
+    value: function deleteFile(index) {
+      var div = this.findFileDiv(index);
+
+      if (div) {
+        div.remove();
+      }
+    }
+  }, {
+    key: "setError",
+    value: function setError(index) {
+      var span = document.createElement("span");
+      span.classList.add("dff-error");
+      span.innerHTML = this.translations["Upload failed"];
+      var el = this.findFileDiv(index);
+
+      if (el) {
+        el.appendChild(span);
+        el.classList.add("dff-upload-fail");
+      }
+
+      this.removeProgress(index);
+      this.removeCancel(index);
+    }
+  }, {
+    key: "setDeleteFailed",
+    value: function setDeleteFailed(index) {
+      var el = this.findFileDiv(index);
+
+      if (el) {
+        var span = document.createElement("span");
+        span.innerHTML = this.translations["Delete failed"];
+        el.appendChild(span);
+      }
+
+      this.enableDelete(index);
+    }
+  }, {
+    key: "findFileDiv",
+    value: function findFileDiv(index) {
+      return this.container.querySelector(".dff-file-id-".concat(index));
+    }
+  }, {
+    key: "setSuccess",
+    value: function setSuccess(index, size) {
+      var translations = this.translations;
+      var el = this.findFileDiv(index);
+
+      if (el) {
+        el.classList.add("dff-upload-success");
+        var fileSizeInfo = document.createElement("span");
+        fileSizeInfo.innerHTML = Object(util["b" /* formatBytes */])(size, 2);
+        fileSizeInfo.className = "dff-filesize";
+        el.appendChild(fileSizeInfo);
+        var deleteLink = document.createElement("a");
+        deleteLink.innerHTML = translations.Delete;
+        deleteLink.className = "dff-delete";
+        deleteLink.setAttribute("data-index", "".concat(index));
+        deleteLink.href = "#";
+        el.appendChild(deleteLink);
+      }
+
+      this.removeProgress(index);
+      this.removeCancel(index);
+    }
+  }, {
+    key: "removeProgress",
+    value: function removeProgress(index) {
+      var el = this.findFileDiv(index);
+
+      if (el) {
+        var progressSpan = el.querySelector(".dff-progress");
+
+        if (progressSpan) {
+          progressSpan.remove();
+        }
+      }
+    }
+  }, {
+    key: "removeCancel",
+    value: function removeCancel(index) {
+      var el = this.findFileDiv(index);
+
+      if (el) {
+        var cancelSpan = el.querySelector(".dff-cancel");
+
+        if (cancelSpan) {
+          cancelSpan.remove();
+        }
+      }
+    }
+  }, {
+    key: "clearInput",
+    value: function clearInput() {
+      var input = this.input;
+      input.value = "";
+    }
+  }, {
+    key: "updateProgress",
+    value: function updateProgress(index, percentage) {
+      var el = this.container.querySelector(".dff-file-id-".concat(index));
+
+      if (el) {
+        var innerProgressSpan = el.querySelector(".dff-progress-inner");
+
+        if (innerProgressSpan) {
+          innerProgressSpan.style.width = "".concat(percentage, "%");
+        }
+      }
+    }
+  }, {
+    key: "renderDropHint",
+    value: function renderDropHint() {
+      if (this.container.querySelector(".dff-drop-hint")) {
+        return;
+      }
+
+      var dropHint = document.createElement("div");
+      dropHint.className = "dff-drop-hint";
+      dropHint.innerHTML = this.translations["Drop your files here"];
+      this.container.appendChild(dropHint);
+    }
+  }, {
+    key: "removeDropHint",
+    value: function removeDropHint() {
+      var dropHint = this.container.querySelector(".dff-drop-hint");
+
+      if (dropHint) {
+        dropHint.remove();
+      }
+    }
+  }, {
+    key: "disableDelete",
+    value: function disableDelete(index) {
+      var deleteLink = this.findDeleteLink(index);
+
+      if (deleteLink) {
+        deleteLink.classList.add("dff-disabled");
+      }
+    }
+  }, {
+    key: "enableDelete",
+    value: function enableDelete(index) {
+      var deleteLink = this.findDeleteLink(index);
+
+      if (deleteLink) {
+        deleteLink.classList.remove("dff-disabled");
+      }
+    }
+  }, {
+    key: "findDeleteLink",
+    value: function findDeleteLink(index) {
+      var div = this.findFileDiv(index);
+
+      if (!div) {
+        return div;
+      }
+
+      return div.querySelector(".dff-delete");
+    }
+  }]);
+
+  return RenderUploadFile;
+}();
+
+/* harmony default export */ var render_upload_file = (render_upload_file_RenderUploadFile);
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/regenerator/index.js
+var regenerator = __webpack_require__(4);
+var regenerator_default = /*#__PURE__*/__webpack_require__.n(regenerator);
+
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/asyncToGenerator.js
+var asyncToGenerator = __webpack_require__(9);
+var asyncToGenerator_default = /*#__PURE__*/__webpack_require__.n(asyncToGenerator);
+
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/asyncIterator.js
+var asyncIterator = __webpack_require__(22);
+var asyncIterator_default = /*#__PURE__*/__webpack_require__.n(asyncIterator);
+
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/slicedToArray.js
+var slicedToArray = __webpack_require__(23);
+var slicedToArray_default = /*#__PURE__*/__webpack_require__.n(slicedToArray);
+
+// EXTERNAL MODULE: ./node_modules/mime/lite.js
+var lite = __webpack_require__(24);
+var lite_default = /*#__PURE__*/__webpack_require__.n(lite);
+
+// EXTERNAL MODULE: ./node_modules/picomatch/index.js
+var picomatch = __webpack_require__(17);
+var picomatch_default = /*#__PURE__*/__webpack_require__.n(picomatch);
+
+// CONCATENATED MODULE: ./src/accepted_file_types.ts
+
+
+
+
+
+
+
+var parseInputAccept = function parseInputAccept(inputAccept) {
+  var extensions = [];
+  var mimeTypes = [];
+  inputAccept.split(",").map(function (mimeType) {
+    return mimeType.trim();
+  }).filter(Boolean).forEach(function (fileType) {
+    if (fileType.startsWith(".")) {
+      extensions.push("*".concat(fileType));
+    } else {
+      mimeTypes.push(fileType);
+    }
+  });
+  return [extensions, mimeTypes];
+};
+
+var accepted_file_types_AcceptedFileTypes = /*#__PURE__*/function () {
+  function AcceptedFileTypes(inputAccept) {
+    classCallCheck_default()(this, AcceptedFileTypes);
+
+    defineProperty_default()(this, "extensions", void 0);
+
+    defineProperty_default()(this, "mimeTypes", void 0);
+
+    var _parseInputAccept = parseInputAccept(inputAccept),
+        _parseInputAccept2 = slicedToArray_default()(_parseInputAccept, 2),
+        extensions = _parseInputAccept2[0],
+        mimeTypes = _parseInputAccept2[1];
+
+    this.extensions = extensions;
+    this.mimeTypes = mimeTypes;
+  }
+
+  createClass_default()(AcceptedFileTypes, [{
+    key: "isAccepted",
+    value: function isAccepted(fileName) {
+      if (this.extensions.length === 0 && this.mimeTypes.length === 0) {
+        return true;
+      }
+
+      return this.isMimeTypeAccepted(lite_default.a.getType(fileName)) || this.isExtensionAccepted(fileName);
+    }
+  }, {
+    key: "isMimeTypeAccepted",
+    value: function isMimeTypeAccepted(mimeType) {
+      if (this.mimeTypes.length === 0) {
+        return false;
+      }
+
+      return picomatch_default.a.isMatch(mimeType, this.mimeTypes);
+    }
+  }, {
+    key: "isExtensionAccepted",
+    value: function isExtensionAccepted(fileName) {
+      if (this.extensions.length === 0) {
+        return false;
+      }
+
+      return picomatch_default.a.isMatch(fileName, this.extensions);
+    }
+  }]);
+
+  return AcceptedFileTypes;
+}();
+
+/* harmony default export */ var accepted_file_types = (accepted_file_types_AcceptedFileTypes);
+// CONCATENATED MODULE: ./src/drop_area.ts
+
+
+
+
+
+
+
+
+var getEntriesFromDirectory = /*#__PURE__*/function () {
+  var _ref = asyncToGenerator_default()( /*#__PURE__*/regenerator_default.a.mark(function _callee(directoryEntry) {
+    return regenerator_default.a.wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            return _context.abrupt("return", new Promise(function (resolve, reject) {
+              return directoryEntry.createReader().readEntries(resolve, reject);
+            }));
+
+          case 1:
+          case "end":
+            return _context.stop();
+        }
+      }
+    }, _callee);
+  }));
+
+  return function getEntriesFromDirectory(_x) {
+    return _ref.apply(this, arguments);
+  };
+}();
+
+var getFileFromFileEntry = /*#__PURE__*/function () {
+  var _ref2 = asyncToGenerator_default()( /*#__PURE__*/regenerator_default.a.mark(function _callee2(fileEntry) {
+    return regenerator_default.a.wrap(function _callee2$(_context2) {
+      while (1) {
+        switch (_context2.prev = _context2.next) {
+          case 0:
+            return _context2.abrupt("return", new Promise(function (resolve, reject) {
+              return fileEntry.file(resolve, reject);
+            }));
+
+          case 1:
+          case "end":
+            return _context2.stop();
+        }
+      }
+    }, _callee2);
+  }));
+
+  return function getFileFromFileEntry(_x2) {
+    return _ref2.apply(this, arguments);
+  };
+}();
+
+var getFilesFromFileSystemEntries = /*#__PURE__*/function () {
+  var _ref3 = asyncToGenerator_default()( /*#__PURE__*/regenerator_default.a.mark(function _callee3(entries) {
+    var result, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, _value, entry, file, entriesFromDirectory, _files;
+
+    return regenerator_default.a.wrap(function _callee3$(_context3) {
+      while (1) {
+        switch (_context3.prev = _context3.next) {
+          case 0:
+            result = [];
+            _iteratorNormalCompletion = true;
+            _didIteratorError = false;
+            _context3.prev = 3;
+            _iterator = asyncIterator_default()(entries);
+
+          case 5:
+            _context3.next = 7;
+            return _iterator.next();
+
+          case 7:
+            _step = _context3.sent;
+            _iteratorNormalCompletion = _step.done;
+            _context3.next = 11;
+            return _step.value;
+
+          case 11:
+            _value = _context3.sent;
+
+            if (_iteratorNormalCompletion) {
+              _context3.next = 32;
+              break;
+            }
+
+            entry = _value;
+
+            if (!entry.isFile) {
+              _context3.next = 21;
+              break;
+            }
+
+            _context3.next = 17;
+            return getFileFromFileEntry(entry);
+
+          case 17:
+            file = _context3.sent;
+            result.push(file);
+            _context3.next = 29;
+            break;
+
+          case 21:
+            if (!entry.isDirectory) {
+              _context3.next = 29;
+              break;
+            }
+
+            _context3.next = 24;
+            return getEntriesFromDirectory(entry);
+
+          case 24:
+            entriesFromDirectory = _context3.sent;
+            _context3.next = 27;
+            return getFilesFromFileSystemEntries(entriesFromDirectory);
+
+          case 27:
+            _files = _context3.sent;
+
+            _files.forEach(function (file) {
+              return result.push(file);
+            });
+
+          case 29:
+            _iteratorNormalCompletion = true;
+            _context3.next = 5;
+            break;
+
+          case 32:
+            _context3.next = 38;
+            break;
+
+          case 34:
+            _context3.prev = 34;
+            _context3.t0 = _context3["catch"](3);
+            _didIteratorError = true;
+            _iteratorError = _context3.t0;
+
+          case 38:
+            _context3.prev = 38;
+            _context3.prev = 39;
+
+            if (!(!_iteratorNormalCompletion && _iterator["return"] != null)) {
+              _context3.next = 43;
+              break;
+            }
+
+            _context3.next = 43;
+            return _iterator["return"]();
+
+          case 43:
+            _context3.prev = 43;
+
+            if (!_didIteratorError) {
+              _context3.next = 46;
+              break;
+            }
+
+            throw _iteratorError;
+
+          case 46:
+            return _context3.finish(43);
+
+          case 47:
+            return _context3.finish(38);
+
+          case 48:
+            return _context3.abrupt("return", result);
+
+          case 49:
+          case "end":
+            return _context3.stop();
+        }
+      }
+    }, _callee3, null, [[3, 34, 38, 48], [39,, 43, 47]]);
+  }));
+
+  return function getFilesFromFileSystemEntries(_x3) {
+    return _ref3.apply(this, arguments);
+  };
+}();
+
+var getFilesFromDataTransfer = /*#__PURE__*/function () {
+  var _ref4 = asyncToGenerator_default()( /*#__PURE__*/regenerator_default.a.mark(function _callee4(dataTransfer) {
+    var entries, _files2;
+
+    return regenerator_default.a.wrap(function _callee4$(_context4) {
+      while (1) {
+        switch (_context4.prev = _context4.next) {
+          case 0:
+            if (!dataTransfer.items) {
+              _context4.next = 8;
+              break;
+            }
+
+            entries = toConsumableArray_default()(dataTransfer.items).map(function (item) {
+              return item.webkitGetAsEntry();
+            });
+            _context4.next = 4;
+            return getFilesFromFileSystemEntries(entries);
+
+          case 4:
+            _files2 = _context4.sent;
+            return _context4.abrupt("return", _files2);
+
+          case 8:
+            return _context4.abrupt("return", toConsumableArray_default()(dataTransfer.files));
+
+          case 9:
+          case "end":
+            return _context4.stop();
+        }
+      }
+    }, _callee4);
+  }));
+
+  return function getFilesFromDataTransfer(_x4) {
+    return _ref4.apply(this, arguments);
+  };
+}();
+
+var drop_area_DropArea = function DropArea(_ref5) {
+  var _this = this;
+
+  var container = _ref5.container,
+      inputAccept = _ref5.inputAccept,
+      onUploadFiles = _ref5.onUploadFiles;
+
+  classCallCheck_default()(this, DropArea);
+
+  defineProperty_default()(this, "acceptedFileTypes", void 0);
+
+  defineProperty_default()(this, "container", void 0);
+
+  defineProperty_default()(this, "onUploadFiles", void 0);
+
+  defineProperty_default()(this, "onDrop", function (e) {
+    var dragEvent = e;
+
+    _this.container.classList.remove("dff-dropping");
+
+    dragEvent.preventDefault();
+    dragEvent.stopPropagation();
+
+    var uploadFiles = /*#__PURE__*/function () {
+      var _ref6 = asyncToGenerator_default()( /*#__PURE__*/regenerator_default.a.mark(function _callee5() {
+        var _files3, acceptedFiles;
+
+        return regenerator_default.a.wrap(function _callee5$(_context5) {
+          while (1) {
+            switch (_context5.prev = _context5.next) {
+              case 0:
+                _context5.prev = 0;
+
+                if (!dragEvent.dataTransfer) {
+                  _context5.next = 7;
+                  break;
+                }
+
+                _context5.next = 4;
+                return getFilesFromDataTransfer(dragEvent.dataTransfer);
+
+              case 4:
+                _files3 = _context5.sent;
+                acceptedFiles = _files3.filter(function (file) {
+                  return _this.acceptedFileTypes.isAccepted(file.name);
+                });
+
+                _this.onUploadFiles(acceptedFiles);
+
+              case 7:
+                _context5.next = 12;
+                break;
+
+              case 9:
+                _context5.prev = 9;
+                _context5.t0 = _context5["catch"](0);
+                console.error(_context5.t0);
+
+              case 12:
+              case "end":
+                return _context5.stop();
+            }
+          }
+        }, _callee5, null, [[0, 9]]);
+      }));
+
+      return function uploadFiles() {
+        return _ref6.apply(this, arguments);
+      };
+    }();
+
+    void uploadFiles();
+  });
+
+  this.container = container;
+  this.onUploadFiles = onUploadFiles;
+  this.acceptedFileTypes = new accepted_file_types(inputAccept);
+  container.addEventListener("dragenter", function () {
+    container.classList.add("dff-dropping");
+  });
+  container.addEventListener("dragleave", function () {
+    container.classList.remove("dff-dropping");
+  });
+  container.addEventListener("dragover", function (e) {
+    container.classList.add("dff-dropping");
+    e.preventDefault();
+  });
+  container.addEventListener("drop", this.onDrop);
+};
+
+/* harmony default export */ var drop_area = (drop_area_DropArea);
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/typeof.js
+var helpers_typeof = __webpack_require__(13);
+var typeof_default = /*#__PURE__*/__webpack_require__.n(helpers_typeof);
+
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/assertThisInitialized.js
+var assertThisInitialized = __webpack_require__(1);
+var assertThisInitialized_default = /*#__PURE__*/__webpack_require__.n(assertThisInitialized);
+
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/inherits.js
+var inherits = __webpack_require__(6);
+var inherits_default = /*#__PURE__*/__webpack_require__.n(inherits);
+
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/possibleConstructorReturn.js
+var possibleConstructorReturn = __webpack_require__(8);
+var possibleConstructorReturn_default = /*#__PURE__*/__webpack_require__.n(possibleConstructorReturn);
+
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/getPrototypeOf.js
+var getPrototypeOf = __webpack_require__(7);
+var getPrototypeOf_default = /*#__PURE__*/__webpack_require__.n(getPrototypeOf);
+
+// EXTERNAL MODULE: ./node_modules/url-join/lib/url-join.js
+var url_join = __webpack_require__(11);
+var url_join_default = /*#__PURE__*/__webpack_require__.n(url_join);
+
+// CONCATENATED MODULE: ./src/base_upload.ts
+
+
+
+var base_upload_BaseUpload = function BaseUpload(status, uploadIndex) {
+  classCallCheck_default()(this, BaseUpload);
+
+  defineProperty_default()(this, "status", void 0);
+
+  defineProperty_default()(this, "uploadIndex", void 0);
+
+  this.status = status;
+  this.uploadIndex = uploadIndex;
+};
+
+/* harmony default export */ var base_upload = (base_upload_BaseUpload);
+// CONCATENATED MODULE: ./src/s3_upload.ts
+
+
+
+
+
+
+
+
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = getPrototypeOf_default()(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = getPrototypeOf_default()(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return possibleConstructorReturn_default()(this, result); }; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+
+// The following code is adapted from https://github.com/transloadit/uppy/blob/master/packages/%40uppy/aws-s3-multipart/src/MultipartUploader.js
+// which is released under a MIT License (https://github.com/transloadit/uppy/blob/master/LICENSE)
+
+
+var MB = 1024 * 1024;
+
+var getChunkSize = function getChunkSize(file) {
+  return Math.ceil(file.size / 10000);
+};
+
+var createMultipartUpload = function createMultipartUpload(file, s3UploadDir, endpoint) {
+  var csrftoken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
+  var headers = new Headers({
+    accept: "application/json",
+    "content-type": "application/json",
+    "X-CSRFToken": csrftoken
+  });
+  return fetch(endpoint, {
+    method: "post",
+    headers: headers,
+    body: JSON.stringify({
+      filename: file.name,
+      contentType: file.type,
+      s3UploadDir: s3UploadDir
+    })
+  }).then(function (response) {
+    return response.json();
+  }).then(function (data) {
+    return data;
+  });
+};
+
+var s3_upload_listParts = function listParts(_ref) {
+  var key = _ref.key,
+      uploadId = _ref.uploadId,
+      endpoint = _ref.endpoint;
+  var filename = encodeURIComponent(key);
+  var uploadIdEnc = encodeURIComponent(uploadId);
+  var url = url_join_default()(endpoint, uploadIdEnc, "?key=".concat(filename));
+  return fetch(url, {
+    method: "get"
+  }).then(function (response) {
+    return response.json();
+  }).then(function (data) {
+    return data["parts"];
+  });
+};
+
+var s3_upload_abortMultipartUpload = function abortMultipartUpload(_ref2) {
+  var key = _ref2.key,
+      uploadId = _ref2.uploadId,
+      endpoint = _ref2.endpoint;
+  var filename = encodeURIComponent(key);
+  var uploadIdEnc = encodeURIComponent(uploadId);
+  var csrftoken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
+  var headers = new Headers({
+    "X-CSRFToken": csrftoken
+  });
+  var url = url_join_default()(endpoint, uploadIdEnc, "?key=".concat(filename));
+  return fetch(url, {
+    method: "delete",
+    headers: headers
+  }).then(function (response) {
+    return response.json();
+  });
+};
+
+var s3_upload_prepareUploadPart = function prepareUploadPart(_ref3) {
+  var key = _ref3.key,
+      uploadId = _ref3.uploadId,
+      number = _ref3.number,
+      endpoint = _ref3.endpoint;
+  var filename = encodeURIComponent(key);
+  var csrftoken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
+  var headers = new Headers({
+    "X-CSRFToken": csrftoken
+  });
+  var url = url_join_default()(endpoint, uploadId, "".concat(number), "?key=".concat(filename));
+  return fetch(url, {
+    method: "get",
+    headers: headers
+  }).then(function (response) {
+    return response.json();
+  }).then(function (data) {
+    return data;
+  });
+};
+
+var s3_upload_completeMultipartUpload = function completeMultipartUpload(_ref4) {
+  var key = _ref4.key,
+      uploadId = _ref4.uploadId,
+      parts = _ref4.parts,
+      endpoint = _ref4.endpoint;
+  var filename = encodeURIComponent(key);
+  var uploadIdEnc = encodeURIComponent(uploadId);
+  var csrftoken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
+  var headers = new Headers({
+    "X-CSRFToken": csrftoken
+  });
+  var url = url_join_default()(endpoint, uploadIdEnc, "complete", "?key=".concat(filename));
+  return fetch(url, {
+    method: "post",
+    headers: headers,
+    body: JSON.stringify({
+      parts: parts
+    })
+  }).then(function (response) {
+    return response.json();
+  }).then(function (data) {
+    return data;
+  });
+};
+
+function remove(arr, el) {
+  var i = arr.indexOf(el);
+
+  if (i !== -1) {
+    arr.splice(i, 1);
+  }
+}
+
+var s3_upload_S3Upload = /*#__PURE__*/function (_BaseUpload) {
+  inherits_default()(S3Upload, _BaseUpload);
+
+  var _super = _createSuper(S3Upload);
+
+  function S3Upload(file, uploadIndex, options) {
+    var _this;
+
+    classCallCheck_default()(this, S3Upload);
+
+    _this = _super.call(this, "uploading", uploadIndex);
+
+    defineProperty_default()(assertThisInitialized_default()(_this), "chunkState", void 0);
+
+    defineProperty_default()(assertThisInitialized_default()(_this), "chunks", void 0);
+
+    defineProperty_default()(assertThisInitialized_default()(_this), "createdPromise", void 0);
+
+    defineProperty_default()(assertThisInitialized_default()(_this), "file", void 0);
+
+    defineProperty_default()(assertThisInitialized_default()(_this), "isPaused", void 0);
+
+    defineProperty_default()(assertThisInitialized_default()(_this), "key", void 0);
+
+    defineProperty_default()(assertThisInitialized_default()(_this), "options", void 0);
+
+    defineProperty_default()(assertThisInitialized_default()(_this), "parts", void 0);
+
+    defineProperty_default()(assertThisInitialized_default()(_this), "s3UploadDir", void 0);
+
+    defineProperty_default()(assertThisInitialized_default()(_this), "endpoint", void 0);
+
+    defineProperty_default()(assertThisInitialized_default()(_this), "uploadId", void 0);
+
+    defineProperty_default()(assertThisInitialized_default()(_this), "uploading", void 0);
+
+    _this.options = options;
+    _this.file = file;
+    _this.key = _this.options.key || null;
+    _this.uploadId = _this.options.uploadId || null;
+    _this.parts = [];
+    _this.s3UploadDir = _this.options.s3UploadDir;
+    _this.endpoint = _this.options.endpoint; // Do `this.createdPromise.then(OP)` to execute an operation `OP` _only_ if the
+    // upload was created already. That also ensures that the sequencing is right
+    // (so the `OP` definitely happens if the upload is created).
+    //
+    // This mostly exists to make `_abortUpload` work well: only sending the abort request if
+    // the upload was already created, and if the createMultipartUpload request is still in flight,
+    // aborting it immediately after it finishes.
+
+    _this.createdPromise = Promise.reject(); // eslint-disable-line prefer-promise-reject-errors
+
+    _this.isPaused = false;
+    _this.chunks = [];
+    _this.chunkState = [];
+    _this.uploading = [];
+
+    _this._initChunks();
+
+    _this.createdPromise["catch"](function () {
+      return {};
+    }); // silence uncaught rejection warning
+
+
+    return _this;
+  }
+
+  createClass_default()(S3Upload, [{
+    key: "_initChunks",
+    value: function _initChunks() {
+      var chunks = [];
+      var desiredChunkSize = getChunkSize(this.file); // at least 5MB per request, at most 10k requests
+
+      var minChunkSize = Math.max(5 * MB, Math.ceil(this.file.size / 10000));
+      var chunkSize = Math.max(desiredChunkSize, minChunkSize);
+
+      for (var i = 0; i < this.file.size; i += chunkSize) {
+        var end = Math.min(this.file.size, i + chunkSize);
+        chunks.push(this.file.slice(i, end));
+      }
+
+      this.chunks = chunks;
+      this.chunkState = chunks.map(function () {
+        return {
+          uploaded: 0,
+          busy: false,
+          done: false
+        };
+      });
+    }
+  }, {
+    key: "_createUpload",
+    value: function _createUpload() {
+      var _this2 = this;
+
+      this.createdPromise = createMultipartUpload(this.file, this.s3UploadDir, this.endpoint);
+      return this.createdPromise.then(function (result) {
+        var valid = typeof_default()(result) === "object" && result && typeof result.uploadId === "string" && typeof result.key === "string";
+
+        if (!valid) {
+          throw new TypeError("AwsS3/Multipart: Got incorrect result from `createMultipartUpload()`, expected an object `{ uploadId, key }`.");
+        }
+
+        _this2.key = result.key;
+        _this2.uploadId = result.uploadId;
+
+        if (_this2.options.onStart) {
+          _this2.options.onStart(result);
+        }
+
+        _this2._uploadParts();
+      })["catch"](function (err) {
+        _this2._onError(err);
+      });
+    }
+  }, {
+    key: "_resumeUpload",
+    value: function _resumeUpload() {
+      var _this3 = this;
+
+      if (!this.key || !this.uploadId) {
+        return Promise.resolve();
+      }
+
+      return s3_upload_listParts({
+        uploadId: this.uploadId,
+        key: this.key,
+        endpoint: this.endpoint
+      }).then(function (parts) {
+        parts.forEach(function (part) {
+          var i = part.PartNumber - 1;
+          _this3.chunkState[i] = {
+            uploaded: part.Size,
+            etag: part.ETag,
+            done: true,
+            busy: false
+          }; // Only add if we did not yet know about this part.
+
+          if (!_this3.parts.some(function (p) {
+            return p.PartNumber === part.PartNumber;
+          })) {
+            _this3.parts.push({
+              ETag: part.ETag,
+              PartNumber: part.PartNumber
+            });
+          }
+        });
+
+        _this3._uploadParts();
+      })["catch"](function (err) {
+        _this3._onError(err);
+      });
+    }
+  }, {
+    key: "_uploadParts",
+    value: function _uploadParts() {
+      var _this4 = this;
+
+      if (this.isPaused) {
+        return;
+      }
+
+      var need = (this.options.limit || 1) - this.uploading.length;
+
+      if (need === 0) {
+        return;
+      } // All parts are uploaded.
+
+
+      if (this.chunkState.every(function (state) {
+        return state.done;
+      })) {
+        void this._completeUpload();
+        return;
+      }
+
+      var candidates = [];
+
+      for (var i = 0; i < this.chunkState.length; i++) {
+        var state = this.chunkState[i];
+        if (state.done || state.busy) continue;
+        candidates.push(i);
+
+        if (candidates.length >= need) {
+          break;
+        }
+      }
+
+      candidates.forEach(function (index) {
+        void _this4._uploadPart(index);
+      });
+    }
+  }, {
+    key: "_uploadPart",
+    value: function _uploadPart(index) {
+      var _this5 = this;
+
+      this.chunkState[index].busy = true;
+
+      if (!this.key || !this.uploadId) {
+        return Promise.resolve();
+      }
+
+      return s3_upload_prepareUploadPart({
+        key: this.key,
+        uploadId: this.uploadId,
+        number: index + 1,
+        endpoint: this.endpoint
+      }).then(function (result) {
+        var valid = typeof_default()(result) === "object" && result && typeof result.url === "string";
+
+        if (!valid) {
+          throw new TypeError("AwsS3/Multipart: Got incorrect result from `prepareUploadPart()`, expected an object `{ url }`.");
+        }
+
+        return result;
+      }).then(function (_ref5) {
+        var url = _ref5.url;
+
+        _this5._uploadPartBytes(index, url);
+      }, function (err) {
+        _this5._onError(err);
+      });
+    }
+  }, {
+    key: "_onPartProgress",
+    value: function _onPartProgress(index, sent) {
+      this.chunkState[index].uploaded = sent;
+
+      if (this.options.onProgress) {
+        var totalUploaded = this.chunkState.reduce(function (n, c) {
+          return n + c.uploaded;
+        }, 0);
+        this.options.onProgress(totalUploaded, this.file.size);
+      }
+    }
+  }, {
+    key: "_onPartComplete",
+    value: function _onPartComplete(index, etag) {
+      this.chunkState[index].etag = etag;
+      this.chunkState[index].done = true;
+      var part = {
+        PartNumber: index + 1,
+        ETag: etag
+      };
+      this.parts.push(part);
+
+      if (this.options.onPartComplete) {
+        this.options.onPartComplete(part);
+      }
+
+      this._uploadParts();
+    }
+  }, {
+    key: "_uploadPartBytes",
+    value: function _uploadPartBytes(index, url) {
+      var _this6 = this;
+
+      var body = this.chunks[index];
+      var xhr = new XMLHttpRequest();
+      xhr.open("PUT", url, true);
+      xhr.responseType = "text";
+      this.uploading.push(xhr);
+      xhr.upload.addEventListener("progress", function (ev) {
+        if (!ev.lengthComputable) return;
+
+        _this6._onPartProgress(index, ev.loaded);
+      });
+      xhr.addEventListener("abort", function (ev) {
+        remove(_this6.uploading, ev.target);
+        _this6.chunkState[index].busy = false;
+      });
+      xhr.addEventListener("load", function (ev) {
+        var target = ev.target;
+        remove(_this6.uploading, target);
+        _this6.chunkState[index].busy = false;
+
+        if (target.status < 200 || target.status >= 300) {
+          _this6._onError(new Error("Non 2xx"));
+
+          return;
+        }
+
+        _this6._onPartProgress(index, body.size); // NOTE This must be allowed by CORS.
+
+
+        var etag = target.getResponseHeader("ETag");
+
+        if (etag === null) {
+          _this6._onError(new Error("AwsS3/Multipart: Could not read the ETag header. This likely means CORS is not configured correctly on the S3 Bucket. See https://uppy.io/docs/aws-s3-multipart#S3-Bucket-Configuration for instructions."));
+
+          return;
+        }
+
+        _this6._onPartComplete(index, etag);
+      });
+      xhr.addEventListener("error", function (ev) {
+        remove(_this6.uploading, ev.target);
+        _this6.chunkState[index].busy = false;
+        var error = new Error("Unknown error"); // error.source = ev.target
+
+        _this6._onError(error);
+      });
+      xhr.send(body);
+    }
+  }, {
+    key: "_completeUpload",
+    value: function _completeUpload() {
+      var _this7 = this;
+
+      // Parts may not have completed uploading in sorted order, if limit > 1.
+      this.parts.sort(function (a, b) {
+        return a.PartNumber - b.PartNumber;
+      });
+
+      if (!this.uploadId || !this.key) {
+        return Promise.resolve();
+      }
+
+      return s3_upload_completeMultipartUpload({
+        key: this.key,
+        uploadId: this.uploadId,
+        parts: this.parts,
+        endpoint: this.endpoint
+      }).then(function (result) {
+        if (_this7.options.onSuccess) {
+          _this7.options.onSuccess(result);
+        }
+      }, function (err) {
+        _this7._onError(err);
+      });
+    }
+  }, {
+    key: "_onError",
+    value: function _onError(error) {
+      if (this.options.onError) {
+        this.options.onError(error);
+      } else {
+        throw error;
+      }
+    }
+  }, {
+    key: "start",
+    value: function start() {
+      this.isPaused = false;
+
+      if (this.uploadId) {
+        void this._resumeUpload();
+      } else {
+        void this._createUpload();
+      }
+    }
+  }, {
+    key: "pause",
+    value: function pause() {
+      var inProgress = this.uploading.slice();
+      inProgress.forEach(function (xhr) {
+        xhr.abort();
+      });
+      this.isPaused = true;
+    }
+  }, {
+    key: "abort",
+    value: function abort() {
+      var _this8 = this;
+
+      this.uploading.slice().forEach(function (xhr) {
+        xhr.abort();
+      });
+      this.createdPromise.then(function () {
+        if (_this8.key && _this8.uploadId) {
+          void s3_upload_abortMultipartUpload({
+            key: _this8.key,
+            uploadId: _this8.uploadId,
+            endpoint: _this8.endpoint
+          });
+        }
+      }, function () {// if the creation failed we do not need to abort
+      });
+      this.uploading = [];
+    }
+  }]);
+
+  return S3Upload;
+}(base_upload);
+
+/* harmony default export */ var s3_upload = (s3_upload_S3Upload);
+// CONCATENATED MODULE: ./src/uploaded_file.ts
+
+
+
+
+
+
+
+function uploaded_file_createSuper(Derived) { var hasNativeReflectConstruct = uploaded_file_isNativeReflectConstruct(); return function _createSuperInternal() { var Super = getPrototypeOf_default()(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = getPrototypeOf_default()(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return possibleConstructorReturn_default()(this, result); }; }
+
+function uploaded_file_isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+
+
+var uploaded_file_BaseUploadedFile = /*#__PURE__*/function (_BaseUpload) {
+  inherits_default()(BaseUploadedFile, _BaseUpload);
+
+  var _super = uploaded_file_createSuper(BaseUploadedFile);
+
+  // true for placeholder, false for S3, undefined for regular files
+  function BaseUploadedFile(initialFile, uploadIndex) {
+    var _this;
+
+    classCallCheck_default()(this, BaseUploadedFile);
+
+    _this = _super.call(this, "done", uploadIndex);
+
+    defineProperty_default()(assertThisInitialized_default()(_this), "id", void 0);
+
+    defineProperty_default()(assertThisInitialized_default()(_this), "name", void 0);
+
+    defineProperty_default()(assertThisInitialized_default()(_this), "placeholder", void 0);
+
+    defineProperty_default()(assertThisInitialized_default()(_this), "size", void 0);
+
+    defineProperty_default()(assertThisInitialized_default()(_this), "url", void 0);
+
+    _this.id = initialFile.id;
+    _this.name = initialFile.name;
+    _this.size = initialFile.size;
+    return _this;
+  }
+
+  return BaseUploadedFile;
+}(base_upload);
+
+var uploaded_file_PlaceholderFile = /*#__PURE__*/function (_BaseUploadedFile) {
+  inherits_default()(PlaceholderFile, _BaseUploadedFile);
+
+  var _super2 = uploaded_file_createSuper(PlaceholderFile);
+
+  function PlaceholderFile(initialFile, uploadIndex) {
+    var _this2;
+
+    classCallCheck_default()(this, PlaceholderFile);
+
+    _this2 = _super2.call(this, initialFile, uploadIndex);
+    _this2.placeholder = true;
+    return _this2;
+  }
+
+  return PlaceholderFile;
+}(uploaded_file_BaseUploadedFile);
+
+var uploaded_file_UploadedS3File = /*#__PURE__*/function (_BaseUploadedFile2) {
+  inherits_default()(UploadedS3File, _BaseUploadedFile2);
+
+  var _super3 = uploaded_file_createSuper(UploadedS3File);
+
+  function UploadedS3File(initialFile, uploadIndex) {
+    var _this3;
+
+    classCallCheck_default()(this, UploadedS3File);
+
+    _this3 = _super3.call(this, initialFile, uploadIndex);
+
+    defineProperty_default()(assertThisInitialized_default()(_this3), "original_name", void 0);
+
+    _this3.original_name = initialFile.original_name || initialFile.name;
+    _this3.placeholder = false;
+    return _this3;
+  }
+
+  return UploadedS3File;
+}(uploaded_file_BaseUploadedFile);
+
+var uploaded_file_UploadedFile = /*#__PURE__*/function (_BaseUploadedFile3) {
+  inherits_default()(UploadedFile, _BaseUploadedFile3);
+
+  var _super4 = uploaded_file_createSuper(UploadedFile);
+
+  function UploadedFile(initialFile, uploadUrl, uploadIndex) {
+    var _this4;
+
+    classCallCheck_default()(this, UploadedFile);
+
+    _this4 = _super4.call(this, initialFile, uploadIndex);
+    _this4.url = "".concat(uploadUrl).concat(initialFile.id);
+    return _this4;
+  }
+
+  return UploadedFile;
+}(uploaded_file_BaseUploadedFile);
+
+var createUploadedFile = function createUploadedFile(initialFile, uploadUrl, uploadIndex) {
+  if (initialFile.placeholder === true) {
+    return new uploaded_file_PlaceholderFile(initialFile, uploadIndex);
+  } else if (initialFile.placeholder === false) {
+    return new uploaded_file_UploadedS3File(initialFile, uploadIndex);
+  } else {
+    return new uploaded_file_UploadedFile(initialFile, uploadUrl, uploadIndex);
+  }
+};
 // EXTERNAL MODULE: ./node_modules/js-base64/base64.js
-var base64 = __webpack_require__(21);
+var base64 = __webpack_require__(25);
 
 // EXTERNAL MODULE: ./node_modules/url-parse/index.js
-var url_parse = __webpack_require__(22);
+var url_parse = __webpack_require__(26);
 var url_parse_default = /*#__PURE__*/__webpack_require__.n(url_parse);
 
 // CONCATENATED MODULE: ./node_modules/tus-js-client/lib.esm/error.js
@@ -2137,7 +3470,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
-function _createSuper(Derived) { return function () { var Super = _getPrototypeOf(Derived), result; if (_isNativeReflectConstruct()) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+function error_createSuper(Derived) { return function () { var Super = _getPrototypeOf(Derived), result; if (error_isNativeReflectConstruct()) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
 
 function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
 
@@ -2145,9 +3478,9 @@ function _assertThisInitialized(self) { if (self === void 0) { throw new Referen
 
 function _wrapNativeSuper(Class) { var _cache = typeof Map === "function" ? new Map() : undefined; _wrapNativeSuper = function _wrapNativeSuper(Class) { if (Class === null || !_isNativeFunction(Class)) return Class; if (typeof Class !== "function") { throw new TypeError("Super expression must either be null or a function"); } if (typeof _cache !== "undefined") { if (_cache.has(Class)) return _cache.get(Class); _cache.set(Class, Wrapper); } function Wrapper() { return _construct(Class, arguments, _getPrototypeOf(this).constructor); } Wrapper.prototype = Object.create(Class.prototype, { constructor: { value: Wrapper, enumerable: false, writable: true, configurable: true } }); return _setPrototypeOf(Wrapper, Class); }; return _wrapNativeSuper(Class); }
 
-function _construct(Parent, args, Class) { if (_isNativeReflectConstruct()) { _construct = Reflect.construct; } else { _construct = function _construct(Parent, args, Class) { var a = [null]; a.push.apply(a, args); var Constructor = Function.bind.apply(Parent, a); var instance = new Constructor(); if (Class) _setPrototypeOf(instance, Class.prototype); return instance; }; } return _construct.apply(null, arguments); }
+function _construct(Parent, args, Class) { if (error_isNativeReflectConstruct()) { _construct = Reflect.construct; } else { _construct = function _construct(Parent, args, Class) { var a = [null]; a.push.apply(a, args); var Constructor = Function.bind.apply(Parent, a); var instance = new Constructor(); if (Class) _setPrototypeOf(instance, Class.prototype); return instance; }; } return _construct.apply(null, arguments); }
 
-function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+function error_isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
 
 function _isNativeFunction(fn) { return Function.toString.call(fn).indexOf("[native code]") !== -1; }
 
@@ -2158,7 +3491,7 @@ function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.g
 var DetailedError = /*#__PURE__*/function (_Error) {
   _inherits(DetailedError, _Error);
 
-  var _super = _createSuper(DetailedError);
+  var _super = error_createSuper(DetailedError);
 
   function DetailedError(message) {
     var _this;
@@ -3980,1336 +5313,6 @@ var _window = window,
     browser_Blob = _window.Blob;
 var isSupported = browser_XMLHttpRequest && browser_Blob && typeof browser_Blob.prototype.slice === "function";
 
-// EXTERNAL MODULE: ./src/util.ts
-var util = __webpack_require__(3);
-
-// EXTERNAL MODULE: ./node_modules/escape-html/index.js
-var escape_html = __webpack_require__(23);
-var escape_html_default = /*#__PURE__*/__webpack_require__.n(escape_html);
-
-// CONCATENATED MODULE: ./src/render_upload_file.ts
-
-
-
-
-
-
-var render_upload_file_RenderUploadFile = /*#__PURE__*/function () {
-  function RenderUploadFile(_ref) {
-    var _parent = _ref.parent,
-        input = _ref.input,
-        skipRequired = _ref.skipRequired,
-        translations = _ref.translations;
-
-    classCallCheck_default()(this, RenderUploadFile);
-
-    defineProperty_default()(this, "container", void 0);
-
-    defineProperty_default()(this, "input", void 0);
-
-    defineProperty_default()(this, "translations", void 0);
-
-    defineProperty_default()(this, "createFilesContainer", function (parent) {
-      var div = document.createElement("div");
-      div.className = "dff-files";
-      parent.appendChild(div);
-      return div;
-    });
-
-    this.container = this.createFilesContainer(_parent);
-    this.input = input;
-    this.translations = translations;
-
-    if (skipRequired) {
-      this.input.required = false;
-    }
-  }
-
-  createClass_default()(RenderUploadFile, [{
-    key: "addUploadedFile",
-    value: function addUploadedFile(filename, uploadIndex, filesize) {
-      var element = this.addFile(filename, uploadIndex);
-      this.setSuccess(uploadIndex, filesize);
-      return element;
-    }
-  }, {
-    key: "addNewUpload",
-    value: function addNewUpload(filename, uploadIndex) {
-      var div = this.addFile(filename, uploadIndex);
-      var progressSpan = document.createElement("span");
-      progressSpan.className = "dff-progress";
-      var innerSpan = document.createElement("span");
-      innerSpan.className = "dff-progress-inner";
-      progressSpan.appendChild(innerSpan);
-      div.appendChild(progressSpan);
-      var cancelLink = document.createElement("a");
-      cancelLink.className = "dff-cancel";
-      cancelLink.innerHTML = this.translations.Cancel;
-      cancelLink.setAttribute("data-index", "".concat(uploadIndex));
-      cancelLink.href = "#";
-      div.appendChild(cancelLink);
-      return div;
-    }
-  }, {
-    key: "addFile",
-    value: function addFile(filename, uploadIndex) {
-      var div = document.createElement("div");
-      div.className = "dff-file dff-file-id-".concat(uploadIndex);
-      var nameSpan = document.createElement("span");
-      nameSpan.innerHTML = escape_html_default()(filename);
-      div.appendChild(nameSpan);
-      this.container.appendChild(div);
-      this.input.required = false;
-      return div;
-    }
-  }, {
-    key: "deleteFile",
-    value: function deleteFile(index) {
-      var div = this.findFileDiv(index);
-
-      if (div) {
-        div.remove();
-      }
-    }
-  }, {
-    key: "setError",
-    value: function setError(index) {
-      var span = document.createElement("span");
-      span.classList.add("dff-error");
-      span.innerHTML = this.translations["Upload failed"];
-      var el = this.findFileDiv(index);
-
-      if (el) {
-        el.appendChild(span);
-        el.classList.add("dff-upload-fail");
-      }
-
-      this.removeProgress(index);
-      this.removeCancel(index);
-    }
-  }, {
-    key: "setDeleteFailed",
-    value: function setDeleteFailed(index) {
-      var el = this.findFileDiv(index);
-
-      if (el) {
-        var span = document.createElement("span");
-        span.innerHTML = this.translations["Delete failed"];
-        el.appendChild(span);
-      }
-
-      this.enableDelete(index);
-    }
-  }, {
-    key: "findFileDiv",
-    value: function findFileDiv(index) {
-      return this.container.querySelector(".dff-file-id-".concat(index));
-    }
-  }, {
-    key: "setSuccess",
-    value: function setSuccess(index, size) {
-      var translations = this.translations;
-      var el = this.findFileDiv(index);
-
-      if (el) {
-        el.classList.add("dff-upload-success");
-        var fileSizeInfo = document.createElement("span");
-        fileSizeInfo.innerHTML = Object(util["b" /* formatBytes */])(size, 2);
-        fileSizeInfo.className = "dff-filesize";
-        el.appendChild(fileSizeInfo);
-        var deleteLink = document.createElement("a");
-        deleteLink.innerHTML = translations.Delete;
-        deleteLink.className = "dff-delete";
-        deleteLink.setAttribute("data-index", "".concat(index));
-        deleteLink.href = "#";
-        el.appendChild(deleteLink);
-      }
-
-      this.removeProgress(index);
-      this.removeCancel(index);
-    }
-  }, {
-    key: "removeProgress",
-    value: function removeProgress(index) {
-      var el = this.findFileDiv(index);
-
-      if (el) {
-        var progressSpan = el.querySelector(".dff-progress");
-
-        if (progressSpan) {
-          progressSpan.remove();
-        }
-      }
-    }
-  }, {
-    key: "removeCancel",
-    value: function removeCancel(index) {
-      var el = this.findFileDiv(index);
-
-      if (el) {
-        var cancelSpan = el.querySelector(".dff-cancel");
-
-        if (cancelSpan) {
-          cancelSpan.remove();
-        }
-      }
-    }
-  }, {
-    key: "clearInput",
-    value: function clearInput() {
-      var input = this.input;
-      input.value = "";
-    }
-  }, {
-    key: "updateProgress",
-    value: function updateProgress(index, percentage) {
-      var el = this.container.querySelector(".dff-file-id-".concat(index));
-
-      if (el) {
-        var innerProgressSpan = el.querySelector(".dff-progress-inner");
-
-        if (innerProgressSpan) {
-          innerProgressSpan.style.width = "".concat(percentage, "%");
-        }
-      }
-    }
-  }, {
-    key: "renderDropHint",
-    value: function renderDropHint() {
-      if (this.container.querySelector(".dff-drop-hint")) {
-        return;
-      }
-
-      var dropHint = document.createElement("div");
-      dropHint.className = "dff-drop-hint";
-      dropHint.innerHTML = this.translations["Drop your files here"];
-      this.container.appendChild(dropHint);
-    }
-  }, {
-    key: "removeDropHint",
-    value: function removeDropHint() {
-      var dropHint = this.container.querySelector(".dff-drop-hint");
-
-      if (dropHint) {
-        dropHint.remove();
-      }
-    }
-  }, {
-    key: "disableDelete",
-    value: function disableDelete(index) {
-      var deleteLink = this.findDeleteLink(index);
-
-      if (deleteLink) {
-        deleteLink.classList.add("dff-disabled");
-      }
-    }
-  }, {
-    key: "enableDelete",
-    value: function enableDelete(index) {
-      var deleteLink = this.findDeleteLink(index);
-
-      if (deleteLink) {
-        deleteLink.classList.remove("dff-disabled");
-      }
-    }
-  }, {
-    key: "findDeleteLink",
-    value: function findDeleteLink(index) {
-      var div = this.findFileDiv(index);
-
-      if (!div) {
-        return div;
-      }
-
-      return div.querySelector(".dff-delete");
-    }
-  }]);
-
-  return RenderUploadFile;
-}();
-
-/* harmony default export */ var render_upload_file = (render_upload_file_RenderUploadFile);
-// EXTERNAL MODULE: ./node_modules/@babel/runtime/regenerator/index.js
-var regenerator = __webpack_require__(4);
-var regenerator_default = /*#__PURE__*/__webpack_require__.n(regenerator);
-
-// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/asyncToGenerator.js
-var asyncToGenerator = __webpack_require__(9);
-var asyncToGenerator_default = /*#__PURE__*/__webpack_require__.n(asyncToGenerator);
-
-// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/asyncIterator.js
-var asyncIterator = __webpack_require__(24);
-var asyncIterator_default = /*#__PURE__*/__webpack_require__.n(asyncIterator);
-
-// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/slicedToArray.js
-var slicedToArray = __webpack_require__(25);
-var slicedToArray_default = /*#__PURE__*/__webpack_require__.n(slicedToArray);
-
-// EXTERNAL MODULE: ./node_modules/mime/lite.js
-var lite = __webpack_require__(26);
-var lite_default = /*#__PURE__*/__webpack_require__.n(lite);
-
-// EXTERNAL MODULE: ./node_modules/picomatch/index.js
-var picomatch = __webpack_require__(17);
-var picomatch_default = /*#__PURE__*/__webpack_require__.n(picomatch);
-
-// CONCATENATED MODULE: ./src/accepted_file_types.ts
-
-
-
-
-
-
-
-var parseInputAccept = function parseInputAccept(inputAccept) {
-  var extensions = [];
-  var mimeTypes = [];
-  inputAccept.split(",").map(function (mimeType) {
-    return mimeType.trim();
-  }).filter(Boolean).forEach(function (fileType) {
-    if (fileType.startsWith(".")) {
-      extensions.push("*".concat(fileType));
-    } else {
-      mimeTypes.push(fileType);
-    }
-  });
-  return [extensions, mimeTypes];
-};
-
-var accepted_file_types_AcceptedFileTypes = /*#__PURE__*/function () {
-  function AcceptedFileTypes(inputAccept) {
-    classCallCheck_default()(this, AcceptedFileTypes);
-
-    defineProperty_default()(this, "extensions", void 0);
-
-    defineProperty_default()(this, "mimeTypes", void 0);
-
-    var _parseInputAccept = parseInputAccept(inputAccept),
-        _parseInputAccept2 = slicedToArray_default()(_parseInputAccept, 2),
-        extensions = _parseInputAccept2[0],
-        mimeTypes = _parseInputAccept2[1];
-
-    this.extensions = extensions;
-    this.mimeTypes = mimeTypes;
-  }
-
-  createClass_default()(AcceptedFileTypes, [{
-    key: "isAccepted",
-    value: function isAccepted(fileName) {
-      if (this.extensions.length === 0 && this.mimeTypes.length === 0) {
-        return true;
-      }
-
-      return this.isMimeTypeAccepted(lite_default.a.getType(fileName)) || this.isExtensionAccepted(fileName);
-    }
-  }, {
-    key: "isMimeTypeAccepted",
-    value: function isMimeTypeAccepted(mimeType) {
-      if (this.mimeTypes.length === 0) {
-        return false;
-      }
-
-      return picomatch_default.a.isMatch(mimeType, this.mimeTypes);
-    }
-  }, {
-    key: "isExtensionAccepted",
-    value: function isExtensionAccepted(fileName) {
-      if (this.extensions.length === 0) {
-        return false;
-      }
-
-      return picomatch_default.a.isMatch(fileName, this.extensions);
-    }
-  }]);
-
-  return AcceptedFileTypes;
-}();
-
-/* harmony default export */ var accepted_file_types = (accepted_file_types_AcceptedFileTypes);
-// CONCATENATED MODULE: ./src/drop_area.ts
-
-
-
-
-
-
-
-
-var getEntriesFromDirectory = /*#__PURE__*/function () {
-  var _ref = asyncToGenerator_default()( /*#__PURE__*/regenerator_default.a.mark(function _callee(directoryEntry) {
-    return regenerator_default.a.wrap(function _callee$(_context) {
-      while (1) {
-        switch (_context.prev = _context.next) {
-          case 0:
-            return _context.abrupt("return", new Promise(function (resolve, reject) {
-              return directoryEntry.createReader().readEntries(resolve, reject);
-            }));
-
-          case 1:
-          case "end":
-            return _context.stop();
-        }
-      }
-    }, _callee);
-  }));
-
-  return function getEntriesFromDirectory(_x) {
-    return _ref.apply(this, arguments);
-  };
-}();
-
-var getFileFromFileEntry = /*#__PURE__*/function () {
-  var _ref2 = asyncToGenerator_default()( /*#__PURE__*/regenerator_default.a.mark(function _callee2(fileEntry) {
-    return regenerator_default.a.wrap(function _callee2$(_context2) {
-      while (1) {
-        switch (_context2.prev = _context2.next) {
-          case 0:
-            return _context2.abrupt("return", new Promise(function (resolve, reject) {
-              return fileEntry.file(resolve, reject);
-            }));
-
-          case 1:
-          case "end":
-            return _context2.stop();
-        }
-      }
-    }, _callee2);
-  }));
-
-  return function getFileFromFileEntry(_x2) {
-    return _ref2.apply(this, arguments);
-  };
-}();
-
-var getFilesFromFileSystemEntries = /*#__PURE__*/function () {
-  var _ref3 = asyncToGenerator_default()( /*#__PURE__*/regenerator_default.a.mark(function _callee3(entries) {
-    var result, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, _value, entry, file, entriesFromDirectory, _files;
-
-    return regenerator_default.a.wrap(function _callee3$(_context3) {
-      while (1) {
-        switch (_context3.prev = _context3.next) {
-          case 0:
-            result = [];
-            _iteratorNormalCompletion = true;
-            _didIteratorError = false;
-            _context3.prev = 3;
-            _iterator = asyncIterator_default()(entries);
-
-          case 5:
-            _context3.next = 7;
-            return _iterator.next();
-
-          case 7:
-            _step = _context3.sent;
-            _iteratorNormalCompletion = _step.done;
-            _context3.next = 11;
-            return _step.value;
-
-          case 11:
-            _value = _context3.sent;
-
-            if (_iteratorNormalCompletion) {
-              _context3.next = 32;
-              break;
-            }
-
-            entry = _value;
-
-            if (!entry.isFile) {
-              _context3.next = 21;
-              break;
-            }
-
-            _context3.next = 17;
-            return getFileFromFileEntry(entry);
-
-          case 17:
-            file = _context3.sent;
-            result.push(file);
-            _context3.next = 29;
-            break;
-
-          case 21:
-            if (!entry.isDirectory) {
-              _context3.next = 29;
-              break;
-            }
-
-            _context3.next = 24;
-            return getEntriesFromDirectory(entry);
-
-          case 24:
-            entriesFromDirectory = _context3.sent;
-            _context3.next = 27;
-            return getFilesFromFileSystemEntries(entriesFromDirectory);
-
-          case 27:
-            _files = _context3.sent;
-
-            _files.forEach(function (file) {
-              return result.push(file);
-            });
-
-          case 29:
-            _iteratorNormalCompletion = true;
-            _context3.next = 5;
-            break;
-
-          case 32:
-            _context3.next = 38;
-            break;
-
-          case 34:
-            _context3.prev = 34;
-            _context3.t0 = _context3["catch"](3);
-            _didIteratorError = true;
-            _iteratorError = _context3.t0;
-
-          case 38:
-            _context3.prev = 38;
-            _context3.prev = 39;
-
-            if (!(!_iteratorNormalCompletion && _iterator["return"] != null)) {
-              _context3.next = 43;
-              break;
-            }
-
-            _context3.next = 43;
-            return _iterator["return"]();
-
-          case 43:
-            _context3.prev = 43;
-
-            if (!_didIteratorError) {
-              _context3.next = 46;
-              break;
-            }
-
-            throw _iteratorError;
-
-          case 46:
-            return _context3.finish(43);
-
-          case 47:
-            return _context3.finish(38);
-
-          case 48:
-            return _context3.abrupt("return", result);
-
-          case 49:
-          case "end":
-            return _context3.stop();
-        }
-      }
-    }, _callee3, null, [[3, 34, 38, 48], [39,, 43, 47]]);
-  }));
-
-  return function getFilesFromFileSystemEntries(_x3) {
-    return _ref3.apply(this, arguments);
-  };
-}();
-
-var getFilesFromDataTransfer = /*#__PURE__*/function () {
-  var _ref4 = asyncToGenerator_default()( /*#__PURE__*/regenerator_default.a.mark(function _callee4(dataTransfer) {
-    var entries, _files2;
-
-    return regenerator_default.a.wrap(function _callee4$(_context4) {
-      while (1) {
-        switch (_context4.prev = _context4.next) {
-          case 0:
-            if (!dataTransfer.items) {
-              _context4.next = 8;
-              break;
-            }
-
-            entries = toConsumableArray_default()(dataTransfer.items).map(function (item) {
-              return item.webkitGetAsEntry();
-            });
-            _context4.next = 4;
-            return getFilesFromFileSystemEntries(entries);
-
-          case 4:
-            _files2 = _context4.sent;
-            return _context4.abrupt("return", _files2);
-
-          case 8:
-            return _context4.abrupt("return", toConsumableArray_default()(dataTransfer.files));
-
-          case 9:
-          case "end":
-            return _context4.stop();
-        }
-      }
-    }, _callee4);
-  }));
-
-  return function getFilesFromDataTransfer(_x4) {
-    return _ref4.apply(this, arguments);
-  };
-}();
-
-var drop_area_DropArea = function DropArea(_ref5) {
-  var _this = this;
-
-  var container = _ref5.container,
-      inputAccept = _ref5.inputAccept,
-      onUploadFiles = _ref5.onUploadFiles;
-
-  classCallCheck_default()(this, DropArea);
-
-  defineProperty_default()(this, "acceptedFileTypes", void 0);
-
-  defineProperty_default()(this, "container", void 0);
-
-  defineProperty_default()(this, "onUploadFiles", void 0);
-
-  defineProperty_default()(this, "onDrop", function (e) {
-    var dragEvent = e;
-
-    _this.container.classList.remove("dff-dropping");
-
-    dragEvent.preventDefault();
-    dragEvent.stopPropagation();
-
-    var uploadFiles = /*#__PURE__*/function () {
-      var _ref6 = asyncToGenerator_default()( /*#__PURE__*/regenerator_default.a.mark(function _callee5() {
-        var _files3, acceptedFiles;
-
-        return regenerator_default.a.wrap(function _callee5$(_context5) {
-          while (1) {
-            switch (_context5.prev = _context5.next) {
-              case 0:
-                _context5.prev = 0;
-
-                if (!dragEvent.dataTransfer) {
-                  _context5.next = 7;
-                  break;
-                }
-
-                _context5.next = 4;
-                return getFilesFromDataTransfer(dragEvent.dataTransfer);
-
-              case 4:
-                _files3 = _context5.sent;
-                acceptedFiles = _files3.filter(function (file) {
-                  return _this.acceptedFileTypes.isAccepted(file.name);
-                });
-
-                _this.onUploadFiles(acceptedFiles);
-
-              case 7:
-                _context5.next = 12;
-                break;
-
-              case 9:
-                _context5.prev = 9;
-                _context5.t0 = _context5["catch"](0);
-                console.error(_context5.t0);
-
-              case 12:
-              case "end":
-                return _context5.stop();
-            }
-          }
-        }, _callee5, null, [[0, 9]]);
-      }));
-
-      return function uploadFiles() {
-        return _ref6.apply(this, arguments);
-      };
-    }();
-
-    void uploadFiles();
-  });
-
-  this.container = container;
-  this.onUploadFiles = onUploadFiles;
-  this.acceptedFileTypes = new accepted_file_types(inputAccept);
-  container.addEventListener("dragenter", function () {
-    container.classList.add("dff-dropping");
-  });
-  container.addEventListener("dragleave", function () {
-    container.classList.remove("dff-dropping");
-  });
-  container.addEventListener("dragover", function (e) {
-    container.classList.add("dff-dropping");
-    e.preventDefault();
-  });
-  container.addEventListener("drop", this.onDrop);
-};
-
-/* harmony default export */ var drop_area = (drop_area_DropArea);
-// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/typeof.js
-var helpers_typeof = __webpack_require__(13);
-var typeof_default = /*#__PURE__*/__webpack_require__.n(helpers_typeof);
-
-// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/assertThisInitialized.js
-var assertThisInitialized = __webpack_require__(1);
-var assertThisInitialized_default = /*#__PURE__*/__webpack_require__.n(assertThisInitialized);
-
-// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/inherits.js
-var inherits = __webpack_require__(6);
-var inherits_default = /*#__PURE__*/__webpack_require__.n(inherits);
-
-// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/possibleConstructorReturn.js
-var possibleConstructorReturn = __webpack_require__(8);
-var possibleConstructorReturn_default = /*#__PURE__*/__webpack_require__.n(possibleConstructorReturn);
-
-// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/getPrototypeOf.js
-var getPrototypeOf = __webpack_require__(7);
-var getPrototypeOf_default = /*#__PURE__*/__webpack_require__.n(getPrototypeOf);
-
-// EXTERNAL MODULE: ./node_modules/url-join/lib/url-join.js
-var url_join = __webpack_require__(11);
-var url_join_default = /*#__PURE__*/__webpack_require__.n(url_join);
-
-// CONCATENATED MODULE: ./src/base_upload.ts
-
-
-
-var base_upload_BaseUpload = function BaseUpload(status) {
-  classCallCheck_default()(this, BaseUpload);
-
-  defineProperty_default()(this, "status", void 0);
-
-  this.status = status;
-};
-
-/* harmony default export */ var base_upload = (base_upload_BaseUpload);
-// CONCATENATED MODULE: ./src/s3_upload.ts
-
-
-
-
-
-
-
-
-
-function s3_upload_createSuper(Derived) { var hasNativeReflectConstruct = s3_upload_isNativeReflectConstruct(); return function _createSuperInternal() { var Super = getPrototypeOf_default()(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = getPrototypeOf_default()(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return possibleConstructorReturn_default()(this, result); }; }
-
-function s3_upload_isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
-
-// The following code is adapted from https://github.com/transloadit/uppy/blob/master/packages/%40uppy/aws-s3-multipart/src/MultipartUploader.js
-// which is released under a MIT License (https://github.com/transloadit/uppy/blob/master/LICENSE)
-
-
-var MB = 1024 * 1024;
-
-var getChunkSize = function getChunkSize(file) {
-  return Math.ceil(file.size / 10000);
-};
-
-var createMultipartUpload = function createMultipartUpload(file, s3UploadDir, endpoint) {
-  var csrftoken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
-  var headers = new Headers({
-    accept: "application/json",
-    "content-type": "application/json",
-    "X-CSRFToken": csrftoken
-  });
-  return fetch(endpoint, {
-    method: "post",
-    headers: headers,
-    body: JSON.stringify({
-      filename: file.name,
-      contentType: file.type,
-      s3UploadDir: s3UploadDir
-    })
-  }).then(function (response) {
-    return response.json();
-  }).then(function (data) {
-    return data;
-  });
-};
-
-var s3_upload_listParts = function listParts(_ref) {
-  var key = _ref.key,
-      uploadId = _ref.uploadId,
-      endpoint = _ref.endpoint;
-  var filename = encodeURIComponent(key);
-  var uploadIdEnc = encodeURIComponent(uploadId);
-  var url = url_join_default()(endpoint, uploadIdEnc, "?key=".concat(filename));
-  return fetch(url, {
-    method: "get"
-  }).then(function (response) {
-    return response.json();
-  }).then(function (data) {
-    return data["parts"];
-  });
-};
-
-var s3_upload_abortMultipartUpload = function abortMultipartUpload(_ref2) {
-  var key = _ref2.key,
-      uploadId = _ref2.uploadId,
-      endpoint = _ref2.endpoint;
-  var filename = encodeURIComponent(key);
-  var uploadIdEnc = encodeURIComponent(uploadId);
-  var csrftoken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
-  var headers = new Headers({
-    "X-CSRFToken": csrftoken
-  });
-  var url = url_join_default()(endpoint, uploadIdEnc, "?key=".concat(filename));
-  return fetch(url, {
-    method: "delete",
-    headers: headers
-  }).then(function (response) {
-    return response.json();
-  });
-};
-
-var s3_upload_prepareUploadPart = function prepareUploadPart(_ref3) {
-  var key = _ref3.key,
-      uploadId = _ref3.uploadId,
-      number = _ref3.number,
-      endpoint = _ref3.endpoint;
-  var filename = encodeURIComponent(key);
-  var csrftoken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
-  var headers = new Headers({
-    "X-CSRFToken": csrftoken
-  });
-  var url = url_join_default()(endpoint, uploadId, "".concat(number), "?key=".concat(filename));
-  return fetch(url, {
-    method: "get",
-    headers: headers
-  }).then(function (response) {
-    return response.json();
-  }).then(function (data) {
-    return data;
-  });
-};
-
-var s3_upload_completeMultipartUpload = function completeMultipartUpload(_ref4) {
-  var key = _ref4.key,
-      uploadId = _ref4.uploadId,
-      parts = _ref4.parts,
-      endpoint = _ref4.endpoint;
-  var filename = encodeURIComponent(key);
-  var uploadIdEnc = encodeURIComponent(uploadId);
-  var csrftoken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
-  var headers = new Headers({
-    "X-CSRFToken": csrftoken
-  });
-  var url = url_join_default()(endpoint, uploadIdEnc, "complete", "?key=".concat(filename));
-  return fetch(url, {
-    method: "post",
-    headers: headers,
-    body: JSON.stringify({
-      parts: parts
-    })
-  }).then(function (response) {
-    return response.json();
-  }).then(function (data) {
-    return data;
-  });
-};
-
-function remove(arr, el) {
-  var i = arr.indexOf(el);
-
-  if (i !== -1) {
-    arr.splice(i, 1);
-  }
-}
-
-var s3_upload_S3Upload = /*#__PURE__*/function (_BaseUpload) {
-  inherits_default()(S3Upload, _BaseUpload);
-
-  var _super = s3_upload_createSuper(S3Upload);
-
-  function S3Upload(file, options) {
-    var _this;
-
-    classCallCheck_default()(this, S3Upload);
-
-    _this = _super.call(this, "uploading");
-
-    defineProperty_default()(assertThisInitialized_default()(_this), "chunkState", void 0);
-
-    defineProperty_default()(assertThisInitialized_default()(_this), "chunks", void 0);
-
-    defineProperty_default()(assertThisInitialized_default()(_this), "createdPromise", void 0);
-
-    defineProperty_default()(assertThisInitialized_default()(_this), "file", void 0);
-
-    defineProperty_default()(assertThisInitialized_default()(_this), "isPaused", void 0);
-
-    defineProperty_default()(assertThisInitialized_default()(_this), "key", void 0);
-
-    defineProperty_default()(assertThisInitialized_default()(_this), "options", void 0);
-
-    defineProperty_default()(assertThisInitialized_default()(_this), "parts", void 0);
-
-    defineProperty_default()(assertThisInitialized_default()(_this), "s3UploadDir", void 0);
-
-    defineProperty_default()(assertThisInitialized_default()(_this), "endpoint", void 0);
-
-    defineProperty_default()(assertThisInitialized_default()(_this), "uploadId", void 0);
-
-    defineProperty_default()(assertThisInitialized_default()(_this), "uploading", void 0);
-
-    _this.options = options;
-    _this.file = file;
-    _this.key = _this.options.key || null;
-    _this.uploadId = _this.options.uploadId || null;
-    _this.parts = [];
-    _this.s3UploadDir = _this.options.s3UploadDir;
-    _this.endpoint = _this.options.endpoint; // Do `this.createdPromise.then(OP)` to execute an operation `OP` _only_ if the
-    // upload was created already. That also ensures that the sequencing is right
-    // (so the `OP` definitely happens if the upload is created).
-    //
-    // This mostly exists to make `_abortUpload` work well: only sending the abort request if
-    // the upload was already created, and if the createMultipartUpload request is still in flight,
-    // aborting it immediately after it finishes.
-
-    _this.createdPromise = Promise.reject(); // eslint-disable-line prefer-promise-reject-errors
-
-    _this.isPaused = false;
-    _this.chunks = [];
-    _this.chunkState = [];
-    _this.uploading = [];
-
-    _this._initChunks();
-
-    _this.createdPromise["catch"](function () {
-      return {};
-    }); // silence uncaught rejection warning
-
-
-    return _this;
-  }
-
-  createClass_default()(S3Upload, [{
-    key: "_initChunks",
-    value: function _initChunks() {
-      var chunks = [];
-      var desiredChunkSize = getChunkSize(this.file); // at least 5MB per request, at most 10k requests
-
-      var minChunkSize = Math.max(5 * MB, Math.ceil(this.file.size / 10000));
-      var chunkSize = Math.max(desiredChunkSize, minChunkSize);
-
-      for (var i = 0; i < this.file.size; i += chunkSize) {
-        var end = Math.min(this.file.size, i + chunkSize);
-        chunks.push(this.file.slice(i, end));
-      }
-
-      this.chunks = chunks;
-      this.chunkState = chunks.map(function () {
-        return {
-          uploaded: 0,
-          busy: false,
-          done: false
-        };
-      });
-    }
-  }, {
-    key: "_createUpload",
-    value: function _createUpload() {
-      var _this2 = this;
-
-      this.createdPromise = createMultipartUpload(this.file, this.s3UploadDir, this.endpoint);
-      return this.createdPromise.then(function (result) {
-        var valid = typeof_default()(result) === "object" && result && typeof result.uploadId === "string" && typeof result.key === "string";
-
-        if (!valid) {
-          throw new TypeError("AwsS3/Multipart: Got incorrect result from `createMultipartUpload()`, expected an object `{ uploadId, key }`.");
-        }
-
-        _this2.key = result.key;
-        _this2.uploadId = result.uploadId;
-
-        if (_this2.options.onStart) {
-          _this2.options.onStart(result);
-        }
-
-        _this2._uploadParts();
-      })["catch"](function (err) {
-        _this2._onError(err);
-      });
-    }
-  }, {
-    key: "_resumeUpload",
-    value: function _resumeUpload() {
-      var _this3 = this;
-
-      if (!this.key || !this.uploadId) {
-        return Promise.resolve();
-      }
-
-      return s3_upload_listParts({
-        uploadId: this.uploadId,
-        key: this.key,
-        endpoint: this.endpoint
-      }).then(function (parts) {
-        parts.forEach(function (part) {
-          var i = part.PartNumber - 1;
-          _this3.chunkState[i] = {
-            uploaded: part.Size,
-            etag: part.ETag,
-            done: true,
-            busy: false
-          }; // Only add if we did not yet know about this part.
-
-          if (!_this3.parts.some(function (p) {
-            return p.PartNumber === part.PartNumber;
-          })) {
-            _this3.parts.push({
-              ETag: part.ETag,
-              PartNumber: part.PartNumber
-            });
-          }
-        });
-
-        _this3._uploadParts();
-      })["catch"](function (err) {
-        _this3._onError(err);
-      });
-    }
-  }, {
-    key: "_uploadParts",
-    value: function _uploadParts() {
-      var _this4 = this;
-
-      if (this.isPaused) {
-        return;
-      }
-
-      var need = (this.options.limit || 1) - this.uploading.length;
-
-      if (need === 0) {
-        return;
-      } // All parts are uploaded.
-
-
-      if (this.chunkState.every(function (state) {
-        return state.done;
-      })) {
-        void this._completeUpload();
-        return;
-      }
-
-      var candidates = [];
-
-      for (var i = 0; i < this.chunkState.length; i++) {
-        var state = this.chunkState[i];
-        if (state.done || state.busy) continue;
-        candidates.push(i);
-
-        if (candidates.length >= need) {
-          break;
-        }
-      }
-
-      candidates.forEach(function (index) {
-        void _this4._uploadPart(index);
-      });
-    }
-  }, {
-    key: "_uploadPart",
-    value: function _uploadPart(index) {
-      var _this5 = this;
-
-      this.chunkState[index].busy = true;
-
-      if (!this.key || !this.uploadId) {
-        return Promise.resolve();
-      }
-
-      return s3_upload_prepareUploadPart({
-        key: this.key,
-        uploadId: this.uploadId,
-        number: index + 1,
-        endpoint: this.endpoint
-      }).then(function (result) {
-        var valid = typeof_default()(result) === "object" && result && typeof result.url === "string";
-
-        if (!valid) {
-          throw new TypeError("AwsS3/Multipart: Got incorrect result from `prepareUploadPart()`, expected an object `{ url }`.");
-        }
-
-        return result;
-      }).then(function (_ref5) {
-        var url = _ref5.url;
-
-        _this5._uploadPartBytes(index, url);
-      }, function (err) {
-        _this5._onError(err);
-      });
-    }
-  }, {
-    key: "_onPartProgress",
-    value: function _onPartProgress(index, sent) {
-      this.chunkState[index].uploaded = sent;
-
-      if (this.options.onProgress) {
-        var totalUploaded = this.chunkState.reduce(function (n, c) {
-          return n + c.uploaded;
-        }, 0);
-        this.options.onProgress(totalUploaded, this.file.size);
-      }
-    }
-  }, {
-    key: "_onPartComplete",
-    value: function _onPartComplete(index, etag) {
-      this.chunkState[index].etag = etag;
-      this.chunkState[index].done = true;
-      var part = {
-        PartNumber: index + 1,
-        ETag: etag
-      };
-      this.parts.push(part);
-
-      if (this.options.onPartComplete) {
-        this.options.onPartComplete(part);
-      }
-
-      this._uploadParts();
-    }
-  }, {
-    key: "_uploadPartBytes",
-    value: function _uploadPartBytes(index, url) {
-      var _this6 = this;
-
-      var body = this.chunks[index];
-      var xhr = new XMLHttpRequest();
-      xhr.open("PUT", url, true);
-      xhr.responseType = "text";
-      this.uploading.push(xhr);
-      xhr.upload.addEventListener("progress", function (ev) {
-        if (!ev.lengthComputable) return;
-
-        _this6._onPartProgress(index, ev.loaded);
-      });
-      xhr.addEventListener("abort", function (ev) {
-        remove(_this6.uploading, ev.target);
-        _this6.chunkState[index].busy = false;
-      });
-      xhr.addEventListener("load", function (ev) {
-        var target = ev.target;
-        remove(_this6.uploading, target);
-        _this6.chunkState[index].busy = false;
-
-        if (target.status < 200 || target.status >= 300) {
-          _this6._onError(new Error("Non 2xx"));
-
-          return;
-        }
-
-        _this6._onPartProgress(index, body.size); // NOTE This must be allowed by CORS.
-
-
-        var etag = target.getResponseHeader("ETag");
-
-        if (etag === null) {
-          _this6._onError(new Error("AwsS3/Multipart: Could not read the ETag header. This likely means CORS is not configured correctly on the S3 Bucket. See https://uppy.io/docs/aws-s3-multipart#S3-Bucket-Configuration for instructions."));
-
-          return;
-        }
-
-        _this6._onPartComplete(index, etag);
-      });
-      xhr.addEventListener("error", function (ev) {
-        remove(_this6.uploading, ev.target);
-        _this6.chunkState[index].busy = false;
-        var error = new Error("Unknown error"); // error.source = ev.target
-
-        _this6._onError(error);
-      });
-      xhr.send(body);
-    }
-  }, {
-    key: "_completeUpload",
-    value: function _completeUpload() {
-      var _this7 = this;
-
-      // Parts may not have completed uploading in sorted order, if limit > 1.
-      this.parts.sort(function (a, b) {
-        return a.PartNumber - b.PartNumber;
-      });
-
-      if (!this.uploadId || !this.key) {
-        return Promise.resolve();
-      }
-
-      return s3_upload_completeMultipartUpload({
-        key: this.key,
-        uploadId: this.uploadId,
-        parts: this.parts,
-        endpoint: this.endpoint
-      }).then(function (result) {
-        if (_this7.options.onSuccess) {
-          _this7.options.onSuccess(result);
-        }
-      }, function (err) {
-        _this7._onError(err);
-      });
-    }
-  }, {
-    key: "_onError",
-    value: function _onError(error) {
-      if (this.options.onError) {
-        this.options.onError(error);
-      } else {
-        throw error;
-      }
-    }
-  }, {
-    key: "start",
-    value: function start() {
-      this.isPaused = false;
-
-      if (this.uploadId) {
-        void this._resumeUpload();
-      } else {
-        void this._createUpload();
-      }
-    }
-  }, {
-    key: "pause",
-    value: function pause() {
-      var inProgress = this.uploading.slice();
-      inProgress.forEach(function (xhr) {
-        xhr.abort();
-      });
-      this.isPaused = true;
-    }
-  }, {
-    key: "abort",
-    value: function abort() {
-      var _this8 = this;
-
-      this.uploading.slice().forEach(function (xhr) {
-        xhr.abort();
-      });
-      this.createdPromise.then(function () {
-        if (_this8.key && _this8.uploadId) {
-          void s3_upload_abortMultipartUpload({
-            key: _this8.key,
-            uploadId: _this8.uploadId,
-            endpoint: _this8.endpoint
-          });
-        }
-      }, function () {// if the creation failed we do not need to abort
-      });
-      this.uploading = [];
-    }
-  }]);
-
-  return S3Upload;
-}(base_upload);
-
-/* harmony default export */ var s3_upload = (s3_upload_S3Upload);
-// CONCATENATED MODULE: ./src/uploaded_file.ts
-
-
-
-
-
-
-
-function uploaded_file_createSuper(Derived) { var hasNativeReflectConstruct = uploaded_file_isNativeReflectConstruct(); return function _createSuperInternal() { var Super = getPrototypeOf_default()(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = getPrototypeOf_default()(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return possibleConstructorReturn_default()(this, result); }; }
-
-function uploaded_file_isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
-
-
-var uploaded_file_BaseUploadedFile = /*#__PURE__*/function (_BaseUpload) {
-  inherits_default()(BaseUploadedFile, _BaseUpload);
-
-  var _super = uploaded_file_createSuper(BaseUploadedFile);
-
-  // true for placeholder, false for S3, undefined for regular files
-  // available only for S3 uploaded file
-  function BaseUploadedFile(initialFile) {
-    var _this;
-
-    classCallCheck_default()(this, BaseUploadedFile);
-
-    _this = _super.call(this, "done");
-
-    defineProperty_default()(assertThisInitialized_default()(_this), "id", void 0);
-
-    defineProperty_default()(assertThisInitialized_default()(_this), "name", void 0);
-
-    defineProperty_default()(assertThisInitialized_default()(_this), "placeholder", void 0);
-
-    defineProperty_default()(assertThisInitialized_default()(_this), "size", void 0);
-
-    defineProperty_default()(assertThisInitialized_default()(_this), "url", void 0);
-
-    defineProperty_default()(assertThisInitialized_default()(_this), "original_name", void 0);
-
-    _this.id = initialFile.id;
-    _this.name = initialFile.name;
-    _this.size = initialFile.size;
-    return _this;
-  }
-
-  return BaseUploadedFile;
-}(base_upload);
-
-var uploaded_file_PlaceholderFile = /*#__PURE__*/function (_BaseUploadedFile) {
-  inherits_default()(PlaceholderFile, _BaseUploadedFile);
-
-  var _super2 = uploaded_file_createSuper(PlaceholderFile);
-
-  function PlaceholderFile(initialFile) {
-    var _this2;
-
-    classCallCheck_default()(this, PlaceholderFile);
-
-    _this2 = _super2.call(this, initialFile);
-    _this2.placeholder = true;
-    return _this2;
-  }
-
-  return PlaceholderFile;
-}(uploaded_file_BaseUploadedFile);
-
-var uploaded_file_UploadedS3File = /*#__PURE__*/function (_BaseUploadedFile2) {
-  inherits_default()(UploadedS3File, _BaseUploadedFile2);
-
-  var _super3 = uploaded_file_createSuper(UploadedS3File);
-
-  function UploadedS3File(initialFile) {
-    var _this3;
-
-    classCallCheck_default()(this, UploadedS3File);
-
-    _this3 = _super3.call(this, initialFile);
-    _this3.original_name = initialFile.original_name;
-    _this3.placeholder = false;
-    return _this3;
-  }
-
-  return UploadedS3File;
-}(uploaded_file_BaseUploadedFile);
-
-var uploaded_file_UploadedFile = /*#__PURE__*/function (_BaseUploadedFile3) {
-  inherits_default()(UploadedFile, _BaseUploadedFile3);
-
-  var _super4 = uploaded_file_createSuper(UploadedFile);
-
-  function UploadedFile(initialFile, uploadUrl) {
-    var _this4;
-
-    classCallCheck_default()(this, UploadedFile);
-
-    _this4 = _super4.call(this, initialFile);
-    _this4.url = "".concat(uploadUrl).concat(initialFile.id);
-    return _this4;
-  }
-
-  return UploadedFile;
-}(uploaded_file_BaseUploadedFile);
-
-var createUploadedFile = function createUploadedFile(initialFile, uploadUrl) {
-  if (initialFile.placeholder === true) {
-    return new uploaded_file_PlaceholderFile(initialFile);
-  } else if (initialFile.placeholder === false) {
-    return new uploaded_file_UploadedS3File(initialFile);
-  } else {
-    return new uploaded_file_UploadedFile(initialFile, uploadUrl);
-  }
-};
 // CONCATENATED MODULE: ./src/tus_upload.ts
 
 
@@ -5331,12 +5334,12 @@ var tus_upload_TusUpload = /*#__PURE__*/function (_BaseUpload) {
 
   var _super = tus_upload_createSuper(TusUpload);
 
-  function TusUpload(file, options) {
+  function TusUpload(file, uploadIndex, options) {
     var _this;
 
     classCallCheck_default()(this, TusUpload);
 
-    _this = _super.call(this, "uploading");
+    _this = _super.call(this, "uploading", uploadIndex);
 
     defineProperty_default()(assertThisInitialized_default()(_this), "fileName", void 0);
 
@@ -5390,7 +5393,7 @@ var tus_upload_TusUpload = /*#__PURE__*/function (_BaseUpload) {
 
 
 
-
+//import { Upload } from "tus-js-client";
 
 
 
@@ -5403,8 +5406,10 @@ var file_field_getFileNameFromUpload = function getFileNameFromUpload(upload) {
     return upload.fileName;
   } else if (upload instanceof s3_upload) {
     return upload.file.name;
+  } else if (upload instanceof uploaded_file_UploadedS3File) {
+    return upload.original_name;
   } else {
-    return upload.original_name || upload.name;
+    return upload.name;
   }
 };
 
@@ -5444,8 +5449,6 @@ var file_field_FileField = /*#__PURE__*/function () {
 
     defineProperty_default()(this, "formId", void 0);
 
-    defineProperty_default()(this, "s3UploadDir", void 0);
-
     defineProperty_default()(this, "multiple", void 0);
 
     defineProperty_default()(this, "prefix", void 0);
@@ -5454,13 +5457,13 @@ var file_field_FileField = /*#__PURE__*/function () {
 
     defineProperty_default()(this, "retryDelays", void 0);
 
+    defineProperty_default()(this, "s3UploadDir", void 0);
+
     defineProperty_default()(this, "supportDropArea", void 0);
 
-    defineProperty_default()(this, "uploadIndex", void 0);
+    defineProperty_default()(this, "uploads", void 0);
 
     defineProperty_default()(this, "uploadUrl", void 0);
-
-    defineProperty_default()(this, "uploads", void 0);
 
     defineProperty_default()(this, "uploadFiles", function (files) {
       if (files.length === 0) {
@@ -5524,16 +5527,16 @@ var file_field_FileField = /*#__PURE__*/function () {
       var onProgress = _this.callbacks.onProgress;
 
       if (onProgress) {
-        var _upload = _this.uploads[uploadIndex];
+        var _upload = _this.getUploadByIndex(uploadIndex);
 
-        if (_upload instanceof browser_Upload) {
+        if (_upload && _upload instanceof tus_upload_TusUpload) {
           onProgress(bytesUploaded, bytesTotal, _upload);
         }
       }
     });
 
     defineProperty_default()(this, "handleError", function (uploadIndex, error) {
-      var upload = _this.uploads[uploadIndex];
+      var upload = _this.getUploadByIndex(uploadIndex);
 
       if (!upload) {
         return;
@@ -5545,16 +5548,14 @@ var file_field_FileField = /*#__PURE__*/function () {
       var onError = _this.callbacks.onError;
 
       if (onError) {
-        var _upload2 = _this.uploads[uploadIndex];
-
-        if (_upload2 instanceof browser_Upload) {
-          onError(error, _upload2);
+        if (upload instanceof tus_upload_TusUpload) {
+          onError(error, upload);
         }
       }
     });
 
     defineProperty_default()(this, "handleSuccess", function (uploadIndex, uploadedSize) {
-      var upload = _this.uploads[uploadIndex];
+      var upload = _this.getUploadByIndex(uploadIndex);
 
       if (!upload) {
         return;
@@ -5573,7 +5574,7 @@ var file_field_FileField = /*#__PURE__*/function () {
       _this.emitEvent("uploadComplete", element, upload);
 
       if (onSuccess) {
-        if (upload instanceof browser_Upload) {
+        if (upload instanceof tus_upload_TusUpload) {
           onSuccess(upload);
         }
       }
@@ -5591,7 +5592,6 @@ var file_field_FileField = /*#__PURE__*/function () {
     this.retryDelays = retryDelays;
     this.supportDropArea = supportDropArea;
     this.uploadUrl = uploadUrl;
-    this.uploadIndex = 0;
     this.uploads = [];
     this.renderer = new render_upload_file({
       parent: parent,
@@ -5626,11 +5626,11 @@ var file_field_FileField = /*#__PURE__*/function () {
       var multiple = this.multiple,
           renderer = this.renderer;
 
-      var addInitialFile = function addInitialFile(initialFile, i) {
+      var addInitialFile = function addInitialFile(initialFile, uploadIndex) {
         var name = initialFile.name,
             size = initialFile.size;
-        var element = renderer.addUploadedFile(initialFile.original_name ? initialFile.original_name : name, i, size);
-        var upload = createUploadedFile(initialFile, _this2.uploadUrl);
+        var element = renderer.addUploadedFile(initialFile.original_name ? initialFile.original_name : name, uploadIndex, size);
+        var upload = createUploadedFile(initialFile, _this2.uploadUrl, uploadIndex);
 
         _this2.uploads.push(upload);
 
@@ -5659,7 +5659,7 @@ var file_field_FileField = /*#__PURE__*/function () {
           uploads = this.uploads,
           uploadUrl = this.uploadUrl;
       var fileName = file.name;
-      var existingUploadIndex = this.findUpload(fileName);
+      var existingUploadIndex = this.findUploadByName(fileName);
 
       if (existingUploadIndex !== null) {
         this.removeExistingUpload(existingUploadIndex);
@@ -5669,7 +5669,7 @@ var file_field_FileField = /*#__PURE__*/function () {
       var upload = null;
 
       if (s3UploadDir != null) {
-        upload = new s3_upload(file, {
+        upload = new s3_upload(file, uploadIndex, {
           s3UploadDir: s3UploadDir,
           endpoint: uploadUrl,
           onProgress: function onProgress(bytesUploaded, bytesTotal) {
@@ -5684,7 +5684,7 @@ var file_field_FileField = /*#__PURE__*/function () {
         });
         upload.start();
       } else {
-        upload = new tus_upload_TusUpload(file, {
+        upload = new tus_upload_TusUpload(file, uploadIndex, {
           chunkSize: this.chunkSize,
           fieldName: fieldName,
           formId: formId,
@@ -5707,8 +5707,15 @@ var file_field_FileField = /*#__PURE__*/function () {
       this.emitEvent("addUpload", element, upload);
     }
   }, {
-    key: "findUpload",
-    value: function findUpload(fileName) {
+    key: "getUploadByIndex",
+    value: function getUploadByIndex(uploadIndex) {
+      return this.uploads.find(function (upload) {
+        return (upload === null || upload === void 0 ? void 0 : upload.uploadIndex) === uploadIndex;
+      });
+    }
+  }, {
+    key: "findUploadByName",
+    value: function findUploadByName(fileName) {
       var upload = this.uploads.find(function (upload) {
         if (upload instanceof tus_upload_TusUpload) {
           return upload.fileName === fileName;
@@ -5720,25 +5727,24 @@ var file_field_FileField = /*#__PURE__*/function () {
           return false;
         }
       });
-      var index = this.uploads.indexOf(upload);
-      return index >= 0 ? index : null;
+
+      if (upload) {
+        return upload.uploadIndex;
+      } else {
+        return null;
+      }
     }
   }, {
     key: "removeExistingUpload",
     value: function removeExistingUpload(uploadIndex) {
-      var _this$uploads$uploadI;
-
-      var uploadStatus = (_this$uploads$uploadI = this.uploads[uploadIndex]) === null || _this$uploads$uploadI === void 0 ? void 0 : _this$uploads$uploadI.status;
-
-      if (uploadStatus === "uploading") {
-        var _upload3 = this.uploads[uploadIndex];
-        void _upload3.abort();
-      }
-
-      var upload = this.uploads[uploadIndex];
+      var upload = this.getUploadByIndex(uploadIndex);
 
       if (!upload) {
         return;
+      }
+
+      if (upload.status === "uploading") {
+        void upload.abort();
       }
 
       var element = this.renderer.findFileDiv(uploadIndex);
@@ -5748,7 +5754,7 @@ var file_field_FileField = /*#__PURE__*/function () {
       }
 
       if (upload instanceof tus_upload_TusUpload || upload instanceof s3_upload || upload.url) {
-        switch (uploadStatus) {
+        switch (upload.status) {
           case "done":
             {
               if (upload instanceof s3_upload) {
@@ -5768,8 +5774,12 @@ var file_field_FileField = /*#__PURE__*/function () {
 
           case "uploading":
             {
-              var _upload4 = this.uploads[uploadIndex];
-              void _upload4.abort();
+              var _upload2 = this.getUploadByIndex(uploadIndex);
+
+              if (_upload2) {
+                void _upload2.abort();
+              }
+
               this.removeUploadFromList(uploadIndex);
               break;
             }
@@ -5781,7 +5791,7 @@ var file_field_FileField = /*#__PURE__*/function () {
   }, {
     key: "removeUploadFromList",
     value: function removeUploadFromList(uploadIndex) {
-      var upload = this.uploads[uploadIndex];
+      var upload = this.getUploadByIndex(uploadIndex);
 
       if (!upload) {
         return;
@@ -5801,7 +5811,7 @@ var file_field_FileField = /*#__PURE__*/function () {
     value: function deleteFromServer(uploadIndex) {
       var _this4 = this;
 
-      var upload = this.uploads[uploadIndex];
+      var upload = this.getUploadByIndex(uploadIndex);
 
       if (!upload) {
         return;
@@ -5849,10 +5859,10 @@ var file_field_FileField = /*#__PURE__*/function () {
   }, {
     key: "handleCancel",
     value: function handleCancel(uploadIndex) {
-      var upload = this.uploads[uploadIndex];
+      var upload = this.getUploadByIndex(uploadIndex);
 
-      if (upload instanceof browser_Upload) {
-        void upload.abort(true);
+      if (upload instanceof tus_upload_TusUpload) {
+        void upload.abort();
         this.removeUploadFromList(uploadIndex);
       } else if (upload instanceof s3_upload) {
         upload.abort();
@@ -5911,8 +5921,8 @@ var file_field_FileField = /*#__PURE__*/function () {
       }).map(function (upload) {
         var s3Upload = upload;
         return {
-          id: s3Upload.uploadId,
-          name: s3Upload.key,
+          id: s3Upload.uploadId || "",
+          name: s3Upload.key || "",
           placeholder: false,
           size: s3Upload.file.size,
           original_name: s3Upload.file.name
@@ -6146,176 +6156,6 @@ module.exports = _nonIterableSpread;
 
 /***/ }),
 /* 33 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-/**
- * Check if we're required to add a port number.
- *
- * @see https://url.spec.whatwg.org/#default-port
- * @param {Number|String} port Port number we need to check
- * @param {String} protocol Protocol we need to check against.
- * @returns {Boolean} Is it a default port for the given protocol
- * @api private
- */
-module.exports = function required(port, protocol) {
-  protocol = protocol.split(':')[0];
-  port = +port;
-
-  if (!port) return false;
-
-  switch (protocol) {
-    case 'http':
-    case 'ws':
-    return port !== 80;
-
-    case 'https':
-    case 'wss':
-    return port !== 443;
-
-    case 'ftp':
-    return port !== 21;
-
-    case 'gopher':
-    return port !== 70;
-
-    case 'file':
-    return false;
-  }
-
-  return port !== 0;
-};
-
-
-/***/ }),
-/* 34 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var has = Object.prototype.hasOwnProperty
-  , undef;
-
-/**
- * Decode a URI encoded string.
- *
- * @param {String} input The URI encoded string.
- * @returns {String|Null} The decoded string.
- * @api private
- */
-function decode(input) {
-  try {
-    return decodeURIComponent(input.replace(/\+/g, ' '));
-  } catch (e) {
-    return null;
-  }
-}
-
-/**
- * Attempts to encode a given input.
- *
- * @param {String} input The string that needs to be encoded.
- * @returns {String|Null} The encoded string.
- * @api private
- */
-function encode(input) {
-  try {
-    return encodeURIComponent(input);
-  } catch (e) {
-    return null;
-  }
-}
-
-/**
- * Simple query string parser.
- *
- * @param {String} query The query string that needs to be parsed.
- * @returns {Object}
- * @api public
- */
-function querystring(query) {
-  var parser = /([^=?#&]+)=?([^&]*)/g
-    , result = {}
-    , part;
-
-  while (part = parser.exec(query)) {
-    var key = decode(part[1])
-      , value = decode(part[2]);
-
-    //
-    // Prevent overriding of existing properties. This ensures that build-in
-    // methods like `toString` or __proto__ are not overriden by malicious
-    // querystrings.
-    //
-    // In the case if failed decoding, we want to omit the key/value pairs
-    // from the result.
-    //
-    if (key === null || value === null || key in result) continue;
-    result[key] = value;
-  }
-
-  return result;
-}
-
-/**
- * Transform a query string to an object.
- *
- * @param {Object} obj Object that should be transformed.
- * @param {String} prefix Optional prefix.
- * @returns {String}
- * @api public
- */
-function querystringify(obj, prefix) {
-  prefix = prefix || '';
-
-  var pairs = []
-    , value
-    , key;
-
-  //
-  // Optionally prefix with a '?' if needed
-  //
-  if ('string' !== typeof prefix) prefix = '?';
-
-  for (key in obj) {
-    if (has.call(obj, key)) {
-      value = obj[key];
-
-      //
-      // Edge cases where we actually want to encode the value to an empty
-      // string instead of the stringified value.
-      //
-      if (!value && (value === null || value === undef || isNaN(value))) {
-        value = '';
-      }
-
-      key = encode(key);
-      value = encode(value);
-
-      //
-      // If we failed to encode the strings, we should bail out as we don't
-      // want to add invalid strings to the query.
-      //
-      if (key === null || value === null) continue;
-      pairs.push(key +'='+ value);
-    }
-  }
-
-  return pairs.length ? prefix + pairs.join('&') : '';
-}
-
-//
-// Expose the module.
-//
-exports.stringify = querystringify;
-exports.parse = querystring;
-
-
-/***/ }),
-/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -7069,7 +6909,7 @@ try {
 
 
 /***/ }),
-/* 36 */
+/* 34 */
 /***/ (function(module, exports) {
 
 function _arrayWithHoles(arr) {
@@ -7079,7 +6919,7 @@ function _arrayWithHoles(arr) {
 module.exports = _arrayWithHoles;
 
 /***/ }),
-/* 37 */
+/* 35 */
 /***/ (function(module, exports) {
 
 function _iterableToArrayLimit(arr, i) {
@@ -7112,7 +6952,7 @@ function _iterableToArrayLimit(arr, i) {
 module.exports = _iterableToArrayLimit;
 
 /***/ }),
-/* 38 */
+/* 36 */
 /***/ (function(module, exports) {
 
 function _nonIterableRest() {
@@ -7122,7 +6962,7 @@ function _nonIterableRest() {
 module.exports = _nonIterableRest;
 
 /***/ }),
-/* 39 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7224,21 +7064,21 @@ module.exports = Mime;
 
 
 /***/ }),
-/* 40 */
+/* 38 */
 /***/ (function(module, exports) {
 
 module.exports = {"application/andrew-inset":["ez"],"application/applixware":["aw"],"application/atom+xml":["atom"],"application/atomcat+xml":["atomcat"],"application/atomdeleted+xml":["atomdeleted"],"application/atomsvc+xml":["atomsvc"],"application/atsc-dwd+xml":["dwd"],"application/atsc-held+xml":["held"],"application/atsc-rsat+xml":["rsat"],"application/bdoc":["bdoc"],"application/calendar+xml":["xcs"],"application/ccxml+xml":["ccxml"],"application/cdfx+xml":["cdfx"],"application/cdmi-capability":["cdmia"],"application/cdmi-container":["cdmic"],"application/cdmi-domain":["cdmid"],"application/cdmi-object":["cdmio"],"application/cdmi-queue":["cdmiq"],"application/cu-seeme":["cu"],"application/dash+xml":["mpd"],"application/davmount+xml":["davmount"],"application/docbook+xml":["dbk"],"application/dssc+der":["dssc"],"application/dssc+xml":["xdssc"],"application/ecmascript":["ecma","es"],"application/emma+xml":["emma"],"application/emotionml+xml":["emotionml"],"application/epub+zip":["epub"],"application/exi":["exi"],"application/fdt+xml":["fdt"],"application/font-tdpfr":["pfr"],"application/geo+json":["geojson"],"application/gml+xml":["gml"],"application/gpx+xml":["gpx"],"application/gxf":["gxf"],"application/gzip":["gz"],"application/hjson":["hjson"],"application/hyperstudio":["stk"],"application/inkml+xml":["ink","inkml"],"application/ipfix":["ipfix"],"application/its+xml":["its"],"application/java-archive":["jar","war","ear"],"application/java-serialized-object":["ser"],"application/java-vm":["class"],"application/javascript":["js","mjs"],"application/json":["json","map"],"application/json5":["json5"],"application/jsonml+json":["jsonml"],"application/ld+json":["jsonld"],"application/lgr+xml":["lgr"],"application/lost+xml":["lostxml"],"application/mac-binhex40":["hqx"],"application/mac-compactpro":["cpt"],"application/mads+xml":["mads"],"application/manifest+json":["webmanifest"],"application/marc":["mrc"],"application/marcxml+xml":["mrcx"],"application/mathematica":["ma","nb","mb"],"application/mathml+xml":["mathml"],"application/mbox":["mbox"],"application/mediaservercontrol+xml":["mscml"],"application/metalink+xml":["metalink"],"application/metalink4+xml":["meta4"],"application/mets+xml":["mets"],"application/mmt-aei+xml":["maei"],"application/mmt-usd+xml":["musd"],"application/mods+xml":["mods"],"application/mp21":["m21","mp21"],"application/mp4":["mp4s","m4p"],"application/mrb-consumer+xml":["*xdf"],"application/mrb-publish+xml":["*xdf"],"application/msword":["doc","dot"],"application/mxf":["mxf"],"application/n-quads":["nq"],"application/n-triples":["nt"],"application/node":["cjs"],"application/octet-stream":["bin","dms","lrf","mar","so","dist","distz","pkg","bpk","dump","elc","deploy","exe","dll","deb","dmg","iso","img","msi","msp","msm","buffer"],"application/oda":["oda"],"application/oebps-package+xml":["opf"],"application/ogg":["ogx"],"application/omdoc+xml":["omdoc"],"application/onenote":["onetoc","onetoc2","onetmp","onepkg"],"application/oxps":["oxps"],"application/p2p-overlay+xml":["relo"],"application/patch-ops-error+xml":["*xer"],"application/pdf":["pdf"],"application/pgp-encrypted":["pgp"],"application/pgp-signature":["asc","sig"],"application/pics-rules":["prf"],"application/pkcs10":["p10"],"application/pkcs7-mime":["p7m","p7c"],"application/pkcs7-signature":["p7s"],"application/pkcs8":["p8"],"application/pkix-attr-cert":["ac"],"application/pkix-cert":["cer"],"application/pkix-crl":["crl"],"application/pkix-pkipath":["pkipath"],"application/pkixcmp":["pki"],"application/pls+xml":["pls"],"application/postscript":["ai","eps","ps"],"application/provenance+xml":["provx"],"application/pskc+xml":["pskcxml"],"application/raml+yaml":["raml"],"application/rdf+xml":["rdf","owl"],"application/reginfo+xml":["rif"],"application/relax-ng-compact-syntax":["rnc"],"application/resource-lists+xml":["rl"],"application/resource-lists-diff+xml":["rld"],"application/rls-services+xml":["rs"],"application/route-apd+xml":["rapd"],"application/route-s-tsid+xml":["sls"],"application/route-usd+xml":["rusd"],"application/rpki-ghostbusters":["gbr"],"application/rpki-manifest":["mft"],"application/rpki-roa":["roa"],"application/rsd+xml":["rsd"],"application/rss+xml":["rss"],"application/rtf":["rtf"],"application/sbml+xml":["sbml"],"application/scvp-cv-request":["scq"],"application/scvp-cv-response":["scs"],"application/scvp-vp-request":["spq"],"application/scvp-vp-response":["spp"],"application/sdp":["sdp"],"application/senml+xml":["senmlx"],"application/sensml+xml":["sensmlx"],"application/set-payment-initiation":["setpay"],"application/set-registration-initiation":["setreg"],"application/shf+xml":["shf"],"application/sieve":["siv","sieve"],"application/smil+xml":["smi","smil"],"application/sparql-query":["rq"],"application/sparql-results+xml":["srx"],"application/srgs":["gram"],"application/srgs+xml":["grxml"],"application/sru+xml":["sru"],"application/ssdl+xml":["ssdl"],"application/ssml+xml":["ssml"],"application/swid+xml":["swidtag"],"application/tei+xml":["tei","teicorpus"],"application/thraud+xml":["tfi"],"application/timestamped-data":["tsd"],"application/toml":["toml"],"application/ttml+xml":["ttml"],"application/urc-ressheet+xml":["rsheet"],"application/voicexml+xml":["vxml"],"application/wasm":["wasm"],"application/widget":["wgt"],"application/winhlp":["hlp"],"application/wsdl+xml":["wsdl"],"application/wspolicy+xml":["wspolicy"],"application/xaml+xml":["xaml"],"application/xcap-att+xml":["xav"],"application/xcap-caps+xml":["xca"],"application/xcap-diff+xml":["xdf"],"application/xcap-el+xml":["xel"],"application/xcap-error+xml":["xer"],"application/xcap-ns+xml":["xns"],"application/xenc+xml":["xenc"],"application/xhtml+xml":["xhtml","xht"],"application/xliff+xml":["xlf"],"application/xml":["xml","xsl","xsd","rng"],"application/xml-dtd":["dtd"],"application/xop+xml":["xop"],"application/xproc+xml":["xpl"],"application/xslt+xml":["xslt"],"application/xspf+xml":["xspf"],"application/xv+xml":["mxml","xhvml","xvml","xvm"],"application/yang":["yang"],"application/yin+xml":["yin"],"application/zip":["zip"],"audio/3gpp":["*3gpp"],"audio/adpcm":["adp"],"audio/basic":["au","snd"],"audio/midi":["mid","midi","kar","rmi"],"audio/mobile-xmf":["mxmf"],"audio/mp3":["*mp3"],"audio/mp4":["m4a","mp4a"],"audio/mpeg":["mpga","mp2","mp2a","mp3","m2a","m3a"],"audio/ogg":["oga","ogg","spx"],"audio/s3m":["s3m"],"audio/silk":["sil"],"audio/wav":["wav"],"audio/wave":["*wav"],"audio/webm":["weba"],"audio/xm":["xm"],"font/collection":["ttc"],"font/otf":["otf"],"font/ttf":["ttf"],"font/woff":["woff"],"font/woff2":["woff2"],"image/aces":["exr"],"image/apng":["apng"],"image/bmp":["bmp"],"image/cgm":["cgm"],"image/dicom-rle":["drle"],"image/emf":["emf"],"image/fits":["fits"],"image/g3fax":["g3"],"image/gif":["gif"],"image/heic":["heic"],"image/heic-sequence":["heics"],"image/heif":["heif"],"image/heif-sequence":["heifs"],"image/hej2k":["hej2"],"image/hsj2":["hsj2"],"image/ief":["ief"],"image/jls":["jls"],"image/jp2":["jp2","jpg2"],"image/jpeg":["jpeg","jpg","jpe"],"image/jph":["jph"],"image/jphc":["jhc"],"image/jpm":["jpm"],"image/jpx":["jpx","jpf"],"image/jxr":["jxr"],"image/jxra":["jxra"],"image/jxrs":["jxrs"],"image/jxs":["jxs"],"image/jxsc":["jxsc"],"image/jxsi":["jxsi"],"image/jxss":["jxss"],"image/ktx":["ktx"],"image/png":["png"],"image/sgi":["sgi"],"image/svg+xml":["svg","svgz"],"image/t38":["t38"],"image/tiff":["tif","tiff"],"image/tiff-fx":["tfx"],"image/webp":["webp"],"image/wmf":["wmf"],"message/disposition-notification":["disposition-notification"],"message/global":["u8msg"],"message/global-delivery-status":["u8dsn"],"message/global-disposition-notification":["u8mdn"],"message/global-headers":["u8hdr"],"message/rfc822":["eml","mime"],"model/3mf":["3mf"],"model/gltf+json":["gltf"],"model/gltf-binary":["glb"],"model/iges":["igs","iges"],"model/mesh":["msh","mesh","silo"],"model/mtl":["mtl"],"model/obj":["obj"],"model/stl":["stl"],"model/vrml":["wrl","vrml"],"model/x3d+binary":["*x3db","x3dbz"],"model/x3d+fastinfoset":["x3db"],"model/x3d+vrml":["*x3dv","x3dvz"],"model/x3d+xml":["x3d","x3dz"],"model/x3d-vrml":["x3dv"],"text/cache-manifest":["appcache","manifest"],"text/calendar":["ics","ifb"],"text/coffeescript":["coffee","litcoffee"],"text/css":["css"],"text/csv":["csv"],"text/html":["html","htm","shtml"],"text/jade":["jade"],"text/jsx":["jsx"],"text/less":["less"],"text/markdown":["markdown","md"],"text/mathml":["mml"],"text/mdx":["mdx"],"text/n3":["n3"],"text/plain":["txt","text","conf","def","list","log","in","ini"],"text/richtext":["rtx"],"text/rtf":["*rtf"],"text/sgml":["sgml","sgm"],"text/shex":["shex"],"text/slim":["slim","slm"],"text/stylus":["stylus","styl"],"text/tab-separated-values":["tsv"],"text/troff":["t","tr","roff","man","me","ms"],"text/turtle":["ttl"],"text/uri-list":["uri","uris","urls"],"text/vcard":["vcard"],"text/vtt":["vtt"],"text/xml":["*xml"],"text/yaml":["yaml","yml"],"video/3gpp":["3gp","3gpp"],"video/3gpp2":["3g2"],"video/h261":["h261"],"video/h263":["h263"],"video/h264":["h264"],"video/jpeg":["jpgv"],"video/jpm":["*jpm","jpgm"],"video/mj2":["mj2","mjp2"],"video/mp2t":["ts"],"video/mp4":["mp4","mp4v","mpg4"],"video/mpeg":["mpeg","mpg","mpe","m1v","m2v"],"video/ogg":["ogv"],"video/quicktime":["qt","mov"],"video/webm":["webm"]};
 
 /***/ }),
-/* 41 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 const path = __webpack_require__(15);
-const scan = __webpack_require__(42);
-const parse = __webpack_require__(43);
+const scan = __webpack_require__(40);
+const parse = __webpack_require__(41);
 const utils = __webpack_require__(16);
 const constants = __webpack_require__(12);
 const isObject = val => val && typeof val === 'object' && !Array.isArray(val);
@@ -7576,7 +7416,7 @@ module.exports = picomatch;
 
 
 /***/ }),
-/* 42 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7966,7 +7806,7 @@ module.exports = scan;
 
 
 /***/ }),
-/* 43 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -9051,7 +8891,7 @@ module.exports = parse;
 
 
 /***/ }),
-/* 44 */
+/* 42 */
 /***/ (function(module, exports) {
 
 function _setPrototypeOf(o, p) {
@@ -9064,6 +8904,176 @@ function _setPrototypeOf(o, p) {
 }
 
 module.exports = _setPrototypeOf;
+
+/***/ }),
+/* 43 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/**
+ * Check if we're required to add a port number.
+ *
+ * @see https://url.spec.whatwg.org/#default-port
+ * @param {Number|String} port Port number we need to check
+ * @param {String} protocol Protocol we need to check against.
+ * @returns {Boolean} Is it a default port for the given protocol
+ * @api private
+ */
+module.exports = function required(port, protocol) {
+  protocol = protocol.split(':')[0];
+  port = +port;
+
+  if (!port) return false;
+
+  switch (protocol) {
+    case 'http':
+    case 'ws':
+    return port !== 80;
+
+    case 'https':
+    case 'wss':
+    return port !== 443;
+
+    case 'ftp':
+    return port !== 21;
+
+    case 'gopher':
+    return port !== 70;
+
+    case 'file':
+    return false;
+  }
+
+  return port !== 0;
+};
+
+
+/***/ }),
+/* 44 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var has = Object.prototype.hasOwnProperty
+  , undef;
+
+/**
+ * Decode a URI encoded string.
+ *
+ * @param {String} input The URI encoded string.
+ * @returns {String|Null} The decoded string.
+ * @api private
+ */
+function decode(input) {
+  try {
+    return decodeURIComponent(input.replace(/\+/g, ' '));
+  } catch (e) {
+    return null;
+  }
+}
+
+/**
+ * Attempts to encode a given input.
+ *
+ * @param {String} input The string that needs to be encoded.
+ * @returns {String|Null} The encoded string.
+ * @api private
+ */
+function encode(input) {
+  try {
+    return encodeURIComponent(input);
+  } catch (e) {
+    return null;
+  }
+}
+
+/**
+ * Simple query string parser.
+ *
+ * @param {String} query The query string that needs to be parsed.
+ * @returns {Object}
+ * @api public
+ */
+function querystring(query) {
+  var parser = /([^=?#&]+)=?([^&]*)/g
+    , result = {}
+    , part;
+
+  while (part = parser.exec(query)) {
+    var key = decode(part[1])
+      , value = decode(part[2]);
+
+    //
+    // Prevent overriding of existing properties. This ensures that build-in
+    // methods like `toString` or __proto__ are not overriden by malicious
+    // querystrings.
+    //
+    // In the case if failed decoding, we want to omit the key/value pairs
+    // from the result.
+    //
+    if (key === null || value === null || key in result) continue;
+    result[key] = value;
+  }
+
+  return result;
+}
+
+/**
+ * Transform a query string to an object.
+ *
+ * @param {Object} obj Object that should be transformed.
+ * @param {String} prefix Optional prefix.
+ * @returns {String}
+ * @api public
+ */
+function querystringify(obj, prefix) {
+  prefix = prefix || '';
+
+  var pairs = []
+    , value
+    , key;
+
+  //
+  // Optionally prefix with a '?' if needed
+  //
+  if ('string' !== typeof prefix) prefix = '?';
+
+  for (key in obj) {
+    if (has.call(obj, key)) {
+      value = obj[key];
+
+      //
+      // Edge cases where we actually want to encode the value to an empty
+      // string instead of the stringified value.
+      //
+      if (!value && (value === null || value === undef || isNaN(value))) {
+        value = '';
+      }
+
+      key = encode(key);
+      value = encode(value);
+
+      //
+      // If we failed to encode the strings, we should bail out as we don't
+      // want to add invalid strings to the query.
+      //
+      if (key === null || value === null) continue;
+      pairs.push(key +'='+ value);
+    }
+  }
+
+  return pairs.length ? prefix + pairs.join('&') : '';
+}
+
+//
+// Expose the module.
+//
+exports.stringify = querystringify;
+exports.parse = querystring;
+
 
 /***/ })
 /******/ ]);
