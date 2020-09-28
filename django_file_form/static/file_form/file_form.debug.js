@@ -2810,13 +2810,20 @@ var url_join_default = /*#__PURE__*/__webpack_require__.n(url_join);
 
 
 
-var base_upload_BaseUpload = function BaseUpload(status, uploadIndex) {
+var base_upload_BaseUpload = function BaseUpload(_ref) {
+  var name = _ref.name,
+      status = _ref.status,
+      uploadIndex = _ref.uploadIndex;
+
   classCallCheck_default()(this, BaseUpload);
+
+  defineProperty_default()(this, "name", void 0);
 
   defineProperty_default()(this, "status", void 0);
 
   defineProperty_default()(this, "uploadIndex", void 0);
 
+  this.name = name;
   this.status = status;
   this.uploadIndex = uploadIndex;
 };
@@ -2967,7 +2974,11 @@ var s3_upload_S3Upload = /*#__PURE__*/function (_BaseUpload) {
 
     classCallCheck_default()(this, S3Upload);
 
-    _this = _super.call(this, "uploading", uploadIndex);
+    _this = _super.call(this, {
+      name: file.name,
+      status: "uploading",
+      uploadIndex: uploadIndex
+    });
 
     defineProperty_default()(assertThisInitialized_default()(_this), "chunkState", void 0);
 
@@ -3363,26 +3374,30 @@ var uploaded_file_BaseUploadedFile = /*#__PURE__*/function (_BaseUpload) {
   var _super = uploaded_file_createSuper(BaseUploadedFile);
 
   // true for placeholder, false for S3, undefined for regular files
-  function BaseUploadedFile(initialFile, uploadIndex) {
+  function BaseUploadedFile(_ref) {
     var _this;
+
+    var id = _ref.id,
+        name = _ref.name,
+        size = _ref.size,
+        uploadIndex = _ref.uploadIndex;
 
     classCallCheck_default()(this, BaseUploadedFile);
 
-    _this = _super.call(this, "done", uploadIndex);
+    _this = _super.call(this, {
+      name: name,
+      status: "done",
+      uploadIndex: uploadIndex
+    });
 
     defineProperty_default()(assertThisInitialized_default()(_this), "id", void 0);
-
-    defineProperty_default()(assertThisInitialized_default()(_this), "name", void 0);
 
     defineProperty_default()(assertThisInitialized_default()(_this), "placeholder", void 0);
 
     defineProperty_default()(assertThisInitialized_default()(_this), "size", void 0);
 
-    defineProperty_default()(assertThisInitialized_default()(_this), "url", void 0);
-
-    _this.id = initialFile.id;
-    _this.name = initialFile.name;
-    _this.size = initialFile.size;
+    _this.id = id;
+    _this.size = size;
     return _this;
   }
 
@@ -3399,7 +3414,12 @@ var uploaded_file_PlaceholderFile = /*#__PURE__*/function (_BaseUploadedFile) {
 
     classCallCheck_default()(this, PlaceholderFile);
 
-    _this2 = _super2.call(this, initialFile, uploadIndex);
+    _this2 = _super2.call(this, {
+      id: initialFile.id,
+      name: initialFile.name,
+      size: initialFile.size,
+      uploadIndex: uploadIndex
+    });
     _this2.placeholder = true;
     return _this2;
   }
@@ -3417,18 +3437,22 @@ var uploaded_file_UploadedS3File = /*#__PURE__*/function (_BaseUploadedFile2) {
 
     classCallCheck_default()(this, UploadedS3File);
 
-    _this3 = _super3.call(this, initialFile, uploadIndex);
+    _this3 = _super3.call(this, {
+      id: initialFile.id,
+      name: initialFile.original_name || initialFile.name,
+      size: initialFile.size,
+      uploadIndex: uploadIndex
+    });
 
-    defineProperty_default()(assertThisInitialized_default()(_this3), "original_name", void 0);
+    defineProperty_default()(assertThisInitialized_default()(_this3), "key", void 0);
 
-    _this3.original_name = initialFile.original_name || initialFile.name;
+    _this3.key = initialFile.name;
     _this3.placeholder = false;
     return _this3;
   }
 
   return UploadedS3File;
 }(uploaded_file_BaseUploadedFile);
-
 var uploaded_file_UploadedFile = /*#__PURE__*/function (_BaseUploadedFile3) {
   inherits_default()(UploadedFile, _BaseUploadedFile3);
 
@@ -3439,14 +3463,21 @@ var uploaded_file_UploadedFile = /*#__PURE__*/function (_BaseUploadedFile3) {
 
     classCallCheck_default()(this, UploadedFile);
 
-    _this4 = _super4.call(this, initialFile, uploadIndex);
+    _this4 = _super4.call(this, {
+      id: initialFile.id,
+      name: initialFile.name,
+      size: initialFile.size,
+      uploadIndex: uploadIndex
+    });
+
+    defineProperty_default()(assertThisInitialized_default()(_this4), "url", void 0);
+
     _this4.url = "".concat(uploadUrl).concat(initialFile.id);
     return _this4;
   }
 
   return UploadedFile;
 }(uploaded_file_BaseUploadedFile);
-
 var createUploadedFile = function createUploadedFile(initialFile, uploadUrl, uploadIndex) {
   if (initialFile.placeholder === true) {
     return new uploaded_file_PlaceholderFile(initialFile, uploadIndex);
@@ -5339,9 +5370,11 @@ var tus_upload_TusUpload = /*#__PURE__*/function (_BaseUpload) {
 
     classCallCheck_default()(this, TusUpload);
 
-    _this = _super.call(this, "uploading", uploadIndex);
-
-    defineProperty_default()(assertThisInitialized_default()(_this), "fileName", void 0);
+    _this = _super.call(this, {
+      name: file.name,
+      status: "uploading",
+      uploadIndex: uploadIndex
+    });
 
     defineProperty_default()(assertThisInitialized_default()(_this), "onSuccess", void 0);
 
@@ -5351,7 +5384,6 @@ var tus_upload_TusUpload = /*#__PURE__*/function (_BaseUpload) {
       _this.onSuccess(_this.upload.file.size);
     });
 
-    _this.fileName = file.name;
     _this.onSuccess = options.onSuccess;
     _this.upload = new browser_Upload(file, {
       chunkSize: options.chunkSize,
@@ -5393,25 +5425,12 @@ var tus_upload_TusUpload = /*#__PURE__*/function (_BaseUpload) {
 
 
 
-//import { Upload } from "tus-js-client";
 
 
 
 
 
 
-
-var file_field_getFileNameFromUpload = function getFileNameFromUpload(upload) {
-  if (upload instanceof tus_upload_TusUpload) {
-    return upload.fileName;
-  } else if (upload instanceof s3_upload) {
-    return upload.file.name;
-  } else if (upload instanceof uploaded_file_UploadedS3File) {
-    return upload.original_name;
-  } else {
-    return upload.name;
-  }
-};
 
 var file_field_FileField = /*#__PURE__*/function () {
   function FileField(_ref) {
@@ -5717,15 +5736,7 @@ var file_field_FileField = /*#__PURE__*/function () {
     key: "findUploadByName",
     value: function findUploadByName(fileName) {
       var upload = this.uploads.find(function (upload) {
-        if (upload instanceof tus_upload_TusUpload) {
-          return upload.fileName === fileName;
-        } else if (upload instanceof s3_upload) {
-          return upload.file.name === fileName;
-        } else if (upload) {
-          return upload.name === fileName;
-        } else {
-          return false;
-        }
+        return upload && upload.name === fileName;
       });
 
       if (upload) {
@@ -5929,7 +5940,15 @@ var file_field_FileField = /*#__PURE__*/function () {
         };
       });
       var uploadedInfo = this.uploads.filter(function (upload) {
-        return upload && !(upload instanceof tus_upload_TusUpload) && !(upload instanceof s3_upload) && upload.placeholder === false;
+        return upload && upload instanceof uploaded_file_UploadedS3File;
+      }).map(function (upload) {
+        var uploadedS3File = upload;
+        return {
+          id: uploadedS3File.id,
+          name: uploadedS3File.key,
+          original_name: uploadedS3File.name,
+          size: uploadedS3File.size
+        };
       }).concat(s3Uploads);
       var input = Object(util["a" /* findInput */])(this.form, Object(util["g" /* getS3UploadedFieldName */])(this.fieldName, this.prefix), this.prefix);
 
@@ -5949,7 +5968,7 @@ var file_field_FileField = /*#__PURE__*/function () {
         this.eventEmitter.emit(eventName, {
           element: element,
           fieldName: this.fieldName,
-          fileName: file_field_getFileNameFromUpload(upload),
+          fileName: upload.name,
           metaDataField: this.getMetaDataField(),
           upload: upload
         });
