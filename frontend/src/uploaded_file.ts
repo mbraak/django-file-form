@@ -16,11 +16,9 @@ export class BaseUploadedFile extends BaseUpload {
   placeholder?: boolean | undefined;
   size: number;
   url?: string;
-  // available only for S3 uploaded file
-  original_name?: string;
 
-  constructor(initialFile: InitialFile) {
-    super("done");
+  constructor(initialFile: InitialFile, uploadIndex: number) {
+    super("done", uploadIndex);
 
     this.id = initialFile.id;
     this.name = initialFile.name;
@@ -29,25 +27,31 @@ export class BaseUploadedFile extends BaseUpload {
 }
 
 class PlaceholderFile extends BaseUploadedFile {
-  constructor(initialFile: InitialFile) {
-    super(initialFile);
+  constructor(initialFile: InitialFile, uploadIndex: number) {
+    super(initialFile, uploadIndex);
 
     this.placeholder = true;
   }
 }
 
-class UploadedS3File extends BaseUploadedFile {
-  constructor(initialFile: InitialFile) {
-    super(initialFile);
+export class UploadedS3File extends BaseUploadedFile {
+  original_name: string;
 
-    this.original_name = initialFile.original_name;
+  constructor(initialFile: InitialFile, uploadIndex: number) {
+    super(initialFile, uploadIndex);
+
+    this.original_name = initialFile.original_name || initialFile.name;
     this.placeholder = false;
   }
 }
 
 class UploadedFile extends BaseUploadedFile {
-  constructor(initialFile: InitialFile, uploadUrl: string) {
-    super(initialFile);
+  constructor(
+    initialFile: InitialFile,
+    uploadUrl: string,
+    uploadIndex: number
+  ) {
+    super(initialFile, uploadIndex);
 
     this.url = `${uploadUrl}${initialFile.id}`;
   }
@@ -55,13 +59,14 @@ class UploadedFile extends BaseUploadedFile {
 
 export const createUploadedFile = (
   initialFile: InitialFile,
-  uploadUrl: string
+  uploadUrl: string,
+  uploadIndex: number
 ): BaseUploadedFile => {
   if (initialFile.placeholder === true) {
-    return new PlaceholderFile(initialFile);
+    return new PlaceholderFile(initialFile, uploadIndex);
   } else if (initialFile.placeholder === false) {
-    return new UploadedS3File(initialFile);
+    return new UploadedS3File(initialFile, uploadIndex);
   } else {
-    return new UploadedFile(initialFile, uploadUrl);
+    return new UploadedFile(initialFile, uploadUrl, uploadIndex);
   }
 };

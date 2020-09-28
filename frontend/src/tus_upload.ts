@@ -17,8 +17,8 @@ export default class TusUpload extends BaseUpload {
   onSuccess: (size: number) => void;
   upload: Upload;
 
-  constructor(file: File, options: Options) {
-    super("uploading");
+  constructor(file: File, uploadIndex: number, options: Options) {
+    super("uploading", uploadIndex);
 
     this.fileName = file.name;
     this.onSuccess = options.onSuccess;
