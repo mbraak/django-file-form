@@ -511,7 +511,6 @@ class LiveTestCase(BaseLiveTestCase):
         temp_file.named_temporary_file.seek(0)
 
         page.upload_using_js(temp_file)
-        page.find_upload_success(temp_file, upload_index=0)
         page.assert_page_contains_text('14 Bytes')
 
         self.assertEqual(page.get_upload_count(), 1)
