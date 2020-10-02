@@ -2806,7 +2806,7 @@ var getPrototypeOf_default = /*#__PURE__*/__webpack_require__.n(getPrototypeOf);
 var url_join = __webpack_require__(11);
 var url_join_default = /*#__PURE__*/__webpack_require__.n(url_join);
 
-// CONCATENATED MODULE: ./src/base_upload.ts
+// CONCATENATED MODULE: ./src/uploads/base_upload.ts
 
 
 
@@ -2829,7 +2829,7 @@ var base_upload_BaseUpload = function BaseUpload(_ref) {
 };
 
 /* harmony default export */ var base_upload = (base_upload_BaseUpload);
-// CONCATENATED MODULE: ./src/s3_upload.ts
+// CONCATENATED MODULE: ./src/uploads/s3_upload.ts
 
 
 
@@ -3355,7 +3355,7 @@ var s3_upload_S3Upload = /*#__PURE__*/function (_BaseUpload) {
 }(base_upload);
 
 /* harmony default export */ var s3_upload = (s3_upload_S3Upload);
-// CONCATENATED MODULE: ./src/uploaded_file.ts
+// CONCATENATED MODULE: ./src/uploads/uploaded_file.ts
 
 
 
@@ -5344,7 +5344,7 @@ var _window = window,
     browser_Blob = _window.Blob;
 var isSupported = browser_XMLHttpRequest && browser_Blob && typeof browser_Blob.prototype.slice === "function";
 
-// CONCATENATED MODULE: ./src/tus_upload.ts
+// CONCATENATED MODULE: ./src/uploads/tus_upload.ts
 
 
 
@@ -5442,13 +5442,13 @@ var file_field_FileField = /*#__PURE__*/function () {
         fieldName = _ref.fieldName,
         form = _ref.form,
         formId = _ref.formId,
-        s3UploadDir = _ref.s3UploadDir,
         initial = _ref.initial,
         input = _ref.input,
         multiple = _ref.multiple,
         parent = _ref.parent,
         prefix = _ref.prefix,
         retryDelays = _ref.retryDelays,
+        s3UploadDir = _ref.s3UploadDir,
         skipRequired = _ref.skipRequired,
         supportDropArea = _ref.supportDropArea,
         translations = _ref.translations,
@@ -5469,6 +5469,8 @@ var file_field_FileField = /*#__PURE__*/function () {
     defineProperty_default()(this, "formId", void 0);
 
     defineProperty_default()(this, "multiple", void 0);
+
+    defineProperty_default()(this, "nextUploadIndex", void 0);
 
     defineProperty_default()(this, "prefix", void 0);
 
@@ -5509,29 +5511,30 @@ var file_field_FileField = /*#__PURE__*/function () {
     defineProperty_default()(this, "onClick", function (e) {
       var target = e.target;
 
-      var getUploadIndex = function getUploadIndex() {
+      var getUpload = function getUpload() {
         var dataIndex = target.getAttribute("data-index");
 
         if (!dataIndex) {
-          return null;
+          return undefined;
         }
 
-        return parseInt(dataIndex, 10);
+        var uploadIndex = parseInt(dataIndex, 10);
+        return _this.getUploadByIndex(uploadIndex);
       };
 
       if (target.classList.contains("dff-delete") && !target.classList.contains("dff-disabled")) {
-        var uploadIndex = getUploadIndex();
+        var _upload = getUpload();
 
-        if (uploadIndex !== null) {
-          _this.removeExistingUpload(uploadIndex);
+        if (_upload) {
+          _this.removeExistingUpload(_upload);
         }
 
         e.preventDefault();
       } else if (target.classList.contains("dff-cancel")) {
-        var _uploadIndex = getUploadIndex();
+        var _upload2 = getUpload();
 
-        if (_uploadIndex !== null) {
-          _this.handleCancel(_uploadIndex);
+        if (_upload2) {
+          _this.handleCancel(_upload2);
         }
 
         e.preventDefault();
@@ -5546,10 +5549,10 @@ var file_field_FileField = /*#__PURE__*/function () {
       var onProgress = _this.callbacks.onProgress;
 
       if (onProgress) {
-        var _upload = _this.getUploadByIndex(uploadIndex);
+        var _upload3 = _this.getUploadByIndex(uploadIndex);
 
-        if (_upload && _upload instanceof tus_upload_TusUpload) {
-          onProgress(bytesUploaded, bytesTotal, _upload);
+        if (_upload3 && _upload3 instanceof tus_upload_TusUpload) {
+          onProgress(bytesUploaded, bytesTotal, _upload3);
         }
       }
     });
@@ -5605,13 +5608,14 @@ var file_field_FileField = /*#__PURE__*/function () {
     this.fieldName = fieldName;
     this.form = form;
     this.formId = formId;
-    this.s3UploadDir = s3UploadDir;
     this.multiple = multiple;
     this.prefix = prefix;
     this.retryDelays = retryDelays;
+    this.s3UploadDir = s3UploadDir;
     this.supportDropArea = supportDropArea;
     this.uploadUrl = uploadUrl;
     this.uploads = [];
+    this.nextUploadIndex = 0;
     this.renderer = new render_upload_file({
       parent: parent,
       input: input,
@@ -5645,11 +5649,11 @@ var file_field_FileField = /*#__PURE__*/function () {
       var multiple = this.multiple,
           renderer = this.renderer;
 
-      var addInitialFile = function addInitialFile(initialFile, uploadIndex) {
+      var addInitialFile = function addInitialFile(initialFile) {
         var name = initialFile.name,
             size = initialFile.size;
-        var element = renderer.addUploadedFile(initialFile.original_name ? initialFile.original_name : name, uploadIndex, size);
-        var upload = createUploadedFile(initialFile, _this2.uploadUrl, uploadIndex);
+        var element = renderer.addUploadedFile(initialFile.original_name ? initialFile.original_name : name, _this2.nextUploadIndex, size);
+        var upload = createUploadedFile(initialFile, _this2.uploadUrl, _this2.nextUploadIndex);
 
         _this2.uploads.push(upload);
 
@@ -5657,13 +5661,12 @@ var file_field_FileField = /*#__PURE__*/function () {
       };
 
       if (multiple) {
-        var uploadIndex = 0;
         initialFiles.forEach(function (file) {
-          addInitialFile(file, uploadIndex);
-          uploadIndex += 1;
+          addInitialFile(file);
+          _this2.nextUploadIndex += 1;
         });
       } else {
-        addInitialFile(initialFiles[0], 0);
+        addInitialFile(initialFiles[0]);
       }
     }
   }, {
@@ -5675,53 +5678,56 @@ var file_field_FileField = /*#__PURE__*/function () {
           formId = this.formId,
           s3UploadDir = this.s3UploadDir,
           renderer = this.renderer,
-          uploads = this.uploads,
           uploadUrl = this.uploadUrl;
       var fileName = file.name;
-      var existingUploadIndex = this.findUploadByName(fileName);
+      var existingUpload = this.findUploadByName(fileName);
+      var newUploadIndex = existingUpload ? existingUpload.uploadIndex : this.nextUploadIndex;
 
-      if (existingUploadIndex !== null) {
-        this.removeExistingUpload(existingUploadIndex);
+      if (!existingUpload) {
+        this.nextUploadIndex += 1;
       }
 
-      var uploadIndex = uploads.length;
+      if (existingUpload) {
+        this.removeExistingUpload(existingUpload);
+      }
+
       var upload = null;
 
       if (s3UploadDir != null) {
-        upload = new s3_upload(file, uploadIndex, {
+        upload = new s3_upload(file, newUploadIndex, {
           s3UploadDir: s3UploadDir,
           endpoint: uploadUrl,
           onProgress: function onProgress(bytesUploaded, bytesTotal) {
-            return _this3.handleProgress(uploadIndex, bytesUploaded, bytesTotal);
+            return _this3.handleProgress(newUploadIndex, bytesUploaded, bytesTotal);
           },
           onError: function onError(error) {
-            return _this3.handleError(uploadIndex, error);
+            return _this3.handleError(newUploadIndex, error);
           },
           onSuccess: function onSuccess() {
-            return _this3.handleSuccess(uploadIndex, upload.file.size);
+            return _this3.handleSuccess(newUploadIndex, upload.file.size);
           }
         });
         upload.start();
       } else {
-        upload = new tus_upload_TusUpload(file, uploadIndex, {
+        upload = new tus_upload_TusUpload(file, newUploadIndex, {
           chunkSize: this.chunkSize,
           fieldName: fieldName,
           formId: formId,
           onError: function onError(error) {
-            return _this3.handleError(uploadIndex, error);
+            return _this3.handleError(newUploadIndex, error);
           },
           onProgress: function onProgress(bytesUploaded, bytesTotal) {
-            return _this3.handleProgress(uploadIndex, bytesUploaded, bytesTotal);
+            return _this3.handleProgress(newUploadIndex, bytesUploaded, bytesTotal);
           },
           onSuccess: function onSuccess(size) {
-            return _this3.handleSuccess(uploadIndex, size);
+            return _this3.handleSuccess(newUploadIndex, size);
           },
           retryDelays: this.retryDelays,
           uploadUrl: uploadUrl
         });
       }
 
-      var element = renderer.addNewUpload(fileName, uploadIndex);
+      var element = renderer.addNewUpload(fileName, newUploadIndex);
       this.uploads.push(upload);
       this.emitEvent("addUpload", element, upload);
     }
@@ -5735,30 +5741,18 @@ var file_field_FileField = /*#__PURE__*/function () {
   }, {
     key: "findUploadByName",
     value: function findUploadByName(fileName) {
-      var upload = this.uploads.find(function (upload) {
+      return this.uploads.find(function (upload) {
         return upload && upload.name === fileName;
       });
-
-      if (upload) {
-        return upload.uploadIndex;
-      } else {
-        return null;
-      }
     }
   }, {
     key: "removeExistingUpload",
-    value: function removeExistingUpload(uploadIndex) {
-      var upload = this.getUploadByIndex(uploadIndex);
-
-      if (!upload) {
-        return;
-      }
-
+    value: function removeExistingUpload(upload) {
       if (upload.status === "uploading") {
         void upload.abort();
       }
 
-      var element = this.renderer.findFileDiv(uploadIndex);
+      var element = this.renderer.findFileDiv(upload.uploadIndex);
 
       if (element) {
         this.emitEvent("removeUpload", element, upload);
@@ -5769,47 +5763,30 @@ var file_field_FileField = /*#__PURE__*/function () {
           case "done":
             {
               if (upload instanceof s3_upload) {
-                this.deleteS3Uploaded(uploadIndex);
+                this.deleteS3Uploaded(upload);
               } else {
-                this.deleteFromServer(uploadIndex);
+                this.deleteFromServer(upload);
               }
 
               break;
             }
 
           case "error":
-            {
-              this.removeUploadFromList(uploadIndex);
-              break;
-            }
-
           case "uploading":
             {
-              var _upload2 = this.getUploadByIndex(uploadIndex);
-
-              if (_upload2) {
-                void _upload2.abort();
-              }
-
-              this.removeUploadFromList(uploadIndex);
+              this.removeUploadFromList(upload);
               break;
             }
         }
       } else if (upload.placeholder) {
-        this.deletePlaceholder(uploadIndex);
+        this.deletePlaceholder(upload);
       }
     }
   }, {
     key: "removeUploadFromList",
-    value: function removeUploadFromList(uploadIndex) {
-      var upload = this.getUploadByIndex(uploadIndex);
-
-      if (!upload) {
-        return;
-      }
-
-      this.renderer.deleteFile(uploadIndex);
-      delete this.uploads[uploadIndex];
+    value: function removeUploadFromList(upload) {
+      this.renderer.deleteFile(upload.uploadIndex);
+      this.uploads.splice(upload.uploadIndex, 1);
       this.checkDropHint();
       var onDelete = this.callbacks.onDelete;
 
@@ -5819,14 +5796,8 @@ var file_field_FileField = /*#__PURE__*/function () {
     }
   }, {
     key: "deleteFromServer",
-    value: function deleteFromServer(uploadIndex) {
+    value: function deleteFromServer(upload) {
       var _this4 = this;
-
-      var upload = this.getUploadByIndex(uploadIndex);
-
-      if (!upload) {
-        return;
-      }
 
       var url = null;
 
@@ -5840,15 +5811,15 @@ var file_field_FileField = /*#__PURE__*/function () {
         return;
       }
 
-      this.renderer.disableDelete(uploadIndex);
+      this.renderer.disableDelete(upload.uploadIndex);
       var xhr = new window.XMLHttpRequest();
       xhr.open("DELETE", url);
 
       xhr.onload = function () {
         if (xhr.status === 204) {
-          _this4.removeUploadFromList(uploadIndex);
+          _this4.removeUploadFromList(upload);
         } else {
-          _this4.renderer.setDeleteFailed(uploadIndex);
+          _this4.renderer.setDeleteFailed(upload.uploadIndex);
         }
       };
 
@@ -5857,27 +5828,25 @@ var file_field_FileField = /*#__PURE__*/function () {
     }
   }, {
     key: "deletePlaceholder",
-    value: function deletePlaceholder(uploadIndex) {
-      this.removeUploadFromList(uploadIndex);
+    value: function deletePlaceholder(upload) {
+      this.removeUploadFromList(upload);
       this.updatePlaceholderInput();
     }
   }, {
     key: "deleteS3Uploaded",
-    value: function deleteS3Uploaded(uploadIndex) {
-      this.removeUploadFromList(uploadIndex);
+    value: function deleteS3Uploaded(upload) {
+      this.removeUploadFromList(upload);
       this.updateS3UploadedInput();
     }
   }, {
     key: "handleCancel",
-    value: function handleCancel(uploadIndex) {
-      var upload = this.getUploadByIndex(uploadIndex);
-
+    value: function handleCancel(upload) {
       if (upload instanceof tus_upload_TusUpload) {
         void upload.abort();
-        this.removeUploadFromList(uploadIndex);
+        this.removeUploadFromList(upload);
       } else if (upload instanceof s3_upload) {
         upload.abort();
-        this.removeUploadFromList(uploadIndex);
+        this.removeUploadFromList(upload);
       }
     }
   }, {
