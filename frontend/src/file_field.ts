@@ -40,12 +40,13 @@ class FileField {
   form: Element;
   formId: string;
   multiple: boolean;
+  nextUploadIndex: number;
   prefix: string | null;
   renderer: RenderUploadFile;
   retryDelays: number[] | null;
   s3UploadDir: string | null;
   supportDropArea: boolean;
-  uploads: (BaseUpload | undefined)[];
+  uploads: BaseUpload[];
   uploadUrl: string;
 
   constructor({
@@ -55,13 +56,13 @@ class FileField {
     fieldName,
     form,
     formId,
-    s3UploadDir,
     initial,
     input,
     multiple,
     parent,
     prefix,
     retryDelays,
+    s3UploadDir,
     skipRequired,
     supportDropArea,
     translations,
@@ -73,13 +74,13 @@ class FileField {
     fieldName: string;
     form: Element;
     formId: string;
-    s3UploadDir: string | null;
     initial: InitialFile[];
     input: HTMLInputElement;
     multiple: boolean;
     parent: Element;
     prefix: string | null;
     retryDelays: number[] | null;
+    s3UploadDir: string | null;
     skipRequired: boolean;
     supportDropArea: boolean;
     translations: Translations;
@@ -91,14 +92,15 @@ class FileField {
     this.fieldName = fieldName;
     this.form = form;
     this.formId = formId;
-    this.s3UploadDir = s3UploadDir;
     this.multiple = multiple;
     this.prefix = prefix;
     this.retryDelays = retryDelays;
+    this.s3UploadDir = s3UploadDir;
     this.supportDropArea = supportDropArea;
     this.uploadUrl = uploadUrl;
 
     this.uploads = [];
+    this.nextUploadIndex = 0;
 
     this.renderer = new RenderUploadFile({
       parent,
@@ -129,21 +131,18 @@ class FileField {
 
     const { multiple, renderer } = this;
 
-    const addInitialFile = (
-      initialFile: InitialFile,
-      uploadIndex: number
-    ): void => {
+    const addInitialFile = (initialFile: InitialFile): void => {
       const { name, size } = initialFile;
       const element = renderer.addUploadedFile(
         initialFile.original_name ? initialFile.original_name : name,
-        uploadIndex,
+        this.nextUploadIndex,
         size
       );
 
       const upload = createUploadedFile(
         initialFile,
         this.uploadUrl,
-        uploadIndex
+        this.nextUploadIndex
       );
       this.uploads.push(upload);
 
@@ -151,14 +150,12 @@ class FileField {
     };
 
     if (multiple) {
-      let uploadIndex = 0;
-
       initialFiles.forEach((file: InitialFile): void => {
-        addInitialFile(file, uploadIndex);
-        uploadIndex += 1;
+        addInitialFile(file);
+        this.nextUploadIndex += 1;
       });
     } else {
-      addInitialFile(initialFiles[0], 0);
+      addInitialFile(initialFiles[0]);
     }
   }
 
@@ -180,51 +177,52 @@ class FileField {
   };
 
   uploadFile(file: File): void {
-    const {
-      fieldName,
-      formId,
-      s3UploadDir,
-      renderer,
-      uploads,
-      uploadUrl
-    } = this;
+    const { fieldName, formId, s3UploadDir, renderer, uploadUrl } = this;
     const fileName = file.name;
-    const existingUploadIndex = this.findUploadByName(fileName);
+    const existingUpload = this.findUploadByName(fileName);
+    const newUploadIndex = existingUpload
+      ? existingUpload.uploadIndex
+      : this.nextUploadIndex;
 
-    if (existingUploadIndex !== null) {
-      this.removeExistingUpload(existingUploadIndex);
+    if (!existingUpload) {
+      this.nextUploadIndex += 1;
     }
 
-    const uploadIndex = uploads.length;
+    if (existingUpload) {
+      this.removeExistingUpload(existingUpload);
+    }
+
     let upload: S3Upload | TusUpload | null = null;
 
     if (s3UploadDir != null) {
-      upload = new S3Upload(file, uploadIndex, {
+      upload = new S3Upload(file, newUploadIndex, {
         s3UploadDir: s3UploadDir,
         endpoint: uploadUrl,
         onProgress: (bytesUploaded: number, bytesTotal: number): void =>
-          this.handleProgress(uploadIndex, bytesUploaded, bytesTotal),
-        onError: (error: Error): void => this.handleError(uploadIndex, error),
+          this.handleProgress(newUploadIndex, bytesUploaded, bytesTotal),
+        onError: (error: Error): void =>
+          this.handleError(newUploadIndex, error),
         onSuccess: (): void =>
-          this.handleSuccess(uploadIndex, (upload as S3Upload).file.size)
+          this.handleSuccess(newUploadIndex, (upload as S3Upload).file.size)
       });
       upload.start();
     } else {
-      upload = new TusUpload(file, uploadIndex, {
+      upload = new TusUpload(file, newUploadIndex, {
         chunkSize: this.chunkSize,
         fieldName,
         formId,
-        onError: (error: Error): void => this.handleError(uploadIndex, error),
+        onError: (error: Error): void =>
+          this.handleError(newUploadIndex, error),
         onProgress: (bytesUploaded: number, bytesTotal: number): void =>
-          this.handleProgress(uploadIndex, bytesUploaded, bytesTotal),
+          this.handleProgress(newUploadIndex, bytesUploaded, bytesTotal),
         onSuccess: (size: number): void =>
-          this.handleSuccess(uploadIndex, size),
+          this.handleSuccess(newUploadIndex, size),
         retryDelays: this.retryDelays,
         uploadUrl
       });
     }
 
-    const element = renderer.addNewUpload(fileName, uploadIndex);
+    const element = renderer.addNewUpload(fileName, newUploadIndex);
     this.uploads.push(upload);
 
     this.emitEvent("addUpload", element, upload);
@@ -234,30 +232,16 @@ class FileField {
     return this.uploads.find(upload => upload?.uploadIndex === uploadIndex);
   }
 
-  findUploadByName(fileName: string): number | null {
-    const upload = this.uploads.find(
-      upload => upload && upload.name === fileName
-    );
-
-    if (upload) {
-      return upload.uploadIndex;
-    } else {
-      return null;
-    }
+  findUploadByName(fileName: string): BaseUpload | undefined {
+    return this.uploads.find(upload => upload && upload.name === fileName);
   }
 
-  removeExistingUpload(uploadIndex: number): void {
-    const upload = this.getUploadByIndex(uploadIndex);
-
-    if (!upload) {
-      return;
-    }
-
+  removeExistingUpload(upload: BaseUpload): void {
     if (upload.status === "uploading") {
       void (upload as TusUpload).abort();
     }
 
-    const element = this.renderer.findFileDiv(uploadIndex);
+    const element = this.renderer.findFileDiv(upload.uploadIndex);
 
     if (element) {
       this.emitEvent("removeUpload", element, upload);
@@ -271,30 +255,21 @@ class FileField {
       switch (upload.status) {
         case "done": {
           if (upload instanceof S3Upload) {
-            this.deleteS3Uploaded(uploadIndex);
+            this.deleteS3Uploaded(upload.uploadIndex);
           } else {
-            this.deleteFromServer(uploadIndex);
+            this.deleteFromServer(upload.uploadIndex);
           }
           break;
         }
 
-        case "error": {
-          this.removeUploadFromList(uploadIndex);
-          break;
-        }
-
+        case "error":
         case "uploading": {
-          const upload = this.getUploadByIndex(uploadIndex);
-
-          if (upload) {
-            void (upload as TusUpload).abort();
-          }
-          this.removeUploadFromList(uploadIndex);
+          this.removeUploadFromList(upload.uploadIndex);
           break;
         }
       }
     } else if ((upload as BaseUploadedFile).placeholder) {
-      this.deletePlaceholder(uploadIndex);
+      this.deletePlaceholder(upload.uploadIndex);
     }
   }
 
@@ -322,7 +297,11 @@ class FileField {
       const uploadIndex = getUploadIndex();
 
       if (uploadIndex !== null) {
-        this.removeExistingUpload(uploadIndex);
+        const upload = this.getUploadByIndex(uploadIndex);
+
+        if (upload) {
+          this.removeExistingUpload(upload);
+        }
       }
 
       e.preventDefault();
@@ -411,7 +390,7 @@ class FileField {
     }
 
     this.renderer.deleteFile(uploadIndex);
-    delete this.uploads[uploadIndex];
+    this.uploads.splice(uploadIndex, 1);
 
     this.checkDropHint();
 
