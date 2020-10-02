@@ -7,7 +7,7 @@ import {
 import RenderUploadFile from "./render_upload_file";
 import DropArea from "./drop_area";
 
-import S3Upload from "./s3_upload";
+import S3Upload from "./uploads/s3_upload";
 import EventEmitter from "eventemitter3";
 import {
   BaseUploadedFile,
@@ -15,9 +15,9 @@ import {
   InitialFile,
   UploadedFile,
   UploadedS3File
-} from "./uploaded_file";
-import TusUpload from "./tus_upload";
-import BaseUpload from "./base_upload";
+} from "./uploads/uploaded_file";
+import TusUpload from "./uploads/tus_upload";
+import BaseUpload from "./uploads/base_upload";
 
 export type Translations = { [key: string]: string };
 
