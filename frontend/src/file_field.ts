@@ -255,21 +255,21 @@ class FileField {
       switch (upload.status) {
         case "done": {
           if (upload instanceof S3Upload) {
-            this.deleteS3Uploaded(upload.uploadIndex);
+            this.deleteS3Uploaded(upload);
           } else {
-            this.deleteFromServer(upload.uploadIndex);
+            this.deleteFromServer(upload);
           }
           break;
         }
 
         case "error":
         case "uploading": {
-          this.removeUploadFromList(upload.uploadIndex);
+          this.removeUploadFromList(upload);
           break;
         }
       }
     } else if ((upload as BaseUploadedFile).placeholder) {
-      this.deletePlaceholder(upload.uploadIndex);
+      this.deletePlaceholder(upload);
     }
   }
 
@@ -280,36 +280,33 @@ class FileField {
   onClick = (e: Event): void => {
     const target = e.target as HTMLInputElement;
 
-    const getUploadIndex = (): number | null => {
+    const getUpload = (): BaseUpload | undefined => {
       const dataIndex = target.getAttribute("data-index");
 
       if (!dataIndex) {
-        return null;
+        return undefined;
       }
 
-      return parseInt(dataIndex, 10);
+      const uploadIndex = parseInt(dataIndex, 10);
+      return this.getUploadByIndex(uploadIndex);
     };
 
     if (
       target.classList.contains("dff-delete") &&
       !target.classList.contains("dff-disabled")
     ) {
-      const uploadIndex = getUploadIndex();
+      const upload = getUpload();
 
-      if (uploadIndex !== null) {
-        const upload = this.getUploadByIndex(uploadIndex);
-
-        if (upload) {
-          this.removeExistingUpload(upload);
-        }
+      if (upload) {
+        this.removeExistingUpload(upload);
       }
 
       e.preventDefault();
     } else if (target.classList.contains("dff-cancel")) {
-      const uploadIndex = getUploadIndex();
+      const upload = getUpload();
 
-      if (uploadIndex !== null) {
-        this.handleCancel(uploadIndex);
+      if (upload) {
+        this.handleCancel(upload);
       }
 
       e.preventDefault();
@@ -382,15 +379,9 @@ class FileField {
     }
   };
 
-  removeUploadFromList(uploadIndex: number): void {
-    const upload = this.getUploadByIndex(uploadIndex);
-
-    if (!upload) {
-      return;
-    }
-
-    this.renderer.deleteFile(uploadIndex);
-    this.uploads.splice(uploadIndex, 1);
+  removeUploadFromList(upload: BaseUpload): void {
+    this.renderer.deleteFile(upload.uploadIndex);
+    this.uploads.splice(upload.uploadIndex, 1);
 
     this.checkDropHint();
 
@@ -401,13 +392,7 @@ class FileField {
     }
   }
 
-  deleteFromServer(uploadIndex: number): void {
-    const upload = this.getUploadByIndex(uploadIndex);
-
-    if (!upload) {
-      return;
-    }
-
+  deleteFromServer(upload: BaseUpload): void {
     let url = null;
     if (upload instanceof TusUpload) {
       url = upload.getUrl();
@@ -419,41 +404,39 @@ class FileField {
       return;
     }
 
-    this.renderer.disableDelete(uploadIndex);
+    this.renderer.disableDelete(upload.uploadIndex);
 
     const xhr = new window.XMLHttpRequest();
     xhr.open("DELETE", url);
 
     xhr.onload = (): void => {
       if (xhr.status === 204) {
-        this.removeUploadFromList(uploadIndex);
+        this.removeUploadFromList(upload);
       } else {
-        this.renderer.setDeleteFailed(uploadIndex);
+        this.renderer.setDeleteFailed(upload.uploadIndex);
       }
     };
     xhr.setRequestHeader("Tus-Resumable", "1.0.0");
     xhr.send(null);
   }
 
-  deletePlaceholder(uploadIndex: number): void {
-    this.removeUploadFromList(uploadIndex);
+  deletePlaceholder(upload: BaseUpload): void {
+    this.removeUploadFromList(upload);
     this.updatePlaceholderInput();
   }
 
-  deleteS3Uploaded(uploadIndex: number): void {
-    this.removeUploadFromList(uploadIndex);
+  deleteS3Uploaded(upload: BaseUpload): void {
+    this.removeUploadFromList(upload);
     this.updateS3UploadedInput();
   }
 
-  handleCancel(uploadIndex: number): void {
-    const upload = this.getUploadByIndex(uploadIndex);
-
+  handleCancel(upload: BaseUpload): void {
     if (upload instanceof TusUpload) {
       void upload.abort();
-      this.removeUploadFromList(uploadIndex);
+      this.removeUploadFromList(upload);
     } else if (upload instanceof S3Upload) {
       upload.abort();
-      this.removeUploadFromList(uploadIndex);
+      this.removeUploadFromList(upload);
     }
   }
 
