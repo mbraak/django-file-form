@@ -197,12 +197,15 @@ class FileField {
     if (s3UploadDir != null) {
       upload = new S3Upload(file, newUploadIndex, {
         endpoint: uploadUrl,
-        onProgress: (bytesUploaded: number, bytesTotal: number): void =>
-          this.handleProgress(newUploadIndex, bytesUploaded, bytesTotal),
         onError: (error: Error): void =>
-          this.handleError(newUploadIndex, error),
+          this.handleError(upload as S3Upload, error),
+        onProgress: (bytesUploaded: number, bytesTotal: number): void =>
+          this.handleProgress(upload as S3Upload, bytesUploaded, bytesTotal),
         onSuccess: (): void =>
-          this.handleSuccess(newUploadIndex, (upload as S3Upload).file.size),
+          this.handleSuccess(
+            upload as S3Upload,
+            (upload as S3Upload).file.size
+          ),
         s3UploadDir
       });
       upload.start();
@@ -212,11 +215,11 @@ class FileField {
         fieldName,
         formId,
         onError: (error: Error): void =>
-          this.handleError(newUploadIndex, error),
+          this.handleError(upload as TusUpload, error),
         onProgress: (bytesUploaded: number, bytesTotal: number): void =>
-          this.handleProgress(newUploadIndex, bytesUploaded, bytesTotal),
+          this.handleProgress(upload as TusUpload, bytesUploaded, bytesTotal),
         onSuccess: (size: number): void =>
-          this.handleSuccess(newUploadIndex, size),
+          this.handleSuccess(upload as TusUpload, size),
         retryDelays: this.retryDelays,
         uploadUrl
       });
@@ -314,33 +317,25 @@ class FileField {
   };
 
   handleProgress = (
-    uploadIndex: number,
+    upload: BaseUpload,
     bytesUploaded: number,
     bytesTotal: number
   ): void => {
     const percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2);
 
-    this.renderer.updateProgress(uploadIndex, percentage);
+    this.renderer.updateProgress(upload.uploadIndex, percentage);
 
     const { onProgress } = this.callbacks;
 
     if (onProgress) {
-      const upload = this.getUploadByIndex(uploadIndex);
-
-      if (upload && upload instanceof TusUpload) {
+      if (upload instanceof TusUpload) {
         onProgress(bytesUploaded, bytesTotal, upload);
       }
     }
   };
 
-  handleError = (uploadIndex: number, error: Error): void => {
-    const upload = this.getUploadByIndex(uploadIndex);
-
-    if (!upload) {
-      return;
-    }
-
-    this.renderer.setError(uploadIndex);
+  handleError = (upload: BaseUpload, error: Error): void => {
+    this.renderer.setError(upload.uploadIndex);
     upload.status = "error";
 
     const { onError } = this.callbacks;
@@ -352,23 +347,17 @@ class FileField {
     }
   };
 
-  handleSuccess = (uploadIndex: number, uploadedSize: number): void => {
-    const upload = this.getUploadByIndex(uploadIndex);
-
-    if (!upload) {
-      return;
-    }
-
+  handleSuccess = (upload: BaseUpload, uploadedSize: number): void => {
     const { renderer } = this;
     this.updateS3UploadedInput();
     renderer.clearInput();
-    renderer.setSuccess(uploadIndex, uploadedSize);
+    renderer.setSuccess(upload.uploadIndex, uploadedSize);
     upload.status = "done";
 
     const { onSuccess } = this.callbacks;
 
     const element = document.getElementsByClassName(
-      `dff-file-id-${uploadIndex}`
+      `dff-file-id-${upload.uploadIndex}`
     )[0] as HTMLElement;
     this.emitEvent("uploadComplete", element, upload);
 
