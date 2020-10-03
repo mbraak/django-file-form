@@ -1,39 +1,28 @@
 // The following code is adapted from https://github.com/transloadit/uppy/blob/master/packages/%40uppy/aws-s3-multipart/src/MultipartUploader.js
 // which is released under a MIT License (https://github.com/transloadit/uppy/blob/master/LICENSE)
 
-import urljoin from "url-join";
 import BaseUpload from "./base_upload";
+import {
+  abortMultipartUpload,
+  completeMultipartUpload,
+  createMultipartUpload,
+  getChunkSize,
+  listParts,
+  LocationInfo,
+  MB,
+  MultipartUpload,
+  Part,
+  prepareUploadPart,
+  remove,
+  ServerPart,
+  UrlInfo
+} from "./s3_utils";
 
 interface ChunkState {
   busy: boolean;
   done: boolean;
   etag?: string;
   uploaded: number;
-}
-
-interface Part {
-  ETag: string;
-  PartNumber: number;
-}
-
-interface ServerPart {
-  ETag: string;
-  PartNumber: number;
-  Size: number;
-}
-
-interface MultipartUpload {
-  key: string;
-  uploadId: string;
-  endpoint: string;
-}
-
-interface UrlInfo {
-  url: string;
-}
-
-interface LocationInfo {
-  location: string;
 }
 
 interface Options {
@@ -47,147 +36,6 @@ interface Options {
   s3UploadDir: string;
   endpoint: string;
   uploadId?: string;
-}
-
-const MB = 1024 * 1024;
-
-const getChunkSize = (file: File) => Math.ceil(file.size / 10000);
-
-const createMultipartUpload = (
-  file: File,
-  s3UploadDir: string,
-  endpoint: string
-): Promise<MultipartUpload> => {
-  const csrftoken = (<HTMLInputElement>(
-    document.getElementsByName("csrfmiddlewaretoken")[0]
-  )).value;
-  const headers = new Headers({
-    accept: "application/json",
-    "content-type": "application/json",
-    "X-CSRFToken": csrftoken
-  });
-  return fetch(endpoint, {
-    method: "post",
-    headers: headers,
-    body: JSON.stringify({
-      filename: file.name,
-      contentType: file.type,
-      s3UploadDir: s3UploadDir
-    })
-  })
-    .then(response => {
-      return response.json();
-    })
-    .then(data => {
-      return data as MultipartUpload;
-    });
-};
-
-const listParts = ({
-  key,
-  uploadId,
-  endpoint
-}: MultipartUpload): Promise<ServerPart[]> => {
-  const filename = encodeURIComponent(key);
-  const uploadIdEnc = encodeURIComponent(uploadId);
-  const url = urljoin(endpoint, uploadIdEnc, `?key=${filename}`);
-
-  return fetch(url, { method: "get" })
-    .then(response => {
-      return response.json();
-    })
-    .then(data => {
-      return (data as Record<string, unknown>)["parts"] as ServerPart[];
-    });
-};
-
-const abortMultipartUpload = ({ key, uploadId, endpoint }: MultipartUpload) => {
-  const filename = encodeURIComponent(key);
-  const uploadIdEnc = encodeURIComponent(uploadId);
-  const csrftoken = (<HTMLInputElement>(
-    document.getElementsByName("csrfmiddlewaretoken")[0]
-  )).value;
-  const headers = new Headers({
-    "X-CSRFToken": csrftoken
-  });
-  const url = urljoin(endpoint, uploadIdEnc, `?key=${filename}`);
-  return fetch(url, {
-    method: "delete",
-    headers: headers
-  }).then(response => {
-    return response.json();
-  });
-};
-
-const prepareUploadPart = ({
-  key,
-  uploadId,
-  number,
-  endpoint
-}: {
-  key: string;
-  uploadId: string;
-  number: number;
-  endpoint: string;
-}) => {
-  const filename = encodeURIComponent(key);
-  const csrftoken = (<HTMLInputElement>(
-    document.getElementsByName("csrfmiddlewaretoken")[0]
-  )).value;
-  const headers = new Headers({ "X-CSRFToken": csrftoken });
-  const url = urljoin(endpoint, uploadId, `${number}`, `?key=${filename}`);
-  return fetch(url, {
-    method: "get",
-    headers: headers
-  })
-    .then(response => {
-      return response.json();
-    })
-    .then(data => {
-      return data as UrlInfo;
-    });
-};
-
-const completeMultipartUpload = ({
-  key,
-  uploadId,
-  parts,
-  endpoint
-}: {
-  key: string;
-  uploadId: string;
-  parts: Part[];
-  endpoint: string;
-}): Promise<LocationInfo> => {
-  const filename = encodeURIComponent(key);
-  const uploadIdEnc = encodeURIComponent(uploadId);
-  const csrftoken = (<HTMLInputElement>(
-    document.getElementsByName("csrfmiddlewaretoken")[0]
-  )).value;
-  const headers = new Headers({
-    "X-CSRFToken": csrftoken
-  });
-  const url = urljoin(endpoint, uploadIdEnc, "complete", `?key=${filename}`);
-  return fetch(url, {
-    method: "post",
-    headers: headers,
-    body: JSON.stringify({
-      parts: parts
-    })
-  })
-    .then(response => {
-      return response.json();
-    })
-    .then(data => {
-      return data as LocationInfo;
-    });
-};
-
-function remove(arr: unknown[], el: unknown) {
-  const i = arr.indexOf(el);
-  if (i !== -1) {
-    arr.splice(i, 1);
-  }
 }
 
 class S3Upload extends BaseUpload {

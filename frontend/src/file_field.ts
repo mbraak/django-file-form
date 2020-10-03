@@ -196,14 +196,14 @@ class FileField {
 
     if (s3UploadDir != null) {
       upload = new S3Upload(file, newUploadIndex, {
-        s3UploadDir: s3UploadDir,
         endpoint: uploadUrl,
         onProgress: (bytesUploaded: number, bytesTotal: number): void =>
           this.handleProgress(newUploadIndex, bytesUploaded, bytesTotal),
         onError: (error: Error): void =>
           this.handleError(newUploadIndex, error),
         onSuccess: (): void =>
-          this.handleSuccess(newUploadIndex, (upload as S3Upload).file.size)
+          this.handleSuccess(newUploadIndex, (upload as S3Upload).file.size),
+        s3UploadDir
       });
       upload.start();
     } else {

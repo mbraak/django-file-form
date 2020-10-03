@@ -1,6 +1,6 @@
 import EventEmitter from "eventemitter3";
 import FileField, { Callbacks, Translations } from "./file_field";
-import { InitialFile } from "./uploaded_file";
+import { InitialFile } from "./uploads/uploaded_file";
 import {
   getInputNameWithPrefix,
   getInputValueForFormAndPrefix,
