@@ -2802,10 +2802,6 @@ var possibleConstructorReturn_default = /*#__PURE__*/__webpack_require__.n(possi
 var getPrototypeOf = __webpack_require__(7);
 var getPrototypeOf_default = /*#__PURE__*/__webpack_require__.n(getPrototypeOf);
 
-// EXTERNAL MODULE: ./node_modules/url-join/lib/url-join.js
-var url_join = __webpack_require__(11);
-var url_join_default = /*#__PURE__*/__webpack_require__.n(url_join);
-
 // CONCATENATED MODULE: ./src/uploads/base_upload.ts
 
 
@@ -2829,30 +2825,55 @@ var base_upload_BaseUpload = function BaseUpload(_ref) {
 };
 
 /* harmony default export */ var base_upload = (base_upload_BaseUpload);
-// CONCATENATED MODULE: ./src/uploads/s3_upload.ts
+// EXTERNAL MODULE: ./node_modules/url-join/lib/url-join.js
+var url_join = __webpack_require__(11);
+var url_join_default = /*#__PURE__*/__webpack_require__.n(url_join);
 
-
-
-
-
-
-
-
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = getPrototypeOf_default()(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = getPrototypeOf_default()(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return possibleConstructorReturn_default()(this, result); }; }
-
-function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
-
-// The following code is adapted from https://github.com/transloadit/uppy/blob/master/packages/%40uppy/aws-s3-multipart/src/MultipartUploader.js
-// which is released under a MIT License (https://github.com/transloadit/uppy/blob/master/LICENSE)
-
+// CONCATENATED MODULE: ./src/uploads/s3_utils.ts
 
 var MB = 1024 * 1024;
-
-var getChunkSize = function getChunkSize(file) {
-  return Math.ceil(file.size / 10000);
+var s3_utils_abortMultipartUpload = function abortMultipartUpload(_ref) {
+  var key = _ref.key,
+      uploadId = _ref.uploadId,
+      endpoint = _ref.endpoint;
+  var filename = encodeURIComponent(key);
+  var uploadIdEnc = encodeURIComponent(uploadId);
+  var csrftoken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
+  var headers = new Headers({
+    "X-CSRFToken": csrftoken
+  });
+  var url = url_join_default()(endpoint, uploadIdEnc, "?key=".concat(filename));
+  return fetch(url, {
+    method: "delete",
+    headers: headers
+  }).then(function (response) {
+    return response.json();
+  });
 };
-
+var s3_utils_completeMultipartUpload = function completeMultipartUpload(_ref2) {
+  var key = _ref2.key,
+      uploadId = _ref2.uploadId,
+      parts = _ref2.parts,
+      endpoint = _ref2.endpoint;
+  var filename = encodeURIComponent(key);
+  var uploadIdEnc = encodeURIComponent(uploadId);
+  var csrftoken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
+  var headers = new Headers({
+    "X-CSRFToken": csrftoken
+  });
+  var url = url_join_default()(endpoint, uploadIdEnc, "complete", "?key=".concat(filename));
+  return fetch(url, {
+    method: "post",
+    headers: headers,
+    body: JSON.stringify({
+      parts: parts
+    })
+  }).then(function (response) {
+    return response.json();
+  }).then(function (data) {
+    return data;
+  });
+};
 var createMultipartUpload = function createMultipartUpload(file, s3UploadDir, endpoint) {
   var csrftoken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
   var headers = new Headers({
@@ -2874,11 +2895,13 @@ var createMultipartUpload = function createMultipartUpload(file, s3UploadDir, en
     return data;
   });
 };
-
-var s3_upload_listParts = function listParts(_ref) {
-  var key = _ref.key,
-      uploadId = _ref.uploadId,
-      endpoint = _ref.endpoint;
+var getChunkSize = function getChunkSize(file) {
+  return Math.ceil(file.size / 10000);
+};
+var s3_utils_listParts = function listParts(_ref3) {
+  var key = _ref3.key,
+      endpoint = _ref3.endpoint,
+      uploadId = _ref3.uploadId;
   var filename = encodeURIComponent(key);
   var uploadIdEnc = encodeURIComponent(uploadId);
   var url = url_join_default()(endpoint, uploadIdEnc, "?key=".concat(filename));
@@ -2890,31 +2913,11 @@ var s3_upload_listParts = function listParts(_ref) {
     return data["parts"];
   });
 };
-
-var s3_upload_abortMultipartUpload = function abortMultipartUpload(_ref2) {
-  var key = _ref2.key,
-      uploadId = _ref2.uploadId,
-      endpoint = _ref2.endpoint;
-  var filename = encodeURIComponent(key);
-  var uploadIdEnc = encodeURIComponent(uploadId);
-  var csrftoken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
-  var headers = new Headers({
-    "X-CSRFToken": csrftoken
-  });
-  var url = url_join_default()(endpoint, uploadIdEnc, "?key=".concat(filename));
-  return fetch(url, {
-    method: "delete",
-    headers: headers
-  }).then(function (response) {
-    return response.json();
-  });
-};
-
-var s3_upload_prepareUploadPart = function prepareUploadPart(_ref3) {
-  var key = _ref3.key,
-      uploadId = _ref3.uploadId,
-      number = _ref3.number,
-      endpoint = _ref3.endpoint;
+var s3_utils_prepareUploadPart = function prepareUploadPart(_ref4) {
+  var key = _ref4.key,
+      uploadId = _ref4.uploadId,
+      number = _ref4.number,
+      endpoint = _ref4.endpoint;
   var filename = encodeURIComponent(key);
   var csrftoken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
   var headers = new Headers({
@@ -2930,39 +2933,31 @@ var s3_upload_prepareUploadPart = function prepareUploadPart(_ref3) {
     return data;
   });
 };
-
-var s3_upload_completeMultipartUpload = function completeMultipartUpload(_ref4) {
-  var key = _ref4.key,
-      uploadId = _ref4.uploadId,
-      parts = _ref4.parts,
-      endpoint = _ref4.endpoint;
-  var filename = encodeURIComponent(key);
-  var uploadIdEnc = encodeURIComponent(uploadId);
-  var csrftoken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
-  var headers = new Headers({
-    "X-CSRFToken": csrftoken
-  });
-  var url = url_join_default()(endpoint, uploadIdEnc, "complete", "?key=".concat(filename));
-  return fetch(url, {
-    method: "post",
-    headers: headers,
-    body: JSON.stringify({
-      parts: parts
-    })
-  }).then(function (response) {
-    return response.json();
-  }).then(function (data) {
-    return data;
-  });
-};
-
-function remove(arr, el) {
+var remove = function remove(arr, el) {
   var i = arr.indexOf(el);
 
   if (i !== -1) {
     arr.splice(i, 1);
   }
-}
+};
+// CONCATENATED MODULE: ./src/uploads/s3_upload.ts
+
+
+
+
+
+
+
+
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = getPrototypeOf_default()(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = getPrototypeOf_default()(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return possibleConstructorReturn_default()(this, result); }; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+
+// The following code is adapted from https://github.com/transloadit/uppy/blob/master/packages/%40uppy/aws-s3-multipart/src/MultipartUploader.js
+// which is released under a MIT License (https://github.com/transloadit/uppy/blob/master/LICENSE)
+
+
 
 var s3_upload_S3Upload = /*#__PURE__*/function (_BaseUpload) {
   inherits_default()(S3Upload, _BaseUpload);
@@ -3092,7 +3087,7 @@ var s3_upload_S3Upload = /*#__PURE__*/function (_BaseUpload) {
         return Promise.resolve();
       }
 
-      return s3_upload_listParts({
+      return s3_utils_listParts({
         uploadId: this.uploadId,
         key: this.key,
         endpoint: this.endpoint
@@ -3171,7 +3166,7 @@ var s3_upload_S3Upload = /*#__PURE__*/function (_BaseUpload) {
         return Promise.resolve();
       }
 
-      return s3_upload_prepareUploadPart({
+      return s3_utils_prepareUploadPart({
         key: this.key,
         uploadId: this.uploadId,
         number: index + 1,
@@ -3184,8 +3179,8 @@ var s3_upload_S3Upload = /*#__PURE__*/function (_BaseUpload) {
         }
 
         return result;
-      }).then(function (_ref5) {
-        var url = _ref5.url;
+      }).then(function (_ref) {
+        var url = _ref.url;
 
         _this5._uploadPartBytes(index, url);
       }, function (err) {
@@ -3287,7 +3282,7 @@ var s3_upload_S3Upload = /*#__PURE__*/function (_BaseUpload) {
         return Promise.resolve();
       }
 
-      return s3_upload_completeMultipartUpload({
+      return s3_utils_completeMultipartUpload({
         key: this.key,
         uploadId: this.uploadId,
         parts: this.parts,
@@ -3339,7 +3334,7 @@ var s3_upload_S3Upload = /*#__PURE__*/function (_BaseUpload) {
       });
       this.createdPromise.then(function () {
         if (_this8.key && _this8.uploadId) {
-          void s3_upload_abortMultipartUpload({
+          void s3_utils_abortMultipartUpload({
             key: _this8.key,
             uploadId: _this8.uploadId,
             endpoint: _this8.endpoint
@@ -5695,7 +5690,6 @@ var file_field_FileField = /*#__PURE__*/function () {
 
       if (s3UploadDir != null) {
         upload = new s3_upload(file, newUploadIndex, {
-          s3UploadDir: s3UploadDir,
           endpoint: uploadUrl,
           onProgress: function onProgress(bytesUploaded, bytesTotal) {
             return _this3.handleProgress(newUploadIndex, bytesUploaded, bytesTotal);
@@ -5705,7 +5699,8 @@ var file_field_FileField = /*#__PURE__*/function () {
           },
           onSuccess: function onSuccess() {
             return _this3.handleSuccess(newUploadIndex, upload.file.size);
-          }
+          },
+          s3UploadDir: s3UploadDir
         });
         upload.start();
       } else {
