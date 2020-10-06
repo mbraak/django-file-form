@@ -13,6 +13,7 @@ interface BaseUploadedFileParameters {
   id: string;
   name: string;
   size: number;
+  type: string;
   uploadIndex: number;
 }
 
@@ -22,8 +23,14 @@ export class BaseUploadedFile extends BaseUpload {
   placeholder?: boolean | undefined;
   size: number;
 
-  constructor({ id, name, size, uploadIndex }: BaseUploadedFileParameters) {
-    super({ name, status: "done", uploadIndex });
+  constructor({
+    id,
+    name,
+    size,
+    type,
+    uploadIndex
+  }: BaseUploadedFileParameters) {
+    super({ name, status: "done", type, uploadIndex });
 
     this.id = id;
     this.size = size;
@@ -31,11 +38,14 @@ export class BaseUploadedFile extends BaseUpload {
 }
 
 class PlaceholderFile extends BaseUploadedFile {
+  type: "placeholder";
+
   constructor(initialFile: InitialFile, uploadIndex: number) {
     super({
       id: initialFile.id,
       name: initialFile.name,
       size: initialFile.size,
+      type: "placeholder",
       uploadIndex
     });
 
@@ -45,12 +55,14 @@ class PlaceholderFile extends BaseUploadedFile {
 
 export class UploadedS3File extends BaseUploadedFile {
   key: string;
+  type: "uploadedS3";
 
   constructor(initialFile: InitialFile, uploadIndex: number) {
     super({
       id: initialFile.id,
       name: initialFile.original_name || initialFile.name,
       size: initialFile.size,
+      type: "uploadedS3",
       uploadIndex
     });
 
@@ -60,6 +72,7 @@ export class UploadedS3File extends BaseUploadedFile {
 }
 
 export class UploadedFile extends BaseUploadedFile {
+  type: "uploadedTus";
   url: string;
 
   constructor(
@@ -71,6 +84,7 @@ export class UploadedFile extends BaseUploadedFile {
       id: initialFile.id,
       name: initialFile.name,
       size: initialFile.size,
+      type: "uploadedTus",
       uploadIndex
     });
 

@@ -42,18 +42,19 @@ class S3Upload extends BaseUpload {
   chunkState: ChunkState[];
   chunks: Blob[];
   createdPromise: Promise<MultipartUpload>;
+  endpoint: string;
   file: File;
   isPaused: boolean;
   key: string | null;
   options: Options;
   parts: Part[];
   s3UploadDir: string;
-  endpoint: string;
+  type: "s3";
   uploadId: string | null;
   uploading: XMLHttpRequest[];
 
   constructor(file: File, uploadIndex: number, options: Options) {
-    super({ name: file.name, status: "uploading", uploadIndex });
+    super({ name: file.name, status: "uploading", type: "s3", uploadIndex });
 
     this.options = options;
 
