@@ -70,7 +70,7 @@ class S3Upload extends BaseUpload {
     // upload was created already. That also ensures that the sequencing is right
     // (so the `OP` definitely happens if the upload is created).
     //
-    // This mostly exists to make `_abortUpload` work well: only sending the abort request if
+    // This mostly exists to make `abortUpload` work well: only sending the abort request if
     // the upload was already created, and if the createMultipartUpload request is still in flight,
     // aborting it immediately after it finishes.
     this.createdPromise = Promise.reject(); // eslint-disable-line prefer-promise-reject-errors
@@ -79,12 +79,50 @@ class S3Upload extends BaseUpload {
     this.chunkState = [];
     this.uploading = [];
 
-    this._initChunks();
+    this.initChunks();
 
     this.createdPromise.catch(() => ({})); // silence uncaught rejection warning
   }
 
-  _initChunks(): void {
+  public start(): void {
+    this.isPaused = false;
+    if (this.uploadId) {
+      void this.resumeUpload();
+    } else {
+      void this.createUpload();
+    }
+  }
+
+  public pause(): void {
+    const inProgress = this.uploading.slice();
+    inProgress.forEach(xhr => {
+      xhr.abort();
+    });
+    this.isPaused = true;
+  }
+
+  public abort(): void {
+    this.uploading.slice().forEach(xhr => {
+      xhr.abort();
+    });
+    this.createdPromise.then(
+      () => {
+        if (this.key && this.uploadId) {
+          void abortMultipartUpload({
+            key: this.key,
+            uploadId: this.uploadId,
+            endpoint: this.endpoint
+          });
+        }
+      },
+      () => {
+        // if the creation failed we do not need to abort
+      }
+    );
+    this.uploading = [];
+  }
+
+  private initChunks(): void {
     const chunks: Blob[] = [];
     const desiredChunkSize = getChunkSize(this.file);
     // at least 5MB per request, at most 10k requests
@@ -104,7 +142,7 @@ class S3Upload extends BaseUpload {
     }));
   }
 
-  _createUpload(): Promise<void> {
+  private createUpload(): Promise<void> {
     this.createdPromise = createMultipartUpload(
       this.file,
       this.s3UploadDir,
@@ -129,14 +167,14 @@ class S3Upload extends BaseUpload {
         if (this.options.onStart) {
           this.options.onStart(result);
         }
-        this._uploadParts();
+        this.uploadParts();
       })
       .catch((err: Error) => {
-        this._onError(err);
+        this.onError(err);
       });
   }
 
-  _resumeUpload(): Promise<void> {
+  private resumeUpload(): Promise<void> {
     if (!this.key || !this.uploadId) {
       return Promise.resolve();
     }
@@ -164,14 +202,14 @@ class S3Upload extends BaseUpload {
             });
           }
         });
-        this._uploadParts();
+        this.uploadParts();
       })
       .catch(err => {
-        this._onError(err);
+        this.onError(err);
       });
   }
 
-  _uploadParts(): void {
+  private uploadParts(): void {
     if (this.isPaused) {
       return;
     }
@@ -183,7 +221,7 @@ class S3Upload extends BaseUpload {
 
     // All parts are uploaded.
     if (this.chunkState.every(state => state.done)) {
-      void this._completeUpload();
+      void this.completeUpload();
       return;
     }
 
@@ -199,11 +237,11 @@ class S3Upload extends BaseUpload {
     }
 
     candidates.forEach(index => {
-      void this._uploadPart(index);
+      void this.uploadPart(index);
     });
   }
 
-  _uploadPart(index: number): Promise<void> {
+  private uploadPart(index: number): Promise<void> {
     this.chunkState[index].busy = true;
 
     if (!this.key || !this.uploadId) {
@@ -230,15 +268,15 @@ class S3Upload extends BaseUpload {
       })
       .then(
         ({ url }: UrlInfo) => {
-          this._uploadPartBytes(index, url);
+          this.uploadPartBytes(index, url);
         },
         err => {
-          this._onError(err);
+          this.onError(err);
         }
       );
   }
 
-  _onPartProgress(index: number, sent: number): void {
+  private onPartProgress(index: number, sent: number): void {
     this.chunkState[index].uploaded = sent;
 
     if (this.options.onProgress) {
@@ -247,7 +285,7 @@ class S3Upload extends BaseUpload {
     }
   }
 
-  _onPartComplete(index: number, etag: string): void {
+  private onPartComplete(index: number, etag: string): void {
     this.chunkState[index].etag = etag;
     this.chunkState[index].done = true;
 
@@ -261,10 +299,10 @@ class S3Upload extends BaseUpload {
       this.options.onPartComplete(part);
     }
 
-    this._uploadParts();
+    this.uploadParts();
   }
 
-  _uploadPartBytes(index: number, url: string): void {
+  private uploadPartBytes(index: number, url: string): void {
     const body = this.chunks[index];
     const xhr = new XMLHttpRequest();
     xhr.open("PUT", url, true);
@@ -275,7 +313,7 @@ class S3Upload extends BaseUpload {
     xhr.upload.addEventListener("progress", ev => {
       if (!ev.lengthComputable) return;
 
-      this._onPartProgress(index, ev.loaded);
+      this.onPartProgress(index, ev.loaded);
     });
 
     xhr.addEventListener("abort", ev => {
@@ -289,16 +327,16 @@ class S3Upload extends BaseUpload {
       this.chunkState[index].busy = false;
 
       if (target.status < 200 || target.status >= 300) {
-        this._onError(new Error("Non 2xx"));
+        this.onError(new Error("Non 2xx"));
         return;
       }
 
-      this._onPartProgress(index, body.size);
+      this.onPartProgress(index, body.size);
 
       // NOTE This must be allowed by CORS.
       const etag = target.getResponseHeader("ETag");
       if (etag === null) {
-        this._onError(
+        this.onError(
           new Error(
             "AwsS3/Multipart: Could not read the ETag header. This likely means CORS is not configured correctly on the S3 Bucket. See https://uppy.io/docs/aws-s3-multipart#S3-Bucket-Configuration for instructions."
           )
@@ -306,7 +344,7 @@ class S3Upload extends BaseUpload {
         return;
       }
 
-      this._onPartComplete(index, etag);
+      this.onPartComplete(index, etag);
     });
 
     xhr.addEventListener("error", ev => {
@@ -314,12 +352,12 @@ class S3Upload extends BaseUpload {
       this.chunkState[index].busy = false;
       const error = new Error("Unknown error");
       // error.source = ev.target
-      this._onError(error);
+      this.onError(error);
     });
     xhr.send(body);
   }
 
-  _completeUpload(): Promise<void> {
+  private completeUpload(): Promise<void> {
     // Parts may not have completed uploading in sorted order, if limit > 1.
     this.parts.sort((a, b) => a.PartNumber - b.PartNumber);
 
@@ -339,55 +377,17 @@ class S3Upload extends BaseUpload {
         }
       },
       err => {
-        this._onError(err);
+        this.onError(err);
       }
     );
   }
 
-  _onError(error: Error): void {
+  private onError(error: Error): void {
     if (this.options.onError) {
       this.options.onError(error);
     } else {
       throw error;
     }
-  }
-
-  start(): void {
-    this.isPaused = false;
-    if (this.uploadId) {
-      void this._resumeUpload();
-    } else {
-      void this._createUpload();
-    }
-  }
-
-  pause(): void {
-    const inProgress = this.uploading.slice();
-    inProgress.forEach(xhr => {
-      xhr.abort();
-    });
-    this.isPaused = true;
-  }
-
-  abort(): void {
-    this.uploading.slice().forEach(xhr => {
-      xhr.abort();
-    });
-    this.createdPromise.then(
-      () => {
-        if (this.key && this.uploadId) {
-          void abortMultipartUpload({
-            key: this.key,
-            uploadId: this.uploadId,
-            endpoint: this.endpoint
-          });
-        }
-      },
-      () => {
-        // if the creation failed we do not need to abort
-      }
-    );
-    this.uploading = [];
   }
 }
 
