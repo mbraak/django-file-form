@@ -208,7 +208,6 @@ class FileField {
           ),
         s3UploadDir
       });
-      upload.start();
     } else {
       upload = new TusUpload(file, newUploadIndex, {
         chunkSize: this.chunkSize,
@@ -224,6 +223,8 @@ class FileField {
         uploadUrl
       });
     }
+
+    upload.start();
 
     const element = renderer.addNewUpload(fileName, newUploadIndex);
     this.uploads.push(upload);

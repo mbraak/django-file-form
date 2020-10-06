@@ -35,12 +35,14 @@ export default class TusUpload extends BaseUpload {
       onSuccess: this.handleSucces,
       retryDelays: options.retryDelays || [0, 1000, 3000, 5000]
     });
-
-    this.upload.start();
   }
 
-  abort(): void {
+  public abort(): void {
     void this.upload.abort(true);
+  }
+
+  public start(): void {
+    this.upload.start();
   }
 
   getUrl(): string | null {
