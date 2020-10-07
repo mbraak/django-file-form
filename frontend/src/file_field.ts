@@ -159,7 +159,7 @@ class FileField {
     }
   }
 
-  uploadFiles = (files: File[]): void => {
+  uploadFiles = async (files: File[]): Promise<void> => {
     if (files.length === 0) {
       return;
     }
@@ -169,14 +169,14 @@ class FileField {
       this.uploads = [];
     }
 
-    files.forEach(file => {
-      this.uploadFile(file);
-    });
+    for await (const file of files) {
+      await this.uploadFile(file);
+    }
 
     this.checkDropHint();
   };
 
-  uploadFile(file: File): void {
+  async uploadFile(file: File): Promise<void> {
     const { fieldName, formId, s3UploadDir, renderer, uploadUrl } = this;
     const fileName = file.name;
     const existingUpload = this.findUploadByName(fileName);
@@ -189,7 +189,7 @@ class FileField {
     }
 
     if (existingUpload) {
-      this.removeExistingUpload(existingUpload);
+      await this.removeExistingUpload(existingUpload);
     }
 
     let upload: S3Upload | TusUpload | null = null;
@@ -240,7 +240,7 @@ class FileField {
     return this.uploads.find(upload => upload && upload.name === fileName);
   }
 
-  removeExistingUpload(upload: BaseUpload): void {
+  async removeExistingUpload(upload: BaseUpload): Promise<void> {
     if (upload.status === "uploading") {
       void (upload as TusUpload).abort();
     }
@@ -261,7 +261,7 @@ class FileField {
           if (upload instanceof S3Upload) {
             this.deleteS3Uploaded(upload);
           } else {
-            this.deleteFromServer(upload);
+            await this.deleteFromServer(upload);
           }
           break;
         }
@@ -278,7 +278,7 @@ class FileField {
   }
 
   onChange = (e: Event): void => {
-    this.uploadFiles([...(e.target as HTMLInputElement).files]);
+    void this.uploadFiles([...(e.target as HTMLInputElement).files]);
   };
 
   onClick = (e: Event): void => {
@@ -302,7 +302,7 @@ class FileField {
       const upload = getUpload();
 
       if (upload) {
-        this.removeExistingUpload(upload);
+        void this.removeExistingUpload(upload);
       }
 
       e.preventDefault();
@@ -382,7 +382,7 @@ class FileField {
     }
   }
 
-  deleteFromServer(upload: BaseUpload): void {
+  async deleteFromServer(upload: BaseUpload): Promise<void> {
     let url = null;
     if (upload instanceof TusUpload) {
       url = upload.getUrl();
@@ -391,23 +391,34 @@ class FileField {
     }
 
     if (!url) {
-      return;
+      return Promise.resolve();
     }
 
     this.renderer.disableDelete(upload.uploadIndex);
 
-    const xhr = new window.XMLHttpRequest();
-    xhr.open("DELETE", url);
+    try {
+      await this.deleteTusUploadFromServer(url);
+      this.removeUploadFromList(upload);
+    } catch {
+      this.renderer.setDeleteFailed(upload.uploadIndex);
+    }
+  }
 
-    xhr.onload = (): void => {
-      if (xhr.status === 204) {
-        this.removeUploadFromList(upload);
-      } else {
-        this.renderer.setDeleteFailed(upload.uploadIndex);
-      }
-    };
-    xhr.setRequestHeader("Tus-Resumable", "1.0.0");
-    xhr.send(null);
+  deleteTusUploadFromServer(url: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const xhr = new window.XMLHttpRequest();
+      xhr.open("DELETE", url);
+
+      xhr.onload = (): void => {
+        if (xhr.status === 204) {
+          resolve();
+        } else {
+          reject();
+        }
+      };
+      xhr.setRequestHeader("Tus-Resumable", "1.0.0");
+      xhr.send(null);
+    });
   }
 
   deletePlaceholder(upload: BaseUpload): void {
