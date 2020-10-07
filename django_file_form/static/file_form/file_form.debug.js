@@ -121,6 +121,13 @@ module.exports = _assertThisInitialized;
 
 /***/ }),
 /* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__(33);
+
+
+/***/ }),
+/* 3 */
 /***/ (function(module, exports) {
 
 function _classCallCheck(instance, Constructor) {
@@ -132,7 +139,7 @@ function _classCallCheck(instance, Constructor) {
 module.exports = _classCallCheck;
 
 /***/ }),
-/* 3 */
+/* 4 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -190,90 +197,7 @@ var getMetadataFieldName = function getMetadataFieldName(fieldName, prefix) {
 };
 
 /***/ }),
-/* 4 */
-/***/ (function(module, exports, __webpack_require__) {
-
-module.exports = __webpack_require__(33);
-
-
-/***/ }),
 /* 5 */
-/***/ (function(module, exports) {
-
-function _defineProperties(target, props) {
-  for (var i = 0; i < props.length; i++) {
-    var descriptor = props[i];
-    descriptor.enumerable = descriptor.enumerable || false;
-    descriptor.configurable = true;
-    if ("value" in descriptor) descriptor.writable = true;
-    Object.defineProperty(target, descriptor.key, descriptor);
-  }
-}
-
-function _createClass(Constructor, protoProps, staticProps) {
-  if (protoProps) _defineProperties(Constructor.prototype, protoProps);
-  if (staticProps) _defineProperties(Constructor, staticProps);
-  return Constructor;
-}
-
-module.exports = _createClass;
-
-/***/ }),
-/* 6 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var setPrototypeOf = __webpack_require__(42);
-
-function _inherits(subClass, superClass) {
-  if (typeof superClass !== "function" && superClass !== null) {
-    throw new TypeError("Super expression must either be null or a function");
-  }
-
-  subClass.prototype = Object.create(superClass && superClass.prototype, {
-    constructor: {
-      value: subClass,
-      writable: true,
-      configurable: true
-    }
-  });
-  if (superClass) setPrototypeOf(subClass, superClass);
-}
-
-module.exports = _inherits;
-
-/***/ }),
-/* 7 */
-/***/ (function(module, exports) {
-
-function _getPrototypeOf(o) {
-  module.exports = _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) {
-    return o.__proto__ || Object.getPrototypeOf(o);
-  };
-  return _getPrototypeOf(o);
-}
-
-module.exports = _getPrototypeOf;
-
-/***/ }),
-/* 8 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var _typeof = __webpack_require__(13);
-
-var assertThisInitialized = __webpack_require__(1);
-
-function _possibleConstructorReturn(self, call) {
-  if (call && (_typeof(call) === "object" || typeof call === "function")) {
-    return call;
-  }
-
-  return assertThisInitialized(self);
-}
-
-module.exports = _possibleConstructorReturn;
-
-/***/ }),
-/* 9 */
 /***/ (function(module, exports) {
 
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
@@ -315,6 +239,82 @@ function _asyncToGenerator(fn) {
 module.exports = _asyncToGenerator;
 
 /***/ }),
+/* 6 */
+/***/ (function(module, exports) {
+
+function _defineProperties(target, props) {
+  for (var i = 0; i < props.length; i++) {
+    var descriptor = props[i];
+    descriptor.enumerable = descriptor.enumerable || false;
+    descriptor.configurable = true;
+    if ("value" in descriptor) descriptor.writable = true;
+    Object.defineProperty(target, descriptor.key, descriptor);
+  }
+}
+
+function _createClass(Constructor, protoProps, staticProps) {
+  if (protoProps) _defineProperties(Constructor.prototype, protoProps);
+  if (staticProps) _defineProperties(Constructor, staticProps);
+  return Constructor;
+}
+
+module.exports = _createClass;
+
+/***/ }),
+/* 7 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var setPrototypeOf = __webpack_require__(42);
+
+function _inherits(subClass, superClass) {
+  if (typeof superClass !== "function" && superClass !== null) {
+    throw new TypeError("Super expression must either be null or a function");
+  }
+
+  subClass.prototype = Object.create(superClass && superClass.prototype, {
+    constructor: {
+      value: subClass,
+      writable: true,
+      configurable: true
+    }
+  });
+  if (superClass) setPrototypeOf(subClass, superClass);
+}
+
+module.exports = _inherits;
+
+/***/ }),
+/* 8 */
+/***/ (function(module, exports) {
+
+function _getPrototypeOf(o) {
+  module.exports = _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) {
+    return o.__proto__ || Object.getPrototypeOf(o);
+  };
+  return _getPrototypeOf(o);
+}
+
+module.exports = _getPrototypeOf;
+
+/***/ }),
+/* 9 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var _typeof = __webpack_require__(14);
+
+var assertThisInitialized = __webpack_require__(1);
+
+function _possibleConstructorReturn(self, call) {
+  if (call && (_typeof(call) === "object" || typeof call === "function")) {
+    return call;
+  }
+
+  return assertThisInitialized(self);
+}
+
+module.exports = _possibleConstructorReturn;
+
+/***/ }),
 /* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -322,7 +322,7 @@ var arrayWithoutHoles = __webpack_require__(30);
 
 var iterableToArray = __webpack_require__(31);
 
-var unsupportedIterableToArray = __webpack_require__(19);
+var unsupportedIterableToArray = __webpack_require__(20);
 
 var nonIterableSpread = __webpack_require__(32);
 
@@ -427,7 +427,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (nam
 "use strict";
 
 
-const path = __webpack_require__(15);
+const path = __webpack_require__(16);
 const WIN_SLASH = '\\\\/';
 const WIN_NO_SLASH = `[^${WIN_SLASH}]`;
 
@@ -610,6 +610,30 @@ module.exports = {
 /* 13 */
 /***/ (function(module, exports) {
 
+function _asyncIterator(iterable) {
+  var method;
+
+  if (typeof Symbol !== "undefined") {
+    if (Symbol.asyncIterator) {
+      method = iterable[Symbol.asyncIterator];
+      if (method != null) return method.call(iterable);
+    }
+
+    if (Symbol.iterator) {
+      method = iterable[Symbol.iterator];
+      if (method != null) return method.call(iterable);
+    }
+  }
+
+  throw new TypeError("Object is not async iterable");
+}
+
+module.exports = _asyncIterator;
+
+/***/ }),
+/* 14 */
+/***/ (function(module, exports) {
+
 function _typeof(obj) {
   "@babel/helpers - typeof";
 
@@ -629,7 +653,7 @@ function _typeof(obj) {
 module.exports = _typeof;
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, exports) {
 
 var g;
@@ -655,7 +679,7 @@ module.exports = g;
 
 
 /***/ }),
-/* 15 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(process) {// .dirname, .basename, and .extname methods are extracted from Node.js v8.11.1,
@@ -961,16 +985,16 @@ var substr = 'ab'.substr(-1) === 'b'
     }
 ;
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(20)))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(21)))
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(process) {
 
-const path = __webpack_require__(15);
+const path = __webpack_require__(16);
 const win32 = process.platform === 'win32';
 const {
   REGEX_BACKSLASH,
@@ -1033,10 +1057,10 @@ exports.wrapOutput = (input, state = {}, options = {}) => {
   return output;
 };
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(20)))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(21)))
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1046,7 +1070,7 @@ module.exports = __webpack_require__(39);
 
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, exports) {
 
 function _arrayLikeToArray(arr, len) {
@@ -1062,10 +1086,10 @@ function _arrayLikeToArray(arr, len) {
 module.exports = _arrayLikeToArray;
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var arrayLikeToArray = __webpack_require__(18);
+var arrayLikeToArray = __webpack_require__(19);
 
 function _unsupportedIterableToArray(o, minLen) {
   if (!o) return;
@@ -1079,7 +1103,7 @@ function _unsupportedIterableToArray(o, minLen) {
 module.exports = _unsupportedIterableToArray;
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports) {
 
 // shim for using process in browser
@@ -1269,7 +1293,7 @@ process.umask = function() { return 0; };
 
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1354,30 +1378,6 @@ function escapeHtml(string) {
 
 
 /***/ }),
-/* 22 */
-/***/ (function(module, exports) {
-
-function _asyncIterator(iterable) {
-  var method;
-
-  if (typeof Symbol !== "undefined") {
-    if (Symbol.asyncIterator) {
-      method = iterable[Symbol.asyncIterator];
-      if (method != null) return method.call(iterable);
-    }
-
-    if (Symbol.iterator) {
-      method = iterable[Symbol.iterator];
-      if (method != null) return method.call(iterable);
-    }
-  }
-
-  throw new TypeError("Object is not async iterable");
-}
-
-module.exports = _asyncIterator;
-
-/***/ }),
 /* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -1385,7 +1385,7 @@ var arrayWithHoles = __webpack_require__(34);
 
 var iterableToArrayLimit = __webpack_require__(35);
 
-var unsupportedIterableToArray = __webpack_require__(19);
+var unsupportedIterableToArray = __webpack_require__(20);
 
 var nonIterableRest = __webpack_require__(36);
 
@@ -1641,7 +1641,7 @@ module.exports = new Mime(__webpack_require__(38));
     return {Base64: global.Base64}
 }));
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(14)))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(15)))
 
 /***/ }),
 /* 26 */
@@ -2099,7 +2099,7 @@ Url.qs = qs;
 
 module.exports = Url;
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(14)))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(15)))
 
 /***/ }),
 /* 27 */
@@ -2111,23 +2111,35 @@ module.exports = Url;
 var toConsumableArray = __webpack_require__(10);
 var toConsumableArray_default = /*#__PURE__*/__webpack_require__.n(toConsumableArray);
 
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/regenerator/index.js
+var regenerator = __webpack_require__(2);
+var regenerator_default = /*#__PURE__*/__webpack_require__.n(regenerator);
+
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/asyncToGenerator.js
+var asyncToGenerator = __webpack_require__(5);
+var asyncToGenerator_default = /*#__PURE__*/__webpack_require__.n(asyncToGenerator);
+
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/classCallCheck.js
-var classCallCheck = __webpack_require__(2);
+var classCallCheck = __webpack_require__(3);
 var classCallCheck_default = /*#__PURE__*/__webpack_require__.n(classCallCheck);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/createClass.js
-var createClass = __webpack_require__(5);
+var createClass = __webpack_require__(6);
 var createClass_default = /*#__PURE__*/__webpack_require__.n(createClass);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/defineProperty.js
 var defineProperty = __webpack_require__(0);
 var defineProperty_default = /*#__PURE__*/__webpack_require__.n(defineProperty);
 
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/asyncIterator.js
+var asyncIterator = __webpack_require__(13);
+var asyncIterator_default = /*#__PURE__*/__webpack_require__.n(asyncIterator);
+
 // EXTERNAL MODULE: ./src/util.ts
-var util = __webpack_require__(3);
+var util = __webpack_require__(4);
 
 // EXTERNAL MODULE: ./node_modules/escape-html/index.js
-var escape_html = __webpack_require__(21);
+var escape_html = __webpack_require__(22);
 var escape_html_default = /*#__PURE__*/__webpack_require__.n(escape_html);
 
 // CONCATENATED MODULE: ./src/render_upload_file.ts
@@ -2372,18 +2384,6 @@ var render_upload_file_RenderUploadFile = /*#__PURE__*/function () {
 }();
 
 /* harmony default export */ var render_upload_file = (render_upload_file_RenderUploadFile);
-// EXTERNAL MODULE: ./node_modules/@babel/runtime/regenerator/index.js
-var regenerator = __webpack_require__(4);
-var regenerator_default = /*#__PURE__*/__webpack_require__.n(regenerator);
-
-// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/asyncToGenerator.js
-var asyncToGenerator = __webpack_require__(9);
-var asyncToGenerator_default = /*#__PURE__*/__webpack_require__.n(asyncToGenerator);
-
-// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/asyncIterator.js
-var asyncIterator = __webpack_require__(22);
-var asyncIterator_default = /*#__PURE__*/__webpack_require__.n(asyncIterator);
-
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/slicedToArray.js
 var slicedToArray = __webpack_require__(23);
 var slicedToArray_default = /*#__PURE__*/__webpack_require__.n(slicedToArray);
@@ -2393,7 +2393,7 @@ var lite = __webpack_require__(24);
 var lite_default = /*#__PURE__*/__webpack_require__.n(lite);
 
 // EXTERNAL MODULE: ./node_modules/picomatch/index.js
-var picomatch = __webpack_require__(17);
+var picomatch = __webpack_require__(18);
 var picomatch_default = /*#__PURE__*/__webpack_require__.n(picomatch);
 
 // CONCATENATED MODULE: ./src/accepted_file_types.ts
@@ -2783,7 +2783,7 @@ var drop_area_DropArea = function DropArea(_ref5) {
 
 /* harmony default export */ var drop_area = (drop_area_DropArea);
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/typeof.js
-var helpers_typeof = __webpack_require__(13);
+var helpers_typeof = __webpack_require__(14);
 var typeof_default = /*#__PURE__*/__webpack_require__.n(helpers_typeof);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/assertThisInitialized.js
@@ -2791,15 +2791,15 @@ var assertThisInitialized = __webpack_require__(1);
 var assertThisInitialized_default = /*#__PURE__*/__webpack_require__.n(assertThisInitialized);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/inherits.js
-var inherits = __webpack_require__(6);
+var inherits = __webpack_require__(7);
 var inherits_default = /*#__PURE__*/__webpack_require__.n(inherits);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/possibleConstructorReturn.js
-var possibleConstructorReturn = __webpack_require__(8);
+var possibleConstructorReturn = __webpack_require__(9);
 var possibleConstructorReturn_default = /*#__PURE__*/__webpack_require__.n(possibleConstructorReturn);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/getPrototypeOf.js
-var getPrototypeOf = __webpack_require__(7);
+var getPrototypeOf = __webpack_require__(8);
 var getPrototypeOf_default = /*#__PURE__*/__webpack_require__.n(getPrototypeOf);
 
 // CONCATENATED MODULE: ./src/uploads/base_upload.ts
@@ -2809,6 +2809,7 @@ var getPrototypeOf_default = /*#__PURE__*/__webpack_require__.n(getPrototypeOf);
 var base_upload_BaseUpload = function BaseUpload(_ref) {
   var name = _ref.name,
       status = _ref.status,
+      type = _ref.type,
       uploadIndex = _ref.uploadIndex;
 
   classCallCheck_default()(this, BaseUpload);
@@ -2817,10 +2818,13 @@ var base_upload_BaseUpload = function BaseUpload(_ref) {
 
   defineProperty_default()(this, "status", void 0);
 
+  defineProperty_default()(this, "type", void 0);
+
   defineProperty_default()(this, "uploadIndex", void 0);
 
   this.name = name;
   this.status = status;
+  this.type = type;
   this.uploadIndex = uploadIndex;
 };
 
@@ -2972,6 +2976,7 @@ var s3_upload_S3Upload = /*#__PURE__*/function (_BaseUpload) {
     _this = _super.call(this, {
       name: file.name,
       status: "uploading",
+      type: "s3",
       uploadIndex: uploadIndex
     });
 
@@ -2980,6 +2985,8 @@ var s3_upload_S3Upload = /*#__PURE__*/function (_BaseUpload) {
     defineProperty_default()(assertThisInitialized_default()(_this), "chunks", void 0);
 
     defineProperty_default()(assertThisInitialized_default()(_this), "createdPromise", void 0);
+
+    defineProperty_default()(assertThisInitialized_default()(_this), "endpoint", void 0);
 
     defineProperty_default()(assertThisInitialized_default()(_this), "file", void 0);
 
@@ -2993,7 +3000,7 @@ var s3_upload_S3Upload = /*#__PURE__*/function (_BaseUpload) {
 
     defineProperty_default()(assertThisInitialized_default()(_this), "s3UploadDir", void 0);
 
-    defineProperty_default()(assertThisInitialized_default()(_this), "endpoint", void 0);
+    defineProperty_default()(assertThisInitialized_default()(_this), "type", void 0);
 
     defineProperty_default()(assertThisInitialized_default()(_this), "uploadId", void 0);
 
@@ -3009,7 +3016,7 @@ var s3_upload_S3Upload = /*#__PURE__*/function (_BaseUpload) {
     // upload was created already. That also ensures that the sequencing is right
     // (so the `OP` definitely happens if the upload is created).
     //
-    // This mostly exists to make `_abortUpload` work well: only sending the abort request if
+    // This mostly exists to make `abortUpload` work well: only sending the abort request if
     // the upload was already created, and if the createMultipartUpload request is still in flight,
     // aborting it immediately after it finishes.
 
@@ -3020,7 +3027,7 @@ var s3_upload_S3Upload = /*#__PURE__*/function (_BaseUpload) {
     _this.chunkState = [];
     _this.uploading = [];
 
-    _this._initChunks();
+    _this.initChunks();
 
     _this.createdPromise["catch"](function () {
       return {};
@@ -3031,8 +3038,48 @@ var s3_upload_S3Upload = /*#__PURE__*/function (_BaseUpload) {
   }
 
   createClass_default()(S3Upload, [{
-    key: "_initChunks",
-    value: function _initChunks() {
+    key: "start",
+    value: function start() {
+      this.isPaused = false;
+
+      if (this.uploadId) {
+        void this.resumeUpload();
+      } else {
+        void this.createUpload();
+      }
+    }
+  }, {
+    key: "pause",
+    value: function pause() {
+      var inProgress = this.uploading.slice();
+      inProgress.forEach(function (xhr) {
+        xhr.abort();
+      });
+      this.isPaused = true;
+    }
+  }, {
+    key: "abort",
+    value: function abort() {
+      var _this2 = this;
+
+      this.uploading.slice().forEach(function (xhr) {
+        xhr.abort();
+      });
+      this.createdPromise.then(function () {
+        if (_this2.key && _this2.uploadId) {
+          void s3_utils_abortMultipartUpload({
+            key: _this2.key,
+            uploadId: _this2.uploadId,
+            endpoint: _this2.endpoint
+          });
+        }
+      }, function () {// if the creation failed we do not need to abort
+      });
+      this.uploading = [];
+    }
+  }, {
+    key: "initChunks",
+    value: function initChunks() {
       var chunks = [];
       var desiredChunkSize = getChunkSize(this.file); // at least 5MB per request, at most 10k requests
 
@@ -3054,9 +3101,9 @@ var s3_upload_S3Upload = /*#__PURE__*/function (_BaseUpload) {
       });
     }
   }, {
-    key: "_createUpload",
-    value: function _createUpload() {
-      var _this2 = this;
+    key: "createUpload",
+    value: function createUpload() {
+      var _this3 = this;
 
       this.createdPromise = createMultipartUpload(this.file, this.s3UploadDir, this.endpoint);
       return this.createdPromise.then(function (result) {
@@ -3066,22 +3113,22 @@ var s3_upload_S3Upload = /*#__PURE__*/function (_BaseUpload) {
           throw new TypeError("AwsS3/Multipart: Got incorrect result from `createMultipartUpload()`, expected an object `{ uploadId, key }`.");
         }
 
-        _this2.key = result.key;
-        _this2.uploadId = result.uploadId;
+        _this3.key = result.key;
+        _this3.uploadId = result.uploadId;
 
-        if (_this2.options.onStart) {
-          _this2.options.onStart(result);
+        if (_this3.options.onStart) {
+          _this3.options.onStart(result);
         }
 
-        _this2._uploadParts();
+        _this3.uploadParts();
       })["catch"](function (err) {
-        _this2._onError(err);
+        _this3.onError(err);
       });
     }
   }, {
-    key: "_resumeUpload",
-    value: function _resumeUpload() {
-      var _this3 = this;
+    key: "resumeUpload",
+    value: function resumeUpload() {
+      var _this4 = this;
 
       if (!this.key || !this.uploadId) {
         return Promise.resolve();
@@ -3094,32 +3141,32 @@ var s3_upload_S3Upload = /*#__PURE__*/function (_BaseUpload) {
       }).then(function (parts) {
         parts.forEach(function (part) {
           var i = part.PartNumber - 1;
-          _this3.chunkState[i] = {
+          _this4.chunkState[i] = {
             uploaded: part.Size,
             etag: part.ETag,
             done: true,
             busy: false
           }; // Only add if we did not yet know about this part.
 
-          if (!_this3.parts.some(function (p) {
+          if (!_this4.parts.some(function (p) {
             return p.PartNumber === part.PartNumber;
           })) {
-            _this3.parts.push({
+            _this4.parts.push({
               ETag: part.ETag,
               PartNumber: part.PartNumber
             });
           }
         });
 
-        _this3._uploadParts();
+        _this4.uploadParts();
       })["catch"](function (err) {
-        _this3._onError(err);
+        _this4.onError(err);
       });
     }
   }, {
-    key: "_uploadParts",
-    value: function _uploadParts() {
-      var _this4 = this;
+    key: "uploadParts",
+    value: function uploadParts() {
+      var _this5 = this;
 
       if (this.isPaused) {
         return;
@@ -3135,7 +3182,7 @@ var s3_upload_S3Upload = /*#__PURE__*/function (_BaseUpload) {
       if (this.chunkState.every(function (state) {
         return state.done;
       })) {
-        void this._completeUpload();
+        void this.completeUpload();
         return;
       }
 
@@ -3152,13 +3199,13 @@ var s3_upload_S3Upload = /*#__PURE__*/function (_BaseUpload) {
       }
 
       candidates.forEach(function (index) {
-        void _this4._uploadPart(index);
+        void _this5.uploadPart(index);
       });
     }
   }, {
-    key: "_uploadPart",
-    value: function _uploadPart(index) {
-      var _this5 = this;
+    key: "uploadPart",
+    value: function uploadPart(index) {
+      var _this6 = this;
 
       this.chunkState[index].busy = true;
 
@@ -3182,14 +3229,14 @@ var s3_upload_S3Upload = /*#__PURE__*/function (_BaseUpload) {
       }).then(function (_ref) {
         var url = _ref.url;
 
-        _this5._uploadPartBytes(index, url);
+        _this6.uploadPartBytes(index, url);
       }, function (err) {
-        _this5._onError(err);
+        _this6.onError(err);
       });
     }
   }, {
-    key: "_onPartProgress",
-    value: function _onPartProgress(index, sent) {
+    key: "onPartProgress",
+    value: function onPartProgress(index, sent) {
       this.chunkState[index].uploaded = sent;
 
       if (this.options.onProgress) {
@@ -3200,8 +3247,8 @@ var s3_upload_S3Upload = /*#__PURE__*/function (_BaseUpload) {
       }
     }
   }, {
-    key: "_onPartComplete",
-    value: function _onPartComplete(index, etag) {
+    key: "onPartComplete",
+    value: function onPartComplete(index, etag) {
       this.chunkState[index].etag = etag;
       this.chunkState[index].done = true;
       var part = {
@@ -3214,12 +3261,12 @@ var s3_upload_S3Upload = /*#__PURE__*/function (_BaseUpload) {
         this.options.onPartComplete(part);
       }
 
-      this._uploadParts();
+      this.uploadParts();
     }
   }, {
-    key: "_uploadPartBytes",
-    value: function _uploadPartBytes(index, url) {
-      var _this6 = this;
+    key: "uploadPartBytes",
+    value: function uploadPartBytes(index, url) {
+      var _this7 = this;
 
       var body = this.chunks[index];
       var xhr = new XMLHttpRequest();
@@ -3229,49 +3276,49 @@ var s3_upload_S3Upload = /*#__PURE__*/function (_BaseUpload) {
       xhr.upload.addEventListener("progress", function (ev) {
         if (!ev.lengthComputable) return;
 
-        _this6._onPartProgress(index, ev.loaded);
+        _this7.onPartProgress(index, ev.loaded);
       });
       xhr.addEventListener("abort", function (ev) {
-        remove(_this6.uploading, ev.target);
-        _this6.chunkState[index].busy = false;
+        remove(_this7.uploading, ev.target);
+        _this7.chunkState[index].busy = false;
       });
       xhr.addEventListener("load", function (ev) {
         var target = ev.target;
-        remove(_this6.uploading, target);
-        _this6.chunkState[index].busy = false;
+        remove(_this7.uploading, target);
+        _this7.chunkState[index].busy = false;
 
         if (target.status < 200 || target.status >= 300) {
-          _this6._onError(new Error("Non 2xx"));
+          _this7.onError(new Error("Non 2xx"));
 
           return;
         }
 
-        _this6._onPartProgress(index, body.size); // NOTE This must be allowed by CORS.
+        _this7.onPartProgress(index, body.size); // NOTE This must be allowed by CORS.
 
 
         var etag = target.getResponseHeader("ETag");
 
         if (etag === null) {
-          _this6._onError(new Error("AwsS3/Multipart: Could not read the ETag header. This likely means CORS is not configured correctly on the S3 Bucket. See https://uppy.io/docs/aws-s3-multipart#S3-Bucket-Configuration for instructions."));
+          _this7.onError(new Error("AwsS3/Multipart: Could not read the ETag header. This likely means CORS is not configured correctly on the S3 Bucket. See https://uppy.io/docs/aws-s3-multipart#S3-Bucket-Configuration for instructions."));
 
           return;
         }
 
-        _this6._onPartComplete(index, etag);
+        _this7.onPartComplete(index, etag);
       });
       xhr.addEventListener("error", function (ev) {
-        remove(_this6.uploading, ev.target);
-        _this6.chunkState[index].busy = false;
+        remove(_this7.uploading, ev.target);
+        _this7.chunkState[index].busy = false;
         var error = new Error("Unknown error"); // error.source = ev.target
 
-        _this6._onError(error);
+        _this7.onError(error);
       });
       xhr.send(body);
     }
   }, {
-    key: "_completeUpload",
-    value: function _completeUpload() {
-      var _this7 = this;
+    key: "completeUpload",
+    value: function completeUpload() {
+      var _this8 = this;
 
       // Parts may not have completed uploading in sorted order, if limit > 1.
       this.parts.sort(function (a, b) {
@@ -3288,61 +3335,21 @@ var s3_upload_S3Upload = /*#__PURE__*/function (_BaseUpload) {
         parts: this.parts,
         endpoint: this.endpoint
       }).then(function (result) {
-        if (_this7.options.onSuccess) {
-          _this7.options.onSuccess(result);
+        if (_this8.options.onSuccess) {
+          _this8.options.onSuccess(result);
         }
       }, function (err) {
-        _this7._onError(err);
+        _this8.onError(err);
       });
     }
   }, {
-    key: "_onError",
-    value: function _onError(error) {
+    key: "onError",
+    value: function onError(error) {
       if (this.options.onError) {
         this.options.onError(error);
       } else {
         throw error;
       }
-    }
-  }, {
-    key: "start",
-    value: function start() {
-      this.isPaused = false;
-
-      if (this.uploadId) {
-        void this._resumeUpload();
-      } else {
-        void this._createUpload();
-      }
-    }
-  }, {
-    key: "pause",
-    value: function pause() {
-      var inProgress = this.uploading.slice();
-      inProgress.forEach(function (xhr) {
-        xhr.abort();
-      });
-      this.isPaused = true;
-    }
-  }, {
-    key: "abort",
-    value: function abort() {
-      var _this8 = this;
-
-      this.uploading.slice().forEach(function (xhr) {
-        xhr.abort();
-      });
-      this.createdPromise.then(function () {
-        if (_this8.key && _this8.uploadId) {
-          void s3_utils_abortMultipartUpload({
-            key: _this8.key,
-            uploadId: _this8.uploadId,
-            endpoint: _this8.endpoint
-          });
-        }
-      }, function () {// if the creation failed we do not need to abort
-      });
-      this.uploading = [];
     }
   }]);
 
@@ -3375,6 +3382,7 @@ var uploaded_file_BaseUploadedFile = /*#__PURE__*/function (_BaseUpload) {
     var id = _ref.id,
         name = _ref.name,
         size = _ref.size,
+        type = _ref.type,
         uploadIndex = _ref.uploadIndex;
 
     classCallCheck_default()(this, BaseUploadedFile);
@@ -3382,6 +3390,7 @@ var uploaded_file_BaseUploadedFile = /*#__PURE__*/function (_BaseUpload) {
     _this = _super.call(this, {
       name: name,
       status: "done",
+      type: type,
       uploadIndex: uploadIndex
     });
 
@@ -3413,8 +3422,12 @@ var uploaded_file_PlaceholderFile = /*#__PURE__*/function (_BaseUploadedFile) {
       id: initialFile.id,
       name: initialFile.name,
       size: initialFile.size,
+      type: "placeholder",
       uploadIndex: uploadIndex
     });
+
+    defineProperty_default()(assertThisInitialized_default()(_this2), "type", void 0);
+
     _this2.placeholder = true;
     return _this2;
   }
@@ -3436,10 +3449,13 @@ var uploaded_file_UploadedS3File = /*#__PURE__*/function (_BaseUploadedFile2) {
       id: initialFile.id,
       name: initialFile.original_name || initialFile.name,
       size: initialFile.size,
+      type: "uploadedS3",
       uploadIndex: uploadIndex
     });
 
     defineProperty_default()(assertThisInitialized_default()(_this3), "key", void 0);
+
+    defineProperty_default()(assertThisInitialized_default()(_this3), "type", void 0);
 
     _this3.key = initialFile.name;
     _this3.placeholder = false;
@@ -3462,8 +3478,11 @@ var uploaded_file_UploadedFile = /*#__PURE__*/function (_BaseUploadedFile3) {
       id: initialFile.id,
       name: initialFile.name,
       size: initialFile.size,
+      type: "uploadedTus",
       uploadIndex: uploadIndex
     });
+
+    defineProperty_default()(assertThisInitialized_default()(_this4), "type", void 0);
 
     defineProperty_default()(assertThisInitialized_default()(_this4), "url", void 0);
 
@@ -5368,10 +5387,13 @@ var tus_upload_TusUpload = /*#__PURE__*/function (_BaseUpload) {
     _this = _super.call(this, {
       name: file.name,
       status: "uploading",
+      type: "tus",
       uploadIndex: uploadIndex
     });
 
     defineProperty_default()(assertThisInitialized_default()(_this), "onSuccess", void 0);
+
+    defineProperty_default()(assertThisInitialized_default()(_this), "type", void 0);
 
     defineProperty_default()(assertThisInitialized_default()(_this), "upload", void 0);
 
@@ -5393,9 +5415,6 @@ var tus_upload_TusUpload = /*#__PURE__*/function (_BaseUpload) {
       onSuccess: _this.handleSucces,
       retryDelays: options.retryDelays || [0, 1000, 3000, 5000]
     });
-
-    _this.upload.start();
-
     return _this;
   }
 
@@ -5403,6 +5422,11 @@ var tus_upload_TusUpload = /*#__PURE__*/function (_BaseUpload) {
     key: "abort",
     value: function abort() {
       void this.upload.abort(true);
+    }
+  }, {
+    key: "start",
+    value: function start() {
+      this.upload.start();
     }
   }, {
     key: "getUrl",
@@ -5416,6 +5440,9 @@ var tus_upload_TusUpload = /*#__PURE__*/function (_BaseUpload) {
 
 
 // CONCATENATED MODULE: ./src/file_field.ts
+
+
+
 
 
 
@@ -5481,26 +5508,116 @@ var file_field_FileField = /*#__PURE__*/function () {
 
     defineProperty_default()(this, "uploadUrl", void 0);
 
-    defineProperty_default()(this, "uploadFiles", function (files) {
-      if (files.length === 0) {
-        return;
-      }
+    defineProperty_default()(this, "uploadFiles", /*#__PURE__*/function () {
+      var _ref2 = asyncToGenerator_default()( /*#__PURE__*/regenerator_default.a.mark(function _callee(files) {
+        var _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, _value, file;
 
-      if (!_this.multiple && _this.uploads.length !== 0) {
-        _this.renderer.deleteFile(0);
+        return regenerator_default.a.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                if (!(files.length === 0)) {
+                  _context.next = 2;
+                  break;
+                }
 
-        _this.uploads = [];
-      }
+                return _context.abrupt("return");
 
-      files.forEach(function (file) {
-        _this.uploadFile(file);
-      });
+              case 2:
+                if (!_this.multiple && _this.uploads.length !== 0) {
+                  _this.renderer.deleteFile(0);
 
-      _this.checkDropHint();
-    });
+                  _this.uploads = [];
+                }
+
+                _iteratorNormalCompletion = true;
+                _didIteratorError = false;
+                _context.prev = 5;
+                _iterator = asyncIterator_default()(files);
+
+              case 7:
+                _context.next = 9;
+                return _iterator.next();
+
+              case 9:
+                _step = _context.sent;
+                _iteratorNormalCompletion = _step.done;
+                _context.next = 13;
+                return _step.value;
+
+              case 13:
+                _value = _context.sent;
+
+                if (_iteratorNormalCompletion) {
+                  _context.next = 21;
+                  break;
+                }
+
+                file = _value;
+                _context.next = 18;
+                return _this.uploadFile(file);
+
+              case 18:
+                _iteratorNormalCompletion = true;
+                _context.next = 7;
+                break;
+
+              case 21:
+                _context.next = 27;
+                break;
+
+              case 23:
+                _context.prev = 23;
+                _context.t0 = _context["catch"](5);
+                _didIteratorError = true;
+                _iteratorError = _context.t0;
+
+              case 27:
+                _context.prev = 27;
+                _context.prev = 28;
+
+                if (!(!_iteratorNormalCompletion && _iterator["return"] != null)) {
+                  _context.next = 32;
+                  break;
+                }
+
+                _context.next = 32;
+                return _iterator["return"]();
+
+              case 32:
+                _context.prev = 32;
+
+                if (!_didIteratorError) {
+                  _context.next = 35;
+                  break;
+                }
+
+                throw _iteratorError;
+
+              case 35:
+                return _context.finish(32);
+
+              case 36:
+                return _context.finish(27);
+
+              case 37:
+                _this.checkDropHint();
+
+              case 38:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee, null, [[5, 23, 27, 37], [28,, 32, 36]]);
+      }));
+
+      return function (_x) {
+        return _ref2.apply(this, arguments);
+      };
+    }());
 
     defineProperty_default()(this, "onChange", function (e) {
-      _this.uploadFiles(toConsumableArray_default()(e.target.files));
+      void _this.uploadFiles(toConsumableArray_default()(e.target.files));
     });
 
     defineProperty_default()(this, "onClick", function (e) {
@@ -5521,7 +5638,7 @@ var file_field_FileField = /*#__PURE__*/function () {
         var _upload = getUpload();
 
         if (_upload) {
-          _this.removeExistingUpload(_upload);
+          void _this.removeExistingUpload(_upload);
         }
 
         e.preventDefault();
@@ -5536,30 +5653,22 @@ var file_field_FileField = /*#__PURE__*/function () {
       }
     });
 
-    defineProperty_default()(this, "handleProgress", function (uploadIndex, bytesUploaded, bytesTotal) {
+    defineProperty_default()(this, "handleProgress", function (upload, bytesUploaded, bytesTotal) {
       var percentage = (bytesUploaded / bytesTotal * 100).toFixed(2);
 
-      _this.renderer.updateProgress(uploadIndex, percentage);
+      _this.renderer.updateProgress(upload.uploadIndex, percentage);
 
       var onProgress = _this.callbacks.onProgress;
 
       if (onProgress) {
-        var _upload3 = _this.getUploadByIndex(uploadIndex);
-
-        if (_upload3 && _upload3 instanceof tus_upload_TusUpload) {
-          onProgress(bytesUploaded, bytesTotal, _upload3);
+        if (upload instanceof tus_upload_TusUpload) {
+          onProgress(bytesUploaded, bytesTotal, upload);
         }
       }
     });
 
-    defineProperty_default()(this, "handleError", function (uploadIndex, error) {
-      var upload = _this.getUploadByIndex(uploadIndex);
-
-      if (!upload) {
-        return;
-      }
-
-      _this.renderer.setError(uploadIndex);
+    defineProperty_default()(this, "handleError", function (upload, error) {
+      _this.renderer.setError(upload.uploadIndex);
 
       upload.status = "error";
       var onError = _this.callbacks.onError;
@@ -5571,22 +5680,16 @@ var file_field_FileField = /*#__PURE__*/function () {
       }
     });
 
-    defineProperty_default()(this, "handleSuccess", function (uploadIndex, uploadedSize) {
-      var upload = _this.getUploadByIndex(uploadIndex);
-
-      if (!upload) {
-        return;
-      }
-
+    defineProperty_default()(this, "handleSuccess", function (upload, uploadedSize) {
       var renderer = _this.renderer;
 
       _this.updateS3UploadedInput();
 
       renderer.clearInput();
-      renderer.setSuccess(uploadIndex, uploadedSize);
+      renderer.setSuccess(upload.uploadIndex, uploadedSize);
       upload.status = "done";
       var onSuccess = _this.callbacks.onSuccess;
-      var element = document.getElementsByClassName("dff-file-id-".concat(uploadIndex))[0];
+      var element = document.getElementsByClassName("dff-file-id-".concat(upload.uploadIndex))[0];
 
       _this.emitEvent("uploadComplete", element, upload);
 
@@ -5666,66 +5769,87 @@ var file_field_FileField = /*#__PURE__*/function () {
     }
   }, {
     key: "uploadFile",
-    value: function uploadFile(file) {
-      var _this3 = this;
+    value: function () {
+      var _uploadFile = asyncToGenerator_default()( /*#__PURE__*/regenerator_default.a.mark(function _callee2(file) {
+        var _this3 = this;
 
-      var fieldName = this.fieldName,
-          formId = this.formId,
-          s3UploadDir = this.s3UploadDir,
-          renderer = this.renderer,
-          uploadUrl = this.uploadUrl;
-      var fileName = file.name;
-      var existingUpload = this.findUploadByName(fileName);
-      var newUploadIndex = existingUpload ? existingUpload.uploadIndex : this.nextUploadIndex;
+        var fieldName, formId, s3UploadDir, renderer, uploadUrl, fileName, existingUpload, newUploadIndex, upload, element;
+        return regenerator_default.a.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                fieldName = this.fieldName, formId = this.formId, s3UploadDir = this.s3UploadDir, renderer = this.renderer, uploadUrl = this.uploadUrl;
+                fileName = file.name;
+                existingUpload = this.findUploadByName(fileName);
+                newUploadIndex = existingUpload ? existingUpload.uploadIndex : this.nextUploadIndex;
 
-      if (!existingUpload) {
-        this.nextUploadIndex += 1;
+                if (!existingUpload) {
+                  this.nextUploadIndex += 1;
+                }
+
+                if (!existingUpload) {
+                  _context2.next = 8;
+                  break;
+                }
+
+                _context2.next = 8;
+                return this.removeExistingUpload(existingUpload);
+
+              case 8:
+                upload = null;
+
+                if (s3UploadDir != null) {
+                  upload = new s3_upload(file, newUploadIndex, {
+                    endpoint: uploadUrl,
+                    onError: function onError(error) {
+                      return _this3.handleError(upload, error);
+                    },
+                    onProgress: function onProgress(bytesUploaded, bytesTotal) {
+                      return _this3.handleProgress(upload, bytesUploaded, bytesTotal);
+                    },
+                    onSuccess: function onSuccess() {
+                      return _this3.handleSuccess(upload, upload.file.size);
+                    },
+                    s3UploadDir: s3UploadDir
+                  });
+                } else {
+                  upload = new tus_upload_TusUpload(file, newUploadIndex, {
+                    chunkSize: this.chunkSize,
+                    fieldName: fieldName,
+                    formId: formId,
+                    onError: function onError(error) {
+                      return _this3.handleError(upload, error);
+                    },
+                    onProgress: function onProgress(bytesUploaded, bytesTotal) {
+                      return _this3.handleProgress(upload, bytesUploaded, bytesTotal);
+                    },
+                    onSuccess: function onSuccess(size) {
+                      return _this3.handleSuccess(upload, size);
+                    },
+                    retryDelays: this.retryDelays,
+                    uploadUrl: uploadUrl
+                  });
+                }
+
+                upload.start();
+                element = renderer.addNewUpload(fileName, newUploadIndex);
+                this.uploads.push(upload);
+                this.emitEvent("addUpload", element, upload);
+
+              case 14:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2, this);
+      }));
+
+      function uploadFile(_x2) {
+        return _uploadFile.apply(this, arguments);
       }
 
-      if (existingUpload) {
-        this.removeExistingUpload(existingUpload);
-      }
-
-      var upload = null;
-
-      if (s3UploadDir != null) {
-        upload = new s3_upload(file, newUploadIndex, {
-          endpoint: uploadUrl,
-          onProgress: function onProgress(bytesUploaded, bytesTotal) {
-            return _this3.handleProgress(newUploadIndex, bytesUploaded, bytesTotal);
-          },
-          onError: function onError(error) {
-            return _this3.handleError(newUploadIndex, error);
-          },
-          onSuccess: function onSuccess() {
-            return _this3.handleSuccess(newUploadIndex, upload.file.size);
-          },
-          s3UploadDir: s3UploadDir
-        });
-        upload.start();
-      } else {
-        upload = new tus_upload_TusUpload(file, newUploadIndex, {
-          chunkSize: this.chunkSize,
-          fieldName: fieldName,
-          formId: formId,
-          onError: function onError(error) {
-            return _this3.handleError(newUploadIndex, error);
-          },
-          onProgress: function onProgress(bytesUploaded, bytesTotal) {
-            return _this3.handleProgress(newUploadIndex, bytesUploaded, bytesTotal);
-          },
-          onSuccess: function onSuccess(size) {
-            return _this3.handleSuccess(newUploadIndex, size);
-          },
-          retryDelays: this.retryDelays,
-          uploadUrl: uploadUrl
-        });
-      }
-
-      var element = renderer.addNewUpload(fileName, newUploadIndex);
-      this.uploads.push(upload);
-      this.emitEvent("addUpload", element, upload);
-    }
+      return uploadFile;
+    }()
   }, {
     key: "getUploadByIndex",
     value: function getUploadByIndex(uploadIndex) {
@@ -5742,41 +5866,76 @@ var file_field_FileField = /*#__PURE__*/function () {
     }
   }, {
     key: "removeExistingUpload",
-    value: function removeExistingUpload(upload) {
-      if (upload.status === "uploading") {
-        void upload.abort();
-      }
+    value: function () {
+      var _removeExistingUpload = asyncToGenerator_default()( /*#__PURE__*/regenerator_default.a.mark(function _callee3(upload) {
+        var element;
+        return regenerator_default.a.wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                if (upload.status === "uploading") {
+                  void upload.abort();
+                }
 
-      var element = this.renderer.findFileDiv(upload.uploadIndex);
+                element = this.renderer.findFileDiv(upload.uploadIndex);
 
-      if (element) {
-        this.emitEvent("removeUpload", element, upload);
-      }
+                if (element) {
+                  this.emitEvent("removeUpload", element, upload);
+                }
 
-      if (upload instanceof tus_upload_TusUpload || upload instanceof s3_upload || upload.url) {
-        switch (upload.status) {
-          case "done":
-            {
-              if (upload instanceof s3_upload) {
+                if (!(upload instanceof tus_upload_TusUpload || upload instanceof s3_upload || upload.url)) {
+                  _context3.next = 18;
+                  break;
+                }
+
+                _context3.t0 = upload.status;
+                _context3.next = _context3.t0 === "done" ? 7 : _context3.t0 === "error" ? 14 : _context3.t0 === "uploading" ? 14 : 16;
+                break;
+
+              case 7:
+                if (!(upload instanceof s3_upload)) {
+                  _context3.next = 11;
+                  break;
+                }
+
                 this.deleteS3Uploaded(upload);
-              } else {
-                this.deleteFromServer(upload);
-              }
+                _context3.next = 13;
+                break;
 
-              break;
-            }
+              case 11:
+                _context3.next = 13;
+                return this.deleteFromServer(upload);
 
-          case "error":
-          case "uploading":
-            {
-              this.removeUploadFromList(upload);
-              break;
+              case 13:
+                return _context3.abrupt("break", 16);
+
+              case 14:
+                this.removeUploadFromList(upload);
+                return _context3.abrupt("break", 16);
+
+              case 16:
+                _context3.next = 19;
+                break;
+
+              case 18:
+                if (upload.placeholder) {
+                  this.deletePlaceholder(upload);
+                }
+
+              case 19:
+              case "end":
+                return _context3.stop();
             }
-        }
-      } else if (upload.placeholder) {
-        this.deletePlaceholder(upload);
+          }
+        }, _callee3, this);
+      }));
+
+      function removeExistingUpload(_x3) {
+        return _removeExistingUpload.apply(this, arguments);
       }
-    }
+
+      return removeExistingUpload;
+    }()
   }, {
     key: "removeUploadFromList",
     value: function removeUploadFromList(upload) {
@@ -5791,35 +5950,76 @@ var file_field_FileField = /*#__PURE__*/function () {
     }
   }, {
     key: "deleteFromServer",
-    value: function deleteFromServer(upload) {
-      var _this4 = this;
+    value: function () {
+      var _deleteFromServer = asyncToGenerator_default()( /*#__PURE__*/regenerator_default.a.mark(function _callee4(upload) {
+        var url;
+        return regenerator_default.a.wrap(function _callee4$(_context4) {
+          while (1) {
+            switch (_context4.prev = _context4.next) {
+              case 0:
+                url = null;
 
-      var url = null;
+                if (upload instanceof tus_upload_TusUpload) {
+                  url = upload.getUrl();
+                } else {
+                  url = upload.url;
+                }
 
-      if (upload instanceof tus_upload_TusUpload) {
-        url = upload.getUrl();
-      } else {
-        url = upload.url;
+                if (url) {
+                  _context4.next = 4;
+                  break;
+                }
+
+                return _context4.abrupt("return", Promise.resolve());
+
+              case 4:
+                this.renderer.disableDelete(upload.uploadIndex);
+                _context4.prev = 5;
+                _context4.next = 8;
+                return this.deleteTusUploadFromServer(url);
+
+              case 8:
+                this.removeUploadFromList(upload);
+                _context4.next = 14;
+                break;
+
+              case 11:
+                _context4.prev = 11;
+                _context4.t0 = _context4["catch"](5);
+                this.renderer.setDeleteFailed(upload.uploadIndex);
+
+              case 14:
+              case "end":
+                return _context4.stop();
+            }
+          }
+        }, _callee4, this, [[5, 11]]);
+      }));
+
+      function deleteFromServer(_x4) {
+        return _deleteFromServer.apply(this, arguments);
       }
 
-      if (!url) {
-        return;
-      }
+      return deleteFromServer;
+    }()
+  }, {
+    key: "deleteTusUploadFromServer",
+    value: function deleteTusUploadFromServer(url) {
+      return new Promise(function (resolve, reject) {
+        var xhr = new window.XMLHttpRequest();
+        xhr.open("DELETE", url);
 
-      this.renderer.disableDelete(upload.uploadIndex);
-      var xhr = new window.XMLHttpRequest();
-      xhr.open("DELETE", url);
+        xhr.onload = function () {
+          if (xhr.status === 204) {
+            resolve();
+          } else {
+            reject();
+          }
+        };
 
-      xhr.onload = function () {
-        if (xhr.status === 204) {
-          _this4.removeUploadFromList(upload);
-        } else {
-          _this4.renderer.setDeleteFailed(upload.uploadIndex);
-        }
-      };
-
-      xhr.setRequestHeader("Tus-Resumable", "1.0.0");
-      xhr.send(null);
+        xhr.setRequestHeader("Tus-Resumable", "1.0.0");
+        xhr.send(null);
+      });
     }
   }, {
     key: "deletePlaceholder",
@@ -5961,7 +6161,7 @@ __webpack_require__.r(__webpack_exports__);
 /* WEBPACK VAR INJECTION */(function(global) {/* harmony import */ var _babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(0);
 /* harmony import */ var _babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _file_field__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(27);
-/* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(3);
+/* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(4);
 
 
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
@@ -6103,13 +6303,13 @@ var initFormSet = function initFormSet(form, optionsParam) {
 global.initFormSet = initFormSet; // eslint-disable-line  @typescript-eslint/no-unsafe-member-access
 
 global.initUploadFields = initUploadFields; // eslint-disable-line  @typescript-eslint/no-unsafe-member-access
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(14)))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(15)))
 
 /***/ }),
 /* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var arrayLikeToArray = __webpack_require__(18);
+var arrayLikeToArray = __webpack_require__(19);
 
 function _arrayWithoutHoles(arr) {
   if (Array.isArray(arr)) return arrayLikeToArray(arr);
@@ -7059,10 +7259,10 @@ module.exports = {"application/andrew-inset":["ez"],"application/applixware":["a
 "use strict";
 
 
-const path = __webpack_require__(15);
+const path = __webpack_require__(16);
 const scan = __webpack_require__(40);
 const parse = __webpack_require__(41);
-const utils = __webpack_require__(16);
+const utils = __webpack_require__(17);
 const constants = __webpack_require__(12);
 const isObject = val => val && typeof val === 'object' && !Array.isArray(val);
 
@@ -7405,7 +7605,7 @@ module.exports = picomatch;
 "use strict";
 
 
-const utils = __webpack_require__(16);
+const utils = __webpack_require__(17);
 const {
   CHAR_ASTERISK,             /* * */
   CHAR_AT,                   /* @ */
@@ -7796,7 +7996,7 @@ module.exports = scan;
 
 
 const constants = __webpack_require__(12);
-const utils = __webpack_require__(16);
+const utils = __webpack_require__(17);
 
 /**
  * Constants
