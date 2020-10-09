@@ -2612,13 +2612,13 @@ var getFilesFromFileSystemEntries = /*#__PURE__*/function () {
             _context3.prev = 38;
             _context3.prev = 39;
 
-            if (!(!_iteratorNormalCompletion && _iterator["return"] != null)) {
+            if (!(!_iteratorNormalCompletion && _iterator.return != null)) {
               _context3.next = 43;
               break;
             }
 
             _context3.next = 43;
-            return _iterator["return"]();
+            return _iterator.return();
 
           case 43:
             _context3.prev = 43;
@@ -3000,8 +3000,6 @@ var s3_upload_S3Upload = /*#__PURE__*/function (_BaseUpload) {
 
     defineProperty_default()(assertThisInitialized_default()(_this), "s3UploadDir", void 0);
 
-    defineProperty_default()(assertThisInitialized_default()(_this), "type", void 0);
-
     defineProperty_default()(assertThisInitialized_default()(_this), "uploadId", void 0);
 
     defineProperty_default()(assertThisInitialized_default()(_this), "uploading", void 0);
@@ -3029,7 +3027,7 @@ var s3_upload_S3Upload = /*#__PURE__*/function (_BaseUpload) {
 
     _this.initChunks();
 
-    _this.createdPromise["catch"](function () {
+    _this.createdPromise.catch(function () {
       return {};
     }); // silence uncaught rejection warning
 
@@ -3121,7 +3119,7 @@ var s3_upload_S3Upload = /*#__PURE__*/function (_BaseUpload) {
         }
 
         _this3.uploadParts();
-      })["catch"](function (err) {
+      }).catch(function (err) {
         _this3.onError(err);
       });
     }
@@ -3159,7 +3157,7 @@ var s3_upload_S3Upload = /*#__PURE__*/function (_BaseUpload) {
         });
 
         _this4.uploadParts();
-      })["catch"](function (err) {
+      }).catch(function (err) {
         _this4.onError(err);
       });
     }
@@ -3425,9 +3423,6 @@ var uploaded_file_PlaceholderFile = /*#__PURE__*/function (_BaseUploadedFile) {
       type: "placeholder",
       uploadIndex: uploadIndex
     });
-
-    defineProperty_default()(assertThisInitialized_default()(_this2), "type", void 0);
-
     _this2.placeholder = true;
     return _this2;
   }
@@ -3455,8 +3450,6 @@ var uploaded_file_UploadedS3File = /*#__PURE__*/function (_BaseUploadedFile2) {
 
     defineProperty_default()(assertThisInitialized_default()(_this3), "key", void 0);
 
-    defineProperty_default()(assertThisInitialized_default()(_this3), "type", void 0);
-
     _this3.key = initialFile.name;
     _this3.placeholder = false;
     return _this3;
@@ -3481,8 +3474,6 @@ var uploaded_file_UploadedFile = /*#__PURE__*/function (_BaseUploadedFile3) {
       type: "uploadedTus",
       uploadIndex: uploadIndex
     });
-
-    defineProperty_default()(assertThisInitialized_default()(_this4), "type", void 0);
 
     defineProperty_default()(assertThisInitialized_default()(_this4), "url", void 0);
 
@@ -5393,14 +5384,13 @@ var tus_upload_TusUpload = /*#__PURE__*/function (_BaseUpload) {
 
     defineProperty_default()(assertThisInitialized_default()(_this), "onSuccess", void 0);
 
-    defineProperty_default()(assertThisInitialized_default()(_this), "type", void 0);
-
     defineProperty_default()(assertThisInitialized_default()(_this), "upload", void 0);
 
     defineProperty_default()(assertThisInitialized_default()(_this), "handleSucces", function () {
       _this.onSuccess(_this.upload.file.size);
     });
 
+    console.log('TusUpload', _this.type);
     _this.onSuccess = options.onSuccess;
     _this.upload = new browser_Upload(file, {
       chunkSize: options.chunkSize,
@@ -5576,13 +5566,13 @@ var file_field_FileField = /*#__PURE__*/function () {
                 _context.prev = 27;
                 _context.prev = 28;
 
-                if (!(!_iteratorNormalCompletion && _iterator["return"] != null)) {
+                if (!(!_iteratorNormalCompletion && _iterator.return != null)) {
                   _context.next = 32;
                   break;
                 }
 
                 _context.next = 32;
-                return _iterator["return"]();
+                return _iterator.return();
 
               case 32:
                 _context.prev = 32;
@@ -6085,14 +6075,8 @@ var file_field_FileField = /*#__PURE__*/function () {
   }, {
     key: "updateS3UploadedInput",
     value: function updateS3UploadedInput() {
-      // upload could be
-      // 1. A regular Upload object
-      // 2. A map object with .placeholder == true
-      // 3. A map object with .placeholder == false, created when the form is reloaded
-      // 4. An S3Uploader object that will need to be saved as UploadedFile
-      // the latter two cases are handled here
       var s3Uploads = this.uploads.filter(function (upload) {
-        return upload instanceof s3_upload;
+        return upload.type === "s3";
       }).map(function (upload) {
         var s3Upload = upload;
         return {
@@ -6104,7 +6088,7 @@ var file_field_FileField = /*#__PURE__*/function () {
         };
       });
       var uploadedInfo = this.uploads.filter(function (upload) {
-        return upload && upload instanceof uploaded_file_UploadedS3File;
+        return upload.type === "uploadedS3";
       }).map(function (upload) {
         var uploadedS3File = upload;
         return {
