@@ -38,8 +38,6 @@ export class BaseUploadedFile extends BaseUpload {
 }
 
 class PlaceholderFile extends BaseUploadedFile {
-  type: "placeholder";
-
   constructor(initialFile: InitialFile, uploadIndex: number) {
     super({
       id: initialFile.id,
@@ -55,7 +53,6 @@ class PlaceholderFile extends BaseUploadedFile {
 
 export class UploadedS3File extends BaseUploadedFile {
   key: string;
-  type: "uploadedS3";
 
   constructor(initialFile: InitialFile, uploadIndex: number) {
     super({
@@ -72,7 +69,6 @@ export class UploadedS3File extends BaseUploadedFile {
 }
 
 export class UploadedFile extends BaseUploadedFile {
-  type: "uploadedTus";
   url: string;
 
   constructor(

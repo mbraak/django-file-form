@@ -49,7 +49,6 @@ class S3Upload extends BaseUpload {
   options: Options;
   parts: Part[];
   s3UploadDir: string;
-  type: "s3";
   uploadId: string | null;
   uploading: XMLHttpRequest[];
 

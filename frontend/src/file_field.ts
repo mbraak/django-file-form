@@ -483,15 +483,8 @@ class FileField {
   }
 
   updateS3UploadedInput(): void {
-    // upload could be
-    // 1. A regular Upload object
-    // 2. A map object with .placeholder == true
-    // 3. A map object with .placeholder == false, created when the form is reloaded
-    // 4. An S3Uploader object that will need to be saved as UploadedFile
-    // the latter two cases are handled here
-
     const s3Uploads: InitialFile[] = this.uploads
-      .filter(upload => upload instanceof S3Upload)
+      .filter(upload => upload.type === "s3")
       .map(upload => {
         const s3Upload = upload as S3Upload;
         return {
@@ -504,7 +497,7 @@ class FileField {
       });
 
     const uploadedInfo: InitialFile[] = this.uploads
-      .filter(upload => upload && upload instanceof UploadedS3File)
+      .filter(upload => upload.type === "uploadedS3")
       .map(upload => {
         const uploadedS3File = upload as UploadedS3File;
 

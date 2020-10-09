@@ -14,11 +14,11 @@ interface Options {
 
 export default class TusUpload extends BaseUpload {
   onSuccess: (size: number) => void;
-  type: "tus";
   upload: Upload;
 
   constructor(file: File, uploadIndex: number, options: Options) {
     super({ name: file.name, status: "uploading", type: "tus", uploadIndex });
+    console.log('TusUpload', this.type)
 
     this.onSuccess = options.onSuccess;
 
