@@ -200,6 +200,28 @@ var getMetadataFieldName = function getMetadataFieldName(fieldName, prefix) {
 /* 5 */
 /***/ (function(module, exports) {
 
+function _defineProperties(target, props) {
+  for (var i = 0; i < props.length; i++) {
+    var descriptor = props[i];
+    descriptor.enumerable = descriptor.enumerable || false;
+    descriptor.configurable = true;
+    if ("value" in descriptor) descriptor.writable = true;
+    Object.defineProperty(target, descriptor.key, descriptor);
+  }
+}
+
+function _createClass(Constructor, protoProps, staticProps) {
+  if (protoProps) _defineProperties(Constructor.prototype, protoProps);
+  if (staticProps) _defineProperties(Constructor, staticProps);
+  return Constructor;
+}
+
+module.exports = _createClass;
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports) {
+
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
   try {
     var info = gen[key](arg);
@@ -237,28 +259,6 @@ function _asyncToGenerator(fn) {
 }
 
 module.exports = _asyncToGenerator;
-
-/***/ }),
-/* 6 */
-/***/ (function(module, exports) {
-
-function _defineProperties(target, props) {
-  for (var i = 0; i < props.length; i++) {
-    var descriptor = props[i];
-    descriptor.enumerable = descriptor.enumerable || false;
-    descriptor.configurable = true;
-    if ("value" in descriptor) descriptor.writable = true;
-    Object.defineProperty(target, descriptor.key, descriptor);
-  }
-}
-
-function _createClass(Constructor, protoProps, staticProps) {
-  if (protoProps) _defineProperties(Constructor.prototype, protoProps);
-  if (staticProps) _defineProperties(Constructor, staticProps);
-  return Constructor;
-}
-
-module.exports = _createClass;
 
 /***/ }),
 /* 7 */
@@ -2116,7 +2116,7 @@ var regenerator = __webpack_require__(2);
 var regenerator_default = /*#__PURE__*/__webpack_require__.n(regenerator);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/asyncToGenerator.js
-var asyncToGenerator = __webpack_require__(5);
+var asyncToGenerator = __webpack_require__(6);
 var asyncToGenerator_default = /*#__PURE__*/__webpack_require__.n(asyncToGenerator);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/classCallCheck.js
@@ -2124,7 +2124,7 @@ var classCallCheck = __webpack_require__(3);
 var classCallCheck_default = /*#__PURE__*/__webpack_require__.n(classCallCheck);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/createClass.js
-var createClass = __webpack_require__(6);
+var createClass = __webpack_require__(5);
 var createClass_default = /*#__PURE__*/__webpack_require__.n(createClass);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/defineProperty.js
@@ -3076,6 +3076,17 @@ var s3_upload_S3Upload = /*#__PURE__*/function (_BaseUpload) {
       this.uploading = [];
     }
   }, {
+    key: "getInitialFile",
+    value: function getInitialFile() {
+      return {
+        id: this.uploadId || "",
+        name: this.key || "",
+        placeholder: false,
+        size: this.file.size,
+        original_name: this.file.name
+      };
+    }
+  }, {
     key: "initChunks",
     value: function initChunks() {
       var chunks = [];
@@ -3363,6 +3374,7 @@ var s3_upload_S3Upload = /*#__PURE__*/function (_BaseUpload) {
 
 
 
+
 function uploaded_file_createSuper(Derived) { var hasNativeReflectConstruct = uploaded_file_isNativeReflectConstruct(); return function _createSuperInternal() { var Super = getPrototypeOf_default()(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = getPrototypeOf_default()(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return possibleConstructorReturn_default()(this, result); }; }
 
 function uploaded_file_isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
@@ -3454,6 +3466,18 @@ var uploaded_file_UploadedS3File = /*#__PURE__*/function (_BaseUploadedFile2) {
     _this3.placeholder = false;
     return _this3;
   }
+
+  createClass_default()(UploadedS3File, [{
+    key: "getInitialFile",
+    value: function getInitialFile() {
+      return {
+        id: this.id,
+        name: this.key,
+        original_name: this.name,
+        size: this.size
+      };
+    }
+  }]);
 
   return UploadedS3File;
 }(uploaded_file_BaseUploadedFile);
@@ -6075,29 +6099,11 @@ var file_field_FileField = /*#__PURE__*/function () {
   }, {
     key: "updateS3UploadedInput",
     value: function updateS3UploadedInput() {
-      var s3Uploads = this.uploads.filter(function (upload) {
-        return upload.type === "s3";
-      }).map(function (upload) {
-        var s3Upload = upload;
-        return {
-          id: s3Upload.uploadId || "",
-          name: s3Upload.key || "",
-          placeholder: false,
-          size: s3Upload.file.size,
-          original_name: s3Upload.file.name
-        };
-      });
       var uploadedInfo = this.uploads.filter(function (upload) {
-        return upload.type === "uploadedS3";
+        return upload.type === "s3" || upload.type === "uploadedS3";
       }).map(function (upload) {
-        var uploadedS3File = upload;
-        return {
-          id: uploadedS3File.id,
-          name: uploadedS3File.key,
-          original_name: uploadedS3File.name,
-          size: uploadedS3File.size
-        };
-      }).concat(s3Uploads);
+        return upload.getInitialFile();
+      });
       var input = Object(util["a" /* findInput */])(this.form, Object(util["g" /* getS3UploadedFieldName */])(this.fieldName, this.prefix), this.prefix);
 
       if (input) {
