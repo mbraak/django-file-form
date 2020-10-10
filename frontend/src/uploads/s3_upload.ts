@@ -17,6 +17,7 @@ import {
   ServerPart,
   UrlInfo
 } from "./s3_utils";
+import { InitialFile } from "./uploaded_file";
 
 interface ChunkState {
   busy: boolean;
@@ -119,6 +120,16 @@ class S3Upload extends BaseUpload {
       }
     );
     this.uploading = [];
+  }
+
+  public getInitialFile(): InitialFile {
+    return {
+      id: this.uploadId || "",
+      name: this.key || "",
+      placeholder: false,
+      size: this.file.size,
+      original_name: this.file.name
+    };
   }
 
   private initChunks(): void {

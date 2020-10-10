@@ -66,6 +66,15 @@ export class UploadedS3File extends BaseUploadedFile {
     this.key = initialFile.name;
     this.placeholder = false;
   }
+
+  getInitialFile(): InitialFile {
+    return {
+      id: this.id,
+      name: this.key,
+      original_name: this.name,
+      size: this.size
+    }
+  }
 }
 
 export class UploadedFile extends BaseUploadedFile {

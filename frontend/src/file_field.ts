@@ -483,32 +483,9 @@ class FileField {
   }
 
   updateS3UploadedInput(): void {
-    const s3Uploads: InitialFile[] = this.uploads
-      .filter(upload => upload.type === "s3")
-      .map(upload => {
-        const s3Upload = upload as S3Upload;
-        return {
-          id: s3Upload.uploadId || "",
-          name: s3Upload.key || "",
-          placeholder: false,
-          size: s3Upload.file.size,
-          original_name: s3Upload.file.name
-        };
-      });
-
     const uploadedInfo: InitialFile[] = this.uploads
-      .filter(upload => upload.type === "uploadedS3")
-      .map(upload => {
-        const uploadedS3File = upload as UploadedS3File;
-
-        return {
-          id: uploadedS3File.id,
-          name: uploadedS3File.key,
-          original_name: uploadedS3File.name,
-          size: uploadedS3File.size
-        } as InitialFile;
-      })
-      .concat(s3Uploads);
+      .filter(upload => upload.type === "s3" || upload.type === "uploadedS3")
+      .map(upload=> (upload as S3Upload | UploadedS3File).getInitialFile());
 
     const input = findInput(
       this.form,
