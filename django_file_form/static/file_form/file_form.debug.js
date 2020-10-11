@@ -5976,12 +5976,31 @@ var file_field_FileField = /*#__PURE__*/function () {
       var _uploadFile = asyncToGenerator_default()( /*#__PURE__*/regenerator_default.a.mark(function _callee2(file) {
         var _this3 = this;
 
-        var fieldName, formId, s3UploadDir, renderer, uploadUrl, fileName, existingUpload, newUploadIndex, upload, element;
+        var createUpload, fieldName, formId, renderer, uploadUrl, fileName, existingUpload, newUploadIndex, upload, element;
         return regenerator_default.a.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
-                fieldName = this.fieldName, formId = this.formId, s3UploadDir = this.s3UploadDir, renderer = this.renderer, uploadUrl = this.uploadUrl;
+                createUpload = function createUpload() {
+                  var s3UploadDir = _this3.s3UploadDir;
+
+                  if (s3UploadDir != null) {
+                    return new s3_upload(file, newUploadIndex, {
+                      endpoint: uploadUrl,
+                      s3UploadDir: s3UploadDir
+                    });
+                  } else {
+                    return new tus_upload_TusUpload(file, newUploadIndex, {
+                      chunkSize: _this3.chunkSize,
+                      fieldName: fieldName,
+                      formId: formId,
+                      retryDelays: _this3.retryDelays,
+                      uploadUrl: uploadUrl
+                    });
+                  }
+                };
+
+                fieldName = this.fieldName, formId = this.formId, renderer = this.renderer, uploadUrl = this.uploadUrl;
                 fileName = file.name;
                 existingUpload = this.findUploadByName(fileName);
                 newUploadIndex = existingUpload ? existingUpload.uploadIndex : this.nextUploadIndex;
@@ -5991,28 +6010,15 @@ var file_field_FileField = /*#__PURE__*/function () {
                 }
 
                 if (!existingUpload) {
-                  _context2.next = 8;
+                  _context2.next = 9;
                   break;
                 }
 
-                _context2.next = 8;
+                _context2.next = 9;
                 return this.removeExistingUpload(existingUpload);
 
-              case 8:
-                if (s3UploadDir != null) {
-                  upload = new s3_upload(file, newUploadIndex, {
-                    endpoint: uploadUrl,
-                    s3UploadDir: s3UploadDir
-                  });
-                } else {
-                  upload = new tus_upload_TusUpload(file, newUploadIndex, {
-                    chunkSize: this.chunkSize,
-                    fieldName: fieldName,
-                    formId: formId,
-                    retryDelays: this.retryDelays,
-                    uploadUrl: uploadUrl
-                  });
-                }
+              case 9:
+                upload = createUpload();
 
                 upload.onError = function (error) {
                   return _this3.handleError(upload, error);
@@ -6031,7 +6037,7 @@ var file_field_FileField = /*#__PURE__*/function () {
                 element = renderer.addNewUpload(fileName, newUploadIndex);
                 this.emitEvent("addUpload", element, upload);
 
-              case 16:
+              case 17:
               case "end":
                 return _context2.stop();
             }
@@ -6049,14 +6055,14 @@ var file_field_FileField = /*#__PURE__*/function () {
     key: "getUploadByIndex",
     value: function getUploadByIndex(uploadIndex) {
       return this.uploads.find(function (upload) {
-        return (upload === null || upload === void 0 ? void 0 : upload.uploadIndex) === uploadIndex;
+        return upload.uploadIndex === uploadIndex;
       });
     }
   }, {
     key: "findUploadByName",
     value: function findUploadByName(fileName) {
       return this.uploads.find(function (upload) {
-        return upload && upload.name === fileName;
+        return upload.name === fileName;
       });
     }
   }, {
