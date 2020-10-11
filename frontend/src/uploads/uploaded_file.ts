@@ -1,4 +1,5 @@
 import BaseUpload from "./base_upload";
+import { deleteUpload } from "./tus_utils";
 
 export interface InitialFile {
   id: string;
@@ -73,11 +74,11 @@ export class UploadedS3File extends BaseUploadedFile {
       name: this.key,
       original_name: this.name,
       size: this.size
-    }
+    };
   }
 }
 
-export class UploadedFile extends BaseUploadedFile {
+export class UploadedTusFile extends BaseUploadedFile {
   url: string;
 
   constructor(
@@ -95,6 +96,10 @@ export class UploadedFile extends BaseUploadedFile {
 
     this.url = `${uploadUrl}${initialFile.id}`;
   }
+
+  public async delete(): Promise<void> {
+    await deleteUpload(this.url);
+  }
 }
 
 export const createUploadedFile = (
@@ -107,6 +112,6 @@ export const createUploadedFile = (
   } else if (initialFile.placeholder === false) {
     return new UploadedS3File(initialFile, uploadIndex);
   } else {
-    return new UploadedFile(initialFile, uploadUrl, uploadIndex);
+    return new UploadedTusFile(initialFile, uploadUrl, uploadIndex);
   }
 };

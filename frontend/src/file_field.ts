@@ -10,10 +10,9 @@ import DropArea from "./drop_area";
 import S3Upload from "./uploads/s3_upload";
 import EventEmitter from "eventemitter3";
 import {
-  BaseUploadedFile,
   createUploadedFile,
   InitialFile,
-  UploadedFile,
+  UploadedTusFile,
   UploadedS3File
 } from "./uploads/uploaded_file";
 import TusUpload from "./uploads/tus_upload";
@@ -254,13 +253,16 @@ class FileField {
     if (
       upload instanceof TusUpload ||
       upload instanceof S3Upload ||
-      (upload as UploadedFile).url
+      (upload as UploadedTusFile).url
     ) {
       switch (upload.status) {
         case "done": {
           if (upload instanceof S3Upload) {
             this.deleteS3Uploaded(upload);
-          } else {
+          } else if (
+            upload instanceof TusUpload ||
+            upload instanceof UploadedTusFile
+          ) {
             await this.deleteFromServer(upload);
           }
           break;
@@ -382,43 +384,15 @@ class FileField {
     }
   }
 
-  async deleteFromServer(upload: BaseUpload): Promise<void> {
-    let url = null;
-    if (upload instanceof TusUpload) {
-      url = upload.getUrl();
-    } else {
-      url = (upload as UploadedFile).url;
-    }
-
-    if (!url) {
-      return Promise.resolve();
-    }
-
+  async deleteFromServer(upload: TusUpload | UploadedTusFile): Promise<void> {
     this.renderer.disableDelete(upload.uploadIndex);
 
     try {
-      await this.deleteTusUploadFromServer(url);
+      await upload.delete();
       this.removeUploadFromList(upload);
     } catch {
       this.renderer.setDeleteFailed(upload.uploadIndex);
     }
-  }
-
-  deleteTusUploadFromServer(url: string): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const xhr = new window.XMLHttpRequest();
-      xhr.open("DELETE", url);
-
-      xhr.onload = (): void => {
-        if (xhr.status === 204) {
-          resolve();
-        } else {
-          reject();
-        }
-      };
-      xhr.setRequestHeader("Tus-Resumable", "1.0.0");
-      xhr.send(null);
-    });
   }
 
   deletePlaceholder(upload: BaseUpload): void {

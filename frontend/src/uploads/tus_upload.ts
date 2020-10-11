@@ -1,5 +1,6 @@
 import { Upload } from "tus-js-client";
 import BaseUpload from "./base_upload";
+import { deleteUpload } from "./tus_utils";
 
 interface Options {
   chunkSize: number;
@@ -18,7 +19,7 @@ export default class TusUpload extends BaseUpload {
 
   constructor(file: File, uploadIndex: number, options: Options) {
     super({ name: file.name, status: "uploading", type: "tus", uploadIndex });
-    console.log('TusUpload', this.type)
+    console.log("TusUpload", this.type);
 
     this.onSuccess = options.onSuccess;
 
@@ -45,8 +46,18 @@ export default class TusUpload extends BaseUpload {
     this.upload.start();
   }
 
-  getUrl(): string | null {
+  public getUrl(): string | null {
     return this.upload.url;
+  }
+
+  public async delete(): Promise<void> {
+    const url = this.getUrl();
+
+    if (!url) {
+      return Promise.resolve();
+    }
+
+    await deleteUpload(url);
   }
 
   private handleSucces = (): void => {
