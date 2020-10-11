@@ -8,7 +8,6 @@ import {
   createMultipartUpload,
   getChunkSize,
   listParts,
-  LocationInfo,
   MB,
   MultipartUpload,
   Part,
@@ -29,9 +28,7 @@ interface ChunkState {
 interface Options {
   key?: string;
   limit?: number;
-  onError?: (error: Error) => void;
   onPartComplete?: (part: Part) => void;
-  onProgress?: (uploaded: number, total: number) => void;
   onStart?: (multipartUpload: MultipartUpload) => void;
   s3UploadDir: string;
   endpoint: string;
@@ -39,6 +36,8 @@ interface Options {
 }
 
 class S3Upload extends BaseUpload {
+  public onError?: (error: Error) => void;
+  public onProgress?: (bytesUploaded: number, bytesTotal: number) => void;
   public onSuccess?: () => void;
 
   private chunkState: ChunkState[];
@@ -79,6 +78,9 @@ class S3Upload extends BaseUpload {
     this.chunks = [];
     this.chunkState = [];
     this.uploading = [];
+    this.onError = undefined;
+    this.onProgress = undefined;
+    this.onSuccess = undefined;
 
     this.initChunks();
 
@@ -189,7 +191,7 @@ class S3Upload extends BaseUpload {
         this.uploadParts();
       })
       .catch((err: Error) => {
-        this.onError(err);
+        this.handleError(err);
       });
   }
 
@@ -224,7 +226,7 @@ class S3Upload extends BaseUpload {
         this.uploadParts();
       })
       .catch(err => {
-        this.onError(err);
+        this.handleError(err);
       });
   }
 
@@ -290,7 +292,7 @@ class S3Upload extends BaseUpload {
           this.uploadPartBytes(index, url);
         },
         err => {
-          this.onError(err);
+          this.handleError(err);
         }
       );
   }
@@ -298,9 +300,9 @@ class S3Upload extends BaseUpload {
   private onPartProgress(index: number, sent: number): void {
     this.chunkState[index].uploaded = sent;
 
-    if (this.options.onProgress) {
+    if (this.onProgress) {
       const totalUploaded = this.chunkState.reduce((n, c) => n + c.uploaded, 0);
-      this.options.onProgress(totalUploaded, this.file.size);
+      this.onProgress(totalUploaded, this.file.size);
     }
   }
 
@@ -346,7 +348,7 @@ class S3Upload extends BaseUpload {
       this.chunkState[index].busy = false;
 
       if (target.status < 200 || target.status >= 300) {
-        this.onError(new Error("Non 2xx"));
+        this.handleError(new Error("Non 2xx"));
         return;
       }
 
@@ -355,7 +357,7 @@ class S3Upload extends BaseUpload {
       // NOTE This must be allowed by CORS.
       const etag = target.getResponseHeader("ETag");
       if (etag === null) {
-        this.onError(
+        this.handleError(
           new Error(
             "AwsS3/Multipart: Could not read the ETag header. This likely means CORS is not configured correctly on the S3 Bucket. See https://uppy.io/docs/aws-s3-multipart#S3-Bucket-Configuration for instructions."
           )
@@ -371,7 +373,7 @@ class S3Upload extends BaseUpload {
       this.chunkState[index].busy = false;
       const error = new Error("Unknown error");
       // error.source = ev.target
-      this.onError(error);
+      this.handleError(error);
     });
     xhr.send(body);
   }
@@ -396,14 +398,14 @@ class S3Upload extends BaseUpload {
         }
       },
       err => {
-        this.onError(err);
+        this.handleError(err);
       }
     );
   }
 
-  private onError(error: Error): void {
-    if (this.options.onError) {
-      this.options.onError(error);
+  private handleError(error: Error): void {
+    if (this.onError) {
+      this.onError(error);
     } else {
       throw error;
     }

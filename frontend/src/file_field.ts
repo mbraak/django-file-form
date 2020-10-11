@@ -196,9 +196,6 @@ class FileField {
     if (s3UploadDir != null) {
       upload = new S3Upload(file, newUploadIndex, {
         endpoint: uploadUrl,
-        onError: (error: Error): void => this.handleError(upload, error),
-        onProgress: (bytesUploaded: number, bytesTotal: number): void =>
-          this.handleProgress(upload as S3Upload, bytesUploaded, bytesTotal),
         s3UploadDir
       });
     } else {
@@ -206,20 +203,20 @@ class FileField {
         chunkSize: this.chunkSize,
         fieldName,
         formId,
-        onError: (error: Error): void => this.handleError(upload, error),
-        onProgress: (bytesUploaded: number, bytesTotal: number): void =>
-          this.handleProgress(upload as TusUpload, bytesUploaded, bytesTotal),
         retryDelays: this.retryDelays,
         uploadUrl
       });
     }
 
+    upload.onError = error => this.handleError(upload, error);
+    upload.onProgress = (bytesUploaded, bytesTotal) =>
+      this.handleProgress(upload, bytesUploaded, bytesTotal);
     upload.onSuccess = () => this.handleSuccess(upload);
     upload.start();
 
-    const element = renderer.addNewUpload(fileName, newUploadIndex);
     this.uploads.push(upload);
 
+    const element = renderer.addNewUpload(fileName, newUploadIndex);
     this.emitEvent("addUpload", element, upload);
   }
 

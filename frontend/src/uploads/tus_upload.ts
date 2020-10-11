@@ -6,13 +6,13 @@ interface Options {
   chunkSize: number;
   fieldName: string;
   formId: string;
-  onError: (error: Error) => void;
-  onProgress: (bytesUploaded: number, bytesTotal: number) => void;
   retryDelays: number[] | null;
   uploadUrl: string;
 }
 
 export default class TusUpload extends BaseUpload {
+  public onError?: (error: Error) => void;
+  public onProgress?: (bytesUploaded: number, bytesTotal: number) => void;
   public onSuccess?: () => void;
   private upload: Upload;
 
@@ -27,11 +27,15 @@ export default class TusUpload extends BaseUpload {
         filename: file.name,
         formId: options.formId
       },
-      onError: options.onError,
-      onProgress: options.onProgress,
+      onError: this.handleError,
+      onProgress: this.handleProgress,
       onSuccess: this.handleSucces,
       retryDelays: options.retryDelays || [0, 1000, 3000, 5000]
     });
+
+    this.onError = undefined;
+    this.onProgress = undefined;
+    this.onSuccess = undefined;
   }
 
   public abort(): void {
@@ -53,6 +57,20 @@ export default class TusUpload extends BaseUpload {
   public start(): void {
     this.upload.start();
   }
+
+  private handleError = (error: Error) => {
+    if (this.onError) {
+      this.onError(error);
+    } else {
+      throw error;
+    }
+  };
+
+  private handleProgress = (bytesUploaded: number, bytesTotal: number) => {
+    if (this.onProgress) {
+      this.onProgress(bytesUploaded, bytesTotal);
+    }
+  };
 
   private handleSucces = () => {
     if (this.onSuccess) {
