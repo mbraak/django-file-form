@@ -107,6 +107,13 @@ module.exports = _defineProperty;
 
 /***/ }),
 /* 1 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__(33);
+
+
+/***/ }),
+/* 2 */
 /***/ (function(module, exports) {
 
 function _assertThisInitialized(self) {
@@ -118,13 +125,6 @@ function _assertThisInitialized(self) {
 }
 
 module.exports = _assertThisInitialized;
-
-/***/ }),
-/* 2 */
-/***/ (function(module, exports, __webpack_require__) {
-
-module.exports = __webpack_require__(33);
-
 
 /***/ }),
 /* 3 */
@@ -140,6 +140,48 @@ module.exports = _classCallCheck;
 
 /***/ }),
 /* 4 */
+/***/ (function(module, exports) {
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
+  try {
+    var info = gen[key](arg);
+    var value = info.value;
+  } catch (error) {
+    reject(error);
+    return;
+  }
+
+  if (info.done) {
+    resolve(value);
+  } else {
+    Promise.resolve(value).then(_next, _throw);
+  }
+}
+
+function _asyncToGenerator(fn) {
+  return function () {
+    var self = this,
+        args = arguments;
+    return new Promise(function (resolve, reject) {
+      var gen = fn.apply(self, args);
+
+      function _next(value) {
+        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);
+      }
+
+      function _throw(err) {
+        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);
+      }
+
+      _next(undefined);
+    });
+  };
+}
+
+module.exports = _asyncToGenerator;
+
+/***/ }),
+/* 5 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -197,7 +239,7 @@ var getMetadataFieldName = function getMetadataFieldName(fieldName, prefix) {
 };
 
 /***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, exports) {
 
 function _defineProperties(target, props) {
@@ -217,48 +259,6 @@ function _createClass(Constructor, protoProps, staticProps) {
 }
 
 module.exports = _createClass;
-
-/***/ }),
-/* 6 */
-/***/ (function(module, exports) {
-
-function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
-  try {
-    var info = gen[key](arg);
-    var value = info.value;
-  } catch (error) {
-    reject(error);
-    return;
-  }
-
-  if (info.done) {
-    resolve(value);
-  } else {
-    Promise.resolve(value).then(_next, _throw);
-  }
-}
-
-function _asyncToGenerator(fn) {
-  return function () {
-    var self = this,
-        args = arguments;
-    return new Promise(function (resolve, reject) {
-      var gen = fn.apply(self, args);
-
-      function _next(value) {
-        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);
-      }
-
-      function _throw(err) {
-        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);
-      }
-
-      _next(undefined);
-    });
-  };
-}
-
-module.exports = _asyncToGenerator;
 
 /***/ }),
 /* 7 */
@@ -302,7 +302,7 @@ module.exports = _getPrototypeOf;
 
 var _typeof = __webpack_require__(14);
 
-var assertThisInitialized = __webpack_require__(1);
+var assertThisInitialized = __webpack_require__(2);
 
 function _possibleConstructorReturn(self, call) {
   if (call && (_typeof(call) === "object" || typeof call === "function")) {
@@ -2112,11 +2112,11 @@ var toConsumableArray = __webpack_require__(10);
 var toConsumableArray_default = /*#__PURE__*/__webpack_require__.n(toConsumableArray);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/regenerator/index.js
-var regenerator = __webpack_require__(2);
+var regenerator = __webpack_require__(1);
 var regenerator_default = /*#__PURE__*/__webpack_require__.n(regenerator);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/asyncToGenerator.js
-var asyncToGenerator = __webpack_require__(6);
+var asyncToGenerator = __webpack_require__(4);
 var asyncToGenerator_default = /*#__PURE__*/__webpack_require__.n(asyncToGenerator);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/classCallCheck.js
@@ -2124,7 +2124,7 @@ var classCallCheck = __webpack_require__(3);
 var classCallCheck_default = /*#__PURE__*/__webpack_require__.n(classCallCheck);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/createClass.js
-var createClass = __webpack_require__(5);
+var createClass = __webpack_require__(6);
 var createClass_default = /*#__PURE__*/__webpack_require__.n(createClass);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/defineProperty.js
@@ -2136,7 +2136,7 @@ var asyncIterator = __webpack_require__(13);
 var asyncIterator_default = /*#__PURE__*/__webpack_require__.n(asyncIterator);
 
 // EXTERNAL MODULE: ./src/util.ts
-var util = __webpack_require__(4);
+var util = __webpack_require__(5);
 
 // EXTERNAL MODULE: ./node_modules/escape-html/index.js
 var escape_html = __webpack_require__(22);
@@ -2787,7 +2787,7 @@ var helpers_typeof = __webpack_require__(14);
 var typeof_default = /*#__PURE__*/__webpack_require__.n(helpers_typeof);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/assertThisInitialized.js
-var assertThisInitialized = __webpack_require__(1);
+var assertThisInitialized = __webpack_require__(2);
 var assertThisInitialized_default = /*#__PURE__*/__webpack_require__.n(assertThisInitialized);
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/inherits.js
@@ -3366,7 +3366,46 @@ var s3_upload_S3Upload = /*#__PURE__*/function (_BaseUpload) {
 }(base_upload);
 
 /* harmony default export */ var s3_upload = (s3_upload_S3Upload);
+// CONCATENATED MODULE: ./src/uploads/tus_utils.ts
+
+
+var deleteUpload = /*#__PURE__*/function () {
+  var _ref = asyncToGenerator_default()( /*#__PURE__*/regenerator_default.a.mark(function _callee(url) {
+    return regenerator_default.a.wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            return _context.abrupt("return", new Promise(function (resolve, reject) {
+              var xhr = new XMLHttpRequest();
+              xhr.open("DELETE", url);
+
+              xhr.onload = function () {
+                if (xhr.status === 204) {
+                  resolve();
+                } else {
+                  reject();
+                }
+              };
+
+              xhr.setRequestHeader("Tus-Resumable", "1.0.0");
+              xhr.send(null);
+            }));
+
+          case 1:
+          case "end":
+            return _context.stop();
+        }
+      }
+    }, _callee);
+  }));
+
+  return function deleteUpload(_x) {
+    return _ref.apply(this, arguments);
+  };
+}();
 // CONCATENATED MODULE: ./src/uploads/uploaded_file.ts
+
+
 
 
 
@@ -3380,12 +3419,12 @@ function uploaded_file_createSuper(Derived) { var hasNativeReflectConstruct = up
 function uploaded_file_isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
 
 
+
 var uploaded_file_BaseUploadedFile = /*#__PURE__*/function (_BaseUpload) {
   inherits_default()(BaseUploadedFile, _BaseUpload);
 
   var _super = uploaded_file_createSuper(BaseUploadedFile);
 
-  // true for placeholder, false for S3, undefined for regular files
   function BaseUploadedFile(_ref) {
     var _this;
 
@@ -3406,14 +3445,18 @@ var uploaded_file_BaseUploadedFile = /*#__PURE__*/function (_BaseUpload) {
 
     defineProperty_default()(assertThisInitialized_default()(_this), "id", void 0);
 
-    defineProperty_default()(assertThisInitialized_default()(_this), "placeholder", void 0);
-
     defineProperty_default()(assertThisInitialized_default()(_this), "size", void 0);
 
     _this.id = id;
     _this.size = size;
     return _this;
   }
+
+  createClass_default()(BaseUploadedFile, [{
+    key: "abort",
+    value: function abort() {//
+    }
+  }]);
 
   return BaseUploadedFile;
 }(base_upload);
@@ -3424,19 +3467,15 @@ var uploaded_file_PlaceholderFile = /*#__PURE__*/function (_BaseUploadedFile) {
   var _super2 = uploaded_file_createSuper(PlaceholderFile);
 
   function PlaceholderFile(initialFile, uploadIndex) {
-    var _this2;
-
     classCallCheck_default()(this, PlaceholderFile);
 
-    _this2 = _super2.call(this, {
+    return _super2.call(this, {
       id: initialFile.id,
       name: initialFile.name,
       size: initialFile.size,
       type: "placeholder",
       uploadIndex: uploadIndex
     });
-    _this2.placeholder = true;
-    return _this2;
   }
 
   return PlaceholderFile;
@@ -3448,11 +3487,11 @@ var uploaded_file_UploadedS3File = /*#__PURE__*/function (_BaseUploadedFile2) {
   var _super3 = uploaded_file_createSuper(UploadedS3File);
 
   function UploadedS3File(initialFile, uploadIndex) {
-    var _this3;
+    var _this2;
 
     classCallCheck_default()(this, UploadedS3File);
 
-    _this3 = _super3.call(this, {
+    _this2 = _super3.call(this, {
       id: initialFile.id,
       name: initialFile.original_name || initialFile.name,
       size: initialFile.size,
@@ -3460,11 +3499,10 @@ var uploaded_file_UploadedS3File = /*#__PURE__*/function (_BaseUploadedFile2) {
       uploadIndex: uploadIndex
     });
 
-    defineProperty_default()(assertThisInitialized_default()(_this3), "key", void 0);
+    defineProperty_default()(assertThisInitialized_default()(_this2), "key", void 0);
 
-    _this3.key = initialFile.name;
-    _this3.placeholder = false;
-    return _this3;
+    _this2.key = initialFile.name;
+    return _this2;
   }
 
   createClass_default()(UploadedS3File, [{
@@ -3481,17 +3519,17 @@ var uploaded_file_UploadedS3File = /*#__PURE__*/function (_BaseUploadedFile2) {
 
   return UploadedS3File;
 }(uploaded_file_BaseUploadedFile);
-var uploaded_file_UploadedFile = /*#__PURE__*/function (_BaseUploadedFile3) {
-  inherits_default()(UploadedFile, _BaseUploadedFile3);
+var uploaded_file_UploadedTusFile = /*#__PURE__*/function (_BaseUploadedFile3) {
+  inherits_default()(UploadedTusFile, _BaseUploadedFile3);
 
-  var _super4 = uploaded_file_createSuper(UploadedFile);
+  var _super4 = uploaded_file_createSuper(UploadedTusFile);
 
-  function UploadedFile(initialFile, uploadUrl, uploadIndex) {
-    var _this4;
+  function UploadedTusFile(initialFile, uploadUrl, uploadIndex) {
+    var _this3;
 
-    classCallCheck_default()(this, UploadedFile);
+    classCallCheck_default()(this, UploadedTusFile);
 
-    _this4 = _super4.call(this, {
+    _this3 = _super4.call(this, {
       id: initialFile.id,
       name: initialFile.name,
       size: initialFile.size,
@@ -3499,13 +3537,40 @@ var uploaded_file_UploadedFile = /*#__PURE__*/function (_BaseUploadedFile3) {
       uploadIndex: uploadIndex
     });
 
-    defineProperty_default()(assertThisInitialized_default()(_this4), "url", void 0);
+    defineProperty_default()(assertThisInitialized_default()(_this3), "url", void 0);
 
-    _this4.url = "".concat(uploadUrl).concat(initialFile.id);
-    return _this4;
+    _this3.url = "".concat(uploadUrl).concat(initialFile.id);
+    return _this3;
   }
 
-  return UploadedFile;
+  createClass_default()(UploadedTusFile, [{
+    key: "delete",
+    value: function () {
+      var _delete2 = asyncToGenerator_default()( /*#__PURE__*/regenerator_default.a.mark(function _callee() {
+        return regenerator_default.a.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                _context.next = 2;
+                return deleteUpload(this.url);
+
+              case 2:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee, this);
+      }));
+
+      function _delete() {
+        return _delete2.apply(this, arguments);
+      }
+
+      return _delete;
+    }()
+  }]);
+
+  return UploadedTusFile;
 }(uploaded_file_BaseUploadedFile);
 var createUploadedFile = function createUploadedFile(initialFile, uploadUrl, uploadIndex) {
   if (initialFile.placeholder === true) {
@@ -3513,7 +3578,7 @@ var createUploadedFile = function createUploadedFile(initialFile, uploadUrl, upl
   } else if (initialFile.placeholder === false) {
     return new uploaded_file_UploadedS3File(initialFile, uploadIndex);
   } else {
-    return new uploaded_file_UploadedFile(initialFile, uploadUrl, uploadIndex);
+    return new uploaded_file_UploadedTusFile(initialFile, uploadUrl, uploadIndex);
   }
 };
 // EXTERNAL MODULE: ./node_modules/js-base64/base64.js
@@ -5382,9 +5447,12 @@ var isSupported = browser_XMLHttpRequest && browser_Blob && typeof browser_Blob.
 
 
 
+
+
 function tus_upload_createSuper(Derived) { var hasNativeReflectConstruct = tus_upload_isNativeReflectConstruct(); return function _createSuperInternal() { var Super = getPrototypeOf_default()(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = getPrototypeOf_default()(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return possibleConstructorReturn_default()(this, result); }; }
 
 function tus_upload_isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+
 
 
 
@@ -5414,7 +5482,6 @@ var tus_upload_TusUpload = /*#__PURE__*/function (_BaseUpload) {
       _this.onSuccess(_this.upload.file.size);
     });
 
-    console.log('TusUpload', _this.type);
     _this.onSuccess = options.onSuccess;
     _this.upload = new browser_Upload(file, {
       chunkSize: options.chunkSize,
@@ -5447,6 +5514,42 @@ var tus_upload_TusUpload = /*#__PURE__*/function (_BaseUpload) {
     value: function getUrl() {
       return this.upload.url;
     }
+  }, {
+    key: "delete",
+    value: function () {
+      var _delete2 = asyncToGenerator_default()( /*#__PURE__*/regenerator_default.a.mark(function _callee() {
+        var url;
+        return regenerator_default.a.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                url = this.getUrl();
+
+                if (url) {
+                  _context.next = 3;
+                  break;
+                }
+
+                return _context.abrupt("return", Promise.resolve());
+
+              case 3:
+                _context.next = 5;
+                return deleteUpload(url);
+
+              case 5:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee, this);
+      }));
+
+      function _delete() {
+        return _delete2.apply(this, arguments);
+      }
+
+      return _delete;
+    }()
   }]);
 
   return TusUpload;
@@ -5882,61 +5985,51 @@ var file_field_FileField = /*#__PURE__*/function () {
     key: "removeExistingUpload",
     value: function () {
       var _removeExistingUpload = asyncToGenerator_default()( /*#__PURE__*/regenerator_default.a.mark(function _callee3(upload) {
-        var element;
+        var element, deleted;
         return regenerator_default.a.wrap(function _callee3$(_context3) {
           while (1) {
             switch (_context3.prev = _context3.next) {
               case 0:
-                if (upload.status === "uploading") {
-                  void upload.abort();
-                }
-
                 element = this.renderer.findFileDiv(upload.uploadIndex);
 
                 if (element) {
                   this.emitEvent("removeUpload", element, upload);
                 }
 
-                if (!(upload instanceof tus_upload_TusUpload || upload instanceof s3_upload || upload.url)) {
-                  _context3.next = 18;
+                if (!(upload.status === "uploading")) {
+                  _context3.next = 6;
                   break;
                 }
 
-                _context3.t0 = upload.status;
-                _context3.next = _context3.t0 === "done" ? 7 : _context3.t0 === "error" ? 14 : _context3.t0 === "uploading" ? 14 : 16;
+                upload.abort();
+                _context3.next = 12;
                 break;
 
-              case 7:
-                if (!(upload instanceof s3_upload)) {
-                  _context3.next = 11;
+              case 6:
+                if (!(upload.status === "done" && (upload.type === "tus" || upload.type === "uploadedTus"))) {
+                  _context3.next = 12;
                   break;
                 }
 
-                this.deleteS3Uploaded(upload);
-                _context3.next = 13;
-                break;
+                _context3.next = 9;
+                return this.deleteFromServer(upload || uploaded_file_UploadedTusFile);
 
-              case 11:
-                _context3.next = 13;
-                return this.deleteFromServer(upload);
+              case 9:
+                deleted = _context3.sent;
 
-              case 13:
-                return _context3.abrupt("break", 16);
+                if (deleted) {
+                  _context3.next = 12;
+                  break;
+                }
 
-              case 14:
+                return _context3.abrupt("return");
+
+              case 12:
                 this.removeUploadFromList(upload);
-                return _context3.abrupt("break", 16);
+                this.updateS3UploadedInput();
+                this.updatePlaceholderInput();
 
-              case 16:
-                _context3.next = 19;
-                break;
-
-              case 18:
-                if (upload.placeholder) {
-                  this.deletePlaceholder(upload);
-                }
-
-              case 19:
+              case 15:
               case "end":
                 return _context3.stop();
             }
@@ -5966,48 +6059,30 @@ var file_field_FileField = /*#__PURE__*/function () {
     key: "deleteFromServer",
     value: function () {
       var _deleteFromServer = asyncToGenerator_default()( /*#__PURE__*/regenerator_default.a.mark(function _callee4(upload) {
-        var url;
         return regenerator_default.a.wrap(function _callee4$(_context4) {
           while (1) {
             switch (_context4.prev = _context4.next) {
               case 0:
-                url = null;
-
-                if (upload instanceof tus_upload_TusUpload) {
-                  url = upload.getUrl();
-                } else {
-                  url = upload.url;
-                }
-
-                if (url) {
-                  _context4.next = 4;
-                  break;
-                }
-
-                return _context4.abrupt("return", Promise.resolve());
+                this.renderer.disableDelete(upload.uploadIndex);
+                _context4.prev = 1;
+                _context4.next = 4;
+                return upload.delete();
 
               case 4:
-                this.renderer.disableDelete(upload.uploadIndex);
-                _context4.prev = 5;
-                _context4.next = 8;
-                return this.deleteTusUploadFromServer(url);
+                return _context4.abrupt("return", true);
 
-              case 8:
-                this.removeUploadFromList(upload);
-                _context4.next = 14;
-                break;
+              case 7:
+                _context4.prev = 7;
+                _context4.t0 = _context4["catch"](1);
+                this.renderer.setDeleteFailed(upload.uploadIndex);
+                return _context4.abrupt("return", false);
 
               case 11:
-                _context4.prev = 11;
-                _context4.t0 = _context4["catch"](5);
-                this.renderer.setDeleteFailed(upload.uploadIndex);
-
-              case 14:
               case "end":
                 return _context4.stop();
             }
           }
-        }, _callee4, this, [[5, 11]]);
+        }, _callee4, this, [[1, 7]]);
       }));
 
       function deleteFromServer(_x4) {
@@ -6017,46 +6092,10 @@ var file_field_FileField = /*#__PURE__*/function () {
       return deleteFromServer;
     }()
   }, {
-    key: "deleteTusUploadFromServer",
-    value: function deleteTusUploadFromServer(url) {
-      return new Promise(function (resolve, reject) {
-        var xhr = new window.XMLHttpRequest();
-        xhr.open("DELETE", url);
-
-        xhr.onload = function () {
-          if (xhr.status === 204) {
-            resolve();
-          } else {
-            reject();
-          }
-        };
-
-        xhr.setRequestHeader("Tus-Resumable", "1.0.0");
-        xhr.send(null);
-      });
-    }
-  }, {
-    key: "deletePlaceholder",
-    value: function deletePlaceholder(upload) {
-      this.removeUploadFromList(upload);
-      this.updatePlaceholderInput();
-    }
-  }, {
-    key: "deleteS3Uploaded",
-    value: function deleteS3Uploaded(upload) {
-      this.removeUploadFromList(upload);
-      this.updateS3UploadedInput();
-    }
-  }, {
     key: "handleCancel",
     value: function handleCancel(upload) {
-      if (upload instanceof tus_upload_TusUpload) {
-        void upload.abort();
-        this.removeUploadFromList(upload);
-      } else if (upload instanceof s3_upload) {
-        upload.abort();
-        this.removeUploadFromList(upload);
-      }
+      upload.abort();
+      this.removeUploadFromList(upload);
     }
   }, {
     key: "initDropArea",
@@ -6087,28 +6126,32 @@ var file_field_FileField = /*#__PURE__*/function () {
   }, {
     key: "updatePlaceholderInput",
     value: function updatePlaceholderInput() {
-      var placeholdersInfo = this.uploads.filter(function (upload) {
-        return upload && !(upload instanceof tus_upload_TusUpload) && !(upload instanceof s3_upload) && upload.placeholder;
-      });
       var input = Object(util["a" /* findInput */])(this.form, Object(util["f" /* getPlaceholderFieldName */])(this.fieldName, this.prefix), this.prefix);
 
-      if (input) {
-        input.value = JSON.stringify(placeholdersInfo);
+      if (!input) {
+        return;
       }
+
+      var placeholdersInfo = this.uploads.filter(function (upload) {
+        return upload.type === "placeholder";
+      });
+      input.value = JSON.stringify(placeholdersInfo);
     }
   }, {
     key: "updateS3UploadedInput",
     value: function updateS3UploadedInput() {
+      var input = Object(util["a" /* findInput */])(this.form, Object(util["g" /* getS3UploadedFieldName */])(this.fieldName, this.prefix), this.prefix);
+
+      if (!input) {
+        return;
+      }
+
       var uploadedInfo = this.uploads.filter(function (upload) {
         return upload.type === "s3" || upload.type === "uploadedS3";
       }).map(function (upload) {
         return upload.getInitialFile();
       });
-      var input = Object(util["a" /* findInput */])(this.form, Object(util["g" /* getS3UploadedFieldName */])(this.fieldName, this.prefix), this.prefix);
-
-      if (input) {
-        input.value = JSON.stringify(uploadedInfo);
-      }
+      input.value = JSON.stringify(uploadedInfo);
     }
   }, {
     key: "getMetaDataField",
@@ -6151,7 +6194,7 @@ __webpack_require__.r(__webpack_exports__);
 /* WEBPACK VAR INJECTION */(function(global) {/* harmony import */ var _babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(0);
 /* harmony import */ var _babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_defineProperty__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _file_field__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(27);
-/* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(4);
+/* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(5);
 
 
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
