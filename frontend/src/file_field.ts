@@ -175,7 +175,26 @@ class FileField {
   };
 
   async uploadFile(file: File): Promise<void> {
-    const { fieldName, formId, s3UploadDir, renderer, uploadUrl } = this;
+    const createUpload = (): S3Upload | TusUpload => {
+      const { s3UploadDir } = this;
+
+      if (s3UploadDir != null) {
+        return new S3Upload(file, newUploadIndex, {
+          endpoint: uploadUrl,
+          s3UploadDir
+        });
+      } else {
+        return new TusUpload(file, newUploadIndex, {
+          chunkSize: this.chunkSize,
+          fieldName,
+          formId,
+          retryDelays: this.retryDelays,
+          uploadUrl
+        });
+      }
+    };
+
+    const { fieldName, formId, renderer, uploadUrl } = this;
     const fileName = file.name;
     const existingUpload = this.findUploadByName(fileName);
     const newUploadIndex = existingUpload
@@ -190,22 +209,7 @@ class FileField {
       await this.removeExistingUpload(existingUpload);
     }
 
-    let upload: S3Upload | TusUpload;
-
-    if (s3UploadDir != null) {
-      upload = new S3Upload(file, newUploadIndex, {
-        endpoint: uploadUrl,
-        s3UploadDir
-      });
-    } else {
-      upload = new TusUpload(file, newUploadIndex, {
-        chunkSize: this.chunkSize,
-        fieldName,
-        formId,
-        retryDelays: this.retryDelays,
-        uploadUrl
-      });
-    }
+    const upload = createUpload();
 
     upload.onError = error => this.handleError(upload, error);
     upload.onProgress = (bytesUploaded, bytesTotal) =>
@@ -220,11 +224,11 @@ class FileField {
   }
 
   getUploadByIndex(uploadIndex: number): BaseUpload | undefined {
-    return this.uploads.find(upload => upload?.uploadIndex === uploadIndex);
+    return this.uploads.find(upload => upload.uploadIndex === uploadIndex);
   }
 
   findUploadByName(fileName: string): BaseUpload | undefined {
-    return this.uploads.find(upload => upload && upload.name === fileName);
+    return this.uploads.find(upload => upload.name === fileName);
   }
 
   async removeExistingUpload(upload: BaseUpload): Promise<void> {
