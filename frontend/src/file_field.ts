@@ -272,7 +272,7 @@ class FileField {
           break;
         }
       }
-    } else if ((upload as BaseUploadedFile).placeholder) {
+    } else if (upload.type === "placeholder") {
       this.deletePlaceholder(upload);
     }
   }
