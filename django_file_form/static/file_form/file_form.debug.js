@@ -2954,6 +2954,8 @@ var remove = function remove(arr, el) {
 
 
 
+
+
 function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = getPrototypeOf_default()(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = getPrototypeOf_default()(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return possibleConstructorReturn_default()(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
@@ -2979,6 +2981,12 @@ var s3_upload_S3Upload = /*#__PURE__*/function (_BaseUpload) {
       type: "s3",
       uploadIndex: uploadIndex
     });
+
+    defineProperty_default()(assertThisInitialized_default()(_this), "onError", void 0);
+
+    defineProperty_default()(assertThisInitialized_default()(_this), "onProgress", void 0);
+
+    defineProperty_default()(assertThisInitialized_default()(_this), "onSuccess", void 0);
 
     defineProperty_default()(assertThisInitialized_default()(_this), "chunkState", void 0);
 
@@ -3024,6 +3032,9 @@ var s3_upload_S3Upload = /*#__PURE__*/function (_BaseUpload) {
     _this.chunks = [];
     _this.chunkState = [];
     _this.uploading = [];
+    _this.onError = undefined;
+    _this.onProgress = undefined;
+    _this.onSuccess = undefined;
 
     _this.initChunks();
 
@@ -3036,26 +3047,6 @@ var s3_upload_S3Upload = /*#__PURE__*/function (_BaseUpload) {
   }
 
   createClass_default()(S3Upload, [{
-    key: "start",
-    value: function start() {
-      this.isPaused = false;
-
-      if (this.uploadId) {
-        void this.resumeUpload();
-      } else {
-        void this.createUpload();
-      }
-    }
-  }, {
-    key: "pause",
-    value: function pause() {
-      var inProgress = this.uploading.slice();
-      inProgress.forEach(function (xhr) {
-        xhr.abort();
-      });
-      this.isPaused = true;
-    }
-  }, {
     key: "abort",
     value: function abort() {
       var _this2 = this;
@@ -3076,6 +3067,30 @@ var s3_upload_S3Upload = /*#__PURE__*/function (_BaseUpload) {
       this.uploading = [];
     }
   }, {
+    key: "delete",
+    value: function () {
+      var _delete2 = asyncToGenerator_default()( /*#__PURE__*/regenerator_default.a.mark(function _callee() {
+        return regenerator_default.a.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                return _context.abrupt("return", Promise.resolve());
+
+              case 1:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee);
+      }));
+
+      function _delete() {
+        return _delete2.apply(this, arguments);
+      }
+
+      return _delete;
+    }()
+  }, {
     key: "getInitialFile",
     value: function getInitialFile() {
       return {
@@ -3085,6 +3100,31 @@ var s3_upload_S3Upload = /*#__PURE__*/function (_BaseUpload) {
         size: this.file.size,
         original_name: this.file.name
       };
+    }
+  }, {
+    key: "getSize",
+    value: function getSize() {
+      return this.file.size;
+    }
+  }, {
+    key: "pause",
+    value: function pause() {
+      var inProgress = this.uploading.slice();
+      inProgress.forEach(function (xhr) {
+        xhr.abort();
+      });
+      this.isPaused = true;
+    }
+  }, {
+    key: "start",
+    value: function start() {
+      this.isPaused = false;
+
+      if (this.uploadId) {
+        void this.resumeUpload();
+      } else {
+        void this.createUpload();
+      }
     }
   }, {
     key: "initChunks",
@@ -3131,7 +3171,7 @@ var s3_upload_S3Upload = /*#__PURE__*/function (_BaseUpload) {
 
         _this3.uploadParts();
       }).catch(function (err) {
-        _this3.onError(err);
+        _this3.handleError(err);
       });
     }
   }, {
@@ -3169,7 +3209,7 @@ var s3_upload_S3Upload = /*#__PURE__*/function (_BaseUpload) {
 
         _this4.uploadParts();
       }).catch(function (err) {
-        _this4.onError(err);
+        _this4.handleError(err);
       });
     }
   }, {
@@ -3240,7 +3280,7 @@ var s3_upload_S3Upload = /*#__PURE__*/function (_BaseUpload) {
 
         _this6.uploadPartBytes(index, url);
       }, function (err) {
-        _this6.onError(err);
+        _this6.handleError(err);
       });
     }
   }, {
@@ -3248,11 +3288,11 @@ var s3_upload_S3Upload = /*#__PURE__*/function (_BaseUpload) {
     value: function onPartProgress(index, sent) {
       this.chunkState[index].uploaded = sent;
 
-      if (this.options.onProgress) {
+      if (this.onProgress) {
         var totalUploaded = this.chunkState.reduce(function (n, c) {
           return n + c.uploaded;
         }, 0);
-        this.options.onProgress(totalUploaded, this.file.size);
+        this.onProgress(totalUploaded, this.file.size);
       }
     }
   }, {
@@ -3297,7 +3337,7 @@ var s3_upload_S3Upload = /*#__PURE__*/function (_BaseUpload) {
         _this7.chunkState[index].busy = false;
 
         if (target.status < 200 || target.status >= 300) {
-          _this7.onError(new Error("Non 2xx"));
+          _this7.handleError(new Error("Non 2xx"));
 
           return;
         }
@@ -3308,7 +3348,7 @@ var s3_upload_S3Upload = /*#__PURE__*/function (_BaseUpload) {
         var etag = target.getResponseHeader("ETag");
 
         if (etag === null) {
-          _this7.onError(new Error("AwsS3/Multipart: Could not read the ETag header. This likely means CORS is not configured correctly on the S3 Bucket. See https://uppy.io/docs/aws-s3-multipart#S3-Bucket-Configuration for instructions."));
+          _this7.handleError(new Error("AwsS3/Multipart: Could not read the ETag header. This likely means CORS is not configured correctly on the S3 Bucket. See https://uppy.io/docs/aws-s3-multipart#S3-Bucket-Configuration for instructions."));
 
           return;
         }
@@ -3320,7 +3360,7 @@ var s3_upload_S3Upload = /*#__PURE__*/function (_BaseUpload) {
         _this7.chunkState[index].busy = false;
         var error = new Error("Unknown error"); // error.source = ev.target
 
-        _this7.onError(error);
+        _this7.handleError(error);
       });
       xhr.send(body);
     }
@@ -3343,19 +3383,19 @@ var s3_upload_S3Upload = /*#__PURE__*/function (_BaseUpload) {
         uploadId: this.uploadId,
         parts: this.parts,
         endpoint: this.endpoint
-      }).then(function (result) {
-        if (_this8.options.onSuccess) {
-          _this8.options.onSuccess(result);
+      }).then(function () {
+        if (_this8.onSuccess) {
+          _this8.onSuccess();
         }
       }, function (err) {
-        _this8.onError(err);
+        _this8.handleError(err);
       });
     }
   }, {
-    key: "onError",
-    value: function onError(error) {
-      if (this.options.onError) {
-        this.options.onError(error);
+    key: "handleError",
+    value: function handleError(error) {
+      if (this.onError) {
+        this.onError(error);
       } else {
         throw error;
       }
@@ -3456,6 +3496,35 @@ var uploaded_file_BaseUploadedFile = /*#__PURE__*/function (_BaseUpload) {
     key: "abort",
     value: function abort() {//
     }
+  }, {
+    key: "delete",
+    value: function () {
+      var _delete2 = asyncToGenerator_default()( /*#__PURE__*/regenerator_default.a.mark(function _callee() {
+        return regenerator_default.a.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                return _context.abrupt("return", Promise.resolve());
+
+              case 1:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee);
+      }));
+
+      function _delete() {
+        return _delete2.apply(this, arguments);
+      }
+
+      return _delete;
+    }()
+  }, {
+    key: "getSize",
+    value: function getSize() {
+      return this.size;
+    }
   }]);
 
   return BaseUploadedFile;
@@ -3546,24 +3615,24 @@ var uploaded_file_UploadedTusFile = /*#__PURE__*/function (_BaseUploadedFile3) {
   createClass_default()(UploadedTusFile, [{
     key: "delete",
     value: function () {
-      var _delete2 = asyncToGenerator_default()( /*#__PURE__*/regenerator_default.a.mark(function _callee() {
-        return regenerator_default.a.wrap(function _callee$(_context) {
+      var _delete3 = asyncToGenerator_default()( /*#__PURE__*/regenerator_default.a.mark(function _callee2() {
+        return regenerator_default.a.wrap(function _callee2$(_context2) {
           while (1) {
-            switch (_context.prev = _context.next) {
+            switch (_context2.prev = _context2.next) {
               case 0:
-                _context.next = 2;
+                _context2.next = 2;
                 return deleteUpload(this.url);
 
               case 2:
               case "end":
-                return _context.stop();
+                return _context2.stop();
             }
           }
-        }, _callee, this);
+        }, _callee2, this);
       }));
 
       function _delete() {
-        return _delete2.apply(this, arguments);
+        return _delete3.apply(this, arguments);
       }
 
       return _delete;
@@ -5474,15 +5543,34 @@ var tus_upload_TusUpload = /*#__PURE__*/function (_BaseUpload) {
       uploadIndex: uploadIndex
     });
 
+    defineProperty_default()(assertThisInitialized_default()(_this), "onError", void 0);
+
+    defineProperty_default()(assertThisInitialized_default()(_this), "onProgress", void 0);
+
     defineProperty_default()(assertThisInitialized_default()(_this), "onSuccess", void 0);
 
     defineProperty_default()(assertThisInitialized_default()(_this), "upload", void 0);
 
-    defineProperty_default()(assertThisInitialized_default()(_this), "handleSucces", function () {
-      _this.onSuccess(_this.upload.file.size);
+    defineProperty_default()(assertThisInitialized_default()(_this), "handleError", function (error) {
+      if (_this.onError) {
+        _this.onError(error);
+      } else {
+        throw error;
+      }
     });
 
-    _this.onSuccess = options.onSuccess;
+    defineProperty_default()(assertThisInitialized_default()(_this), "handleProgress", function (bytesUploaded, bytesTotal) {
+      if (_this.onProgress) {
+        _this.onProgress(bytesUploaded, bytesTotal);
+      }
+    });
+
+    defineProperty_default()(assertThisInitialized_default()(_this), "handleSucces", function () {
+      if (_this.onSuccess) {
+        _this.onSuccess();
+      }
+    });
+
     _this.upload = new browser_Upload(file, {
       chunkSize: options.chunkSize,
       endpoint: options.uploadUrl,
@@ -5491,11 +5579,14 @@ var tus_upload_TusUpload = /*#__PURE__*/function (_BaseUpload) {
         filename: file.name,
         formId: options.formId
       },
-      onError: options.onError,
-      onProgress: options.onProgress,
+      onError: _this.handleError,
+      onProgress: _this.handleProgress,
       onSuccess: _this.handleSucces,
       retryDelays: options.retryDelays || [0, 1000, 3000, 5000]
     });
+    _this.onError = undefined;
+    _this.onProgress = undefined;
+    _this.onSuccess = undefined;
     return _this;
   }
 
@@ -5505,38 +5596,25 @@ var tus_upload_TusUpload = /*#__PURE__*/function (_BaseUpload) {
       void this.upload.abort(true);
     }
   }, {
-    key: "start",
-    value: function start() {
-      this.upload.start();
-    }
-  }, {
-    key: "getUrl",
-    value: function getUrl() {
-      return this.upload.url;
-    }
-  }, {
     key: "delete",
     value: function () {
       var _delete2 = asyncToGenerator_default()( /*#__PURE__*/regenerator_default.a.mark(function _callee() {
-        var url;
         return regenerator_default.a.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                url = this.getUrl();
-
-                if (url) {
-                  _context.next = 3;
+                if (this.upload.url) {
+                  _context.next = 2;
                   break;
                 }
 
                 return _context.abrupt("return", Promise.resolve());
 
-              case 3:
-                _context.next = 5;
-                return deleteUpload(url);
+              case 2:
+                _context.next = 4;
+                return deleteUpload(this.upload.url);
 
-              case 5:
+              case 4:
               case "end":
                 return _context.stop();
             }
@@ -5550,6 +5628,16 @@ var tus_upload_TusUpload = /*#__PURE__*/function (_BaseUpload) {
 
       return _delete;
     }()
+  }, {
+    key: "getSize",
+    value: function getSize() {
+      return this.upload.file.size;
+    }
+  }, {
+    key: "start",
+    value: function start() {
+      this.upload.start();
+    }
   }]);
 
   return TusUpload;
@@ -5797,23 +5885,21 @@ var file_field_FileField = /*#__PURE__*/function () {
       }
     });
 
-    defineProperty_default()(this, "handleSuccess", function (upload, uploadedSize) {
+    defineProperty_default()(this, "handleSuccess", function (upload) {
       var renderer = _this.renderer;
 
       _this.updateS3UploadedInput();
 
       renderer.clearInput();
-      renderer.setSuccess(upload.uploadIndex, uploadedSize);
+      renderer.setSuccess(upload.uploadIndex, upload.getSize());
       upload.status = "done";
       var onSuccess = _this.callbacks.onSuccess;
       var element = document.getElementsByClassName("dff-file-id-".concat(upload.uploadIndex))[0];
 
       _this.emitEvent("uploadComplete", element, upload);
 
-      if (onSuccess) {
-        if (upload instanceof tus_upload_TusUpload) {
-          onSuccess(upload);
-        }
+      if (onSuccess && upload.type === "tus") {
+        onSuccess(upload);
       }
     });
 
@@ -5913,20 +5999,9 @@ var file_field_FileField = /*#__PURE__*/function () {
                 return this.removeExistingUpload(existingUpload);
 
               case 8:
-                upload = null;
-
                 if (s3UploadDir != null) {
                   upload = new s3_upload(file, newUploadIndex, {
                     endpoint: uploadUrl,
-                    onError: function onError(error) {
-                      return _this3.handleError(upload, error);
-                    },
-                    onProgress: function onProgress(bytesUploaded, bytesTotal) {
-                      return _this3.handleProgress(upload, bytesUploaded, bytesTotal);
-                    },
-                    onSuccess: function onSuccess() {
-                      return _this3.handleSuccess(upload, upload.file.size);
-                    },
                     s3UploadDir: s3UploadDir
                   });
                 } else {
@@ -5934,26 +6009,29 @@ var file_field_FileField = /*#__PURE__*/function () {
                     chunkSize: this.chunkSize,
                     fieldName: fieldName,
                     formId: formId,
-                    onError: function onError(error) {
-                      return _this3.handleError(upload, error);
-                    },
-                    onProgress: function onProgress(bytesUploaded, bytesTotal) {
-                      return _this3.handleProgress(upload, bytesUploaded, bytesTotal);
-                    },
-                    onSuccess: function onSuccess(size) {
-                      return _this3.handleSuccess(upload, size);
-                    },
                     retryDelays: this.retryDelays,
                     uploadUrl: uploadUrl
                   });
                 }
 
+                upload.onError = function (error) {
+                  return _this3.handleError(upload, error);
+                };
+
+                upload.onProgress = function (bytesUploaded, bytesTotal) {
+                  return _this3.handleProgress(upload, bytesUploaded, bytesTotal);
+                };
+
+                upload.onSuccess = function () {
+                  return _this3.handleSuccess(upload);
+                };
+
                 upload.start();
-                element = renderer.addNewUpload(fileName, newUploadIndex);
                 this.uploads.push(upload);
+                element = renderer.addNewUpload(fileName, newUploadIndex);
                 this.emitEvent("addUpload", element, upload);
 
-              case 14:
+              case 16:
               case "end":
                 return _context2.stop();
             }
@@ -5985,7 +6063,7 @@ var file_field_FileField = /*#__PURE__*/function () {
     key: "removeExistingUpload",
     value: function () {
       var _removeExistingUpload = asyncToGenerator_default()( /*#__PURE__*/regenerator_default.a.mark(function _callee3(upload) {
-        var element, deleted;
+        var element;
         return regenerator_default.a.wrap(function _callee3$(_context3) {
           while (1) {
             switch (_context3.prev = _context3.next) {
@@ -6002,39 +6080,41 @@ var file_field_FileField = /*#__PURE__*/function () {
                 }
 
                 upload.abort();
-                _context3.next = 12;
+                _context3.next = 17;
                 break;
 
               case 6:
-                if (!(upload.status === "done" && (upload.type === "tus" || upload.type === "uploadedTus"))) {
-                  _context3.next = 12;
+                if (!(upload.status === "done")) {
+                  _context3.next = 17;
                   break;
                 }
 
-                _context3.next = 9;
-                return this.deleteFromServer(upload || uploaded_file_UploadedTusFile);
+                this.renderer.disableDelete(upload.uploadIndex);
+                _context3.prev = 8;
+                _context3.next = 11;
+                return upload.delete();
 
-              case 9:
-                deleted = _context3.sent;
+              case 11:
+                _context3.next = 17;
+                break;
 
-                if (deleted) {
-                  _context3.next = 12;
-                  break;
-                }
-
+              case 13:
+                _context3.prev = 13;
+                _context3.t0 = _context3["catch"](8);
+                this.renderer.setDeleteFailed(upload.uploadIndex);
                 return _context3.abrupt("return");
 
-              case 12:
+              case 17:
                 this.removeUploadFromList(upload);
                 this.updateS3UploadedInput();
                 this.updatePlaceholderInput();
 
-              case 15:
+              case 20:
               case "end":
                 return _context3.stop();
             }
           }
-        }, _callee3, this);
+        }, _callee3, this, [[8, 13]]);
       }));
 
       function removeExistingUpload(_x3) {
@@ -6055,42 +6135,6 @@ var file_field_FileField = /*#__PURE__*/function () {
         onDelete(upload);
       }
     }
-  }, {
-    key: "deleteFromServer",
-    value: function () {
-      var _deleteFromServer = asyncToGenerator_default()( /*#__PURE__*/regenerator_default.a.mark(function _callee4(upload) {
-        return regenerator_default.a.wrap(function _callee4$(_context4) {
-          while (1) {
-            switch (_context4.prev = _context4.next) {
-              case 0:
-                this.renderer.disableDelete(upload.uploadIndex);
-                _context4.prev = 1;
-                _context4.next = 4;
-                return upload.delete();
-
-              case 4:
-                return _context4.abrupt("return", true);
-
-              case 7:
-                _context4.prev = 7;
-                _context4.t0 = _context4["catch"](1);
-                this.renderer.setDeleteFailed(upload.uploadIndex);
-                return _context4.abrupt("return", false);
-
-              case 11:
-              case "end":
-                return _context4.stop();
-            }
-          }
-        }, _callee4, this, [[1, 7]]);
-      }));
-
-      function deleteFromServer(_x4) {
-        return _deleteFromServer.apply(this, arguments);
-      }
-
-      return deleteFromServer;
-    }()
   }, {
     key: "handleCancel",
     value: function handleCancel(upload) {
