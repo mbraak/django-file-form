@@ -7,7 +7,7 @@ interface UploadParameters {
   uploadIndex: number;
 }
 
-class BaseUpload {
+abstract class BaseUpload {
   name: string;
   status: UploadStatus;
   type: string;
@@ -19,6 +19,8 @@ class BaseUpload {
     this.type = type;
     this.uploadIndex = uploadIndex;
   }
+
+  public abstract abort(): void;
 }
 
 export default BaseUpload;

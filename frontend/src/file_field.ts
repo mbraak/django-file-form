@@ -240,43 +240,29 @@ class FileField {
   }
 
   async removeExistingUpload(upload: BaseUpload): Promise<void> {
-    if (upload.status === "uploading") {
-      void (upload as TusUpload).abort();
-    }
-
     const element = this.renderer.findFileDiv(upload.uploadIndex);
 
     if (element) {
       this.emitEvent("removeUpload", element, upload);
     }
 
-    if (
-      upload instanceof TusUpload ||
-      upload instanceof S3Upload ||
-      (upload as UploadedTusFile).url
+    if (upload.status === "uploading") {
+      upload.abort();
+    } else if (
+      upload.status === "done" &&
+      (upload.type === "tus" || upload.type === "uploadedTus")
     ) {
-      switch (upload.status) {
-        case "done": {
-          if (upload instanceof S3Upload) {
-            this.deleteS3Uploaded(upload);
-          } else if (
-            upload instanceof TusUpload ||
-            upload instanceof UploadedTusFile
-          ) {
-            await this.deleteFromServer(upload);
-          }
-          break;
-        }
-
-        case "error":
-        case "uploading": {
-          this.removeUploadFromList(upload);
-          break;
-        }
+      const deleted = await this.deleteFromServer(
+        (upload as TusUpload) || UploadedTusFile
+      );
+      if (!deleted) {
+        return;
       }
-    } else if (upload.type === "placeholder") {
-      this.deletePlaceholder(upload);
     }
+
+    this.removeUploadFromList(upload);
+    this.updateS3UploadedInput();
+    this.updatePlaceholderInput();
   }
 
   onChange = (e: Event): void => {
@@ -384,35 +370,23 @@ class FileField {
     }
   }
 
-  async deleteFromServer(upload: TusUpload | UploadedTusFile): Promise<void> {
+  async deleteFromServer(
+    upload: TusUpload | UploadedTusFile
+  ): Promise<boolean> {
     this.renderer.disableDelete(upload.uploadIndex);
 
     try {
       await upload.delete();
-      this.removeUploadFromList(upload);
+      return true;
     } catch {
       this.renderer.setDeleteFailed(upload.uploadIndex);
+      return false;
     }
-  }
-
-  deletePlaceholder(upload: BaseUpload): void {
-    this.removeUploadFromList(upload);
-    this.updatePlaceholderInput();
-  }
-
-  deleteS3Uploaded(upload: BaseUpload): void {
-    this.removeUploadFromList(upload);
-    this.updateS3UploadedInput();
   }
 
   handleCancel(upload: BaseUpload): void {
-    if (upload instanceof TusUpload) {
-      void upload.abort();
-      this.removeUploadFromList(upload);
-    } else if (upload instanceof S3Upload) {
-      upload.abort();
-      this.removeUploadFromList(upload);
-    }
+    upload.abort();
+    this.removeUploadFromList(upload);
   }
 
   initDropArea(container: Element, inputAccept: string): void {

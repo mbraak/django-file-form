@@ -34,6 +34,10 @@ export class BaseUploadedFile extends BaseUpload {
     this.id = id;
     this.size = size;
   }
+
+  public abort(): void {
+    //
+  }
 }
 
 class PlaceholderFile extends BaseUploadedFile {

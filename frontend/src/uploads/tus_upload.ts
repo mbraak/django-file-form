@@ -19,7 +19,6 @@ export default class TusUpload extends BaseUpload {
 
   constructor(file: File, uploadIndex: number, options: Options) {
     super({ name: file.name, status: "uploading", type: "tus", uploadIndex });
-    console.log("TusUpload", this.type);
 
     this.onSuccess = options.onSuccess;
 
