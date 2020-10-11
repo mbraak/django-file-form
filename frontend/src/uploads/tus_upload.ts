@@ -8,13 +8,13 @@ interface Options {
   formId: string;
   onError: (error: Error) => void;
   onProgress: (bytesUploaded: number, bytesTotal: number) => void;
-  onSuccess: () => void;
   retryDelays: number[] | null;
   uploadUrl: string;
 }
 
 export default class TusUpload extends BaseUpload {
-  upload: Upload;
+  public onSuccess?: () => void;
+  private upload: Upload;
 
   constructor(file: File, uploadIndex: number, options: Options) {
     super({ name: file.name, status: "uploading", type: "tus", uploadIndex });
@@ -29,7 +29,7 @@ export default class TusUpload extends BaseUpload {
       },
       onError: options.onError,
       onProgress: options.onProgress,
-      onSuccess: options.onSuccess,
+      onSuccess: this.handleSucces,
       retryDelays: options.retryDelays || [0, 1000, 3000, 5000]
     });
   }
@@ -53,4 +53,10 @@ export default class TusUpload extends BaseUpload {
   public start(): void {
     this.upload.start();
   }
+
+  private handleSucces = () => {
+    if (this.onSuccess) {
+      this.onSuccess();
+    }
+  };
 }

@@ -33,25 +33,26 @@ interface Options {
   onPartComplete?: (part: Part) => void;
   onProgress?: (uploaded: number, total: number) => void;
   onStart?: (multipartUpload: MultipartUpload) => void;
-  onSuccess?: (locationInfo: LocationInfo) => void;
   s3UploadDir: string;
   endpoint: string;
   uploadId?: string;
 }
 
 class S3Upload extends BaseUpload {
-  chunkState: ChunkState[];
-  chunks: Blob[];
-  createdPromise: Promise<MultipartUpload>;
-  endpoint: string;
-  file: File;
-  isPaused: boolean;
-  key: string | null;
-  options: Options;
-  parts: Part[];
-  s3UploadDir: string;
-  uploadId: string | null;
-  uploading: XMLHttpRequest[];
+  public onSuccess?: () => void;
+
+  private chunkState: ChunkState[];
+  private chunks: Blob[];
+  private createdPromise: Promise<MultipartUpload>;
+  private endpoint: string;
+  private file: File;
+  private isPaused: boolean;
+  private key: string | null;
+  private options: Options;
+  private parts: Part[];
+  private s3UploadDir: string;
+  private uploadId: string | null;
+  private uploading: XMLHttpRequest[];
 
   constructor(file: File, uploadIndex: number, options: Options) {
     super({ name: file.name, status: "uploading", type: "s3", uploadIndex });
@@ -389,9 +390,9 @@ class S3Upload extends BaseUpload {
       parts: this.parts,
       endpoint: this.endpoint
     }).then(
-      result => {
-        if (this.options.onSuccess) {
-          this.options.onSuccess(result);
+      () => {
+        if (this.onSuccess) {
+          this.onSuccess();
         }
       },
       err => {

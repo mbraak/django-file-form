@@ -196,11 +196,9 @@ class FileField {
     if (s3UploadDir != null) {
       upload = new S3Upload(file, newUploadIndex, {
         endpoint: uploadUrl,
-        onError: (error: Error): void =>
-          this.handleError(upload as S3Upload, error),
+        onError: (error: Error): void => this.handleError(upload, error),
         onProgress: (bytesUploaded: number, bytesTotal: number): void =>
           this.handleProgress(upload as S3Upload, bytesUploaded, bytesTotal),
-        onSuccess: (): void => this.handleSuccess(upload),
         s3UploadDir
       });
     } else {
@@ -208,16 +206,15 @@ class FileField {
         chunkSize: this.chunkSize,
         fieldName,
         formId,
-        onError: (error: Error): void =>
-          this.handleError(upload as TusUpload, error),
+        onError: (error: Error): void => this.handleError(upload, error),
         onProgress: (bytesUploaded: number, bytesTotal: number): void =>
           this.handleProgress(upload as TusUpload, bytesUploaded, bytesTotal),
-        onSuccess: (): void => this.handleSuccess(upload),
         retryDelays: this.retryDelays,
         uploadUrl
       });
     }
 
+    upload.onSuccess = () => this.handleSuccess(upload);
     upload.start();
 
     const element = renderer.addNewUpload(fileName, newUploadIndex);
