@@ -20,8 +20,6 @@ interface BaseUploadedFileParameters {
 
 export class BaseUploadedFile extends BaseUpload {
   id: string;
-  // true for placeholder, false for S3, undefined for regular files
-  placeholder?: boolean | undefined;
   size: number;
 
   constructor({
@@ -47,8 +45,6 @@ class PlaceholderFile extends BaseUploadedFile {
       type: "placeholder",
       uploadIndex
     });
-
-    this.placeholder = true;
   }
 }
 
@@ -65,7 +61,6 @@ export class UploadedS3File extends BaseUploadedFile {
     });
 
     this.key = initialFile.name;
-    this.placeholder = false;
   }
 
   getInitialFile(): InitialFile {
