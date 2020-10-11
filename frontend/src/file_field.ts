@@ -12,7 +12,6 @@ import EventEmitter from "eventemitter3";
 import {
   createUploadedFile,
   InitialFile,
-  UploadedTusFile,
   UploadedS3File
 } from "./uploads/uploaded_file";
 import TusUpload from "./uploads/tus_upload";
