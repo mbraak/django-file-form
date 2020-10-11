@@ -8,19 +8,16 @@ interface Options {
   formId: string;
   onError: (error: Error) => void;
   onProgress: (bytesUploaded: number, bytesTotal: number) => void;
-  onSuccess: (size: number) => void;
+  onSuccess: () => void;
   retryDelays: number[] | null;
   uploadUrl: string;
 }
 
 export default class TusUpload extends BaseUpload {
-  onSuccess: (size: number) => void;
   upload: Upload;
 
   constructor(file: File, uploadIndex: number, options: Options) {
     super({ name: file.name, status: "uploading", type: "tus", uploadIndex });
-
-    this.onSuccess = options.onSuccess;
 
     this.upload = new Upload(file, {
       chunkSize: options.chunkSize,
@@ -32,17 +29,13 @@ export default class TusUpload extends BaseUpload {
       },
       onError: options.onError,
       onProgress: options.onProgress,
-      onSuccess: this.handleSucces,
+      onSuccess: options.onSuccess,
       retryDelays: options.retryDelays || [0, 1000, 3000, 5000]
     });
   }
 
   public abort(): void {
     void this.upload.abort(true);
-  }
-
-  public start(): void {
-    this.upload.start();
   }
 
   public async delete(): Promise<void> {
@@ -53,7 +46,11 @@ export default class TusUpload extends BaseUpload {
     await deleteUpload(this.upload.url);
   }
 
-  private handleSucces = (): void => {
-    this.onSuccess((this.upload.file as File).size);
-  };
+  public getSize(): number {
+    return (this.upload.file as File).size;
+  }
+
+  public start(): void {
+    this.upload.start();
+  }
 }

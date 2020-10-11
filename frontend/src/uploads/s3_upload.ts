@@ -84,23 +84,6 @@ class S3Upload extends BaseUpload {
     this.createdPromise.catch(() => ({})); // silence uncaught rejection warning
   }
 
-  public start(): void {
-    this.isPaused = false;
-    if (this.uploadId) {
-      void this.resumeUpload();
-    } else {
-      void this.createUpload();
-    }
-  }
-
-  public pause(): void {
-    const inProgress = this.uploading.slice();
-    inProgress.forEach(xhr => {
-      xhr.abort();
-    });
-    this.isPaused = true;
-  }
-
   public abort(): void {
     this.uploading.slice().forEach(xhr => {
       xhr.abort();
@@ -122,6 +105,10 @@ class S3Upload extends BaseUpload {
     this.uploading = [];
   }
 
+  public async delete(): Promise<void> {
+    return Promise.resolve();
+  }
+
   public getInitialFile(): InitialFile {
     return {
       id: this.uploadId || "",
@@ -132,8 +119,25 @@ class S3Upload extends BaseUpload {
     };
   }
 
-  public async delete(): Promise<void> {
-    return Promise.resolve();
+  public getSize(): number {
+    return this.file.size;
+  }
+
+  public pause(): void {
+    const inProgress = this.uploading.slice();
+    inProgress.forEach(xhr => {
+      xhr.abort();
+    });
+    this.isPaused = true;
+  }
+
+  public start(): void {
+    this.isPaused = false;
+    if (this.uploadId) {
+      void this.resumeUpload();
+    } else {
+      void this.createUpload();
+    }
   }
 
   private initChunks(): void {

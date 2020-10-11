@@ -191,7 +191,7 @@ class FileField {
       await this.removeExistingUpload(existingUpload);
     }
 
-    let upload: S3Upload | TusUpload | null = null;
+    let upload: S3Upload | TusUpload;
 
     if (s3UploadDir != null) {
       upload = new S3Upload(file, newUploadIndex, {
@@ -200,11 +200,7 @@ class FileField {
           this.handleError(upload as S3Upload, error),
         onProgress: (bytesUploaded: number, bytesTotal: number): void =>
           this.handleProgress(upload as S3Upload, bytesUploaded, bytesTotal),
-        onSuccess: (): void =>
-          this.handleSuccess(
-            upload as S3Upload,
-            (upload as S3Upload).file.size
-          ),
+        onSuccess: (): void => this.handleSuccess(upload, upload.getSize()),
         s3UploadDir
       });
     } else {
@@ -216,8 +212,7 @@ class FileField {
           this.handleError(upload as TusUpload, error),
         onProgress: (bytesUploaded: number, bytesTotal: number): void =>
           this.handleProgress(upload as TusUpload, bytesUploaded, bytesTotal),
-        onSuccess: (size: number): void =>
-          this.handleSuccess(upload as TusUpload, size),
+        onSuccess: (): void => this.handleSuccess(upload, upload.getSize()),
         retryDelays: this.retryDelays,
         uploadUrl
       });
@@ -337,6 +332,7 @@ class FileField {
 
   handleSuccess = (upload: BaseUpload, uploadedSize: number): void => {
     const { renderer } = this;
+
     this.updateS3UploadedInput();
     renderer.clearInput();
     renderer.setSuccess(upload.uploadIndex, uploadedSize);
@@ -349,10 +345,8 @@ class FileField {
     )[0] as HTMLElement;
     this.emitEvent("uploadComplete", element, upload);
 
-    if (onSuccess) {
-      if (upload instanceof TusUpload) {
-        onSuccess(upload);
-      }
+    if (onSuccess && upload.type === "tus") {
+      onSuccess(upload);
     }
   };
 
