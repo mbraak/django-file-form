@@ -200,7 +200,7 @@ class FileField {
           this.handleError(upload as S3Upload, error),
         onProgress: (bytesUploaded: number, bytesTotal: number): void =>
           this.handleProgress(upload as S3Upload, bytesUploaded, bytesTotal),
-        onSuccess: (): void => this.handleSuccess(upload, upload.getSize()),
+        onSuccess: (): void => this.handleSuccess(upload),
         s3UploadDir
       });
     } else {
@@ -212,7 +212,7 @@ class FileField {
           this.handleError(upload as TusUpload, error),
         onProgress: (bytesUploaded: number, bytesTotal: number): void =>
           this.handleProgress(upload as TusUpload, bytesUploaded, bytesTotal),
-        onSuccess: (): void => this.handleSuccess(upload, upload.getSize()),
+        onSuccess: (): void => this.handleSuccess(upload),
         retryDelays: this.retryDelays,
         uploadUrl
       });
@@ -330,12 +330,12 @@ class FileField {
     }
   };
 
-  handleSuccess = (upload: BaseUpload, uploadedSize: number): void => {
+  handleSuccess = (upload: BaseUpload): void => {
     const { renderer } = this;
 
     this.updateS3UploadedInput();
     renderer.clearInput();
-    renderer.setSuccess(upload.uploadIndex, uploadedSize);
+    renderer.setSuccess(upload.uploadIndex, upload.getSize());
     upload.status = "done";
 
     const { onSuccess } = this.callbacks;

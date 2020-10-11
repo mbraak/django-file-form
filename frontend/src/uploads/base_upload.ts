@@ -22,6 +22,7 @@ abstract class BaseUpload {
 
   public abstract abort(): void;
   public abstract async delete(): Promise<void>;
+  public abstract getSize(): number;
 }
 
 export default BaseUpload;

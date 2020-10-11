@@ -42,6 +42,10 @@ export class BaseUploadedFile extends BaseUpload {
   public async delete(): Promise<void> {
     return Promise.resolve();
   }
+
+  public getSize(): number {
+    return this.size;
+  }
 }
 
 class PlaceholderFile extends BaseUploadedFile {
