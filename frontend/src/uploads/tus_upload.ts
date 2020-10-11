@@ -45,18 +45,12 @@ export default class TusUpload extends BaseUpload {
     this.upload.start();
   }
 
-  public getUrl(): string | null {
-    return this.upload.url;
-  }
-
   public async delete(): Promise<void> {
-    const url = this.getUrl();
-
-    if (!url) {
+    if (!this.upload.url) {
       return Promise.resolve();
     }
 
-    await deleteUpload(url);
+    await deleteUpload(this.upload.url);
   }
 
   private handleSucces = (): void => {

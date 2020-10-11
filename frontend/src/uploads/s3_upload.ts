@@ -132,6 +132,10 @@ class S3Upload extends BaseUpload {
     };
   }
 
+  public async delete(): Promise<void> {
+    return Promise.resolve();
+  }
+
   private initChunks(): void {
     const chunks: Blob[] = [];
     const desiredChunkSize = getChunkSize(this.file);

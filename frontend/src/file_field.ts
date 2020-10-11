@@ -248,14 +248,13 @@ class FileField {
 
     if (upload.status === "uploading") {
       upload.abort();
-    } else if (
-      upload.status === "done" &&
-      (upload.type === "tus" || upload.type === "uploadedTus")
-    ) {
-      const deleted = await this.deleteFromServer(
-        (upload as TusUpload) || UploadedTusFile
-      );
-      if (!deleted) {
+    } else if (upload.status === "done") {
+      this.renderer.disableDelete(upload.uploadIndex);
+
+      try {
+        await upload.delete();
+      } catch {
+        this.renderer.setDeleteFailed(upload.uploadIndex);
         return;
       }
     }
@@ -367,20 +366,6 @@ class FileField {
 
     if (onDelete) {
       onDelete(upload);
-    }
-  }
-
-  async deleteFromServer(
-    upload: TusUpload | UploadedTusFile
-  ): Promise<boolean> {
-    this.renderer.disableDelete(upload.uploadIndex);
-
-    try {
-      await upload.delete();
-      return true;
-    } catch {
-      this.renderer.setDeleteFailed(upload.uploadIndex);
-      return false;
     }
   }
 

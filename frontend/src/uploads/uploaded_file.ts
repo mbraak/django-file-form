@@ -38,6 +38,10 @@ export class BaseUploadedFile extends BaseUpload {
   public abort(): void {
     //
   }
+
+  public async delete(): Promise<void> {
+    return Promise.resolve();
+  }
 }
 
 class PlaceholderFile extends BaseUploadedFile {

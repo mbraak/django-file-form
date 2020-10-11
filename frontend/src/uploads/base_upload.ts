@@ -21,6 +21,7 @@ abstract class BaseUpload {
   }
 
   public abstract abort(): void;
+  public abstract async delete(): Promise<void>;
 }
 
 export default BaseUpload;
