@@ -464,37 +464,36 @@ class FileField {
   }
 
   updatePlaceholderInput(): void {
-    const placeholdersInfo = this.uploads.filter(
-      upload =>
-        upload &&
-        !(upload instanceof TusUpload) &&
-        !(upload instanceof S3Upload) &&
-        (upload as BaseUploadedFile).placeholder
-    ) as BaseUploadedFile[];
-
     const input = findInput(
       this.form,
       getPlaceholderFieldName(this.fieldName, this.prefix),
       this.prefix
     );
-    if (input) {
-      input.value = JSON.stringify(placeholdersInfo);
+    if (!input) {
+      return;
     }
+
+    const placeholdersInfo = this.uploads.filter(
+      upload => upload.type === "placeholder"
+    );
+    input.value = JSON.stringify(placeholdersInfo);
   }
 
   updateS3UploadedInput(): void {
-    const uploadedInfo: InitialFile[] = this.uploads
-      .filter(upload => upload.type === "s3" || upload.type === "uploadedS3")
-      .map(upload=> (upload as S3Upload | UploadedS3File).getInitialFile());
-
     const input = findInput(
       this.form,
       getS3UploadedFieldName(this.fieldName, this.prefix),
       this.prefix
     );
-    if (input) {
-      input.value = JSON.stringify(uploadedInfo);
+    if (!input) {
+      return;
     }
+
+    const uploadedInfo: InitialFile[] = this.uploads
+      .filter(upload => upload.type === "s3" || upload.type === "uploadedS3")
+      .map(upload => (upload as S3Upload | UploadedS3File).getInitialFile());
+
+    input.value = JSON.stringify(uploadedInfo);
   }
 
   getMetaDataField(): HTMLElement | null {
