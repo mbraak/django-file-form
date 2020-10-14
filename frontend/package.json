@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "lint": "eslint src/**/*.ts",
-    "build": "webpack --mode production; SKIP_COMPRESS_JS=true webpack --mode production; COVERAGE=true webpack --mode production",
-    "sass": "node-sass style/file_form.scss -o ../django_file_form/static/file_form/",
+    "build": "yarn run sass; webpack --mode production; SKIP_COMPRESS_JS=true webpack --mode production; COVERAGE=true webpack --mode production",
+    "sass": "sass --no-source-map style/file_form.scss ../django_file_form/static/file_form/file_form.css",
     "tsc": "tsc --noEmit",
     "watch": "webpack --mode development --watch"
   },
@@ -37,7 +37,7 @@
     "eslint-plugin-import": "^2.21.2",
     "eslint-plugin-jsx-a11y": "^6.3.1",
     "eslint-plugin-react": "^7.20.0",
-    "node-sass": "^4.13.1",
+    "sass": "^1.27.0",
     "typescript": "^4.0.2",
     "webpack": "^4.41.6",
     "webpack-cli": "^3.3.12"
