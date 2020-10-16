@@ -7,8 +7,7 @@ from django_file_form.models import UploadedFile
 from django_file_form_example.base_live_testcase import BaseLiveTestCase
 from django_file_form_example.models import Example, Example2
 from django_file_form_example.page import Page
-from django_file_form_example.test_utils import read_file
-
+from django_file_form_example.test_utils import read_file, count_temp_uploads
 
 media_root = Path(settings.MEDIA_ROOT)
 
@@ -21,7 +20,7 @@ class LiveTestCase(BaseLiveTestCase):
 
         temp_file = page.create_temp_file('content1')
         temp_uploads_path = Path(settings.MEDIA_ROOT).joinpath('temp_uploads')
-        original_temp_file_count = len(list(temp_uploads_path.iterdir()))
+        original_temp_file_count = count_temp_uploads()
 
         page.open('/')
 
@@ -38,7 +37,7 @@ class LiveTestCase(BaseLiveTestCase):
         self.assertEqual(read_file(uploaded_file.uploaded_file), b'content1')
         self.assertTrue(uploaded_file.uploaded_file.name.startswith('temp_uploads/'))
         self.assertEqual(Path(str(uploaded_file.uploaded_file.path)).parent, temp_uploads_path)
-        self.assertEqual(len(list(temp_uploads_path.iterdir())), original_temp_file_count + 1)
+        self.assertEqual(count_temp_uploads(), original_temp_file_count + 1)
 
         page.submit()
         page.assert_page_contains_text('Upload success')
@@ -527,6 +526,8 @@ class LiveTestCase(BaseLiveTestCase):
         self.assertEqual(temp_file.uploaded_file().read_text(), "test-test-test")
 
     def test_cancel_upload(self):
+        original_temp_file_count = count_temp_uploads()
+
         page = self.page
         page.open('/multiple')
 
@@ -536,3 +537,6 @@ class LiveTestCase(BaseLiveTestCase):
         page.upload_using_js(temp_file)
         page.cancel_upload()
         page.wait_until_upload_is_removed()
+
+        self.assertEqual(UploadedFile.objects.count(), 0)
+        self.assertEqual(count_temp_uploads(), original_temp_file_count)
