@@ -525,3 +525,14 @@ class LiveTestCase(BaseLiveTestCase):
         example_file = example2.files.first()
         self.assertEqual(example_file.input_file.name, f'example/{temp_file.base_name()}')
         self.assertEqual(temp_file.uploaded_file().read_text(), "test-test-test")
+
+    def test_cancel_upload(self):
+        page = self.page
+        page.open('/multiple')
+
+        page.set_slow_network_conditions()
+
+        temp_file = page.create_temp_file(b'a' * (2 ** 21), binary=True)
+        page.upload_using_js(temp_file)
+        page.cancel_upload()
+        page.wait_until_upload_is_removed()
