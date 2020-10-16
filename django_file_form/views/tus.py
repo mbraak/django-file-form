@@ -143,7 +143,6 @@ class TusUpload(View):
         resource_id = kwargs.get('resource_id', None)
 
         filename = cache.get("tus-uploads/{}/filename".format(resource_id))
-        file_size = int(cache.get("tus-uploads/{}/file_size".format(resource_id)))
         metadata = cache.get("tus-uploads/{}/metadata".format(resource_id))
         offset = cache.get("tus-uploads/{}/offset".format(resource_id))
 
@@ -159,7 +158,7 @@ class TusUpload(View):
             response.status_code = 409  # HTTP 409 Conflict
             return response
 
-        logger.info(f"TUS patch resource_id={resource_id} filename={filename} file_size={file_size} metadata={metadata} offset={offset} upload_file_path={upload_file_path}")
+        logger.info(f"TUS patch resource_id={resource_id} filename={filename} metadata={metadata} offset={offset} upload_file_path={upload_file_path}")
 
         file = None
         try:
@@ -171,7 +170,6 @@ class TusUpload(View):
                 file.seek(file_offset)
                 file.write(request.body)
                 file.close()
-
         try:
             new_offset = cache.incr("tus-uploads/{}/offset".format(resource_id), chunk_size)
         except ValueError:
@@ -181,6 +179,8 @@ class TusUpload(View):
         response['Upload-Offset'] = new_offset
 
         response.status_code = 204
+
+        file_size = int(cache.get("tus-uploads/{}/file_size".format(resource_id)))
 
         if file_size == new_offset:
             remove_resource_from_cache(resource_id)
@@ -201,6 +201,8 @@ class TusUpload(View):
 
         logger.info(f"TUS delete resource_id={resource_id}")
 
+        remove_resource_from_cache(resource_id)
+
         upload_file_path = get_upload_path().joinpath(resource_id)
 
         if upload_file_path.exists():
@@ -211,7 +213,5 @@ class TusUpload(View):
         if uploaded_file:
             uploaded_file.delete()
 
-        remove_resource_from_cache(resource_id)
-
-        response.status_code = 204 if uploaded_file else 404
+        response.status_code = 204
         return response
