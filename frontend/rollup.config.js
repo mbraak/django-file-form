@@ -38,7 +38,8 @@ if (minimize) {
 
 if (includeCoverage) {
   const coveragePlugin = coverage({
-    esModules: true
+    esModules: true,
+    exclude: ["node_modules/**"]
   });
   plugins.push(coveragePlugin);
 }
