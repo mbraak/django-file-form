@@ -87,25 +87,21 @@ class S3Upload extends BaseUpload {
     this.createdPromise.catch(() => ({})); // silence uncaught rejection warning
   }
 
-  public abort(): void {
+  public async abort(): Promise<void> {
     this.uploading.slice().forEach(xhr => {
       xhr.abort();
     });
-    this.createdPromise.then(
-      () => {
-        if (this.key && this.uploadId) {
-          void abortMultipartUpload({
-            key: this.key,
-            uploadId: this.uploadId,
-            endpoint: this.endpoint
-          });
-        }
-      },
-      () => {
-        // if the creation failed we do not need to abort
-      }
-    );
     this.uploading = [];
+
+    await this.createdPromise;
+
+    if (this.key && this.uploadId) {
+      await abortMultipartUpload({
+        key: this.key,
+        uploadId: this.uploadId,
+        endpoint: this.endpoint
+      });
+    }
   }
 
   public async delete(): Promise<void> {

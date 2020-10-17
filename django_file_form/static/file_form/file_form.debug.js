@@ -4111,13 +4111,6 @@
 	  }
 
 	  createClass(RenderUploadFile, [{
-	    key: "addUploadedFile",
-	    value: function addUploadedFile(filename, uploadIndex, filesize) {
-	      var element = this.addFile(filename, uploadIndex);
-	      this.setSuccess(uploadIndex, filesize);
-	      return element;
-	    }
-	  }, {
 	    key: "addNewUpload",
 	    value: function addNewUpload(filename, uploadIndex) {
 	      var div = this.addFile(filename, uploadIndex);
@@ -4136,16 +4129,17 @@
 	      return div;
 	    }
 	  }, {
-	    key: "addFile",
-	    value: function addFile(filename, uploadIndex) {
-	      var div = document.createElement("div");
-	      div.className = "dff-file dff-file-id-".concat(uploadIndex);
-	      var nameSpan = document.createElement("span");
-	      nameSpan.innerHTML = escapeHtml_1(filename);
-	      div.appendChild(nameSpan);
-	      this.container.appendChild(div);
-	      this.input.required = false;
-	      return div;
+	    key: "addUploadedFile",
+	    value: function addUploadedFile(filename, uploadIndex, filesize) {
+	      var element = this.addFile(filename, uploadIndex);
+	      this.setSuccess(uploadIndex, filesize);
+	      return element;
+	    }
+	  }, {
+	    key: "clearInput",
+	    value: function clearInput() {
+	      var input = this.input;
+	      input.value = "";
 	    }
 	  }, {
 	    key: "deleteFile",
@@ -4155,6 +4149,63 @@
 	      if (div) {
 	        div.remove();
 	      }
+	    }
+	  }, {
+	    key: "disableCancel",
+	    value: function disableCancel(index) {
+	      var cancelSpan = this.findCancelSpan(index);
+
+	      if (cancelSpan) {
+	        cancelSpan.classList.add("dff-disabled");
+	      }
+	    }
+	  }, {
+	    key: "disableDelete",
+	    value: function disableDelete(index) {
+	      var deleteLink = this.findDeleteLink(index);
+
+	      if (deleteLink) {
+	        deleteLink.classList.add("dff-disabled");
+	      }
+	    }
+	  }, {
+	    key: "findFileDiv",
+	    value: function findFileDiv(index) {
+	      return this.container.querySelector(".dff-file-id-".concat(index));
+	    }
+	  }, {
+	    key: "removeDropHint",
+	    value: function removeDropHint() {
+	      var dropHint = this.container.querySelector(".dff-drop-hint");
+
+	      if (dropHint) {
+	        dropHint.remove();
+	      }
+	    }
+	  }, {
+	    key: "renderDropHint",
+	    value: function renderDropHint() {
+	      if (this.container.querySelector(".dff-drop-hint")) {
+	        return;
+	      }
+
+	      var dropHint = document.createElement("div");
+	      dropHint.className = "dff-drop-hint";
+	      dropHint.innerHTML = this.translations["Drop your files here"];
+	      this.container.appendChild(dropHint);
+	    }
+	  }, {
+	    key: "setDeleteFailed",
+	    value: function setDeleteFailed(index) {
+	      var el = this.findFileDiv(index);
+
+	      if (el) {
+	        var span = document.createElement("span");
+	        span.innerHTML = this.translations["Delete failed"];
+	        el.appendChild(span);
+	      }
+
+	      this.enableDelete(index);
 	    }
 	  }, {
 	    key: "setError",
@@ -4171,24 +4222,6 @@
 
 	      this.removeProgress(index);
 	      this.removeCancel(index);
-	    }
-	  }, {
-	    key: "setDeleteFailed",
-	    value: function setDeleteFailed(index) {
-	      var el = this.findFileDiv(index);
-
-	      if (el) {
-	        var span = document.createElement("span");
-	        span.innerHTML = this.translations["Delete failed"];
-	        el.appendChild(span);
-	      }
-
-	      this.enableDelete(index);
-	    }
-	  }, {
-	    key: "findFileDiv",
-	    value: function findFileDiv(index) {
-	      return this.container.querySelector(".dff-file-id-".concat(index));
 	    }
 	  }, {
 	    key: "setSuccess",
@@ -4214,6 +4247,31 @@
 	      this.removeCancel(index);
 	    }
 	  }, {
+	    key: "updateProgress",
+	    value: function updateProgress(index, percentage) {
+	      var el = this.container.querySelector(".dff-file-id-".concat(index));
+
+	      if (el) {
+	        var innerProgressSpan = el.querySelector(".dff-progress-inner");
+
+	        if (innerProgressSpan) {
+	          innerProgressSpan.style.width = "".concat(percentage, "%");
+	        }
+	      }
+	    }
+	  }, {
+	    key: "addFile",
+	    value: function addFile(filename, uploadIndex) {
+	      var div = document.createElement("div");
+	      div.className = "dff-file dff-file-id-".concat(uploadIndex);
+	      var nameSpan = document.createElement("span");
+	      nameSpan.innerHTML = escapeHtml_1(filename);
+	      div.appendChild(nameSpan);
+	      this.container.appendChild(div);
+	      this.input.required = false;
+	      return div;
+	    }
+	  }, {
 	    key: "removeProgress",
 	    value: function removeProgress(index) {
 	      var el = this.findFileDiv(index);
@@ -4229,64 +4287,22 @@
 	  }, {
 	    key: "removeCancel",
 	    value: function removeCancel(index) {
+	      var cancelSpan = this.findCancelSpan(index);
+
+	      if (cancelSpan) {
+	        cancelSpan.remove();
+	      }
+	    }
+	  }, {
+	    key: "findCancelSpan",
+	    value: function findCancelSpan(index) {
 	      var el = this.findFileDiv(index);
 
-	      if (el) {
-	        var cancelSpan = el.querySelector(".dff-cancel");
-
-	        if (cancelSpan) {
-	          cancelSpan.remove();
-	        }
-	      }
-	    }
-	  }, {
-	    key: "clearInput",
-	    value: function clearInput() {
-	      var input = this.input;
-	      input.value = "";
-	    }
-	  }, {
-	    key: "updateProgress",
-	    value: function updateProgress(index, percentage) {
-	      var el = this.container.querySelector(".dff-file-id-".concat(index));
-
-	      if (el) {
-	        var innerProgressSpan = el.querySelector(".dff-progress-inner");
-
-	        if (innerProgressSpan) {
-	          innerProgressSpan.style.width = "".concat(percentage, "%");
-	        }
-	      }
-	    }
-	  }, {
-	    key: "renderDropHint",
-	    value: function renderDropHint() {
-	      if (this.container.querySelector(".dff-drop-hint")) {
-	        return;
+	      if (!el) {
+	        return null;
 	      }
 
-	      var dropHint = document.createElement("div");
-	      dropHint.className = "dff-drop-hint";
-	      dropHint.innerHTML = this.translations["Drop your files here"];
-	      this.container.appendChild(dropHint);
-	    }
-	  }, {
-	    key: "removeDropHint",
-	    value: function removeDropHint() {
-	      var dropHint = this.container.querySelector(".dff-drop-hint");
-
-	      if (dropHint) {
-	        dropHint.remove();
-	      }
-	    }
-	  }, {
-	    key: "disableDelete",
-	    value: function disableDelete(index) {
-	      var deleteLink = this.findDeleteLink(index);
-
-	      if (deleteLink) {
-	        deleteLink.classList.add("dff-disabled");
-	      }
+	      return el.querySelector(".dff-cancel");
 	    }
 	  }, {
 	    key: "enableDelete",
@@ -9316,40 +9332,62 @@
 
 	  createClass(S3Upload, [{
 	    key: "abort",
-	    value: function abort() {
-	      var _this2 = this;
-
-	      this.uploading.slice().forEach(function (xhr) {
-	        xhr.abort();
-	      });
-	      this.createdPromise.then(function () {
-	        if (_this2.key && _this2.uploadId) {
-	          void abortMultipartUpload({
-	            key: _this2.key,
-	            uploadId: _this2.uploadId,
-	            endpoint: _this2.endpoint
-	          });
-	        }
-	      }, function () {// if the creation failed we do not need to abort
-	      });
-	      this.uploading = [];
-	    }
-	  }, {
-	    key: "delete",
 	    value: function () {
-	      var _delete2 = asyncToGenerator( /*#__PURE__*/regenerator.mark(function _callee() {
+	      var _abort = asyncToGenerator( /*#__PURE__*/regenerator.mark(function _callee() {
 	        return regenerator.wrap(function _callee$(_context) {
 	          while (1) {
 	            switch (_context.prev = _context.next) {
 	              case 0:
-	                return _context.abrupt("return", Promise.resolve());
+	                this.uploading.slice().forEach(function (xhr) {
+	                  xhr.abort();
+	                });
+	                this.uploading = [];
+	                _context.next = 4;
+	                return this.createdPromise;
 
-	              case 1:
+	              case 4:
+	                if (!(this.key && this.uploadId)) {
+	                  _context.next = 7;
+	                  break;
+	                }
+
+	                _context.next = 7;
+	                return abortMultipartUpload({
+	                  key: this.key,
+	                  uploadId: this.uploadId,
+	                  endpoint: this.endpoint
+	                });
+
+	              case 7:
 	              case "end":
 	                return _context.stop();
 	            }
 	          }
-	        }, _callee);
+	        }, _callee, this);
+	      }));
+
+	      function abort() {
+	        return _abort.apply(this, arguments);
+	      }
+
+	      return abort;
+	    }()
+	  }, {
+	    key: "delete",
+	    value: function () {
+	      var _delete2 = asyncToGenerator( /*#__PURE__*/regenerator.mark(function _callee2() {
+	        return regenerator.wrap(function _callee2$(_context2) {
+	          while (1) {
+	            switch (_context2.prev = _context2.next) {
+	              case 0:
+	                return _context2.abrupt("return", Promise.resolve());
+
+	              case 1:
+	              case "end":
+	                return _context2.stop();
+	            }
+	          }
+	        }, _callee2);
 	      }));
 
 	      function _delete() {
@@ -9420,7 +9458,7 @@
 	  }, {
 	    key: "createUpload",
 	    value: function createUpload() {
-	      var _this3 = this;
+	      var _this2 = this;
 
 	      this.createdPromise = createMultipartUpload(this.file, this.s3UploadDir, this.endpoint);
 	      return this.createdPromise.then(function (result) {
@@ -9430,22 +9468,22 @@
 	          throw new TypeError("AwsS3/Multipart: Got incorrect result from `createMultipartUpload()`, expected an object `{ uploadId, key }`.");
 	        }
 
-	        _this3.key = result.key;
-	        _this3.uploadId = result.uploadId;
+	        _this2.key = result.key;
+	        _this2.uploadId = result.uploadId;
 
-	        if (_this3.options.onStart) {
-	          _this3.options.onStart(result);
+	        if (_this2.options.onStart) {
+	          _this2.options.onStart(result);
 	        }
 
-	        _this3.uploadParts();
+	        _this2.uploadParts();
 	      }).catch(function (err) {
-	        _this3.handleError(err);
+	        _this2.handleError(err);
 	      });
 	    }
 	  }, {
 	    key: "resumeUpload",
 	    value: function resumeUpload() {
-	      var _this4 = this;
+	      var _this3 = this;
 
 	      if (!this.key || !this.uploadId) {
 	        return Promise.resolve();
@@ -9458,32 +9496,32 @@
 	      }).then(function (parts) {
 	        parts.forEach(function (part) {
 	          var i = part.PartNumber - 1;
-	          _this4.chunkState[i] = {
+	          _this3.chunkState[i] = {
 	            uploaded: part.Size,
 	            etag: part.ETag,
 	            done: true,
 	            busy: false
 	          }; // Only add if we did not yet know about this part.
 
-	          if (!_this4.parts.some(function (p) {
+	          if (!_this3.parts.some(function (p) {
 	            return p.PartNumber === part.PartNumber;
 	          })) {
-	            _this4.parts.push({
+	            _this3.parts.push({
 	              ETag: part.ETag,
 	              PartNumber: part.PartNumber
 	            });
 	          }
 	        });
 
-	        _this4.uploadParts();
+	        _this3.uploadParts();
 	      }).catch(function (err) {
-	        _this4.handleError(err);
+	        _this3.handleError(err);
 	      });
 	    }
 	  }, {
 	    key: "uploadParts",
 	    value: function uploadParts() {
-	      var _this5 = this;
+	      var _this4 = this;
 
 	      if (this.isPaused) {
 	        return;
@@ -9516,13 +9554,13 @@
 	      }
 
 	      candidates.forEach(function (index) {
-	        void _this5.uploadPart(index);
+	        void _this4.uploadPart(index);
 	      });
 	    }
 	  }, {
 	    key: "uploadPart",
 	    value: function uploadPart(index) {
-	      var _this6 = this;
+	      var _this5 = this;
 
 	      this.chunkState[index].busy = true;
 
@@ -9546,9 +9584,9 @@
 	      }).then(function (_ref) {
 	        var url = _ref.url;
 
-	        _this6.uploadPartBytes(index, url);
+	        _this5.uploadPartBytes(index, url);
 	      }, function (err) {
-	        _this6.handleError(err);
+	        _this5.handleError(err);
 	      });
 	    }
 	  }, {
@@ -9583,7 +9621,7 @@
 	  }, {
 	    key: "uploadPartBytes",
 	    value: function uploadPartBytes(index, url) {
-	      var _this7 = this;
+	      var _this6 = this;
 
 	      var body = this.chunks[index];
 	      var xhr = new XMLHttpRequest();
@@ -9593,49 +9631,49 @@
 	      xhr.upload.addEventListener("progress", function (ev) {
 	        if (!ev.lengthComputable) return;
 
-	        _this7.onPartProgress(index, ev.loaded);
+	        _this6.onPartProgress(index, ev.loaded);
 	      });
 	      xhr.addEventListener("abort", function (ev) {
-	        remove(_this7.uploading, ev.target);
-	        _this7.chunkState[index].busy = false;
+	        remove(_this6.uploading, ev.target);
+	        _this6.chunkState[index].busy = false;
 	      });
 	      xhr.addEventListener("load", function (ev) {
 	        var target = ev.target;
-	        remove(_this7.uploading, target);
-	        _this7.chunkState[index].busy = false;
+	        remove(_this6.uploading, target);
+	        _this6.chunkState[index].busy = false;
 
 	        if (target.status < 200 || target.status >= 300) {
-	          _this7.handleError(new Error("Non 2xx"));
+	          _this6.handleError(new Error("Non 2xx"));
 
 	          return;
 	        }
 
-	        _this7.onPartProgress(index, body.size); // NOTE This must be allowed by CORS.
+	        _this6.onPartProgress(index, body.size); // NOTE This must be allowed by CORS.
 
 
 	        var etag = target.getResponseHeader("ETag");
 
 	        if (etag === null) {
-	          _this7.handleError(new Error("AwsS3/Multipart: Could not read the ETag header. This likely means CORS is not configured correctly on the S3 Bucket. See https://uppy.io/docs/aws-s3-multipart#S3-Bucket-Configuration for instructions."));
+	          _this6.handleError(new Error("AwsS3/Multipart: Could not read the ETag header. This likely means CORS is not configured correctly on the S3 Bucket. See https://uppy.io/docs/aws-s3-multipart#S3-Bucket-Configuration for instructions."));
 
 	          return;
 	        }
 
-	        _this7.onPartComplete(index, etag);
+	        _this6.onPartComplete(index, etag);
 	      });
 	      xhr.addEventListener("error", function (ev) {
-	        remove(_this7.uploading, ev.target);
-	        _this7.chunkState[index].busy = false;
+	        remove(_this6.uploading, ev.target);
+	        _this6.chunkState[index].busy = false;
 	        var error = new Error("Unknown error"); // error.source = ev.target
 
-	        _this7.handleError(error);
+	        _this6.handleError(error);
 	      });
 	      xhr.send(body);
 	    }
 	  }, {
 	    key: "completeUpload",
 	    value: function completeUpload() {
-	      var _this8 = this;
+	      var _this7 = this;
 
 	      // Parts may not have completed uploading in sorted order, if limit > 1.
 	      this.parts.sort(function (a, b) {
@@ -9652,11 +9690,11 @@
 	        parts: this.parts,
 	        endpoint: this.endpoint
 	      }).then(function () {
-	        if (_this8.onSuccess) {
-	          _this8.onSuccess();
+	        if (_this7.onSuccess) {
+	          _this7.onSuccess();
 	        }
 	      }, function (err) {
-	        _this8.handleError(err);
+	        _this7.handleError(err);
 	      });
 	    }
 	  }, {
@@ -9745,12 +9783,8 @@
 
 	  createClass(BaseUploadedFile, [{
 	    key: "abort",
-	    value: function abort() {//
-	    }
-	  }, {
-	    key: "delete",
 	    value: function () {
-	      var _delete2 = asyncToGenerator( /*#__PURE__*/regenerator.mark(function _callee() {
+	      var _abort = asyncToGenerator( /*#__PURE__*/regenerator.mark(function _callee() {
 	        return regenerator.wrap(function _callee$(_context) {
 	          while (1) {
 	            switch (_context.prev = _context.next) {
@@ -9763,6 +9797,30 @@
 	            }
 	          }
 	        }, _callee);
+	      }));
+
+	      function abort() {
+	        return _abort.apply(this, arguments);
+	      }
+
+	      return abort;
+	    }()
+	  }, {
+	    key: "delete",
+	    value: function () {
+	      var _delete2 = asyncToGenerator( /*#__PURE__*/regenerator.mark(function _callee2() {
+	        return regenerator.wrap(function _callee2$(_context2) {
+	          while (1) {
+	            switch (_context2.prev = _context2.next) {
+	              case 0:
+	                return _context2.abrupt("return", Promise.resolve());
+
+	              case 1:
+	              case "end":
+	                return _context2.stop();
+	            }
+	          }
+	        }, _callee2);
 	      }));
 
 	      function _delete() {
@@ -9866,20 +9924,20 @@
 	  createClass(UploadedTusFile, [{
 	    key: "delete",
 	    value: function () {
-	      var _delete3 = asyncToGenerator( /*#__PURE__*/regenerator.mark(function _callee2() {
-	        return regenerator.wrap(function _callee2$(_context2) {
+	      var _delete3 = asyncToGenerator( /*#__PURE__*/regenerator.mark(function _callee3() {
+	        return regenerator.wrap(function _callee3$(_context3) {
 	          while (1) {
-	            switch (_context2.prev = _context2.next) {
+	            switch (_context3.prev = _context3.next) {
 	              case 0:
-	                _context2.next = 2;
+	                _context3.next = 2;
 	                return deleteUpload(this.url);
 
 	              case 2:
 	              case "end":
-	                return _context2.stop();
+	                return _context3.stop();
 	            }
 	          }
-	        }, _callee2, this);
+	        }, _callee3, this);
 	      }));
 
 	      function _delete() {
@@ -14458,34 +14516,54 @@
 
 	  createClass(TusUpload, [{
 	    key: "abort",
-	    value: function abort() {
-	      void this.upload.abort(true);
-	    }
-	  }, {
-	    key: "delete",
 	    value: function () {
-	      var _delete2 = asyncToGenerator( /*#__PURE__*/regenerator.mark(function _callee() {
+	      var _abort = asyncToGenerator( /*#__PURE__*/regenerator.mark(function _callee() {
 	        return regenerator.wrap(function _callee$(_context) {
 	          while (1) {
 	            switch (_context.prev = _context.next) {
 	              case 0:
-	                if (this.upload.url) {
-	                  _context.next = 2;
-	                  break;
-	                }
-
-	                return _context.abrupt("return", Promise.resolve());
+	                _context.next = 2;
+	                return this.upload.abort(true);
 
 	              case 2:
-	                _context.next = 4;
-	                return deleteUpload(this.upload.url);
-
-	              case 4:
 	              case "end":
 	                return _context.stop();
 	            }
 	          }
 	        }, _callee, this);
+	      }));
+
+	      function abort() {
+	        return _abort.apply(this, arguments);
+	      }
+
+	      return abort;
+	    }()
+	  }, {
+	    key: "delete",
+	    value: function () {
+	      var _delete2 = asyncToGenerator( /*#__PURE__*/regenerator.mark(function _callee2() {
+	        return regenerator.wrap(function _callee2$(_context2) {
+	          while (1) {
+	            switch (_context2.prev = _context2.next) {
+	              case 0:
+	                if (this.upload.url) {
+	                  _context2.next = 2;
+	                  break;
+	                }
+
+	                return _context2.abrupt("return", Promise.resolve());
+
+	              case 2:
+	                _context2.next = 4;
+	                return deleteUpload(this.upload.url);
+
+	              case 4:
+	              case "end":
+	                return _context2.stop();
+	            }
+	          }
+	        }, _callee2, this);
 	      }));
 
 	      function _delete() {
@@ -14701,7 +14779,7 @@
 	        var _upload2 = getUpload();
 
 	        if (_upload2) {
-	          _this.handleCancel(_upload2);
+	          void _this.handleCancel(_upload2);
 	        }
 
 	        e.preventDefault();
@@ -14931,46 +15009,50 @@
 	                }
 
 	                if (!(upload.status === "uploading")) {
-	                  _context3.next = 6;
+	                  _context3.next = 8;
 	                  break;
 	                }
 
-	                upload.abort();
-	                _context3.next = 17;
-	                break;
+	                this.renderer.disableCancel(upload.uploadIndex);
+	                _context3.next = 6;
+	                return upload.abort();
 
 	              case 6:
+	                _context3.next = 19;
+	                break;
+
+	              case 8:
 	                if (!(upload.status === "done")) {
-	                  _context3.next = 17;
+	                  _context3.next = 19;
 	                  break;
 	                }
 
 	                this.renderer.disableDelete(upload.uploadIndex);
-	                _context3.prev = 8;
-	                _context3.next = 11;
+	                _context3.prev = 10;
+	                _context3.next = 13;
 	                return upload.delete();
 
-	              case 11:
-	                _context3.next = 17;
+	              case 13:
+	                _context3.next = 19;
 	                break;
 
-	              case 13:
-	                _context3.prev = 13;
-	                _context3.t0 = _context3["catch"](8);
+	              case 15:
+	                _context3.prev = 15;
+	                _context3.t0 = _context3["catch"](10);
 	                this.renderer.setDeleteFailed(upload.uploadIndex);
 	                return _context3.abrupt("return");
 
-	              case 17:
+	              case 19:
 	                this.removeUploadFromList(upload);
 	                this.updateS3UploadedInput();
 	                this.updatePlaceholderInput();
 
-	              case 20:
+	              case 22:
 	              case "end":
 	                return _context3.stop();
 	            }
 	          }
-	        }, _callee3, this, [[8, 13]]);
+	        }, _callee3, this, [[10, 15]]);
 	      }));
 
 	      function removeExistingUpload(_x3) {
@@ -14993,10 +15075,33 @@
 	    }
 	  }, {
 	    key: "handleCancel",
-	    value: function handleCancel(upload) {
-	      upload.abort();
-	      this.removeUploadFromList(upload);
-	    }
+	    value: function () {
+	      var _handleCancel = asyncToGenerator( /*#__PURE__*/regenerator.mark(function _callee4(upload) {
+	        return regenerator.wrap(function _callee4$(_context4) {
+	          while (1) {
+	            switch (_context4.prev = _context4.next) {
+	              case 0:
+	                this.renderer.disableCancel(upload.uploadIndex);
+	                _context4.next = 3;
+	                return upload.abort();
+
+	              case 3:
+	                this.removeUploadFromList(upload);
+
+	              case 4:
+	              case "end":
+	                return _context4.stop();
+	            }
+	          }
+	        }, _callee4, this);
+	      }));
+
+	      function handleCancel(_x4) {
+	        return _handleCancel.apply(this, arguments);
+	      }
+
+	      return handleCancel;
+	    }()
 	  }, {
 	    key: "initDropArea",
 	    value: function initDropArea(container, inputAccept) {

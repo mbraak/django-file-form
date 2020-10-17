@@ -38,8 +38,8 @@ export default class TusUpload extends BaseUpload {
     this.onSuccess = undefined;
   }
 
-  public abort(): void {
-    void this.upload.abort(true);
+  public async abort(): Promise<void> {
+    await this.upload.abort(true);
   }
 
   public async delete(): Promise<void> {
