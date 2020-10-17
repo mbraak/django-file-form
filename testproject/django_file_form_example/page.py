@@ -113,3 +113,13 @@ class Page(object):
         self.selenium.find_element_by_name('username').send_keys(username)
         self.selenium.find_element_by_name('password').send_keys(password)
         self.selenium.find_element_by_css_selector('input[type=submit]').click()
+
+    def set_slow_network_conditions(self):
+        self.selenium.set_network_conditions(
+            latency=5,
+            throughput=500 * 1024
+        )
+
+    def cancel_upload(self, upload_index=0):
+        el = self.selenium.find_element_by_css_selector(f'.dff-file-id-{upload_index}')
+        el.find_element_by_link_text('Cancel').click()

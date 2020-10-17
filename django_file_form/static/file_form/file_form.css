@@ -19,9 +19,11 @@
 .dff-uploader .dff-files .dff-file:last-child {
   margin-bottom: 0;
 }
+.dff-uploader .dff-files .dff-cancel,
 .dff-uploader .dff-files .dff-delete {
   margin-left: 8px;
 }
+.dff-uploader .dff-files .dff-cancel.dff-disabled,
 .dff-uploader .dff-files .dff-delete.dff-disabled {
   color: #aaa;
   pointer-events: none;
@@ -48,7 +50,4 @@
 .dff-uploader .dff-error {
   margin-left: 8px;
   color: red;
-}
-.dff-uploader .dff-cancel {
-  margin-left: 8px;
 }

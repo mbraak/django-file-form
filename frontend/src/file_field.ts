@@ -239,7 +239,8 @@ class FileField {
     }
 
     if (upload.status === "uploading") {
-      upload.abort();
+      this.renderer.disableCancel(upload.uploadIndex);
+      await upload.abort();
     } else if (upload.status === "done") {
       this.renderer.disableDelete(upload.uploadIndex);
 
@@ -289,7 +290,7 @@ class FileField {
       const upload = getUpload();
 
       if (upload) {
-        this.handleCancel(upload);
+        void this.handleCancel(upload);
       }
 
       e.preventDefault();
@@ -360,8 +361,9 @@ class FileField {
     }
   }
 
-  handleCancel(upload: BaseUpload): void {
-    upload.abort();
+  async handleCancel(upload: BaseUpload): Promise<void> {
+    this.renderer.disableCancel(upload.uploadIndex);
+    await upload.abort();
     this.removeUploadFromList(upload);
   }
 

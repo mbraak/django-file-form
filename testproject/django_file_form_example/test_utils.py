@@ -44,3 +44,8 @@ def write_json(path, data):
     json = dumps(data)
 
     Path(path).write_text(json)
+
+
+def count_temp_uploads():
+    temp_uploads_path = Path(settings.MEDIA_ROOT).joinpath('temp_uploads')
+    return len(list(temp_uploads_path.iterdir()))
