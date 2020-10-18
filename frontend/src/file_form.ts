@@ -155,7 +155,7 @@ const initFormSet = (form: Element, optionsParam: Options | string): void => {
   }
 };
 
-declare const global: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+declare const window: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
-global.initFormSet = initFormSet; // eslint-disable-line  @typescript-eslint/no-unsafe-member-access
-global.initUploadFields = initUploadFields; // eslint-disable-line  @typescript-eslint/no-unsafe-member-access
+window.initFormSet = initFormSet; // eslint-disable-line  @typescript-eslint/no-unsafe-member-access
+window.initUploadFields = initUploadFields; // eslint-disable-line  @typescript-eslint/no-unsafe-member-access

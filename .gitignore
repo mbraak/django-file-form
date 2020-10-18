@@ -1,8 +1,10 @@
 *.pyc
 *.egg-info
+Pipfile
+Pipfile.lock
 testproject/*.db
 testproject/*.log
 testproject/media
 testproject/t
-Pipfile
-Pipfile.lock
+django_file_form/static/file_form/file_form.coverage.js
+django_file_form/static/file_form/file_form.coverage.js.map
