@@ -9,6 +9,8 @@
 
 **Django-file-form** helps you to write forms with a pretty ajax upload.
 
+Read the documentation at [http://mbraak.github.io/django-file-form/](http://mbraak.github.io/django-file-form/)
+
 Features:
 
 * You can easily add an ajax file-upload to a form.
