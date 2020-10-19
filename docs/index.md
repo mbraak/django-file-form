@@ -140,7 +140,7 @@ class ExampleFormView(generic.FormView):
 
 ## Details
 
-**1 Include hidden fields**
+### Include hidden fields
 
 Make sure that hidden form fields are included:
 
@@ -154,7 +154,7 @@ NB: it's possible that the hidden fields are already included; for example if yo
 
 Also see the testproject in the repository.
 
-**2 Temp upload dir must exist**
+### Temp upload dir must exist
 
 Make sure the `FILE_FORM_UPLOAD_DIR` directory exists.
 
@@ -165,7 +165,7 @@ if not os.path.exists(temp_upload_dir):
   os.mkdir(temp_upload_dir)
 ```
 
-**3 Adding placeholder files**
+### Adding placeholder files
 
 If you have used `django-file-form` to upload files, potentially have saved the files elsewhere, but would like to use `django-file-form` to edit (remove or replace) the original uploaded files and append new files, you can add information about the original uploaded files as placeholders to the `UploadedFileField`. More specifically, you can initialize your field with one or more `PlaceholderUploadedFile` as follows:
 
@@ -198,7 +198,7 @@ for f in self.cleaned_data['my_field']:
 # ...
 ```
 
-**4 Upload directly to AWS S3**
+### Upload directly to AWS S3
 
 `django-file-form` supports upload directly to AWS S3 compatible storages. The files will be uploaded
 by clients directly to S3 through AJAX operations and return to the backend as `File` objects
@@ -256,7 +256,7 @@ name of the file that was uploaded that can be different from the basename
 of the object on S3 (`f.name`). Reading from these objects will download the files
 from S3.
 
-**5 Accept attribute**
+### Accept attribute
 
 You can add an accept attribute to the file input using the `accept` parameter on `UploadedFileField`:
 
@@ -264,7 +264,7 @@ You can add an accept attribute to the file input using the `accept` parameter o
 file = UploadedFileField(accept='image/*,.pdf')
 ```
 
-**6 Additional file metadata**
+### Additional file metadata
 
 If you want to add and maintain additional metadata such as short descriptions and
 categories of uploaded files, you can use the `.metadata` field of uploaded files.
