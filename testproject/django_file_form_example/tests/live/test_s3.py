@@ -87,3 +87,14 @@ class S3TestCase(BaseLiveTestCase):
             read_file(example2.files.all()[0].input_file),
             b'content1'
         )
+
+    def test_cancel_upload(self):
+        page = self.page
+        page.open('/s3multiple')
+
+        page.set_slow_network_conditions()
+
+        temp_file = page.create_temp_file(b'a' * (2 ** 21), binary=True)
+        page.upload_using_js(temp_file)
+        page.cancel_upload()
+        page.wait_until_upload_is_removed()
