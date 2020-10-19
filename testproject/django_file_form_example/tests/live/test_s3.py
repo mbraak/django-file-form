@@ -61,15 +61,6 @@ class S3TestCase(BaseLiveTestCase):
         bucket.create()
 
         self.bucket = bucket
-        """
-        self.s3_client = boto3.client(
-            's3',
-            endpoint_url='http://localhost:4566',
-            aws_access_key_id='access1',
-            aws_secret_access_key='test1'
-        )
-        self.s3_client.create_bucket(Bucket='MyBucket')
-        """
 
     def tearDown(self):
         try:
