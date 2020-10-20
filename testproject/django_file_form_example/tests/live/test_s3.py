@@ -95,18 +95,6 @@ class S3TestCase(BaseLiveTestCase):
             b'content1'
         )
 
-    def test_delete_upload(self):
-        page = self.page
-        page.open('/s3multiple')
-
-        temp_file = page.create_temp_file('content1')
-
-        page.upload_using_js(temp_file)
-        page.find_upload_success(temp_file)
-
-        page.delete_ajax_file()
-        page.wait_until_upload_is_removed()
-
     def test_cancel_upload(self):
         page = self.page
         page.open('/s3multiple')
