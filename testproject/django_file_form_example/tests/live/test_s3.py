@@ -51,13 +51,16 @@ class S3TestCase(BaseLiveTestCase):
         thread.start()
         self.thread = thread
 
-        s3_client = boto3.client(
+        s3 = boto3.resource(
             's3',
             endpoint_url='http://localhost:4566',
             aws_access_key_id='access1',
             aws_secret_access_key='test1'
         )
-        s3_client.create_bucket(Bucket='MyBucket')
+        bucket = s3.Bucket('MyBucket')
+        bucket.create()
+
+        self.bucket = bucket
 
     def tearDown(self):
         try:
@@ -74,8 +77,12 @@ class S3TestCase(BaseLiveTestCase):
         page.fill_title_field('abc')
         page.upload_using_js(temp_file)
         page.find_upload_success(temp_file)
-
         page.assert_page_contains_text('8 Bytes')
+
+        files_in_bucket = list(self.bucket.objects.all())
+        self.assertEqual(len(files_in_bucket), 1)
+        self.assertEqual(files_in_bucket[0].key, f'temp_uploads/s3_example/{temp_file.base_name()}')
+
         page.submit()
         page.assert_page_contains_text('Upload success')
 
@@ -87,3 +94,17 @@ class S3TestCase(BaseLiveTestCase):
             read_file(example2.files.all()[0].input_file),
             b'content1'
         )
+
+    def test_cancel_upload(self):
+        page = self.page
+        page.open('/s3multiple')
+
+        page.set_slow_network_conditions()
+
+        temp_file = page.create_temp_file(b'a' * (2 ** 21), binary=True)
+        page.upload_using_js(temp_file)
+        page.cancel_upload()
+        page.wait_until_upload_is_removed()
+
+        files_in_bucket = list(self.bucket.objects.all())
+        self.assertEqual(len(files_in_bucket), 0)
