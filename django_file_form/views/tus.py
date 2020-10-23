@@ -160,16 +160,21 @@ class TusUpload(View):
 
         logger.info(f"TUS patch resource_id={resource_id} filename={filename} metadata={metadata} offset={offset} upload_file_path={upload_file_path}")
 
-        file = None
         try:
             file = upload_file_path.open("r+b")
         except IOError:
             file = upload_file_path.open("wb")
-        finally:
-            if file:
+
+        if file:
+            try:
                 file.seek(file_offset)
                 file.write(request.body)
+            except IOError:
+                response.status_code = 500
+                return response
+            finally:
                 file.close()
+
         try:
             new_offset = cache.incr("tus-uploads/{}/offset".format(resource_id), chunk_size)
         except ValueError:

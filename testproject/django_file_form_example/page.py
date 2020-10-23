@@ -117,7 +117,7 @@ class Page(object):
     def set_slow_network_conditions(self):
         self.selenium.set_network_conditions(
             latency=5,
-            throughput=500 * 1024
+            throughput=50 * 1024
         )
 
     def cancel_upload(self, upload_index=0):
