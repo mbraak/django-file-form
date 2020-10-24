@@ -36,6 +36,10 @@ class BaseLiveTestCase(StaticLiveServerTestCase):
 
     def setUp(self):
         self.page = self.page_class(self.selenium, self.live_server_url, self.handle_coverage)
+        self.selenium.set_network_conditions(
+            latency=0,
+            throughput=-1
+        )
 
     def handle_coverage(self):
         if settings.DJANGO_FILE_FORM_COVERAGE_JS:
