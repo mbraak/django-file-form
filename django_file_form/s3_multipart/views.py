@@ -1,12 +1,13 @@
 import json
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseNotFound
 
 from .utils import get_bucket_name, file_form_upload_dir, get_client, get_available_name
 
 
 def create_multipart_upload(request):
     if request.method != 'POST':
-        return
+        return HttpResponseNotFound()
+
     client = get_client()
     json_body = json.loads(request.body)
     filename = json_body["filename"]
@@ -49,7 +50,8 @@ def get_parts_or_abort_upload(request, upload_id):
 
 def sign_part_upload(request, upload_id, part_number):
     if request.method != 'GET':
-        return
+        return HttpResponseNotFound()
+
     client = get_client()
     key = request.GET['key']
     bucket_name = get_bucket_name()
@@ -69,7 +71,8 @@ def sign_part_upload(request, upload_id, part_number):
 
 def complete_multipart_upload(request, upload_id):
     if request.method != 'POST':
-        return
+        return HttpResponseNotFound()
+
     client = get_client()
     json_body = json.loads(request.body)
     key = request.GET['key']
