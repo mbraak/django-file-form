@@ -3,49 +3,19 @@ import logging
 import uuid
 from pathlib import Path
 
-from django.http import HttpResponse
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import View
-
 from django_file_form import conf
 from django_file_form.models import UploadedFile
-from django_file_form.util import check_permission, get_upload_path
+from django_file_form.util import get_upload_path
 from .utils import cache, create_uploaded_file_in_db, remove_resource_from_cache
+from .tus_base_view import get_tus_response, TusBaseView
 
 
 logger = logging.getLogger(__name__)
 
 
-class TusUpload(View):
-    tus_api_version = '1.0.0'
-    tus_api_version_supported = ['1.0.0', ]
-    tus_api_extensions = ['creation', 'termination', 'file-check']
-
-    @method_decorator(csrf_exempt)
-    def dispatch(self, *args, **kwargs):
-        check_permission(self.request)
-
-        logger.info(f"TUS dispatch method={self.request.method}")
-
-        return super(TusUpload, self).dispatch(*args, **kwargs)
-
-    def get_tus_response(self):
-        response = HttpResponse()
-        response['Tus-Resumable'] = self.tus_api_version
-        response['Tus-Version'] = ",".join(self.tus_api_version_supported)
-        response['Tus-Extension'] = ",".join(self.tus_api_extensions)
-        response['Tus-Max-Size'] = conf.MAX_FILE_SIZE
-        response['Access-Control-Allow-Origin'] = "*"
-        response['Access-Control-Allow-Methods'] = "PATCH,HEAD,GET,POST,OPTIONS"
-        response['Access-Control-Expose-Headers'] = "Tus-Resumable,upload-length,upload-metadata,Location,Upload-Offset"
-        response['Access-Control-Allow-Headers'] = "Tus-Resumable,upload-length,upload-metadata,Location,Upload-Offset,content-type"
-        response['Cache-Control'] = 'no-store'
-
-        return response
-
+class StartTusUpload(TusBaseView):
     def post(self, request, *args, **kwargs):
-        response = self.get_tus_response()
+        response = get_tus_response()
 
         if request.META.get("HTTP_TUS_RESUMABLE", None) is None:
             logger.warning("Received File upload for unsupported file transfer protocol")
@@ -85,8 +55,10 @@ class TusUpload(View):
         response['Location'] = '{}{}'.format(request.build_absolute_uri(), resource_id)
         return response
 
+
+class TusUpload(TusBaseView):
     def head(self, request, *args, **kwargs):
-        response = self.get_tus_response()
+        response = get_tus_response()
         resource_id = kwargs.get('resource_id', None)
 
         logger.info(f"TUS head resource_id={resource_id}")
@@ -106,7 +78,7 @@ class TusUpload(View):
         return response
 
     def patch(self, request, *args, **kwargs):
-        response = self.get_tus_response()
+        response = get_tus_response()
 
         resource_id = kwargs.get('resource_id', None)
 
@@ -150,7 +122,6 @@ class TusUpload(View):
             return response
 
         response['Upload-Offset'] = new_offset
-
         response.status_code = 204
 
         file_size = int(cache.get("tus-uploads/{}/file_size".format(resource_id)))
@@ -169,7 +140,7 @@ class TusUpload(View):
         return response
 
     def delete(self, request, *args, **kwargs):
-        response = self.get_tus_response()
+        response = get_tus_response()
         resource_id = kwargs.get('resource_id', None)
 
         logger.info(f"TUS delete resource_id={resource_id}")
