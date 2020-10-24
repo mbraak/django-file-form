@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 @require_POST
-def create_multipart_upload(request):
+def create_upload(request):
     logger.info("Create upload")
 
     client = get_client()
@@ -36,27 +36,38 @@ def create_multipart_upload(request):
 
 @require_http_methods(["GET", "DELETE"])
 def get_parts_or_abort_upload(request, upload_id):
-    client = get_client()
-    key = request.GET['key']
-    bucket_name = get_bucket_name()
     if request.method == 'GET':
-        logger.info("Get part")
-
-        response = client.list_parts(
-            Bucket=bucket_name, Key=key, UploadId=upload_id)
-        if "Parts" in response:
-            return JsonResponse({'parts': response["Parts"]})
-        else:
-            return JsonResponse({'parts': []})
+        return get_parts(request, upload_id)
     elif request.method == 'DELETE':
-        logger.info("Abort upload")
+        return abort_upload(request, upload_id)
 
-        client.abort_multipart_upload(
-            Bucket=bucket_name,
-            Key=key,
-            UploadId=upload_id,
-        )
-        return JsonResponse({})
+
+def abort_upload(request, upload_id):
+    logger.info("Abort upload")
+    client = get_client()
+    bucket_name = get_bucket_name()
+    key = request.GET['key']
+
+    client.abort_multipart_upload(
+        Bucket=bucket_name,
+        Key=key,
+        UploadId=upload_id,
+    )
+    return JsonResponse({})
+
+
+def get_parts(request, upload_id):
+    logger.info("Get part")
+    client = get_client()
+    bucket_name = get_bucket_name()
+    key = request.GET['key']
+
+    response = client.list_parts(Bucket=bucket_name, Key=key, UploadId=upload_id)
+
+    if "Parts" in response:
+        return JsonResponse({'parts': response["Parts"]})
+    else:
+        return JsonResponse({'parts': []})
 
 
 @require_GET
@@ -81,7 +92,7 @@ def sign_part_upload(request, upload_id, part_number):
 
 
 @require_POST
-def complete_multipart_upload(request, upload_id):
+def complete_upload(request, upload_id):
     logger.info("Complete upload")
 
     client = get_client()
@@ -93,5 +104,6 @@ def complete_multipart_upload(request, upload_id):
         Bucket=bucket_name,
         Key=key,
         UploadId=upload_id,
-        MultipartUpload={'Parts': parts})
+        MultipartUpload={'Parts': parts}
+    )
     return JsonResponse({"location": response["Location"]})
