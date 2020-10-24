@@ -2,7 +2,10 @@ import os
 from django.conf import settings
 from django.core.cache import caches
 from django.core.files import File
+from django.http import HttpResponse
+
 from django_file_form.models import UploadedFile
+from django_file_form import conf
 
 
 cache = caches[getattr(settings, 'FILE_FORM_CACHE', 'default')]
@@ -32,3 +35,23 @@ def create_uploaded_file_in_db(field_name, file_id, form_id, original_filename, 
         UploadedFile.objects.create(**values)
 
     os.remove(uploaded_file)
+
+
+tus_api_version = '1.0.0'
+tus_api_version_supported = ['1.0.0', ]
+tus_api_extensions = ['creation', 'termination', 'file-check']
+
+
+def get_tus_response():
+    response = HttpResponse()
+    response['Tus-Resumable'] = tus_api_version
+    response['Tus-Version'] = ",".join(tus_api_version_supported)
+    response['Tus-Extension'] = ",".join(tus_api_extensions)
+    response['Tus-Max-Size'] = conf.MAX_FILE_SIZE
+    response['Access-Control-Allow-Origin'] = "*"
+    response['Access-Control-Allow-Methods'] = "PATCH,HEAD,GET,POST,OPTIONS"
+    response['Access-Control-Expose-Headers'] = "Tus-Resumable,upload-length,upload-metadata,Location,Upload-Offset"
+    response['Access-Control-Allow-Headers'] = "Tus-Resumable,upload-length,upload-metadata,Location,Upload-Offset,content-type"
+    response['Cache-Control'] = 'no-store'
+
+    return response

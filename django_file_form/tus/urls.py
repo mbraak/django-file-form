@@ -1,7 +1,8 @@
 from django.urls import path
-from .views import start_upload, TusUpload
+from .views import handle_upload, start_upload
+
 
 urlpatterns = [
     path('', start_upload, name='tus_upload'),
-    path('<str:resource_id>', TusUpload.as_view(), name='tus_upload_chunks'),
+    path('<str:resource_id>', handle_upload, name='tus_upload_chunks'),
 ]

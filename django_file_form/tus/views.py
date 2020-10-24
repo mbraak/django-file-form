@@ -4,13 +4,12 @@ import uuid
 from pathlib import Path
 
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_http_methods
 
 from django_file_form import conf
 from django_file_form.models import UploadedFile
 from django_file_form.util import get_upload_path, check_permission
-from .utils import cache, create_uploaded_file_in_db, remove_resource_from_cache
-from .tus_base_view import get_tus_response, TusBaseView
+from .utils import cache, create_uploaded_file_in_db, get_tus_response, remove_resource_from_cache
 
 
 logger = logging.getLogger(__name__)
@@ -62,106 +61,115 @@ def start_upload(request):
     return response
 
 
-class TusUpload(TusBaseView):
-    def head(self, request, *args, **kwargs):
-        response = get_tus_response()
-        resource_id = kwargs.get('resource_id', None)
+@csrf_exempt
+@require_http_methods(['DELETE', 'HEAD', 'PATCH'])
+def handle_upload(request, resource_id):
+    check_permission(request)
 
-        logger.info(f"TUS head resource_id={resource_id}")
+    if request.method == 'DELETE':
+        return cancel_upload(resource_id)
+    if request.method == 'HEAD':
+        return upload_info(resource_id)
+    elif request.method == 'PATCH':
+        return upload_part(request, resource_id)
 
-        offset = cache.get("tus-uploads/{}/offset".format(resource_id))
-        file_size = cache.get("tus-uploads/{}/file_size".format(resource_id))
-        if offset is None:
-            logger.info("TUS head resource not found")
-            response.status_code = 404
-            return response
 
-        else:
-            response.status_code = 200
-            response['Upload-Offset'] = offset
-            response['Upload-Length'] = file_size
+def upload_info(resource_id):
+    logger.info(f"TUS head resource_id={resource_id}")
 
+    response = get_tus_response()
+
+    offset = cache.get("tus-uploads/{}/offset".format(resource_id))
+    file_size = cache.get("tus-uploads/{}/file_size".format(resource_id))
+    if offset is None:
+        logger.info("TUS head resource not found")
+        response.status_code = 404
         return response
 
-    def patch(self, request, *args, **kwargs):
-        response = get_tus_response()
+    else:
+        response.status_code = 200
+        response['Upload-Offset'] = offset
+        response['Upload-Length'] = file_size
 
-        resource_id = kwargs.get('resource_id', None)
+    return response
 
-        filename = cache.get("tus-uploads/{}/filename".format(resource_id))
-        metadata = cache.get("tus-uploads/{}/metadata".format(resource_id))
-        offset = cache.get("tus-uploads/{}/offset".format(resource_id))
 
-        file_offset = int(request.META.get("HTTP_UPLOAD_OFFSET", 0))
-        chunk_size = int(request.META.get("CONTENT_LENGTH", 102400))
+def upload_part(request, resource_id):
+    response = get_tus_response()
 
-        upload_file_path = get_upload_path().joinpath(resource_id)
-        if filename is None or not upload_file_path.exists():
-            response.status_code = 410
-            return response
+    filename = cache.get("tus-uploads/{}/filename".format(resource_id))
+    metadata = cache.get("tus-uploads/{}/metadata".format(resource_id))
+    offset = cache.get("tus-uploads/{}/offset".format(resource_id))
 
-        if file_offset != offset:  # check to make sure we're in sync
-            response.status_code = 409  # HTTP 409 Conflict
-            return response
+    file_offset = int(request.META.get("HTTP_UPLOAD_OFFSET", 0))
+    chunk_size = int(request.META.get("CONTENT_LENGTH", 102400))
 
-        logger.info(f"TUS patch resource_id={resource_id} filename={filename} metadata={metadata} offset={offset} upload_file_path={upload_file_path}")
+    upload_file_path = get_upload_path().joinpath(resource_id)
+    if filename is None or not upload_file_path.exists():
+        response.status_code = 410
+        return response
 
+    if file_offset != offset:  # check to make sure we're in sync
+        response.status_code = 409  # HTTP 409 Conflict
+        return response
+
+    logger.info(f"TUS patch resource_id={resource_id} filename={filename} metadata={metadata} offset={offset} upload_file_path={upload_file_path}")
+
+    try:
+        file = upload_file_path.open("r+b")
+    except IOError:
+        file = upload_file_path.open("wb")
+
+    if file:
         try:
-            file = upload_file_path.open("r+b")
+            file.seek(file_offset)
+            file.write(request.body)
         except IOError:
-            file = upload_file_path.open("wb")
-
-        if file:
-            try:
-                file.seek(file_offset)
-                file.write(request.body)
-            except IOError:
-                response.status_code = 500
-                return response
-            finally:
-                file.close()
-
-        try:
-            new_offset = cache.incr("tus-uploads/{}/offset".format(resource_id), chunk_size)
-        except ValueError:
-            response.status_code = 404
+            response.status_code = 500
             return response
+        finally:
+            file.close()
 
-        response['Upload-Offset'] = new_offset
-        response.status_code = 204
-
-        file_size = int(cache.get("tus-uploads/{}/file_size".format(resource_id)))
-
-        if file_size == new_offset:
-            remove_resource_from_cache(resource_id)
-
-            create_uploaded_file_in_db(
-                field_name=metadata.get('fieldName'),
-                file_id=resource_id,
-                form_id=metadata.get('formId'),
-                original_filename=metadata.get('filename'),
-                uploaded_file=upload_file_path
-            )
-
+    try:
+        new_offset = cache.incr("tus-uploads/{}/offset".format(resource_id), chunk_size)
+    except ValueError:
+        response.status_code = 404
         return response
 
-    def delete(self, request, *args, **kwargs):
-        response = get_tus_response()
-        resource_id = kwargs.get('resource_id', None)
+    response['Upload-Offset'] = new_offset
+    response.status_code = 204
 
-        logger.info(f"TUS delete resource_id={resource_id}")
+    file_size = int(cache.get("tus-uploads/{}/file_size".format(resource_id)))
 
+    if file_size == new_offset:
         remove_resource_from_cache(resource_id)
 
-        upload_file_path = get_upload_path().joinpath(resource_id)
+        create_uploaded_file_in_db(
+            field_name=metadata.get('fieldName'),
+            file_id=resource_id,
+            form_id=metadata.get('formId'),
+            original_filename=metadata.get('filename'),
+            uploaded_file=upload_file_path
+        )
 
-        if upload_file_path.exists():
-            upload_file_path.unlink()
+    return response
 
-        uploaded_file = UploadedFile.objects.try_get(file_id=resource_id)
 
-        if uploaded_file:
-            uploaded_file.delete()
+def cancel_upload(resource_id):
+    logger.info(f"TUS delete resource_id={resource_id}")
 
-        response.status_code = 204
-        return response
+    remove_resource_from_cache(resource_id)
+
+    upload_file_path = get_upload_path().joinpath(resource_id)
+
+    if upload_file_path.exists():
+        upload_file_path.unlink()
+
+    uploaded_file = UploadedFile.objects.try_get(file_id=resource_id)
+
+    if uploaded_file:
+        uploaded_file.delete()
+
+    response = get_tus_response()
+    response.status_code = 204
+    return response
