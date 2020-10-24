@@ -7,7 +7,7 @@ tus_patterns = [
 ]
 
 try:
-    from .views.s3multipart import s3multipart
+    from .views import s3multipart
     s3_patterns = [
         path('s3upload/', s3multipart.create_multipart_upload, name='s3_upload'),
         path('s3upload/<upload_id>/', s3multipart.get_parts_or_abort_upload, name='get_parts_or_abort_upload'),
