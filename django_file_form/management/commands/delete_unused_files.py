@@ -9,9 +9,9 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         deleted_files = UploadedFile.objects.delete_unused_files()
 
-        verbosity = options.get('verbosity')
+        verbosity = options.get("verbosity")
         if verbosity:
             if not deleted_files:
-                print('No files deleted')
+                print("No files deleted")
             else:
-                print('Deleted files: {0!s}'.format(', '.join(deleted_files)))
+                print("Deleted files: {0!s}".format(", ".join(deleted_files)))

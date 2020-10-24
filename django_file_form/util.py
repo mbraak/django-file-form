@@ -21,15 +21,15 @@ def get_list(v):
 
 
 def check_permission(request):
-    must_login = getattr(settings, 'FILE_FORM_MUST_LOGIN', False)
+    must_login = getattr(settings, "FILE_FORM_MUST_LOGIN", False)
 
     if must_login and not request.user.is_authenticated:
         raise PermissionDenied()
 
 
 def get_upload_path():
-    default_upload_dir = 'temp_uploads'
-    upload_path = Path(getattr(settings, 'FILE_FORM_UPLOAD_DIR', default_upload_dir))
+    default_upload_dir = "temp_uploads"
+    upload_path = Path(getattr(settings, "FILE_FORM_UPLOAD_DIR", default_upload_dir))
 
     if upload_path.is_absolute():
         return upload_path

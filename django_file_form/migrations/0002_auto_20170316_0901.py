@@ -10,13 +10,15 @@ from . import storage
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('django_file_form', '0001_initial'),
+        ("django_file_form", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='uploadedfile',
-            name='uploaded_file',
-            field=models.FileField(max_length=255, storage=storage, upload_to='temp_uploads'),
+            model_name="uploadedfile",
+            name="uploaded_file",
+            field=models.FileField(
+                max_length=255, storage=storage, upload_to="temp_uploads"
+            ),
         ),
     ]
