@@ -11,12 +11,12 @@ class TempFile(object):
     def __init__(self):
         self.named_temporary_file = None
 
-    def create(self, content='abc', prefix=None, binary=False):
+    def create(self, content="abc", prefix=None, binary=False):
         if self.named_temporary_file:
-            raise Exception('Tempfile is already created')
+            raise Exception("Tempfile is already created")
 
         def create_named_temporary_file():
-            f = NamedTemporaryFile(mode='w+b', prefix=prefix or 'tmp')
+            f = NamedTemporaryFile(mode="w+b", prefix=prefix or "tmp")
             f.write(content if binary else content.encode())
             f.seek(0)
 
@@ -26,13 +26,13 @@ class TempFile(object):
 
     def base_name(self):
         if not self.named_temporary_file:
-            raise Exception('Tempfile is not created')
+            raise Exception("Tempfile is not created")
 
         return os.path.basename(self.named_temporary_file.name)
 
     def path(self):
         if not self.named_temporary_file:
-            raise Exception('Tempfile is not created')
+            raise Exception("Tempfile is not created")
 
         return self.named_temporary_file.name
 
@@ -51,6 +51,6 @@ class TempFile(object):
 
     def uploaded_file(self):
         if not self.named_temporary_file:
-            raise Exception('Tempfile is not created')
+            raise Exception("Tempfile is not created")
 
-        return Path(settings.MEDIA_ROOT).joinpath('example', self.base_name())
+        return Path(settings.MEDIA_ROOT).joinpath("example", self.base_name())
