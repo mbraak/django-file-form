@@ -1,12 +1,19 @@
 import json
+import logging
+
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST, require_http_methods, require_GET
 
 from .utils import get_bucket_name, file_form_upload_dir, get_client, get_available_name
 
 
+logger = logging.getLogger(__name__)
+
+
 @require_POST
 def create_multipart_upload(request):
+    logger.info("Create upload")
+
     client = get_client()
     json_body = json.loads(request.body)
     filename = json_body["filename"]
@@ -33,6 +40,8 @@ def get_parts_or_abort_upload(request, upload_id):
     key = request.GET['key']
     bucket_name = get_bucket_name()
     if request.method == 'GET':
+        logger.info("Get part")
+
         response = client.list_parts(
             Bucket=bucket_name, Key=key, UploadId=upload_id)
         if "Parts" in response:
@@ -40,6 +49,8 @@ def get_parts_or_abort_upload(request, upload_id):
         else:
             return JsonResponse({'parts': []})
     elif request.method == 'DELETE':
+        logger.info("Abort upload")
+
         client.abort_multipart_upload(
             Bucket=bucket_name,
             Key=key,
@@ -50,6 +61,8 @@ def get_parts_or_abort_upload(request, upload_id):
 
 @require_GET
 def sign_part_upload(request, upload_id, part_number):
+    logger.info("Generate presigned url")
+
     client = get_client()
     key = request.GET['key']
     bucket_name = get_bucket_name()
@@ -69,6 +82,8 @@ def sign_part_upload(request, upload_id, part_number):
 
 @require_POST
 def complete_multipart_upload(request, upload_id):
+    logger.info("Complete upload")
+
     client = get_client()
     json_body = json.loads(request.body)
     key = request.GET['key']
