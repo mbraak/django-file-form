@@ -3,9 +3,12 @@ import logging
 import uuid
 from pathlib import Path
 
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+
 from django_file_form import conf
 from django_file_form.models import UploadedFile
-from django_file_form.util import get_upload_path
+from django_file_form.util import get_upload_path, check_permission
 from .utils import cache, create_uploaded_file_in_db, remove_resource_from_cache
 from .tus_base_view import get_tus_response, TusBaseView
 
@@ -13,47 +16,50 @@ from .tus_base_view import get_tus_response, TusBaseView
 logger = logging.getLogger(__name__)
 
 
-class StartTusUpload(TusBaseView):
-    def post(self, request, *args, **kwargs):
-        response = get_tus_response()
+@csrf_exempt
+@require_POST
+def start_upload(request):
+    check_permission(request)
 
-        if request.META.get("HTTP_TUS_RESUMABLE", None) is None:
-            logger.warning("Received File upload for unsupported file transfer protocol")
-            response.status_code = 500
-            response.reason_phrase = "Received File upload for unsupported file transfer protocol"
-            return response
+    response = get_tus_response()
 
-        metadata = {}
-        upload_metadata = request.META.get("HTTP_UPLOAD_METADATA", None)
-
-        if upload_metadata:
-            for kv in upload_metadata.split(","):
-                (key, value) = kv.split(" ")
-                metadata[key] = base64.b64decode(value).decode("utf-8")
-
-        logger.info(f"TUS post metadata={metadata}")
-
-        file_size = int(request.META.get("HTTP_UPLOAD_LENGTH", "0"))
-        resource_id = str(uuid.uuid4())
-
-        cache.add("tus-uploads/{}/filename".format(resource_id), metadata.get("filename"), conf.TIMEOUT)
-        cache.add("tus-uploads/{}/file_size".format(resource_id), file_size, conf.TIMEOUT)
-        cache.add("tus-uploads/{}/offset".format(resource_id), 0, conf.TIMEOUT)
-        cache.add("tus-uploads/{}/metadata".format(resource_id), metadata, conf.TIMEOUT)
-
-        try:
-            with Path(get_upload_path()).joinpath(resource_id).open("wb") as f:
-                pass
-        except IOError as e:
-            logger.error("Unable to create file: {}".format(e), exc_info=True, extra={
-                'request': request,
-            })
-            response.status_code = 500
-            return response
-
-        response.status_code = 201
-        response['Location'] = '{}{}'.format(request.build_absolute_uri(), resource_id)
+    if request.META.get("HTTP_TUS_RESUMABLE", None) is None:
+        logger.warning("Received File upload for unsupported file transfer protocol")
+        response.status_code = 500
+        response.reason_phrase = "Received File upload for unsupported file transfer protocol"
         return response
+
+    metadata = {}
+    upload_metadata = request.META.get("HTTP_UPLOAD_METADATA", None)
+
+    if upload_metadata:
+        for kv in upload_metadata.split(","):
+            (key, value) = kv.split(" ")
+            metadata[key] = base64.b64decode(value).decode("utf-8")
+
+    logger.info(f"TUS post metadata={metadata}")
+
+    file_size = int(request.META.get("HTTP_UPLOAD_LENGTH", "0"))
+    resource_id = str(uuid.uuid4())
+
+    cache.add("tus-uploads/{}/filename".format(resource_id), metadata.get("filename"), conf.TIMEOUT)
+    cache.add("tus-uploads/{}/file_size".format(resource_id), file_size, conf.TIMEOUT)
+    cache.add("tus-uploads/{}/offset".format(resource_id), 0, conf.TIMEOUT)
+    cache.add("tus-uploads/{}/metadata".format(resource_id), metadata, conf.TIMEOUT)
+
+    try:
+        with Path(get_upload_path()).joinpath(resource_id).open("wb") as f:
+            pass
+    except IOError as e:
+        logger.error("Unable to create file: {}".format(e), exc_info=True, extra={
+            'request': request,
+        })
+        response.status_code = 500
+        return response
+
+    response.status_code = 201
+    response['Location'] = '{}{}'.format(request.build_absolute_uri(), resource_id)
+    return response
 
 
 class TusUpload(TusBaseView):
