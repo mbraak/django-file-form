@@ -1,13 +1,12 @@
 import json
-from django.http import JsonResponse, HttpResponseNotFound
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST, require_http_methods, require_GET
 
 from .utils import get_bucket_name, file_form_upload_dir, get_client, get_available_name
 
 
+@require_POST
 def create_multipart_upload(request):
-    if request.method != 'POST':
-        return HttpResponseNotFound()
-
     client = get_client()
     json_body = json.loads(request.body)
     filename = json_body["filename"]
@@ -28,6 +27,7 @@ def create_multipart_upload(request):
     })
 
 
+@require_http_methods(["GET", "DELETE"])
 def get_parts_or_abort_upload(request, upload_id):
     client = get_client()
     key = request.GET['key']
@@ -48,10 +48,8 @@ def get_parts_or_abort_upload(request, upload_id):
         return JsonResponse({})
 
 
+@require_GET
 def sign_part_upload(request, upload_id, part_number):
-    if request.method != 'GET':
-        return HttpResponseNotFound()
-
     client = get_client()
     key = request.GET['key']
     bucket_name = get_bucket_name()
@@ -69,10 +67,8 @@ def sign_part_upload(request, upload_id, part_number):
     return JsonResponse({'url': response})
 
 
+@require_POST
 def complete_multipart_upload(request, upload_id):
-    if request.method != 'POST':
-        return HttpResponseNotFound()
-
     client = get_client()
     json_body = json.loads(request.body)
     key = request.GET['key']
