@@ -1,5 +1,5 @@
 from django.urls import path
-from .views.tus import TusUpload
+from .tus.views import TusUpload
 
 tus_patterns = [
     path('upload/', TusUpload.as_view(), name='tus_upload'),
@@ -7,7 +7,7 @@ tus_patterns = [
 ]
 
 try:
-    from .views import s3multipart
+    from .s3_multipart import views as s3multipart
     s3_patterns = [
         path('s3upload/', s3multipart.create_multipart_upload, name='s3_upload'),
         path('s3upload/<upload_id>/', s3multipart.get_parts_or_abort_upload, name='get_parts_or_abort_upload'),
