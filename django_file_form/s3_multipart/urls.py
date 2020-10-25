@@ -12,7 +12,7 @@ try:
         ),
         path(
             "<upload_id>/<int:part_number>",
-            views.sign_part_upload,
+            views.sign_upload_part,
             name="sign_part_upload",
         ),
         path(

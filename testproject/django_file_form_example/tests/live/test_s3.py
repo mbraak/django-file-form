@@ -36,7 +36,7 @@ class S3ServerThread(threading.Thread):
 
 
 @override_settings(
-    AWS_STORAGE_BUCKET_NAME="MyBucket",
+    AWS_STORAGE_BUCKET_NAME="mybucket",
     AWS_S3_ENDPOINT_URL="http://localhost:4566",
     AWS_ACCESS_KEY_ID="access1",
     AWS_SECRET_ACCESS_KEY="test1",
@@ -59,7 +59,7 @@ class S3TestCase(BaseLiveTestCase):
             aws_access_key_id="access1",
             aws_secret_access_key="test1",
         )
-        bucket = s3.Bucket("MyBucket")
+        bucket = s3.Bucket("mybucket")
         bucket.create()
 
         self.bucket = bucket

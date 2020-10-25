@@ -99,9 +99,9 @@ def get_available_name(client, bucket_name, name, max_length=None):
             # Entire file_root was truncated in attempt to find an available filename.
             if not file_root:
                 raise SuspiciousFileOperation(
-                    'Storage can not find an available filename for "%s". '
+                    f'Storage can not find an available filename for "{name}". '
                     "Please make sure that the corresponding file field "
-                    'allows sufficient "max_length".' % name
+                    'allows sufficient "max_length".'
                 )
             name = os.path.join(dir_name, get_alternative_name(file_root, file_ext))
     return name
