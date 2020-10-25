@@ -26,7 +26,7 @@ class Page(object):
             temp_file.destroy()
 
     def open(self, page):
-        self.selenium.get("%s%s" % (self.live_server_url, page))
+        self.selenium.get(f"{self.live_server_url}{page}")
 
     def fill_title_field(self, value, form_prefix="example"):
         self.selenium.find_element_by_name(f"{form_prefix}-title").send_keys(value)
@@ -54,10 +54,10 @@ class Page(object):
 
         try:
             el = parent_element.find_element_by_css_selector(
-                ".dff-file-id-%d.dff-upload-success" % upload_index
+                f".dff-file-id-{upload_index}.dff-upload-success"
             )
             return el.find_element_by_xpath(
-                "//*[contains(text(), '%s')]" % temp_file.base_name()
+                f"//*[contains(text(), '{temp_file.base_name()}')]"
             )
         except NoSuchElementException as e:
             print(
@@ -83,45 +83,43 @@ class Page(object):
 
     def find_upload_fail(self, temp_file, upload_index=0):
         el = self.find_upload_element(upload_index, extra_class="dff-upload-fail")
-        el.find_element_by_xpath("//*[contains(text(), '%s')]" % temp_file.base_name())
+        el.find_element_by_xpath(f"//*[contains(text(), '{temp_file.base_name()}')]")
         el.find_element_by_xpath("//*[contains(text(), 'Upload failed')]")
         return el
 
     def find_upload_element(self, upload_index=0, extra_class=None):
-        classes = ["dff-file-id-%d" % upload_index, extra_class]
+        classes = [f"dff-file-id-{upload_index}", extra_class]
 
         return self.selenium.find_element_by_css_selector(to_class_string(classes))
 
     def wait_until_upload_is_removed(self, upload_index=0, field_selector=None):
         WebDriverWait(self.selenium, timeout=10).until_not(
             lambda selenium: selenium.find_element_by_css_selector(
-                "%s .dff-file-id-%d.dff-upload-success"
-                % (field_selector or "", upload_index)
+                f"{field_selector or ''} .dff-file-id-{upload_index}.dff-upload-success"
             )
         )
 
     def find_delete_failed(self, upload_index=0, text="Delete failed"):
         el = self.selenium.find_element_by_css_selector(
-            ".dff-file-id-%d.dff-upload-success" % upload_index
+            f".dff-file-id-{upload_index}.dff-upload-success"
         )
-        el.find_element_by_xpath("//*[contains(text(), '%s')]" % text)
+        el.find_element_by_xpath(f"//*[contains(text(), '{text}')]")
 
     def submit(self):
         self.on_submit()
         self.selenium.find_element_by_css_selector("input[type=submit]").click()
 
     def assert_page_contains_text(self, text):
-        self.selenium.find_element_by_xpath("//*[contains(text(), '%s')]" % text)
+        self.selenium.find_element_by_xpath(f"//*[contains(text(), '{text}')]")
 
     def delete_ajax_file(self, upload_index=0, text="Delete", field_selector=None):
         el = self.selenium.find_element_by_css_selector(
-            "%s .dff-file-id-%d.dff-upload-success"
-            % (field_selector or "", upload_index)
+            f"{field_selector or ''} .dff-file-id-{upload_index}.dff-upload-success"
         )
         el.find_element_by_link_text(text).click()
 
     def create_user(self, username, password):
-        u = User.objects.create(username=username, email="%s@test.nl" % username)
+        u = User.objects.create(username=username, email=f"{username}@test.nl")
         u.set_password(password)
         u.save()
 

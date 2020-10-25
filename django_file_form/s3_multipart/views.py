@@ -73,7 +73,7 @@ def get_parts(request, upload_id):
 
 
 @require_GET
-def sign_part_upload(request, upload_id, part_number):
+def sign_upload_part(request, upload_id, part_number):
     logger.info("Generate presigned url")
 
     client = get_client()

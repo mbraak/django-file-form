@@ -245,7 +245,9 @@ class S3Upload extends BaseUpload {
     const candidates = [];
     for (let i = 0; i < this.chunkState.length; i++) {
       const state = this.chunkState[i];
-      if (state.done || state.busy) continue;
+      if (state.done || state.busy) {
+        continue;
+      }
 
       candidates.push(i);
       if (candidates.length >= need) {
@@ -328,7 +330,9 @@ class S3Upload extends BaseUpload {
     this.uploading.push(xhr);
 
     xhr.upload.addEventListener("progress", ev => {
-      if (!ev.lengthComputable) return;
+      if (!ev.lengthComputable) {
+        return;
+      }
 
       this.onPartProgress(index, ev.loaded);
     });
