@@ -86,7 +86,8 @@ TEMPLATES = [
     ),
 ]
 
-DJANGO_FILE_FORM_COVERAGE_JS = "COVERAGE" in os.environ
+if "COVERAGE" in os.environ:
+    DJANGO_FILE_FORM_COVERAGE_JS = True
 
 ALLOWED_HOSTS = ["*"]
 
@@ -103,7 +104,7 @@ CSP_FONT_SRC = ("'self'",)
 CSP_IMG_SRC = ("'self'",)
 CSP_CONNECT_SRC = ("'self'", AWS_S3_ENDPOINT_URL)
 
-if DJANGO_FILE_FORM_COVERAGE_JS:
+if "COVERAGE" in os.environ:
     CSP_SCRIPT_SRC += ["'unsafe-eval'"]
 
 logging.basicConfig(level="INFO")
