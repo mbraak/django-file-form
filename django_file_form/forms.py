@@ -2,7 +2,7 @@ import json
 import uuid
 
 from django.urls import reverse
-from django.forms import CharField, HiddenInput
+from django.forms import CharField, Form, HiddenInput
 
 # UploadedFileField and MultipleUploadedFileField must be in this module because they are in the api
 from .fields import UploadedFileField, MultipleUploadedFileField
@@ -28,12 +28,12 @@ class FileFormMixin(object):
         self.add_placeholder_inputs()
         self.add_metadata_inputs()
 
-    def add_hidden_field(self, name, initial):
+    def add_hidden_field(self: Form, name: str, initial):
         self.fields[name] = CharField(
             widget=HiddenInput, initial=initial, required=False
         )
 
-    def full_clean(self):
+    def full_clean(self: Form):
         if not self.is_bound:
             # Form is unbound; just call super
             super().full_clean()
@@ -44,14 +44,14 @@ class FileFormMixin(object):
             # Call super
             super().full_clean()
 
-    def file_form_field_names(self):
+    def file_form_field_names(self: Form):
         return [
             field_name
             for field_name, field in self.fields.items()
             if hasattr(field, "get_file_data")
         ]
 
-    def update_files_data(self):
+    def update_files_data(self: Form):
         form_id = self.data.get(self.add_prefix("form_id"))
 
         if form_id:
@@ -67,7 +67,7 @@ class FileFormMixin(object):
                     else:
                         self.files[prefixed_field_name] = file_data
 
-    def delete_temporary_files(self):
+    def delete_temporary_files(self: Form):
         form_id = self.data.get(self.add_prefix("form_id"))
 
         if form_id:
@@ -90,7 +90,7 @@ class FileFormMixin(object):
                 json.dumps(self.get_placesholders_for_field(field_name)),
             )
 
-    def get_placesholders_for_field(self, field_name):
+    def get_placesholders_for_field(self: Form, field_name: str):
         initial_values = get_list(self.initial.get(field_name, []))
 
         return [
@@ -106,7 +106,7 @@ class FileFormMixin(object):
                 metadata_field_name, json.dumps(self.get_metadata_for_field(field_name))
             )
 
-    def get_metadata_for_field(self, field_name):
+    def get_metadata_for_field(self: Form, field_name: str):
         initial_values = get_list(self.initial.get(field_name, []))
         return {
             value.name: value.metadata
