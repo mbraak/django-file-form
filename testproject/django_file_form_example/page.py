@@ -93,9 +93,9 @@ class Page(object):
         return self.selenium.find_element_by_css_selector(to_class_string(classes))
 
     def wait_until_upload_is_removed(self, upload_index=0, field_selector=None):
-        WebDriverWait(self.selenium, timeout=10).until_not(
+        WebDriverWait(self.selenium, timeout=10, poll_frequency=0.1).until_not(
             lambda selenium: selenium.find_element_by_css_selector(
-                f"{field_selector or ''} .dff-file-id-{upload_index}.dff-upload-success"
+                f"{field_selector or ''} .dff-file-id-{upload_index}"
             )
         )
 

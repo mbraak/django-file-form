@@ -13,7 +13,7 @@ from . import forms
 
 
 def file_form_js():
-    if settings.DJANGO_FILE_FORM_COVERAGE_JS:
+    if getattr(settings, 'DJANGO_FILE_FORM_COVERAGE_JS', False):
         return "file_form/file_form.coverage.js"
     else:
         return "file_form/file_form.js"
