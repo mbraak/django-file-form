@@ -1,13 +1,19 @@
 import json
+from typing import Dict, Union, List
 
 from django.forms import ClearableFileInput
+from django.http import QueryDict
 from django.template.loader import render_to_string
+from django.utils.datastructures import MultiValueDict
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
 from django_file_form.util import get_list
 
-from django_file_form.models import PlaceholderUploadedFile, S3UploadedFileWithId
-
+from django_file_form.models import (
+    PlaceholderUploadedFile,
+    S3UploadedFileWithId,
+    UploadedFileWithId,
+)
 
 TRANSLATIONS = {
     "Cancel": _("Cancel"),
@@ -17,8 +23,14 @@ TRANSLATIONS = {
     "Drop your files here": _("Drop your files here"),
 }
 
+UploadedFileTypes = Union[
+    PlaceholderUploadedFile,
+    UploadedFileWithId,
+    List[Union[PlaceholderUploadedFile, UploadedFileWithId]],
+]
 
-def get_uploaded_files(value):
+
+def get_uploaded_files(value: UploadedFileTypes):
     if not value:
         return []
 
@@ -32,7 +44,7 @@ def get_uploaded_files(value):
     ]
 
 
-def get_placeholder_files(data, field_name):
+def get_placeholder_files(data: QueryDict, field_name: str):
     placeholder_field_name = field_name + "-placeholder"
     value = data.get(placeholder_field_name)
 
@@ -49,7 +61,7 @@ def get_placeholder_files(data, field_name):
         ]
 
 
-def get_s3_uploaded_files(data, field_name):
+def get_s3_uploaded_files(data: QueryDict, field_name: str):
     s3uploaded_field_name = field_name + "-s3direct"
     value = data.get(s3uploaded_field_name)
 
@@ -67,7 +79,7 @@ def get_s3_uploaded_files(data, field_name):
         ]
 
 
-def get_file_meta(data, field_name):
+def get_file_meta(data: QueryDict, field_name: str):
     meta_field_name = field_name + "-metadata"
     value = data.get(meta_field_name)
     if not value:
@@ -81,8 +93,15 @@ def get_file_meta(data, field_name):
         return {}
 
 
-class UploadWidgetMixin(ClearableFileInput):
-    def render(self, name, value, attrs=None, renderer=None):
+class BaseUploadWidget(ClearableFileInput):
+    def render(
+        self,
+        name: str,
+        value: UploadedFileTypes,
+        attrs=None,
+        renderer=None,
+    ):
+        print("render value:", value)
         upload_input = super().render(name, value, attrs, renderer)
         return mark_safe(
             render_to_string(
@@ -96,8 +115,8 @@ class UploadWidgetMixin(ClearableFileInput):
         )
 
 
-class UploadWidget(UploadWidgetMixin, ClearableFileInput):
-    def value_from_datadict(self, data, files, name):
+class UploadWidget(BaseUploadWidget):
+    def value_from_datadict(self, data: QueryDict, files: MultiValueDict, name: str):
         upload = super().value_from_datadict(data, files, name)
 
         if upload:
@@ -116,8 +135,10 @@ class UploadWidget(UploadWidgetMixin, ClearableFileInput):
             return obj
 
 
-class UploadMultipleWidget(UploadWidget):
-    def value_from_datadict(self, data, files, name):
+class UploadMultipleWidget(BaseUploadWidget):
+    def value_from_datadict(
+        self, data: QueryDict, files: Union[Dict, MultiValueDict], name: str
+    ):
         if hasattr(files, "getlist"):
             metadata = get_file_meta(data, name)
             objs = (
