@@ -101,7 +101,6 @@ class BaseUploadWidget(ClearableFileInput):
         attrs=None,
         renderer=None,
     ):
-        print("render value:", value)
         upload_input = super().render(name, value, attrs, renderer)
         return mark_safe(
             render_to_string(
