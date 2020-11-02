@@ -9545,7 +9545,11 @@
 
 	      for (var i = 0; i < this.chunkState.length; i++) {
 	        var state = this.chunkState[i];
-	        if (state.done || state.busy) continue;
+
+	        if (state.done || state.busy) {
+	          continue;
+	        }
+
 	        candidates.push(i);
 
 	        if (candidates.length >= need) {
@@ -9629,7 +9633,9 @@
 	      xhr.responseType = "text";
 	      this.uploading.push(xhr);
 	      xhr.upload.addEventListener("progress", function (ev) {
-	        if (!ev.lengthComputable) return;
+	        if (!ev.lengthComputable) {
+	          return;
+	        }
 
 	        _this6.onPartProgress(index, ev.loaded);
 	      });
