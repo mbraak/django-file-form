@@ -33,6 +33,7 @@ export interface Callbacks {
 class FileField {
   callbacks: Callbacks;
   chunkSize: number;
+  csrfToken?: string;
   eventEmitter?: EventEmitter;
   fieldName: string;
   form: Element;
@@ -50,6 +51,7 @@ class FileField {
   constructor({
     callbacks,
     chunkSize,
+    csrfToken,
     eventEmitter,
     fieldName,
     form,
@@ -68,6 +70,7 @@ class FileField {
   }: {
     callbacks: Callbacks;
     chunkSize: number;
+    csrfToken?: string;
     eventEmitter?: EventEmitter;
     fieldName: string;
     form: Element;
@@ -86,6 +89,7 @@ class FileField {
   }) {
     this.callbacks = callbacks;
     this.chunkSize = chunkSize;
+    this.csrfToken = csrfToken;
     this.eventEmitter = eventEmitter;
     this.fieldName = fieldName;
     this.form = form;
@@ -176,12 +180,15 @@ class FileField {
 
   async uploadFile(file: File): Promise<void> {
     const createUpload = (): S3Upload | TusUpload => {
-      const { s3UploadDir } = this;
+      const { csrfToken, s3UploadDir } = this;
 
       if (s3UploadDir != null) {
-        return new S3Upload(file, newUploadIndex, {
+        return new S3Upload({
+          csrfToken,
           endpoint: uploadUrl,
-          s3UploadDir
+          file,
+          s3UploadDir,
+          uploadIndex: newUploadIndex
         });
       } else {
         return new TusUpload(file, newUploadIndex, {

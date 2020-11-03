@@ -2,6 +2,7 @@ import EventEmitter from "eventemitter3";
 import FileField, { Callbacks, Translations } from "./file_field";
 import { InitialFile } from "./uploads/uploaded_file";
 import {
+  findInput,
   getInputNameWithPrefix,
   getInputValueForFormAndPrefix,
   getPlaceholderFieldName,
@@ -68,6 +69,7 @@ const initUploadFields = (form: Element, options: Options = {}): void => {
   const s3UploadDir = getInputValue("s3_upload_dir");
   const skipRequired = options.skipRequired || false;
   const prefix = getPrefix();
+  const csrfToken = findInput(form, "csrfmiddlewaretoken", null)?.value;
 
   if (!formId || !uploadUrl) {
     return;
@@ -104,6 +106,7 @@ const initUploadFields = (form: Element, options: Options = {}): void => {
     new FileField({
       callbacks: options.callbacks || {},
       chunkSize: options.chunkSize || 2621440,
+      csrfToken,
       eventEmitter: options.eventEmitter,
       fieldName,
       form,
