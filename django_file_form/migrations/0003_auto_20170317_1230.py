@@ -9,13 +9,13 @@ import django_file_form.models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('django_file_form', '0002_auto_20170316_0901'),
+        ("django_file_form", "0002_auto_20170316_0901"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='uploadedfile',
-            name='uploaded_file',
+            model_name="uploadedfile",
+            name="uploaded_file",
             field=models.FileField(max_length=255),
         ),
     ]

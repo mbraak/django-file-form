@@ -44,11 +44,11 @@ class UploadedFileManager(ModelManager):
 
 def get_upload_to(instance, filename):
     # Full path including filename is needed for custom storage backends.
-    path = getattr(settings, 'FILE_FORM_UPLOAD_DIR', 'temp_uploads')
+    path = getattr(settings, "FILE_FORM_UPLOAD_DIR", "temp_uploads")
     return os.path.join(path, filename)
 
 
-if hasattr(settings, 'FILE_FORM_TEMP_STORAGE'):
+if hasattr(settings, "FILE_FORM_TEMP_STORAGE"):
     storage_class = import_string(settings.FILE_FORM_TEMP_STORAGE)
 else:
     storage_class = FileSystemStorage
@@ -56,7 +56,9 @@ else:
 
 class UploadedFile(models.Model):
     created = models.DateTimeField(default=timezone.now)
-    uploaded_file = models.FileField(max_length=255, storage=storage_class(), upload_to=get_upload_to)
+    uploaded_file = models.FileField(
+        max_length=255, storage=storage_class(), upload_to=get_upload_to
+    )
     original_filename = models.CharField(max_length=255)
     field_name = models.CharField(max_length=255, null=True, blank=True)
     file_id = models.CharField(max_length=40)
@@ -69,10 +71,12 @@ class UploadedFile(models.Model):
         index_together = (("form_id", "field_name"),)
 
     def __str__(self):
-        return str(self.original_filename or '')
+        return str(self.original_filename or "")
 
     def delete(self, *args, **kwargs):
-        if self.uploaded_file and self.uploaded_file.storage.exists(self.uploaded_file.name):
+        if self.uploaded_file and self.uploaded_file.storage.exists(
+            self.uploaded_file.name
+        ):
             self.uploaded_file.delete()
 
         super().delete(*args, **kwargs)
@@ -84,9 +88,7 @@ class UploadedFile(models.Model):
 
     def get_uploaded_file(self):
         return UploadedFileWithId(
-            file=self.uploaded_file,
-            name=self.original_filename,
-            file_id=self.file_id
+            file=self.uploaded_file, name=self.original_filename, file_id=self.file_id
         )
 
 
@@ -102,7 +104,9 @@ class UploadedFileWithId(uploadedfile.UploadedFile):
         self.metadata = metadata
 
     def get_values(self):
-        return dict(id=self.file_id, name=self.name, size=self.size, metadata=self.metadata)
+        return dict(
+            id=self.file_id, name=self.name, size=self.size, metadata=self.metadata
+        )
 
 
 class PlaceholderUploadedFile(object):
@@ -119,8 +123,13 @@ class PlaceholderUploadedFile(object):
         self.metadata = metadata
 
     def get_values(self):
-        return dict(id=self.file_id, placeholder=True, name=self.name,
-            size=self.size, metadata=self.metadata)
+        return dict(
+            id=self.file_id,
+            placeholder=True,
+            name=self.name,
+            size=self.size,
+            metadata=self.metadata,
+        )
 
 
 try:
@@ -130,18 +139,17 @@ try:
     class S3UploadedFileWithId(S3Boto3StorageFile):
         def __init__(self, file_id, name, original_name, size, metadata=None, **kwargs):
             boto_storage = S3Boto3Storage(
-                bucket_name=setting('AWS_STORAGE_BUCKET_NAME'),
-                endpoint_url=setting('AWS_S3_ENDPOINT_URL'),
-                access_key=setting('AWS_S3_ACCESS_KEY_ID', setting('AWS_ACCESS_KEY_ID')),
-                secret_key=setting('AWS_S3_SECRET_ACCESS_KEY', setting('AWS_SECRET_ACCESS_KEY'))
+                bucket_name=setting("AWS_STORAGE_BUCKET_NAME"),
+                endpoint_url=setting("AWS_S3_ENDPOINT_URL"),
+                access_key=setting(
+                    "AWS_S3_ACCESS_KEY_ID", setting("AWS_ACCESS_KEY_ID")
+                ),
+                secret_key=setting(
+                    "AWS_S3_SECRET_ACCESS_KEY", setting("AWS_SECRET_ACCESS_KEY")
+                ),
             )
 
-            super().__init__(
-                name=name,
-                mode='rb',
-                storage=boto_storage,
-                **kwargs
-            )
+            super().__init__(name=name, mode="rb", storage=boto_storage, **kwargs)
 
             self.file_id = file_id
             self.original_name = original_name
@@ -153,8 +161,14 @@ try:
             self.metadata = metadata
 
         def get_values(self):
-            return dict(id=self.file_id, placeholder=False, name=self.name,
-                size=self.size, metadata=self.metadata)
+            return dict(
+                id=self.file_id,
+                placeholder=False,
+                name=self.name,
+                size=self.size,
+                metadata=self.metadata,
+            )
+
 
 except (ImportError, ImproperlyConfigured):
     # S3 is an optional feature but we keep the symbol

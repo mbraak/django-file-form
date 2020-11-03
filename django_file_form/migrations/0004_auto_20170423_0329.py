@@ -8,12 +8,12 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('django_file_form', '0003_auto_20170317_1230'),
+        ("django_file_form", "0003_auto_20170317_1230"),
     ]
 
     operations = [
         migrations.AlterIndexTogether(
-            name='uploadedfile',
-            index_together=set([('form_id', 'field_name')]),
+            name="uploadedfile",
+            index_together=set([("form_id", "field_name")]),
         ),
     ]

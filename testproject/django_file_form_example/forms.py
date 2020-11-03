@@ -4,7 +4,11 @@ from pathlib import Path
 from django.core.exceptions import ValidationError
 from django.forms import formset_factory, BaseFormSet, Form, CharField
 
-from django_file_form.forms import UploadedFileField, MultipleUploadedFileField, FileFormMixin
+from django_file_form.forms import (
+    UploadedFileField,
+    MultipleUploadedFileField,
+    FileFormMixin,
+)
 
 from .models import Example, Example2, ExampleFile
 
@@ -15,23 +19,20 @@ class BaseForm(FileFormMixin, Form):
     def clean(self):
         cleaned_data = super(BaseForm, self).clean()
 
-        if not cleaned_data['title']:
-            raise ValidationError('Title field is required')
+        if not cleaned_data["title"]:
+            raise ValidationError("Title field is required")
 
         return cleaned_data
 
 
 class ExampleForm(BaseForm):
-    prefix = 'example'
+    prefix = "example"
     input_file = UploadedFileField()
 
     def save(self):
-        input_file = self.cleaned_data['input_file']
+        input_file = self.cleaned_data["input_file"]
 
-        Example.objects.create(
-            title=self.cleaned_data['title'],
-            input_file=input_file
-        )
+        Example.objects.create(title=self.cleaned_data["title"], input_file=input_file)
 
         input_file.close()
 
@@ -48,34 +49,27 @@ ExampleFormSet = formset_factory(ExampleForm, extra=2, formset=ExampleBaseFormSe
 
 
 class MultipleFileExampleForm(BaseForm):
-    prefix = 'example'
+    prefix = "example"
     input_file = MultipleUploadedFileField()
 
     def save(self):
-        example = Example2.objects.create(
-            title=self.cleaned_data['title']
-        )
+        example = Example2.objects.create(title=self.cleaned_data["title"])
 
-        for f in self.cleaned_data['input_file']:
-            ExampleFile.objects.create(
-                example=example,
-                input_file=f
-            )
+        for f in self.cleaned_data["input_file"]:
+            ExampleFile.objects.create(example=example, input_file=f)
             f.close()
 
         self.delete_temporary_files()
 
 
 class S3ExampleForm(BaseForm):
-    prefix = 'example'
+    prefix = "example"
     input_file = MultipleUploadedFileField()
-    s3_upload_dir = 's3_example'
+    s3_upload_dir = "s3_example"
 
     def save(self):
-        example = Example2.objects.create(
-            title=self.cleaned_data['title']
-        )
-        for f in self.cleaned_data['input_file']:
+        example = Example2.objects.create(title=self.cleaned_data["title"])
+        for f in self.cleaned_data["input_file"]:
             assert f.is_s3direct
 
             # FILE_FORM_UPLOAD_DIR/s3_upload_dir/basename_RANDOM.ext
@@ -96,23 +90,18 @@ class WizardStepForm(Form):
 
 
 class PlaceholderExampleForm(BaseForm):
-    prefix = 'example'
+    prefix = "example"
     input_file = MultipleUploadedFileField()
     other_input_file = UploadedFileField()
 
     def save(self):
-        example = Example2.objects.create(
-            title=self.cleaned_data['title']
-        )
+        example = Example2.objects.create(title=self.cleaned_data["title"])
 
-        for f in self.cleaned_data['input_file']:
+        for f in self.cleaned_data["input_file"]:
             if f.is_placeholder:
                 continue
 
-            ExampleFile.objects.create(
-                example=example,
-                input_file=f
-            )
+            ExampleFile.objects.create(example=example, input_file=f)
             f.close()
 
         self.delete_temporary_files()
@@ -120,16 +109,14 @@ class PlaceholderExampleForm(BaseForm):
 
 class PlaceholderWidgetExampleForm(PlaceholderExampleForm):
     def save(self):
-        example = Example2.objects.create(
-            title=self.cleaned_data['title']
-        )
+        example = Example2.objects.create(title=self.cleaned_data["title"])
 
-        for f in self.cleaned_data['input_file']:
+        for f in self.cleaned_data["input_file"]:
             assert f.metadata is not None
 
         self.delete_temporary_files()
 
 
 class WithAcceptExampleForm(BaseForm):
-    prefix = 'example'
-    input_file = MultipleUploadedFileField(accept='image/*')
+    prefix = "example"
+    input_file = MultipleUploadedFileField(accept="image/*")

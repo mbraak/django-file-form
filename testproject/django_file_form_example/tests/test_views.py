@@ -8,9 +8,12 @@ class ModelTests(TestCase):
         self.do_post(Client())
 
     def test_post_without_metadata(self):
-        response = Client().post('/upload/')
+        response = Client().post("/upload/")
         self.assertEqual(response.status_code, 500)
-        self.assertEqual(response.reason_phrase, 'Received File upload for unsupported file transfer protocol')
+        self.assertEqual(
+            response.reason_phrase,
+            "Received File upload for unsupported file transfer protocol",
+        )
 
     def test_head(self):
         client = Client()
@@ -19,19 +22,19 @@ class ModelTests(TestCase):
 
         response = client.head(f"/upload/{resource_id}")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response['Upload-Offset'], '0')
-        self.assertEqual(response['Upload-Length'], '0')
+        self.assertEqual(response["Upload-Offset"], "0")
+        self.assertEqual(response["Upload-Length"], "0")
 
     def test_head_with_unknown_resource_id(self):
-        response = Client().head('/upload/unknown')
+        response = Client().head("/upload/unknown")
         self.assertEqual(response.status_code, 404)
 
     def do_post(self, client):
-        response = client.post('/upload/', HTTP_TUS_RESUMABLE=True)
+        response = client.post("/upload/", HTTP_TUS_RESUMABLE=True)
         self.assertEqual(response.status_code, 201)
 
-        re_url_upload_resource = re.compile(r'http://testserver/upload/(.*)')
+        re_url_upload_resource = re.compile(r"http://testserver/upload/(.*)")
 
-        self.assertRegex(response['Location'], re_url_upload_resource)
+        self.assertRegex(response["Location"], re_url_upload_resource)
 
-        return re_url_upload_resource.match(response['Location']).group(1)
+        return re_url_upload_resource.match(response["Location"]).group(1)

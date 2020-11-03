@@ -7,18 +7,30 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('django_file_form_example', '0001_initial'),
+        ("django_file_form_example", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='example',
-            name='input_file',
-            field=models.FileField(max_length=255, storage=django.core.files.storage.FileSystemStorage(location='/Users/mbraak/django-file-form/testproject/media'), upload_to='example'),
+            model_name="example",
+            name="input_file",
+            field=models.FileField(
+                max_length=255,
+                storage=django.core.files.storage.FileSystemStorage(
+                    location="/Users/mbraak/django-file-form/testproject/media"
+                ),
+                upload_to="example",
+            ),
         ),
         migrations.AlterField(
-            model_name='examplefile',
-            name='input_file',
-            field=models.FileField(max_length=255, storage=django.core.files.storage.FileSystemStorage(location='/Users/mbraak/django-file-form/testproject/media'), upload_to='example'),
+            model_name="examplefile",
+            name="input_file",
+            field=models.FileField(
+                max_length=255,
+                storage=django.core.files.storage.FileSystemStorage(
+                    location="/Users/mbraak/django-file-form/testproject/media"
+                ),
+                upload_to="example",
+            ),
         ),
     ]

@@ -1,6 +1,6 @@
 import babel from "@rollup/plugin-babel";
 import commonjs from "@rollup/plugin-commonjs";
-import coverage from "rollup-plugin-istanbul";
+import coverage from "rollup-plugin-istanbul2";
 import nodePolyfills from "rollup-plugin-node-polyfills";
 import resolve from "@rollup/plugin-node-resolve";
 import { terser } from "rollup-plugin-terser";
@@ -38,7 +38,6 @@ if (minimize) {
 
 if (includeCoverage) {
   const coveragePlugin = coverage({
-    esModules: true,
     exclude: ["node_modules/**"]
   });
   plugins.push(coveragePlugin);

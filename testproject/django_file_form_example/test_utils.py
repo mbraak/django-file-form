@@ -30,7 +30,7 @@ def remove_p(path):
 
 
 def to_class_string(classes):
-    return ''.join('.%s' % v for v in classes if v)
+    return "".join(f".{v}" for v in classes if v)
 
 
 def read_file(file):
@@ -47,5 +47,5 @@ def write_json(path, data):
 
 
 def count_temp_uploads():
-    temp_uploads_path = Path(settings.MEDIA_ROOT).joinpath('temp_uploads')
+    temp_uploads_path = Path(settings.MEDIA_ROOT).joinpath("temp_uploads")
     return len(list(temp_uploads_path.iterdir()))
