@@ -9137,14 +9137,14 @@
 
 	var MB = 1024 * 1024;
 	var abortMultipartUpload = function abortMultipartUpload(_ref) {
-	  var key = _ref.key,
+	  var csrfToken = _ref.csrfToken,
+	      key = _ref.key,
 	      uploadId = _ref.uploadId,
 	      endpoint = _ref.endpoint;
 	  var filename = encodeURIComponent(key);
 	  var uploadIdEnc = encodeURIComponent(uploadId);
-	  var csrftoken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
 	  var headers = new Headers({
-	    "X-CSRFToken": csrftoken
+	    "X-CSRFToken": csrfToken
 	  });
 	  var url = urlJoin(endpoint, uploadIdEnc, "?key=".concat(filename));
 	  return fetch(url, {
@@ -9155,15 +9155,15 @@
 	  });
 	};
 	var completeMultipartUpload = function completeMultipartUpload(_ref2) {
-	  var key = _ref2.key,
+	  var csrfToken = _ref2.csrfToken,
+	      key = _ref2.key,
 	      uploadId = _ref2.uploadId,
 	      parts = _ref2.parts,
 	      endpoint = _ref2.endpoint;
 	  var filename = encodeURIComponent(key);
 	  var uploadIdEnc = encodeURIComponent(uploadId);
-	  var csrftoken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
 	  var headers = new Headers({
-	    "X-CSRFToken": csrftoken
+	    "X-CSRFToken": csrfToken
 	  });
 	  var url = urlJoin(endpoint, uploadIdEnc, "complete", "?key=".concat(filename));
 	  return fetch(url, {
@@ -9178,12 +9178,15 @@
 	    return data;
 	  });
 	};
-	var createMultipartUpload = function createMultipartUpload(file, s3UploadDir, endpoint) {
-	  var csrftoken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
+	var createMultipartUpload = function createMultipartUpload(_ref3) {
+	  var csrfToken = _ref3.csrfToken,
+	      endpoint = _ref3.endpoint,
+	      file = _ref3.file,
+	      s3UploadDir = _ref3.s3UploadDir;
 	  var headers = new Headers({
 	    accept: "application/json",
 	    "content-type": "application/json",
-	    "X-CSRFToken": csrftoken
+	    "X-CSRFToken": csrfToken
 	  });
 	  return fetch(endpoint, {
 	    method: "post",
@@ -9202,10 +9205,10 @@
 	var getChunkSize = function getChunkSize(file) {
 	  return Math.ceil(file.size / 10000);
 	};
-	var listParts = function listParts(_ref3) {
-	  var key = _ref3.key,
-	      endpoint = _ref3.endpoint,
-	      uploadId = _ref3.uploadId;
+	var listParts = function listParts(_ref4) {
+	  var key = _ref4.key,
+	      endpoint = _ref4.endpoint,
+	      uploadId = _ref4.uploadId;
 	  var filename = encodeURIComponent(key);
 	  var uploadIdEnc = encodeURIComponent(uploadId);
 	  var url = urlJoin(endpoint, uploadIdEnc, "?key=".concat(filename));
@@ -9217,15 +9220,15 @@
 	    return data["parts"];
 	  });
 	};
-	var prepareUploadPart = function prepareUploadPart(_ref4) {
-	  var key = _ref4.key,
-	      uploadId = _ref4.uploadId,
-	      number = _ref4.number,
-	      endpoint = _ref4.endpoint;
+	var prepareUploadPart = function prepareUploadPart(_ref5) {
+	  var csrfToken = _ref5.csrfToken,
+	      endpoint = _ref5.endpoint,
+	      key = _ref5.key,
+	      number = _ref5.number,
+	      uploadId = _ref5.uploadId;
 	  var filename = encodeURIComponent(key);
-	  var csrftoken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
 	  var headers = new Headers({
-	    "X-CSRFToken": csrftoken
+	    "X-CSRFToken": csrfToken
 	  });
 	  var url = urlJoin(endpoint, uploadId, "".concat(number), "?key=".concat(filename));
 	  return fetch(url, {
@@ -9254,8 +9257,14 @@
 
 	  var _super = _createSuper(S3Upload);
 
-	  function S3Upload(file, uploadIndex, options) {
+	  function S3Upload(_ref) {
 	    var _this;
+
+	    var csrfToken = _ref.csrfToken,
+	        endpoint = _ref.endpoint,
+	        file = _ref.file,
+	        s3UploadDir = _ref.s3UploadDir,
+	        uploadIndex = _ref.uploadIndex;
 
 	    classCallCheck(this, S3Upload);
 
@@ -9278,6 +9287,8 @@
 
 	    defineProperty$4(assertThisInitialized(_this), "createdPromise", void 0);
 
+	    defineProperty$4(assertThisInitialized(_this), "csrfToken", void 0);
+
 	    defineProperty$4(assertThisInitialized(_this), "endpoint", void 0);
 
 	    defineProperty$4(assertThisInitialized(_this), "file", void 0);
@@ -9285,8 +9296,6 @@
 	    defineProperty$4(assertThisInitialized(_this), "isPaused", void 0);
 
 	    defineProperty$4(assertThisInitialized(_this), "key", void 0);
-
-	    defineProperty$4(assertThisInitialized(_this), "options", void 0);
 
 	    defineProperty$4(assertThisInitialized(_this), "parts", void 0);
 
@@ -9296,13 +9305,13 @@
 
 	    defineProperty$4(assertThisInitialized(_this), "uploading", void 0);
 
-	    _this.options = options;
+	    _this.csrfToken = csrfToken;
+	    _this.endpoint = endpoint;
 	    _this.file = file;
-	    _this.key = _this.options.key || null;
-	    _this.uploadId = _this.options.uploadId || null;
-	    _this.parts = [];
-	    _this.s3UploadDir = _this.options.s3UploadDir;
-	    _this.endpoint = _this.options.endpoint; // Do `this.createdPromise.then(OP)` to execute an operation `OP` _only_ if the
+	    _this.s3UploadDir = s3UploadDir;
+	    _this.key = null;
+	    _this.uploadId = null;
+	    _this.parts = []; // Do `this.createdPromise.then(OP)` to execute an operation `OP` _only_ if the
 	    // upload was created already. That also ensures that the sequencing is right
 	    // (so the `OP` definitely happens if the upload is created).
 	    //
@@ -9353,9 +9362,10 @@
 
 	                _context.next = 7;
 	                return abortMultipartUpload({
+	                  csrfToken: this.csrfToken || "",
+	                  endpoint: this.endpoint,
 	                  key: this.key,
-	                  uploadId: this.uploadId,
-	                  endpoint: this.endpoint
+	                  uploadId: this.uploadId
 	                });
 
 	              case 7:
@@ -9460,7 +9470,12 @@
 	    value: function createUpload() {
 	      var _this2 = this;
 
-	      this.createdPromise = createMultipartUpload(this.file, this.s3UploadDir, this.endpoint);
+	      this.createdPromise = createMultipartUpload({
+	        csrfToken: this.csrfToken || "",
+	        endpoint: this.endpoint,
+	        file: this.file,
+	        s3UploadDir: this.s3UploadDir
+	      });
 	      return this.createdPromise.then(function (result) {
 	        var valid = _typeof_1(result) === "object" && result && typeof result.uploadId === "string" && typeof result.key === "string";
 
@@ -9470,10 +9485,6 @@
 
 	        _this2.key = result.key;
 	        _this2.uploadId = result.uploadId;
-
-	        if (_this2.options.onStart) {
-	          _this2.options.onStart(result);
-	        }
 
 	        _this2.uploadParts();
 	      }).catch(function (err) {
@@ -9527,7 +9538,7 @@
 	        return;
 	      }
 
-	      var need = (this.options.limit || 1) - this.uploading.length;
+	      var need = 1 - this.uploading.length;
 
 	      if (need === 0) {
 	        return;
@@ -9545,7 +9556,11 @@
 
 	      for (var i = 0; i < this.chunkState.length; i++) {
 	        var state = this.chunkState[i];
-	        if (state.done || state.busy) continue;
+
+	        if (state.done || state.busy) {
+	          continue;
+	        }
+
 	        candidates.push(i);
 
 	        if (candidates.length >= need) {
@@ -9569,10 +9584,11 @@
 	      }
 
 	      return prepareUploadPart({
+	        csrfToken: this.csrfToken || "",
+	        endpoint: this.endpoint,
 	        key: this.key,
-	        uploadId: this.uploadId,
 	        number: index + 1,
-	        endpoint: this.endpoint
+	        uploadId: this.uploadId
 	      }).then(function (result) {
 	        var valid = _typeof_1(result) === "object" && result && typeof result.url === "string";
 
@@ -9581,8 +9597,8 @@
 	        }
 
 	        return result;
-	      }).then(function (_ref) {
-	        var url = _ref.url;
+	      }).then(function (_ref2) {
+	        var url = _ref2.url;
 
 	        _this5.uploadPartBytes(index, url);
 	      }, function (err) {
@@ -9611,11 +9627,6 @@
 	        ETag: etag
 	      };
 	      this.parts.push(part);
-
-	      if (this.options.onPartComplete) {
-	        this.options.onPartComplete(part);
-	      }
-
 	      this.uploadParts();
 	    }
 	  }, {
@@ -9629,7 +9640,9 @@
 	      xhr.responseType = "text";
 	      this.uploading.push(xhr);
 	      xhr.upload.addEventListener("progress", function (ev) {
-	        if (!ev.lengthComputable) return;
+	        if (!ev.lengthComputable) {
+	          return;
+	        }
 
 	        _this6.onPartProgress(index, ev.loaded);
 	      });
@@ -9685,10 +9698,11 @@
 	      }
 
 	      return completeMultipartUpload({
+	        csrfToken: this.csrfToken || "",
+	        endpoint: this.endpoint,
 	        key: this.key,
 	        uploadId: this.uploadId,
-	        parts: this.parts,
-	        endpoint: this.endpoint
+	        parts: this.parts
 	      }).then(function () {
 	        if (_this7.onSuccess) {
 	          _this7.onSuccess();
@@ -14593,6 +14607,7 @@
 
 	    var callbacks = _ref.callbacks,
 	        chunkSize = _ref.chunkSize,
+	        csrfToken = _ref.csrfToken,
 	        eventEmitter = _ref.eventEmitter,
 	        fieldName = _ref.fieldName,
 	        form = _ref.form,
@@ -14614,6 +14629,8 @@
 	    defineProperty$4(this, "callbacks", void 0);
 
 	    defineProperty$4(this, "chunkSize", void 0);
+
+	    defineProperty$4(this, "csrfToken", void 0);
 
 	    defineProperty$4(this, "eventEmitter", void 0);
 
@@ -14833,6 +14850,7 @@
 
 	    this.callbacks = callbacks;
 	    this.chunkSize = chunkSize;
+	    this.csrfToken = csrfToken;
 	    this.eventEmitter = eventEmitter;
 	    this.fieldName = fieldName;
 	    this.form = form;
@@ -14910,12 +14928,16 @@
 	            switch (_context2.prev = _context2.next) {
 	              case 0:
 	                createUpload = function createUpload() {
-	                  var s3UploadDir = _this3.s3UploadDir;
+	                  var csrfToken = _this3.csrfToken,
+	                      s3UploadDir = _this3.s3UploadDir;
 
 	                  if (s3UploadDir != null) {
-	                    return new S3Upload(file, newUploadIndex, {
+	                    return new S3Upload({
+	                      csrfToken: csrfToken,
 	                      endpoint: uploadUrl,
-	                      s3UploadDir: s3UploadDir
+	                      file: file,
+	                      s3UploadDir: s3UploadDir,
+	                      uploadIndex: newUploadIndex
 	                    });
 	                  } else {
 	                    return new TusUpload(file, newUploadIndex, {
@@ -15186,6 +15208,8 @@
 	function _objectSpread$5(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys$6(Object(source), true).forEach(function (key) { defineProperty$4(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys$6(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
 	var initUploadFields = function initUploadFields(form) {
+	  var _findInput;
+
 	  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
 	  var matchesPrefix = function matchesPrefix(fieldName) {
@@ -15239,6 +15263,7 @@
 	  var s3UploadDir = getInputValue("s3_upload_dir");
 	  var skipRequired = options.skipRequired || false;
 	  var prefix = getPrefix();
+	  var csrfToken = (_findInput = findInput(form, "csrfmiddlewaretoken", null)) === null || _findInput === void 0 ? void 0 : _findInput.value;
 
 	  if (!formId || !uploadUrl) {
 	    return;
@@ -15266,6 +15291,7 @@
 	    new FileField({
 	      callbacks: options.callbacks || {},
 	      chunkSize: options.chunkSize || 2621440,
+	      csrfToken: csrfToken,
 	      eventEmitter: options.eventEmitter,
 	      fieldName: fieldName,
 	      form: form,
