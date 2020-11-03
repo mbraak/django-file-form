@@ -107,7 +107,7 @@ class S3TestCase(BaseLiveTestCase):
 
         temp_file = page.create_temp_file(b"a" * (2 ** 21), binary=True)
         page.upload_using_js(temp_file)
-        sleep(1)
+        page.wait_until_upload_starts()
         page.cancel_upload()
         page.wait_until_upload_is_removed()
 

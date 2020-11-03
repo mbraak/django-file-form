@@ -1,3 +1,4 @@
+import re
 from django.contrib.auth.models import User
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support.wait import WebDriverWait
@@ -135,3 +136,23 @@ class Page(object):
                 f"{field_selector or ''} .dff-file-id-{upload_index}"
             )
         )
+
+    def wait_until_upload_starts(self, upload_index=0):
+        def get_percentage(selenium):
+            progress_element = selenium.find_element_by_css_selector(f".dff-file-id-{upload_index} .dff-progress-inner")
+
+            if not progress_element:
+                return 0.0
+
+            style = progress_element.get_attribute("style")
+            m = re.match(r'^width: (\d+\.\d+)%;$', style)
+
+            if not m:
+                return 0.0
+            else:
+                return float(m.group(1))
+
+        WebDriverWait(self.selenium, timeout=10, poll_frequency=0.1).until(
+            lambda selenium: get_percentage(selenium) > 5
+        )
+
