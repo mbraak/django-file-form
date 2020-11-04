@@ -74,7 +74,7 @@ class Page(object):
             return el.find_element_by_xpath(
                 f"//*[contains(text(), '{temp_file.base_name()}')]"
             )
-        except NoSuchElementException as e:
+        except NoSuchElementException as e:  # pragma: no cover
             print(
                 parent_element.find_element_by_css_selector(".dff-files").get_attribute(
                     "outerHTML"
@@ -143,7 +143,7 @@ class Page(object):
                 f".dff-file-id-{upload_index} .dff-progress-inner"
             )
 
-            if not progress_element:
+            if not progress_element:  # pragma: no cover
                 return 0.0
 
             style = progress_element.get_attribute("style")
