@@ -149,7 +149,7 @@ class Page(object):
             style = progress_element.get_attribute("style")
             m = re.match(r"^width: (\d+\.\d+)%;$", style)
 
-            if not m:
+            if not m:  # pragma: no cover
                 return 0.0
             else:
                 return float(m.group(1))
