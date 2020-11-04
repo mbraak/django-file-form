@@ -7,13 +7,11 @@ import {
   completeMultipartUpload,
   createMultipartUpload,
   getChunkSize,
-  listParts,
   MB,
   MultipartUpload,
   Part,
   prepareUploadPart,
   remove,
-  ServerPart,
   UrlInfo
 } from "./s3_utils";
 import { InitialFile } from "./uploaded_file";
@@ -44,7 +42,6 @@ class S3Upload extends BaseUpload {
   private csrfToken?: string;
   private endpoint: string;
   private file: File;
-  private isPaused: boolean;
   private key: string | null;
   private parts: Part[];
   private s3UploadDir: string;
@@ -77,7 +74,6 @@ class S3Upload extends BaseUpload {
     // the upload was already created, and if the createMultipartUpload request is still in flight,
     // aborting it immediately after it finishes.
     this.createdPromise = Promise.reject(); // eslint-disable-line prefer-promise-reject-errors
-    this.isPaused = false;
     this.chunks = [];
     this.chunkState = [];
     this.uploading = [];
@@ -126,21 +122,8 @@ class S3Upload extends BaseUpload {
     return this.file.size;
   }
 
-  public pause(): void {
-    const inProgress = this.uploading.slice();
-    inProgress.forEach(xhr => {
-      xhr.abort();
-    });
-    this.isPaused = true;
-  }
-
   public start(): void {
-    this.isPaused = false;
-    if (this.uploadId) {
-      void this.resumeUpload();
-    } else {
-      void this.createUpload();
-    }
+    void this.createUpload();
   }
 
   private initChunks(): void {
@@ -193,46 +176,7 @@ class S3Upload extends BaseUpload {
       });
   }
 
-  private resumeUpload(): Promise<void> {
-    if (!this.key || !this.uploadId) {
-      return Promise.resolve();
-    }
-
-    return listParts({
-      uploadId: this.uploadId,
-      key: this.key,
-      endpoint: this.endpoint
-    })
-      .then(parts => {
-        parts.forEach((part: ServerPart) => {
-          const i = part.PartNumber - 1;
-          this.chunkState[i] = {
-            uploaded: part.Size,
-            etag: part.ETag,
-            done: true,
-            busy: false
-          };
-
-          // Only add if we did not yet know about this part.
-          if (!this.parts.some(p => p.PartNumber === part.PartNumber)) {
-            this.parts.push({
-              ETag: part.ETag,
-              PartNumber: part.PartNumber
-            });
-          }
-        });
-        this.uploadParts();
-      })
-      .catch(err => {
-        this.handleError(err);
-      });
-  }
-
   private uploadParts(): void {
-    if (this.isPaused) {
-      return;
-    }
-
     const need = 1 - this.uploading.length;
     if (need === 0) {
       return;
