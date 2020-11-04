@@ -25,14 +25,12 @@ interface ChunkState {
   uploaded: number;
 }
 
-interface Options {
-  key?: string;
-  limit?: number;
-  onPartComplete?: (part: Part) => void;
-  onStart?: (multipartUpload: MultipartUpload) => void;
-  s3UploadDir: string;
+interface S3UploadParameters {
+  csrfToken?: string;
   endpoint: string;
-  uploadId?: string;
+  file: File;
+  s3UploadDir: string;
+  uploadIndex: number;
 }
 
 class S3Upload extends BaseUpload {
@@ -43,28 +41,33 @@ class S3Upload extends BaseUpload {
   private chunkState: ChunkState[];
   private chunks: Blob[];
   private createdPromise: Promise<MultipartUpload>;
+  private csrfToken?: string;
   private endpoint: string;
   private file: File;
   private isPaused: boolean;
   private key: string | null;
-  private options: Options;
   private parts: Part[];
   private s3UploadDir: string;
   private uploadId: string | null;
   private uploading: XMLHttpRequest[];
 
-  constructor(file: File, uploadIndex: number, options: Options) {
+  constructor({
+    csrfToken,
+    endpoint,
+    file,
+    s3UploadDir,
+    uploadIndex
+  }: S3UploadParameters) {
     super({ name: file.name, status: "uploading", type: "s3", uploadIndex });
 
-    this.options = options;
-
+    this.csrfToken = csrfToken;
+    this.endpoint = endpoint;
     this.file = file;
+    this.s3UploadDir = s3UploadDir;
 
-    this.key = this.options.key || null;
-    this.uploadId = this.options.uploadId || null;
+    this.key = null;
+    this.uploadId = null;
     this.parts = [];
-    this.s3UploadDir = this.options.s3UploadDir;
-    this.endpoint = this.options.endpoint;
 
     // Do `this.createdPromise.then(OP)` to execute an operation `OP` _only_ if the
     // upload was created already. That also ensures that the sequencing is right
@@ -97,9 +100,10 @@ class S3Upload extends BaseUpload {
 
     if (this.key && this.uploadId) {
       await abortMultipartUpload({
+        csrfToken: this.csrfToken || "",
+        endpoint: this.endpoint,
         key: this.key,
-        uploadId: this.uploadId,
-        endpoint: this.endpoint
+        uploadId: this.uploadId
       });
     }
   }
@@ -160,11 +164,12 @@ class S3Upload extends BaseUpload {
   }
 
   private createUpload(): Promise<void> {
-    this.createdPromise = createMultipartUpload(
-      this.file,
-      this.s3UploadDir,
-      this.endpoint
-    );
+    this.createdPromise = createMultipartUpload({
+      csrfToken: this.csrfToken || "",
+      endpoint: this.endpoint,
+      file: this.file,
+      s3UploadDir: this.s3UploadDir
+    });
     return this.createdPromise
       .then((result: MultipartUpload) => {
         const valid =
@@ -181,9 +186,6 @@ class S3Upload extends BaseUpload {
         this.key = result.key;
         this.uploadId = result.uploadId;
 
-        if (this.options.onStart) {
-          this.options.onStart(result);
-        }
         this.uploadParts();
       })
       .catch((err: Error) => {
@@ -231,7 +233,7 @@ class S3Upload extends BaseUpload {
       return;
     }
 
-    const need = (this.options.limit || 1) - this.uploading.length;
+    const need = 1 - this.uploading.length;
     if (need === 0) {
       return;
     }
@@ -268,10 +270,11 @@ class S3Upload extends BaseUpload {
     }
 
     return prepareUploadPart({
+      csrfToken: this.csrfToken || "",
+      endpoint: this.endpoint,
       key: this.key,
-      uploadId: this.uploadId,
       number: index + 1,
-      endpoint: this.endpoint
+      uploadId: this.uploadId
     })
       .then(result => {
         const valid =
@@ -313,10 +316,6 @@ class S3Upload extends BaseUpload {
       ETag: etag
     };
     this.parts.push(part);
-
-    if (this.options.onPartComplete) {
-      this.options.onPartComplete(part);
-    }
 
     this.uploadParts();
   }
@@ -387,10 +386,11 @@ class S3Upload extends BaseUpload {
     }
 
     return completeMultipartUpload({
+      csrfToken: this.csrfToken || "",
+      endpoint: this.endpoint,
       key: this.key,
       uploadId: this.uploadId,
-      parts: this.parts,
-      endpoint: this.endpoint
+      parts: this.parts
     }).then(
       () => {
         if (this.onSuccess) {

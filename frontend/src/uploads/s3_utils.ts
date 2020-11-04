@@ -27,18 +27,23 @@ export interface UrlInfo {
 
 export const MB = 1024 * 1024;
 
+interface AbortMultipartUploadParameters {
+  csrfToken: string;
+  endpoint: string;
+  key: string;
+  uploadId: string;
+}
+
 export const abortMultipartUpload = ({
+  csrfToken,
   key,
   uploadId,
   endpoint
-}: MultipartUpload): Promise<unknown> => {
+}: AbortMultipartUploadParameters): Promise<unknown> => {
   const filename = encodeURIComponent(key);
   const uploadIdEnc = encodeURIComponent(uploadId);
-  const csrftoken = (<HTMLInputElement>(
-    document.getElementsByName("csrfmiddlewaretoken")[0]
-  )).value;
   const headers = new Headers({
-    "X-CSRFToken": csrftoken
+    "X-CSRFToken": csrfToken
   });
   const url = urljoin(endpoint, uploadIdEnc, `?key=${filename}`);
   return fetch(url, {
@@ -49,24 +54,25 @@ export const abortMultipartUpload = ({
   });
 };
 
+interface CompleteMultipartUploadParameters {
+  csrfToken: string;
+  endpoint: string;
+  key: string;
+  parts: Part[];
+  uploadId: string;
+}
+
 export const completeMultipartUpload = ({
+  csrfToken,
   key,
   uploadId,
   parts,
   endpoint
-}: {
-  key: string;
-  uploadId: string;
-  parts: Part[];
-  endpoint: string;
-}): Promise<LocationInfo> => {
+}: CompleteMultipartUploadParameters): Promise<LocationInfo> => {
   const filename = encodeURIComponent(key);
   const uploadIdEnc = encodeURIComponent(uploadId);
-  const csrftoken = (<HTMLInputElement>(
-    document.getElementsByName("csrfmiddlewaretoken")[0]
-  )).value;
   const headers = new Headers({
-    "X-CSRFToken": csrftoken
+    "X-CSRFToken": csrfToken
   });
   const url = urljoin(endpoint, uploadIdEnc, "complete", `?key=${filename}`);
   return fetch(url, {
@@ -84,18 +90,23 @@ export const completeMultipartUpload = ({
     });
 };
 
-export const createMultipartUpload = (
-  file: File,
-  s3UploadDir: string,
-  endpoint: string
-): Promise<MultipartUpload> => {
-  const csrftoken = (<HTMLInputElement>(
-    document.getElementsByName("csrfmiddlewaretoken")[0]
-  )).value;
+interface CreateMultipartUploadParameters {
+  csrfToken: string;
+  endpoint: string;
+  file: File;
+  s3UploadDir: string;
+}
+
+export const createMultipartUpload = ({
+  csrfToken,
+  endpoint,
+  file,
+  s3UploadDir
+}: CreateMultipartUploadParameters): Promise<MultipartUpload> => {
   const headers = new Headers({
     accept: "application/json",
     "content-type": "application/json",
-    "X-CSRFToken": csrftoken
+    "X-CSRFToken": csrfToken
   });
   return fetch(endpoint, {
     method: "post",
@@ -135,22 +146,23 @@ export const listParts = ({
     });
 };
 
-export const prepareUploadPart = ({
-  key,
-  uploadId,
-  number,
-  endpoint
-}: {
-  key: string;
-  uploadId: string;
-  number: number;
+interface PrepareUploadPartParameters {
+  csrfToken: string;
   endpoint: string;
-}): Promise<UrlInfo> => {
+  key: string;
+  number: number;
+  uploadId: string;
+}
+
+export const prepareUploadPart = ({
+  csrfToken,
+  endpoint,
+  key,
+  number,
+  uploadId
+}: PrepareUploadPartParameters): Promise<UrlInfo> => {
   const filename = encodeURIComponent(key);
-  const csrftoken = (<HTMLInputElement>(
-    document.getElementsByName("csrfmiddlewaretoken")[0]
-  )).value;
-  const headers = new Headers({ "X-CSRFToken": csrftoken });
+  const headers = new Headers({ "X-CSRFToken": csrfToken });
   const url = urljoin(endpoint, uploadId, `${number}`, `?key=${filename}`);
   return fetch(url, {
     method: "get",
