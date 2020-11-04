@@ -43,7 +43,7 @@ class BaseLiveTestCase(StaticLiveServerTestCase):
         self.selenium.set_network_conditions(latency=0, throughput=-1)
 
     def handle_coverage(self):
-        if getattr(settings, 'DJANGO_FILE_FORM_COVERAGE_JS', False):
+        if getattr(settings, "DJANGO_FILE_FORM_COVERAGE_JS", False):
             self.save_coverage()
 
     def save_coverage(self):

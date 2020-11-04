@@ -12,7 +12,7 @@ class TempFile(object):
         self.named_temporary_file = None
 
     def create(self, content="abc", prefix=None, binary=False):
-        if self.named_temporary_file: # pragma: no cover
+        if self.named_temporary_file:  # pragma: no cover
             raise Exception("Tempfile is already created")
 
         def create_named_temporary_file():
@@ -25,13 +25,13 @@ class TempFile(object):
         self.named_temporary_file = create_named_temporary_file()
 
     def base_name(self):
-        if not self.named_temporary_file: # pragma: no cover
+        if not self.named_temporary_file:  # pragma: no cover
             raise Exception("Tempfile is not created")
 
         return os.path.basename(self.named_temporary_file.name)
 
     def path(self):
-        if not self.named_temporary_file: # pragma: no cover
+        if not self.named_temporary_file:  # pragma: no cover
             raise Exception("Tempfile is not created")
 
         return self.named_temporary_file.name
@@ -50,7 +50,7 @@ class TempFile(object):
                 uploaded_file.uploaded_file.delete()
 
     def uploaded_file(self):
-        if not self.named_temporary_file: # pragma: no cover
+        if not self.named_temporary_file:  # pragma: no cover
             raise Exception("Tempfile is not created")
 
         return Path(settings.MEDIA_ROOT).joinpath("example", self.base_name())

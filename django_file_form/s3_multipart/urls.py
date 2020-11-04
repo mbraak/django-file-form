@@ -21,5 +21,5 @@ try:
             name="complete_multipart_upload",
         ),
     ]
-except ImportError: # pragma: no cover
+except ImportError:  # pragma: no cover
     urlpatterns = []
