@@ -52,7 +52,7 @@ def get_client():
 
 def exists(client, bucket_name, name):
     """
-    Check if key already exists bucket,
+    Check if key already exists in bucket.
 
     Code adapted from storage.backends.s3boto3
     """
