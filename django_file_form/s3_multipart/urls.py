@@ -7,7 +7,7 @@ try:
         path("", views.create_upload, name="s3_upload"),
         path(
             "<upload_id>/",
-            views.get_parts_or_abort_upload,
+            views.abort_upload,
             name="get_parts_or_abort_upload",
         ),
         path(
@@ -21,5 +21,5 @@ try:
             name="complete_multipart_upload",
         ),
     ]
-except ImportError:
+except ImportError:  # pragma: no cover
     urlpatterns = []

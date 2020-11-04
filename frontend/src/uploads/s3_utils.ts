@@ -15,12 +15,6 @@ export interface Part {
   PartNumber: number;
 }
 
-export interface ServerPart {
-  ETag: string;
-  PartNumber: number;
-  Size: number;
-}
-
 export interface UrlInfo {
   url: string;
 }
@@ -127,24 +121,6 @@ export const createMultipartUpload = ({
 
 export const getChunkSize = (file: File): number =>
   Math.ceil(file.size / 10000);
-
-export const listParts = ({
-  key,
-  endpoint,
-  uploadId
-}: MultipartUpload): Promise<ServerPart[]> => {
-  const filename = encodeURIComponent(key);
-  const uploadIdEnc = encodeURIComponent(uploadId);
-  const url = urljoin(endpoint, uploadIdEnc, `?key=${filename}`);
-
-  return fetch(url, { method: "get" })
-    .then(response => {
-      return response.json();
-    })
-    .then(data => {
-      return (data as Record<string, unknown>)["parts"] as ServerPart[];
-    });
-};
 
 interface PrepareUploadPartParameters {
   csrfToken: string;

@@ -8891,21 +8891,6 @@
 	  }
 	});
 
-	var $some = arrayIteration.some;
-
-
-
-	var STRICT_METHOD$6 = arrayMethodIsStrict('some');
-	var USES_TO_LENGTH$b = arrayMethodUsesToLength('some');
-
-	// `Array.prototype.some` method
-	// https://tc39.github.io/ecma262/#sec-array.prototype.some
-	_export({ target: 'Array', proto: true, forced: !STRICT_METHOD$6 || !USES_TO_LENGTH$b }, {
-	  some: function some(callbackfn /* , thisArg */) {
-	    return $some(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
-	  }
-	});
-
 	var slice = [].slice;
 	var factories = {};
 
@@ -9205,27 +9190,12 @@
 	var getChunkSize = function getChunkSize(file) {
 	  return Math.ceil(file.size / 10000);
 	};
-	var listParts = function listParts(_ref4) {
-	  var key = _ref4.key,
+	var prepareUploadPart = function prepareUploadPart(_ref4) {
+	  var csrfToken = _ref4.csrfToken,
 	      endpoint = _ref4.endpoint,
+	      key = _ref4.key,
+	      number = _ref4.number,
 	      uploadId = _ref4.uploadId;
-	  var filename = encodeURIComponent(key);
-	  var uploadIdEnc = encodeURIComponent(uploadId);
-	  var url = urlJoin(endpoint, uploadIdEnc, "?key=".concat(filename));
-	  return fetch(url, {
-	    method: "get"
-	  }).then(function (response) {
-	    return response.json();
-	  }).then(function (data) {
-	    return data["parts"];
-	  });
-	};
-	var prepareUploadPart = function prepareUploadPart(_ref5) {
-	  var csrfToken = _ref5.csrfToken,
-	      endpoint = _ref5.endpoint,
-	      key = _ref5.key,
-	      number = _ref5.number,
-	      uploadId = _ref5.uploadId;
 	  var filename = encodeURIComponent(key);
 	  var headers = new Headers({
 	    "X-CSRFToken": csrfToken
@@ -9293,8 +9263,6 @@
 
 	    defineProperty$4(assertThisInitialized(_this), "file", void 0);
 
-	    defineProperty$4(assertThisInitialized(_this), "isPaused", void 0);
-
 	    defineProperty$4(assertThisInitialized(_this), "key", void 0);
 
 	    defineProperty$4(assertThisInitialized(_this), "parts", void 0);
@@ -9321,7 +9289,6 @@
 
 	    _this.createdPromise = Promise.reject(); // eslint-disable-line prefer-promise-reject-errors
 
-	    _this.isPaused = false;
 	    _this.chunks = [];
 	    _this.chunkState = [];
 	    _this.uploading = [];
@@ -9423,24 +9390,9 @@
 	      return this.file.size;
 	    }
 	  }, {
-	    key: "pause",
-	    value: function pause() {
-	      var inProgress = this.uploading.slice();
-	      inProgress.forEach(function (xhr) {
-	        xhr.abort();
-	      });
-	      this.isPaused = true;
-	    }
-	  }, {
 	    key: "start",
 	    value: function start() {
-	      this.isPaused = false;
-
-	      if (this.uploadId) {
-	        void this.resumeUpload();
-	      } else {
-	        void this.createUpload();
-	      }
+	      void this.createUpload();
 	    }
 	  }, {
 	    key: "initChunks",
@@ -9492,51 +9444,9 @@
 	      });
 	    }
 	  }, {
-	    key: "resumeUpload",
-	    value: function resumeUpload() {
-	      var _this3 = this;
-
-	      if (!this.key || !this.uploadId) {
-	        return Promise.resolve();
-	      }
-
-	      return listParts({
-	        uploadId: this.uploadId,
-	        key: this.key,
-	        endpoint: this.endpoint
-	      }).then(function (parts) {
-	        parts.forEach(function (part) {
-	          var i = part.PartNumber - 1;
-	          _this3.chunkState[i] = {
-	            uploaded: part.Size,
-	            etag: part.ETag,
-	            done: true,
-	            busy: false
-	          }; // Only add if we did not yet know about this part.
-
-	          if (!_this3.parts.some(function (p) {
-	            return p.PartNumber === part.PartNumber;
-	          })) {
-	            _this3.parts.push({
-	              ETag: part.ETag,
-	              PartNumber: part.PartNumber
-	            });
-	          }
-	        });
-
-	        _this3.uploadParts();
-	      }).catch(function (err) {
-	        _this3.handleError(err);
-	      });
-	    }
-	  }, {
 	    key: "uploadParts",
 	    value: function uploadParts() {
-	      var _this4 = this;
-
-	      if (this.isPaused) {
-	        return;
-	      }
+	      var _this3 = this;
 
 	      var need = 1 - this.uploading.length;
 
@@ -9569,13 +9479,13 @@
 	      }
 
 	      candidates.forEach(function (index) {
-	        void _this4.uploadPart(index);
+	        void _this3.uploadPart(index);
 	      });
 	    }
 	  }, {
 	    key: "uploadPart",
 	    value: function uploadPart(index) {
-	      var _this5 = this;
+	      var _this4 = this;
 
 	      this.chunkState[index].busy = true;
 
@@ -9600,9 +9510,9 @@
 	      }).then(function (_ref2) {
 	        var url = _ref2.url;
 
-	        _this5.uploadPartBytes(index, url);
+	        _this4.uploadPartBytes(index, url);
 	      }, function (err) {
-	        _this5.handleError(err);
+	        _this4.handleError(err);
 	      });
 	    }
 	  }, {
@@ -9632,7 +9542,7 @@
 	  }, {
 	    key: "uploadPartBytes",
 	    value: function uploadPartBytes(index, url) {
-	      var _this6 = this;
+	      var _this5 = this;
 
 	      var body = this.chunks[index];
 	      var xhr = new XMLHttpRequest();
@@ -9644,49 +9554,49 @@
 	          return;
 	        }
 
-	        _this6.onPartProgress(index, ev.loaded);
+	        _this5.onPartProgress(index, ev.loaded);
 	      });
 	      xhr.addEventListener("abort", function (ev) {
-	        remove(_this6.uploading, ev.target);
-	        _this6.chunkState[index].busy = false;
+	        remove(_this5.uploading, ev.target);
+	        _this5.chunkState[index].busy = false;
 	      });
 	      xhr.addEventListener("load", function (ev) {
 	        var target = ev.target;
-	        remove(_this6.uploading, target);
-	        _this6.chunkState[index].busy = false;
+	        remove(_this5.uploading, target);
+	        _this5.chunkState[index].busy = false;
 
 	        if (target.status < 200 || target.status >= 300) {
-	          _this6.handleError(new Error("Non 2xx"));
+	          _this5.handleError(new Error("Non 2xx"));
 
 	          return;
 	        }
 
-	        _this6.onPartProgress(index, body.size); // NOTE This must be allowed by CORS.
+	        _this5.onPartProgress(index, body.size); // NOTE This must be allowed by CORS.
 
 
 	        var etag = target.getResponseHeader("ETag");
 
 	        if (etag === null) {
-	          _this6.handleError(new Error("AwsS3/Multipart: Could not read the ETag header. This likely means CORS is not configured correctly on the S3 Bucket. See https://uppy.io/docs/aws-s3-multipart#S3-Bucket-Configuration for instructions."));
+	          _this5.handleError(new Error("AwsS3/Multipart: Could not read the ETag header. This likely means CORS is not configured correctly on the S3 Bucket. See https://uppy.io/docs/aws-s3-multipart#S3-Bucket-Configuration for instructions."));
 
 	          return;
 	        }
 
-	        _this6.onPartComplete(index, etag);
+	        _this5.onPartComplete(index, etag);
 	      });
 	      xhr.addEventListener("error", function (ev) {
-	        remove(_this6.uploading, ev.target);
-	        _this6.chunkState[index].busy = false;
+	        remove(_this5.uploading, ev.target);
+	        _this5.chunkState[index].busy = false;
 	        var error = new Error("Unknown error"); // error.source = ev.target
 
-	        _this6.handleError(error);
+	        _this5.handleError(error);
 	      });
 	      xhr.send(body);
 	    }
 	  }, {
 	    key: "completeUpload",
 	    value: function completeUpload() {
-	      var _this7 = this;
+	      var _this6 = this;
 
 	      // Parts may not have completed uploading in sorted order, if limit > 1.
 	      this.parts.sort(function (a, b) {
@@ -9704,11 +9614,11 @@
 	        uploadId: this.uploadId,
 	        parts: this.parts
 	      }).then(function () {
-	        if (_this7.onSuccess) {
-	          _this7.onSuccess();
+	        if (_this6.onSuccess) {
+	          _this6.onSuccess();
 	        }
 	      }, function (err) {
-	        _this7.handleError(err);
+	        _this6.handleError(err);
 	      });
 	    }
 	  }, {
@@ -11041,7 +10951,7 @@
 	  return result;
 	}, FORCED$8);
 
-	var $some$1 = arrayIteration.some;
+	var $some = arrayIteration.some;
 
 	var aTypedArray$j = arrayBufferViewCore.aTypedArray;
 	var exportTypedArrayMethod$j = arrayBufferViewCore.exportTypedArrayMethod;
@@ -11049,7 +10959,7 @@
 	// `%TypedArray%.prototype.some` method
 	// https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.some
 	exportTypedArrayMethod$j('some', function some(callbackfn /* , thisArg */) {
-	  return $some$1(aTypedArray$j(this), callbackfn, arguments.length > 1 ? arguments[1] : undefined);
+	  return $some(aTypedArray$j(this), callbackfn, arguments.length > 1 ? arguments[1] : undefined);
 	});
 
 	var aTypedArray$k = arrayBufferViewCore.aTypedArray;

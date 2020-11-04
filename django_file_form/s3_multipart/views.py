@@ -36,14 +36,7 @@ def create_upload(request):
     return JsonResponse({"key": response["Key"], "uploadId": response["UploadId"]})
 
 
-@require_http_methods(["GET", "DELETE"])
-def get_parts_or_abort_upload(request, upload_id):
-    if request.method == "GET":
-        return get_parts(request, upload_id)
-    elif request.method == "DELETE":
-        return abort_upload(request, upload_id)
-
-
+@require_http_methods(["DELETE"])
 def abort_upload(request, upload_id):
     logger.info("Abort upload")
     client = get_client()
@@ -56,20 +49,6 @@ def abort_upload(request, upload_id):
         UploadId=upload_id,
     )
     return JsonResponse({})
-
-
-def get_parts(request, upload_id):
-    logger.info("Get part")
-    client = get_client()
-    bucket_name = get_bucket_name()
-    key = request.GET["key"]
-
-    response = client.list_parts(Bucket=bucket_name, Key=key, UploadId=upload_id)
-
-    if "Parts" in response:
-        return JsonResponse({"parts": response["Parts"]})
-    else:
-        return JsonResponse({"parts": []})
 
 
 @require_GET
