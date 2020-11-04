@@ -24,7 +24,7 @@ interface ChunkState {
 }
 
 interface S3UploadParameters {
-  csrfToken?: string;
+  csrfToken: string;
   endpoint: string;
   file: File;
   s3UploadDir: string;
@@ -39,7 +39,7 @@ class S3Upload extends BaseUpload {
   private chunkState: ChunkState[];
   private chunks: Blob[];
   private createdPromise: Promise<MultipartUpload>;
-  private csrfToken?: string;
+  private csrfToken: string;
   private endpoint: string;
   private file: File;
   private key: string | null;
@@ -96,7 +96,7 @@ class S3Upload extends BaseUpload {
 
     if (this.key && this.uploadId) {
       await abortMultipartUpload({
-        csrfToken: this.csrfToken || "",
+        csrfToken: this.csrfToken,
         endpoint: this.endpoint,
         key: this.key,
         uploadId: this.uploadId
@@ -148,7 +148,7 @@ class S3Upload extends BaseUpload {
 
   private createUpload(): Promise<void> {
     this.createdPromise = createMultipartUpload({
-      csrfToken: this.csrfToken || "",
+      csrfToken: this.csrfToken,
       endpoint: this.endpoint,
       file: this.file,
       s3UploadDir: this.s3UploadDir
@@ -214,7 +214,7 @@ class S3Upload extends BaseUpload {
     }
 
     return prepareUploadPart({
-      csrfToken: this.csrfToken || "",
+      csrfToken: this.csrfToken,
       endpoint: this.endpoint,
       key: this.key,
       number: index + 1,
@@ -330,7 +330,7 @@ class S3Upload extends BaseUpload {
     }
 
     return completeMultipartUpload({
-      csrfToken: this.csrfToken || "",
+      csrfToken: this.csrfToken,
       endpoint: this.endpoint,
       key: this.key,
       uploadId: this.uploadId,

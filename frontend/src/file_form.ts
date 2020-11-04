@@ -71,6 +71,10 @@ const initUploadFields = (form: Element, options: Options = {}): void => {
   const prefix = getPrefix();
   const csrfToken = findInput(form, "csrfmiddlewaretoken", null)?.value;
 
+  if (!csrfToken) {
+    throw Error("Csrf token not found");
+  }
+
   if (!formId || !uploadUrl) {
     return;
   }

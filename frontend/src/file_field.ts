@@ -33,7 +33,7 @@ export interface Callbacks {
 class FileField {
   callbacks: Callbacks;
   chunkSize: number;
-  csrfToken?: string;
+  csrfToken: string;
   eventEmitter?: EventEmitter;
   fieldName: string;
   form: Element;
@@ -70,7 +70,7 @@ class FileField {
   }: {
     callbacks: Callbacks;
     chunkSize: number;
-    csrfToken?: string;
+    csrfToken: string;
     eventEmitter?: EventEmitter;
     fieldName: string;
     form: Element;
@@ -141,11 +141,12 @@ class FileField {
         size
       );
 
-      const upload = createUploadedFile(
+      const upload = createUploadedFile({
+        csrfToken: this.csrfToken,
         initialFile,
-        this.uploadUrl,
-        this.nextUploadIndex
-      );
+        uploadIndex: this.nextUploadIndex,
+        uploadUrl: this.uploadUrl
+      });
       this.uploads.push(upload);
 
       this.emitEvent("addUpload", element, upload);
@@ -191,11 +192,14 @@ class FileField {
           uploadIndex: newUploadIndex
         });
       } else {
-        return new TusUpload(file, newUploadIndex, {
+        return new TusUpload({
           chunkSize: this.chunkSize,
+          csrfToken: this.csrfToken,
           fieldName,
+          file,
           formId,
           retryDelays: this.retryDelays,
+          uploadIndex: newUploadIndex,
           uploadUrl
         });
       }

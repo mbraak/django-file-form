@@ -1,12 +1,15 @@
-import { Upload } from "tus-js-client";
+import { HttpRequest, Upload } from "tus-js-client";
 import BaseUpload from "./base_upload";
 import { deleteUpload } from "./tus_utils";
 
-interface Options {
+interface Parameters {
   chunkSize: number;
+  csrfToken: string;
   fieldName: string;
+  file: File;
   formId: string;
   retryDelays: number[] | null;
+  uploadIndex: number;
   uploadUrl: string;
 }
 
@@ -15,22 +18,35 @@ export default class TusUpload extends BaseUpload {
   public onProgress?: (bytesUploaded: number, bytesTotal: number) => void;
   public onSuccess?: () => void;
   private upload: Upload;
+  private csrfToken: string;
 
-  constructor(file: File, uploadIndex: number, options: Options) {
+  constructor({
+    chunkSize,
+    csrfToken,
+    fieldName,
+    file,
+    formId,
+    retryDelays,
+    uploadIndex,
+    uploadUrl
+  }: Parameters) {
     super({ name: file.name, status: "uploading", type: "tus", uploadIndex });
 
+    this.csrfToken = csrfToken;
+
     this.upload = new Upload(file, {
-      chunkSize: options.chunkSize,
-      endpoint: options.uploadUrl,
+      chunkSize,
+      endpoint: uploadUrl,
       metadata: {
-        fieldName: options.fieldName,
+        fieldName: fieldName,
         filename: file.name,
-        formId: options.formId
+        formId: formId
       },
+      onBeforeRequest: this.addCsrTokenToRequest,
       onError: this.handleError,
       onProgress: this.handleProgress,
       onSuccess: this.handleSucces,
-      retryDelays: options.retryDelays || [0, 1000, 3000, 5000]
+      retryDelays: retryDelays || [0, 1000, 3000, 5000]
     });
 
     this.onError = undefined;
@@ -47,7 +63,7 @@ export default class TusUpload extends BaseUpload {
       return Promise.resolve();
     }
 
-    await deleteUpload(this.upload.url);
+    await deleteUpload(this.upload.url, this.csrfToken);
   }
 
   public getSize(): number {
@@ -76,5 +92,9 @@ export default class TusUpload extends BaseUpload {
     if (this.onSuccess) {
       this.onSuccess();
     }
+  };
+
+  private addCsrTokenToRequest = (request: HttpRequest) => {
+    request.setHeader("X-CSRFToken", this.csrfToken);
   };
 }
