@@ -1,5 +1,9 @@
 ## Changelog
 
+**Development version**
+
+  * Issue #388: add cross-site request forgery protection to tus uploads using the standard Django csrf token
+
 **3.1.0 (15 september 2020)**
 
   * Issue #324: get placeholder file for UploadWidget (thanks to Shrikrishna Singh)
