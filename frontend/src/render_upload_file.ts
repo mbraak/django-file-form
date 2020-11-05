@@ -113,26 +113,16 @@ class RenderUploadFile {
   }
 
   public setDeleteFailed(index: number): void {
-    const el = this.findFileDiv(index);
-
-    if (el) {
-      const span = document.createElement("span");
-      span.innerHTML = this.translations["Delete failed"];
-
-      el.appendChild(span);
-    }
+    this.setErrorMessage(index, this.translations["Delete failed"]);
 
     this.enableDelete(index);
   }
 
   public setError(index: number): void {
-    const span = document.createElement("span");
-    span.classList.add("dff-error");
-    span.innerHTML = this.translations["Upload failed"];
+    this.setErrorMessage(index, this.translations["Upload failed"]);
 
     const el = this.findFileDiv(index);
     if (el) {
-      el.appendChild(span);
       el.classList.add("dff-upload-fail");
     }
 
@@ -244,6 +234,24 @@ class RenderUploadFile {
     }
 
     return div.querySelector(".dff-delete");
+  }
+
+  private setErrorMessage(index: number, message: string): void {
+    const el = this.findFileDiv(index);
+    if (!el) {
+      return;
+    }
+
+    const originalMessageSpan = document.querySelector(".dff-error");
+    if (originalMessageSpan) {
+      originalMessageSpan.remove();
+    }
+
+    const span = document.createElement("span");
+    span.classList.add("dff-error");
+    span.innerHTML = message;
+
+    el.appendChild(span);
   }
 }
 
