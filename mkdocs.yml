@@ -1,2 +1,13 @@
 site_name: django-file-form
 theme: readthedocs
+nav:
+    - Home: index.md
+    - Usage: usage.md
+    - Details: details.md
+    - Upgrade: upgrade.md
+    - Python settings: python_settings.md
+    - Javascript options: javascript_options.md
+    - Form sets: form_sets.md
+    - Translations: translations.md
+    - Javascript events: javascript_events.md
+    - Changelog: changelog.md
