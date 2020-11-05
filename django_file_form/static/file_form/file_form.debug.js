@@ -9329,7 +9329,7 @@
 
 	                _context.next = 7;
 	                return abortMultipartUpload({
-	                  csrfToken: this.csrfToken || "",
+	                  csrfToken: this.csrfToken,
 	                  endpoint: this.endpoint,
 	                  key: this.key,
 	                  uploadId: this.uploadId
@@ -9423,7 +9423,7 @@
 	      var _this2 = this;
 
 	      this.createdPromise = createMultipartUpload({
-	        csrfToken: this.csrfToken || "",
+	        csrfToken: this.csrfToken,
 	        endpoint: this.endpoint,
 	        file: this.file,
 	        s3UploadDir: this.s3UploadDir
@@ -9494,7 +9494,7 @@
 	      }
 
 	      return prepareUploadPart({
-	        csrfToken: this.csrfToken || "",
+	        csrfToken: this.csrfToken,
 	        endpoint: this.endpoint,
 	        key: this.key,
 	        number: index + 1,
@@ -9608,7 +9608,7 @@
 	      }
 
 	      return completeMultipartUpload({
-	        csrfToken: this.csrfToken || "",
+	        csrfToken: this.csrfToken,
 	        endpoint: this.endpoint,
 	        key: this.key,
 	        uploadId: this.uploadId,
@@ -9636,7 +9636,7 @@
 	}(BaseUpload);
 
 	var deleteUpload = /*#__PURE__*/function () {
-	  var _ref = asyncToGenerator( /*#__PURE__*/regenerator.mark(function _callee(url) {
+	  var _ref = asyncToGenerator( /*#__PURE__*/regenerator.mark(function _callee(url, csrfToken) {
 	    return regenerator.wrap(function _callee$(_context) {
 	      while (1) {
 	        switch (_context.prev = _context.next) {
@@ -9654,6 +9654,7 @@
 	              };
 
 	              xhr.setRequestHeader("Tus-Resumable", "1.0.0");
+	              xhr.setRequestHeader("X-CSRFToken", csrfToken);
 	              xhr.send(null);
 	            }));
 
@@ -9665,7 +9666,7 @@
 	    }, _callee);
 	  }));
 
-	  return function deleteUpload(_x) {
+	  return function deleteUpload(_x, _x2) {
 	    return _ref.apply(this, arguments);
 	  };
 	}();
@@ -9826,8 +9827,13 @@
 
 	  var _super4 = _createSuper$1(UploadedTusFile);
 
-	  function UploadedTusFile(initialFile, uploadUrl, uploadIndex) {
+	  function UploadedTusFile(_ref2) {
 	    var _this3;
+
+	    var csrfToken = _ref2.csrfToken,
+	        initialFile = _ref2.initialFile,
+	        uploadUrl = _ref2.uploadUrl,
+	        uploadIndex = _ref2.uploadIndex;
 
 	    classCallCheck(this, UploadedTusFile);
 
@@ -9839,8 +9845,11 @@
 	      uploadIndex: uploadIndex
 	    });
 
+	    defineProperty$4(assertThisInitialized(_this3), "csrfToken", void 0);
+
 	    defineProperty$4(assertThisInitialized(_this3), "url", void 0);
 
+	    _this3.csrfToken = csrfToken;
 	    _this3.url = "".concat(uploadUrl).concat(initialFile.id);
 	    return _this3;
 	  }
@@ -9854,7 +9863,7 @@
 	            switch (_context3.prev = _context3.next) {
 	              case 0:
 	                _context3.next = 2;
-	                return deleteUpload(this.url);
+	                return deleteUpload(this.url, this.csrfToken);
 
 	              case 2:
 	              case "end":
@@ -9874,13 +9883,23 @@
 
 	  return UploadedTusFile;
 	}(BaseUploadedFile);
-	var createUploadedFile = function createUploadedFile(initialFile, uploadUrl, uploadIndex) {
+	var createUploadedFile = function createUploadedFile(_ref3) {
+	  var csrfToken = _ref3.csrfToken,
+	      initialFile = _ref3.initialFile,
+	      uploadUrl = _ref3.uploadUrl,
+	      uploadIndex = _ref3.uploadIndex;
+
 	  if (initialFile.placeholder === true) {
 	    return new PlaceholderFile(initialFile, uploadIndex);
 	  } else if (initialFile.placeholder === false) {
 	    return new UploadedS3File(initialFile, uploadIndex);
 	  } else {
-	    return new UploadedTusFile(initialFile, uploadUrl, uploadIndex);
+	    return new UploadedTusFile({
+	      csrfToken: csrfToken,
+	      initialFile: initialFile,
+	      uploadUrl: uploadUrl,
+	      uploadIndex: uploadIndex
+	    });
 	  }
 	};
 
@@ -14379,8 +14398,17 @@
 
 	  var _super = _createSuper$4(TusUpload);
 
-	  function TusUpload(file, uploadIndex, options) {
+	  function TusUpload(_ref) {
 	    var _this;
+
+	    var chunkSize = _ref.chunkSize,
+	        csrfToken = _ref.csrfToken,
+	        fieldName = _ref.fieldName,
+	        file = _ref.file,
+	        formId = _ref.formId,
+	        retryDelays = _ref.retryDelays,
+	        uploadIndex = _ref.uploadIndex,
+	        uploadUrl = _ref.uploadUrl;
 
 	    classCallCheck(this, TusUpload);
 
@@ -14398,6 +14426,8 @@
 	    defineProperty$4(assertThisInitialized(_this), "onSuccess", void 0);
 
 	    defineProperty$4(assertThisInitialized(_this), "upload", void 0);
+
+	    defineProperty$4(assertThisInitialized(_this), "csrfToken", void 0);
 
 	    defineProperty$4(assertThisInitialized(_this), "handleError", function (error) {
 	      if (_this.onError) {
@@ -14419,18 +14449,24 @@
 	      }
 	    });
 
+	    defineProperty$4(assertThisInitialized(_this), "addCsrTokenToRequest", function (request) {
+	      request.setHeader("X-CSRFToken", _this.csrfToken);
+	    });
+
+	    _this.csrfToken = csrfToken;
 	    _this.upload = new Upload(file, {
-	      chunkSize: options.chunkSize,
-	      endpoint: options.uploadUrl,
+	      chunkSize: chunkSize,
+	      endpoint: uploadUrl,
 	      metadata: {
-	        fieldName: options.fieldName,
+	        fieldName: fieldName,
 	        filename: file.name,
-	        formId: options.formId
+	        formId: formId
 	      },
+	      onBeforeRequest: _this.addCsrTokenToRequest,
 	      onError: _this.handleError,
 	      onProgress: _this.handleProgress,
 	      onSuccess: _this.handleSucces,
-	      retryDelays: options.retryDelays || [0, 1000, 3000, 5000]
+	      retryDelays: retryDelays || [0, 1000, 3000, 5000]
 	    });
 	    _this.onError = undefined;
 	    _this.onProgress = undefined;
@@ -14480,7 +14516,7 @@
 
 	              case 2:
 	                _context2.next = 4;
-	                return deleteUpload(this.upload.url);
+	                return deleteUpload(this.upload.url, this.csrfToken);
 
 	              case 4:
 	              case "end":
@@ -14810,7 +14846,12 @@
 	        var name = initialFile.name,
 	            size = initialFile.size;
 	        var element = renderer.addUploadedFile(initialFile.original_name ? initialFile.original_name : name, _this2.nextUploadIndex, size);
-	        var upload = createUploadedFile(initialFile, _this2.uploadUrl, _this2.nextUploadIndex);
+	        var upload = createUploadedFile({
+	          csrfToken: _this2.csrfToken,
+	          initialFile: initialFile,
+	          uploadIndex: _this2.nextUploadIndex,
+	          uploadUrl: _this2.uploadUrl
+	        });
 
 	        _this2.uploads.push(upload);
 
@@ -14850,11 +14891,14 @@
 	                      uploadIndex: newUploadIndex
 	                    });
 	                  } else {
-	                    return new TusUpload(file, newUploadIndex, {
+	                    return new TusUpload({
 	                      chunkSize: _this3.chunkSize,
+	                      csrfToken: _this3.csrfToken,
 	                      fieldName: fieldName,
+	                      file: file,
 	                      formId: formId,
 	                      retryDelays: _this3.retryDelays,
+	                      uploadIndex: newUploadIndex,
 	                      uploadUrl: uploadUrl
 	                    });
 	                  }
@@ -15174,6 +15218,10 @@
 	  var skipRequired = options.skipRequired || false;
 	  var prefix = getPrefix();
 	  var csrfToken = (_findInput = findInput(form, "csrfmiddlewaretoken", null)) === null || _findInput === void 0 ? void 0 : _findInput.value;
+
+	  if (!csrfToken) {
+	    throw Error("Csrf token not found");
+	  }
 
 	  if (!formId || !uploadUrl) {
 	    return;

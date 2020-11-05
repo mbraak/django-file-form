@@ -1,5 +1,8 @@
-export const deleteUpload = async (url: string): Promise<void> => {
-  return new Promise((resolve, reject) => {
+export const deleteUpload = async (
+  url: string,
+  csrfToken: string
+): Promise<void> =>
+  new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open("DELETE", url);
 
@@ -11,6 +14,6 @@ export const deleteUpload = async (url: string): Promise<void> => {
       }
     };
     xhr.setRequestHeader("Tus-Resumable", "1.0.0");
+    xhr.setRequestHeader("X-CSRFToken", csrfToken);
     xhr.send(null);
   });
-};

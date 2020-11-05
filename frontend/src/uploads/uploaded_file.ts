@@ -85,14 +85,23 @@ export class UploadedS3File extends BaseUploadedFile {
   }
 }
 
+interface UploadedTusFileParameters {
+  csrfToken: string;
+  initialFile: InitialFile;
+  uploadUrl: string;
+  uploadIndex: number;
+}
+
 export class UploadedTusFile extends BaseUploadedFile {
+  csrfToken: string;
   url: string;
 
-  constructor(
-    initialFile: InitialFile,
-    uploadUrl: string,
-    uploadIndex: number
-  ) {
+  constructor({
+    csrfToken,
+    initialFile,
+    uploadUrl,
+    uploadIndex
+  }: UploadedTusFileParameters) {
     super({
       id: initialFile.id,
       name: initialFile.name,
@@ -101,24 +110,38 @@ export class UploadedTusFile extends BaseUploadedFile {
       uploadIndex
     });
 
+    this.csrfToken = csrfToken;
     this.url = `${uploadUrl}${initialFile.id}`;
   }
 
   public async delete(): Promise<void> {
-    await deleteUpload(this.url);
+    await deleteUpload(this.url, this.csrfToken);
   }
 }
 
-export const createUploadedFile = (
-  initialFile: InitialFile,
-  uploadUrl: string,
-  uploadIndex: number
-): BaseUploadedFile => {
+interface UploadedFileParameters {
+  csrfToken: string;
+  initialFile: InitialFile;
+  uploadUrl: string;
+  uploadIndex: number;
+}
+
+export const createUploadedFile = ({
+  csrfToken,
+  initialFile,
+  uploadUrl,
+  uploadIndex
+}: UploadedFileParameters): BaseUploadedFile => {
   if (initialFile.placeholder === true) {
     return new PlaceholderFile(initialFile, uploadIndex);
   } else if (initialFile.placeholder === false) {
     return new UploadedS3File(initialFile, uploadIndex);
   } else {
-    return new UploadedTusFile(initialFile, uploadUrl, uploadIndex);
+    return new UploadedTusFile({
+      csrfToken,
+      initialFile,
+      uploadUrl,
+      uploadIndex
+    });
   }
 };

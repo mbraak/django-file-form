@@ -3,7 +3,6 @@ import logging
 import uuid
 from pathlib import Path
 
-from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_http_methods
 
 from django_file_form import conf
@@ -20,7 +19,6 @@ from .utils import (
 logger = logging.getLogger(__name__)
 
 
-@csrf_exempt
 @require_POST
 def start_upload(request):
     check_permission(request)
@@ -76,7 +74,6 @@ def start_upload(request):
     return response
 
 
-@csrf_exempt
 @require_http_methods(["DELETE", "HEAD", "PATCH"])
 def handle_upload(request, resource_id):
     check_permission(request)
