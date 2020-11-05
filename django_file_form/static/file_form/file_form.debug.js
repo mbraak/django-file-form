@@ -4197,26 +4197,16 @@
 	  }, {
 	    key: "setDeleteFailed",
 	    value: function setDeleteFailed(index) {
-	      var el = this.findFileDiv(index);
-
-	      if (el) {
-	        var span = document.createElement("span");
-	        span.innerHTML = this.translations["Delete failed"];
-	        el.appendChild(span);
-	      }
-
+	      this.setErrorMessage(index, this.translations["Delete failed"]);
 	      this.enableDelete(index);
 	    }
 	  }, {
 	    key: "setError",
 	    value: function setError(index) {
-	      var span = document.createElement("span");
-	      span.classList.add("dff-error");
-	      span.innerHTML = this.translations["Upload failed"];
+	      this.setErrorMessage(index, this.translations["Upload failed"]);
 	      var el = this.findFileDiv(index);
 
 	      if (el) {
-	        el.appendChild(span);
 	        el.classList.add("dff-upload-fail");
 	      }
 
@@ -4323,6 +4313,26 @@
 	      }
 
 	      return div.querySelector(".dff-delete");
+	    }
+	  }, {
+	    key: "setErrorMessage",
+	    value: function setErrorMessage(index, message) {
+	      var el = this.findFileDiv(index);
+
+	      if (!el) {
+	        return;
+	      }
+
+	      var originalMessageSpan = document.querySelector(".dff-error");
+
+	      if (originalMessageSpan) {
+	        originalMessageSpan.remove();
+	      }
+
+	      var span = document.createElement("span");
+	      span.classList.add("dff-error");
+	      span.innerHTML = message;
+	      el.appendChild(span);
 	    }
 	  }]);
 
