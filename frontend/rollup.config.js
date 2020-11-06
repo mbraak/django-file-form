@@ -21,12 +21,16 @@ const getOutputFilename = () => {
 };
 
 const plugins = [
-  resolve({ browser: true, extensions: [".js", ".ts"], preferBuiltins: true }),
+  resolve({
+    browser: true,
+    extensions: [".js", ".ts", ".tsx"],
+    preferBuiltins: true
+  }),
   commonjs(),
   nodePolyfills(),
   babel({
     babelHelpers: "runtime",
-    extensions: [".js", ".ts"],
+    extensions: [".js", ".ts", ".tsx"],
     exclude: "node_modules/core-js/**"
   })
 ];

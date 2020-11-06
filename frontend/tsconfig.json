@@ -4,6 +4,7 @@
   "compilerOptions": {
     "downlevelIteration": true,
     "esModuleInterop": true,
+    "jsx": "preserve",
     "lib": ["DOM", "DOM.Iterable", "ES2018"],
     "moduleResolution": "node",
     "noFallthroughCasesInSwitch": true,
