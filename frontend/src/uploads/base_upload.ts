@@ -1,5 +1,7 @@
 type UploadStatus = "done" | "error" | "uploading";
 
+type ActionStatus = "in_progress" | "error";
+
 interface UploadParameters {
   name: string;
   status: UploadStatus;
@@ -8,7 +10,9 @@ interface UploadParameters {
 }
 
 abstract class BaseUpload {
+  deleteStatus?: ActionStatus;
   name: string;
+  progress: number;
   status: UploadStatus;
   type: string;
   uploadIndex: number;
@@ -18,6 +22,9 @@ abstract class BaseUpload {
     this.status = status;
     this.type = type;
     this.uploadIndex = uploadIndex;
+
+    this.progress = 0;
+    this.deleteStatus = undefined;
   }
 
   public abstract async abort(): Promise<void>;

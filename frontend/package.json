@@ -29,7 +29,6 @@
     "@rollup/plugin-babel": "^5.2.1",
     "@rollup/plugin-commonjs": "^16.0.0",
     "@rollup/plugin-node-resolve": "^10.0.0",
-    "@types/escape-html": "^1.0.0",
     "@types/picomatch": "^2.2.1",
     "@typescript-eslint/eslint-plugin": "^4.0.1",
     "@typescript-eslint/parser": "^4.0.1",
@@ -49,7 +48,6 @@
   },
   "dependencies": {
     "core-js": "^3.6.5",
-    "escape-html": "^1.0.3",
     "eventemitter3": "^4.0.7",
     "inferno": "^7.4.6",
     "mime": "^2.4.6",
