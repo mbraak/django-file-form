@@ -2,16 +2,19 @@
   display: flex;
   flex-direction: column;
   margin: 16px 0 16px 0;
-  outline: solid 1px #ddd;
   max-width: 40em;
+}
+.dff-uploader .dff-files .dff-drop-area {
+  width: 100%;
+  height: 100%;
   padding: 16px;
+  outline: solid 1px #ddd;
 }
-.dff-uploader .dff-files:empty {
-  margin: 0;
-  outline: none;
-}
-.dff-uploader .dff-files.dff-dropping {
+.dff-uploader .dff-files .dff-drop-area.dff-dropping {
   outline: dashed 2px #ddd;
+}
+.dff-uploader .dff-files .dff-drop-area:empty {
+  margin: 0;
 }
 .dff-uploader .dff-files .dff-file {
   margin-bottom: 8px;

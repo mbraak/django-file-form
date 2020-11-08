@@ -12,6 +12,21 @@
 		}, fn(module, module.exports), module.exports;
 	}
 
+	function getAugmentedNamespace(n) {
+		if (n.__esModule) return n;
+		var a = Object.defineProperty({}, '__esModule', {value: true});
+		Object.keys(n).forEach(function (k) {
+			var d = Object.getOwnPropertyDescriptor(n, k);
+			Object.defineProperty(a, k, d.get ? d : {
+				enumerable: true,
+				get: function () {
+					return n[k];
+				}
+			});
+		});
+		return a;
+	}
+
 	function commonjsRequire () {
 		throw new Error('Dynamic requires are not currently supported by @rollup/plugin-commonjs');
 	}
@@ -10382,6 +10397,257 @@
 	  return TusUpload;
 	}(BaseUpload);
 
+	var global$1 = typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {};
+
+	// based off https://github.com/defunctzombie/node-process/blob/master/browser.js
+
+	function defaultSetTimout() {
+	  throw new Error('setTimeout has not been defined');
+	}
+
+	function defaultClearTimeout() {
+	  throw new Error('clearTimeout has not been defined');
+	}
+
+	var cachedSetTimeout = defaultSetTimout;
+	var cachedClearTimeout = defaultClearTimeout;
+
+	if (typeof global$1.setTimeout === 'function') {
+	  cachedSetTimeout = setTimeout;
+	}
+
+	if (typeof global$1.clearTimeout === 'function') {
+	  cachedClearTimeout = clearTimeout;
+	}
+
+	function runTimeout(fun) {
+	  if (cachedSetTimeout === setTimeout) {
+	    //normal enviroments in sane situations
+	    return setTimeout(fun, 0);
+	  } // if setTimeout wasn't available but was latter defined
+
+
+	  if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+	    cachedSetTimeout = setTimeout;
+	    return setTimeout(fun, 0);
+	  }
+
+	  try {
+	    // when when somebody has screwed with setTimeout but no I.E. maddness
+	    return cachedSetTimeout(fun, 0);
+	  } catch (e) {
+	    try {
+	      // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
+	      return cachedSetTimeout.call(null, fun, 0);
+	    } catch (e) {
+	      // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
+	      return cachedSetTimeout.call(this, fun, 0);
+	    }
+	  }
+	}
+
+	function runClearTimeout(marker) {
+	  if (cachedClearTimeout === clearTimeout) {
+	    //normal enviroments in sane situations
+	    return clearTimeout(marker);
+	  } // if clearTimeout wasn't available but was latter defined
+
+
+	  if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+	    cachedClearTimeout = clearTimeout;
+	    return clearTimeout(marker);
+	  }
+
+	  try {
+	    // when when somebody has screwed with setTimeout but no I.E. maddness
+	    return cachedClearTimeout(marker);
+	  } catch (e) {
+	    try {
+	      // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
+	      return cachedClearTimeout.call(null, marker);
+	    } catch (e) {
+	      // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
+	      // Some versions of I.E. have different rules for clearTimeout vs setTimeout
+	      return cachedClearTimeout.call(this, marker);
+	    }
+	  }
+	}
+
+	var queue$1 = [];
+	var draining = false;
+	var currentQueue;
+	var queueIndex = -1;
+
+	function cleanUpNextTick() {
+	  if (!draining || !currentQueue) {
+	    return;
+	  }
+
+	  draining = false;
+
+	  if (currentQueue.length) {
+	    queue$1 = currentQueue.concat(queue$1);
+	  } else {
+	    queueIndex = -1;
+	  }
+
+	  if (queue$1.length) {
+	    drainQueue();
+	  }
+	}
+
+	function drainQueue() {
+	  if (draining) {
+	    return;
+	  }
+
+	  var timeout = runTimeout(cleanUpNextTick);
+	  draining = true;
+	  var len = queue$1.length;
+
+	  while (len) {
+	    currentQueue = queue$1;
+	    queue$1 = [];
+
+	    while (++queueIndex < len) {
+	      if (currentQueue) {
+	        currentQueue[queueIndex].run();
+	      }
+	    }
+
+	    queueIndex = -1;
+	    len = queue$1.length;
+	  }
+
+	  currentQueue = null;
+	  draining = false;
+	  runClearTimeout(timeout);
+	}
+
+	function nextTick(fun) {
+	  var args = new Array(arguments.length - 1);
+
+	  if (arguments.length > 1) {
+	    for (var i = 1; i < arguments.length; i++) {
+	      args[i - 1] = arguments[i];
+	    }
+	  }
+
+	  queue$1.push(new Item(fun, args));
+
+	  if (queue$1.length === 1 && !draining) {
+	    runTimeout(drainQueue);
+	  }
+	} // v8 likes predictible objects
+
+
+	function Item(fun, array) {
+	  this.fun = fun;
+	  this.array = array;
+	}
+
+	Item.prototype.run = function () {
+	  this.fun.apply(null, this.array);
+	};
+
+	var title = 'browser';
+	var platform = 'browser';
+	var browser = true;
+	var env = {};
+	var argv = [];
+	var version$1 = ''; // empty string to avoid regexp issues
+
+	var versions$1 = {};
+	var release = {};
+	var config = {};
+
+	function noop() {}
+
+	var on = noop;
+	var addListener = noop;
+	var once = noop;
+	var off = noop;
+	var removeListener = noop;
+	var removeAllListeners = noop;
+	var emit = noop;
+
+	function binding(name) {
+	  throw new Error('process.binding is not supported');
+	}
+
+	function cwd() {
+	  return '/';
+	}
+
+	function chdir(dir) {
+	  throw new Error('process.chdir is not supported');
+	}
+
+	function umask() {
+	  return 0;
+	} // from https://github.com/kumavis/browser-process-hrtime/blob/master/index.js
+
+
+	var performance = global$1.performance || {};
+
+	var performanceNow = performance.now || performance.mozNow || performance.msNow || performance.oNow || performance.webkitNow || function () {
+	  return new Date().getTime();
+	}; // generate timestamp or delta
+	// see http://nodejs.org/api/process.html#process_process_hrtime
+
+
+	function hrtime(previousTimestamp) {
+	  var clocktime = performanceNow.call(performance) * 1e-3;
+	  var seconds = Math.floor(clocktime);
+	  var nanoseconds = Math.floor(clocktime % 1 * 1e9);
+
+	  if (previousTimestamp) {
+	    seconds = seconds - previousTimestamp[0];
+	    nanoseconds = nanoseconds - previousTimestamp[1];
+
+	    if (nanoseconds < 0) {
+	      seconds--;
+	      nanoseconds += 1e9;
+	    }
+	  }
+
+	  return [seconds, nanoseconds];
+	}
+
+	var startTime = new Date();
+
+	function uptime() {
+	  var currentTime = new Date();
+	  var dif = currentTime - startTime;
+	  return dif / 1000;
+	}
+
+	var browser$1 = {
+	  nextTick: nextTick,
+	  title: title,
+	  browser: browser,
+	  env: env,
+	  argv: argv,
+	  version: version$1,
+	  versions: versions$1,
+	  on: on,
+	  addListener: addListener,
+	  once: once,
+	  off: off,
+	  removeListener: removeListener,
+	  removeAllListeners: removeAllListeners,
+	  emit: emit,
+	  binding: binding,
+	  cwd: cwd,
+	  chdir: chdir,
+	  umask: umask,
+	  hrtime: hrtime,
+	  platform: platform,
+	  release: release,
+	  config: config,
+	  uptime: uptime
+	};
+
 	var UNSUPPORTED_Y$3 = regexpStickyHelpers.UNSUPPORTED_Y;
 
 	// `RegExp.prototype.flags` getter
@@ -10633,6 +10899,10 @@
 
 	  return state;
 	}
+
+	var renderCheck = {
+	  v: false
+	};
 	var options = {
 	  componentComparator: null,
 	  createVNode: null,
@@ -10807,6 +11077,46 @@
 	  }
 
 	  return fragment;
+	}
+
+	function normalizeProps(vNode) {
+	  var props = vNode.props;
+
+	  if (props) {
+	    var flags = vNode.flags;
+
+	    if (flags & 481
+	    /* Element */
+	    ) {
+	        if (props.children !== void 0 && isNullOrUndef(vNode.children)) {
+	          normalizeChildren(vNode, props.children);
+	        }
+
+	        if (props.className !== void 0) {
+	          vNode.className = props.className || null;
+	          props.className = undefined;
+	        }
+	      }
+
+	    if (props.key !== void 0) {
+	      vNode.key = props.key;
+	      props.key = undefined;
+	    }
+
+	    if (props.ref !== void 0) {
+	      if (flags & 8
+	      /* ComponentFunction */
+	      ) {
+	          vNode.ref = combineFrom(vNode.ref, props.ref);
+	        } else {
+	        vNode.ref = props.ref;
+	      }
+
+	      props.ref = undefined;
+	    }
+	  }
+
+	  return vNode;
 	}
 	/*
 	 * Fragment is different than normal vNode,
@@ -12870,6 +13180,7 @@
 	function __render(input, parentDOM, callback, context) {
 	  var lifecycle = [];
 	  var rootInput = parentDOM.$V;
+	  renderCheck.v = true;
 
 	  if (isNullOrUndef(rootInput)) {
 	    if (!isNullOrUndef(input)) {
@@ -12900,6 +13211,7 @@
 	  }
 
 	  callAll(lifecycle);
+	  renderCheck.v = false;
 
 	  if (isFunction(callback)) {
 	    callback();
@@ -12916,18 +13228,3685 @@
 
 	  __render(input, parentDOM, callback, context);
 	}
-	var nextTick = typeof Promise !== 'undefined' ? Promise.resolve().then.bind(Promise.resolve()) : function (a) {
+
+	var QUEUE = [];
+	var nextTick$1 = typeof Promise !== 'undefined' ? Promise.resolve().then.bind(Promise.resolve()) : function (a) {
 	  window.setTimeout(a, 0);
+	};
+	var microTaskPending = false;
+
+	function queueStateChanges(component, newState, callback, force) {
+	  var pending = component.$PS;
+
+	  if (isFunction(newState)) {
+	    newState = newState(pending ? combineFrom(component.state, pending) : component.state, component.props, component.context);
+	  }
+
+	  if (isNullOrUndef(pending)) {
+	    component.$PS = newState;
+	  } else {
+	    for (var stateKey in newState) {
+	      pending[stateKey] = newState[stateKey];
+	    }
+	  }
+
+	  if (!component.$BR) {
+	    if (!renderCheck.v) {
+	      if (QUEUE.length === 0) {
+	        applyState(component, force);
+
+	        if (isFunction(callback)) {
+	          callback.call(component);
+	        }
+
+	        return;
+	      }
+	    }
+
+	    if (QUEUE.indexOf(component) === -1) {
+	      QUEUE.push(component);
+	    }
+
+	    if (!microTaskPending) {
+	      microTaskPending = true;
+	      nextTick$1(rerender);
+	    }
+
+	    if (isFunction(callback)) {
+	      var QU = component.$QU;
+
+	      if (!QU) {
+	        QU = component.$QU = [];
+	      }
+
+	      QU.push(callback);
+	    }
+	  } else if (isFunction(callback)) {
+	    component.$L.push(callback.bind(component));
+	  }
+	}
+
+	function callSetStateCallbacks(component) {
+	  var queue = component.$QU;
+
+	  for (var i = 0; i < queue.length; ++i) {
+	    queue[i].call(component);
+	  }
+
+	  component.$QU = null;
+	}
+
+	function rerender() {
+	  var component;
+	  microTaskPending = false;
+
+	  while (component = QUEUE.shift()) {
+	    if (!component.$UN) {
+	      applyState(component, false);
+
+	      if (component.$QU) {
+	        callSetStateCallbacks(component);
+	      }
+	    }
+	  }
+	}
+
+	function applyState(component, force) {
+	  if (force || !component.$BR) {
+	    var pendingState = component.$PS;
+	    component.$PS = null;
+	    var lifecycle = [];
+	    renderCheck.v = true;
+	    updateClassComponent(component, combineFrom(component.state, pendingState), component.props, findDOMfromVNode(component.$LI, true).parentNode, component.context, component.$SVG, force, null, lifecycle);
+	    callAll(lifecycle);
+	    renderCheck.v = false;
+	  } else {
+	    component.state = component.$PS;
+	    component.$PS = null;
+	  }
+	}
+
+	var Component = function Component(props, context) {
+	  // Public
+	  this.state = null; // Internal properties
+
+	  this.$BR = false; // BLOCK RENDER
+
+	  this.$BS = true; // BLOCK STATE
+
+	  this.$PS = null; // PENDING STATE (PARTIAL or FULL)
+
+	  this.$LI = null; // LAST INPUT
+
+	  this.$UN = false; // UNMOUNTED
+
+	  this.$CX = null; // CHILDCONTEXT
+
+	  this.$QU = null; // QUEUE
+
+	  this.$N = false; // Uses new lifecycle API Flag
+
+	  this.$L = null; // Current lifecycle of this component
+
+	  this.$SVG = false; // Flag to keep track if component is inside SVG tree
+
+	  this.props = props || EMPTY_OBJ;
+	  this.context = context || EMPTY_OBJ; // context should not be mutable
+	};
+
+	Component.prototype.forceUpdate = function forceUpdate(callback) {
+	  if (this.$UN) {
+	    return;
+	  } // Do not allow double render during force update
+
+
+	  queueStateChanges(this, {}, callback, true);
+	};
+
+	Component.prototype.setState = function setState(newState, callback) {
+	  if (this.$UN) {
+	    return;
+	  }
+
+	  if (!this.$BS) {
+	    queueStateChanges(this, newState, callback, false);
+	  }
+	};
+
+	Component.prototype.render = function render(_nextProps, _nextState, _nextContext) {
+	  return null;
 	};
 
 	{
 	  console.warn('You are running production build of Inferno in development mode. Use dev:module entry point.');
 	}
 
-	var CancelLink = function CancelLink(_ref) {
-	  var onDelete = _ref.onDelete,
-	      translations = _ref.translations,
-	      upload = _ref.upload;
+	var $trim = stringTrim.trim;
+
+
+	// `String.prototype.trim` method
+	// https://tc39.github.io/ecma262/#sec-string.prototype.trim
+	_export({ target: 'String', proto: true, forced: stringTrimForced('trim') }, {
+	  trim: function trim() {
+	    return $trim(this);
+	  }
+	});
+
+	function _arrayWithHoles(arr) {
+	  if (Array.isArray(arr)) return arr;
+	}
+
+	var arrayWithHoles = _arrayWithHoles;
+
+	function _iterableToArrayLimit(arr, i) {
+	  if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return;
+	  var _arr = [];
+	  var _n = true;
+	  var _d = false;
+	  var _e = undefined;
+
+	  try {
+	    for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+	      _arr.push(_s.value);
+
+	      if (i && _arr.length === i) break;
+	    }
+	  } catch (err) {
+	    _d = true;
+	    _e = err;
+	  } finally {
+	    try {
+	      if (!_n && _i["return"] != null) _i["return"]();
+	    } finally {
+	      if (_d) throw _e;
+	    }
+	  }
+
+	  return _arr;
+	}
+
+	var iterableToArrayLimit = _iterableToArrayLimit;
+
+	function _nonIterableRest() {
+	  throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+	}
+
+	var nonIterableRest = _nonIterableRest;
+
+	function _slicedToArray(arr, i) {
+	  return arrayWithHoles(arr) || iterableToArrayLimit(arr, i) || unsupportedIterableToArray(arr, i) || nonIterableRest();
+	}
+
+	var slicedToArray = _slicedToArray;
+
+	function Mime() {
+	  this._types = Object.create(null);
+	  this._extensions = Object.create(null);
+
+	  for (var i = 0; i < arguments.length; i++) {
+	    this.define(arguments[i]);
+	  }
+
+	  this.define = this.define.bind(this);
+	  this.getType = this.getType.bind(this);
+	  this.getExtension = this.getExtension.bind(this);
+	}
+	/**
+	 * Define mimetype -> extension mappings.  Each key is a mime-type that maps
+	 * to an array of extensions associated with the type.  The first extension is
+	 * used as the default extension for the type.
+	 *
+	 * e.g. mime.define({'audio/ogg', ['oga', 'ogg', 'spx']});
+	 *
+	 * If a type declares an extension that has already been defined, an error will
+	 * be thrown.  To suppress this error and force the extension to be associated
+	 * with the new type, pass `force`=true.  Alternatively, you may prefix the
+	 * extension with "*" to map the type to extension, without mapping the
+	 * extension to the type.
+	 *
+	 * e.g. mime.define({'audio/wav', ['wav']}, {'audio/x-wav', ['*wav']});
+	 *
+	 *
+	 * @param map (Object) type definitions
+	 * @param force (Boolean) if true, force overriding of existing definitions
+	 */
+
+
+	Mime.prototype.define = function (typeMap, force) {
+	  for (var type in typeMap) {
+	    var extensions = typeMap[type].map(function (t) {
+	      return t.toLowerCase();
+	    });
+	    type = type.toLowerCase();
+
+	    for (var i = 0; i < extensions.length; i++) {
+	      var ext = extensions[i]; // '*' prefix = not the preferred type for this extension.  So fixup the
+	      // extension, and skip it.
+
+	      if (ext[0] == '*') {
+	        continue;
+	      }
+
+	      if (!force && ext in this._types) {
+	        throw new Error('Attempt to change mapping for "' + ext + '" extension from "' + this._types[ext] + '" to "' + type + '". Pass `force=true` to allow this, otherwise remove "' + ext + '" from the list of extensions for "' + type + '".');
+	      }
+
+	      this._types[ext] = type;
+	    } // Use first extension as default
+
+
+	    if (force || !this._extensions[type]) {
+	      var ext = extensions[0];
+	      this._extensions[type] = ext[0] != '*' ? ext : ext.substr(1);
+	    }
+	  }
+	};
+	/**
+	 * Lookup a mime type based on extension
+	 */
+
+
+	Mime.prototype.getType = function (path) {
+	  path = String(path);
+	  var last = path.replace(/^.*[/\\]/, '').toLowerCase();
+	  var ext = last.replace(/^.*\./, '').toLowerCase();
+	  var hasPath = last.length < path.length;
+	  var hasDot = ext.length < last.length - 1;
+	  return (hasDot || !hasPath) && this._types[ext] || null;
+	};
+	/**
+	 * Return file extension associated with a mime type
+	 */
+
+
+	Mime.prototype.getExtension = function (type) {
+	  type = /^\s*([^;\s]*)/.test(type) && RegExp.$1;
+	  return type && this._extensions[type.toLowerCase()] || null;
+	};
+
+	var Mime_1 = Mime;
+
+	var standard = {
+	  "application/andrew-inset": ["ez"],
+	  "application/applixware": ["aw"],
+	  "application/atom+xml": ["atom"],
+	  "application/atomcat+xml": ["atomcat"],
+	  "application/atomdeleted+xml": ["atomdeleted"],
+	  "application/atomsvc+xml": ["atomsvc"],
+	  "application/atsc-dwd+xml": ["dwd"],
+	  "application/atsc-held+xml": ["held"],
+	  "application/atsc-rsat+xml": ["rsat"],
+	  "application/bdoc": ["bdoc"],
+	  "application/calendar+xml": ["xcs"],
+	  "application/ccxml+xml": ["ccxml"],
+	  "application/cdfx+xml": ["cdfx"],
+	  "application/cdmi-capability": ["cdmia"],
+	  "application/cdmi-container": ["cdmic"],
+	  "application/cdmi-domain": ["cdmid"],
+	  "application/cdmi-object": ["cdmio"],
+	  "application/cdmi-queue": ["cdmiq"],
+	  "application/cu-seeme": ["cu"],
+	  "application/dash+xml": ["mpd"],
+	  "application/davmount+xml": ["davmount"],
+	  "application/docbook+xml": ["dbk"],
+	  "application/dssc+der": ["dssc"],
+	  "application/dssc+xml": ["xdssc"],
+	  "application/ecmascript": ["ecma", "es"],
+	  "application/emma+xml": ["emma"],
+	  "application/emotionml+xml": ["emotionml"],
+	  "application/epub+zip": ["epub"],
+	  "application/exi": ["exi"],
+	  "application/fdt+xml": ["fdt"],
+	  "application/font-tdpfr": ["pfr"],
+	  "application/geo+json": ["geojson"],
+	  "application/gml+xml": ["gml"],
+	  "application/gpx+xml": ["gpx"],
+	  "application/gxf": ["gxf"],
+	  "application/gzip": ["gz"],
+	  "application/hjson": ["hjson"],
+	  "application/hyperstudio": ["stk"],
+	  "application/inkml+xml": ["ink", "inkml"],
+	  "application/ipfix": ["ipfix"],
+	  "application/its+xml": ["its"],
+	  "application/java-archive": ["jar", "war", "ear"],
+	  "application/java-serialized-object": ["ser"],
+	  "application/java-vm": ["class"],
+	  "application/javascript": ["js", "mjs"],
+	  "application/json": ["json", "map"],
+	  "application/json5": ["json5"],
+	  "application/jsonml+json": ["jsonml"],
+	  "application/ld+json": ["jsonld"],
+	  "application/lgr+xml": ["lgr"],
+	  "application/lost+xml": ["lostxml"],
+	  "application/mac-binhex40": ["hqx"],
+	  "application/mac-compactpro": ["cpt"],
+	  "application/mads+xml": ["mads"],
+	  "application/manifest+json": ["webmanifest"],
+	  "application/marc": ["mrc"],
+	  "application/marcxml+xml": ["mrcx"],
+	  "application/mathematica": ["ma", "nb", "mb"],
+	  "application/mathml+xml": ["mathml"],
+	  "application/mbox": ["mbox"],
+	  "application/mediaservercontrol+xml": ["mscml"],
+	  "application/metalink+xml": ["metalink"],
+	  "application/metalink4+xml": ["meta4"],
+	  "application/mets+xml": ["mets"],
+	  "application/mmt-aei+xml": ["maei"],
+	  "application/mmt-usd+xml": ["musd"],
+	  "application/mods+xml": ["mods"],
+	  "application/mp21": ["m21", "mp21"],
+	  "application/mp4": ["mp4s", "m4p"],
+	  "application/mrb-consumer+xml": ["*xdf"],
+	  "application/mrb-publish+xml": ["*xdf"],
+	  "application/msword": ["doc", "dot"],
+	  "application/mxf": ["mxf"],
+	  "application/n-quads": ["nq"],
+	  "application/n-triples": ["nt"],
+	  "application/node": ["cjs"],
+	  "application/octet-stream": ["bin", "dms", "lrf", "mar", "so", "dist", "distz", "pkg", "bpk", "dump", "elc", "deploy", "exe", "dll", "deb", "dmg", "iso", "img", "msi", "msp", "msm", "buffer"],
+	  "application/oda": ["oda"],
+	  "application/oebps-package+xml": ["opf"],
+	  "application/ogg": ["ogx"],
+	  "application/omdoc+xml": ["omdoc"],
+	  "application/onenote": ["onetoc", "onetoc2", "onetmp", "onepkg"],
+	  "application/oxps": ["oxps"],
+	  "application/p2p-overlay+xml": ["relo"],
+	  "application/patch-ops-error+xml": ["*xer"],
+	  "application/pdf": ["pdf"],
+	  "application/pgp-encrypted": ["pgp"],
+	  "application/pgp-signature": ["asc", "sig"],
+	  "application/pics-rules": ["prf"],
+	  "application/pkcs10": ["p10"],
+	  "application/pkcs7-mime": ["p7m", "p7c"],
+	  "application/pkcs7-signature": ["p7s"],
+	  "application/pkcs8": ["p8"],
+	  "application/pkix-attr-cert": ["ac"],
+	  "application/pkix-cert": ["cer"],
+	  "application/pkix-crl": ["crl"],
+	  "application/pkix-pkipath": ["pkipath"],
+	  "application/pkixcmp": ["pki"],
+	  "application/pls+xml": ["pls"],
+	  "application/postscript": ["ai", "eps", "ps"],
+	  "application/provenance+xml": ["provx"],
+	  "application/pskc+xml": ["pskcxml"],
+	  "application/raml+yaml": ["raml"],
+	  "application/rdf+xml": ["rdf", "owl"],
+	  "application/reginfo+xml": ["rif"],
+	  "application/relax-ng-compact-syntax": ["rnc"],
+	  "application/resource-lists+xml": ["rl"],
+	  "application/resource-lists-diff+xml": ["rld"],
+	  "application/rls-services+xml": ["rs"],
+	  "application/route-apd+xml": ["rapd"],
+	  "application/route-s-tsid+xml": ["sls"],
+	  "application/route-usd+xml": ["rusd"],
+	  "application/rpki-ghostbusters": ["gbr"],
+	  "application/rpki-manifest": ["mft"],
+	  "application/rpki-roa": ["roa"],
+	  "application/rsd+xml": ["rsd"],
+	  "application/rss+xml": ["rss"],
+	  "application/rtf": ["rtf"],
+	  "application/sbml+xml": ["sbml"],
+	  "application/scvp-cv-request": ["scq"],
+	  "application/scvp-cv-response": ["scs"],
+	  "application/scvp-vp-request": ["spq"],
+	  "application/scvp-vp-response": ["spp"],
+	  "application/sdp": ["sdp"],
+	  "application/senml+xml": ["senmlx"],
+	  "application/sensml+xml": ["sensmlx"],
+	  "application/set-payment-initiation": ["setpay"],
+	  "application/set-registration-initiation": ["setreg"],
+	  "application/shf+xml": ["shf"],
+	  "application/sieve": ["siv", "sieve"],
+	  "application/smil+xml": ["smi", "smil"],
+	  "application/sparql-query": ["rq"],
+	  "application/sparql-results+xml": ["srx"],
+	  "application/srgs": ["gram"],
+	  "application/srgs+xml": ["grxml"],
+	  "application/sru+xml": ["sru"],
+	  "application/ssdl+xml": ["ssdl"],
+	  "application/ssml+xml": ["ssml"],
+	  "application/swid+xml": ["swidtag"],
+	  "application/tei+xml": ["tei", "teicorpus"],
+	  "application/thraud+xml": ["tfi"],
+	  "application/timestamped-data": ["tsd"],
+	  "application/toml": ["toml"],
+	  "application/ttml+xml": ["ttml"],
+	  "application/urc-ressheet+xml": ["rsheet"],
+	  "application/voicexml+xml": ["vxml"],
+	  "application/wasm": ["wasm"],
+	  "application/widget": ["wgt"],
+	  "application/winhlp": ["hlp"],
+	  "application/wsdl+xml": ["wsdl"],
+	  "application/wspolicy+xml": ["wspolicy"],
+	  "application/xaml+xml": ["xaml"],
+	  "application/xcap-att+xml": ["xav"],
+	  "application/xcap-caps+xml": ["xca"],
+	  "application/xcap-diff+xml": ["xdf"],
+	  "application/xcap-el+xml": ["xel"],
+	  "application/xcap-error+xml": ["xer"],
+	  "application/xcap-ns+xml": ["xns"],
+	  "application/xenc+xml": ["xenc"],
+	  "application/xhtml+xml": ["xhtml", "xht"],
+	  "application/xliff+xml": ["xlf"],
+	  "application/xml": ["xml", "xsl", "xsd", "rng"],
+	  "application/xml-dtd": ["dtd"],
+	  "application/xop+xml": ["xop"],
+	  "application/xproc+xml": ["xpl"],
+	  "application/xslt+xml": ["xslt"],
+	  "application/xspf+xml": ["xspf"],
+	  "application/xv+xml": ["mxml", "xhvml", "xvml", "xvm"],
+	  "application/yang": ["yang"],
+	  "application/yin+xml": ["yin"],
+	  "application/zip": ["zip"],
+	  "audio/3gpp": ["*3gpp"],
+	  "audio/adpcm": ["adp"],
+	  "audio/basic": ["au", "snd"],
+	  "audio/midi": ["mid", "midi", "kar", "rmi"],
+	  "audio/mobile-xmf": ["mxmf"],
+	  "audio/mp3": ["*mp3"],
+	  "audio/mp4": ["m4a", "mp4a"],
+	  "audio/mpeg": ["mpga", "mp2", "mp2a", "mp3", "m2a", "m3a"],
+	  "audio/ogg": ["oga", "ogg", "spx"],
+	  "audio/s3m": ["s3m"],
+	  "audio/silk": ["sil"],
+	  "audio/wav": ["wav"],
+	  "audio/wave": ["*wav"],
+	  "audio/webm": ["weba"],
+	  "audio/xm": ["xm"],
+	  "font/collection": ["ttc"],
+	  "font/otf": ["otf"],
+	  "font/ttf": ["ttf"],
+	  "font/woff": ["woff"],
+	  "font/woff2": ["woff2"],
+	  "image/aces": ["exr"],
+	  "image/apng": ["apng"],
+	  "image/bmp": ["bmp"],
+	  "image/cgm": ["cgm"],
+	  "image/dicom-rle": ["drle"],
+	  "image/emf": ["emf"],
+	  "image/fits": ["fits"],
+	  "image/g3fax": ["g3"],
+	  "image/gif": ["gif"],
+	  "image/heic": ["heic"],
+	  "image/heic-sequence": ["heics"],
+	  "image/heif": ["heif"],
+	  "image/heif-sequence": ["heifs"],
+	  "image/hej2k": ["hej2"],
+	  "image/hsj2": ["hsj2"],
+	  "image/ief": ["ief"],
+	  "image/jls": ["jls"],
+	  "image/jp2": ["jp2", "jpg2"],
+	  "image/jpeg": ["jpeg", "jpg", "jpe"],
+	  "image/jph": ["jph"],
+	  "image/jphc": ["jhc"],
+	  "image/jpm": ["jpm"],
+	  "image/jpx": ["jpx", "jpf"],
+	  "image/jxr": ["jxr"],
+	  "image/jxra": ["jxra"],
+	  "image/jxrs": ["jxrs"],
+	  "image/jxs": ["jxs"],
+	  "image/jxsc": ["jxsc"],
+	  "image/jxsi": ["jxsi"],
+	  "image/jxss": ["jxss"],
+	  "image/ktx": ["ktx"],
+	  "image/png": ["png"],
+	  "image/sgi": ["sgi"],
+	  "image/svg+xml": ["svg", "svgz"],
+	  "image/t38": ["t38"],
+	  "image/tiff": ["tif", "tiff"],
+	  "image/tiff-fx": ["tfx"],
+	  "image/webp": ["webp"],
+	  "image/wmf": ["wmf"],
+	  "message/disposition-notification": ["disposition-notification"],
+	  "message/global": ["u8msg"],
+	  "message/global-delivery-status": ["u8dsn"],
+	  "message/global-disposition-notification": ["u8mdn"],
+	  "message/global-headers": ["u8hdr"],
+	  "message/rfc822": ["eml", "mime"],
+	  "model/3mf": ["3mf"],
+	  "model/gltf+json": ["gltf"],
+	  "model/gltf-binary": ["glb"],
+	  "model/iges": ["igs", "iges"],
+	  "model/mesh": ["msh", "mesh", "silo"],
+	  "model/mtl": ["mtl"],
+	  "model/obj": ["obj"],
+	  "model/stl": ["stl"],
+	  "model/vrml": ["wrl", "vrml"],
+	  "model/x3d+binary": ["*x3db", "x3dbz"],
+	  "model/x3d+fastinfoset": ["x3db"],
+	  "model/x3d+vrml": ["*x3dv", "x3dvz"],
+	  "model/x3d+xml": ["x3d", "x3dz"],
+	  "model/x3d-vrml": ["x3dv"],
+	  "text/cache-manifest": ["appcache", "manifest"],
+	  "text/calendar": ["ics", "ifb"],
+	  "text/coffeescript": ["coffee", "litcoffee"],
+	  "text/css": ["css"],
+	  "text/csv": ["csv"],
+	  "text/html": ["html", "htm", "shtml"],
+	  "text/jade": ["jade"],
+	  "text/jsx": ["jsx"],
+	  "text/less": ["less"],
+	  "text/markdown": ["markdown", "md"],
+	  "text/mathml": ["mml"],
+	  "text/mdx": ["mdx"],
+	  "text/n3": ["n3"],
+	  "text/plain": ["txt", "text", "conf", "def", "list", "log", "in", "ini"],
+	  "text/richtext": ["rtx"],
+	  "text/rtf": ["*rtf"],
+	  "text/sgml": ["sgml", "sgm"],
+	  "text/shex": ["shex"],
+	  "text/slim": ["slim", "slm"],
+	  "text/stylus": ["stylus", "styl"],
+	  "text/tab-separated-values": ["tsv"],
+	  "text/troff": ["t", "tr", "roff", "man", "me", "ms"],
+	  "text/turtle": ["ttl"],
+	  "text/uri-list": ["uri", "uris", "urls"],
+	  "text/vcard": ["vcard"],
+	  "text/vtt": ["vtt"],
+	  "text/xml": ["*xml"],
+	  "text/yaml": ["yaml", "yml"],
+	  "video/3gpp": ["3gp", "3gpp"],
+	  "video/3gpp2": ["3g2"],
+	  "video/h261": ["h261"],
+	  "video/h263": ["h263"],
+	  "video/h264": ["h264"],
+	  "video/jpeg": ["jpgv"],
+	  "video/jpm": ["*jpm", "jpgm"],
+	  "video/mj2": ["mj2", "mjp2"],
+	  "video/mp2t": ["ts"],
+	  "video/mp4": ["mp4", "mp4v", "mpg4"],
+	  "video/mpeg": ["mpeg", "mpg", "mpe", "m1v", "m2v"],
+	  "video/ogg": ["ogv"],
+	  "video/quicktime": ["qt", "mov"],
+	  "video/webm": ["webm"]
+	};
+
+	var lite = new Mime_1(standard);
+
+	// Copyright Joyent, Inc. and other Node contributors.
+	//
+	// Permission is hereby granted, free of charge, to any person obtaining a
+	// copy of this software and associated documentation files (the
+	// "Software"), to deal in the Software without restriction, including
+	// without limitation the rights to use, copy, modify, merge, publish,
+	// distribute, sublicense, and/or sell copies of the Software, and to permit
+	// persons to whom the Software is furnished to do so, subject to the
+	// following conditions:
+	//
+	// The above copyright notice and this permission notice shall be included
+	// in all copies or substantial portions of the Software.
+	//
+	// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+	// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+	// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+	// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+	// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+	// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+	// USE OR OTHER DEALINGS IN THE SOFTWARE.
+	// resolves . and .. elements in a path array with directory names there
+	// must be no slashes, empty elements, or device names (c:\) in the array
+	// (so also no leading and trailing slashes - it does not distinguish
+	// relative and absolute paths)
+	function normalizeArray(parts, allowAboveRoot) {
+	  // if the path tries to go above the root, `up` ends up > 0
+	  var up = 0;
+
+	  for (var i = parts.length - 1; i >= 0; i--) {
+	    var last = parts[i];
+
+	    if (last === '.') {
+	      parts.splice(i, 1);
+	    } else if (last === '..') {
+	      parts.splice(i, 1);
+	      up++;
+	    } else if (up) {
+	      parts.splice(i, 1);
+	      up--;
+	    }
+	  } // if the path is allowed to go above the root, restore leading ..s
+
+
+	  if (allowAboveRoot) {
+	    for (; up--; up) {
+	      parts.unshift('..');
+	    }
+	  }
+
+	  return parts;
+	} // Split a filename into [root, dir, basename, ext], unix version
+	// 'root' is just a slash, or nothing.
+
+
+	var splitPathRe = /^(\/?|)([\s\S]*?)((?:\.{1,2}|[^\/]+?|)(\.[^.\/]*|))(?:[\/]*)$/;
+
+	var splitPath = function splitPath(filename) {
+	  return splitPathRe.exec(filename).slice(1);
+	}; // path.resolve([from ...], to)
+	// posix version
+
+
+	function resolve$1() {
+	  var resolvedPath = '',
+	      resolvedAbsolute = false;
+
+	  for (var i = arguments.length - 1; i >= -1 && !resolvedAbsolute; i--) {
+	    var path = i >= 0 ? arguments[i] : '/'; // Skip empty and invalid entries
+
+	    if (typeof path !== 'string') {
+	      throw new TypeError('Arguments to path.resolve must be strings');
+	    } else if (!path) {
+	      continue;
+	    }
+
+	    resolvedPath = path + '/' + resolvedPath;
+	    resolvedAbsolute = path.charAt(0) === '/';
+	  } // At this point the path should be resolved to a full absolute path, but
+	  // handle relative paths to be safe (might happen when process.cwd() fails)
+	  // Normalize the path
+
+
+	  resolvedPath = normalizeArray(filter(resolvedPath.split('/'), function (p) {
+	    return !!p;
+	  }), !resolvedAbsolute).join('/');
+	  return (resolvedAbsolute ? '/' : '') + resolvedPath || '.';
+	}
+	// posix version
+
+	function normalize$1(path) {
+	  var isPathAbsolute = isAbsolute(path),
+	      trailingSlash = substr(path, -1) === '/'; // Normalize the path
+
+	  path = normalizeArray(filter(path.split('/'), function (p) {
+	    return !!p;
+	  }), !isPathAbsolute).join('/');
+
+	  if (!path && !isPathAbsolute) {
+	    path = '.';
+	  }
+
+	  if (path && trailingSlash) {
+	    path += '/';
+	  }
+
+	  return (isPathAbsolute ? '/' : '') + path;
+	}
+
+	function isAbsolute(path) {
+	  return path.charAt(0) === '/';
+	} // posix version
+
+	function join() {
+	  var paths = Array.prototype.slice.call(arguments, 0);
+	  return normalize$1(filter(paths, function (p, index) {
+	    if (typeof p !== 'string') {
+	      throw new TypeError('Arguments to path.join must be strings');
+	    }
+
+	    return p;
+	  }).join('/'));
+	} // path.relative(from, to)
+	// posix version
+
+	function relative(from, to) {
+	  from = resolve$1(from).substr(1);
+	  to = resolve$1(to).substr(1);
+
+	  function trim(arr) {
+	    var start = 0;
+
+	    for (; start < arr.length; start++) {
+	      if (arr[start] !== '') break;
+	    }
+
+	    var end = arr.length - 1;
+
+	    for (; end >= 0; end--) {
+	      if (arr[end] !== '') break;
+	    }
+
+	    if (start > end) return [];
+	    return arr.slice(start, end - start + 1);
+	  }
+
+	  var fromParts = trim(from.split('/'));
+	  var toParts = trim(to.split('/'));
+	  var length = Math.min(fromParts.length, toParts.length);
+	  var samePartsLength = length;
+
+	  for (var i = 0; i < length; i++) {
+	    if (fromParts[i] !== toParts[i]) {
+	      samePartsLength = i;
+	      break;
+	    }
+	  }
+
+	  var outputParts = [];
+
+	  for (var i = samePartsLength; i < fromParts.length; i++) {
+	    outputParts.push('..');
+	  }
+
+	  outputParts = outputParts.concat(toParts.slice(samePartsLength));
+	  return outputParts.join('/');
+	}
+	var sep = '/';
+	var delimiter = ':';
+	function dirname(path) {
+	  var result = splitPath(path),
+	      root = result[0],
+	      dir = result[1];
+
+	  if (!root && !dir) {
+	    // No dirname whatsoever
+	    return '.';
+	  }
+
+	  if (dir) {
+	    // It has a dirname, strip trailing slash
+	    dir = dir.substr(0, dir.length - 1);
+	  }
+
+	  return root + dir;
+	}
+	function basename(path, ext) {
+	  var f = splitPath(path)[2]; // TODO: make this comparison case-insensitive on windows?
+
+	  if (ext && f.substr(-1 * ext.length) === ext) {
+	    f = f.substr(0, f.length - ext.length);
+	  }
+
+	  return f;
+	}
+	function extname(path) {
+	  return splitPath(path)[3];
+	}
+	var path$1 = {
+	  extname: extname,
+	  basename: basename,
+	  dirname: dirname,
+	  sep: sep,
+	  delimiter: delimiter,
+	  relative: relative,
+	  join: join,
+	  isAbsolute: isAbsolute,
+	  normalize: normalize$1,
+	  resolve: resolve$1
+	};
+
+	function filter(xs, f) {
+	  if (xs.filter) return xs.filter(f);
+	  var res = [];
+
+	  for (var i = 0; i < xs.length; i++) {
+	    if (f(xs[i], i, xs)) res.push(xs[i]);
+	  }
+
+	  return res;
+	} // String.prototype.substr - negative index don't work in IE8
+
+
+	var substr = 'ab'.substr(-1) === 'b' ? function (str, start, len) {
+	  return str.substr(start, len);
+	} : function (str, start, len) {
+	  if (start < 0) start = str.length + start;
+	  return str.substr(start, len);
+	};
+
+	var path$2 = /*#__PURE__*/Object.freeze({
+		__proto__: null,
+		resolve: resolve$1,
+		normalize: normalize$1,
+		isAbsolute: isAbsolute,
+		join: join,
+		relative: relative,
+		sep: sep,
+		delimiter: delimiter,
+		dirname: dirname,
+		basename: basename,
+		extname: extname,
+		'default': path$1
+	});
+
+	// `Array.prototype.lastIndexOf` method
+	// https://tc39.github.io/ecma262/#sec-array.prototype.lastindexof
+	_export({ target: 'Array', proto: true, forced: arrayLastIndexOf !== [].lastIndexOf }, {
+	  lastIndexOf: arrayLastIndexOf
+	});
+
+	var getOwnPropertyNames$2 = objectGetOwnPropertyNames.f;
+	var getOwnPropertyDescriptor$4 = objectGetOwnPropertyDescriptor.f;
+	var defineProperty$a = objectDefineProperty.f;
+	var trim = stringTrim.trim;
+
+	var NUMBER = 'Number';
+	var NativeNumber = global_1[NUMBER];
+	var NumberPrototype = NativeNumber.prototype;
+
+	// Opera ~12 has broken Object#toString
+	var BROKEN_CLASSOF = classofRaw(objectCreate(NumberPrototype)) == NUMBER;
+
+	// `ToNumber` abstract operation
+	// https://tc39.github.io/ecma262/#sec-tonumber
+	var toNumber = function (argument) {
+	  var it = toPrimitive(argument, false);
+	  var first, third, radix, maxCode, digits, length, index, code;
+	  if (typeof it == 'string' && it.length > 2) {
+	    it = trim(it);
+	    first = it.charCodeAt(0);
+	    if (first === 43 || first === 45) {
+	      third = it.charCodeAt(2);
+	      if (third === 88 || third === 120) return NaN; // Number('+0x1') should be NaN, old V8 fix
+	    } else if (first === 48) {
+	      switch (it.charCodeAt(1)) {
+	        case 66: case 98: radix = 2; maxCode = 49; break; // fast equal of /^0b[01]+$/i
+	        case 79: case 111: radix = 8; maxCode = 55; break; // fast equal of /^0o[0-7]+$/i
+	        default: return +it;
+	      }
+	      digits = it.slice(2);
+	      length = digits.length;
+	      for (index = 0; index < length; index++) {
+	        code = digits.charCodeAt(index);
+	        // parseInt parses a string to a first unavailable symbol
+	        // but ToNumber should return NaN if a string contains unavailable symbols
+	        if (code < 48 || code > maxCode) return NaN;
+	      } return parseInt(digits, radix);
+	    }
+	  } return +it;
+	};
+
+	// `Number` constructor
+	// https://tc39.github.io/ecma262/#sec-number-constructor
+	if (isForced_1(NUMBER, !NativeNumber(' 0o1') || !NativeNumber('0b1') || NativeNumber('+0x1'))) {
+	  var NumberWrapper = function Number(value) {
+	    var it = arguments.length < 1 ? 0 : value;
+	    var dummy = this;
+	    return dummy instanceof NumberWrapper
+	      // check on 1..constructor(foo) case
+	      && (BROKEN_CLASSOF ? fails(function () { NumberPrototype.valueOf.call(dummy); }) : classofRaw(dummy) != NUMBER)
+	        ? inheritIfRequired(new NativeNumber(toNumber(it)), dummy, NumberWrapper) : toNumber(it);
+	  };
+	  for (var keys$3 = descriptors ? getOwnPropertyNames$2(NativeNumber) : (
+	    // ES3:
+	    'MAX_VALUE,MIN_VALUE,NaN,NEGATIVE_INFINITY,POSITIVE_INFINITY,' +
+	    // ES2015 (in case, if modules with ES2015 Number statics required before):
+	    'EPSILON,isFinite,isInteger,isNaN,isSafeInteger,MAX_SAFE_INTEGER,' +
+	    'MIN_SAFE_INTEGER,parseFloat,parseInt,isInteger'
+	  ).split(','), j$1 = 0, key$2; keys$3.length > j$1; j$1++) {
+	    if (has(NativeNumber, key$2 = keys$3[j$1]) && !has(NumberWrapper, key$2)) {
+	      defineProperty$a(NumberWrapper, key$2, getOwnPropertyDescriptor$4(NativeNumber, key$2));
+	    }
+	  }
+	  NumberWrapper.prototype = NumberPrototype;
+	  NumberPrototype.constructor = NumberWrapper;
+	  redefine(global_1, NUMBER, NumberWrapper);
+	}
+
+	var path$3 = /*@__PURE__*/getAugmentedNamespace(path$2);
+
+	function ownKeys$3(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+	function _objectSpread$2(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys$3(Object(source), true).forEach(function (key) { defineProperty$4(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys$3(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+	var WIN_SLASH = '\\\\/';
+	var WIN_NO_SLASH = "[^".concat(WIN_SLASH, "]");
+	/**
+	 * Posix glob regex
+	 */
+
+	var DOT_LITERAL = '\\.';
+	var PLUS_LITERAL = '\\+';
+	var QMARK_LITERAL = '\\?';
+	var SLASH_LITERAL = '\\/';
+	var ONE_CHAR = '(?=.)';
+	var QMARK = '[^/]';
+	var END_ANCHOR = "(?:".concat(SLASH_LITERAL, "|$)");
+	var START_ANCHOR = "(?:^|".concat(SLASH_LITERAL, ")");
+	var DOTS_SLASH = "".concat(DOT_LITERAL, "{1,2}").concat(END_ANCHOR);
+	var NO_DOT = "(?!".concat(DOT_LITERAL, ")");
+	var NO_DOTS = "(?!".concat(START_ANCHOR).concat(DOTS_SLASH, ")");
+	var NO_DOT_SLASH = "(?!".concat(DOT_LITERAL, "{0,1}").concat(END_ANCHOR, ")");
+	var NO_DOTS_SLASH = "(?!".concat(DOTS_SLASH, ")");
+	var QMARK_NO_DOT = "[^.".concat(SLASH_LITERAL, "]");
+	var STAR = "".concat(QMARK, "*?");
+	var POSIX_CHARS = {
+	  DOT_LITERAL: DOT_LITERAL,
+	  PLUS_LITERAL: PLUS_LITERAL,
+	  QMARK_LITERAL: QMARK_LITERAL,
+	  SLASH_LITERAL: SLASH_LITERAL,
+	  ONE_CHAR: ONE_CHAR,
+	  QMARK: QMARK,
+	  END_ANCHOR: END_ANCHOR,
+	  DOTS_SLASH: DOTS_SLASH,
+	  NO_DOT: NO_DOT,
+	  NO_DOTS: NO_DOTS,
+	  NO_DOT_SLASH: NO_DOT_SLASH,
+	  NO_DOTS_SLASH: NO_DOTS_SLASH,
+	  QMARK_NO_DOT: QMARK_NO_DOT,
+	  STAR: STAR,
+	  START_ANCHOR: START_ANCHOR
+	};
+	/**
+	 * Windows glob regex
+	 */
+
+	var WINDOWS_CHARS = _objectSpread$2(_objectSpread$2({}, POSIX_CHARS), {}, {
+	  SLASH_LITERAL: "[".concat(WIN_SLASH, "]"),
+	  QMARK: WIN_NO_SLASH,
+	  STAR: "".concat(WIN_NO_SLASH, "*?"),
+	  DOTS_SLASH: "".concat(DOT_LITERAL, "{1,2}(?:[").concat(WIN_SLASH, "]|$)"),
+	  NO_DOT: "(?!".concat(DOT_LITERAL, ")"),
+	  NO_DOTS: "(?!(?:^|[".concat(WIN_SLASH, "])").concat(DOT_LITERAL, "{1,2}(?:[").concat(WIN_SLASH, "]|$))"),
+	  NO_DOT_SLASH: "(?!".concat(DOT_LITERAL, "{0,1}(?:[").concat(WIN_SLASH, "]|$))"),
+	  NO_DOTS_SLASH: "(?!".concat(DOT_LITERAL, "{1,2}(?:[").concat(WIN_SLASH, "]|$))"),
+	  QMARK_NO_DOT: "[^.".concat(WIN_SLASH, "]"),
+	  START_ANCHOR: "(?:^|[".concat(WIN_SLASH, "])"),
+	  END_ANCHOR: "(?:[".concat(WIN_SLASH, "]|$)")
+	});
+	/**
+	 * POSIX Bracket Regex
+	 */
+
+
+	var POSIX_REGEX_SOURCE = {
+	  alnum: 'a-zA-Z0-9',
+	  alpha: 'a-zA-Z',
+	  ascii: '\\x00-\\x7F',
+	  blank: ' \\t',
+	  cntrl: '\\x00-\\x1F\\x7F',
+	  digit: '0-9',
+	  graph: '\\x21-\\x7E',
+	  lower: 'a-z',
+	  print: '\\x20-\\x7E ',
+	  punct: '\\-!"#$%&\'()\\*+,./:;<=>?@[\\]^_`{|}~',
+	  space: ' \\t\\r\\n\\v\\f',
+	  upper: 'A-Z',
+	  word: 'A-Za-z0-9_',
+	  xdigit: 'A-Fa-f0-9'
+	};
+	var constants = {
+	  MAX_LENGTH: 1024 * 64,
+	  POSIX_REGEX_SOURCE: POSIX_REGEX_SOURCE,
+	  // regular expressions
+	  REGEX_BACKSLASH: /\\(?![*+?^${}(|)[\]])/g,
+	  REGEX_NON_SPECIAL_CHARS: /^[^@![\].,$*+?^{}()|\\/]+/,
+	  REGEX_SPECIAL_CHARS: /[-*+?.^${}(|)[\]]/,
+	  REGEX_SPECIAL_CHARS_BACKREF: /(\\?)((\W)(\3*))/g,
+	  REGEX_SPECIAL_CHARS_GLOBAL: /([-*+?.^${}(|)[\]])/g,
+	  REGEX_REMOVE_BACKSLASH: /(?:\[.*?[^\\]\]|\\(?=.))/g,
+	  // Replace globs with equivalent patterns to reduce parsing time.
+	  REPLACEMENTS: {
+	    '***': '*',
+	    '**/**': '**',
+	    '**/**/**': '**'
+	  },
+	  // Digits
+	  CHAR_0: 48,
+
+	  /* 0 */
+	  CHAR_9: 57,
+
+	  /* 9 */
+	  // Alphabet chars.
+	  CHAR_UPPERCASE_A: 65,
+
+	  /* A */
+	  CHAR_LOWERCASE_A: 97,
+
+	  /* a */
+	  CHAR_UPPERCASE_Z: 90,
+
+	  /* Z */
+	  CHAR_LOWERCASE_Z: 122,
+
+	  /* z */
+	  CHAR_LEFT_PARENTHESES: 40,
+
+	  /* ( */
+	  CHAR_RIGHT_PARENTHESES: 41,
+
+	  /* ) */
+	  CHAR_ASTERISK: 42,
+
+	  /* * */
+	  // Non-alphabetic chars.
+	  CHAR_AMPERSAND: 38,
+
+	  /* & */
+	  CHAR_AT: 64,
+
+	  /* @ */
+	  CHAR_BACKWARD_SLASH: 92,
+
+	  /* \ */
+	  CHAR_CARRIAGE_RETURN: 13,
+
+	  /* \r */
+	  CHAR_CIRCUMFLEX_ACCENT: 94,
+
+	  /* ^ */
+	  CHAR_COLON: 58,
+
+	  /* : */
+	  CHAR_COMMA: 44,
+
+	  /* , */
+	  CHAR_DOT: 46,
+
+	  /* . */
+	  CHAR_DOUBLE_QUOTE: 34,
+
+	  /* " */
+	  CHAR_EQUAL: 61,
+
+	  /* = */
+	  CHAR_EXCLAMATION_MARK: 33,
+
+	  /* ! */
+	  CHAR_FORM_FEED: 12,
+
+	  /* \f */
+	  CHAR_FORWARD_SLASH: 47,
+
+	  /* / */
+	  CHAR_GRAVE_ACCENT: 96,
+
+	  /* ` */
+	  CHAR_HASH: 35,
+
+	  /* # */
+	  CHAR_HYPHEN_MINUS: 45,
+
+	  /* - */
+	  CHAR_LEFT_ANGLE_BRACKET: 60,
+
+	  /* < */
+	  CHAR_LEFT_CURLY_BRACE: 123,
+
+	  /* { */
+	  CHAR_LEFT_SQUARE_BRACKET: 91,
+
+	  /* [ */
+	  CHAR_LINE_FEED: 10,
+
+	  /* \n */
+	  CHAR_NO_BREAK_SPACE: 160,
+
+	  /* \u00A0 */
+	  CHAR_PERCENT: 37,
+
+	  /* % */
+	  CHAR_PLUS: 43,
+
+	  /* + */
+	  CHAR_QUESTION_MARK: 63,
+
+	  /* ? */
+	  CHAR_RIGHT_ANGLE_BRACKET: 62,
+
+	  /* > */
+	  CHAR_RIGHT_CURLY_BRACE: 125,
+
+	  /* } */
+	  CHAR_RIGHT_SQUARE_BRACKET: 93,
+
+	  /* ] */
+	  CHAR_SEMICOLON: 59,
+
+	  /* ; */
+	  CHAR_SINGLE_QUOTE: 39,
+
+	  /* ' */
+	  CHAR_SPACE: 32,
+
+	  /*   */
+	  CHAR_TAB: 9,
+
+	  /* \t */
+	  CHAR_UNDERSCORE: 95,
+
+	  /* _ */
+	  CHAR_VERTICAL_LINE: 124,
+
+	  /* | */
+	  CHAR_ZERO_WIDTH_NOBREAK_SPACE: 65279,
+
+	  /* \uFEFF */
+	  SEP: path$3.sep,
+
+	  /**
+	   * Create EXTGLOB_CHARS
+	   */
+	  extglobChars: function extglobChars(chars) {
+	    return {
+	      '!': {
+	        type: 'negate',
+	        open: '(?:(?!(?:',
+	        close: "))".concat(chars.STAR, ")")
+	      },
+	      '?': {
+	        type: 'qmark',
+	        open: '(?:',
+	        close: ')?'
+	      },
+	      '+': {
+	        type: 'plus',
+	        open: '(?:',
+	        close: ')+'
+	      },
+	      '*': {
+	        type: 'star',
+	        open: '(?:',
+	        close: ')*'
+	      },
+	      '@': {
+	        type: 'at',
+	        open: '(?:',
+	        close: ')'
+	      }
+	    };
+	  },
+
+	  /**
+	   * Create GLOB_CHARS
+	   */
+	  globChars: function globChars(win32) {
+	    return win32 === true ? WINDOWS_CHARS : POSIX_CHARS;
+	  }
+	};
+
+	var utils = createCommonjsModule(function (module, exports) {
+	  var REGEX_BACKSLASH = constants.REGEX_BACKSLASH,
+	      REGEX_REMOVE_BACKSLASH = constants.REGEX_REMOVE_BACKSLASH,
+	      REGEX_SPECIAL_CHARS = constants.REGEX_SPECIAL_CHARS,
+	      REGEX_SPECIAL_CHARS_GLOBAL = constants.REGEX_SPECIAL_CHARS_GLOBAL;
+
+	  exports.isObject = function (val) {
+	    return val !== null && _typeof_1(val) === 'object' && !Array.isArray(val);
+	  };
+
+	  exports.hasRegexChars = function (str) {
+	    return REGEX_SPECIAL_CHARS.test(str);
+	  };
+
+	  exports.isRegexChar = function (str) {
+	    return str.length === 1 && exports.hasRegexChars(str);
+	  };
+
+	  exports.escapeRegex = function (str) {
+	    return str.replace(REGEX_SPECIAL_CHARS_GLOBAL, '\\$1');
+	  };
+
+	  exports.toPosixSlashes = function (str) {
+	    return str.replace(REGEX_BACKSLASH, '/');
+	  };
+
+	  exports.removeBackslashes = function (str) {
+	    return str.replace(REGEX_REMOVE_BACKSLASH, function (match) {
+	      return match === '\\' ? '' : match;
+	    });
+	  };
+
+	  exports.supportsLookbehinds = function () {
+	    var segs = browser$1.version.slice(1).split('.').map(Number);
+
+	    if (segs.length === 3 && segs[0] >= 9 || segs[0] === 8 && segs[1] >= 10) {
+	      return true;
+	    }
+
+	    return false;
+	  };
+
+	  exports.isWindows = function (options) {
+	    if (options && typeof options.windows === 'boolean') {
+	      return options.windows;
+	    }
+
+	    return  path$3.sep === '\\';
+	  };
+
+	  exports.escapeLast = function (input, char, lastIdx) {
+	    var idx = input.lastIndexOf(char, lastIdx);
+	    if (idx === -1) return input;
+	    if (input[idx - 1] === '\\') return exports.escapeLast(input, char, idx - 1);
+	    return "".concat(input.slice(0, idx), "\\").concat(input.slice(idx));
+	  };
+
+	  exports.removePrefix = function (input) {
+	    var state = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+	    var output = input;
+
+	    if (output.startsWith('./')) {
+	      output = output.slice(2);
+	      state.prefix = './';
+	    }
+
+	    return output;
+	  };
+
+	  exports.wrapOutput = function (input) {
+	    var state = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+	    var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+	    var prepend = options.contains ? '' : '^';
+	    var append = options.contains ? '' : '$';
+	    var output = "".concat(prepend, "(?:").concat(input, ")").concat(append);
+
+	    if (state.negated === true) {
+	      output = "(?:^(?!".concat(output, ").*$)");
+	    }
+
+	    return output;
+	  };
+	});
+
+	var CHAR_ASTERISK = constants.CHAR_ASTERISK,
+	    CHAR_AT = constants.CHAR_AT,
+	    CHAR_BACKWARD_SLASH = constants.CHAR_BACKWARD_SLASH,
+	    CHAR_COMMA = constants.CHAR_COMMA,
+	    CHAR_DOT = constants.CHAR_DOT,
+	    CHAR_EXCLAMATION_MARK = constants.CHAR_EXCLAMATION_MARK,
+	    CHAR_FORWARD_SLASH = constants.CHAR_FORWARD_SLASH,
+	    CHAR_LEFT_CURLY_BRACE = constants.CHAR_LEFT_CURLY_BRACE,
+	    CHAR_LEFT_PARENTHESES = constants.CHAR_LEFT_PARENTHESES,
+	    CHAR_LEFT_SQUARE_BRACKET = constants.CHAR_LEFT_SQUARE_BRACKET,
+	    CHAR_PLUS = constants.CHAR_PLUS,
+	    CHAR_QUESTION_MARK = constants.CHAR_QUESTION_MARK,
+	    CHAR_RIGHT_CURLY_BRACE = constants.CHAR_RIGHT_CURLY_BRACE,
+	    CHAR_RIGHT_PARENTHESES = constants.CHAR_RIGHT_PARENTHESES,
+	    CHAR_RIGHT_SQUARE_BRACKET = constants.CHAR_RIGHT_SQUARE_BRACKET;
+
+	var isPathSeparator = function isPathSeparator(code) {
+	  return code === CHAR_FORWARD_SLASH || code === CHAR_BACKWARD_SLASH;
+	};
+
+	var depth = function depth(token) {
+	  if (token.isPrefix !== true) {
+	    token.depth = token.isGlobstar ? Infinity : 1;
+	  }
+	};
+	/**
+	 * Quickly scans a glob pattern and returns an object with a handful of
+	 * useful properties, like `isGlob`, `path` (the leading non-glob, if it exists),
+	 * `glob` (the actual pattern), and `negated` (true if the path starts with `!`).
+	 *
+	 * ```js
+	 * const pm = require('picomatch');
+	 * console.log(pm.scan('foo/bar/*.js'));
+	 * { isGlob: true, input: 'foo/bar/*.js', base: 'foo/bar', glob: '*.js' }
+	 * ```
+	 * @param {String} `str`
+	 * @param {Object} `options`
+	 * @return {Object} Returns an object with tokens and regex source string.
+	 * @api public
+	 */
+
+
+	var scan = function scan(input, options) {
+	  var opts = options || {};
+	  var length = input.length - 1;
+	  var scanToEnd = opts.parts === true || opts.scanToEnd === true;
+	  var slashes = [];
+	  var tokens = [];
+	  var parts = [];
+	  var str = input;
+	  var index = -1;
+	  var start = 0;
+	  var lastIndex = 0;
+	  var isBrace = false;
+	  var isBracket = false;
+	  var isGlob = false;
+	  var isExtglob = false;
+	  var isGlobstar = false;
+	  var braceEscaped = false;
+	  var backslashes = false;
+	  var negated = false;
+	  var finished = false;
+	  var braces = 0;
+	  var prev;
+	  var code;
+	  var token = {
+	    value: '',
+	    depth: 0,
+	    isGlob: false
+	  };
+
+	  var eos = function eos() {
+	    return index >= length;
+	  };
+
+	  var peek = function peek() {
+	    return str.charCodeAt(index + 1);
+	  };
+
+	  var advance = function advance() {
+	    prev = code;
+	    return str.charCodeAt(++index);
+	  };
+
+	  while (index < length) {
+	    code = advance();
+	    var next = void 0;
+
+	    if (code === CHAR_BACKWARD_SLASH) {
+	      backslashes = token.backslashes = true;
+	      code = advance();
+
+	      if (code === CHAR_LEFT_CURLY_BRACE) {
+	        braceEscaped = true;
+	      }
+
+	      continue;
+	    }
+
+	    if (braceEscaped === true || code === CHAR_LEFT_CURLY_BRACE) {
+	      braces++;
+
+	      while (eos() !== true && (code = advance())) {
+	        if (code === CHAR_BACKWARD_SLASH) {
+	          backslashes = token.backslashes = true;
+	          advance();
+	          continue;
+	        }
+
+	        if (code === CHAR_LEFT_CURLY_BRACE) {
+	          braces++;
+	          continue;
+	        }
+
+	        if (braceEscaped !== true && code === CHAR_DOT && (code = advance()) === CHAR_DOT) {
+	          isBrace = token.isBrace = true;
+	          isGlob = token.isGlob = true;
+	          finished = true;
+
+	          if (scanToEnd === true) {
+	            continue;
+	          }
+
+	          break;
+	        }
+
+	        if (braceEscaped !== true && code === CHAR_COMMA) {
+	          isBrace = token.isBrace = true;
+	          isGlob = token.isGlob = true;
+	          finished = true;
+
+	          if (scanToEnd === true) {
+	            continue;
+	          }
+
+	          break;
+	        }
+
+	        if (code === CHAR_RIGHT_CURLY_BRACE) {
+	          braces--;
+
+	          if (braces === 0) {
+	            braceEscaped = false;
+	            isBrace = token.isBrace = true;
+	            finished = true;
+	            break;
+	          }
+	        }
+	      }
+
+	      if (scanToEnd === true) {
+	        continue;
+	      }
+
+	      break;
+	    }
+
+	    if (code === CHAR_FORWARD_SLASH) {
+	      slashes.push(index);
+	      tokens.push(token);
+	      token = {
+	        value: '',
+	        depth: 0,
+	        isGlob: false
+	      };
+	      if (finished === true) continue;
+
+	      if (prev === CHAR_DOT && index === start + 1) {
+	        start += 2;
+	        continue;
+	      }
+
+	      lastIndex = index + 1;
+	      continue;
+	    }
+
+	    if (opts.noext !== true) {
+	      var isExtglobChar = code === CHAR_PLUS || code === CHAR_AT || code === CHAR_ASTERISK || code === CHAR_QUESTION_MARK || code === CHAR_EXCLAMATION_MARK;
+
+	      if (isExtglobChar === true && peek() === CHAR_LEFT_PARENTHESES) {
+	        isGlob = token.isGlob = true;
+	        isExtglob = token.isExtglob = true;
+	        finished = true;
+
+	        if (scanToEnd === true) {
+	          while (eos() !== true && (code = advance())) {
+	            if (code === CHAR_BACKWARD_SLASH) {
+	              backslashes = token.backslashes = true;
+	              code = advance();
+	              continue;
+	            }
+
+	            if (code === CHAR_RIGHT_PARENTHESES) {
+	              isGlob = token.isGlob = true;
+	              finished = true;
+	              break;
+	            }
+	          }
+
+	          continue;
+	        }
+
+	        break;
+	      }
+	    }
+
+	    if (code === CHAR_ASTERISK) {
+	      if (prev === CHAR_ASTERISK) isGlobstar = token.isGlobstar = true;
+	      isGlob = token.isGlob = true;
+	      finished = true;
+
+	      if (scanToEnd === true) {
+	        continue;
+	      }
+
+	      break;
+	    }
+
+	    if (code === CHAR_QUESTION_MARK) {
+	      isGlob = token.isGlob = true;
+	      finished = true;
+
+	      if (scanToEnd === true) {
+	        continue;
+	      }
+
+	      break;
+	    }
+
+	    if (code === CHAR_LEFT_SQUARE_BRACKET) {
+	      while (eos() !== true && (next = advance())) {
+	        if (next === CHAR_BACKWARD_SLASH) {
+	          backslashes = token.backslashes = true;
+	          advance();
+	          continue;
+	        }
+
+	        if (next === CHAR_RIGHT_SQUARE_BRACKET) {
+	          isBracket = token.isBracket = true;
+	          isGlob = token.isGlob = true;
+	          finished = true;
+
+	          if (scanToEnd === true) {
+	            continue;
+	          }
+
+	          break;
+	        }
+	      }
+	    }
+
+	    if (opts.nonegate !== true && code === CHAR_EXCLAMATION_MARK && index === start) {
+	      negated = token.negated = true;
+	      start++;
+	      continue;
+	    }
+
+	    if (opts.noparen !== true && code === CHAR_LEFT_PARENTHESES) {
+	      isGlob = token.isGlob = true;
+
+	      if (scanToEnd === true) {
+	        while (eos() !== true && (code = advance())) {
+	          if (code === CHAR_LEFT_PARENTHESES) {
+	            backslashes = token.backslashes = true;
+	            code = advance();
+	            continue;
+	          }
+
+	          if (code === CHAR_RIGHT_PARENTHESES) {
+	            finished = true;
+	            break;
+	          }
+	        }
+
+	        continue;
+	      }
+
+	      break;
+	    }
+
+	    if (isGlob === true) {
+	      finished = true;
+
+	      if (scanToEnd === true) {
+	        continue;
+	      }
+
+	      break;
+	    }
+	  }
+
+	  if (opts.noext === true) {
+	    isExtglob = false;
+	    isGlob = false;
+	  }
+
+	  var base = str;
+	  var prefix = '';
+	  var glob = '';
+
+	  if (start > 0) {
+	    prefix = str.slice(0, start);
+	    str = str.slice(start);
+	    lastIndex -= start;
+	  }
+
+	  if (base && isGlob === true && lastIndex > 0) {
+	    base = str.slice(0, lastIndex);
+	    glob = str.slice(lastIndex);
+	  } else if (isGlob === true) {
+	    base = '';
+	    glob = str;
+	  } else {
+	    base = str;
+	  }
+
+	  if (base && base !== '' && base !== '/' && base !== str) {
+	    if (isPathSeparator(base.charCodeAt(base.length - 1))) {
+	      base = base.slice(0, -1);
+	    }
+	  }
+
+	  if (opts.unescape === true) {
+	    if (glob) glob = utils.removeBackslashes(glob);
+
+	    if (base && backslashes === true) {
+	      base = utils.removeBackslashes(base);
+	    }
+	  }
+
+	  var state = {
+	    prefix: prefix,
+	    input: input,
+	    start: start,
+	    base: base,
+	    glob: glob,
+	    isBrace: isBrace,
+	    isBracket: isBracket,
+	    isGlob: isGlob,
+	    isExtglob: isExtglob,
+	    isGlobstar: isGlobstar,
+	    negated: negated
+	  };
+
+	  if (opts.tokens === true) {
+	    state.maxDepth = 0;
+
+	    if (!isPathSeparator(code)) {
+	      tokens.push(token);
+	    }
+
+	    state.tokens = tokens;
+	  }
+
+	  if (opts.parts === true || opts.tokens === true) {
+	    var prevIndex;
+
+	    for (var idx = 0; idx < slashes.length; idx++) {
+	      var n = prevIndex ? prevIndex + 1 : start;
+	      var i = slashes[idx];
+	      var value = input.slice(n, i);
+
+	      if (opts.tokens) {
+	        if (idx === 0 && start !== 0) {
+	          tokens[idx].isPrefix = true;
+	          tokens[idx].value = prefix;
+	        } else {
+	          tokens[idx].value = value;
+	        }
+
+	        depth(tokens[idx]);
+	        state.maxDepth += tokens[idx].depth;
+	      }
+
+	      if (idx !== 0 || value !== '') {
+	        parts.push(value);
+	      }
+
+	      prevIndex = i;
+	    }
+
+	    if (prevIndex && prevIndex + 1 < input.length) {
+	      var _value = input.slice(prevIndex + 1);
+
+	      parts.push(_value);
+
+	      if (opts.tokens) {
+	        tokens[tokens.length - 1].value = _value;
+	        depth(tokens[tokens.length - 1]);
+	        state.maxDepth += tokens[tokens.length - 1].depth;
+	      }
+	    }
+
+	    state.slashes = slashes;
+	    state.parts = parts;
+	  }
+
+	  return state;
+	};
+
+	var scan_1 = scan;
+
+	var $includes$1 = arrayIncludes.includes;
+
+
+
+	var USES_TO_LENGTH$a = arrayMethodUsesToLength('indexOf', { ACCESSORS: true, 1: 0 });
+
+	// `Array.prototype.includes` method
+	// https://tc39.github.io/ecma262/#sec-array.prototype.includes
+	_export({ target: 'Array', proto: true, forced: !USES_TO_LENGTH$a }, {
+	  includes: function includes(el /* , fromIndex = 0 */) {
+	    return $includes$1(this, el, arguments.length > 1 ? arguments[1] : undefined);
+	  }
+	});
+
+	// https://tc39.github.io/ecma262/#sec-array.prototype-@@unscopables
+	addToUnscopables('includes');
+
+	// `String.prototype.includes` method
+	// https://tc39.github.io/ecma262/#sec-string.prototype.includes
+	_export({ target: 'String', proto: true, forced: !correctIsRegexpLogic('includes') }, {
+	  includes: function includes(searchString /* , position = 0 */) {
+	    return !!~String(requireObjectCoercible(this))
+	      .indexOf(notARegexp(searchString), arguments.length > 1 ? arguments[1] : undefined);
+	  }
+	});
+
+	// `String.prototype.repeat` method
+	// https://tc39.github.io/ecma262/#sec-string.prototype.repeat
+	_export({ target: 'String', proto: true }, {
+	  repeat: stringRepeat
+	});
+
+	function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray$1(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+	function _unsupportedIterableToArray$1(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray$1(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray$1(o, minLen); }
+
+	function _arrayLikeToArray$1(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+	function ownKeys$4(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+	function _objectSpread$3(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys$4(Object(source), true).forEach(function (key) { defineProperty$4(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys$4(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+	/**
+	 * Constants
+	 */
+
+
+	var MAX_LENGTH = constants.MAX_LENGTH,
+	    POSIX_REGEX_SOURCE$1 = constants.POSIX_REGEX_SOURCE,
+	    REGEX_NON_SPECIAL_CHARS = constants.REGEX_NON_SPECIAL_CHARS,
+	    REGEX_SPECIAL_CHARS_BACKREF = constants.REGEX_SPECIAL_CHARS_BACKREF,
+	    REPLACEMENTS = constants.REPLACEMENTS;
+	/**
+	 * Helpers
+	 */
+
+	var expandRange = function expandRange(args, options) {
+	  if (typeof options.expandRange === 'function') {
+	    return options.expandRange.apply(options, toConsumableArray(args).concat([options]));
+	  }
+
+	  args.sort();
+	  var value = "[".concat(args.join('-'), "]");
+
+	  try {
+	    /* eslint-disable-next-line no-new */
+	    new RegExp(value);
+	  } catch (ex) {
+	    return args.map(function (v) {
+	      return utils.escapeRegex(v);
+	    }).join('..');
+	  }
+
+	  return value;
+	};
+	/**
+	 * Create the message for a syntax error
+	 */
+
+
+	var syntaxError = function syntaxError(type, char) {
+	  return "Missing ".concat(type, ": \"").concat(char, "\" - use \"\\\\").concat(char, "\" to match literal characters");
+	};
+	/**
+	 * Parse the given input string.
+	 * @param {String} input
+	 * @param {Object} options
+	 * @return {Object}
+	 */
+
+
+	var parse$1 = function parse(input, options) {
+	  if (typeof input !== 'string') {
+	    throw new TypeError('Expected a string');
+	  }
+
+	  input = REPLACEMENTS[input] || input;
+
+	  var opts = _objectSpread$3({}, options);
+
+	  var max = typeof opts.maxLength === 'number' ? Math.min(MAX_LENGTH, opts.maxLength) : MAX_LENGTH;
+	  var len = input.length;
+
+	  if (len > max) {
+	    throw new SyntaxError("Input length: ".concat(len, ", exceeds maximum allowed length: ").concat(max));
+	  }
+
+	  var bos = {
+	    type: 'bos',
+	    value: '',
+	    output: opts.prepend || ''
+	  };
+	  var tokens = [bos];
+	  var capture = opts.capture ? '' : '?:';
+	  var win32 = utils.isWindows(options); // create constants based on platform, for windows or posix
+
+	  var PLATFORM_CHARS = constants.globChars(win32);
+	  var EXTGLOB_CHARS = constants.extglobChars(PLATFORM_CHARS);
+	  var DOT_LITERAL = PLATFORM_CHARS.DOT_LITERAL,
+	      PLUS_LITERAL = PLATFORM_CHARS.PLUS_LITERAL,
+	      SLASH_LITERAL = PLATFORM_CHARS.SLASH_LITERAL,
+	      ONE_CHAR = PLATFORM_CHARS.ONE_CHAR,
+	      DOTS_SLASH = PLATFORM_CHARS.DOTS_SLASH,
+	      NO_DOT = PLATFORM_CHARS.NO_DOT,
+	      NO_DOT_SLASH = PLATFORM_CHARS.NO_DOT_SLASH,
+	      NO_DOTS_SLASH = PLATFORM_CHARS.NO_DOTS_SLASH,
+	      QMARK = PLATFORM_CHARS.QMARK,
+	      QMARK_NO_DOT = PLATFORM_CHARS.QMARK_NO_DOT,
+	      STAR = PLATFORM_CHARS.STAR,
+	      START_ANCHOR = PLATFORM_CHARS.START_ANCHOR;
+
+	  var globstar = function globstar(opts) {
+	    return "(".concat(capture, "(?:(?!").concat(START_ANCHOR).concat(opts.dot ? DOTS_SLASH : DOT_LITERAL, ").)*?)");
+	  };
+
+	  var nodot = opts.dot ? '' : NO_DOT;
+	  var qmarkNoDot = opts.dot ? QMARK : QMARK_NO_DOT;
+	  var star = opts.bash === true ? globstar(opts) : STAR;
+
+	  if (opts.capture) {
+	    star = "(".concat(star, ")");
+	  } // minimatch options support
+
+
+	  if (typeof opts.noext === 'boolean') {
+	    opts.noextglob = opts.noext;
+	  }
+
+	  var state = {
+	    input: input,
+	    index: -1,
+	    start: 0,
+	    dot: opts.dot === true,
+	    consumed: '',
+	    output: '',
+	    prefix: '',
+	    backtrack: false,
+	    negated: false,
+	    brackets: 0,
+	    braces: 0,
+	    parens: 0,
+	    quotes: 0,
+	    globstar: false,
+	    tokens: tokens
+	  };
+	  input = utils.removePrefix(input, state);
+	  len = input.length;
+	  var extglobs = [];
+	  var braces = [];
+	  var stack = [];
+	  var prev = bos;
+	  var value;
+	  /**
+	   * Tokenizing helpers
+	   */
+
+	  var eos = function eos() {
+	    return state.index === len - 1;
+	  };
+
+	  var peek = state.peek = function () {
+	    var n = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
+	    return input[state.index + n];
+	  };
+
+	  var advance = state.advance = function () {
+	    return input[++state.index];
+	  };
+
+	  var remaining = function remaining() {
+	    return input.slice(state.index + 1);
+	  };
+
+	  var consume = function consume() {
+	    var value = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
+	    var num = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+	    state.consumed += value;
+	    state.index += num;
+	  };
+
+	  var append = function append(token) {
+	    state.output += token.output != null ? token.output : token.value;
+	    consume(token.value);
+	  };
+
+	  var negate = function negate() {
+	    var count = 1;
+
+	    while (peek() === '!' && (peek(2) !== '(' || peek(3) === '?')) {
+	      advance();
+	      state.start++;
+	      count++;
+	    }
+
+	    if (count % 2 === 0) {
+	      return false;
+	    }
+
+	    state.negated = true;
+	    state.start++;
+	    return true;
+	  };
+
+	  var increment = function increment(type) {
+	    state[type]++;
+	    stack.push(type);
+	  };
+
+	  var decrement = function decrement(type) {
+	    state[type]--;
+	    stack.pop();
+	  };
+	  /**
+	   * Push tokens onto the tokens array. This helper speeds up
+	   * tokenizing by 1) helping us avoid backtracking as much as possible,
+	   * and 2) helping us avoid creating extra tokens when consecutive
+	   * characters are plain text. This improves performance and simplifies
+	   * lookbehinds.
+	   */
+
+
+	  var push = function push(tok) {
+	    if (prev.type === 'globstar') {
+	      var isBrace = state.braces > 0 && (tok.type === 'comma' || tok.type === 'brace');
+	      var isExtglob = tok.extglob === true || extglobs.length && (tok.type === 'pipe' || tok.type === 'paren');
+
+	      if (tok.type !== 'slash' && tok.type !== 'paren' && !isBrace && !isExtglob) {
+	        state.output = state.output.slice(0, -prev.output.length);
+	        prev.type = 'star';
+	        prev.value = '*';
+	        prev.output = star;
+	        state.output += prev.output;
+	      }
+	    }
+
+	    if (extglobs.length && tok.type !== 'paren' && !EXTGLOB_CHARS[tok.value]) {
+	      extglobs[extglobs.length - 1].inner += tok.value;
+	    }
+
+	    if (tok.value || tok.output) append(tok);
+
+	    if (prev && prev.type === 'text' && tok.type === 'text') {
+	      prev.value += tok.value;
+	      prev.output = (prev.output || '') + tok.value;
+	      return;
+	    }
+
+	    tok.prev = prev;
+	    tokens.push(tok);
+	    prev = tok;
+	  };
+
+	  var extglobOpen = function extglobOpen(type, value) {
+	    var token = _objectSpread$3(_objectSpread$3({}, EXTGLOB_CHARS[value]), {}, {
+	      conditions: 1,
+	      inner: ''
+	    });
+
+	    token.prev = prev;
+	    token.parens = state.parens;
+	    token.output = state.output;
+	    var output = (opts.capture ? '(' : '') + token.open;
+	    increment('parens');
+	    push({
+	      type: type,
+	      value: value,
+	      output: state.output ? '' : ONE_CHAR
+	    });
+	    push({
+	      type: 'paren',
+	      extglob: true,
+	      value: advance(),
+	      output: output
+	    });
+	    extglobs.push(token);
+	  };
+
+	  var extglobClose = function extglobClose(token) {
+	    var output = token.close + (opts.capture ? ')' : '');
+
+	    if (token.type === 'negate') {
+	      var extglobStar = star;
+
+	      if (token.inner && token.inner.length > 1 && token.inner.includes('/')) {
+	        extglobStar = globstar(opts);
+	      }
+
+	      if (extglobStar !== star || eos() || /^\)+$/.test(remaining())) {
+	        output = token.close = ")$))".concat(extglobStar);
+	      }
+
+	      if (token.prev.type === 'bos' && eos()) {
+	        state.negatedExtglob = true;
+	      }
+	    }
+
+	    push({
+	      type: 'paren',
+	      extglob: true,
+	      value: value,
+	      output: output
+	    });
+	    decrement('parens');
+	  };
+	  /**
+	   * Fast paths
+	   */
+
+
+	  if (opts.fastpaths !== false && !/(^[*!]|[/()[\]{}"])/.test(input)) {
+	    var backslashes = false;
+	    var output = input.replace(REGEX_SPECIAL_CHARS_BACKREF, function (m, esc, chars, first, rest, index) {
+	      if (first === '\\') {
+	        backslashes = true;
+	        return m;
+	      }
+
+	      if (first === '?') {
+	        if (esc) {
+	          return esc + first + (rest ? QMARK.repeat(rest.length) : '');
+	        }
+
+	        if (index === 0) {
+	          return qmarkNoDot + (rest ? QMARK.repeat(rest.length) : '');
+	        }
+
+	        return QMARK.repeat(chars.length);
+	      }
+
+	      if (first === '.') {
+	        return DOT_LITERAL.repeat(chars.length);
+	      }
+
+	      if (first === '*') {
+	        if (esc) {
+	          return esc + first + (rest ? star : '');
+	        }
+
+	        return star;
+	      }
+
+	      return esc ? m : "\\".concat(m);
+	    });
+
+	    if (backslashes === true) {
+	      if (opts.unescape === true) {
+	        output = output.replace(/\\/g, '');
+	      } else {
+	        output = output.replace(/\\+/g, function (m) {
+	          return m.length % 2 === 0 ? '\\\\' : m ? '\\' : '';
+	        });
+	      }
+	    }
+
+	    if (output === input && opts.contains === true) {
+	      state.output = input;
+	      return state;
+	    }
+
+	    state.output = utils.wrapOutput(output, state, options);
+	    return state;
+	  }
+	  /**
+	   * Tokenize input until we reach end-of-string
+	   */
+
+
+	  while (!eos()) {
+	    value = advance();
+
+	    if (value === "\0") {
+	      continue;
+	    }
+	    /**
+	     * Escaped characters
+	     */
+
+
+	    if (value === '\\') {
+	      var next = peek();
+
+	      if (next === '/' && opts.bash !== true) {
+	        continue;
+	      }
+
+	      if (next === '.' || next === ';') {
+	        continue;
+	      }
+
+	      if (!next) {
+	        value += '\\';
+	        push({
+	          type: 'text',
+	          value: value
+	        });
+	        continue;
+	      } // collapse slashes to reduce potential for exploits
+
+
+	      var match = /^\\+/.exec(remaining());
+	      var slashes = 0;
+
+	      if (match && match[0].length > 2) {
+	        slashes = match[0].length;
+	        state.index += slashes;
+
+	        if (slashes % 2 !== 0) {
+	          value += '\\';
+	        }
+	      }
+
+	      if (opts.unescape === true) {
+	        value = advance() || '';
+	      } else {
+	        value += advance() || '';
+	      }
+
+	      if (state.brackets === 0) {
+	        push({
+	          type: 'text',
+	          value: value
+	        });
+	        continue;
+	      }
+	    }
+	    /**
+	     * If we're inside a regex character class, continue
+	     * until we reach the closing bracket.
+	     */
+
+
+	    if (state.brackets > 0 && (value !== ']' || prev.value === '[' || prev.value === '[^')) {
+	      if (opts.posix !== false && value === ':') {
+	        var inner = prev.value.slice(1);
+
+	        if (inner.includes('[')) {
+	          prev.posix = true;
+
+	          if (inner.includes(':')) {
+	            var idx = prev.value.lastIndexOf('[');
+	            var pre = prev.value.slice(0, idx);
+
+	            var _rest = prev.value.slice(idx + 2);
+
+	            var posix = POSIX_REGEX_SOURCE$1[_rest];
+
+	            if (posix) {
+	              prev.value = pre + posix;
+	              state.backtrack = true;
+	              advance();
+
+	              if (!bos.output && tokens.indexOf(prev) === 1) {
+	                bos.output = ONE_CHAR;
+	              }
+
+	              continue;
+	            }
+	          }
+	        }
+	      }
+
+	      if (value === '[' && peek() !== ':' || value === '-' && peek() === ']') {
+	        value = "\\".concat(value);
+	      }
+
+	      if (value === ']' && (prev.value === '[' || prev.value === '[^')) {
+	        value = "\\".concat(value);
+	      }
+
+	      if (opts.posix === true && value === '!' && prev.value === '[') {
+	        value = '^';
+	      }
+
+	      prev.value += value;
+	      append({
+	        value: value
+	      });
+	      continue;
+	    }
+	    /**
+	     * If we're inside a quoted string, continue
+	     * until we reach the closing double quote.
+	     */
+
+
+	    if (state.quotes === 1 && value !== '"') {
+	      value = utils.escapeRegex(value);
+	      prev.value += value;
+	      append({
+	        value: value
+	      });
+	      continue;
+	    }
+	    /**
+	     * Double quotes
+	     */
+
+
+	    if (value === '"') {
+	      state.quotes = state.quotes === 1 ? 0 : 1;
+
+	      if (opts.keepQuotes === true) {
+	        push({
+	          type: 'text',
+	          value: value
+	        });
+	      }
+
+	      continue;
+	    }
+	    /**
+	     * Parentheses
+	     */
+
+
+	    if (value === '(') {
+	      increment('parens');
+	      push({
+	        type: 'paren',
+	        value: value
+	      });
+	      continue;
+	    }
+
+	    if (value === ')') {
+	      if (state.parens === 0 && opts.strictBrackets === true) {
+	        throw new SyntaxError(syntaxError('opening', '('));
+	      }
+
+	      var extglob = extglobs[extglobs.length - 1];
+
+	      if (extglob && state.parens === extglob.parens + 1) {
+	        extglobClose(extglobs.pop());
+	        continue;
+	      }
+
+	      push({
+	        type: 'paren',
+	        value: value,
+	        output: state.parens ? ')' : '\\)'
+	      });
+	      decrement('parens');
+	      continue;
+	    }
+	    /**
+	     * Square brackets
+	     */
+
+
+	    if (value === '[') {
+	      if (opts.nobracket === true || !remaining().includes(']')) {
+	        if (opts.nobracket !== true && opts.strictBrackets === true) {
+	          throw new SyntaxError(syntaxError('closing', ']'));
+	        }
+
+	        value = "\\".concat(value);
+	      } else {
+	        increment('brackets');
+	      }
+
+	      push({
+	        type: 'bracket',
+	        value: value
+	      });
+	      continue;
+	    }
+
+	    if (value === ']') {
+	      if (opts.nobracket === true || prev && prev.type === 'bracket' && prev.value.length === 1) {
+	        push({
+	          type: 'text',
+	          value: value,
+	          output: "\\".concat(value)
+	        });
+	        continue;
+	      }
+
+	      if (state.brackets === 0) {
+	        if (opts.strictBrackets === true) {
+	          throw new SyntaxError(syntaxError('opening', '['));
+	        }
+
+	        push({
+	          type: 'text',
+	          value: value,
+	          output: "\\".concat(value)
+	        });
+	        continue;
+	      }
+
+	      decrement('brackets');
+	      var prevValue = prev.value.slice(1);
+
+	      if (prev.posix !== true && prevValue[0] === '^' && !prevValue.includes('/')) {
+	        value = "/".concat(value);
+	      }
+
+	      prev.value += value;
+	      append({
+	        value: value
+	      }); // when literal brackets are explicitly disabled
+	      // assume we should match with a regex character class
+
+	      if (opts.literalBrackets === false || utils.hasRegexChars(prevValue)) {
+	        continue;
+	      }
+
+	      var escaped = utils.escapeRegex(prev.value);
+	      state.output = state.output.slice(0, -prev.value.length); // when literal brackets are explicitly enabled
+	      // assume we should escape the brackets to match literal characters
+
+	      if (opts.literalBrackets === true) {
+	        state.output += escaped;
+	        prev.value = escaped;
+	        continue;
+	      } // when the user specifies nothing, try to match both
+
+
+	      prev.value = "(".concat(capture).concat(escaped, "|").concat(prev.value, ")");
+	      state.output += prev.value;
+	      continue;
+	    }
+	    /**
+	     * Braces
+	     */
+
+
+	    if (value === '{' && opts.nobrace !== true) {
+	      increment('braces');
+	      var open = {
+	        type: 'brace',
+	        value: value,
+	        output: '(',
+	        outputIndex: state.output.length,
+	        tokensIndex: state.tokens.length
+	      };
+	      braces.push(open);
+	      push(open);
+	      continue;
+	    }
+
+	    if (value === '}') {
+	      var brace = braces[braces.length - 1];
+
+	      if (opts.nobrace === true || !brace) {
+	        push({
+	          type: 'text',
+	          value: value,
+	          output: value
+	        });
+	        continue;
+	      }
+
+	      var _output = ')';
+
+	      if (brace.dots === true) {
+	        var arr = tokens.slice();
+	        var range = [];
+
+	        for (var i = arr.length - 1; i >= 0; i--) {
+	          tokens.pop();
+
+	          if (arr[i].type === 'brace') {
+	            break;
+	          }
+
+	          if (arr[i].type !== 'dots') {
+	            range.unshift(arr[i].value);
+	          }
+	        }
+
+	        _output = expandRange(range, opts);
+	        state.backtrack = true;
+	      }
+
+	      if (brace.comma !== true && brace.dots !== true) {
+	        var out = state.output.slice(0, brace.outputIndex);
+	        var toks = state.tokens.slice(brace.tokensIndex);
+	        brace.value = brace.output = '\\{';
+	        value = _output = '\\}';
+	        state.output = out;
+
+	        var _iterator = _createForOfIteratorHelper(toks),
+	            _step;
+
+	        try {
+	          for (_iterator.s(); !(_step = _iterator.n()).done;) {
+	            var t = _step.value;
+	            state.output += t.output || t.value;
+	          }
+	        } catch (err) {
+	          _iterator.e(err);
+	        } finally {
+	          _iterator.f();
+	        }
+	      }
+
+	      push({
+	        type: 'brace',
+	        value: value,
+	        output: _output
+	      });
+	      decrement('braces');
+	      braces.pop();
+	      continue;
+	    }
+	    /**
+	     * Pipes
+	     */
+
+
+	    if (value === '|') {
+	      if (extglobs.length > 0) {
+	        extglobs[extglobs.length - 1].conditions++;
+	      }
+
+	      push({
+	        type: 'text',
+	        value: value
+	      });
+	      continue;
+	    }
+	    /**
+	     * Commas
+	     */
+
+
+	    if (value === ',') {
+	      var _output2 = value;
+	      var _brace = braces[braces.length - 1];
+
+	      if (_brace && stack[stack.length - 1] === 'braces') {
+	        _brace.comma = true;
+	        _output2 = '|';
+	      }
+
+	      push({
+	        type: 'comma',
+	        value: value,
+	        output: _output2
+	      });
+	      continue;
+	    }
+	    /**
+	     * Slashes
+	     */
+
+
+	    if (value === '/') {
+	      // if the beginning of the glob is "./", advance the start
+	      // to the current index, and don't add the "./" characters
+	      // to the state. This greatly simplifies lookbehinds when
+	      // checking for BOS characters like "!" and "." (not "./")
+	      if (prev.type === 'dot' && state.index === state.start + 1) {
+	        state.start = state.index + 1;
+	        state.consumed = '';
+	        state.output = '';
+	        tokens.pop();
+	        prev = bos; // reset "prev" to the first token
+
+	        continue;
+	      }
+
+	      push({
+	        type: 'slash',
+	        value: value,
+	        output: SLASH_LITERAL
+	      });
+	      continue;
+	    }
+	    /**
+	     * Dots
+	     */
+
+
+	    if (value === '.') {
+	      if (state.braces > 0 && prev.type === 'dot') {
+	        if (prev.value === '.') prev.output = DOT_LITERAL;
+	        var _brace2 = braces[braces.length - 1];
+	        prev.type = 'dots';
+	        prev.output += value;
+	        prev.value += value;
+	        _brace2.dots = true;
+	        continue;
+	      }
+
+	      if (state.braces + state.parens === 0 && prev.type !== 'bos' && prev.type !== 'slash') {
+	        push({
+	          type: 'text',
+	          value: value,
+	          output: DOT_LITERAL
+	        });
+	        continue;
+	      }
+
+	      push({
+	        type: 'dot',
+	        value: value,
+	        output: DOT_LITERAL
+	      });
+	      continue;
+	    }
+	    /**
+	     * Question marks
+	     */
+
+
+	    if (value === '?') {
+	      var isGroup = prev && prev.value === '(';
+
+	      if (!isGroup && opts.noextglob !== true && peek() === '(' && peek(2) !== '?') {
+	        extglobOpen('qmark', value);
+	        continue;
+	      }
+
+	      if (prev && prev.type === 'paren') {
+	        var _next = peek();
+
+	        var _output3 = value;
+
+	        if (_next === '<' && !utils.supportsLookbehinds()) {
+	          throw new Error('Node.js v10 or higher is required for regex lookbehinds');
+	        }
+
+	        if (prev.value === '(' && !/[!=<:]/.test(_next) || _next === '<' && !/<([!=]|\w+>)/.test(remaining())) {
+	          _output3 = "\\".concat(value);
+	        }
+
+	        push({
+	          type: 'text',
+	          value: value,
+	          output: _output3
+	        });
+	        continue;
+	      }
+
+	      if (opts.dot !== true && (prev.type === 'slash' || prev.type === 'bos')) {
+	        push({
+	          type: 'qmark',
+	          value: value,
+	          output: QMARK_NO_DOT
+	        });
+	        continue;
+	      }
+
+	      push({
+	        type: 'qmark',
+	        value: value,
+	        output: QMARK
+	      });
+	      continue;
+	    }
+	    /**
+	     * Exclamation
+	     */
+
+
+	    if (value === '!') {
+	      if (opts.noextglob !== true && peek() === '(') {
+	        if (peek(2) !== '?' || !/[!=<:]/.test(peek(3))) {
+	          extglobOpen('negate', value);
+	          continue;
+	        }
+	      }
+
+	      if (opts.nonegate !== true && state.index === 0) {
+	        negate();
+	        continue;
+	      }
+	    }
+	    /**
+	     * Plus
+	     */
+
+
+	    if (value === '+') {
+	      if (opts.noextglob !== true && peek() === '(' && peek(2) !== '?') {
+	        extglobOpen('plus', value);
+	        continue;
+	      }
+
+	      if (prev && prev.value === '(' || opts.regex === false) {
+	        push({
+	          type: 'plus',
+	          value: value,
+	          output: PLUS_LITERAL
+	        });
+	        continue;
+	      }
+
+	      if (prev && (prev.type === 'bracket' || prev.type === 'paren' || prev.type === 'brace') || state.parens > 0) {
+	        push({
+	          type: 'plus',
+	          value: value
+	        });
+	        continue;
+	      }
+
+	      push({
+	        type: 'plus',
+	        value: PLUS_LITERAL
+	      });
+	      continue;
+	    }
+	    /**
+	     * Plain text
+	     */
+
+
+	    if (value === '@') {
+	      if (opts.noextglob !== true && peek() === '(' && peek(2) !== '?') {
+	        push({
+	          type: 'at',
+	          extglob: true,
+	          value: value,
+	          output: ''
+	        });
+	        continue;
+	      }
+
+	      push({
+	        type: 'text',
+	        value: value
+	      });
+	      continue;
+	    }
+	    /**
+	     * Plain text
+	     */
+
+
+	    if (value !== '*') {
+	      if (value === '$' || value === '^') {
+	        value = "\\".concat(value);
+	      }
+
+	      var _match = REGEX_NON_SPECIAL_CHARS.exec(remaining());
+
+	      if (_match) {
+	        value += _match[0];
+	        state.index += _match[0].length;
+	      }
+
+	      push({
+	        type: 'text',
+	        value: value
+	      });
+	      continue;
+	    }
+	    /**
+	     * Stars
+	     */
+
+
+	    if (prev && (prev.type === 'globstar' || prev.star === true)) {
+	      prev.type = 'star';
+	      prev.star = true;
+	      prev.value += value;
+	      prev.output = star;
+	      state.backtrack = true;
+	      state.globstar = true;
+	      consume(value);
+	      continue;
+	    }
+
+	    var rest = remaining();
+
+	    if (opts.noextglob !== true && /^\([^?]/.test(rest)) {
+	      extglobOpen('star', value);
+	      continue;
+	    }
+
+	    if (prev.type === 'star') {
+	      if (opts.noglobstar === true) {
+	        consume(value);
+	        continue;
+	      }
+
+	      var prior = prev.prev;
+	      var before = prior.prev;
+	      var isStart = prior.type === 'slash' || prior.type === 'bos';
+	      var afterStar = before && (before.type === 'star' || before.type === 'globstar');
+
+	      if (opts.bash === true && (!isStart || rest[0] && rest[0] !== '/')) {
+	        push({
+	          type: 'star',
+	          value: value,
+	          output: ''
+	        });
+	        continue;
+	      }
+
+	      var isBrace = state.braces > 0 && (prior.type === 'comma' || prior.type === 'brace');
+	      var isExtglob = extglobs.length && (prior.type === 'pipe' || prior.type === 'paren');
+
+	      if (!isStart && prior.type !== 'paren' && !isBrace && !isExtglob) {
+	        push({
+	          type: 'star',
+	          value: value,
+	          output: ''
+	        });
+	        continue;
+	      } // strip consecutive `/**/`
+
+
+	      while (rest.slice(0, 3) === '/**') {
+	        var after = input[state.index + 4];
+
+	        if (after && after !== '/') {
+	          break;
+	        }
+
+	        rest = rest.slice(3);
+	        consume('/**', 3);
+	      }
+
+	      if (prior.type === 'bos' && eos()) {
+	        prev.type = 'globstar';
+	        prev.value += value;
+	        prev.output = globstar(opts);
+	        state.output = prev.output;
+	        state.globstar = true;
+	        consume(value);
+	        continue;
+	      }
+
+	      if (prior.type === 'slash' && prior.prev.type !== 'bos' && !afterStar && eos()) {
+	        state.output = state.output.slice(0, -(prior.output + prev.output).length);
+	        prior.output = "(?:".concat(prior.output);
+	        prev.type = 'globstar';
+	        prev.output = globstar(opts) + (opts.strictSlashes ? ')' : '|$)');
+	        prev.value += value;
+	        state.globstar = true;
+	        state.output += prior.output + prev.output;
+	        consume(value);
+	        continue;
+	      }
+
+	      if (prior.type === 'slash' && prior.prev.type !== 'bos' && rest[0] === '/') {
+	        var end = rest[1] !== void 0 ? '|$' : '';
+	        state.output = state.output.slice(0, -(prior.output + prev.output).length);
+	        prior.output = "(?:".concat(prior.output);
+	        prev.type = 'globstar';
+	        prev.output = "".concat(globstar(opts)).concat(SLASH_LITERAL, "|").concat(SLASH_LITERAL).concat(end, ")");
+	        prev.value += value;
+	        state.output += prior.output + prev.output;
+	        state.globstar = true;
+	        consume(value + advance());
+	        push({
+	          type: 'slash',
+	          value: '/',
+	          output: ''
+	        });
+	        continue;
+	      }
+
+	      if (prior.type === 'bos' && rest[0] === '/') {
+	        prev.type = 'globstar';
+	        prev.value += value;
+	        prev.output = "(?:^|".concat(SLASH_LITERAL, "|").concat(globstar(opts)).concat(SLASH_LITERAL, ")");
+	        state.output = prev.output;
+	        state.globstar = true;
+	        consume(value + advance());
+	        push({
+	          type: 'slash',
+	          value: '/',
+	          output: ''
+	        });
+	        continue;
+	      } // remove single star from output
+
+
+	      state.output = state.output.slice(0, -prev.output.length); // reset previous token to globstar
+
+	      prev.type = 'globstar';
+	      prev.output = globstar(opts);
+	      prev.value += value; // reset output with globstar
+
+	      state.output += prev.output;
+	      state.globstar = true;
+	      consume(value);
+	      continue;
+	    }
+
+	    var token = {
+	      type: 'star',
+	      value: value,
+	      output: star
+	    };
+
+	    if (opts.bash === true) {
+	      token.output = '.*?';
+
+	      if (prev.type === 'bos' || prev.type === 'slash') {
+	        token.output = nodot + token.output;
+	      }
+
+	      push(token);
+	      continue;
+	    }
+
+	    if (prev && (prev.type === 'bracket' || prev.type === 'paren') && opts.regex === true) {
+	      token.output = value;
+	      push(token);
+	      continue;
+	    }
+
+	    if (state.index === state.start || prev.type === 'slash' || prev.type === 'dot') {
+	      if (prev.type === 'dot') {
+	        state.output += NO_DOT_SLASH;
+	        prev.output += NO_DOT_SLASH;
+	      } else if (opts.dot === true) {
+	        state.output += NO_DOTS_SLASH;
+	        prev.output += NO_DOTS_SLASH;
+	      } else {
+	        state.output += nodot;
+	        prev.output += nodot;
+	      }
+
+	      if (peek() !== '*') {
+	        state.output += ONE_CHAR;
+	        prev.output += ONE_CHAR;
+	      }
+	    }
+
+	    push(token);
+	  }
+
+	  while (state.brackets > 0) {
+	    if (opts.strictBrackets === true) throw new SyntaxError(syntaxError('closing', ']'));
+	    state.output = utils.escapeLast(state.output, '[');
+	    decrement('brackets');
+	  }
+
+	  while (state.parens > 0) {
+	    if (opts.strictBrackets === true) throw new SyntaxError(syntaxError('closing', ')'));
+	    state.output = utils.escapeLast(state.output, '(');
+	    decrement('parens');
+	  }
+
+	  while (state.braces > 0) {
+	    if (opts.strictBrackets === true) throw new SyntaxError(syntaxError('closing', '}'));
+	    state.output = utils.escapeLast(state.output, '{');
+	    decrement('braces');
+	  }
+
+	  if (opts.strictSlashes !== true && (prev.type === 'star' || prev.type === 'bracket')) {
+	    push({
+	      type: 'maybe_slash',
+	      value: '',
+	      output: "".concat(SLASH_LITERAL, "?")
+	    });
+	  } // rebuild the output if we had to backtrack at any point
+
+
+	  if (state.backtrack === true) {
+	    state.output = '';
+
+	    var _iterator2 = _createForOfIteratorHelper(state.tokens),
+	        _step2;
+
+	    try {
+	      for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+	        var _token = _step2.value;
+	        state.output += _token.output != null ? _token.output : _token.value;
+
+	        if (_token.suffix) {
+	          state.output += _token.suffix;
+	        }
+	      }
+	    } catch (err) {
+	      _iterator2.e(err);
+	    } finally {
+	      _iterator2.f();
+	    }
+	  }
+
+	  return state;
+	};
+	/**
+	 * Fast paths for creating regular expressions for common glob patterns.
+	 * This can significantly speed up processing and has very little downside
+	 * impact when none of the fast paths match.
+	 */
+
+
+	parse$1.fastpaths = function (input, options) {
+	  var opts = _objectSpread$3({}, options);
+
+	  var max = typeof opts.maxLength === 'number' ? Math.min(MAX_LENGTH, opts.maxLength) : MAX_LENGTH;
+	  var len = input.length;
+
+	  if (len > max) {
+	    throw new SyntaxError("Input length: ".concat(len, ", exceeds maximum allowed length: ").concat(max));
+	  }
+
+	  input = REPLACEMENTS[input] || input;
+	  var win32 = utils.isWindows(options); // create constants based on platform, for windows or posix
+
+	  var _constants$globChars = constants.globChars(win32),
+	      DOT_LITERAL = _constants$globChars.DOT_LITERAL,
+	      SLASH_LITERAL = _constants$globChars.SLASH_LITERAL,
+	      ONE_CHAR = _constants$globChars.ONE_CHAR,
+	      DOTS_SLASH = _constants$globChars.DOTS_SLASH,
+	      NO_DOT = _constants$globChars.NO_DOT,
+	      NO_DOTS = _constants$globChars.NO_DOTS,
+	      NO_DOTS_SLASH = _constants$globChars.NO_DOTS_SLASH,
+	      STAR = _constants$globChars.STAR,
+	      START_ANCHOR = _constants$globChars.START_ANCHOR;
+
+	  var nodot = opts.dot ? NO_DOTS : NO_DOT;
+	  var slashDot = opts.dot ? NO_DOTS_SLASH : NO_DOT;
+	  var capture = opts.capture ? '' : '?:';
+	  var state = {
+	    negated: false,
+	    prefix: ''
+	  };
+	  var star = opts.bash === true ? '.*?' : STAR;
+
+	  if (opts.capture) {
+	    star = "(".concat(star, ")");
+	  }
+
+	  var globstar = function globstar(opts) {
+	    if (opts.noglobstar === true) return star;
+	    return "(".concat(capture, "(?:(?!").concat(START_ANCHOR).concat(opts.dot ? DOTS_SLASH : DOT_LITERAL, ").)*?)");
+	  };
+
+	  var create = function create(str) {
+	    switch (str) {
+	      case '*':
+	        return "".concat(nodot).concat(ONE_CHAR).concat(star);
+
+	      case '.*':
+	        return "".concat(DOT_LITERAL).concat(ONE_CHAR).concat(star);
+
+	      case '*.*':
+	        return "".concat(nodot).concat(star).concat(DOT_LITERAL).concat(ONE_CHAR).concat(star);
+
+	      case '*/*':
+	        return "".concat(nodot).concat(star).concat(SLASH_LITERAL).concat(ONE_CHAR).concat(slashDot).concat(star);
+
+	      case '**':
+	        return nodot + globstar(opts);
+
+	      case '**/*':
+	        return "(?:".concat(nodot).concat(globstar(opts)).concat(SLASH_LITERAL, ")?").concat(slashDot).concat(ONE_CHAR).concat(star);
+
+	      case '**/*.*':
+	        return "(?:".concat(nodot).concat(globstar(opts)).concat(SLASH_LITERAL, ")?").concat(slashDot).concat(star).concat(DOT_LITERAL).concat(ONE_CHAR).concat(star);
+
+	      case '**/.*':
+	        return "(?:".concat(nodot).concat(globstar(opts)).concat(SLASH_LITERAL, ")?").concat(DOT_LITERAL).concat(ONE_CHAR).concat(star);
+
+	      default:
+	        {
+	          var match = /^(.*?)\.(\w+)$/.exec(str);
+	          if (!match) return;
+
+	          var _source = create(match[1]);
+
+	          if (!_source) return;
+	          return _source + DOT_LITERAL + match[2];
+	        }
+	    }
+	  };
+
+	  var output = utils.removePrefix(input, state);
+	  var source = create(output);
+
+	  if (source && opts.strictSlashes !== true) {
+	    source += "".concat(SLASH_LITERAL, "?");
+	  }
+
+	  return source;
+	};
+
+	var parse_1 = parse$1;
+
+	function ownKeys$5(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+	function _objectSpread$4(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys$5(Object(source), true).forEach(function (key) { defineProperty$4(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys$5(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+	function _createForOfIteratorHelper$1(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray$2(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+	function _unsupportedIterableToArray$2(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray$2(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray$2(o, minLen); }
+
+	function _arrayLikeToArray$2(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+	var isObject$1 = function isObject(val) {
+	  return val && _typeof_1(val) === 'object' && !Array.isArray(val);
+	};
+	/**
+	 * Creates a matcher function from one or more glob patterns. The
+	 * returned function takes a string to match as its first argument,
+	 * and returns true if the string is a match. The returned matcher
+	 * function also takes a boolean as the second argument that, when true,
+	 * returns an object with additional information.
+	 *
+	 * ```js
+	 * const picomatch = require('picomatch');
+	 * // picomatch(glob[, options]);
+	 *
+	 * const isMatch = picomatch('*.!(*a)');
+	 * console.log(isMatch('a.a')); //=> false
+	 * console.log(isMatch('a.b')); //=> true
+	 * ```
+	 * @name picomatch
+	 * @param {String|Array} `globs` One or more glob patterns.
+	 * @param {Object=} `options`
+	 * @return {Function=} Returns a matcher function.
+	 * @api public
+	 */
+
+
+	var picomatch = function picomatch(glob, options) {
+	  var returnState = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
+	  if (Array.isArray(glob)) {
+	    var fns = glob.map(function (input) {
+	      return picomatch(input, options, returnState);
+	    });
+
+	    var arrayMatcher = function arrayMatcher(str) {
+	      var _iterator = _createForOfIteratorHelper$1(fns),
+	          _step;
+
+	      try {
+	        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+	          var isMatch = _step.value;
+
+	          var _state = isMatch(str);
+
+	          if (_state) return _state;
+	        }
+	      } catch (err) {
+	        _iterator.e(err);
+	      } finally {
+	        _iterator.f();
+	      }
+
+	      return false;
+	    };
+
+	    return arrayMatcher;
+	  }
+
+	  var isState = isObject$1(glob) && glob.tokens && glob.input;
+
+	  if (glob === '' || typeof glob !== 'string' && !isState) {
+	    throw new TypeError('Expected pattern to be a non-empty string');
+	  }
+
+	  var opts = options || {};
+	  var posix = utils.isWindows(options);
+	  var regex = isState ? picomatch.compileRe(glob, options) : picomatch.makeRe(glob, options, false, true);
+	  var state = regex.state;
+	  delete regex.state;
+
+	  var isIgnored = function isIgnored() {
+	    return false;
+	  };
+
+	  if (opts.ignore) {
+	    var ignoreOpts = _objectSpread$4(_objectSpread$4({}, options), {}, {
+	      ignore: null,
+	      onMatch: null,
+	      onResult: null
+	    });
+
+	    isIgnored = picomatch(opts.ignore, ignoreOpts, returnState);
+	  }
+
+	  var matcher = function matcher(input) {
+	    var returnObject = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+	    var _picomatch$test = picomatch.test(input, regex, options, {
+	      glob: glob,
+	      posix: posix
+	    }),
+	        isMatch = _picomatch$test.isMatch,
+	        match = _picomatch$test.match,
+	        output = _picomatch$test.output;
+
+	    var result = {
+	      glob: glob,
+	      state: state,
+	      regex: regex,
+	      posix: posix,
+	      input: input,
+	      output: output,
+	      match: match,
+	      isMatch: isMatch
+	    };
+
+	    if (typeof opts.onResult === 'function') {
+	      opts.onResult(result);
+	    }
+
+	    if (isMatch === false) {
+	      result.isMatch = false;
+	      return returnObject ? result : false;
+	    }
+
+	    if (isIgnored(input)) {
+	      if (typeof opts.onIgnore === 'function') {
+	        opts.onIgnore(result);
+	      }
+
+	      result.isMatch = false;
+	      return returnObject ? result : false;
+	    }
+
+	    if (typeof opts.onMatch === 'function') {
+	      opts.onMatch(result);
+	    }
+
+	    return returnObject ? result : true;
+	  };
+
+	  if (returnState) {
+	    matcher.state = state;
+	  }
+
+	  return matcher;
+	};
+	/**
+	 * Test `input` with the given `regex`. This is used by the main
+	 * `picomatch()` function to test the input string.
+	 *
+	 * ```js
+	 * const picomatch = require('picomatch');
+	 * // picomatch.test(input, regex[, options]);
+	 *
+	 * console.log(picomatch.test('foo/bar', /^(?:([^/]*?)\/([^/]*?))$/));
+	 * // { isMatch: true, match: [ 'foo/', 'foo', 'bar' ], output: 'foo/bar' }
+	 * ```
+	 * @param {String} `input` String to test.
+	 * @param {RegExp} `regex`
+	 * @return {Object} Returns an object with matching info.
+	 * @api public
+	 */
+
+
+	picomatch.test = function (input, regex, options) {
+	  var _ref = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {},
+	      glob = _ref.glob,
+	      posix = _ref.posix;
+
+	  if (typeof input !== 'string') {
+	    throw new TypeError('Expected input to be a string');
+	  }
+
+	  if (input === '') {
+	    return {
+	      isMatch: false,
+	      output: ''
+	    };
+	  }
+
+	  var opts = options || {};
+	  var format = opts.format || (posix ? utils.toPosixSlashes : null);
+	  var match = input === glob;
+	  var output = match && format ? format(input) : input;
+
+	  if (match === false) {
+	    output = format ? format(input) : input;
+	    match = output === glob;
+	  }
+
+	  if (match === false || opts.capture === true) {
+	    if (opts.matchBase === true || opts.basename === true) {
+	      match = picomatch.matchBase(input, regex, options, posix);
+	    } else {
+	      match = regex.exec(output);
+	    }
+	  }
+
+	  return {
+	    isMatch: Boolean(match),
+	    match: match,
+	    output: output
+	  };
+	};
+	/**
+	 * Match the basename of a filepath.
+	 *
+	 * ```js
+	 * const picomatch = require('picomatch');
+	 * // picomatch.matchBase(input, glob[, options]);
+	 * console.log(picomatch.matchBase('foo/bar.js', '*.js'); // true
+	 * ```
+	 * @param {String} `input` String to test.
+	 * @param {RegExp|String} `glob` Glob pattern or regex created by [.makeRe](#makeRe).
+	 * @return {Boolean}
+	 * @api public
+	 */
+
+
+	picomatch.matchBase = function (input, glob, options) {
+	  var posix = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : utils.isWindows(options);
+	  var regex = glob instanceof RegExp ? glob : picomatch.makeRe(glob, options);
+	  return regex.test(path$3.basename(input));
+	};
+	/**
+	 * Returns true if **any** of the given glob `patterns` match the specified `string`.
+	 *
+	 * ```js
+	 * const picomatch = require('picomatch');
+	 * // picomatch.isMatch(string, patterns[, options]);
+	 *
+	 * console.log(picomatch.isMatch('a.a', ['b.*', '*.a'])); //=> true
+	 * console.log(picomatch.isMatch('a.a', 'b.*')); //=> false
+	 * ```
+	 * @param {String|Array} str The string to test.
+	 * @param {String|Array} patterns One or more glob patterns to use for matching.
+	 * @param {Object} [options] See available [options](#options).
+	 * @return {Boolean} Returns true if any patterns match `str`
+	 * @api public
+	 */
+
+
+	picomatch.isMatch = function (str, patterns, options) {
+	  return picomatch(patterns, options)(str);
+	};
+	/**
+	 * Parse a glob pattern to create the source string for a regular
+	 * expression.
+	 *
+	 * ```js
+	 * const picomatch = require('picomatch');
+	 * const result = picomatch.parse(pattern[, options]);
+	 * ```
+	 * @param {String} `pattern`
+	 * @param {Object} `options`
+	 * @return {Object} Returns an object with useful properties and output to be used as a regex source string.
+	 * @api public
+	 */
+
+
+	picomatch.parse = function (pattern, options) {
+	  if (Array.isArray(pattern)) return pattern.map(function (p) {
+	    return picomatch.parse(p, options);
+	  });
+	  return parse_1(pattern, _objectSpread$4(_objectSpread$4({}, options), {}, {
+	    fastpaths: false
+	  }));
+	};
+	/**
+	 * Scan a glob pattern to separate the pattern into segments.
+	 *
+	 * ```js
+	 * const picomatch = require('picomatch');
+	 * // picomatch.scan(input[, options]);
+	 *
+	 * const result = picomatch.scan('!./foo/*.js');
+	 * console.log(result);
+	 * { prefix: '!./',
+	 *   input: '!./foo/*.js',
+	 *   start: 3,
+	 *   base: 'foo',
+	 *   glob: '*.js',
+	 *   isBrace: false,
+	 *   isBracket: false,
+	 *   isGlob: true,
+	 *   isExtglob: false,
+	 *   isGlobstar: false,
+	 *   negated: true }
+	 * ```
+	 * @param {String} `input` Glob pattern to scan.
+	 * @param {Object} `options`
+	 * @return {Object} Returns an object with
+	 * @api public
+	 */
+
+
+	picomatch.scan = function (input, options) {
+	  return scan_1(input, options);
+	};
+	/**
+	 * Create a regular expression from a parsed glob pattern.
+	 *
+	 * ```js
+	 * const picomatch = require('picomatch');
+	 * const state = picomatch.parse('*.js');
+	 * // picomatch.compileRe(state[, options]);
+	 *
+	 * console.log(picomatch.compileRe(state));
+	 * //=> /^(?:(?!\.)(?=.)[^/]*?\.js)$/
+	 * ```
+	 * @param {String} `state` The object returned from the `.parse` method.
+	 * @param {Object} `options`
+	 * @return {RegExp} Returns a regex created from the given pattern.
+	 * @api public
+	 */
+
+
+	picomatch.compileRe = function (parsed, options) {
+	  var returnOutput = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+	  var returnState = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+
+	  if (returnOutput === true) {
+	    return parsed.output;
+	  }
+
+	  var opts = options || {};
+	  var prepend = opts.contains ? '' : '^';
+	  var append = opts.contains ? '' : '$';
+	  var source = "".concat(prepend, "(?:").concat(parsed.output, ")").concat(append);
+
+	  if (parsed && parsed.negated === true) {
+	    source = "^(?!".concat(source, ").*$");
+	  }
+
+	  var regex = picomatch.toRegex(source, options);
+
+	  if (returnState === true) {
+	    regex.state = parsed;
+	  }
+
+	  return regex;
+	};
+
+	picomatch.makeRe = function (input, options) {
+	  var returnOutput = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+	  var returnState = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+
+	  if (!input || typeof input !== 'string') {
+	    throw new TypeError('Expected a non-empty string');
+	  }
+
+	  var opts = options || {};
+	  var parsed = {
+	    negated: false,
+	    fastpaths: true
+	  };
+	  var prefix = '';
+	  var output;
+
+	  if (input.startsWith('./')) {
+	    input = input.slice(2);
+	    prefix = parsed.prefix = './';
+	  }
+
+	  if (opts.fastpaths !== false && (input[0] === '.' || input[0] === '*')) {
+	    output = parse_1.fastpaths(input, options);
+	  }
+
+	  if (output === undefined) {
+	    parsed = parse_1(input, options);
+	    parsed.prefix = prefix + (parsed.prefix || '');
+	  } else {
+	    parsed.output = output;
+	  }
+
+	  return picomatch.compileRe(parsed, options, returnOutput, returnState);
+	};
+	/**
+	 * Create a regular expression from the given regex source string.
+	 *
+	 * ```js
+	 * const picomatch = require('picomatch');
+	 * // picomatch.toRegex(source[, options]);
+	 *
+	 * const { output } = picomatch.parse('*.js');
+	 * console.log(picomatch.toRegex(output));
+	 * //=> /^(?:(?!\.)(?=.)[^/]*?\.js)$/
+	 * ```
+	 * @param {String} `source` Regular expression source string.
+	 * @param {Object} `options`
+	 * @return {RegExp}
+	 * @api public
+	 */
+
+
+	picomatch.toRegex = function (source, options) {
+	  try {
+	    var opts = options || {};
+	    return new RegExp(source, opts.flags || (opts.nocase ? 'i' : ''));
+	  } catch (err) {
+	    if (options && options.debug === true) throw err;
+	    return /$^/;
+	  }
+	};
+	/**
+	 * Picomatch constants.
+	 * @return {Object}
+	 */
+
+
+	picomatch.constants = constants;
+	/**
+	 * Expose "picomatch"
+	 */
+
+	var picomatch_1 = picomatch;
+
+	var picomatch$1 = picomatch_1;
+
+	var parseInputAccept = function parseInputAccept(inputAccept) {
+	  var extensions = [];
+	  var mimeTypes = [];
+	  inputAccept.split(",").map(function (mimeType) {
+	    return mimeType.trim();
+	  }).filter(Boolean).forEach(function (fileType) {
+	    if (fileType.startsWith(".")) {
+	      extensions.push("*".concat(fileType));
+	    } else {
+	      mimeTypes.push(fileType);
+	    }
+	  });
+	  return [extensions, mimeTypes];
+	};
+
+	var AcceptedFileTypes = /*#__PURE__*/function () {
+	  function AcceptedFileTypes(inputAccept) {
+	    classCallCheck(this, AcceptedFileTypes);
+
+	    defineProperty$4(this, "extensions", void 0);
+
+	    defineProperty$4(this, "mimeTypes", void 0);
+
+	    var _parseInputAccept = parseInputAccept(inputAccept),
+	        _parseInputAccept2 = slicedToArray(_parseInputAccept, 2),
+	        extensions = _parseInputAccept2[0],
+	        mimeTypes = _parseInputAccept2[1];
+
+	    this.extensions = extensions;
+	    this.mimeTypes = mimeTypes;
+	  }
+
+	  createClass(AcceptedFileTypes, [{
+	    key: "isAccepted",
+	    value: function isAccepted(fileName) {
+	      if (this.extensions.length === 0 && this.mimeTypes.length === 0) {
+	        return true;
+	      }
+
+	      return this.isMimeTypeAccepted(lite.getType(fileName)) || this.isExtensionAccepted(fileName);
+	    }
+	  }, {
+	    key: "isMimeTypeAccepted",
+	    value: function isMimeTypeAccepted(mimeType) {
+	      if (this.mimeTypes.length === 0) {
+	        return false;
+	      }
+
+	      return picomatch$1.isMatch(mimeType, this.mimeTypes);
+	    }
+	  }, {
+	    key: "isExtensionAccepted",
+	    value: function isExtensionAccepted(fileName) {
+	      if (this.extensions.length === 0) {
+	        return false;
+	      }
+
+	      return picomatch$1.isMatch(fileName, this.extensions);
+	    }
+	  }]);
+
+	  return AcceptedFileTypes;
+	}();
+
+	function ownKeys$6(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+	function _objectSpread$5(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys$6(Object(source), true).forEach(function (key) { defineProperty$4(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys$6(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+	function _createSuper$5(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$5(); return function _createSuperInternal() { var Super = getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return possibleConstructorReturn(this, result); }; }
+
+	function _isNativeReflectConstruct$5() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+
+	var getEntriesFromDirectory = /*#__PURE__*/function () {
+	  var _ref = asyncToGenerator( /*#__PURE__*/regenerator.mark(function _callee(directoryEntry) {
+	    return regenerator.wrap(function _callee$(_context) {
+	      while (1) {
+	        switch (_context.prev = _context.next) {
+	          case 0:
+	            return _context.abrupt("return", new Promise(function (resolve, reject) {
+	              return directoryEntry.createReader().readEntries(resolve, reject);
+	            }));
+
+	          case 1:
+	          case "end":
+	            return _context.stop();
+	        }
+	      }
+	    }, _callee);
+	  }));
+
+	  return function getEntriesFromDirectory(_x) {
+	    return _ref.apply(this, arguments);
+	  };
+	}();
+
+	var getFileFromFileEntry = /*#__PURE__*/function () {
+	  var _ref2 = asyncToGenerator( /*#__PURE__*/regenerator.mark(function _callee2(fileEntry) {
+	    return regenerator.wrap(function _callee2$(_context2) {
+	      while (1) {
+	        switch (_context2.prev = _context2.next) {
+	          case 0:
+	            return _context2.abrupt("return", new Promise(function (resolve, reject) {
+	              return fileEntry.file(resolve, reject);
+	            }));
+
+	          case 1:
+	          case "end":
+	            return _context2.stop();
+	        }
+	      }
+	    }, _callee2);
+	  }));
+
+	  return function getFileFromFileEntry(_x2) {
+	    return _ref2.apply(this, arguments);
+	  };
+	}();
+
+	var getFilesFromFileSystemEntries = /*#__PURE__*/function () {
+	  var _ref3 = asyncToGenerator( /*#__PURE__*/regenerator.mark(function _callee3(entries) {
+	    var result, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, _value, entry, file, entriesFromDirectory, _files;
+
+	    return regenerator.wrap(function _callee3$(_context3) {
+	      while (1) {
+	        switch (_context3.prev = _context3.next) {
+	          case 0:
+	            result = [];
+	            _iteratorNormalCompletion = true;
+	            _didIteratorError = false;
+	            _context3.prev = 3;
+	            _iterator = asyncIterator(entries);
+
+	          case 5:
+	            _context3.next = 7;
+	            return _iterator.next();
+
+	          case 7:
+	            _step = _context3.sent;
+	            _iteratorNormalCompletion = _step.done;
+	            _context3.next = 11;
+	            return _step.value;
+
+	          case 11:
+	            _value = _context3.sent;
+
+	            if (_iteratorNormalCompletion) {
+	              _context3.next = 32;
+	              break;
+	            }
+
+	            entry = _value;
+
+	            if (!entry.isFile) {
+	              _context3.next = 21;
+	              break;
+	            }
+
+	            _context3.next = 17;
+	            return getFileFromFileEntry(entry);
+
+	          case 17:
+	            file = _context3.sent;
+	            result.push(file);
+	            _context3.next = 29;
+	            break;
+
+	          case 21:
+	            if (!entry.isDirectory) {
+	              _context3.next = 29;
+	              break;
+	            }
+
+	            _context3.next = 24;
+	            return getEntriesFromDirectory(entry);
+
+	          case 24:
+	            entriesFromDirectory = _context3.sent;
+	            _context3.next = 27;
+	            return getFilesFromFileSystemEntries(entriesFromDirectory);
+
+	          case 27:
+	            _files = _context3.sent;
+
+	            _files.forEach(function (file) {
+	              return result.push(file);
+	            });
+
+	          case 29:
+	            _iteratorNormalCompletion = true;
+	            _context3.next = 5;
+	            break;
+
+	          case 32:
+	            _context3.next = 38;
+	            break;
+
+	          case 34:
+	            _context3.prev = 34;
+	            _context3.t0 = _context3["catch"](3);
+	            _didIteratorError = true;
+	            _iteratorError = _context3.t0;
+
+	          case 38:
+	            _context3.prev = 38;
+	            _context3.prev = 39;
+
+	            if (!(!_iteratorNormalCompletion && _iterator.return != null)) {
+	              _context3.next = 43;
+	              break;
+	            }
+
+	            _context3.next = 43;
+	            return _iterator.return();
+
+	          case 43:
+	            _context3.prev = 43;
+
+	            if (!_didIteratorError) {
+	              _context3.next = 46;
+	              break;
+	            }
+
+	            throw _iteratorError;
+
+	          case 46:
+	            return _context3.finish(43);
+
+	          case 47:
+	            return _context3.finish(38);
+
+	          case 48:
+	            return _context3.abrupt("return", result);
+
+	          case 49:
+	          case "end":
+	            return _context3.stop();
+	        }
+	      }
+	    }, _callee3, null, [[3, 34, 38, 48], [39,, 43, 47]]);
+	  }));
+
+	  return function getFilesFromFileSystemEntries(_x3) {
+	    return _ref3.apply(this, arguments);
+	  };
+	}();
+
+	var getFilesFromDataTransfer = /*#__PURE__*/function () {
+	  var _ref4 = asyncToGenerator( /*#__PURE__*/regenerator.mark(function _callee4(dataTransfer) {
+	    var entries, _files2;
+
+	    return regenerator.wrap(function _callee4$(_context4) {
+	      while (1) {
+	        switch (_context4.prev = _context4.next) {
+	          case 0:
+	            if (!dataTransfer.items) {
+	              _context4.next = 8;
+	              break;
+	            }
+
+	            entries = toConsumableArray(dataTransfer.items).map(function (item) {
+	              return item.webkitGetAsEntry();
+	            });
+	            _context4.next = 4;
+	            return getFilesFromFileSystemEntries(entries);
+
+	          case 4:
+	            _files2 = _context4.sent;
+	            return _context4.abrupt("return", _files2);
+
+	          case 8:
+	            return _context4.abrupt("return", toConsumableArray(dataTransfer.files));
+
+	          case 9:
+	          case "end":
+	            return _context4.stop();
+	        }
+	      }
+	    }, _callee4);
+	  }));
+
+	  return function getFilesFromDataTransfer(_x4) {
+	    return _ref4.apply(this, arguments);
+	  };
+	}();
+
+	var CancelLink = function CancelLink(_ref5) {
+	  var onDelete = _ref5.onDelete,
+	      translations = _ref5.translations,
+	      upload = _ref5.upload;
 
 	  var handleCancel = function handleCancel() {
 	    return onDelete(upload);
@@ -12940,10 +16919,10 @@
 	  });
 	};
 
-	var UploadInProgress = function UploadInProgress(_ref2) {
-	  var onDelete = _ref2.onDelete,
-	      translations = _ref2.translations,
-	      upload = _ref2.upload;
+	var UploadInProgress = function UploadInProgress(_ref6) {
+	  var onDelete = _ref6.onDelete,
+	      translations = _ref6.translations,
+	      upload = _ref6.upload;
 	  return createVNode(1, "div", "dff-file dff-file-id-".concat(upload.uploadIndex), [createVNode(1, "span", null, upload.name, 0), createVNode(1, "span", "dff-progress", createVNode(1, "span", "dff-progress-inner", null, 1, {
 	    "style": {
 	      width: "".concat(upload.progress.toFixed(2), "%")
@@ -12955,10 +16934,10 @@
 	  })], 4);
 	};
 
-	var DeleteLink = function DeleteLink(_ref3) {
-	  var onDelete = _ref3.onDelete,
-	      translations = _ref3.translations,
-	      upload = _ref3.upload;
+	var DeleteLink = function DeleteLink(_ref7) {
+	  var onDelete = _ref7.onDelete,
+	      translations = _ref7.translations,
+	      upload = _ref7.upload;
 
 	  var handleDelete = function handleDelete() {
 	    return onDelete(upload);
@@ -12971,10 +16950,10 @@
 	  });
 	};
 
-	var UploadDone = function UploadDone(_ref4) {
-	  var onDelete = _ref4.onDelete,
-	      translations = _ref4.translations,
-	      upload = _ref4.upload;
+	var UploadDone = function UploadDone(_ref8) {
+	  var onDelete = _ref8.onDelete,
+	      translations = _ref8.translations,
+	      upload = _ref8.upload;
 	  return createVNode(1, "div", "dff-file dff-upload-success dff-file-id-".concat(upload.uploadIndex), [createVNode(1, "span", null, upload.name, 0), createVNode(1, "span", "dff-filesize", formatBytes(upload.getSize(), 2), 0), createComponentVNode(2, DeleteLink, {
 	    "onDelete": onDelete,
 	    "translations": translations,
@@ -12982,16 +16961,16 @@
 	  }), upload.deleteStatus === "error" && createVNode(1, "span", "dff-error", translations["Delete failed"], 0)], 0);
 	};
 
-	var UploadError = function UploadError(_ref5) {
-	  var translations = _ref5.translations,
-	      upload = _ref5.upload;
+	var UploadError = function UploadError(_ref9) {
+	  var translations = _ref9.translations,
+	      upload = _ref9.upload;
 	  return createVNode(1, "div", "dff-file dff-upload-fail dff-file-id-".concat(upload.uploadIndex), [createVNode(1, "span", null, upload.name, 0), createVNode(1, "span", "dff-error", translations["Upload failed"], 0)], 4);
 	};
 
-	var Upload$1 = function Upload(_ref6) {
-	  var onDelete = _ref6.onDelete,
-	      translations = _ref6.translations,
-	      upload = _ref6.upload;
+	var Upload$1 = function Upload(_ref10) {
+	  var onDelete = _ref10.onDelete,
+	      translations = _ref10.translations,
+	      upload = _ref10.upload;
 
 	  switch (upload.status) {
 	    case "done":
@@ -13016,18 +16995,153 @@
 	  }
 	};
 
-	var renderUploads = function renderUploads(_ref7) {
-	  var container = _ref7.container,
-	      onDelete = _ref7.onDelete,
-	      translations = _ref7.translations,
-	      uploads = _ref7.uploads;
-	  render(createFragment(uploads.map(function (upload) {
-	    return createComponentVNode(2, Upload$1, {
-	      "onDelete": onDelete,
-	      "upload": upload,
-	      "translations": translations
-	    }, upload.uploadIndex);
-	  }), 0), container);
+	var Uploads = /*#__PURE__*/function (_Component) {
+	  inherits(Uploads, _Component);
+
+	  var _super = _createSuper$5(Uploads);
+
+	  function Uploads(props) {
+	    var _this;
+
+	    classCallCheck(this, Uploads);
+
+	    _this = _super.call(this, props);
+
+	    defineProperty$4(assertThisInitialized(_this), "acceptedFileTypes", void 0);
+
+	    defineProperty$4(assertThisInitialized(_this), "handleDragEnter", function () {
+	      _this.setState({
+	        dropping: true
+	      });
+	    });
+
+	    defineProperty$4(assertThisInitialized(_this), "handleDragLeave", function () {
+	      _this.setState({
+	        dropping: false
+	      });
+	    });
+
+	    defineProperty$4(assertThisInitialized(_this), "handleDragOver", function (e) {
+	      e.preventDefault();
+
+	      _this.setState({
+	        dropping: true
+	      });
+	    });
+
+	    defineProperty$4(assertThisInitialized(_this), "handleDrop", function (e) {
+	      e.preventDefault();
+	      e.stopPropagation();
+
+	      _this.setState({
+	        dropping: false
+	      });
+
+	      var uploadFiles = /*#__PURE__*/function () {
+	        var _ref11 = asyncToGenerator( /*#__PURE__*/regenerator.mark(function _callee5() {
+	          var _files3, acceptedFiles;
+
+	          return regenerator.wrap(function _callee5$(_context5) {
+	            while (1) {
+	              switch (_context5.prev = _context5.next) {
+	                case 0:
+	                  _context5.prev = 0;
+
+	                  if (!e.dataTransfer) {
+	                    _context5.next = 7;
+	                    break;
+	                  }
+
+	                  _context5.next = 4;
+	                  return getFilesFromDataTransfer(e.dataTransfer);
+
+	                case 4:
+	                  _files3 = _context5.sent;
+	                  acceptedFiles = _files3.filter(function (file) {
+	                    return _this.acceptedFileTypes.isAccepted(file.name);
+	                  });
+
+	                  _this.props.onUploadFiles(acceptedFiles);
+
+	                case 7:
+	                  _context5.next = 12;
+	                  break;
+
+	                case 9:
+	                  _context5.prev = 9;
+	                  _context5.t0 = _context5["catch"](0);
+	                  console.error(_context5.t0);
+
+	                case 12:
+	                case "end":
+	                  return _context5.stop();
+	              }
+	            }
+	          }, _callee5, null, [[0, 9]]);
+	        }));
+
+	        return function uploadFiles() {
+	          return _ref11.apply(this, arguments);
+	        };
+	      }();
+
+	      void uploadFiles();
+	    });
+
+	    _this.state = {
+	      dropping: false
+	    };
+	    _this.acceptedFileTypes = new AcceptedFileTypes(props.inputAccept);
+	    return _this;
+	  }
+
+	  createClass(Uploads, [{
+	    key: "render",
+	    value: function render() {
+	      var _this$state;
+
+	      var _this$props = this.props,
+	          onDelete = _this$props.onDelete,
+	          supportDropArea = _this$props.supportDropArea,
+	          translations = _this$props.translations,
+	          uploads = _this$props.uploads;
+	      var dropping = (_this$state = this.state) === null || _this$state === void 0 ? void 0 : _this$state.dropping;
+	      var dragProps = supportDropArea ? {
+	        onDragEnter: this.handleDragEnter,
+	        onDragLeave: this.handleDragLeave,
+	        onDragOver: this.handleDragOver,
+	        onDrop: this.handleDrop
+	      } : {};
+	      var className = "dff-drop-area".concat(dropping ? " dff-dropping" : "");
+	      return normalizeProps(createVNode(1, "div", className, [supportDropArea && !uploads.length && createVNode(1, "div", "dff-drop-hint", translations["Drop your files here"], 0), uploads.map(function (upload) {
+	        return createComponentVNode(2, Upload$1, {
+	          "onDelete": onDelete,
+	          "upload": upload,
+	          "translations": translations
+	        }, upload.uploadIndex);
+	      })], 0, _objectSpread$5({}, dragProps)));
+	    }
+	  }]);
+
+	  return Uploads;
+	}(Component);
+
+	var renderUploads = function renderUploads(_ref12) {
+	  var container = _ref12.container,
+	      inputAccept = _ref12.inputAccept,
+	      onDelete = _ref12.onDelete,
+	      onUploadFiles = _ref12.onUploadFiles,
+	      supportDropArea = _ref12.supportDropArea,
+	      translations = _ref12.translations,
+	      uploads = _ref12.uploads;
+	  render(createComponentVNode(2, Uploads, {
+	    "inputAccept": inputAccept,
+	    "onDelete": onDelete,
+	    "onUploadFiles": onUploadFiles,
+	    "supportDropArea": supportDropArea,
+	    "translations": translations,
+	    "uploads": uploads
+	  }), container);
 	};
 
 	var FileField = /*#__PURE__*/function () {
@@ -13584,7 +17698,10 @@
 	      this.updateInputRequired();
 	      renderUploads({
 	        container: this.container,
+	        inputAccept: this.input.accept,
 	        onDelete: this.handleDelete,
+	        onUploadFiles: this.uploadFiles,
+	        supportDropArea: this.supportDropArea,
 	        translations: this.translations,
 	        uploads: this.uploads
 	      });
@@ -13599,9 +17716,9 @@
 	  return FileField;
 	}();
 
-	function ownKeys$3(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+	function ownKeys$7(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
-	function _objectSpread$2(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys$3(Object(source), true).forEach(function (key) { defineProperty$4(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys$3(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+	function _objectSpread$6(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys$7(Object(source), true).forEach(function (key) { defineProperty$4(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys$7(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
 	var initUploadFields = function initUploadFields(form) {
 	  var _findInput;
@@ -13733,7 +17850,7 @@
 
 	  for (var i = 0; i < formCount; i += 1) {
 	    var subFormPrefix = getInputNameWithPrefix("".concat(i), null);
-	    initUploadFields(form, _objectSpread$2(_objectSpread$2({}, options), {}, {
+	    initUploadFields(form, _objectSpread$6(_objectSpread$6({}, options), {}, {
 	      prefix: "".concat(prefix, "-").concat(subFormPrefix)
 	    }));
 	  }
