@@ -402,7 +402,10 @@ class FileField {
 
     renderUploads({
       container: this.container,
+      inputAccept: this.input.accept,
       onDelete: this.handleDelete,
+      onUploadFiles: this.uploadFiles,
+      supportDropArea: this.supportDropArea,
       translations: this.translations,
       uploads: this.uploads
     });

@@ -1,6 +1,7 @@
-import { render } from "inferno";
+import { render, Component } from "inferno";
 import BaseUpload from "./uploads/base_upload";
 import { formatBytes } from "./util";
+import AcceptedFileTypes from "./accepted_file_types";
 
 export type Translations = { [key: string]: string };
 
@@ -9,6 +10,55 @@ interface CancelLinkProps {
   translations: Translations;
   upload: BaseUpload;
 }
+
+const getEntriesFromDirectory = async (
+  directoryEntry: FileSystemDirectoryEntry
+): Promise<FileSystemEntry[]> =>
+  new Promise((resolve, reject) =>
+    directoryEntry.createReader().readEntries(resolve, reject)
+  );
+
+const getFileFromFileEntry = async (
+  fileEntry: FileSystemFileEntry
+): Promise<File> =>
+  new Promise((resolve, reject) => fileEntry.file(resolve, reject));
+
+const getFilesFromFileSystemEntries = async (
+  entries: FileSystemEntry[]
+): Promise<File[]> => {
+  const result = [];
+
+  for await (const entry of entries) {
+    if (entry.isFile) {
+      const file = await getFileFromFileEntry(entry as FileSystemFileEntry);
+      result.push(file);
+    } else if (entry.isDirectory) {
+      const entriesFromDirectory = await getEntriesFromDirectory(
+        entry as FileSystemDirectoryEntry
+      );
+      const files = await getFilesFromFileSystemEntries(entriesFromDirectory);
+      files.forEach(file => result.push(file));
+    }
+  }
+
+  return result;
+};
+
+const getFilesFromDataTransfer = async (
+  dataTransfer: DataTransfer
+): Promise<File[]> => {
+  if (dataTransfer.items) {
+    const entries = [...dataTransfer.items].map(
+      item => item.webkitGetAsEntry() as FileSystemEntry
+    );
+
+    const files = await getFilesFromFileSystemEntries(entries);
+    return files;
+  } else {
+    // backwards compatibility
+    return [...dataTransfer.files];
+  }
+};
 
 const CancelLink = ({ onDelete, translations, upload }: CancelLinkProps) => {
   const handleCancel = () => onDelete(upload);
@@ -151,30 +201,133 @@ const Upload = ({ onDelete, translations, upload }: UploadProps) => {
   }
 };
 
+interface UploadsProps {
+  inputAccept: string;
+  onDelete: (upload: BaseUpload) => void;
+  onUploadFiles: (files: File[]) => void;
+  supportDropArea: boolean;
+  translations: Translations;
+  uploads: BaseUpload[];
+}
+
+interface UploadsState {
+  dropping: boolean;
+}
+
+class Uploads extends Component<UploadsProps, UploadsState> {
+  acceptedFileTypes: AcceptedFileTypes;
+
+  constructor(props: UploadsProps) {
+    super(props);
+
+    this.state = {
+      dropping: false
+    };
+
+    this.acceptedFileTypes = new AcceptedFileTypes(props.inputAccept);
+  }
+
+  render() {
+    const { onDelete, supportDropArea, translations, uploads } = this.props;
+    const dropping = this.state?.dropping;
+
+    const dragProps = supportDropArea
+      ? {
+          onDragEnter: this.handleDragEnter,
+          onDragLeave: this.handleDragLeave,
+          onDragOver: this.handleDragOver,
+          onDrop: this.handleDrop
+        }
+      : {};
+
+    const className = `dff-drop-area${dropping ? " dff-dropping" : ""}`;
+
+    return (
+      <div className={className} {...dragProps}>
+        {supportDropArea && !uploads.length && (
+          <div className="dff-drop-hint">
+            {translations["Drop your files here"]}
+          </div>
+        )}
+        {uploads.map(upload => (
+          <Upload
+            key={upload.uploadIndex}
+            onDelete={onDelete}
+            upload={upload}
+            translations={translations}
+          />
+        ))}
+      </div>
+    );
+  }
+
+  handleDragEnter = () => {
+    this.setState({ dropping: true });
+  };
+
+  handleDragLeave = () => {
+    this.setState({ dropping: false });
+  };
+
+  handleDragOver = (e: DragEvent) => {
+    e.preventDefault();
+
+    this.setState({ dropping: true });
+  };
+
+  handleDrop = (e: DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    this.setState({ dropping: false });
+
+    const uploadFiles = async (): Promise<void> => {
+      try {
+        if (e.dataTransfer) {
+          const files = await getFilesFromDataTransfer(e.dataTransfer);
+          const acceptedFiles = files.filter(file =>
+            this.acceptedFileTypes.isAccepted(file.name)
+          );
+
+          this.props.onUploadFiles(acceptedFiles);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    void uploadFiles();
+  };
+}
+
 interface RenderUploadParameters {
   container: HTMLElement;
+  inputAccept: string;
   onDelete: (upload: BaseUpload) => void;
+  onUploadFiles: (files: File[]) => void;
+  supportDropArea: boolean;
   translations: Translations;
   uploads: BaseUpload[];
 }
 
 const renderUploads = ({
   container,
+  inputAccept,
   onDelete,
+  onUploadFiles,
+  supportDropArea,
   translations,
   uploads
 }: RenderUploadParameters): void => {
   render(
-    <>
-      {uploads.map(upload => (
-        <Upload
-          key={upload.uploadIndex}
-          onDelete={onDelete}
-          upload={upload}
-          translations={translations}
-        />
-      ))}
-    </>,
+    <Uploads
+      inputAccept={inputAccept}
+      onDelete={onDelete}
+      onUploadFiles={onUploadFiles}
+      supportDropArea={supportDropArea}
+      translations={translations}
+      uploads={uploads}
+    />,
     container
   );
 };

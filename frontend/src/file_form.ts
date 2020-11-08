@@ -1,5 +1,5 @@
 import EventEmitter from "eventemitter3";
-import FileField, { Callbacks, Translations } from "./file_field";
+import FileField, { Callbacks } from "./file_field";
 import { InitialFile } from "./uploads/uploaded_file";
 import {
   findInput,
@@ -8,6 +8,7 @@ import {
   getPlaceholderFieldName,
   getS3UploadedFieldName
 } from "./util";
+import { Translations } from "./renderUploads";
 
 interface Options {
   callbacks?: Callbacks;
