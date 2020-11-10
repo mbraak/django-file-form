@@ -110,3 +110,9 @@ class ExampleFormView(generic.FormView):
 
         return super(ExampleFormView, self).form_valid(form)
 ```
+
+It's also possible to delete unused temporary file using a management command:
+
+```
+python manage.py delete_unused_files
+```
