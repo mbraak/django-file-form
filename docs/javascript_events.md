@@ -22,10 +22,10 @@ eventEmitter.on('uploadComplete', ({ element, fieldName, fileName, metaDataField
 
 
 initUploadFields(
-    document.getElementById("example-form"),
-    {
-      eventEmitter,
-    }
+  document.getElementById("example-form"),
+  {
+    eventEmitter,
+  }
 );
 ```
 

@@ -7,7 +7,7 @@ from django.core.files.base import ContentFile
 from django.test.utils import captured_stdout, override_settings
 
 from django_file_form_example.test_utils import get_random_id, encode_datetime, remove_p
-from django_file_form.models import UploadedFile
+from django_file_form.models import TemporaryUploadedFile
 from django_file_form.util import get_list, get_upload_path
 
 
@@ -33,7 +33,7 @@ class ModelTests(TestCase):
             filename = get_random_id()
             uploaded_file_path = self.temp_uploads_path.joinpath(filename)
             try:
-                uploaded_file = UploadedFile.objects.create(
+                uploaded_file = TemporaryUploadedFile.objects.create(
                     created=encode_datetime(2010, 1, 1),
                     uploaded_file=ContentFile("", filename),
                 )
@@ -43,7 +43,7 @@ class ModelTests(TestCase):
                     output.strip(),
                     f"Deleted files: {Path(uploaded_file.uploaded_file.name).name}",
                 )
-                self.assertEqual(UploadedFile.objects.count(), 0)
+                self.assertEqual(TemporaryUploadedFile.objects.count(), 0)
             finally:
                 remove_p(uploaded_file_path)
 
@@ -58,13 +58,13 @@ class ModelTests(TestCase):
             with uploaded_file_path.open("w") as f:
                 f.write("abc")
 
-            UploadedFile.objects.create(created=encode_datetime(2010, 1, 1))
+            TemporaryUploadedFile.objects.create(created=encode_datetime(2010, 1, 1))
 
             # - delete unused files
-            UploadedFile.objects.delete_unused_files()
+            TemporaryUploadedFile.objects.delete_unused_files()
 
             # UploadedFile must be deleted
-            self.assertEqual(UploadedFile.objects.count(), 0)
+            self.assertEqual(TemporaryUploadedFile.objects.count(), 0)
 
             # file must be deleted
             self.assertFalse(uploaded_file_path.exists())
@@ -74,12 +74,12 @@ class ModelTests(TestCase):
     def test_uploaded_file_unicode(self):
         filename = get_random_id()
 
-        uploaded_file = UploadedFile.objects.create(
+        uploaded_file = TemporaryUploadedFile.objects.create(
             uploaded_file=ContentFile("xyz", filename), original_filename="ooo.txt"
         )
         try:
             self.assertEqual(str(uploaded_file), "ooo.txt")
-            self.assertEqual(str(UploadedFile()), "")
+            self.assertEqual(str(TemporaryUploadedFile()), "")
         finally:
             uploaded_file.uploaded_file.delete()
 

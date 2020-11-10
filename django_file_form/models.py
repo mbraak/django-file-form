@@ -13,7 +13,7 @@ from django.utils.module_loading import import_string
 from .util import ModelManager, get_upload_path
 
 
-class UploadedFileManager(ModelManager):
+class TemporaryUploadedFileManager(ModelManager):
     def delete_unused_files(self, delete=True, now=None):
         deleted_files = []
 
@@ -54,7 +54,14 @@ else:
     storage_class = FileSystemStorage
 
 
-class UploadedFile(models.Model):
+class TemporaryUploadedFile(models.Model):
+    """
+    TemporaryUploadedFile is used for temporary storage of an uploaded file.
+
+    * Added when a file is uploaded using the tus ajax upload
+    * Removed when the form is submitted sucessfully
+    * Or removed later by 'python manage.py delete_unused_files'
+    """
     created = models.DateTimeField(default=timezone.now)
     uploaded_file = models.FileField(
         max_length=255, storage=storage_class(), upload_to=get_upload_to
@@ -64,11 +71,12 @@ class UploadedFile(models.Model):
     file_id = models.CharField(max_length=40)
     form_id = models.CharField(max_length=40)
 
-    objects = UploadedFileManager()
+    objects = TemporaryUploadedFileManager()
 
     class Meta(object):
         # Query string to get back existing uploaded file is using form_id and field_name
         index_together = (("form_id", "field_name"),)
+        db_table = "django_file_form_uploadedfile"
 
     def __str__(self):
         return str(self.original_filename or "")
