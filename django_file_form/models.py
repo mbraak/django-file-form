@@ -55,6 +55,13 @@ else:
 
 
 class TemporaryUploadedFile(models.Model):
+    """
+    TemporaryUploadedFile is used for temporary storage of an uploaded file.
+
+    * Added when a file is uploaded using the tus ajax upload
+    * Removed when the form is submitted sucessfully
+    * Or removed later by 'python manage.py delete_unused_files'
+    """
     created = models.DateTimeField(default=timezone.now)
     uploaded_file = models.FileField(
         max_length=255, storage=storage_class(), upload_to=get_upload_to
