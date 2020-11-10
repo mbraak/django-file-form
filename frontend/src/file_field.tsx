@@ -218,21 +218,19 @@ class FileField {
 
     this.render();
 
-    // todo: event
-    //this.emitEvent("addUpload", element, upload);
-  }
-
-  getUploadByIndex(uploadIndex: number): BaseUpload | undefined {
-    return this.uploads.find(upload => upload.uploadIndex === uploadIndex);
+    this.emitEvent("addUpload", upload);
   }
 
   findUploadByName(fileName: string): BaseUpload | undefined {
     return this.uploads.find(upload => upload.name === fileName);
   }
 
+  findUploadElement(uploadIndex: number): HTMLElement | null {
+    return this.container.querySelector(`.dff-file-id-${uploadIndex}`);
+  }
+
   async removeExistingUpload(upload: BaseUpload): Promise<void> {
-    // todo
-    // this.emitEvent("removeUpload", element, upload);
+    this.emitEvent("removeUpload", upload);
 
     if (upload.status === "uploading") {
       this.render();
@@ -295,13 +293,9 @@ class FileField {
     this.input.value = "";
     upload.status = "done";
 
+    this.emitEvent("uploadComplete", upload);
+
     const { onSuccess } = this.callbacks;
-
-    const element = document.getElementsByClassName(
-      `dff-file-id-${upload.uploadIndex}`
-    )[0] as HTMLElement;
-    this.emitEvent("uploadComplete", element, upload);
-
     if (onSuccess && upload.type === "tus") {
       onSuccess(upload);
     }
@@ -373,8 +367,10 @@ class FileField {
     );
   }
 
-  emitEvent(eventName: string, element: HTMLElement, upload: BaseUpload): void {
-    if (this.eventEmitter) {
+  emitEvent(eventName: string, upload: BaseUpload): void {
+    const element = this.findUploadElement(upload.uploadIndex);
+
+    if (element && this.eventEmitter) {
       this.eventEmitter.emit(eventName, {
         element,
         fieldName: this.fieldName,
