@@ -2,12 +2,12 @@ from __future__ import print_function
 
 from django.core.management.base import BaseCommand
 
-from django_file_form.models import UploadedFile
+from django_file_form.models import TemporaryUploadedFile
 
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        deleted_files = UploadedFile.objects.delete_unused_files()
+        deleted_files = TemporaryUploadedFile.objects.delete_unused_files()
 
         verbosity = options.get("verbosity")
         if verbosity:

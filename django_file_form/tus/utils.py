@@ -4,7 +4,7 @@ from django.core.cache import caches
 from django.core.files import File
 from django.http import HttpResponse
 
-from django_file_form.models import UploadedFile
+from django_file_form.models import TemporaryUploadedFile
 from django_file_form import conf
 
 
@@ -36,7 +36,7 @@ def create_uploaded_file_in_db(
         if field_name:
             values["field_name"] = field_name
 
-        UploadedFile.objects.create(**values)
+        TemporaryUploadedFile.objects.create(**values)
 
     os.remove(uploaded_file)
 

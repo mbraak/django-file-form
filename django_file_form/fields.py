@@ -2,7 +2,7 @@ from django.forms import FileField
 from django.core import validators
 
 from .widgets import UploadWidget, UploadMultipleWidget
-from .models import UploadedFile
+from .models import TemporaryUploadedFile
 from .util import get_list
 
 
@@ -21,7 +21,7 @@ class UploadedFileField(FileField):
                 .latest("created")
                 .get_uploaded_file()
             )
-        except UploadedFile.DoesNotExist:
+        except TemporaryUploadedFile.DoesNotExist:
             return None
 
     def delete_file_data(self, field_name, form_id):
@@ -37,7 +37,7 @@ class UploadedFileField(FileField):
             return dict()
 
     def _get_file_qs(self, field_name, form_id):
-        return UploadedFile.objects.filter(form_id=form_id, field_name=field_name)
+        return TemporaryUploadedFile.objects.filter(form_id=form_id, field_name=field_name)
 
 
 class MultipleUploadedFileField(UploadedFileField):
