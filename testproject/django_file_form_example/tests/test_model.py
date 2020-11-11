@@ -95,7 +95,7 @@ class DeleteUnusedFileTest(TestCase):
     def get_uploaded_file_path(self):
         return self.temp_uploads_path.joinpath(self.filename)
 
-    def test_delete_record_from_yesterday(self):
+    def test_record_from_yesterday(self):
         TemporaryUploadedFile.objects.create(
             created=timezone.now() - timedelta(days=1),
             uploaded_file=ContentFile("abc", self.filename)
@@ -105,3 +105,24 @@ class DeleteUnusedFileTest(TestCase):
 
         self.assertEqual(TemporaryUploadedFile.objects.count(), 0)
         self.assertFalse(self.get_uploaded_file_path().exists())
+
+    def test_record_from_today(self):
+        TemporaryUploadedFile.objects.create(
+            created=timezone.now() - timedelta(hours=1),
+            uploaded_file=ContentFile("abc", self.filename)
+        )
+
+        TemporaryUploadedFile.objects.delete_unused_files()
+
+        self.assertEqual(TemporaryUploadedFile.objects.count(), 1)
+        self.assertTrue(self.get_uploaded_file_path().exists())
+
+    def test_file_without_record(self):
+        uploaded_file_path = self.get_uploaded_file_path()
+
+        with uploaded_file_path.open("w") as f:
+            f.write("abc")
+
+        TemporaryUploadedFile.objects.delete_unused_files()
+
+        self.assertFalse(uploaded_file_path.exists())
