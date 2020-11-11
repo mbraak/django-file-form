@@ -1,3 +1,4 @@
+from datetime import timedelta
 from pathlib import Path
 
 from django.test import TestCase
@@ -5,6 +6,7 @@ from django.core.management import call_command
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.test.utils import captured_stdout, override_settings
+from django.utils import timezone
 
 from django_file_form_example.test_utils import get_random_id, encode_datetime, remove_p
 from django_file_form.models import TemporaryUploadedFile
@@ -50,27 +52,6 @@ class ModelTests(TestCase):
         test_with_no_files()
         test_with_files()
 
-    def test_delete_unused_files(self):
-        # setup
-        filename = get_random_id()
-        uploaded_file_path = self.temp_uploads_path.joinpath(filename)
-        try:
-            with uploaded_file_path.open("w") as f:
-                f.write("abc")
-
-            TemporaryUploadedFile.objects.create(created=encode_datetime(2010, 1, 1))
-
-            # - delete unused files
-            TemporaryUploadedFile.objects.delete_unused_files()
-
-            # UploadedFile must be deleted
-            self.assertEqual(TemporaryUploadedFile.objects.count(), 0)
-
-            # file must be deleted
-            self.assertFalse(uploaded_file_path.exists())
-        finally:
-            remove_p(uploaded_file_path)
-
     def test_uploaded_file_unicode(self):
         filename = get_random_id()
 
@@ -101,3 +82,26 @@ class ConfTest(TestCase):
             str(get_upload_path()),
             str(Path(settings.MEDIA_ROOT).joinpath("relative/path")),
         )
+
+
+class DeleteUnusedFileTest(TestCase):
+    def setUp(self):
+        self.temp_uploads_path = media_root.joinpath("temp_uploads")
+        self.filename = get_random_id()
+
+    def tearDown(self):
+        remove_p(self.get_uploaded_file_path())
+
+    def get_uploaded_file_path(self):
+        return self.temp_uploads_path.joinpath(self.filename)
+
+    def test_delete_record_from_yesterday(self):
+        TemporaryUploadedFile.objects.create(
+            created=timezone.now() - timedelta(days=1),
+            uploaded_file=ContentFile("abc", self.filename)
+        )
+
+        TemporaryUploadedFile.objects.delete_unused_files()
+
+        self.assertEqual(TemporaryUploadedFile.objects.count(), 0)
+        self.assertFalse(self.get_uploaded_file_path().exists())
