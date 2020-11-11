@@ -38,14 +38,17 @@ class TemporaryUploadedFileManager(ModelManager):
         return deleted_files
 
     def get_for_file(self, filename):
-        path = get_upload_path().joinpath(filename)
-        return self.try_get(uploaded_file=path)
+        return self.try_get(uploaded_file=get_upload_to_for_filename(filename))
 
 
-def get_upload_to(instance, filename):
+def get_upload_to_for_filename(filename):
     # Full path including filename is needed for custom storage backends.
     path = getattr(settings, "FILE_FORM_UPLOAD_DIR", "temp_uploads")
     return os.path.join(path, filename)
+
+
+def get_upload_to(_instance, filename):
+    return get_upload_to_for_filename(filename)
 
 
 if hasattr(settings, "FILE_FORM_TEMP_STORAGE"):
