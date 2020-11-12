@@ -6,7 +6,7 @@ from pathlib import Path
 from django.views.decorators.http import require_POST, require_http_methods
 
 from django_file_form import conf
-from django_file_form.models import UploadedFile
+from django_file_form.models import TemporaryUploadedFile
 from django_file_form.util import get_upload_path, check_permission
 from .utils import (
     cache,
@@ -179,7 +179,7 @@ def cancel_upload(resource_id):
     if upload_file_path.exists():
         upload_file_path.unlink()
 
-    uploaded_file = UploadedFile.objects.try_get(file_id=resource_id)
+    uploaded_file = TemporaryUploadedFile.objects.try_get(file_id=resource_id)
 
     if uploaded_file:
         uploaded_file.delete()

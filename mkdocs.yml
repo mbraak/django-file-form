@@ -10,4 +10,5 @@ nav:
     - Form sets: form_sets.md
     - Translations: translations.md
     - Javascript events: javascript_events.md
+    - Internals: internals.md
     - Changelog: changelog.md

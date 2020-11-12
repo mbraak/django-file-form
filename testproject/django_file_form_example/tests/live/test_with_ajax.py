@@ -3,7 +3,7 @@ from pathlib import Path
 from django.conf import settings
 from django.test import override_settings
 
-from django_file_form.models import UploadedFile
+from django_file_form.models import TemporaryUploadedFile
 from django_file_form_example.base_live_testcase import BaseLiveTestCase
 from django_file_form_example.models import Example, Example2
 from django_file_form_example.page import Page
@@ -31,9 +31,9 @@ class LiveTestCase(BaseLiveTestCase):
 
         page.find_upload_success(temp_file)
         page.assert_page_contains_text("8 Bytes")
-        self.assertEqual(UploadedFile.objects.count(), 1)
+        self.assertEqual(TemporaryUploadedFile.objects.count(), 1)
 
-        uploaded_file = UploadedFile.objects.first()
+        uploaded_file = TemporaryUploadedFile.objects.first()
         self.assertEqual(read_file(uploaded_file.uploaded_file), b"content1")
         self.assertTrue(uploaded_file.uploaded_file.name.startswith("temp_uploads/"))
         self.assertEqual(
@@ -50,7 +50,7 @@ class LiveTestCase(BaseLiveTestCase):
         self.assertEqual(example.input_file.name, f"example/{temp_file.base_name()}")
         self.assertEqual(read_file(example.input_file), b"content1")
 
-        self.assertEqual(UploadedFile.objects.count(), 0)
+        self.assertEqual(TemporaryUploadedFile.objects.count(), 0)
         self.assertFalse(Path(uploaded_file.uploaded_file.path).exists())
 
     def test_upload_binary_file(self):
@@ -65,9 +65,9 @@ class LiveTestCase(BaseLiveTestCase):
         page.upload_using_js(temp_file)
 
         page.find_upload_success(temp_file)
-        self.assertEqual(UploadedFile.objects.count(), 1)
+        self.assertEqual(TemporaryUploadedFile.objects.count(), 1)
 
-        uploaded_file = UploadedFile.objects.first()
+        uploaded_file = TemporaryUploadedFile.objects.first()
         self.assertEqual(read_file(uploaded_file.uploaded_file), content)
 
     def test_upload_multiple(self):
@@ -86,9 +86,9 @@ class LiveTestCase(BaseLiveTestCase):
         page.upload_using_js(temp_file2)
         page.find_upload_success(temp_file2, upload_index=1)
 
-        self.assertEqual(UploadedFile.objects.count(), 2)
+        self.assertEqual(TemporaryUploadedFile.objects.count(), 2)
 
-        uploaded_files = UploadedFile.objects.all()
+        uploaded_files = TemporaryUploadedFile.objects.all()
         self.assertSetEqual(
             {
                 read_file(uploaded_file.uploaded_file)
@@ -117,7 +117,7 @@ class LiveTestCase(BaseLiveTestCase):
             {b"content1", b"content2"},
         )
 
-        self.assertEqual(UploadedFile.objects.count(), 0)
+        self.assertEqual(TemporaryUploadedFile.objects.count(), 0)
         self.assertFalse(
             any(
                 Path(uploaded_file.uploaded_file.path).exists()
@@ -164,7 +164,7 @@ class LiveTestCase(BaseLiveTestCase):
         example = Example.objects.get(title="abc")
         self.assertEqual(example.input_file.name, f"example/{temp_file2.base_name()}")
 
-        self.assertEqual(UploadedFile.objects.count(), 0)
+        self.assertEqual(TemporaryUploadedFile.objects.count(), 0)
 
     def test_submit_multiple_empty(self):
         page = self.page
@@ -187,7 +187,7 @@ class LiveTestCase(BaseLiveTestCase):
 
         page.find_upload_success(temp_file)
         page.assert_page_contains_text("8 Bytes")
-        self.assertEqual(UploadedFile.objects.count(), 1)
+        self.assertEqual(TemporaryUploadedFile.objects.count(), 1)
 
         page.fill_title_field("abc")
         page.submit()
@@ -198,7 +198,7 @@ class LiveTestCase(BaseLiveTestCase):
         self.assertEqual(example.input_file.name, f"example/{temp_file.base_name()}")
 
         self.assertEqual(Example.objects.count(), 1)
-        self.assertEqual(UploadedFile.objects.count(), 0)
+        self.assertEqual(TemporaryUploadedFile.objects.count(), 0)
 
     def test_delete_after_submit(self):
         page = self.page
@@ -229,12 +229,12 @@ class LiveTestCase(BaseLiveTestCase):
         page.open("/")
         page.upload_using_js(temp_file)
         page.find_upload_success(temp_file)
-        self.assertEqual(UploadedFile.objects.count(), 1)
+        self.assertEqual(TemporaryUploadedFile.objects.count(), 1)
 
         page.delete_ajax_file()
         page.wait_until_upload_is_removed()
 
-        self.assertEqual(UploadedFile.objects.count(), 0)
+        self.assertEqual(TemporaryUploadedFile.objects.count(), 0)
 
     def test_delete_multiple(self):
         page = self.page
@@ -251,17 +251,17 @@ class LiveTestCase(BaseLiveTestCase):
         page.upload_using_js(temp_file2)
         page.find_upload_success(temp_file2, upload_index=1)
 
-        self.assertEqual(UploadedFile.objects.count(), 2)
+        self.assertEqual(TemporaryUploadedFile.objects.count(), 2)
 
         page.delete_ajax_file(upload_index=1)
         page.wait_until_upload_is_removed(upload_index=1)
 
-        self.assertEqual(UploadedFile.objects.count(), 1)
+        self.assertEqual(TemporaryUploadedFile.objects.count(), 1)
 
         page.delete_ajax_file(upload_index=0)
         page.wait_until_upload_is_removed(upload_index=0)
 
-        self.assertEqual(UploadedFile.objects.count(), 0)
+        self.assertEqual(TemporaryUploadedFile.objects.count(), 0)
 
     def test_unicode_filename(self):
         page = self.page
@@ -273,7 +273,7 @@ class LiveTestCase(BaseLiveTestCase):
         page.upload_using_js(temp_file)
         page.find_upload_success(temp_file)
 
-        uploaded_file = UploadedFile.objects.first()
+        uploaded_file = TemporaryUploadedFile.objects.first()
 
         self.assertEqual(uploaded_file.original_filename, temp_file.base_name())
         self.assertEqual(str(uploaded_file), temp_file.base_name())
@@ -326,7 +326,7 @@ class LiveTestCase(BaseLiveTestCase):
 
         page.upload_using_js(temp_file)
         page.find_upload_success(temp_file)
-        self.assertEqual(UploadedFile.objects.count(), 1)
+        self.assertEqual(TemporaryUploadedFile.objects.count(), 1)
 
         page.selenium.delete_cookie("sessionid")
         page.delete_ajax_file()
@@ -345,7 +345,7 @@ class LiveTestCase(BaseLiveTestCase):
 
         page.upload_using_js(temp_file)
         page.find_upload_success(temp_file)
-        self.assertEqual(UploadedFile.objects.count(), 1)
+        self.assertEqual(TemporaryUploadedFile.objects.count(), 1)
 
         page.delete_ajax_file()
         page.wait_until_upload_is_removed()
@@ -361,7 +361,7 @@ class LiveTestCase(BaseLiveTestCase):
         page.upload_using_js(temp_file)
         page.find_upload_success(temp_file)
 
-        uploaded_file = UploadedFile.objects.first()
+        uploaded_file = TemporaryUploadedFile.objects.first()
 
         self.assertEqual(uploaded_file.original_filename, temp_file.base_name())
         self.assertEqual(str(uploaded_file), temp_file.base_name())
@@ -408,9 +408,9 @@ class LiveTestCase(BaseLiveTestCase):
         page.upload_js_for_input(temp_file2, file_input_element2)
         page.find_upload_success_for_input(temp_file2, file_input_element2)
 
-        self.assertEqual(UploadedFile.objects.count(), 2)
+        self.assertEqual(TemporaryUploadedFile.objects.count(), 2)
 
-        uploaded_files = UploadedFile.objects.all()
+        uploaded_files = TemporaryUploadedFile.objects.all()
         self.assertSetEqual(
             {
                 read_file(uploaded_file.uploaded_file)
@@ -430,7 +430,7 @@ class LiveTestCase(BaseLiveTestCase):
         self.assertEqual(example2.input_file.name, f"example/{temp_file2.base_name()}")
         self.assertEqual(read_file(example2.input_file), b"content2")
 
-        self.assertEqual(UploadedFile.objects.count(), 0)
+        self.assertEqual(TemporaryUploadedFile.objects.count(), 0)
 
     def test_placeholder_files(self):
         page = self.page
@@ -469,7 +469,7 @@ class LiveTestCase(BaseLiveTestCase):
         )
         self.assertEqual(read_file(example_file.input_file), b"content1")
 
-        self.assertEqual(UploadedFile.objects.count(), 0)
+        self.assertEqual(TemporaryUploadedFile.objects.count(), 0)
 
     def test_placeholders_submit(self):
         page = self.page
@@ -594,5 +594,5 @@ class LiveTestCase(BaseLiveTestCase):
         page.cancel_upload()
         page.wait_until_upload_is_removed()
 
-        self.assertEqual(UploadedFile.objects.count(), 0)
+        self.assertEqual(TemporaryUploadedFile.objects.count(), 0)
         self.assertEqual(count_temp_uploads(), original_temp_file_count)

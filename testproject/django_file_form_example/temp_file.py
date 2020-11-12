@@ -4,7 +4,7 @@ from pathlib import Path
 
 from django.conf import settings
 
-from django_file_form.models import UploadedFile
+from django_file_form.models import TemporaryUploadedFile
 
 
 class TempFile(object):
@@ -46,7 +46,7 @@ class TempFile(object):
             self.named_temporary_file.close()
             self.named_temporary_file = None
 
-            for uploaded_file in UploadedFile.objects.all():
+            for uploaded_file in TemporaryUploadedFile.objects.all():
                 uploaded_file.uploaded_file.delete()
 
     def uploaded_file(self):
