@@ -42,7 +42,6 @@ class TemporaryUploadedFileManager(ModelManager):
 
 
 def get_upload_to_for_filename(filename):
-    # Full path including filename is needed for custom storage backends.
     path = getattr(settings, "FILE_FORM_UPLOAD_DIR", "temp_uploads")
     return os.path.join(path, filename)
 
