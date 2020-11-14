@@ -225,10 +225,6 @@ class FileField {
     return this.uploads.find(upload => upload.name === fileName);
   }
 
-  findUploadElement(uploadIndex: number): HTMLElement | null {
-    return this.container.querySelector(`.dff-file-id-${uploadIndex}`);
-  }
-
   async removeExistingUpload(upload: BaseUpload): Promise<void> {
     this.emitEvent("removeUpload", upload);
 
@@ -368,11 +364,8 @@ class FileField {
   }
 
   emitEvent(eventName: string, upload: BaseUpload): void {
-    const element = this.findUploadElement(upload.uploadIndex);
-
-    if (element && this.eventEmitter) {
+    if (this.eventEmitter) {
       this.eventEmitter.emit(eventName, {
-        element,
         fieldName: this.fieldName,
         fileName: upload.name,
         metaDataField: this.getMetaDataField(),
