@@ -2,18 +2,7 @@ import BaseUpload from "../uploads/base_upload";
 import { Translations } from "./types";
 import UploadInProgress from "./UploadInProgress";
 import UploadDone from "./UploadDone";
-
-interface UploadErrorProps {
-  translations: Translations;
-  upload: BaseUpload;
-}
-
-const UploadError = ({ translations, upload }: UploadErrorProps) => (
-  <div className={`dff-file dff-upload-fail dff-file-id-${upload.uploadIndex}`}>
-    <span>{upload.name}</span>
-    <span className="dff-error">{translations["Upload failed"]}</span>
-  </div>
-);
+import UploadError from "./UploadError";
 
 interface UploadProps {
   onDelete: (upload: BaseUpload) => void;
