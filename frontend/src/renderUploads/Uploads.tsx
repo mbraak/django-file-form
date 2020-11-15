@@ -1,7 +1,7 @@
-import { render, Component } from "inferno";
-import BaseUpload from "./uploads/base_upload";
-import { formatBytes } from "./util";
-import AcceptedFileTypes from "./accepted_file_types";
+import { Component } from "inferno";
+import BaseUpload from "../uploads/base_upload";
+import { formatBytes } from "../util";
+import AcceptedFileTypes from "../accepted_file_types";
 
 export type Translations = { [key: string]: string };
 
@@ -227,7 +227,7 @@ class Uploads extends Component<UploadsProps, UploadsState> {
     this.acceptedFileTypes = new AcceptedFileTypes(props.inputAccept);
   }
 
-  render() {
+  render(): JSX.Element {
     const { onDelete, supportDropArea, translations, uploads } = this.props;
     const dropping = this.state?.dropping;
 
@@ -261,21 +261,21 @@ class Uploads extends Component<UploadsProps, UploadsState> {
     );
   }
 
-  handleDragEnter = () => {
+  handleDragEnter = (): void => {
     this.setState({ dropping: true });
   };
 
-  handleDragLeave = () => {
+  handleDragLeave = (): void => {
     this.setState({ dropping: false });
   };
 
-  handleDragOver = (e: DragEvent) => {
+  handleDragOver = (e: DragEvent): void => {
     e.preventDefault();
 
     this.setState({ dropping: true });
   };
 
-  handleDrop = (e: DragEvent) => {
+  handleDrop = (e: DragEvent): void => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -300,36 +300,4 @@ class Uploads extends Component<UploadsProps, UploadsState> {
   };
 }
 
-interface RenderUploadParameters {
-  container: HTMLElement;
-  inputAccept: string;
-  onDelete: (upload: BaseUpload) => void;
-  onUploadFiles: (files: File[]) => void;
-  supportDropArea: boolean;
-  translations: Translations;
-  uploads: BaseUpload[];
-}
-
-const renderUploads = ({
-  container,
-  inputAccept,
-  onDelete,
-  onUploadFiles,
-  supportDropArea,
-  translations,
-  uploads
-}: RenderUploadParameters): void => {
-  render(
-    <Uploads
-      inputAccept={inputAccept}
-      onDelete={onDelete}
-      onUploadFiles={onUploadFiles}
-      supportDropArea={supportDropArea}
-      translations={translations}
-      uploads={uploads}
-    />,
-    container
-  );
-};
-
-export default renderUploads;
+export default Uploads;
