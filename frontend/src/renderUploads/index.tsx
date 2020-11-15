@@ -1,6 +1,7 @@
 import { render } from "inferno";
 import BaseUpload from "../uploads/base_upload";
-import Uploads, { Translations } from "./Uploads";
+import Uploads from "./Uploads";
+import { Translations } from "./types";
 
 interface RenderUploadParameters {
   container: HTMLElement;

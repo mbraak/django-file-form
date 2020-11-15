@@ -3,8 +3,7 @@ import BaseUpload from "../uploads/base_upload";
 import { formatBytes } from "../util";
 import AcceptedFileTypes from "../accepted_file_types";
 import getFilesFromDataTransfer from "./getFilesFromDataTransfer";
-
-export type Translations = { [key: string]: string };
+import { Translations } from "./types";
 
 interface CancelLinkProps {
   onDelete: (upload: BaseUpload) => void;

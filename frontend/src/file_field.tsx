@@ -14,7 +14,8 @@ import {
 } from "./uploads/uploaded_file";
 import TusUpload from "./uploads/tus_upload";
 import BaseUpload from "./uploads/base_upload";
-import renderUploads, { Translations } from "./renderUploads";
+import renderUploads from "./renderUploads";
+import { Translations } from "./renderUploads/types";
 
 export interface Callbacks {
   onDelete?: (upload: BaseUpload) => void;

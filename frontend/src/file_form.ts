@@ -8,7 +8,7 @@ import {
   getPlaceholderFieldName,
   getS3UploadedFieldName
 } from "./util";
-import { Translations } from "./renderUploads";
+import { Translations } from "./renderUploads/types";
 
 interface Options {
   callbacks?: Callbacks;
