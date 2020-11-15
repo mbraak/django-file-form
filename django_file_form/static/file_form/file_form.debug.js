@@ -16682,14 +16682,6 @@
 	  return AcceptedFileTypes;
 	}();
 
-	function ownKeys$6(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
-
-	function _objectSpread$5(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys$6(Object(source), true).forEach(function (key) { defineProperty$4(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys$6(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
-
-	function _createSuper$5(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$5(); return function _createSuperInternal() { var Super = getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return possibleConstructorReturn(this, result); }; }
-
-	function _isNativeReflectConstruct$5() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
-
 	var getEntriesFromDirectory = /*#__PURE__*/function () {
 	  var _ref = asyncToGenerator( /*#__PURE__*/regenerator.mark(function _callee(directoryEntry) {
 	    return regenerator.wrap(function _callee$(_context) {
@@ -16738,7 +16730,7 @@
 
 	var getFilesFromFileSystemEntries = /*#__PURE__*/function () {
 	  var _ref3 = asyncToGenerator( /*#__PURE__*/regenerator.mark(function _callee3(entries) {
-	    var result, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, _value, entry, file, entriesFromDirectory, _files;
+	    var result, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, _value, entry, file, entriesFromDirectory, files;
 
 	    return regenerator.wrap(function _callee3$(_context3) {
 	      while (1) {
@@ -16799,9 +16791,8 @@
 	            return getFilesFromFileSystemEntries(entriesFromDirectory);
 
 	          case 27:
-	            _files = _context3.sent;
-
-	            _files.forEach(function (file) {
+	            files = _context3.sent;
+	            files.forEach(function (file) {
 	              return result.push(file);
 	            });
 
@@ -16866,8 +16857,7 @@
 
 	var getFilesFromDataTransfer = /*#__PURE__*/function () {
 	  var _ref4 = asyncToGenerator( /*#__PURE__*/regenerator.mark(function _callee4(dataTransfer) {
-	    var entries, _files2;
-
+	    var entries, files;
 	    return regenerator.wrap(function _callee4$(_context4) {
 	      while (1) {
 	        switch (_context4.prev = _context4.next) {
@@ -16884,8 +16874,8 @@
 	            return getFilesFromFileSystemEntries(entries);
 
 	          case 4:
-	            _files2 = _context4.sent;
-	            return _context4.abrupt("return", _files2);
+	            files = _context4.sent;
+	            return _context4.abrupt("return", files);
 
 	          case 8:
 	            return _context4.abrupt("return", toConsumableArray(dataTransfer.files));
@@ -16903,10 +16893,10 @@
 	  };
 	}();
 
-	var CancelLink = function CancelLink(_ref5) {
-	  var onDelete = _ref5.onDelete,
-	      translations = _ref5.translations,
-	      upload = _ref5.upload;
+	var CancelLink = function CancelLink(_ref) {
+	  var onDelete = _ref.onDelete,
+	      translations = _ref.translations,
+	      upload = _ref.upload;
 
 	  var handleCancel = function handleCancel() {
 	    return onDelete(upload);
@@ -16919,10 +16909,10 @@
 	  });
 	};
 
-	var UploadInProgress = function UploadInProgress(_ref6) {
-	  var onDelete = _ref6.onDelete,
-	      translations = _ref6.translations,
-	      upload = _ref6.upload;
+	var UploadInProgress = function UploadInProgress(_ref2) {
+	  var onDelete = _ref2.onDelete,
+	      translations = _ref2.translations,
+	      upload = _ref2.upload;
 	  return createVNode(1, "div", "dff-file dff-file-id-".concat(upload.uploadIndex), [createVNode(1, "span", null, upload.name, 0), createVNode(1, "span", "dff-progress", createVNode(1, "span", "dff-progress-inner", null, 1, {
 	    "style": {
 	      width: "".concat(upload.progress.toFixed(2), "%")
@@ -16934,10 +16924,10 @@
 	  })], 4);
 	};
 
-	var DeleteLink = function DeleteLink(_ref7) {
-	  var onDelete = _ref7.onDelete,
-	      translations = _ref7.translations,
-	      upload = _ref7.upload;
+	var DeleteLink = function DeleteLink(_ref) {
+	  var onDelete = _ref.onDelete,
+	      translations = _ref.translations,
+	      upload = _ref.upload;
 
 	  var handleDelete = function handleDelete() {
 	    return onDelete(upload);
@@ -16950,10 +16940,10 @@
 	  });
 	};
 
-	var UploadDone = function UploadDone(_ref8) {
-	  var onDelete = _ref8.onDelete,
-	      translations = _ref8.translations,
-	      upload = _ref8.upload;
+	var UploadDone = function UploadDone(_ref2) {
+	  var onDelete = _ref2.onDelete,
+	      translations = _ref2.translations,
+	      upload = _ref2.upload;
 	  return createVNode(1, "div", "dff-file dff-upload-success dff-file-id-".concat(upload.uploadIndex), [createVNode(1, "span", null, upload.name, 0), createVNode(1, "span", "dff-filesize", formatBytes(upload.getSize(), 2), 0), createComponentVNode(2, DeleteLink, {
 	    "onDelete": onDelete,
 	    "translations": translations,
@@ -16961,16 +16951,16 @@
 	  }), upload.deleteStatus === "error" && createVNode(1, "span", "dff-error", translations["Delete failed"], 0)], 0);
 	};
 
-	var UploadError = function UploadError(_ref9) {
-	  var translations = _ref9.translations,
-	      upload = _ref9.upload;
+	var UploadError = function UploadError(_ref) {
+	  var translations = _ref.translations,
+	      upload = _ref.upload;
 	  return createVNode(1, "div", "dff-file dff-upload-fail dff-file-id-".concat(upload.uploadIndex), [createVNode(1, "span", null, upload.name, 0), createVNode(1, "span", "dff-error", translations["Upload failed"], 0)], 4);
 	};
 
-	var Upload$1 = function Upload(_ref10) {
-	  var onDelete = _ref10.onDelete,
-	      translations = _ref10.translations,
-	      upload = _ref10.upload;
+	var Upload$1 = function Upload(_ref) {
+	  var onDelete = _ref.onDelete,
+	      translations = _ref.translations,
+	      upload = _ref.upload;
 
 	  switch (upload.status) {
 	    case "done":
@@ -16994,6 +16984,14 @@
 	      });
 	  }
 	};
+
+	function ownKeys$6(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+	function _objectSpread$5(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys$6(Object(source), true).forEach(function (key) { defineProperty$4(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys$6(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+	function _createSuper$5(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$5(); return function _createSuperInternal() { var Super = getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return possibleConstructorReturn(this, result); }; }
+
+	function _isNativeReflectConstruct$5() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
 
 	var Uploads = /*#__PURE__*/function (_Component) {
 	  inherits(Uploads, _Component);
@@ -17038,50 +17036,50 @@
 	      });
 
 	      var uploadFiles = /*#__PURE__*/function () {
-	        var _ref11 = asyncToGenerator( /*#__PURE__*/regenerator.mark(function _callee5() {
-	          var _files3, acceptedFiles;
+	        var _ref = asyncToGenerator( /*#__PURE__*/regenerator.mark(function _callee() {
+	          var _files, acceptedFiles;
 
-	          return regenerator.wrap(function _callee5$(_context5) {
+	          return regenerator.wrap(function _callee$(_context) {
 	            while (1) {
-	              switch (_context5.prev = _context5.next) {
+	              switch (_context.prev = _context.next) {
 	                case 0:
-	                  _context5.prev = 0;
+	                  _context.prev = 0;
 
 	                  if (!e.dataTransfer) {
-	                    _context5.next = 7;
+	                    _context.next = 7;
 	                    break;
 	                  }
 
-	                  _context5.next = 4;
+	                  _context.next = 4;
 	                  return getFilesFromDataTransfer(e.dataTransfer);
 
 	                case 4:
-	                  _files3 = _context5.sent;
-	                  acceptedFiles = _files3.filter(function (file) {
+	                  _files = _context.sent;
+	                  acceptedFiles = _files.filter(function (file) {
 	                    return _this.acceptedFileTypes.isAccepted(file.name);
 	                  });
 
 	                  _this.props.onUploadFiles(acceptedFiles);
 
 	                case 7:
-	                  _context5.next = 12;
+	                  _context.next = 12;
 	                  break;
 
 	                case 9:
-	                  _context5.prev = 9;
-	                  _context5.t0 = _context5["catch"](0);
-	                  console.error(_context5.t0);
+	                  _context.prev = 9;
+	                  _context.t0 = _context["catch"](0);
+	                  console.error(_context.t0);
 
 	                case 12:
 	                case "end":
-	                  return _context5.stop();
+	                  return _context.stop();
 	              }
 	            }
-	          }, _callee5, null, [[0, 9]]);
+	          }, _callee, null, [[0, 9]]);
 	        }));
 
 	        return function uploadFiles() {
-	          return _ref11.apply(this, arguments);
+	          return _ref.apply(this, arguments);
 	        };
 	      }();
 
@@ -17126,14 +17124,14 @@
 	  return Uploads;
 	}(Component);
 
-	var renderUploads = function renderUploads(_ref12) {
-	  var container = _ref12.container,
-	      inputAccept = _ref12.inputAccept,
-	      onDelete = _ref12.onDelete,
-	      onUploadFiles = _ref12.onUploadFiles,
-	      supportDropArea = _ref12.supportDropArea,
-	      translations = _ref12.translations,
-	      uploads = _ref12.uploads;
+	var renderUploads = function renderUploads(_ref) {
+	  var container = _ref.container,
+	      inputAccept = _ref.inputAccept,
+	      onDelete = _ref.onDelete,
+	      onUploadFiles = _ref.onUploadFiles,
+	      supportDropArea = _ref.supportDropArea,
+	      translations = _ref.translations,
+	      uploads = _ref.uploads;
 	  render(createComponentVNode(2, Uploads, {
 	    "inputAccept": inputAccept,
 	    "onDelete": onDelete,
@@ -17349,10 +17347,10 @@
 
 	      _this.input.value = "";
 	      upload.status = "done";
-	      var onSuccess = _this.callbacks.onSuccess;
-	      var element = document.getElementsByClassName("dff-file-id-".concat(upload.uploadIndex))[0];
 
-	      _this.emitEvent("uploadComplete", element, upload);
+	      _this.emitEvent("uploadComplete", upload);
+
+	      var onSuccess = _this.callbacks.onSuccess;
 
 	      if (onSuccess && upload.type === "tus") {
 	        onSuccess(upload);
@@ -17503,10 +17501,10 @@
 
 	                upload.start();
 	                this.uploads.push(upload);
-	                this.render(); // todo: event
-	                //this.emitEvent("addUpload", element, upload);
+	                this.render();
+	                this.emitEvent("addUpload", upload);
 
-	              case 16:
+	              case 17:
 	              case "end":
 	                return _context2.stop();
 	            }
@@ -17520,13 +17518,6 @@
 
 	      return uploadFile;
 	    }()
-	  }, {
-	    key: "getUploadByIndex",
-	    value: function getUploadByIndex(uploadIndex) {
-	      return this.uploads.find(function (upload) {
-	        return upload.uploadIndex === uploadIndex;
-	      });
-	    }
 	  }, {
 	    key: "findUploadByName",
 	    value: function findUploadByName(fileName) {
@@ -17542,54 +17533,56 @@
 	          while (1) {
 	            switch (_context3.prev = _context3.next) {
 	              case 0:
+	                this.emitEvent("removeUpload", upload);
+
 	                if (!(upload.status === "uploading")) {
-	                  _context3.next = 6;
+	                  _context3.next = 7;
 	                  break;
 	                }
 
 	                this.render();
-	                _context3.next = 4;
+	                _context3.next = 5;
 	                return upload.abort();
 
-	              case 4:
-	                _context3.next = 19;
+	              case 5:
+	                _context3.next = 20;
 	                break;
 
-	              case 6:
+	              case 7:
 	                if (!(upload.status === "done")) {
-	                  _context3.next = 19;
+	                  _context3.next = 20;
 	                  break;
 	                }
 
-	                _context3.prev = 7;
+	                _context3.prev = 8;
 	                upload.deleteStatus = "in_progress";
 	                this.render();
-	                _context3.next = 12;
+	                _context3.next = 13;
 	                return upload.delete();
 
-	              case 12:
-	                _context3.next = 19;
+	              case 13:
+	                _context3.next = 20;
 	                break;
 
-	              case 14:
-	                _context3.prev = 14;
-	                _context3.t0 = _context3["catch"](7);
+	              case 15:
+	                _context3.prev = 15;
+	                _context3.t0 = _context3["catch"](8);
 	                upload.deleteStatus = "error";
 	                this.render();
 	                return _context3.abrupt("return");
 
-	              case 19:
+	              case 20:
 	                this.removeUploadFromList(upload);
 	                this.updateS3UploadedInput();
 	                this.updatePlaceholderInput();
 	                this.render();
 
-	              case 23:
+	              case 24:
 	              case "end":
 	                return _context3.stop();
 	            }
 	          }
-	        }, _callee3, this, [[7, 14]]);
+	        }, _callee3, this, [[8, 15]]);
 	      }));
 
 	      function removeExistingUpload(_x3) {
@@ -17681,10 +17674,9 @@
 	    }
 	  }, {
 	    key: "emitEvent",
-	    value: function emitEvent(eventName, element, upload) {
+	    value: function emitEvent(eventName, upload) {
 	      if (this.eventEmitter) {
 	        this.eventEmitter.emit(eventName, {
-	          element: element,
 	          fieldName: this.fieldName,
 	          fileName: upload.name,
 	          metaDataField: this.getMetaDataField(),
