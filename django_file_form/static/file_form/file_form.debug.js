@@ -1,4 +1,5 @@
 (function () {
+	'use strict';
 
 	var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -10,21 +11,6 @@
 				return commonjsRequire(path, (base === undefined || base === null) ? module.path : base);
 			}
 		}, fn(module, module.exports), module.exports;
-	}
-
-	function getAugmentedNamespace(n) {
-		if (n.__esModule) return n;
-		var a = Object.defineProperty({}, '__esModule', {value: true});
-		Object.keys(n).forEach(function (k) {
-			var d = Object.getOwnPropertyDescriptor(n, k);
-			Object.defineProperty(a, k, d.get ? d : {
-				enumerable: true,
-				get: function () {
-					return n[k];
-				}
-			});
-		});
-		return a;
 	}
 
 	function commonjsRequire () {
@@ -43,7 +29,7 @@
 	  check(typeof self == 'object' && self) ||
 	  check(typeof commonjsGlobal == 'object' && commonjsGlobal) ||
 	  // eslint-disable-next-line no-new-func
-	  Function('return this')();
+	  (function () { return this; })() || Function('return this')();
 
 	var fails = function (exec) {
 	  try {
@@ -236,7 +222,7 @@
 	(module.exports = function (key, value) {
 	  return sharedStore[key] || (sharedStore[key] = value !== undefined ? value : {});
 	})('versions', []).push({
-	  version: '3.6.5',
+	  version: '3.7.0',
 	  mode:  'global',
 	  copyright: '© 2020 Denis Pushkarev (zloirock.ru)'
 	});
@@ -274,11 +260,12 @@
 	};
 
 	if (nativeWeakMap) {
-	  var store$1 = new WeakMap$1();
+	  var store$1 = sharedStore.state || (sharedStore.state = new WeakMap$1());
 	  var wmget = store$1.get;
 	  var wmhas = store$1.has;
 	  var wmset = store$1.set;
 	  set = function (it, metadata) {
+	    metadata.facade = it;
 	    wmset.call(store$1, it, metadata);
 	    return metadata;
 	  };
@@ -292,6 +279,7 @@
 	  var STATE = sharedKey('state');
 	  hiddenKeys[STATE] = true;
 	  set = function (it, metadata) {
+	    metadata.facade = it;
 	    createNonEnumerableProperty(it, STATE, metadata);
 	    return metadata;
 	  };
@@ -320,9 +308,15 @@
 	  var unsafe = options ? !!options.unsafe : false;
 	  var simple = options ? !!options.enumerable : false;
 	  var noTargetGet = options ? !!options.noTargetGet : false;
+	  var state;
 	  if (typeof value == 'function') {
-	    if (typeof key == 'string' && !has(value, 'name')) createNonEnumerableProperty(value, 'name', key);
-	    enforceInternalState(value).source = TEMPLATE.join(typeof key == 'string' ? key : '');
+	    if (typeof key == 'string' && !has(value, 'name')) {
+	      createNonEnumerableProperty(value, 'name', key);
+	    }
+	    state = enforceInternalState(value);
+	    if (!state.source) {
+	      state.source = TEMPLATE.join(typeof key == 'string' ? key : '');
+	    }
 	  }
 	  if (O === global_1) {
 	    if (simple) O[key] = value;
@@ -1114,8 +1108,8 @@
 
 	var engineUserAgent = getBuiltIn('navigator', 'userAgent') || '';
 
-	var process = global_1.process;
-	var versions = process && process.versions;
+	var process$1 = global_1.process;
+	var versions = process$1 && process$1.versions;
 	var v8 = versions && versions.v8;
 	var match, version;
 
@@ -1349,11 +1343,11 @@
 	  var regexp = /./;
 	  try {
 	    '/./'[METHOD_NAME](regexp);
-	  } catch (e) {
+	  } catch (error1) {
 	    try {
 	      regexp[MATCH$1] = false;
 	      return '/./'[METHOD_NAME](regexp);
-	    } catch (f) { /* empty */ }
+	    } catch (error2) { /* empty */ }
 	  } return false;
 	};
 
@@ -1774,14 +1768,20 @@
 	// https://tc39.github.io/ecma262/#sec-symbol.iterator
 	defineWellKnownSymbol('iterator');
 
+	var iteratorClose = function (iterator) {
+	  var returnMethod = iterator['return'];
+	  if (returnMethod !== undefined) {
+	    return anObject(returnMethod.call(iterator)).value;
+	  }
+	};
+
 	// call something on iterator step with safe closing on error
 	var callWithSafeIterationClosing = function (iterator, fn, value, ENTRIES) {
 	  try {
 	    return ENTRIES ? fn(anObject(value)[0], value[1]) : fn(value);
 	  // 7.4.6 IteratorClose(iterator, completion)
 	  } catch (error) {
-	    var returnMethod = iterator['return'];
-	    if (returnMethod !== undefined) anObject(returnMethod.call(iterator));
+	    iteratorClose(iterator);
 	    throw error;
 	  }
 	};
@@ -2380,15 +2380,30 @@
 	  } return it;
 	};
 
-	var iterate_1 = createCommonjsModule(function (module) {
 	var Result = function (stopped, result) {
 	  this.stopped = stopped;
 	  this.result = result;
 	};
 
-	var iterate = module.exports = function (iterable, fn, that, AS_ENTRIES, IS_ITERATOR) {
-	  var boundFunction = functionBindContext(fn, that, AS_ENTRIES ? 2 : 1);
+	var iterate = function (iterable, unboundFunction, options) {
+	  var that = options && options.that;
+	  var AS_ENTRIES = !!(options && options.AS_ENTRIES);
+	  var IS_ITERATOR = !!(options && options.IS_ITERATOR);
+	  var INTERRUPTED = !!(options && options.INTERRUPTED);
+	  var fn = functionBindContext(unboundFunction, that, 1 + AS_ENTRIES + INTERRUPTED);
 	  var iterator, iterFn, index, length, result, next, step;
+
+	  var stop = function (condition) {
+	    if (iterator) iteratorClose(iterator);
+	    return new Result(true, condition);
+	  };
+
+	  var callFn = function (value) {
+	    if (AS_ENTRIES) {
+	      anObject(value);
+	      return INTERRUPTED ? fn(value[0], value[1], stop) : fn(value[0], value[1]);
+	    } return INTERRUPTED ? fn(value, stop) : fn(value);
+	  };
 
 	  if (IS_ITERATOR) {
 	    iterator = iterable;
@@ -2398,9 +2413,7 @@
 	    // optimisation for array iterators
 	    if (isArrayIteratorMethod(iterFn)) {
 	      for (index = 0, length = toLength(iterable.length); length > index; index++) {
-	        result = AS_ENTRIES
-	          ? boundFunction(anObject(step = iterable[index])[0], step[1])
-	          : boundFunction(iterable[index]);
+	        result = callFn(iterable[index]);
 	        if (result && result instanceof Result) return result;
 	      } return new Result(false);
 	    }
@@ -2409,15 +2422,15 @@
 
 	  next = iterator.next;
 	  while (!(step = next.call(iterator)).done) {
-	    result = callWithSafeIterationClosing(iterator, boundFunction, step.value, AS_ENTRIES);
+	    try {
+	      result = callFn(step.value);
+	    } catch (error) {
+	      iteratorClose(iterator);
+	      throw error;
+	    }
 	    if (typeof result == 'object' && result && result instanceof Result) return result;
 	  } return new Result(false);
 	};
-
-	iterate.stop = function (result) {
-	  return new Result(true, result);
-	};
-	});
 
 	var SPECIES$4 = wellKnownSymbol('species');
 
@@ -2431,10 +2444,12 @@
 
 	var engineIsIos = /(iphone|ipod|ipad).*applewebkit/i.test(engineUserAgent);
 
+	var engineIsNode = classofRaw(global_1.process) == 'process';
+
 	var location = global_1.location;
 	var set$1 = global_1.setImmediate;
 	var clear = global_1.clearImmediate;
-	var process$1 = global_1.process;
+	var process$2 = global_1.process;
 	var MessageChannel = global_1.MessageChannel;
 	var Dispatch = global_1.Dispatch;
 	var counter = 0;
@@ -2483,9 +2498,9 @@
 	    delete queue[id];
 	  };
 	  // Node.js 0.8-
-	  if (classofRaw(process$1) == 'process') {
+	  if (engineIsNode) {
 	    defer = function (id) {
-	      process$1.nextTick(runner(id));
+	      process$2.nextTick(runner(id));
 	    };
 	  // Sphere (JS game engine) Dispatch API
 	  } else if (Dispatch && Dispatch.now) {
@@ -2505,8 +2520,8 @@
 	    global_1.addEventListener &&
 	    typeof postMessage == 'function' &&
 	    !global_1.importScripts &&
-	    !fails(post) &&
-	    location.protocol !== 'file:'
+	    location && location.protocol !== 'file:' &&
+	    !fails(post)
 	  ) {
 	    defer = post;
 	    global_1.addEventListener('message', listener, false);
@@ -2532,14 +2547,14 @@
 	};
 
 	var getOwnPropertyDescriptor$3 = objectGetOwnPropertyDescriptor.f;
-
 	var macrotask = task.set;
 
 
+
 	var MutationObserver = global_1.MutationObserver || global_1.WebKitMutationObserver;
-	var process$2 = global_1.process;
+	var document$2 = global_1.document;
+	var process$3 = global_1.process;
 	var Promise$1 = global_1.Promise;
-	var IS_NODE = classofRaw(process$2) == 'process';
 	// Node.js 11 shows ExperimentalWarning on getting `queueMicrotask`
 	var queueMicrotaskDescriptor = getOwnPropertyDescriptor$3(global_1, 'queueMicrotask');
 	var queueMicrotask = queueMicrotaskDescriptor && queueMicrotaskDescriptor.value;
@@ -2550,7 +2565,7 @@
 	if (!queueMicrotask) {
 	  flush = function () {
 	    var parent, fn;
-	    if (IS_NODE && (parent = process$2.domain)) parent.exit();
+	    if (engineIsNode && (parent = process$3.domain)) parent.exit();
 	    while (head) {
 	      fn = head.fn;
 	      head = head.next;
@@ -2565,15 +2580,10 @@
 	    if (parent) parent.enter();
 	  };
 
-	  // Node.js
-	  if (IS_NODE) {
-	    notify = function () {
-	      process$2.nextTick(flush);
-	    };
 	  // browsers with MutationObserver, except iOS - https://github.com/zloirock/core-js/issues/339
-	  } else if (MutationObserver && !engineIsIos) {
+	  if (!engineIsIos && !engineIsNode && MutationObserver && document$2) {
 	    toggle = true;
-	    node = document.createTextNode('');
+	    node = document$2.createTextNode('');
 	    new MutationObserver(flush).observe(node, { characterData: true });
 	    notify = function () {
 	      node.data = toggle = !toggle;
@@ -2585,6 +2595,11 @@
 	    then = promise.then;
 	    notify = function () {
 	      then.call(promise, flush);
+	    };
+	  // Node.js without promises
+	  } else if (engineIsNode) {
+	    notify = function () {
+	      process$3.nextTick(flush);
 	    };
 	  // for other environments - macrotask based on:
 	  // - setImmediate
@@ -2664,6 +2679,7 @@
 
 
 
+
 	var SPECIES$5 = wellKnownSymbol('species');
 	var PROMISE = 'Promise';
 	var getInternalState$3 = internalState.get;
@@ -2671,13 +2687,13 @@
 	var getInternalPromiseState = internalState.getterFor(PROMISE);
 	var PromiseConstructor = nativePromiseConstructor;
 	var TypeError$1 = global_1.TypeError;
-	var document$2 = global_1.document;
-	var process$3 = global_1.process;
+	var document$3 = global_1.document;
+	var process$4 = global_1.process;
 	var $fetch = getBuiltIn('fetch');
 	var newPromiseCapability$1 = newPromiseCapability.f;
 	var newGenericPromiseCapability = newPromiseCapability$1;
-	var IS_NODE$1 = classofRaw(process$3) == 'process';
-	var DISPATCH_EVENT = !!(document$2 && document$2.createEvent && global_1.dispatchEvent);
+	var DISPATCH_EVENT = !!(document$3 && document$3.createEvent && global_1.dispatchEvent);
+	var NATIVE_REJECTION_EVENT = typeof PromiseRejectionEvent == 'function';
 	var UNHANDLED_REJECTION = 'unhandledrejection';
 	var REJECTION_HANDLED = 'rejectionhandled';
 	var PENDING = 0;
@@ -2695,7 +2711,7 @@
 	    // We can't detect it synchronously, so just check versions
 	    if (engineV8Version === 66) return true;
 	    // Unhandled rejections tracking support, NodeJS Promise without it fails @@species test
-	    if (!IS_NODE$1 && typeof PromiseRejectionEvent != 'function') return true;
+	    if (!engineIsNode && !NATIVE_REJECTION_EVENT) return true;
 	  }
 	  // We can't use @@species feature detection in V8 since it causes
 	  // deoptimization and performance degradation
@@ -2721,7 +2737,7 @@
 	  return isObject(it) && typeof (then = it.then) == 'function' ? then : false;
 	};
 
-	var notify$1 = function (promise, state, isReject) {
+	var notify$1 = function (state, isReject) {
 	  if (state.notified) return;
 	  state.notified = true;
 	  var chain = state.reactions;
@@ -2740,7 +2756,7 @@
 	      try {
 	        if (handler) {
 	          if (!ok) {
-	            if (state.rejection === UNHANDLED) onHandleUnhandled(promise, state);
+	            if (state.rejection === UNHANDLED) onHandleUnhandled(state);
 	            state.rejection = HANDLED;
 	          }
 	          if (handler === true) result = value;
@@ -2765,36 +2781,37 @@
 	    }
 	    state.reactions = [];
 	    state.notified = false;
-	    if (isReject && !state.rejection) onUnhandled(promise, state);
+	    if (isReject && !state.rejection) onUnhandled(state);
 	  });
 	};
 
 	var dispatchEvent = function (name, promise, reason) {
 	  var event, handler;
 	  if (DISPATCH_EVENT) {
-	    event = document$2.createEvent('Event');
+	    event = document$3.createEvent('Event');
 	    event.promise = promise;
 	    event.reason = reason;
 	    event.initEvent(name, false, true);
 	    global_1.dispatchEvent(event);
 	  } else event = { promise: promise, reason: reason };
-	  if (handler = global_1['on' + name]) handler(event);
+	  if (!NATIVE_REJECTION_EVENT && (handler = global_1['on' + name])) handler(event);
 	  else if (name === UNHANDLED_REJECTION) hostReportErrors('Unhandled promise rejection', reason);
 	};
 
-	var onUnhandled = function (promise, state) {
+	var onUnhandled = function (state) {
 	  task$1.call(global_1, function () {
+	    var promise = state.facade;
 	    var value = state.value;
 	    var IS_UNHANDLED = isUnhandled(state);
 	    var result;
 	    if (IS_UNHANDLED) {
 	      result = perform(function () {
-	        if (IS_NODE$1) {
-	          process$3.emit('unhandledRejection', value, promise);
+	        if (engineIsNode) {
+	          process$4.emit('unhandledRejection', value, promise);
 	        } else dispatchEvent(UNHANDLED_REJECTION, promise, value);
 	      });
 	      // Browsers should not trigger `rejectionHandled` event if it was handled here, NodeJS - should
-	      state.rejection = IS_NODE$1 || isUnhandled(state) ? UNHANDLED : HANDLED;
+	      state.rejection = engineIsNode || isUnhandled(state) ? UNHANDLED : HANDLED;
 	      if (result.error) throw result.value;
 	    }
 	  });
@@ -2804,55 +2821,56 @@
 	  return state.rejection !== HANDLED && !state.parent;
 	};
 
-	var onHandleUnhandled = function (promise, state) {
+	var onHandleUnhandled = function (state) {
 	  task$1.call(global_1, function () {
-	    if (IS_NODE$1) {
-	      process$3.emit('rejectionHandled', promise);
+	    var promise = state.facade;
+	    if (engineIsNode) {
+	      process$4.emit('rejectionHandled', promise);
 	    } else dispatchEvent(REJECTION_HANDLED, promise, state.value);
 	  });
 	};
 
-	var bind = function (fn, promise, state, unwrap) {
+	var bind = function (fn, state, unwrap) {
 	  return function (value) {
-	    fn(promise, state, value, unwrap);
+	    fn(state, value, unwrap);
 	  };
 	};
 
-	var internalReject = function (promise, state, value, unwrap) {
+	var internalReject = function (state, value, unwrap) {
 	  if (state.done) return;
 	  state.done = true;
 	  if (unwrap) state = unwrap;
 	  state.value = value;
 	  state.state = REJECTED;
-	  notify$1(promise, state, true);
+	  notify$1(state, true);
 	};
 
-	var internalResolve = function (promise, state, value, unwrap) {
+	var internalResolve = function (state, value, unwrap) {
 	  if (state.done) return;
 	  state.done = true;
 	  if (unwrap) state = unwrap;
 	  try {
-	    if (promise === value) throw TypeError$1("Promise can't be resolved itself");
+	    if (state.facade === value) throw TypeError$1("Promise can't be resolved itself");
 	    var then = isThenable(value);
 	    if (then) {
 	      microtask(function () {
 	        var wrapper = { done: false };
 	        try {
 	          then.call(value,
-	            bind(internalResolve, promise, wrapper, state),
-	            bind(internalReject, promise, wrapper, state)
+	            bind(internalResolve, wrapper, state),
+	            bind(internalReject, wrapper, state)
 	          );
 	        } catch (error) {
-	          internalReject(promise, wrapper, error, state);
+	          internalReject(wrapper, error, state);
 	        }
 	      });
 	    } else {
 	      state.value = value;
 	      state.state = FULFILLED;
-	      notify$1(promise, state, false);
+	      notify$1(state, false);
 	    }
 	  } catch (error) {
-	    internalReject(promise, { done: false }, error, state);
+	    internalReject({ done: false }, error, state);
 	  }
 	};
 
@@ -2865,9 +2883,9 @@
 	    Internal.call(this);
 	    var state = getInternalState$3(this);
 	    try {
-	      executor(bind(internalResolve, this, state), bind(internalReject, this, state));
+	      executor(bind(internalResolve, state), bind(internalReject, state));
 	    } catch (error) {
-	      internalReject(this, state, error);
+	      internalReject(state, error);
 	    }
 	  };
 	  // eslint-disable-next-line no-unused-vars
@@ -2891,10 +2909,10 @@
 	      var reaction = newPromiseCapability$1(speciesConstructor(this, PromiseConstructor));
 	      reaction.ok = typeof onFulfilled == 'function' ? onFulfilled : true;
 	      reaction.fail = typeof onRejected == 'function' && onRejected;
-	      reaction.domain = IS_NODE$1 ? process$3.domain : undefined;
+	      reaction.domain = engineIsNode ? process$4.domain : undefined;
 	      state.parent = true;
 	      state.reactions.push(reaction);
-	      if (state.state != PENDING) notify$1(this, state, false);
+	      if (state.state != PENDING) notify$1(state, false);
 	      return reaction.promise;
 	    },
 	    // `Promise.prototype.catch` method
@@ -2907,8 +2925,8 @@
 	    var promise = new Internal();
 	    var state = getInternalState$3(promise);
 	    this.promise = promise;
-	    this.resolve = bind(internalResolve, promise, state);
-	    this.reject = bind(internalReject, promise, state);
+	    this.resolve = bind(internalResolve, state);
+	    this.reject = bind(internalReject, state);
 	  };
 	  newPromiseCapability.f = newPromiseCapability$1 = function (C) {
 	    return C === PromiseConstructor || C === PromiseWrapper
@@ -2979,7 +2997,7 @@
 	      var values = [];
 	      var counter = 0;
 	      var remaining = 1;
-	      iterate_1(iterable, function (promise) {
+	      iterate(iterable, function (promise) {
 	        var index = counter++;
 	        var alreadyCalled = false;
 	        values.push(undefined);
@@ -3004,7 +3022,7 @@
 	    var reject = capability.reject;
 	    var result = perform(function () {
 	      var $promiseResolve = aFunction$1(C.resolve);
-	      iterate_1(iterable, function (promise) {
+	      iterate(iterable, function (promise) {
 	        $promiseResolve.call(C, promise).then(capability.resolve, reject);
 	      });
 	    });
@@ -5366,270 +5384,46 @@
 	  ];
 	});
 
-	var nativeJoin = [].join;
+	var basename = function basename(path) {
+	  var start = 0;
+	  var end = -1;
+	  var matchedSlash = true;
+	  var i;
 
-	var ES3_STRINGS = indexedObject != Object;
-	var STRICT_METHOD$1 = arrayMethodIsStrict('join', ',');
-
-	// `Array.prototype.join` method
-	// https://tc39.github.io/ecma262/#sec-array.prototype.join
-	_export({ target: 'Array', proto: true, forced: ES3_STRINGS || !STRICT_METHOD$1 }, {
-	  join: function join(separator) {
-	    return nativeJoin.call(toIndexedObject(this), separator === undefined ? ',' : separator);
-	  }
-	});
-
-	// Copyright Joyent, Inc. and other Node contributors.
-	//
-	// Permission is hereby granted, free of charge, to any person obtaining a
-	// copy of this software and associated documentation files (the
-	// "Software"), to deal in the Software without restriction, including
-	// without limitation the rights to use, copy, modify, merge, publish,
-	// distribute, sublicense, and/or sell copies of the Software, and to permit
-	// persons to whom the Software is furnished to do so, subject to the
-	// following conditions:
-	//
-	// The above copyright notice and this permission notice shall be included
-	// in all copies or substantial portions of the Software.
-	//
-	// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-	// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-	// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-	// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-	// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-	// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-	// USE OR OTHER DEALINGS IN THE SOFTWARE.
-	// resolves . and .. elements in a path array with directory names there
-	// must be no slashes, empty elements, or device names (c:\) in the array
-	// (so also no leading and trailing slashes - it does not distinguish
-	// relative and absolute paths)
-	function normalizeArray(parts, allowAboveRoot) {
-	  // if the path tries to go above the root, `up` ends up > 0
-	  var up = 0;
-
-	  for (var i = parts.length - 1; i >= 0; i--) {
-	    var last = parts[i];
-
-	    if (last === '.') {
-	      parts.splice(i, 1);
-	    } else if (last === '..') {
-	      parts.splice(i, 1);
-	      up++;
-	    } else if (up) {
-	      parts.splice(i, 1);
-	      up--;
-	    }
-	  } // if the path is allowed to go above the root, restore leading ..s
-
-
-	  if (allowAboveRoot) {
-	    for (; up--; up) {
-	      parts.unshift('..');
+	  for (i = path.length - 1; i >= 0; --i) {
+	    if (path.charCodeAt(i) === 47) {
+	      // If we reached a path separator that was not part of a set of path
+	      // separators at the end of the string, stop now
+	      if (!matchedSlash) {
+	        start = i + 1;
+	        break;
+	      }
+	    } else if (end === -1) {
+	      // We saw the first non-path separator, mark this as the end of our
+	      // path component
+	      matchedSlash = false;
+	      end = i + 1;
 	    }
 	  }
 
-	  return parts;
-	} // Split a filename into [root, dir, basename, ext], unix version
-	// 'root' is just a slash, or nothing.
-
-
-	var splitPathRe = /^(\/?|)([\s\S]*?)((?:\.{1,2}|[^\/]+?|)(\.[^.\/]*|))(?:[\/]*)$/;
-
-	var splitPath = function splitPath(filename) {
-	  return splitPathRe.exec(filename).slice(1);
-	}; // path.resolve([from ...], to)
-	// posix version
-
-
-	function resolve() {
-	  var resolvedPath = '',
-	      resolvedAbsolute = false;
-
-	  for (var i = arguments.length - 1; i >= -1 && !resolvedAbsolute; i--) {
-	    var path = i >= 0 ? arguments[i] : '/'; // Skip empty and invalid entries
-
-	    if (typeof path !== 'string') {
-	      throw new TypeError('Arguments to path.resolve must be strings');
-	    } else if (!path) {
-	      continue;
-	    }
-
-	    resolvedPath = path + '/' + resolvedPath;
-	    resolvedAbsolute = path.charAt(0) === '/';
-	  } // At this point the path should be resolved to a full absolute path, but
-	  // handle relative paths to be safe (might happen when process.cwd() fails)
-	  // Normalize the path
-
-
-	  resolvedPath = normalizeArray(filter(resolvedPath.split('/'), function (p) {
-	    return !!p;
-	  }), !resolvedAbsolute).join('/');
-	  return (resolvedAbsolute ? '/' : '') + resolvedPath || '.';
-	}
-	// posix version
-
-	function normalize$1(path) {
-	  var isPathAbsolute = isAbsolute(path),
-	      trailingSlash = substr(path, -1) === '/'; // Normalize the path
-
-	  path = normalizeArray(filter(path.split('/'), function (p) {
-	    return !!p;
-	  }), !isPathAbsolute).join('/');
-
-	  if (!path && !isPathAbsolute) {
-	    path = '.';
+	  if (end === -1) {
+	    return '';
 	  }
 
-	  if (path && trailingSlash) {
-	    path += '/';
-	  }
+	  return path.slice(start, end);
+	};
 
-	  return (isPathAbsolute ? '/' : '') + path;
-	}
-
-	function isAbsolute(path) {
-	  return path.charAt(0) === '/';
-	} // posix version
-
-	function join() {
-	  var paths = Array.prototype.slice.call(arguments, 0);
-	  return normalize$1(filter(paths, function (p, index) {
-	    if (typeof p !== 'string') {
-	      throw new TypeError('Arguments to path.join must be strings');
-	    }
-
-	    return p;
-	  }).join('/'));
-	} // path.relative(from, to)
-	// posix version
-
-	function relative(from, to) {
-	  from = resolve(from).substr(1);
-	  to = resolve(to).substr(1);
-
-	  function trim(arr) {
-	    var start = 0;
-
-	    for (; start < arr.length; start++) {
-	      if (arr[start] !== '') break;
-	    }
-
-	    var end = arr.length - 1;
-
-	    for (; end >= 0; end--) {
-	      if (arr[end] !== '') break;
-	    }
-
-	    if (start > end) return [];
-	    return arr.slice(start, end - start + 1);
-	  }
-
-	  var fromParts = trim(from.split('/'));
-	  var toParts = trim(to.split('/'));
-	  var length = Math.min(fromParts.length, toParts.length);
-	  var samePartsLength = length;
-
-	  for (var i = 0; i < length; i++) {
-	    if (fromParts[i] !== toParts[i]) {
-	      samePartsLength = i;
-	      break;
-	    }
-	  }
-
-	  var outputParts = [];
-
-	  for (var i = samePartsLength; i < fromParts.length; i++) {
-	    outputParts.push('..');
-	  }
-
-	  outputParts = outputParts.concat(toParts.slice(samePartsLength));
-	  return outputParts.join('/');
-	}
-	var sep = '/';
-	var delimiter = ':';
-	function dirname(path) {
-	  var result = splitPath(path),
-	      root = result[0],
-	      dir = result[1];
-
-	  if (!root && !dir) {
-	    // No dirname whatsoever
-	    return '.';
-	  }
-
-	  if (dir) {
-	    // It has a dirname, strip trailing slash
-	    dir = dir.substr(0, dir.length - 1);
-	  }
-
-	  return root + dir;
-	}
-	function basename(path, ext) {
-	  var f = splitPath(path)[2]; // TODO: make this comparison case-insensitive on windows?
-
-	  if (ext && f.substr(-1 * ext.length) === ext) {
-	    f = f.substr(0, f.length - ext.length);
-	  }
-
-	  return f;
-	}
-	function extname(path) {
-	  return splitPath(path)[3];
-	}
 	var path$1 = {
-	  extname: extname,
-	  basename: basename,
-	  dirname: dirname,
-	  sep: sep,
-	  delimiter: delimiter,
-	  relative: relative,
-	  join: join,
-	  isAbsolute: isAbsolute,
-	  normalize: normalize$1,
-	  resolve: resolve
+	  basename: basename
 	};
-
-	function filter(xs, f) {
-	  if (xs.filter) return xs.filter(f);
-	  var res = [];
-
-	  for (var i = 0; i < xs.length; i++) {
-	    if (f(xs[i], i, xs)) res.push(xs[i]);
-	  }
-
-	  return res;
-	} // String.prototype.substr - negative index don't work in IE8
-
-
-	var substr = 'ab'.substr(-1) === 'b' ? function (str, start, len) {
-	  return str.substr(start, len);
-	} : function (str, start, len) {
-	  if (start < 0) start = str.length + start;
-	  return str.substr(start, len);
-	};
-
-	var path$2 = /*#__PURE__*/Object.freeze({
-		__proto__: null,
-		resolve: resolve,
-		normalize: normalize$1,
-		isAbsolute: isAbsolute,
-		join: join,
-		relative: relative,
-		sep: sep,
-		delimiter: delimiter,
-		dirname: dirname,
-		basename: basename,
-		extname: extname,
-		'default': path$1
-	});
 
 	var min$6 = Math.min;
 	var nativeLastIndexOf = [].lastIndexOf;
 	var NEGATIVE_ZERO = !!nativeLastIndexOf && 1 / [1].lastIndexOf(1, -0) < 0;
-	var STRICT_METHOD$2 = arrayMethodIsStrict('lastIndexOf');
+	var STRICT_METHOD$1 = arrayMethodIsStrict('lastIndexOf');
 	// For preventing possible almost infinite loop in non-standard implementations, test the forward version of the method
 	var USES_TO_LENGTH$6 = arrayMethodUsesToLength('indexOf', { ACCESSORS: true, 1: 0 });
-	var FORCED$5 = NEGATIVE_ZERO || !STRICT_METHOD$2 || !USES_TO_LENGTH$6;
+	var FORCED$5 = NEGATIVE_ZERO || !STRICT_METHOD$1 || !USES_TO_LENGTH$6;
 
 	// `Array.prototype.lastIndexOf` method implementation
 	// https://tc39.github.io/ecma262/#sec-array.prototype.lastindexof
@@ -5718,259 +5512,6 @@
 	  NumberPrototype.constructor = NumberWrapper;
 	  redefine(global_1, NUMBER, NumberWrapper);
 	}
-
-	var global$1 = typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {};
-
-	// based off https://github.com/defunctzombie/node-process/blob/master/browser.js
-
-	function defaultSetTimout() {
-	  throw new Error('setTimeout has not been defined');
-	}
-
-	function defaultClearTimeout() {
-	  throw new Error('clearTimeout has not been defined');
-	}
-
-	var cachedSetTimeout = defaultSetTimout;
-	var cachedClearTimeout = defaultClearTimeout;
-
-	if (typeof global$1.setTimeout === 'function') {
-	  cachedSetTimeout = setTimeout;
-	}
-
-	if (typeof global$1.clearTimeout === 'function') {
-	  cachedClearTimeout = clearTimeout;
-	}
-
-	function runTimeout(fun) {
-	  if (cachedSetTimeout === setTimeout) {
-	    //normal enviroments in sane situations
-	    return setTimeout(fun, 0);
-	  } // if setTimeout wasn't available but was latter defined
-
-
-	  if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
-	    cachedSetTimeout = setTimeout;
-	    return setTimeout(fun, 0);
-	  }
-
-	  try {
-	    // when when somebody has screwed with setTimeout but no I.E. maddness
-	    return cachedSetTimeout(fun, 0);
-	  } catch (e) {
-	    try {
-	      // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
-	      return cachedSetTimeout.call(null, fun, 0);
-	    } catch (e) {
-	      // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
-	      return cachedSetTimeout.call(this, fun, 0);
-	    }
-	  }
-	}
-
-	function runClearTimeout(marker) {
-	  if (cachedClearTimeout === clearTimeout) {
-	    //normal enviroments in sane situations
-	    return clearTimeout(marker);
-	  } // if clearTimeout wasn't available but was latter defined
-
-
-	  if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
-	    cachedClearTimeout = clearTimeout;
-	    return clearTimeout(marker);
-	  }
-
-	  try {
-	    // when when somebody has screwed with setTimeout but no I.E. maddness
-	    return cachedClearTimeout(marker);
-	  } catch (e) {
-	    try {
-	      // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
-	      return cachedClearTimeout.call(null, marker);
-	    } catch (e) {
-	      // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
-	      // Some versions of I.E. have different rules for clearTimeout vs setTimeout
-	      return cachedClearTimeout.call(this, marker);
-	    }
-	  }
-	}
-
-	var queue$1 = [];
-	var draining = false;
-	var currentQueue;
-	var queueIndex = -1;
-
-	function cleanUpNextTick() {
-	  if (!draining || !currentQueue) {
-	    return;
-	  }
-
-	  draining = false;
-
-	  if (currentQueue.length) {
-	    queue$1 = currentQueue.concat(queue$1);
-	  } else {
-	    queueIndex = -1;
-	  }
-
-	  if (queue$1.length) {
-	    drainQueue();
-	  }
-	}
-
-	function drainQueue() {
-	  if (draining) {
-	    return;
-	  }
-
-	  var timeout = runTimeout(cleanUpNextTick);
-	  draining = true;
-	  var len = queue$1.length;
-
-	  while (len) {
-	    currentQueue = queue$1;
-	    queue$1 = [];
-
-	    while (++queueIndex < len) {
-	      if (currentQueue) {
-	        currentQueue[queueIndex].run();
-	      }
-	    }
-
-	    queueIndex = -1;
-	    len = queue$1.length;
-	  }
-
-	  currentQueue = null;
-	  draining = false;
-	  runClearTimeout(timeout);
-	}
-
-	function nextTick(fun) {
-	  var args = new Array(arguments.length - 1);
-
-	  if (arguments.length > 1) {
-	    for (var i = 1; i < arguments.length; i++) {
-	      args[i - 1] = arguments[i];
-	    }
-	  }
-
-	  queue$1.push(new Item(fun, args));
-
-	  if (queue$1.length === 1 && !draining) {
-	    runTimeout(drainQueue);
-	  }
-	} // v8 likes predictible objects
-
-
-	function Item(fun, array) {
-	  this.fun = fun;
-	  this.array = array;
-	}
-
-	Item.prototype.run = function () {
-	  this.fun.apply(null, this.array);
-	};
-
-	var title = 'browser';
-	var platform = 'browser';
-	var browser = true;
-	var env = {};
-	var argv = [];
-	var version$1 = ''; // empty string to avoid regexp issues
-
-	var versions$1 = {};
-	var release = {};
-	var config = {};
-
-	function noop() {}
-
-	var on = noop;
-	var addListener = noop;
-	var once = noop;
-	var off = noop;
-	var removeListener = noop;
-	var removeAllListeners = noop;
-	var emit = noop;
-
-	function binding(name) {
-	  throw new Error('process.binding is not supported');
-	}
-
-	function cwd() {
-	  return '/';
-	}
-
-	function chdir(dir) {
-	  throw new Error('process.chdir is not supported');
-	}
-
-	function umask() {
-	  return 0;
-	} // from https://github.com/kumavis/browser-process-hrtime/blob/master/index.js
-
-
-	var performance = global$1.performance || {};
-
-	var performanceNow = performance.now || performance.mozNow || performance.msNow || performance.oNow || performance.webkitNow || function () {
-	  return new Date().getTime();
-	}; // generate timestamp or delta
-	// see http://nodejs.org/api/process.html#process_process_hrtime
-
-
-	function hrtime(previousTimestamp) {
-	  var clocktime = performanceNow.call(performance) * 1e-3;
-	  var seconds = Math.floor(clocktime);
-	  var nanoseconds = Math.floor(clocktime % 1 * 1e9);
-
-	  if (previousTimestamp) {
-	    seconds = seconds - previousTimestamp[0];
-	    nanoseconds = nanoseconds - previousTimestamp[1];
-
-	    if (nanoseconds < 0) {
-	      seconds--;
-	      nanoseconds += 1e9;
-	    }
-	  }
-
-	  return [seconds, nanoseconds];
-	}
-
-	var startTime = new Date();
-
-	function uptime() {
-	  var currentTime = new Date();
-	  var dif = currentTime - startTime;
-	  return dif / 1000;
-	}
-
-	var browser$1 = {
-	  nextTick: nextTick,
-	  title: title,
-	  browser: browser,
-	  env: env,
-	  argv: argv,
-	  version: version$1,
-	  versions: versions$1,
-	  on: on,
-	  addListener: addListener,
-	  once: once,
-	  off: off,
-	  removeListener: removeListener,
-	  removeAllListeners: removeAllListeners,
-	  emit: emit,
-	  binding: binding,
-	  cwd: cwd,
-	  chdir: chdir,
-	  umask: umask,
-	  hrtime: hrtime,
-	  platform: platform,
-	  release: release,
-	  config: config,
-	  uptime: uptime
-	};
-
-	var path$3 = /*@__PURE__*/getAugmentedNamespace(path$2);
 
 	function ownKeys$1(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
@@ -6200,7 +5741,7 @@
 	  CHAR_ZERO_WIDTH_NOBREAK_SPACE: 65279,
 
 	  /* \uFEFF */
-	  SEP: path$3.sep,
+	  SEP: '/',
 
 	  /**
 	   * Create EXTGLOB_CHARS
@@ -6238,12 +5779,14 @@
 	  /**
 	   * Create GLOB_CHARS
 	   */
-	  globChars: function globChars(win32) {
+	  globChars: function globChars() {
+	    var win32 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
 	    return win32 === true ? WINDOWS_CHARS : POSIX_CHARS;
 	  }
 	};
 
 	var utils = createCommonjsModule(function (module, exports) {
+
 	  var REGEX_BACKSLASH = constants.REGEX_BACKSLASH,
 	      REGEX_REMOVE_BACKSLASH = constants.REGEX_REMOVE_BACKSLASH,
 	      REGEX_SPECIAL_CHARS = constants.REGEX_SPECIAL_CHARS,
@@ -6276,7 +5819,7 @@
 	  };
 
 	  exports.supportsLookbehinds = function () {
-	    var segs = browser$1.version.slice(1).split('.').map(Number);
+	    var segs = process.version.slice(1).split('.').map(Number);
 
 	    if (segs.length === 3 && segs[0] >= 9 || segs[0] === 8 && segs[1] >= 10) {
 	      return true;
@@ -6290,7 +5833,7 @@
 	      return options.windows;
 	    }
 
-	    return  path$3.sep === '\\';
+	    return false;
 	  };
 
 	  exports.escapeLast = function (input, char, lastIdx) {
@@ -6753,17 +6296,30 @@
 	var nativeIndexOf = [].indexOf;
 
 	var NEGATIVE_ZERO$1 = !!nativeIndexOf && 1 / [1].indexOf(1, -0) < 0;
-	var STRICT_METHOD$3 = arrayMethodIsStrict('indexOf');
+	var STRICT_METHOD$2 = arrayMethodIsStrict('indexOf');
 	var USES_TO_LENGTH$8 = arrayMethodUsesToLength('indexOf', { ACCESSORS: true, 1: 0 });
 
 	// `Array.prototype.indexOf` method
 	// https://tc39.github.io/ecma262/#sec-array.prototype.indexof
-	_export({ target: 'Array', proto: true, forced: NEGATIVE_ZERO$1 || !STRICT_METHOD$3 || !USES_TO_LENGTH$8 }, {
+	_export({ target: 'Array', proto: true, forced: NEGATIVE_ZERO$1 || !STRICT_METHOD$2 || !USES_TO_LENGTH$8 }, {
 	  indexOf: function indexOf(searchElement /* , fromIndex = 0 */) {
 	    return NEGATIVE_ZERO$1
 	      // convert -0 to +0
 	      ? nativeIndexOf.apply(this, arguments) || 0
 	      : $indexOf(this, searchElement, arguments.length > 1 ? arguments[1] : undefined);
+	  }
+	});
+
+	var nativeJoin = [].join;
+
+	var ES3_STRINGS = indexedObject != Object;
+	var STRICT_METHOD$3 = arrayMethodIsStrict('join', ',');
+
+	// `Array.prototype.join` method
+	// https://tc39.github.io/ecma262/#sec-array.prototype.join
+	_export({ target: 'Array', proto: true, forced: ES3_STRINGS || !STRICT_METHOD$3 }, {
+	  join: function join(separator) {
+	    return nativeJoin.call(toIndexedObject(this), separator === undefined ? ',' : separator);
 	  }
 	});
 
@@ -6863,9 +6419,7 @@
 	  };
 	  var tokens = [bos];
 	  var capture = opts.capture ? '' : '?:';
-	  var win32 = utils.isWindows(options); // create constants based on platform, for windows or posix
-
-	  var PLATFORM_CHARS = constants.globChars(win32);
+	  var PLATFORM_CHARS = constants.globChars();
 	  var EXTGLOB_CHARS = constants.extglobChars(PLATFORM_CHARS);
 	  var DOT_LITERAL = PLATFORM_CHARS.DOT_LITERAL,
 	      PLUS_LITERAL = PLATFORM_CHARS.PLUS_LITERAL,
@@ -7965,10 +7519,9 @@
 	    throw new SyntaxError("Input length: ".concat(len, ", exceeds maximum allowed length: ").concat(max));
 	  }
 
-	  input = REPLACEMENTS[input] || input;
-	  var win32 = utils.isWindows(options); // create constants based on platform, for windows or posix
+	  input = REPLACEMENTS[input] || input; // create constants based on platform, for windows or posix
 
-	  var _constants$globChars = constants.globChars(win32),
+	  var _constants$globChars = constants.globChars(),
 	      DOT_LITERAL = _constants$globChars.DOT_LITERAL,
 	      SLASH_LITERAL = _constants$globChars.SLASH_LITERAL,
 	      ONE_CHAR = _constants$globChars.ONE_CHAR,
@@ -8271,7 +7824,7 @@
 	picomatch.matchBase = function (input, glob, options) {
 	  var posix = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : utils.isWindows(options);
 	  var regex = glob instanceof RegExp ? glob : picomatch.makeRe(glob, options);
-	  return regex.test(path$3.basename(input));
+	  return regex.test(path$1.basename(input));
 	};
 	/**
 	 * Returns true if **any** of the given glob `patterns` match the specified `string`.
@@ -8890,12 +8443,17 @@
 
 
 
+
+
 	var STRICT_METHOD$5 = arrayMethodIsStrict('reduce');
 	var USES_TO_LENGTH$a = arrayMethodUsesToLength('reduce', { 1: 0 });
+	// Chrome 80-82 has a critical bug
+	// https://bugs.chromium.org/p/chromium/issues/detail?id=1049982
+	var CHROME_BUG = !engineIsNode && engineV8Version > 79 && engineV8Version < 83;
 
 	// `Array.prototype.reduce` method
 	// https://tc39.github.io/ecma262/#sec-array.prototype.reduce
-	_export({ target: 'Array', proto: true, forced: !STRICT_METHOD$5 || !USES_TO_LENGTH$a }, {
+	_export({ target: 'Array', proto: true, forced: !STRICT_METHOD$5 || !USES_TO_LENGTH$a || CHROME_BUG }, {
 	  reduce: function reduce(callbackfn /* , initialValue */) {
 	    return $reduce(this, callbackfn, arguments.length, arguments.length > 1 ? arguments[1] : undefined);
 	  }
@@ -11571,7 +11129,7 @@
 	 */
 
 
-	function resolve$1(relative, base) {
+	function resolve(relative, base) {
 	  if (relative === '') return base;
 	  var path = (base || '/').split('/').slice(0, -1).concat(relative.split('/')),
 	      i = path.length,
@@ -11708,7 +11266,7 @@
 	  //
 
 	  if (relative && location.slashes && url.pathname.charAt(0) !== '/' && (url.pathname !== '' || location.pathname !== '')) {
-	    url.pathname = resolve$1(url.pathname, location.pathname);
+	    url.pathname = resolve(url.pathname, location.pathname);
 	  } //
 	  // We should not add port numbers if they are already the default port number
 	  // for a given protocol. As the host also contains the port number we're going
@@ -11992,7 +11550,7 @@
 	      Constructor = wrapper(function (dummy, iterable) {
 	        anInstance(dummy, Constructor, CONSTRUCTOR_NAME);
 	        var that = inheritIfRequired(new NativeConstructor(), dummy, Constructor);
-	        if (iterable != undefined) iterate_1(iterable, that[ADDER], that, IS_MAP);
+	        if (iterable != undefined) iterate(iterable, that[ADDER], { that: that, AS_ENTRIES: IS_MAP });
 	        return that;
 	      });
 	      Constructor.prototype = NativePrototype;
@@ -12048,7 +11606,7 @@
 	        size: 0
 	      });
 	      if (!descriptors) that.size = 0;
-	      if (iterable != undefined) iterate_1(iterable, that[ADDER], that, IS_MAP);
+	      if (iterable != undefined) iterate(iterable, that[ADDER], { that: that, AS_ENTRIES: IS_MAP });
 	    });
 
 	    var getInternalState = internalStateGetterFor(CONSTRUCTOR_NAME);
