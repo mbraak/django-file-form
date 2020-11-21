@@ -36,13 +36,13 @@ def create_uploaded_file_in_db(
     if field_name:
         values["field_name"] = field_name
 
-    if storage_class == FileSystemStorage:
-        create_uploaded_file_in_db_default(values, uploaded_file)
+    if storage_class == FileSystemStorage and not getattr(settings, 'FILE_FORM_ALWAYS_COPY_UPLOADED_FILE', False):
+        create_uploaded_file_in_db_with_move(values, uploaded_file)
     else:
-        create_uploaded_file_in_db_non_default(values, uploaded_file)
+        create_uploaded_file_in_db_with_copy(values, uploaded_file)
 
 
-def create_uploaded_file_in_db_non_default(values, uploaded_file):
+def create_uploaded_file_in_db_with_copy(values, uploaded_file):
     with open(uploaded_file, "rb") as fh:
         values["uploaded_file"] = File(file=fh, name=uploaded_file.name)
         TemporaryUploadedFile.objects.create(**values)
@@ -50,7 +50,7 @@ def create_uploaded_file_in_db_non_default(values, uploaded_file):
     os.remove(uploaded_file)
 
 
-def create_uploaded_file_in_db_default(values, uploaded_file):
+def create_uploaded_file_in_db_with_move(values, uploaded_file):
     values["uploaded_file"] = str(uploaded_file.relative_to(Path(settings.MEDIA_ROOT)))
 
     TemporaryUploadedFile.objects.create(**values)
