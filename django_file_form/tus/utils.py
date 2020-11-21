@@ -27,47 +27,31 @@ def remove_resource_from_cache(resource_id):
 def create_uploaded_file_in_db(
     field_name, file_id, form_id, original_filename, uploaded_file
 ):
+    values = dict(
+        file_id=file_id,
+        form_id=form_id,
+        original_filename=original_filename,
+    )
+
+    if field_name:
+        values["field_name"] = field_name
+
     if storage_class == FileSystemStorage:
-        create_uploaded_file_in_db_default(
-            field_name, file_id, form_id, original_filename, uploaded_file
-        )
+        create_uploaded_file_in_db_default(values, uploaded_file)
     else:
-        create_uploaded_file_in_db_non_default(
-            field_name, file_id, form_id, original_filename, uploaded_file
-        )
+        create_uploaded_file_in_db_non_default(values, uploaded_file)
 
 
-def create_uploaded_file_in_db_non_default(
-    field_name, file_id, form_id, original_filename, uploaded_file
-):
+def create_uploaded_file_in_db_non_default(values, uploaded_file):
     with open(uploaded_file, "rb") as fh:
-        values = dict(
-            file_id=file_id,
-            form_id=form_id,
-            uploaded_file=File(file=fh, name=uploaded_file.name),
-            original_filename=original_filename,
-        )
-
-        if field_name:
-            values["field_name"] = field_name
-
+        values["uploaded_file"] = File(file=fh, name=uploaded_file.name)
         TemporaryUploadedFile.objects.create(**values)
 
     os.remove(uploaded_file)
 
 
-def create_uploaded_file_in_db_default(
-    field_name, file_id, form_id, original_filename, uploaded_file
-):
-    values = dict(
-        file_id=file_id,
-        form_id=form_id,
-        uploaded_file=str(uploaded_file.relative_to(Path(settings.MEDIA_ROOT))),
-        original_filename=original_filename
-    )
-
-    if field_name:
-        values['field_name'] = field_name
+def create_uploaded_file_in_db_default(values, uploaded_file):
+    values["uploaded_file"] = str(uploaded_file.relative_to(Path(settings.MEDIA_ROOT)))
 
     TemporaryUploadedFile.objects.create(**values)
 
