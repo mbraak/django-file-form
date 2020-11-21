@@ -1,7 +1,6 @@
 import babel from "@rollup/plugin-babel";
 import commonjs from "@rollup/plugin-commonjs";
 import coverage from "rollup-plugin-istanbul2";
-import nodePolyfills from "rollup-plugin-node-polyfills";
 import resolve from "@rollup/plugin-node-resolve";
 import { terser } from "rollup-plugin-terser";
 
@@ -23,11 +22,9 @@ const getOutputFilename = () => {
 const plugins = [
   resolve({
     browser: true,
-    extensions: [".js", ".ts", ".tsx"],
-    preferBuiltins: true
+    extensions: [".js", ".ts", ".tsx"]
   }),
   commonjs(),
-  nodePolyfills(),
   babel({
     babelHelpers: "runtime",
     extensions: [".js", ".ts", ".tsx"],
