@@ -1,5 +1,3 @@
-import urljoin from "url-join";
-
 export interface LocationInfo {
   location: string;
 }
@@ -21,6 +19,27 @@ export interface UrlInfo {
 
 export const MB = 1024 * 1024;
 
+const urljoin = (path: string, ...parts: string[]): string => {
+  let result = path;
+
+  for (const part of parts) {
+    if (!result.endsWith("/")) {
+      result += "/";
+    }
+
+    result += part;
+  }
+
+  return path;
+};
+
+const encodeQueryParameter = (key: string, value: string): string => {
+  const searchParams = new URLSearchParams();
+  searchParams.append(key, value);
+
+  return searchParams.toString();
+};
+
 interface AbortMultipartUploadParameters {
   csrfToken: string;
   endpoint: string;
@@ -39,7 +58,9 @@ export const abortMultipartUpload = ({
   const headers = new Headers({
     "X-CSRFToken": csrfToken
   });
-  const url = urljoin(endpoint, uploadIdEnc, `?key=${filename}`);
+  let url = urljoin(endpoint, uploadIdEnc);
+  url += "?" + encodeQueryParameter("key", filename);
+
   return fetch(url, {
     method: "delete",
     headers: headers
@@ -68,7 +89,8 @@ export const completeMultipartUpload = ({
   const headers = new Headers({
     "X-CSRFToken": csrfToken
   });
-  const url = urljoin(endpoint, uploadIdEnc, "complete", `?key=${filename}`);
+  let url = urljoin(endpoint, uploadIdEnc, "complete");
+  url += "?" + encodeQueryParameter("key", filename);
   return fetch(url, {
     method: "post",
     headers: headers,
@@ -139,7 +161,10 @@ export const prepareUploadPart = ({
 }: PrepareUploadPartParameters): Promise<UrlInfo> => {
   const filename = encodeURIComponent(key);
   const headers = new Headers({ "X-CSRFToken": csrfToken });
-  const url = urljoin(endpoint, uploadId, `${number}`, `?key=${filename}`);
+
+  let url = urljoin(endpoint, uploadId, `${number}`);
+  url += "?" + encodeQueryParameter("key", filename);
+
   return fetch(url, {
     method: "get",
     headers: headers
