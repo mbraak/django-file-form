@@ -10204,7 +10204,7 @@
 	    result += part;
 	  }
 
-	  return path;
+	  return result;
 	};
 
 	var encodeQueryParameter = function encodeQueryParameter(key, value) {
