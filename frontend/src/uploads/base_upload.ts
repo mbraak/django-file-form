@@ -20,8 +20,12 @@ abstract class BaseUpload {
     this.uploadIndex = uploadIndex;
   }
 
-  public abstract async abort(): Promise<void>;
-  public abstract async delete(): Promise<void>;
+  public async abort(): Promise<void> {
+    //
+  }
+  public async delete(): Promise<void> {
+    //
+  }
   public abstract getSize(): number;
 }
 
