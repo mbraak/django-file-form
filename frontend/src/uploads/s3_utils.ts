@@ -30,7 +30,7 @@ const urljoin = (path: string, ...parts: string[]): string => {
     result += part;
   }
 
-  return path;
+  return result;
 };
 
 const encodeQueryParameter = (key: string, value: string): string => {
