@@ -27,8 +27,12 @@ abstract class BaseUpload {
     this.deleteStatus = undefined;
   }
 
-  public abstract async abort(): Promise<void>;
-  public abstract async delete(): Promise<void>;
+  public async abort(): Promise<void> {
+    //
+  }
+  public async delete(): Promise<void> {
+    //
+  }
   public abstract getSize(): number;
 }
 

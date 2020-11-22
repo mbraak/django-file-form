@@ -251,7 +251,11 @@ class FileField {
   }
 
   onChange = (e: Event): void => {
-    void this.uploadFiles([...(e.target as HTMLInputElement).files]);
+    const files = (e.target as HTMLInputElement).files;
+
+    if (files) {
+      void this.uploadFiles([...files]);
+    }
   };
 
   handleProgress = (

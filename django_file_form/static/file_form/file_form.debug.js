@@ -3996,33 +3996,81 @@
 	  module.exports = _getPrototypeOf;
 	});
 
-	var BaseUpload = function BaseUpload(_ref) {
-	  var name = _ref.name,
-	      status = _ref.status,
-	      type = _ref.type,
-	      uploadIndex = _ref.uploadIndex;
+	var BaseUpload = /*#__PURE__*/function () {
+	  function BaseUpload(_ref) {
+	    var name = _ref.name,
+	        status = _ref.status,
+	        type = _ref.type,
+	        uploadIndex = _ref.uploadIndex;
 
-	  classCallCheck(this, BaseUpload);
+	    classCallCheck(this, BaseUpload);
 
-	  defineProperty$2(this, "deleteStatus", void 0);
+	    defineProperty$2(this, "deleteStatus", void 0);
 
-	  defineProperty$2(this, "name", void 0);
+	    defineProperty$2(this, "name", void 0);
 
-	  defineProperty$2(this, "progress", void 0);
+	    defineProperty$2(this, "progress", void 0);
 
-	  defineProperty$2(this, "status", void 0);
+	    defineProperty$2(this, "status", void 0);
 
-	  defineProperty$2(this, "type", void 0);
+	    defineProperty$2(this, "type", void 0);
 
-	  defineProperty$2(this, "uploadIndex", void 0);
+	    defineProperty$2(this, "uploadIndex", void 0);
 
-	  this.name = name;
-	  this.status = status;
-	  this.type = type;
-	  this.uploadIndex = uploadIndex;
-	  this.progress = 0;
-	  this.deleteStatus = undefined;
-	};
+	    this.name = name;
+	    this.status = status;
+	    this.type = type;
+	    this.uploadIndex = uploadIndex;
+	    this.progress = 0;
+	    this.deleteStatus = undefined;
+	  }
+
+	  createClass(BaseUpload, [{
+	    key: "abort",
+	    value: function () {
+	      var _abort = asyncToGenerator( /*#__PURE__*/regenerator.mark(function _callee() {
+	        return regenerator.wrap(function _callee$(_context) {
+	          while (1) {
+	            switch (_context.prev = _context.next) {
+	              case 0:
+	              case "end":
+	                return _context.stop();
+	            }
+	          }
+	        }, _callee);
+	      }));
+
+	      function abort() {
+	        return _abort.apply(this, arguments);
+	      }
+
+	      return abort;
+	    }()
+	  }, {
+	    key: "delete",
+	    value: function () {
+	      var _delete2 = asyncToGenerator( /*#__PURE__*/regenerator.mark(function _callee2() {
+	        return regenerator.wrap(function _callee2$(_context2) {
+	          while (1) {
+	            switch (_context2.prev = _context2.next) {
+	              case 0:
+	              case "end":
+	                return _context2.stop();
+	            }
+	          }
+	        }, _callee2);
+	      }));
+
+	      function _delete() {
+	        return _delete2.apply(this, arguments);
+	      }
+
+	      return _delete;
+	    }()
+	  }]);
+
+	  return BaseUpload;
+	}();
 
 	var $indexOf = arrayIncludes.indexOf;
 
@@ -16832,7 +16880,11 @@
 	    }());
 
 	    defineProperty$2(this, "onChange", function (e) {
-	      void _this.uploadFiles(toConsumableArray(e.target.files));
+	      var files = e.target.files;
+
+	      if (files) {
+	        void _this.uploadFiles(toConsumableArray(files));
+	      }
 	    });
 
 	    defineProperty$2(this, "handleProgress", function (upload, bytesUploaded, bytesTotal) {
