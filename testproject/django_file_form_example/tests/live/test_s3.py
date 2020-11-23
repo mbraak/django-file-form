@@ -1,5 +1,4 @@
 import threading
-from time import sleep
 
 from django.test import override_settings
 from flask_cors import CORS
@@ -63,6 +62,9 @@ class S3TestCase(BaseLiveTestCase):
         bucket = s3.Bucket("mybucket")
         bucket.create()
 
+        for file in bucket.objects.all():
+            s3.Object("mybucket", file.key).delete()
+
         self.bucket = bucket
 
     def tearDown(self):
@@ -115,6 +117,9 @@ class S3TestCase(BaseLiveTestCase):
         self.assertEqual(len(files_in_bucket), 0)
 
     def test_upload_with_same_name(self):
+        files_in_bucket = list(self.bucket.objects.all())
+        self.assertEqual(len(files_in_bucket), 0)
+
         page = self.page
         page.open("/s3multiple")
 
