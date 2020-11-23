@@ -113,3 +113,40 @@ class S3TestCase(BaseLiveTestCase):
 
         files_in_bucket = list(self.bucket.objects.all())
         self.assertEqual(len(files_in_bucket), 0)
+
+    def test_upload_with_same_name(self):
+        page = self.page
+        page.open("/s3multiple")
+
+        temp_file = page.create_temp_file("content1")
+
+        page.fill_title_field("abc")
+        page.upload_using_js(temp_file)
+        page.find_upload_success(temp_file)
+        page.assert_page_contains_text("8 Bytes")
+
+        files_in_bucket = list(self.bucket.objects.all())
+        self.assertEqual(len(files_in_bucket), 1)
+        self.assertEqual(
+            files_in_bucket[0].key, f"temp_uploads/s3_example/{temp_file.base_name()}"
+        )
+
+        temp_file.named_temporary_file.write(b"test-test-test")
+        temp_file.named_temporary_file.seek(0)
+
+        page.upload_using_js(temp_file)
+        page.assert_page_contains_text("14 Bytes")
+
+        files_in_bucket = list(self.bucket.objects.all())
+        self.assertEqual(len(files_in_bucket), 2)
+
+        page.submit()
+        page.assert_page_contains_text("Upload success")
+
+        example2 = Example2.objects.get(title="abc")
+        self.assertEqual(example2.files.count(), 1)
+
+        self.assertEqual(
+            example2.files.all()[0].input_file.name, f"example/{temp_file.base_name()}"
+        )
+        self.assertEqual(read_file(example2.files.all()[0].input_file), b"test-test-test")
