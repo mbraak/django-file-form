@@ -13159,10 +13159,6 @@
 	  return null;
 	};
 
-	if (process.env.NODE_ENV !== 'production') {
-	  console.warn('You are running production build of Inferno in development mode. Use dev:module entry point.');
-	}
-
 	var $trim = stringTrim.trim;
 
 
