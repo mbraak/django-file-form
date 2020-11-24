@@ -596,3 +596,42 @@ class LiveTestCase(BaseLiveTestCase):
 
         self.assertEqual(TemporaryUploadedFile.objects.count(), 0)
         self.assertEqual(count_temp_uploads(), original_temp_file_count)
+
+    @override_settings(FILE_FORM_ALWAYS_COPY_UPLOADED_FILE=True)
+    def test_copy_temporary_upload(self):
+        page = self.page
+
+        temp_file = page.create_temp_file("content1")
+        temp_uploads_path = Path(settings.MEDIA_ROOT).joinpath("temp_uploads")
+        original_temp_file_count = count_temp_uploads()
+
+        page.open("/")
+
+        page.selenium.find_element_by_css_selector(".dff-files")
+
+        page.fill_title_field("abc")
+        page.upload_using_js(temp_file)
+
+        page.find_upload_success(temp_file)
+        page.assert_page_contains_text("8 Bytes")
+        self.assertEqual(TemporaryUploadedFile.objects.count(), 1)
+
+        uploaded_file = TemporaryUploadedFile.objects.first()
+        self.assertEqual(read_file(uploaded_file.uploaded_file), b"content1")
+        self.assertTrue(uploaded_file.uploaded_file.name.startswith("temp_uploads/"))
+        self.assertEqual(
+            Path(str(uploaded_file.uploaded_file.path)).parent, temp_uploads_path
+        )
+        self.assertEqual(count_temp_uploads(), original_temp_file_count + 1)
+
+        page.submit()
+        page.assert_page_contains_text("Upload success")
+
+        self.assertEqual(temp_file.uploaded_file().read_text(), "content1")
+
+        example = Example.objects.get(title="abc")
+        self.assertEqual(example.input_file.name, f"example/{temp_file.base_name()}")
+        self.assertEqual(read_file(example.input_file), b"content1")
+
+        self.assertEqual(TemporaryUploadedFile.objects.count(), 0)
+        self.assertFalse(Path(uploaded_file.uploaded_file.path).exists())
