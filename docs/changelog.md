@@ -1,6 +1,6 @@
 ## Changelog
 
-**Development version**
+**3.1.1 (26 november 2020)**
 
   * Issue #388: add cross-site request forgery protection to tus uploads using the standard Django csrf token
   * Issue #393: fix delete-unused-files command (thanks to Seb Haase)
