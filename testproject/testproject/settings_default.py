@@ -27,9 +27,9 @@ DATABASES = dict(
         ENGINE="django.db.backends.postgresql",
         NAME="django-file-form-example",
         USER="postgres",
-        PASSWORD="",
-        HOST="",
-        PORT="",
+        PASSWORD=os.environ.get("POSTGRES_PASSWORD", ""),
+        HOST=os.environ.get("POSTGRES_HOST", ""),
+        PORT=os.environ.get("POSTGRES_PORT", ""),
     )
 )
 
@@ -99,7 +99,7 @@ AWS_S3_ENDPOINT_URL = os.environ.get("AWS_S3_ENDPOINT_URL", "")
 
 CSP_DEFAULT_SRC = ("'none'",)
 CSP_STYLE_SRC = ("'self'",)
-CSP_SCRIPT_SRC = ["'self'", "http://unpkg.com"]
+CSP_SCRIPT_SRC = ["'self'"]
 CSP_FONT_SRC = ("'self'",)
 CSP_IMG_SRC = ("'self'",)
 CSP_CONNECT_SRC = ("'self'", AWS_S3_ENDPOINT_URL)
