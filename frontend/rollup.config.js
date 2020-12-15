@@ -48,7 +48,7 @@ export default {
     format: "iife",
     name: "file_form",
     sourcemap: true,
-    strict: false,
+    strict: false
   },
   external: ["jquery"],
   plugins
