@@ -1,5 +1,5 @@
 pytz==2020.4
 django-csp==3.7
-boto3==1.16.18
+boto3==1.16.30
 django-formtools==2.2
 django-storages==1.10.1
