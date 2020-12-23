@@ -22,7 +22,7 @@ def file_form_js():
 class BaseFormView(generic.FormView):
     template_name = "example_form.html"
     use_ajax = True
-    custom_js_file = "example_form.js"
+    custom_js_files = ["example_form.js"]
 
     def get_success_url(self):
         return reverse("example_success")
@@ -33,7 +33,7 @@ class BaseFormView(generic.FormView):
 
     def get_context_data(self, **kwargs):
         kwargs["use_ajax"] = self.use_ajax
-        kwargs["custom_js_file"] = self.custom_js_file
+        kwargs["custom_js_files"] = self.custom_js_files
         kwargs["file_form_js"] = file_form_js()
         return super().get_context_data(**kwargs)
 
@@ -127,7 +127,7 @@ class WithAcceptExample(BaseFormView):
 
 
 class WithCustomWidgetExample(PlaceholderView):
-    custom_js_file = "example_form_custom_widget.js"
+    custom_js_files = ["eventemitter3.js", "example_form_custom_widget.js"]
     form_class = forms.PlaceholderWidgetExampleForm
 
     def get_initial(self):
