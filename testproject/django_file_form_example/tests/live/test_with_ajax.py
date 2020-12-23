@@ -640,3 +640,19 @@ class LiveTestCase(BaseLiveTestCase):
 
         self.assertEqual(TemporaryUploadedFile.objects.count(), 0)
         self.assertFalse(Path(uploaded_file.uploaded_file.path).exists())
+
+    def test_custom_widget(self):
+        page = self.page
+
+        page.open("/custom_widget")
+
+        placeholder1_input_selector = '#row-example-input_file .dff-file-id-0 input.dff-description'
+        placeholder1_input = page.selenium.find_element_by_css_selector(placeholder1_input_selector)
+        self.assertEqual(placeholder1_input.get_property('value'), 'placeholder 1')
+
+        placeholder1_input.clear()
+        placeholder1_input.send_keys('new value')
+        page.submit()
+
+        placeholder1_input = page.selenium.find_element_by_css_selector(placeholder1_input_selector)
+        self.assertEqual(placeholder1_input.get_property('value'), 'new value')
