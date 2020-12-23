@@ -2,18 +2,9 @@
 
 	var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
-	function createCommonjsModule(fn, basedir, module) {
-		return module = {
-			path: basedir,
-			exports: {},
-			require: function (path, base) {
-				return commonjsRequire(path, (base === undefined || base === null) ? module.path : base);
-			}
-		}, fn(module, module.exports), module.exports;
-	}
-
-	function commonjsRequire () {
-		throw new Error('Dynamic requires are not currently supported by @rollup/plugin-commonjs');
+	function createCommonjsModule(fn) {
+	  var module = { exports: {} };
+		return fn(module, module.exports), module.exports;
 	}
 
 	var check = function (it) {
@@ -21,7 +12,7 @@
 	};
 
 	// https://github.com/zloirock/core-js/issues/86#issuecomment-115759028
-	var global_1 =
+	var global$1 =
 	  // eslint-disable-next-line no-undef
 	  check(typeof globalThis == 'object' && globalThis) ||
 	  check(typeof window == 'object' && window) ||
@@ -124,7 +115,7 @@
 	  return hasOwnProperty.call(it, key);
 	};
 
-	var document$1 = global_1.document;
+	var document$1 = global$1.document;
 	// typeof document.createElement is 'object' in old IE
 	var EXISTS = isObject(document$1) && isObject(document$1.createElement);
 
@@ -191,14 +182,14 @@
 
 	var setGlobal = function (key, value) {
 	  try {
-	    createNonEnumerableProperty(global_1, key, value);
+	    createNonEnumerableProperty(global$1, key, value);
 	  } catch (error) {
-	    global_1[key] = value;
+	    global$1[key] = value;
 	  } return value;
 	};
 
 	var SHARED = '__core-js_shared__';
-	var store = global_1[SHARED] || setGlobal(SHARED, {});
+	var store = global$1[SHARED] || setGlobal(SHARED, {});
 
 	var sharedStore = store;
 
@@ -213,7 +204,7 @@
 
 	var inspectSource = sharedStore.inspectSource;
 
-	var WeakMap = global_1.WeakMap;
+	var WeakMap = global$1.WeakMap;
 
 	var nativeWeakMap = typeof WeakMap === 'function' && /native code/.test(inspectSource(WeakMap));
 
@@ -221,7 +212,7 @@
 	(module.exports = function (key, value) {
 	  return sharedStore[key] || (sharedStore[key] = value !== undefined ? value : {});
 	})('versions', []).push({
-	  version: '3.7.0',
+	  version: '3.8.1',
 	  mode:  'global',
 	  copyright: '© 2020 Denis Pushkarev (zloirock.ru)'
 	});
@@ -242,7 +233,7 @@
 
 	var hiddenKeys = {};
 
-	var WeakMap$1 = global_1.WeakMap;
+	var WeakMap$1 = global$1.WeakMap;
 	var set, get, has$1;
 
 	var enforce = function (it) {
@@ -317,7 +308,7 @@
 	      state.source = TEMPLATE.join(typeof key == 'string' ? key : '');
 	    }
 	  }
-	  if (O === global_1) {
+	  if (O === global$1) {
 	    if (simple) O[key] = value;
 	    else setGlobal(key, value);
 	    return;
@@ -334,15 +325,15 @@
 	});
 	});
 
-	var path = global_1;
+	var path = global$1;
 
 	var aFunction = function (variable) {
 	  return typeof variable == 'function' ? variable : undefined;
 	};
 
 	var getBuiltIn = function (namespace, method) {
-	  return arguments.length < 2 ? aFunction(path[namespace]) || aFunction(global_1[namespace])
-	    : path[namespace] && path[namespace][method] || global_1[namespace] && global_1[namespace][method];
+	  return arguments.length < 2 ? aFunction(path[namespace]) || aFunction(global$1[namespace])
+	    : path[namespace] && path[namespace][method] || global$1[namespace] && global$1[namespace][method];
 	};
 
 	var ceil = Math.ceil;
@@ -511,11 +502,11 @@
 	  var STATIC = options.stat;
 	  var FORCED, target, key, targetProperty, sourceProperty, descriptor;
 	  if (GLOBAL) {
-	    target = global_1;
+	    target = global$1;
 	  } else if (STATIC) {
-	    target = global_1[TARGET] || setGlobal(TARGET, {});
+	    target = global$1[TARGET] || setGlobal(TARGET, {});
 	  } else {
-	    target = (global_1[TARGET] || {}).prototype;
+	    target = (global$1[TARGET] || {}).prototype;
 	  }
 	  if (target) for (key in source) {
 	    sourceProperty = source[key];
@@ -569,7 +560,7 @@
 	  && typeof Symbol.iterator == 'symbol';
 
 	var WellKnownSymbolsStore = shared('wks');
-	var Symbol$1 = global_1.Symbol;
+	var Symbol$1 = global$1.Symbol;
 	var createWellKnownSymbol = useSymbolAsUid ? Symbol$1 : Symbol$1 && Symbol$1.withoutSetter || uid;
 
 	var wellKnownSymbol = function (name) {
@@ -598,7 +589,7 @@
 
 	var engineUserAgent = getBuiltIn('navigator', 'userAgent') || '';
 
-	var process = global_1.process;
+	var process = global$1.process;
 	var versions = process && process.versions;
 	var v8 = versions && versions.v8;
 	var match, version;
@@ -711,13 +702,14 @@
 
 	var push = [].push;
 
-	// `Array.prototype.{ forEach, map, filter, some, every, find, findIndex }` methods implementation
+	// `Array.prototype.{ forEach, map, filter, some, every, find, findIndex, filterOut }` methods implementation
 	var createMethod$1 = function (TYPE) {
 	  var IS_MAP = TYPE == 1;
 	  var IS_FILTER = TYPE == 2;
 	  var IS_SOME = TYPE == 3;
 	  var IS_EVERY = TYPE == 4;
 	  var IS_FIND_INDEX = TYPE == 6;
+	  var IS_FILTER_OUT = TYPE == 7;
 	  var NO_HOLES = TYPE == 5 || IS_FIND_INDEX;
 	  return function ($this, callbackfn, that, specificCreate) {
 	    var O = toObject($this);
@@ -726,7 +718,7 @@
 	    var length = toLength(self.length);
 	    var index = 0;
 	    var create = specificCreate || arraySpeciesCreate;
-	    var target = IS_MAP ? create($this, length) : IS_FILTER ? create($this, 0) : undefined;
+	    var target = IS_MAP ? create($this, length) : IS_FILTER || IS_FILTER_OUT ? create($this, 0) : undefined;
 	    var value, result;
 	    for (;length > index; index++) if (NO_HOLES || index in self) {
 	      value = self[index];
@@ -738,7 +730,10 @@
 	          case 5: return value;             // find
 	          case 6: return index;             // findIndex
 	          case 2: push.call(target, value); // filter
-	        } else if (IS_EVERY) return false;  // every
+	        } else switch (TYPE) {
+	          case 4: return false;             // every
+	          case 7: push.call(target, value); // filterOut
+	        }
 	      }
 	    }
 	    return IS_FIND_INDEX ? -1 : IS_SOME || IS_EVERY ? IS_EVERY : target;
@@ -766,7 +761,10 @@
 	  find: createMethod$1(5),
 	  // `Array.prototype.findIndex` method
 	  // https://tc39.github.io/ecma262/#sec-array.prototype.findIndex
-	  findIndex: createMethod$1(6)
+	  findIndex: createMethod$1(6),
+	  // `Array.prototype.filterOut` method
+	  // https://github.com/tc39/proposal-array-filtering
+	  filterOut: createMethod$1(7)
 	};
 
 	var arrayMethodIsStrict = function (METHOD_NAME, argument) {
@@ -939,7 +937,7 @@
 	};
 
 	for (var COLLECTION_NAME in domIterables) {
-	  var Collection = global_1[COLLECTION_NAME];
+	  var Collection = global$1[COLLECTION_NAME];
 	  var CollectionPrototype = Collection && Collection.prototype;
 	  // some Chrome versions have non-configurable methods on DOMTokenList
 	  if (CollectionPrototype && CollectionPrototype.forEach !== arrayForEach) try {
@@ -1271,7 +1269,7 @@
 	var setInternalState = internalState.set;
 	var getInternalState = internalState.getterFor(SYMBOL);
 	var ObjectPrototype = Object[PROTOTYPE$1];
-	var $Symbol = global_1.Symbol;
+	var $Symbol = global$1.Symbol;
 	var $stringify = getBuiltIn('JSON', 'stringify');
 	var nativeGetOwnPropertyDescriptor$1 = objectGetOwnPropertyDescriptor.f;
 	var nativeDefineProperty$1 = objectDefineProperty.f;
@@ -1282,7 +1280,7 @@
 	var StringToSymbolRegistry = shared('string-to-symbol-registry');
 	var SymbolToStringRegistry = shared('symbol-to-string-registry');
 	var WellKnownSymbolsStore$1 = shared('wks');
-	var QObject = global_1.QObject;
+	var QObject = global$1.QObject;
 	// Don't use setters in Qt Script, https://github.com/zloirock/core-js/issues/173
 	var USE_SETTER = !QObject || !QObject[PROTOTYPE$1] || !QObject[PROTOTYPE$1].findChild;
 
@@ -1541,7 +1539,7 @@
 	var defineProperty$5 = objectDefineProperty.f;
 
 
-	var NativeSymbol = global_1.Symbol;
+	var NativeSymbol = global$1.Symbol;
 
 	if (descriptors && typeof NativeSymbol == 'function' && (!('description' in NativeSymbol.prototype) ||
 	  // Safari 12 bug
@@ -2020,7 +2018,7 @@
 	var ArrayValues = es_array_iterator.values;
 
 	for (var COLLECTION_NAME$1 in domIterables) {
-	  var Collection$1 = global_1[COLLECTION_NAME$1];
+	  var Collection$1 = global$1[COLLECTION_NAME$1];
 	  var CollectionPrototype$1 = Collection$1 && Collection$1.prototype;
 	  if (CollectionPrototype$1) {
 	    // some Chrome versions have non-configurable methods on DOMTokenList
@@ -2154,7 +2152,7 @@
 
 	// JSON[@@toStringTag] property
 	// https://tc39.github.io/ecma262/#sec-json-@@tostringtag
-	setToStringTag(global_1.JSON, 'JSON', true);
+	setToStringTag(global$1.JSON, 'JSON', true);
 
 	// Math[@@toStringTag] property
 	// https://tc39.github.io/ecma262/#sec-math-@@tostringtag
@@ -2170,7 +2168,7 @@
 	  }
 	});
 
-	var nativePromiseConstructor = global_1.Promise;
+	var nativePromiseConstructor = global$1.Promise;
 
 	var redefineAll = function (target, src, options) {
 	  for (var key in src) redefine(target, key, src[key], options);
@@ -2261,14 +2259,14 @@
 
 	var engineIsIos = /(iphone|ipod|ipad).*applewebkit/i.test(engineUserAgent);
 
-	var engineIsNode = classofRaw(global_1.process) == 'process';
+	var engineIsNode = classofRaw(global$1.process) == 'process';
 
-	var location = global_1.location;
-	var set$1 = global_1.setImmediate;
-	var clear = global_1.clearImmediate;
-	var process$1 = global_1.process;
-	var MessageChannel = global_1.MessageChannel;
-	var Dispatch = global_1.Dispatch;
+	var location = global$1.location;
+	var set$1 = global$1.setImmediate;
+	var clear = global$1.clearImmediate;
+	var process$1 = global$1.process;
+	var MessageChannel = global$1.MessageChannel;
+	var Dispatch = global$1.Dispatch;
 	var counter = 0;
 	var queue = {};
 	var ONREADYSTATECHANGE = 'onreadystatechange';
@@ -2295,7 +2293,7 @@
 
 	var post = function (id) {
 	  // old engines have not location.origin
-	  global_1.postMessage(id + '', location.protocol + '//' + location.host);
+	  global$1.postMessage(id + '', location.protocol + '//' + location.host);
 	};
 
 	// Node.js 0.9+ & IE10+ has setImmediate, otherwise:
@@ -2334,14 +2332,14 @@
 	  // Browsers with postMessage, skip WebWorkers
 	  // IE8 has postMessage, but it's sync & typeof its postMessage is 'object'
 	  } else if (
-	    global_1.addEventListener &&
+	    global$1.addEventListener &&
 	    typeof postMessage == 'function' &&
-	    !global_1.importScripts &&
+	    !global$1.importScripts &&
 	    location && location.protocol !== 'file:' &&
 	    !fails(post)
 	  ) {
 	    defer = post;
-	    global_1.addEventListener('message', listener, false);
+	    global$1.addEventListener('message', listener, false);
 	  // IE8-
 	  } else if (ONREADYSTATECHANGE in documentCreateElement('script')) {
 	    defer = function (id) {
@@ -2368,12 +2366,12 @@
 
 
 
-	var MutationObserver = global_1.MutationObserver || global_1.WebKitMutationObserver;
-	var document$2 = global_1.document;
-	var process$2 = global_1.process;
-	var Promise$1 = global_1.Promise;
+	var MutationObserver = global$1.MutationObserver || global$1.WebKitMutationObserver;
+	var document$2 = global$1.document;
+	var process$2 = global$1.process;
+	var Promise$1 = global$1.Promise;
 	// Node.js 11 shows ExperimentalWarning on getting `queueMicrotask`
-	var queueMicrotaskDescriptor = getOwnPropertyDescriptor$3(global_1, 'queueMicrotask');
+	var queueMicrotaskDescriptor = getOwnPropertyDescriptor$3(global$1, 'queueMicrotask');
 	var queueMicrotask = queueMicrotaskDescriptor && queueMicrotaskDescriptor.value;
 
 	var flush, head, last, notify, toggle, node, promise, then;
@@ -2427,7 +2425,7 @@
 	  } else {
 	    notify = function () {
 	      // strange IE + webpack dev server bug - use .call(global)
-	      macrotask.call(global_1, flush);
+	      macrotask.call(global$1, flush);
 	    };
 	  }
 	}
@@ -2471,7 +2469,7 @@
 	};
 
 	var hostReportErrors = function (a, b) {
-	  var console = global_1.console;
+	  var console = global$1.console;
 	  if (console && console.error) {
 	    arguments.length === 1 ? console.error(a) : console.error(a, b);
 	  }
@@ -2503,13 +2501,13 @@
 	var setInternalState$3 = internalState.set;
 	var getInternalPromiseState = internalState.getterFor(PROMISE);
 	var PromiseConstructor = nativePromiseConstructor;
-	var TypeError$1 = global_1.TypeError;
-	var document$3 = global_1.document;
-	var process$3 = global_1.process;
+	var TypeError$1 = global$1.TypeError;
+	var document$3 = global$1.document;
+	var process$3 = global$1.process;
 	var $fetch = getBuiltIn('fetch');
 	var newPromiseCapability$1 = newPromiseCapability.f;
 	var newGenericPromiseCapability = newPromiseCapability$1;
-	var DISPATCH_EVENT = !!(document$3 && document$3.createEvent && global_1.dispatchEvent);
+	var DISPATCH_EVENT = !!(document$3 && document$3.createEvent && global$1.dispatchEvent);
 	var NATIVE_REJECTION_EVENT = typeof PromiseRejectionEvent == 'function';
 	var UNHANDLED_REJECTION = 'unhandledrejection';
 	var REJECTION_HANDLED = 'rejectionhandled';
@@ -2609,14 +2607,14 @@
 	    event.promise = promise;
 	    event.reason = reason;
 	    event.initEvent(name, false, true);
-	    global_1.dispatchEvent(event);
+	    global$1.dispatchEvent(event);
 	  } else event = { promise: promise, reason: reason };
-	  if (!NATIVE_REJECTION_EVENT && (handler = global_1['on' + name])) handler(event);
+	  if (!NATIVE_REJECTION_EVENT && (handler = global$1['on' + name])) handler(event);
 	  else if (name === UNHANDLED_REJECTION) hostReportErrors('Unhandled promise rejection', reason);
 	};
 
 	var onUnhandled = function (state) {
-	  task$1.call(global_1, function () {
+	  task$1.call(global$1, function () {
 	    var promise = state.facade;
 	    var value = state.value;
 	    var IS_UNHANDLED = isUnhandled(state);
@@ -2639,7 +2637,7 @@
 	};
 
 	var onHandleUnhandled = function (state) {
-	  task$1.call(global_1, function () {
+	  task$1.call(global$1, function () {
 	    var promise = state.facade;
 	    if (engineIsNode) {
 	      process$3.emit('rejectionHandled', promise);
@@ -2767,7 +2765,7 @@
 	    if (typeof $fetch == 'function') _export({ global: true, enumerable: true, forced: true }, {
 	      // eslint-disable-next-line no-unused-vars
 	      fetch: function fetch(input /* , init */) {
-	        return promiseResolve(PromiseConstructor, $fetch.apply(global_1, arguments));
+	        return promiseResolve(PromiseConstructor, $fetch.apply(global$1, arguments));
 	      }
 	    });
 	  }
@@ -2869,12 +2867,6 @@
 	});
 
 	var runtime_1 = createCommonjsModule(function (module) {
-	  /**
-	   * Copyright (c) 2014-present, Facebook, Inc.
-	   *
-	   * This source code is licensed under the MIT license found in the
-	   * LICENSE file in the root directory of this source tree.
-	   */
 	  var runtime = function (exports) {
 
 	    var Op = Object.prototype;
@@ -5636,9 +5628,9 @@
 
 
 
-	var Int8Array$1 = global_1.Int8Array;
+	var Int8Array$1 = global$1.Int8Array;
 	var Int8ArrayPrototype = Int8Array$1 && Int8Array$1.prototype;
-	var Uint8ClampedArray = global_1.Uint8ClampedArray;
+	var Uint8ClampedArray = global$1.Uint8ClampedArray;
 	var Uint8ClampedArrayPrototype = Uint8ClampedArray && Uint8ClampedArray.prototype;
 	var TypedArray = Int8Array$1 && objectGetPrototypeOf(Int8Array$1);
 	var TypedArrayPrototype = Int8ArrayPrototype && objectGetPrototypeOf(Int8ArrayPrototype);
@@ -5648,7 +5640,7 @@
 	var TO_STRING_TAG$4 = wellKnownSymbol('toStringTag');
 	var TYPED_ARRAY_TAG = uid('TYPED_ARRAY_TAG');
 	// Fixing native typed arrays in Opera Presto crashes the browser, see #595
-	var NATIVE_ARRAY_BUFFER_VIEWS = arrayBufferNative && !!objectSetPrototypeOf && classof(global_1.opera) !== 'Opera';
+	var NATIVE_ARRAY_BUFFER_VIEWS = arrayBufferNative && !!objectSetPrototypeOf && classof(global$1.opera) !== 'Opera';
 	var TYPED_ARRAY_TAG_REQIRED = false;
 	var NAME$1;
 
@@ -5664,13 +5656,24 @@
 	  Float64Array: 8
 	};
 
+	var BigIntArrayConstructorsList = {
+	  BigInt64Array: 8,
+	  BigUint64Array: 8
+	};
+
 	var isView = function isView(it) {
+	  if (!isObject(it)) return false;
 	  var klass = classof(it);
-	  return klass === 'DataView' || has(TypedArrayConstructorsList, klass);
+	  return klass === 'DataView'
+	    || has(TypedArrayConstructorsList, klass)
+	    || has(BigIntArrayConstructorsList, klass);
 	};
 
 	var isTypedArray = function (it) {
-	  return isObject(it) && has(TypedArrayConstructorsList, classof(it));
+	  if (!isObject(it)) return false;
+	  var klass = classof(it);
+	  return has(TypedArrayConstructorsList, klass)
+	    || has(BigIntArrayConstructorsList, klass);
 	};
 
 	var aTypedArray = function (it) {
@@ -5682,7 +5685,7 @@
 	  if (objectSetPrototypeOf) {
 	    if (isPrototypeOf.call(TypedArray, C)) return C;
 	  } else for (var ARRAY in TypedArrayConstructorsList) if (has(TypedArrayConstructorsList, NAME$1)) {
-	    var TypedArrayConstructor = global_1[ARRAY];
+	    var TypedArrayConstructor = global$1[ARRAY];
 	    if (TypedArrayConstructor && (C === TypedArrayConstructor || isPrototypeOf.call(TypedArrayConstructor, C))) {
 	      return C;
 	    }
@@ -5692,7 +5695,7 @@
 	var exportTypedArrayMethod = function (KEY, property, forced) {
 	  if (!descriptors) return;
 	  if (forced) for (var ARRAY in TypedArrayConstructorsList) {
-	    var TypedArrayConstructor = global_1[ARRAY];
+	    var TypedArrayConstructor = global$1[ARRAY];
 	    if (TypedArrayConstructor && has(TypedArrayConstructor.prototype, KEY)) {
 	      delete TypedArrayConstructor.prototype[KEY];
 	    }
@@ -5708,7 +5711,7 @@
 	  if (!descriptors) return;
 	  if (objectSetPrototypeOf) {
 	    if (forced) for (ARRAY in TypedArrayConstructorsList) {
-	      TypedArrayConstructor = global_1[ARRAY];
+	      TypedArrayConstructor = global$1[ARRAY];
 	      if (TypedArrayConstructor && has(TypedArrayConstructor, KEY)) {
 	        delete TypedArrayConstructor[KEY];
 	      }
@@ -5721,7 +5724,7 @@
 	    } else return;
 	  }
 	  for (ARRAY in TypedArrayConstructorsList) {
-	    TypedArrayConstructor = global_1[ARRAY];
+	    TypedArrayConstructor = global$1[ARRAY];
 	    if (TypedArrayConstructor && (!TypedArrayConstructor[KEY] || forced)) {
 	      redefine(TypedArrayConstructor, KEY, property);
 	    }
@@ -5729,7 +5732,7 @@
 	};
 
 	for (NAME$1 in TypedArrayConstructorsList) {
-	  if (!global_1[NAME$1]) NATIVE_ARRAY_BUFFER_VIEWS = false;
+	  if (!global$1[NAME$1]) NATIVE_ARRAY_BUFFER_VIEWS = false;
 	}
 
 	// WebKit bug - typed arrays constructors prototype is Object.prototype
@@ -5739,14 +5742,14 @@
 	    throw TypeError('Incorrect invocation');
 	  };
 	  if (NATIVE_ARRAY_BUFFER_VIEWS) for (NAME$1 in TypedArrayConstructorsList) {
-	    if (global_1[NAME$1]) objectSetPrototypeOf(global_1[NAME$1], TypedArray);
+	    if (global$1[NAME$1]) objectSetPrototypeOf(global$1[NAME$1], TypedArray);
 	  }
 	}
 
 	if (!NATIVE_ARRAY_BUFFER_VIEWS || !TypedArrayPrototype || TypedArrayPrototype === ObjectPrototype$2) {
 	  TypedArrayPrototype = TypedArray.prototype;
 	  if (NATIVE_ARRAY_BUFFER_VIEWS) for (NAME$1 in TypedArrayConstructorsList) {
-	    if (global_1[NAME$1]) objectSetPrototypeOf(global_1[NAME$1].prototype, TypedArrayPrototype);
+	    if (global$1[NAME$1]) objectSetPrototypeOf(global$1[NAME$1].prototype, TypedArrayPrototype);
 	  }
 	}
 
@@ -5760,8 +5763,8 @@
 	  defineProperty$6(TypedArrayPrototype, TO_STRING_TAG$4, { get: function () {
 	    return isObject(this) ? this[TYPED_ARRAY_TAG] : undefined;
 	  } });
-	  for (NAME$1 in TypedArrayConstructorsList) if (global_1[NAME$1]) {
-	    createNonEnumerableProperty(global_1[NAME$1], TYPED_ARRAY_TAG, NAME$1);
+	  for (NAME$1 in TypedArrayConstructorsList) if (global$1[NAME$1]) {
+	    createNonEnumerableProperty(global$1[NAME$1], TYPED_ARRAY_TAG, NAME$1);
 	  }
 	}
 
@@ -5780,12 +5783,10 @@
 
 	/* eslint-disable no-new */
 
-
-
 	var NATIVE_ARRAY_BUFFER_VIEWS$1 = arrayBufferViewCore.NATIVE_ARRAY_BUFFER_VIEWS;
 
-	var ArrayBuffer$1 = global_1.ArrayBuffer;
-	var Int8Array$2 = global_1.Int8Array;
+	var ArrayBuffer$1 = global$1.ArrayBuffer;
+	var Int8Array$2 = global$1.Int8Array;
 
 	var typedArrayConstructorsRequireWrappers = !NATIVE_ARRAY_BUFFER_VIEWS$1 || !fails(function () {
 	  Int8Array$2(1);
@@ -5926,12 +5927,12 @@
 	var PROTOTYPE$2 = 'prototype';
 	var WRONG_LENGTH = 'Wrong length';
 	var WRONG_INDEX = 'Wrong index';
-	var NativeArrayBuffer = global_1[ARRAY_BUFFER];
+	var NativeArrayBuffer = global$1[ARRAY_BUFFER];
 	var $ArrayBuffer = NativeArrayBuffer;
-	var $DataView = global_1[DATA_VIEW];
+	var $DataView = global$1[DATA_VIEW];
 	var $DataViewPrototype = $DataView && $DataView[PROTOTYPE$2];
 	var ObjectPrototype$3 = Object.prototype;
-	var RangeError$1 = global_1.RangeError;
+	var RangeError$1 = global$1.RangeError;
 
 	var packIEEE754 = ieee754.pack;
 	var unpackIEEE754 = ieee754.unpack;
@@ -6214,7 +6215,7 @@
 	var nativeDefineProperty = objectDefineProperty.f;
 	var nativeGetOwnPropertyDescriptor = objectGetOwnPropertyDescriptor.f;
 	var round = Math.round;
-	var RangeError = global_1.RangeError;
+	var RangeError = global$1.RangeError;
 	var ArrayBuffer = arrayBuffer.ArrayBuffer;
 	var DataView = arrayBuffer.DataView;
 	var NATIVE_ARRAY_BUFFER_VIEWS = arrayBufferViewCore.NATIVE_ARRAY_BUFFER_VIEWS;
@@ -6294,7 +6295,7 @@
 	    var CONSTRUCTOR_NAME = TYPE + (CLAMPED ? 'Clamped' : '') + 'Array';
 	    var GETTER = 'get' + TYPE;
 	    var SETTER = 'set' + TYPE;
-	    var NativeTypedArrayConstructor = global_1[CONSTRUCTOR_NAME];
+	    var NativeTypedArrayConstructor = global$1[CONSTRUCTOR_NAME];
 	    var TypedArrayConstructor = NativeTypedArrayConstructor;
 	    var TypedArrayConstructorPrototype = TypedArrayConstructor && TypedArrayConstructor.prototype;
 	    var exported = {};
@@ -6558,7 +6559,7 @@
 	});
 
 	var ITERATOR$6 = wellKnownSymbol('iterator');
-	var Uint8Array$1 = global_1.Uint8Array;
+	var Uint8Array$1 = global$1.Uint8Array;
 	var arrayValues = es_array_iterator.values;
 	var arrayKeys = es_array_iterator.keys;
 	var arrayEntries = es_array_iterator.entries;
@@ -6769,7 +6770,7 @@
 	  );
 	});
 
-	var Int8Array$3 = global_1.Int8Array;
+	var Int8Array$3 = global$1.Int8Array;
 	var aTypedArray$m = arrayBufferViewCore.aTypedArray;
 	var exportTypedArrayMethod$m = arrayBufferViewCore.exportTypedArrayMethod;
 	var $toLocaleString = [].toLocaleString;
@@ -6796,7 +6797,7 @@
 
 
 
-	var Uint8Array$2 = global_1.Uint8Array;
+	var Uint8Array$2 = global$1.Uint8Array;
 	var Uint8ArrayPrototype = Uint8Array$2 && Uint8Array$2.prototype || {};
 	var arrayToString = [].toString;
 	var arrayJoin = [].join;
@@ -7041,7 +7042,7 @@
 
 
 	var MATCH$2 = wellKnownSymbol('match');
-	var NativeRegExp = global_1.RegExp;
+	var NativeRegExp = global$1.RegExp;
 	var RegExpPrototype$1 = NativeRegExp.prototype;
 	var re1 = /a/g;
 	var re2 = /a/g;
@@ -7104,7 +7105,7 @@
 	  while (keys$2.length > index) proxy(keys$2[index++]);
 	  RegExpPrototype$1.constructor = RegExpWrapper;
 	  RegExpWrapper.prototype = RegExpPrototype$1;
-	  redefine(global_1, 'RegExp', RegExpWrapper);
+	  redefine(global$1, 'RegExp', RegExpWrapper);
 	}
 
 	// https://tc39.github.io/ecma262/#sec-get-regexp-@@species
@@ -7812,7 +7813,7 @@
 	  var IS_MAP = CONSTRUCTOR_NAME.indexOf('Map') !== -1;
 	  var IS_WEAK = CONSTRUCTOR_NAME.indexOf('Weak') !== -1;
 	  var ADDER = IS_MAP ? 'set' : 'add';
-	  var NativeConstructor = global_1[CONSTRUCTOR_NAME];
+	  var NativeConstructor = global$1[CONSTRUCTOR_NAME];
 	  var NativePrototype = NativeConstructor && NativeConstructor.prototype;
 	  var Constructor = NativeConstructor;
 	  var exported = {};
@@ -13449,7 +13450,9 @@
 	  "application/timestamped-data": ["tsd"],
 	  "application/toml": ["toml"],
 	  "application/ttml+xml": ["ttml"],
+	  "application/ubjson": ["ubj"],
 	  "application/urc-ressheet+xml": ["rsheet"],
+	  "application/urc-targetdesc+xml": ["td"],
 	  "application/voicexml+xml": ["vxml"],
 	  "application/wasm": ["wasm"],
 	  "application/widget": ["wgt"],
@@ -13470,7 +13473,7 @@
 	  "application/xml-dtd": ["dtd"],
 	  "application/xop+xml": ["xop"],
 	  "application/xproc+xml": ["xpl"],
-	  "application/xslt+xml": ["xslt"],
+	  "application/xslt+xml": ["*xsl", "xslt"],
 	  "application/xspf+xml": ["xspf"],
 	  "application/xv+xml": ["mxml", "xhvml", "xvml", "xvm"],
 	  "application/yang": ["yang"],
@@ -13498,6 +13501,7 @@
 	  "font/woff2": ["woff2"],
 	  "image/aces": ["exr"],
 	  "image/apng": ["apng"],
+	  "image/avif": ["avif"],
 	  "image/bmp": ["bmp"],
 	  "image/cgm": ["cgm"],
 	  "image/dicom-rle": ["drle"],
@@ -13527,6 +13531,7 @@
 	  "image/jxsi": ["jxsi"],
 	  "image/jxss": ["jxss"],
 	  "image/ktx": ["ktx"],
+	  "image/ktx2": ["ktx2"],
 	  "image/png": ["png"],
 	  "image/sgi": ["sgi"],
 	  "image/svg+xml": ["svg", "svgz"],
@@ -13574,6 +13579,7 @@
 	  "text/sgml": ["sgml", "sgm"],
 	  "text/shex": ["shex"],
 	  "text/slim": ["slim", "slm"],
+	  "text/spdx": ["spdx"],
 	  "text/stylus": ["stylus", "styl"],
 	  "text/tab-separated-values": ["tsv"],
 	  "text/troff": ["t", "tr", "roff", "man", "me", "ms"],
