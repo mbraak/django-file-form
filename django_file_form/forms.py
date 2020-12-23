@@ -10,11 +10,11 @@ from .util import get_list
 
 
 class FileFormMixin(object):
+    s3_upload_dir = None
+
     def __init__(self, *args, **kwargs):
-        s3_upload_dir = kwargs.pop(
-            "s3_upload_dir",
-            self.s3_upload_dir if hasattr(self, "s3_upload_dir") else None,
-        )
+        s3_upload_dir = kwargs.pop("s3_upload_dir", self.s3_upload_dir)
+
         super().__init__(*args, **kwargs)
 
         if s3_upload_dir is not None:
