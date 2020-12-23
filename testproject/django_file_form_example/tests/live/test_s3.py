@@ -231,7 +231,8 @@ class S3TestCase(BaseLiveTestCase):
         files_in_bucket = list(self.bucket.objects.all())
         self.assertEqual(len(files_in_bucket), 1)
         self.assertEqual(
-            files_in_bucket[0].key, f"temp_uploads/s3_placeholder_example/{temp_file.base_name()}"
+            files_in_bucket[0].key,
+            f"temp_uploads/s3_placeholder_example/{temp_file.base_name()}",
         )
 
         page.submit()

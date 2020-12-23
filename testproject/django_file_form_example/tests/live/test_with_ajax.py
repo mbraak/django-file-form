@@ -373,7 +373,7 @@ class LiveTestCase(BaseLiveTestCase):
 
         page.open("/wizard")
 
-        page.assert_page_contains_text('Page 1')
+        page.assert_page_contains_text("Page 1")
 
         page.fill_title_field("abc", form_prefix="0")
         page.upload_using_js(temp_file)
@@ -381,20 +381,20 @@ class LiveTestCase(BaseLiveTestCase):
         page.find_upload_success(temp_file)
 
         page.submit()
-        page.assert_page_contains_text('Page 2')
+        page.assert_page_contains_text("Page 2")
 
         previous_button = page.selenium.find_element_by_css_selector("button")
         self.assertEqual(previous_button.text, "Previous")
 
         previous_button.click()
-        page.assert_page_contains_text('Page 1')
+        page.assert_page_contains_text("Page 1")
 
         page.find_upload_success(temp_file)
 
         page.submit()
-        page.assert_page_contains_text('Page 2')
+        page.assert_page_contains_text("Page 2")
         page.submit()
-        page.assert_page_contains_text('Page 1')
+        page.assert_page_contains_text("Page 1")
 
     def test_form_set(self):
         page = self.page
@@ -658,16 +658,22 @@ class LiveTestCase(BaseLiveTestCase):
 
         page.open("/custom_widget")
 
-        placeholder1_input_selector = '#row-example-input_file .dff-file-id-0 input.dff-description'
-        placeholder1_input = page.selenium.find_element_by_css_selector(placeholder1_input_selector)
-        self.assertEqual(placeholder1_input.get_property('value'), 'placeholder 1')
+        placeholder1_input_selector = (
+            "#row-example-input_file .dff-file-id-0 input.dff-description"
+        )
+        placeholder1_input = page.selenium.find_element_by_css_selector(
+            placeholder1_input_selector
+        )
+        self.assertEqual(placeholder1_input.get_property("value"), "placeholder 1")
 
         placeholder1_input.clear()
-        placeholder1_input.send_keys('new value')
+        placeholder1_input.send_keys("new value")
         page.submit()
 
-        placeholder1_input = page.selenium.find_element_by_css_selector(placeholder1_input_selector)
-        self.assertEqual(placeholder1_input.get_property('value'), 'new value')
+        placeholder1_input = page.selenium.find_element_by_css_selector(
+            placeholder1_input_selector
+        )
+        self.assertEqual(placeholder1_input.get_property("value"), "new value")
 
         page.fill_title_field("abc")
         page.submit()
