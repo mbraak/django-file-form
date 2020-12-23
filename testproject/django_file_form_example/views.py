@@ -24,13 +24,6 @@ class BaseFormView(generic.FormView):
     use_ajax = True
     custom_js_file = "example_form.js"
 
-    def get_form_kwargs(self):
-        # pass s3_upload_dir from view to form
-        kwargs = super(BaseFormView, self).get_form_kwargs()
-        if hasattr(self, "s3_upload_dir"):
-            kwargs.update({"s3_upload_dir": self.s3_upload_dir})
-        return kwargs
-
     def get_success_url(self):
         return reverse("example_success")
 
@@ -88,7 +81,7 @@ class PlaceholderView(BaseFormView):
     template_name = "placeholder_form.html"
 
     def get_initial(self):
-        initial = super(PlaceholderView, self).get_initial()
+        initial = super().get_initial()
 
         if self.request.method == "GET":
             initial["input_file"] = [
@@ -122,7 +115,11 @@ class S3ExampleView(BaseFormView):
 
 
 class S3PlaceholderExampleView(PlaceholderView):
-    s3_upload_dir = "s3_placeholder_example"
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+
+        kwargs.update({"s3_upload_dir": "s3_placeholder_example"})
+        return kwargs
 
 
 class WithAcceptExample(BaseFormView):
@@ -134,7 +131,7 @@ class WithCustomWidgetExample(PlaceholderView):
     form_class = forms.PlaceholderWidgetExampleForm
 
     def get_initial(self):
-        initial = super(WithCustomWidgetExample, self).get_initial()
+        initial = super().get_initial()
 
         if self.request.method == "GET":
             initial["input_file"] = [
