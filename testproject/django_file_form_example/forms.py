@@ -17,7 +17,7 @@ class BaseForm(FileFormMixin, Form):
     title = CharField(required=False)
 
     def clean(self):
-        cleaned_data = super(BaseForm, self).clean()
+        cleaned_data = super().clean()
 
         if not cleaned_data["title"]:
             raise ValidationError("Title field is required")
@@ -32,9 +32,12 @@ class ExampleForm(BaseForm):
     def save(self):
         input_file = self.cleaned_data["input_file"]
 
-        Example.objects.create(title=self.cleaned_data["title"], input_file=input_file)
-
-        input_file.close()
+        try:
+            Example.objects.create(
+                title=self.cleaned_data["title"], input_file=input_file
+            )
+        finally:
+            input_file.close()
 
         self.delete_temporary_files()
 
@@ -56,8 +59,10 @@ class MultipleFileExampleForm(BaseForm):
         example = Example2.objects.create(title=self.cleaned_data["title"])
 
         for f in self.cleaned_data["input_file"]:
-            ExampleFile.objects.create(example=example, input_file=f)
-            f.close()
+            try:
+                ExampleFile.objects.create(example=example, input_file=f)
+            finally:
+                f.close()
 
         self.delete_temporary_files()
 
@@ -70,19 +75,22 @@ class S3ExampleForm(BaseForm):
     def save(self):
         example = Example2.objects.create(title=self.cleaned_data["title"])
         for f in self.cleaned_data["input_file"]:
-            assert f.is_s3direct
+            try:
+                assert f.is_s3direct
 
-            # FILE_FORM_UPLOAD_DIR/s3_upload_dir/basename_RANDOM.ext
-            basename = os.path.splitext(os.path.basename(f.name))[0]
-            # basename.ext
-            original_basename = os.path.splitext(f.original_name)[0]
-            assert basename.startswith(original_basename)
-            # download from S3
+                # FILE_FORM_UPLOAD_DIR/s3_upload_dir/basename_RANDOM.ext
+                basename = os.path.splitext(os.path.basename(f.name))[0]
 
-            example_file = ExampleFile(example=example)
-            example_file.input_file.save(original_basename, f)
-            example_file.save()
-            f.close()
+                # basename.ext
+                original_basename = os.path.splitext(f.original_name)[0]
+                assert basename.startswith(original_basename)
+
+                # download from S3
+                example_file = ExampleFile(example=example)
+                example_file.input_file.save(original_basename, f)
+                example_file.save()
+            finally:
+                f.close()
 
 
 class WizardStepForm(Form):
@@ -101,15 +109,17 @@ class PlaceholderExampleForm(BaseForm):
             if f.is_placeholder:
                 continue
 
-            ExampleFile.objects.create(example=example, input_file=f)
-            f.close()
+            try:
+                ExampleFile.objects.create(example=example, input_file=f)
+            finally:
+                f.close()
 
         self.delete_temporary_files()
 
 
 class PlaceholderWidgetExampleForm(PlaceholderExampleForm):
     def save(self):
-        example = Example2.objects.create(title=self.cleaned_data["title"])
+        Example2.objects.create(title=self.cleaned_data["title"])
 
         for f in self.cleaned_data["input_file"]:
             assert f.metadata is not None

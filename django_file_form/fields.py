@@ -37,7 +37,9 @@ class UploadedFileField(FileField):
             return dict()
 
     def _get_file_qs(self, field_name, form_id):
-        return TemporaryUploadedFile.objects.filter(form_id=form_id, field_name=field_name)
+        return TemporaryUploadedFile.objects.filter(
+            form_id=form_id, field_name=field_name
+        )
 
 
 class MultipleUploadedFileField(UploadedFileField):
