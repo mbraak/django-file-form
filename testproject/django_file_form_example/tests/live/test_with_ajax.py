@@ -372,17 +372,29 @@ class LiveTestCase(BaseLiveTestCase):
         temp_file = page.create_temp_file("content1")
 
         page.open("/wizard")
+
+        page.assert_page_contains_text('Page 1')
+
         page.fill_title_field("abc", form_prefix="0")
         page.upload_using_js(temp_file)
 
         page.find_upload_success(temp_file)
+
         page.submit()
+        page.assert_page_contains_text('Page 2')
 
         previous_button = page.selenium.find_element_by_css_selector("button")
         self.assertEqual(previous_button.text, "Previous")
+
         previous_button.click()
+        page.assert_page_contains_text('Page 1')
 
         page.find_upload_success(temp_file)
+
+        page.submit()
+        page.assert_page_contains_text('Page 2')
+        page.submit()
+        page.assert_page_contains_text('Page 1')
 
     def test_form_set(self):
         page = self.page
