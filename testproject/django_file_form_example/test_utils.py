@@ -21,7 +21,7 @@ def encode_datetime(*args, **kwargs):
     if settings.USE_TZ:
         return timezone.make_aware(naive_datime, timezone.get_current_timezone())
     else:
-        return naive_datime
+        return naive_datime  # pragma: no cover
 
 
 def remove_p(path):
