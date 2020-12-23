@@ -668,3 +668,8 @@ class LiveTestCase(BaseLiveTestCase):
 
         placeholder1_input = page.selenium.find_element_by_css_selector(placeholder1_input_selector)
         self.assertEqual(placeholder1_input.get_property('value'), 'new value')
+
+        page.fill_title_field("abc")
+        page.submit()
+
+        self.assertEqual(Example2.objects.count(), 1)
