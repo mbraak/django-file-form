@@ -22,5 +22,5 @@ class ExampleFile(models.Model):
     )
     input_file = models.FileField(max_length=255, upload_to="example", storage=fs)
 
-    def __str__(self):
+    def __str__(self):  # pragma: no cover
         return str(self.input_file)

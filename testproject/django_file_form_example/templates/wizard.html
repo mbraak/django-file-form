@@ -4,6 +4,9 @@
 {% block title %}Wizard example{% endblock %}
 
 {% block body %}
+    <div>
+        Page {{ wizard.steps.step1 }}
+    </div>
     <form
         method="POST"
         enctype="multipart/form-data"
