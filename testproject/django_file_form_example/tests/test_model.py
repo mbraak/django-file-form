@@ -98,7 +98,7 @@ class DeleteUnusedFileTest(TestCase):
     def test_record_from_yesterday(self):
         TemporaryUploadedFile.objects.create(
             created=timezone.now() - timedelta(days=1),
-            uploaded_file=ContentFile("abc", self.filename)
+            uploaded_file=ContentFile("abc", self.filename),
         )
 
         TemporaryUploadedFile.objects.delete_unused_files()
@@ -109,7 +109,7 @@ class DeleteUnusedFileTest(TestCase):
     def test_record_from_today(self):
         TemporaryUploadedFile.objects.create(
             created=timezone.now() - timedelta(hours=1),
-            uploaded_file=ContentFile("abc", self.filename)
+            uploaded_file=ContentFile("abc", self.filename),
         )
 
         TemporaryUploadedFile.objects.delete_unused_files()

@@ -65,15 +65,24 @@ class Page(object):
         return el
 
     def find_upload_success(self, temp_file, upload_index=0, container_element=None):
+        return self.find_upload_success_with_filename(
+            temp_file.base_name(),
+            upload_index=upload_index,
+            container_element=container_element,
+        )
+
+    def find_upload_success_with_filename(
+        self, filename, upload_index=0, container_element=None
+    ):
         parent_element = container_element or self.selenium
 
         try:
             el = parent_element.find_element_by_css_selector(
                 f".dff-file-id-{upload_index}.dff-upload-success"
             )
-            return el.find_element_by_xpath(
-                f"//*[contains(text(), '{temp_file.base_name()}')]"
-            )
+
+            assert filename in el.text, f"{filename} not found"
+            return el
         except NoSuchElementException as e:  # pragma: no cover
             print(
                 parent_element.find_element_by_css_selector(".dff-files").get_attribute(

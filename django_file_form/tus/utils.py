@@ -36,7 +36,9 @@ def create_uploaded_file_in_db(
     if field_name:
         values["field_name"] = field_name
 
-    if storage_class == FileSystemStorage and not getattr(settings, 'FILE_FORM_ALWAYS_COPY_UPLOADED_FILE', False):
+    if storage_class == FileSystemStorage and not getattr(
+        settings, "FILE_FORM_ALWAYS_COPY_UPLOADED_FILE", False
+    ):
         create_uploaded_file_in_db_with_move(values, uploaded_file)
     else:
         create_uploaded_file_in_db_with_copy(values, uploaded_file)

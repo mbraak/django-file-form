@@ -440,19 +440,19 @@ class LiveTestCase(BaseLiveTestCase):
         el = page.selenium.find_element_by_css_selector(
             ".dff-file-id-0.dff-upload-success"
         )
-        el.find_element_by_xpath("//*[contains(text(), 'test_placeholder1.txt')]")
-        el.find_element_by_xpath("//*[contains(text(), '1 KB')]")
+        assert "test_placeholder1.txt" in el.text
+        assert "1 KB" in el.text
 
         el = page.selenium.find_element_by_css_selector(
             ".dff-file-id-1.dff-upload-success"
         )
-        el.find_element_by_xpath("//*[contains(text(), 'test_placeholder2.txt')]")
-        el.find_element_by_xpath("//*[contains(text(), '2 KB')]")
+        assert "test_placeholder2.txt" in el.text
+        assert "2 KB" in el.text
 
         # add file
         temp_file = page.create_temp_file("content1")
         page.upload_using_js(temp_file)
-        page.find_upload_success(temp_file, upload_index=1)
+        page.find_upload_success(temp_file, upload_index=2)
 
         # submit
         page.fill_title_field("abc")
@@ -507,7 +507,7 @@ class LiveTestCase(BaseLiveTestCase):
         # upload file
         temp_file = page.create_temp_file("content1")
         page.upload_using_js(temp_file)
-        page.find_upload_success(temp_file, upload_index=1)
+        page.find_upload_success(temp_file, upload_index=2)
 
         # submit form
         page.submit()
@@ -530,16 +530,21 @@ class LiveTestCase(BaseLiveTestCase):
             2,
         )
 
-        el = page.selenium.find_element_by_css_selector(
-            "#row-example-input_file .dff-file-id-0.dff-upload-success"
+        container = page.selenium.find_element_by_css_selector(
+            "#row-example-input_file"
         )
-        el.find_element_by_xpath("//*[contains(text(), 'test_placeholder2.txt')]")
-        el.find_element_by_xpath("//*[contains(text(), '2 KB')]")
+
+        page.find_upload_success_with_filename(
+            temp_file.base_name(), upload_index=0, container_element=container
+        )
+        page.find_upload_success_with_filename(
+            "test_placeholder2.txt", upload_index=1, container_element=container
+        )
 
         el = page.selenium.find_element_by_css_selector(
             "#row-example-input_file .dff-file-id-1.dff-upload-success"
         )
-        el.find_element_by_xpath(f"//*[contains(text(), '{temp_file.base_name()}')]")
+        assert "2 KB" in el.text
 
     def test_accept_attribute(self):
         page = self.page
