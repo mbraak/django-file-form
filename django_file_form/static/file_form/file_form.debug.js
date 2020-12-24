@@ -16428,11 +16428,20 @@
 	  });
 	};
 
-	var UploadDone = function UploadDone(_ref2) {
-	  var onDelete = _ref2.onDelete,
-	      translations = _ref2.translations,
-	      upload = _ref2.upload;
-	  return createVNode(1, "div", "dff-file dff-upload-success dff-file-id-".concat(upload.uploadIndex), [createVNode(1, "span", null, upload.name, 0), createVNode(1, "span", "dff-filesize", formatBytes(upload.getSize(), 2), 0), createComponentVNode(2, DeleteLink, {
+	var DefaultFileInfo = function DefaultFileInfo(_ref2) {
+	  var upload = _ref2.upload;
+	  return createFragment([createVNode(1, "span", null, upload.name, 0), createVNode(1, "span", "dff-filesize", formatBytes(upload.getSize(), 2), 0)], 4);
+	};
+
+	var UploadDone = function UploadDone(_ref3) {
+	  var CustomFileInfo = _ref3.CustomFileInfo,
+	      onDelete = _ref3.onDelete,
+	      translations = _ref3.translations,
+	      upload = _ref3.upload;
+	  var FileInfo = CustomFileInfo !== null && CustomFileInfo !== void 0 ? CustomFileInfo : DefaultFileInfo;
+	  return createVNode(1, "div", "dff-file dff-upload-success dff-file-id-".concat(upload.uploadIndex), [createComponentVNode(2, FileInfo, {
+	    "upload": upload
+	  }), createComponentVNode(2, DeleteLink, {
 	    "onDelete": onDelete,
 	    "translations": translations,
 	    "upload": upload
@@ -16446,13 +16455,15 @@
 	};
 
 	var Upload$1 = function Upload(_ref) {
-	  var onDelete = _ref.onDelete,
+	  var CustomFileInfo = _ref.CustomFileInfo,
+	      onDelete = _ref.onDelete,
 	      translations = _ref.translations,
 	      upload = _ref.upload;
 
 	  switch (upload.status) {
 	    case "done":
 	      return createComponentVNode(2, UploadDone, {
+	        "CustomFileInfo": CustomFileInfo,
 	        "onDelete": onDelete,
 	        "translations": translations,
 	        "upload": upload
@@ -16587,6 +16598,7 @@
 	      var _this$state;
 
 	      var _this$props = this.props,
+	          CustomFileInfo = _this$props.CustomFileInfo,
 	          onDelete = _this$props.onDelete,
 	          supportDropArea = _this$props.supportDropArea,
 	          translations = _this$props.translations,
@@ -16601,6 +16613,7 @@
 	      var className = "dff-drop-area".concat(dropping ? " dff-dropping" : "");
 	      return normalizeProps(createVNode(1, "div", className, [supportDropArea && !uploads.length && createVNode(1, "div", "dff-drop-hint", translations["Drop your files here"], 0), uploads.map(function (upload) {
 	        return createComponentVNode(2, Upload$1, {
+	          "CustomFileInfo": CustomFileInfo,
 	          "onDelete": onDelete,
 	          "upload": upload,
 	          "translations": translations
@@ -16614,6 +16627,7 @@
 
 	var renderUploads = function renderUploads(_ref) {
 	  var container = _ref.container,
+	      CustomFileInfo = _ref.CustomFileInfo,
 	      inputAccept = _ref.inputAccept,
 	      onDelete = _ref.onDelete,
 	      onUploadFiles = _ref.onUploadFiles,
@@ -16621,6 +16635,7 @@
 	      translations = _ref.translations,
 	      uploads = _ref.uploads;
 	  render(createComponentVNode(2, Uploads, {
+	    "CustomFileInfo": CustomFileInfo,
 	    "inputAccept": inputAccept,
 	    "onDelete": onDelete,
 	    "onUploadFiles": onUploadFiles,
@@ -16637,6 +16652,7 @@
 	    var callbacks = _ref.callbacks,
 	        chunkSize = _ref.chunkSize,
 	        csrfToken = _ref.csrfToken,
+	        CustomFileInfo = _ref.CustomFileInfo,
 	        eventEmitter = _ref.eventEmitter,
 	        fieldName = _ref.fieldName,
 	        form = _ref.form,
@@ -16662,6 +16678,8 @@
 	    defineProperty$2(this, "container", void 0);
 
 	    defineProperty$2(this, "csrfToken", void 0);
+
+	    defineProperty$2(this, "CustomFileInfo", void 0);
 
 	    defineProperty$2(this, "eventEmitter", void 0);
 
@@ -16865,6 +16883,7 @@
 	    this.callbacks = callbacks;
 	    this.chunkSize = chunkSize;
 	    this.csrfToken = csrfToken;
+	    this.CustomFileInfo = CustomFileInfo;
 	    this.eventEmitter = eventEmitter;
 	    this.fieldName = fieldName;
 	    this.form = form;
@@ -17182,6 +17201,7 @@
 	      this.updateInputRequired();
 	      renderUploads({
 	        container: this.container,
+	        CustomFileInfo: this.CustomFileInfo,
 	        inputAccept: this.input.accept,
 	        onDelete: this.handleDelete,
 	        onUploadFiles: this.uploadFiles,
@@ -17293,6 +17313,7 @@
 	      callbacks: options.callbacks || {},
 	      chunkSize: options.chunkSize || 2621440,
 	      csrfToken: csrfToken,
+	      CustomFileInfo: options.CustomFileInfo,
 	      eventEmitter: options.eventEmitter,
 	      fieldName: fieldName,
 	      form: form,
@@ -17344,6 +17365,10 @@
 	window.initFormSet = initFormSet; // eslint-disable-line  @typescript-eslint/no-unsafe-member-access
 
 	window.initUploadFields = initUploadFields; // eslint-disable-line  @typescript-eslint/no-unsafe-member-access
+
+	window.djangoFileForm = {
+	  formatBytes: formatBytes
+	}; // eslint-disable-line  @typescript-eslint/no-unsafe-member-access
 
 }());
 //# sourceMappingURL=file_form.debug.js.map
