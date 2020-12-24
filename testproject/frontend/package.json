@@ -1,0 +1,23 @@
+{
+  "name": "custom_widget_example",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "rollup -c rollup.config.js",
+    "watch": "rollup -c -w rollup.config.js"
+  },
+  "dependencies": {
+    "eventemitter3": "^4.0.7",
+    "inferno": "^7.4.6"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.12.10",
+    "@rollup/plugin-babel": "^5.2.2",
+    "@rollup/plugin-commonjs": "^17.0.0",
+    "@rollup/plugin-node-resolve": "^11.0.1",
+    "@rollup/plugin-replace": "^2.3.4",
+    "babel-plugin-inferno": "^6.1.1",
+    "rollup": "^2.35.1"
+  }
+}
