@@ -127,7 +127,7 @@ class WithAcceptExample(BaseFormView):
 
 
 class WithCustomWidgetExample(PlaceholderView):
-    custom_js_files = ["eventemitter3.js", "example_form_custom_widget.js"]
+    custom_js_files = ["example_form_custom_widget.js"]
     form_class = forms.PlaceholderWidgetExampleForm
 
     def get_initial(self):
