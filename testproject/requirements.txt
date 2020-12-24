@@ -1,4 +1,4 @@
-pytz==2020.4
+pytz==2020.5
 django-csp==3.7
 boto3==1.16.43
 django-formtools==2.2
