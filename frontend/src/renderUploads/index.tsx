@@ -1,10 +1,11 @@
 import { render } from "inferno";
 import BaseUpload from "../uploads/base_upload";
 import Uploads from "./Uploads";
-import { Translations } from "./types";
+import { RenderFileInfo, Translations } from "./types";
 
 interface RenderUploadParameters {
   container: HTMLElement;
+  CustomFileInfo?: RenderFileInfo;
   inputAccept: string;
   onDelete: (upload: BaseUpload) => void;
   onUploadFiles: (files: File[]) => void;
@@ -15,6 +16,7 @@ interface RenderUploadParameters {
 
 const renderUploads = ({
   container,
+  CustomFileInfo,
   inputAccept,
   onDelete,
   onUploadFiles,
@@ -24,6 +26,7 @@ const renderUploads = ({
 }: RenderUploadParameters): void => {
   render(
     <Uploads
+      CustomFileInfo={CustomFileInfo}
       inputAccept={inputAccept}
       onDelete={onDelete}
       onUploadFiles={onUploadFiles}

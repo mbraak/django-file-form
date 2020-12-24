@@ -15,7 +15,7 @@ import {
 import TusUpload from "./uploads/tus_upload";
 import BaseUpload from "./uploads/base_upload";
 import renderUploads from "./renderUploads";
-import { Translations } from "./renderUploads/types";
+import { RenderFileInfo, Translations } from "./renderUploads/types";
 
 export interface Callbacks {
   onDelete?: (upload: BaseUpload) => void;
@@ -32,6 +32,7 @@ interface FileFileParameters {
   callbacks: Callbacks;
   chunkSize: number;
   csrfToken: string;
+  CustomFileInfo?: RenderFileInfo;
   eventEmitter?: EventEmitter;
   fieldName: string;
   form: Element;
@@ -54,6 +55,7 @@ class FileField {
   chunkSize: number;
   container: HTMLElement;
   csrfToken: string;
+  CustomFileInfo?: RenderFileInfo;
   eventEmitter?: EventEmitter;
   fieldName: string;
   form: Element;
@@ -74,6 +76,7 @@ class FileField {
     callbacks,
     chunkSize,
     csrfToken,
+    CustomFileInfo,
     eventEmitter,
     fieldName,
     form,
@@ -93,6 +96,7 @@ class FileField {
     this.callbacks = callbacks;
     this.chunkSize = chunkSize;
     this.csrfToken = csrfToken;
+    this.CustomFileInfo = CustomFileInfo;
     this.eventEmitter = eventEmitter;
     this.fieldName = fieldName;
     this.form = form;
@@ -396,6 +400,7 @@ class FileField {
 
     renderUploads({
       container: this.container,
+      CustomFileInfo: this.CustomFileInfo,
       inputAccept: this.input.accept,
       onDelete: this.handleDelete,
       onUploadFiles: this.uploadFiles,

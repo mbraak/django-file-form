@@ -2,10 +2,11 @@ import { Component } from "inferno";
 import BaseUpload from "../uploads/base_upload";
 import AcceptedFileTypes from "../accepted_file_types";
 import getFilesFromDataTransfer from "./getFilesFromDataTransfer";
-import { Translations } from "./types";
+import { RenderFileInfo, Translations } from "./types";
 import Upload from "./Upload";
 
 interface UploadsProps {
+  CustomFileInfo?: RenderFileInfo;
   inputAccept: string;
   onDelete: (upload: BaseUpload) => void;
   onUploadFiles: (files: File[]) => void;
@@ -32,7 +33,13 @@ class Uploads extends Component<UploadsProps, UploadsState> {
   }
 
   render(): JSX.Element {
-    const { onDelete, supportDropArea, translations, uploads } = this.props;
+    const {
+      CustomFileInfo,
+      onDelete,
+      supportDropArea,
+      translations,
+      uploads
+    } = this.props;
     const dropping = this.state?.dropping;
 
     const dragProps = supportDropArea
@@ -55,6 +62,7 @@ class Uploads extends Component<UploadsProps, UploadsState> {
         )}
         {uploads.map(upload => (
           <Upload
+            CustomFileInfo={CustomFileInfo}
             key={upload.uploadIndex}
             onDelete={onDelete}
             upload={upload}

@@ -3,16 +3,18 @@ import FileField, { Callbacks } from "./file_field";
 import { InitialFile } from "./uploads/uploaded_file";
 import {
   findInput,
+  formatBytes,
   getInputNameWithPrefix,
   getInputValueForFormAndPrefix,
   getPlaceholderFieldName,
   getS3UploadedFieldName
 } from "./util";
-import { Translations } from "./renderUploads/types";
+import { RenderFileInfo, Translations } from "./renderUploads/types";
 
 interface Options {
   callbacks?: Callbacks;
   chunkSize?: number;
+  CustomFileInfo?: RenderFileInfo;
   eventEmitter?: EventEmitter;
   prefix?: string;
   retryDelays?: number[];
@@ -112,6 +114,7 @@ const initUploadFields = (form: Element, options: Options = {}): void => {
       callbacks: options.callbacks || {},
       chunkSize: options.chunkSize || 2621440,
       csrfToken,
+      CustomFileInfo: options.CustomFileInfo,
       eventEmitter: options.eventEmitter,
       fieldName,
       form,
@@ -167,3 +170,5 @@ declare const window: any; // eslint-disable-line @typescript-eslint/no-explicit
 
 window.initFormSet = initFormSet; // eslint-disable-line  @typescript-eslint/no-unsafe-member-access
 window.initUploadFields = initUploadFields; // eslint-disable-line  @typescript-eslint/no-unsafe-member-access
+
+window.djangoFileForm = { formatBytes }; // eslint-disable-line  @typescript-eslint/no-unsafe-member-access

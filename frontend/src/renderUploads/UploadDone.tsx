@@ -1,5 +1,5 @@
 import BaseUpload from "../uploads/base_upload";
-import { Translations } from "./types";
+import { RenderFileInfo, Translations } from "./types";
 import { formatBytes } from "../util";
 
 interface DeleteLinkProps {
@@ -29,31 +29,43 @@ const DeleteLink = ({ onDelete, translations, upload }: DeleteLinkProps) => {
   );
 };
 
+const DefaultFileInfo: RenderFileInfo = ({ upload }) => (
+  <>
+    <span>{upload.name}</span>
+    <span className="dff-filesize">{formatBytes(upload.getSize(), 2)}</span>
+  </>
+);
+
 interface UploadDoneProps {
+  CustomFileInfo?: RenderFileInfo;
   onDelete: (upload: BaseUpload) => void;
   translations: Translations;
   upload: BaseUpload;
 }
 
 const UploadDone = ({
+  CustomFileInfo,
   onDelete,
   translations,
   upload
-}: UploadDoneProps): JSX.Element => (
-  <div
-    className={`dff-file dff-upload-success dff-file-id-${upload.uploadIndex}`}
-  >
-    <span>{upload.name}</span>
-    <span className="dff-filesize">{formatBytes(upload.getSize(), 2)}</span>
-    <DeleteLink
-      onDelete={onDelete}
-      translations={translations}
-      upload={upload}
-    />
-    {upload.deleteStatus === "error" && (
-      <span className="dff-error">{translations["Delete failed"]}</span>
-    )}
-  </div>
-);
+}: UploadDoneProps): JSX.Element => {
+  const FileInfo = CustomFileInfo ?? DefaultFileInfo;
+
+  return (
+    <div
+      className={`dff-file dff-upload-success dff-file-id-${upload.uploadIndex}`}
+    >
+      <FileInfo upload={upload} />
+      <DeleteLink
+        onDelete={onDelete}
+        translations={translations}
+        upload={upload}
+      />
+      {upload.deleteStatus === "error" && (
+        <span className="dff-error">{translations["Delete failed"]}</span>
+      )}
+    </div>
+  );
+};
 
 export default UploadDone;
