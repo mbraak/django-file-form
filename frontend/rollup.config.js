@@ -50,6 +50,5 @@ export default {
     sourcemap: true,
     strict: false
   },
-  external: ["jquery"],
   plugins
 };
