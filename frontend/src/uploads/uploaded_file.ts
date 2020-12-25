@@ -32,7 +32,13 @@ export class BaseUploadedFile extends BaseUpload {
     type,
     uploadIndex
   }: BaseUploadedFileParameters) {
-    super({ metadata, name, status: "done", type, uploadIndex });
+    super({
+      metadata,
+      name,
+      status: "done",
+      type,
+      uploadIndex
+    });
 
     this.id = id;
     this.metadata;
@@ -52,8 +58,13 @@ export class BaseUploadedFile extends BaseUpload {
   }
 }
 
+interface PlaceholderFileParameters {
+  initialFile: InitialFile;
+  uploadIndex: number;
+}
+
 class PlaceholderFile extends BaseUploadedFile {
-  constructor(initialFile: InitialFile, uploadIndex: number) {
+  constructor({ initialFile, uploadIndex }: PlaceholderFileParameters) {
     super({
       id: initialFile.id,
       metadata: initialFile.metadata,
@@ -65,10 +76,15 @@ class PlaceholderFile extends BaseUploadedFile {
   }
 }
 
+interface UploadedS3FileParameters {
+  initialFile: InitialFile;
+  uploadIndex: number;
+}
+
 export class UploadedS3File extends BaseUploadedFile {
   key: string;
 
-  constructor(initialFile: InitialFile, uploadIndex: number) {
+  constructor({ initialFile, uploadIndex }: UploadedS3FileParameters) {
     super({
       id: initialFile.id,
       metadata: initialFile.metadata,
@@ -140,9 +156,15 @@ export const createUploadedFile = ({
   uploadIndex
 }: UploadedFileParameters): BaseUploadedFile => {
   if (initialFile.placeholder === true) {
-    return new PlaceholderFile(initialFile, uploadIndex);
+    return new PlaceholderFile({
+      initialFile,
+      uploadIndex
+    });
   } else if (initialFile.placeholder === false) {
-    return new UploadedS3File(initialFile, uploadIndex);
+    return new UploadedS3File({
+      initialFile,
+      uploadIndex
+    });
   } else {
     return new UploadedTusFile({
       csrfToken,

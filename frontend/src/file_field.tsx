@@ -1,5 +1,7 @@
 import {
   findInput,
+  getInputValueForFormAndPrefix,
+  getMetadataFieldName,
   getPlaceholderFieldName,
   getS3UploadedFieldName
 } from "./util";
@@ -12,7 +14,7 @@ import {
   UploadedS3File
 } from "./uploads/uploaded_file";
 import TusUpload from "./uploads/tus_upload";
-import BaseUpload from "./uploads/base_upload";
+import BaseUpload, { Metadata } from "./uploads/base_upload";
 import renderUploads from "./renderUploads";
 import { RenderFileInfo, Translations } from "./renderUploads/types";
 
@@ -141,6 +143,11 @@ class FileField {
         uploadUrl: this.uploadUrl
       });
       this.uploads.push(upload);
+
+      upload.render = this.render.bind(this);
+      upload.updateMetadata = () => {
+        this.updateMetadata(upload.name, upload.metadata);
+      };
     };
 
     if (multiple) {
@@ -151,6 +158,24 @@ class FileField {
     } else {
       addInitialFile(initialFiles[0]);
     }
+  }
+
+  updateMetadata(fileName: string, metadata: Metadata): void {
+    const metaDataFieldName = getMetadataFieldName(this.fieldName, this.prefix);
+    const metaDataInput = findInput(this.form, metaDataFieldName, this.prefix);
+
+    if (!metaDataInput) {
+      return;
+    }
+
+    const data = metaDataInput.value;
+
+    const metaDataPerFile = data
+      ? (JSON.parse(data) as Record<string, Metadata>)
+      : {};
+
+    metaDataPerFile[fileName] = metadata;
+    metaDataInput.value = JSON.stringify(metaDataPerFile);
   }
 
   uploadFiles = async (files: File[]): Promise<void> => {
@@ -217,6 +242,11 @@ class FileField {
       this.handleProgress(upload, bytesUploaded, bytesTotal);
     upload.onSuccess = () => this.handleSuccess(upload);
     upload.start();
+
+    upload.render = this.render.bind(this);
+    upload.updateMetadata = () => {
+      this.updateMetadata(upload.name, upload.metadata);
+    };
 
     this.uploads.push(upload);
 

@@ -16,8 +16,10 @@ abstract class BaseUpload {
   metadata: Metadata;
   name: string;
   progress: number;
+  render?: () => void;
   status: UploadStatus;
   type: string;
+  updateMetadata?: () => void;
   uploadIndex: number;
 
   constructor({ metadata, name, status, type, uploadIndex }: UploadParameters) {
@@ -38,6 +40,18 @@ abstract class BaseUpload {
     //
   }
   public abstract getSize(): number;
+
+  public setMetadata(metadata: Metadata): void {
+    this.metadata = metadata;
+
+    if (this.render) {
+      this.render();
+    }
+
+    if (this.updateMetadata) {
+      this.updateMetadata();
+    }
+  }
 }
 
 export default BaseUpload;
