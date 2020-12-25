@@ -8,7 +8,6 @@
     "watch": "rollup -c -w rollup.config.js"
   },
   "dependencies": {
-    "eventemitter3": "^4.0.7",
     "inferno": "^7.4.6"
   },
   "devDependencies": {
