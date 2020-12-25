@@ -1,6 +1,5 @@
 import {
   findInput,
-  getMetadataFieldName,
   getPlaceholderFieldName,
   getS3UploadedFieldName
 } from "./util";
@@ -364,20 +363,11 @@ class FileField {
     input.value = JSON.stringify(uploadedInfo);
   }
 
-  getMetaDataField(): HTMLElement | null {
-    return findInput(
-      this.form,
-      getMetadataFieldName(this.fieldName, this.prefix),
-      this.prefix
-    );
-  }
-
   emitEvent(eventName: string, upload: BaseUpload): void {
     if (this.eventEmitter) {
       this.eventEmitter.emit(eventName, {
         fieldName: this.fieldName,
         fileName: upload.name,
-        metaDataField: this.getMetaDataField(),
         upload
       });
     }
