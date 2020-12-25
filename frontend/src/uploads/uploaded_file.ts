@@ -1,17 +1,19 @@
-import BaseUpload from "./base_upload";
+import BaseUpload, { Metadata } from "./base_upload";
 import { deleteUpload } from "./tus_utils";
 
 export interface InitialFile {
   id: string;
+  metadata?: Metadata;
   name: string;
+  original_name?: string;
   placeholder?: boolean | undefined;
   size: number;
   url?: string;
-  original_name?: string;
 }
 
 interface BaseUploadedFileParameters {
   id: string;
+  metadata?: Metadata;
   name: string;
   size: number;
   type: string;
@@ -24,14 +26,16 @@ export class BaseUploadedFile extends BaseUpload {
 
   constructor({
     id,
+    metadata,
     name,
     size,
     type,
     uploadIndex
   }: BaseUploadedFileParameters) {
-    super({ name, status: "done", type, uploadIndex });
+    super({ metadata, name, status: "done", type, uploadIndex });
 
     this.id = id;
+    this.metadata;
     this.size = size;
   }
 
@@ -52,6 +56,7 @@ class PlaceholderFile extends BaseUploadedFile {
   constructor(initialFile: InitialFile, uploadIndex: number) {
     super({
       id: initialFile.id,
+      metadata: initialFile.metadata,
       name: initialFile.name,
       size: initialFile.size,
       type: "placeholder",
@@ -66,6 +71,7 @@ export class UploadedS3File extends BaseUploadedFile {
   constructor(initialFile: InitialFile, uploadIndex: number) {
     super({
       id: initialFile.id,
+      metadata: initialFile.metadata,
       name: initialFile.original_name || initialFile.name,
       size: initialFile.size,
       type: "uploadedS3",
@@ -104,6 +110,7 @@ export class UploadedTusFile extends BaseUploadedFile {
   }: UploadedTusFileParameters) {
     super({
       id: initialFile.id,
+      metadata: initialFile.metadata,
       name: initialFile.name,
       size: initialFile.size,
       type: "uploadedTus",
