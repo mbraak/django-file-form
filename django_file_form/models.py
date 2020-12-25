@@ -139,7 +139,6 @@ class PlaceholderUploadedFile(object):
             placeholder=True,
             name=self.name,
             size=self.size,
-            metadata=self.metadata,
         )
 
 
