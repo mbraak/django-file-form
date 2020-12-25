@@ -2,7 +2,7 @@ const { formatBytes } = window.djangoFileForm;
 
 const CustomFileInfo = ({ upload }) => {
   const handleDescriptionChange = (e) => {
-    upload.metadata.description = e.target.value;
+    upload.setMetadata({ description: e.target.value });
   };
 
   return (
