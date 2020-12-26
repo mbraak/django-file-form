@@ -4,10 +4,10 @@ import { deleteUpload } from "./tus_utils";
 export interface InitialFile {
   id: string;
   name: string;
-  placeholder?: boolean | undefined;
   size: number;
   url?: string;
   original_name?: string;
+  type: "placeholder" | "s3" | "tus";
 }
 
 interface BaseUploadedFileParameters {
@@ -80,7 +80,8 @@ export class UploadedS3File extends BaseUploadedFile {
       id: this.id,
       name: this.key,
       original_name: this.name,
-      size: this.size
+      size: this.size,
+      type: "s3"
     };
   }
 }
@@ -132,16 +133,22 @@ export const createUploadedFile = ({
   uploadUrl,
   uploadIndex
 }: UploadedFileParameters): BaseUploadedFile => {
-  if (initialFile.placeholder === true) {
-    return new PlaceholderFile(initialFile, uploadIndex);
-  } else if (initialFile.placeholder === false) {
-    return new UploadedS3File(initialFile, uploadIndex);
-  } else {
-    return new UploadedTusFile({
-      csrfToken,
-      initialFile,
-      uploadUrl,
-      uploadIndex
-    });
+  switch (initialFile.type) {
+    case "placeholder":
+      return new PlaceholderFile(initialFile, uploadIndex);
+
+    case "s3":
+      return new UploadedS3File(initialFile, uploadIndex);
+
+    case "tus":
+      return new UploadedTusFile({
+        csrfToken,
+        initialFile,
+        uploadUrl,
+        uploadIndex
+      });
+
+    default:
+      throw new Error(`Unknown upload type ${initialFile.type as string}`);
   }
 };

@@ -112,9 +112,9 @@ class S3Upload extends BaseUpload {
     return {
       id: this.uploadId || "",
       name: this.key || "",
-      placeholder: false,
       size: this.file.size,
-      original_name: this.file.name
+      original_name: this.file.name,
+      type: "s3"
     };
   }
 

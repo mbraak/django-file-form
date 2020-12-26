@@ -118,6 +118,7 @@ class UploadedFileWithId(uploadedfile.UploadedFile):
             id=self.file_id,
             name=self.name,
             size=self.size,
+            type="tus"
         )
 
 
@@ -137,9 +138,9 @@ class PlaceholderUploadedFile(object):
     def get_values(self):
         return dict(
             id=self.file_id,
-            placeholder=True,
             name=self.name,
             size=self.size,
+            type="placeholder"
         )
 
 
@@ -174,9 +175,9 @@ try:
         def get_values(self):
             return dict(
                 id=self.file_id,
-                placeholder=False,
                 name=self.name,
                 size=self.size,
+                type="s3"
             )
 
 
