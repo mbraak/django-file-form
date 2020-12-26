@@ -1112,25 +1112,46 @@
 	// https://tc39.github.io/ecma262/#sec-array.prototype-@@unscopables
 	addToUnscopables(FIND);
 
+	var $indexOf = arrayIncludes.indexOf;
+
+
+
+	var nativeIndexOf = [].indexOf;
+
+	var NEGATIVE_ZERO = !!nativeIndexOf && 1 / [1].indexOf(1, -0) < 0;
+	var STRICT_METHOD$1 = arrayMethodIsStrict('indexOf');
+	var USES_TO_LENGTH$3 = arrayMethodUsesToLength('indexOf', { ACCESSORS: true, 1: 0 });
+
+	// `Array.prototype.indexOf` method
+	// https://tc39.github.io/ecma262/#sec-array.prototype.indexof
+	_export({ target: 'Array', proto: true, forced: NEGATIVE_ZERO || !STRICT_METHOD$1 || !USES_TO_LENGTH$3 }, {
+	  indexOf: function indexOf(searchElement /* , fromIndex = 0 */) {
+	    return NEGATIVE_ZERO
+	      // convert -0 to +0
+	      ? nativeIndexOf.apply(this, arguments) || 0
+	      : $indexOf(this, searchElement, arguments.length > 1 ? arguments[1] : undefined);
+	  }
+	});
+
 	var $map = arrayIteration.map;
 
 
 
 	var HAS_SPECIES_SUPPORT$1 = arrayMethodHasSpeciesSupport('map');
 	// FF49- issue
-	var USES_TO_LENGTH$3 = arrayMethodUsesToLength('map');
+	var USES_TO_LENGTH$4 = arrayMethodUsesToLength('map');
 
 	// `Array.prototype.map` method
 	// https://tc39.github.io/ecma262/#sec-array.prototype.map
 	// with adding support of @@species
-	_export({ target: 'Array', proto: true, forced: !HAS_SPECIES_SUPPORT$1 || !USES_TO_LENGTH$3 }, {
+	_export({ target: 'Array', proto: true, forced: !HAS_SPECIES_SUPPORT$1 || !USES_TO_LENGTH$4 }, {
 	  map: function map(callbackfn /* , thisArg */) {
 	    return $map(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
 	  }
 	});
 
 	var HAS_SPECIES_SUPPORT$2 = arrayMethodHasSpeciesSupport('splice');
-	var USES_TO_LENGTH$4 = arrayMethodUsesToLength('splice', { ACCESSORS: true, 0: 0, 1: 2 });
+	var USES_TO_LENGTH$5 = arrayMethodUsesToLength('splice', { ACCESSORS: true, 0: 0, 1: 2 });
 
 	var max$1 = Math.max;
 	var min$3 = Math.min;
@@ -1140,7 +1161,7 @@
 	// `Array.prototype.splice` method
 	// https://tc39.github.io/ecma262/#sec-array.prototype.splice
 	// with adding support of @@species
-	_export({ target: 'Array', proto: true, forced: !HAS_SPECIES_SUPPORT$2 || !USES_TO_LENGTH$4 }, {
+	_export({ target: 'Array', proto: true, forced: !HAS_SPECIES_SUPPORT$2 || !USES_TO_LENGTH$5 }, {
 	  splice: function splice(start, deleteCount /* , ...items */) {
 	    var O = toObject(this);
 	    var len = toLength(O.length);
@@ -2048,7 +2069,7 @@
 	var iterableToArray = _iterableToArray;
 
 	var HAS_SPECIES_SUPPORT$3 = arrayMethodHasSpeciesSupport('slice');
-	var USES_TO_LENGTH$5 = arrayMethodUsesToLength('slice', { ACCESSORS: true, 0: 0, 1: 2 });
+	var USES_TO_LENGTH$6 = arrayMethodUsesToLength('slice', { ACCESSORS: true, 0: 0, 1: 2 });
 
 	var SPECIES$2 = wellKnownSymbol('species');
 	var nativeSlice = [].slice;
@@ -2057,7 +2078,7 @@
 	// `Array.prototype.slice` method
 	// https://tc39.github.io/ecma262/#sec-array.prototype.slice
 	// fallback for not array-like ES3 strings and DOM objects
-	_export({ target: 'Array', proto: true, forced: !HAS_SPECIES_SUPPORT$3 || !USES_TO_LENGTH$5 }, {
+	_export({ target: 'Array', proto: true, forced: !HAS_SPECIES_SUPPORT$3 || !USES_TO_LENGTH$6 }, {
 	  slice: function slice(start, end) {
 	    var O = toIndexedObject(this);
 	    var length = toLength(O.length);
@@ -3860,12 +3881,12 @@
 
 
 
-	var STRICT_METHOD$1 = arrayMethodIsStrict('every');
-	var USES_TO_LENGTH$6 = arrayMethodUsesToLength('every');
+	var STRICT_METHOD$2 = arrayMethodIsStrict('every');
+	var USES_TO_LENGTH$7 = arrayMethodUsesToLength('every');
 
 	// `Array.prototype.every` method
 	// https://tc39.github.io/ecma262/#sec-array.prototype.every
-	_export({ target: 'Array', proto: true, forced: !STRICT_METHOD$1 || !USES_TO_LENGTH$6 }, {
+	_export({ target: 'Array', proto: true, forced: !STRICT_METHOD$2 || !USES_TO_LENGTH$7 }, {
 	  every: function every(callbackfn /* , thisArg */) {
 	    return $every(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
 	  }
@@ -3913,15 +3934,15 @@
 
 
 
-	var STRICT_METHOD$2 = arrayMethodIsStrict('reduce');
-	var USES_TO_LENGTH$7 = arrayMethodUsesToLength('reduce', { 1: 0 });
+	var STRICT_METHOD$3 = arrayMethodIsStrict('reduce');
+	var USES_TO_LENGTH$8 = arrayMethodUsesToLength('reduce', { 1: 0 });
 	// Chrome 80-82 has a critical bug
 	// https://bugs.chromium.org/p/chromium/issues/detail?id=1049982
 	var CHROME_BUG = !engineIsNode && engineV8Version > 79 && engineV8Version < 83;
 
 	// `Array.prototype.reduce` method
 	// https://tc39.github.io/ecma262/#sec-array.prototype.reduce
-	_export({ target: 'Array', proto: true, forced: !STRICT_METHOD$2 || !USES_TO_LENGTH$7 || CHROME_BUG }, {
+	_export({ target: 'Array', proto: true, forced: !STRICT_METHOD$3 || !USES_TO_LENGTH$8 || CHROME_BUG }, {
 	  reduce: function reduce(callbackfn /* , initialValue */) {
 	    return $reduce(this, callbackfn, arguments.length, arguments.length > 1 ? arguments[1] : undefined);
 	  }
@@ -3990,7 +4011,8 @@
 
 	var BaseUpload = /*#__PURE__*/function () {
 	  function BaseUpload(_ref) {
-	    var name = _ref.name,
+	    var metadata = _ref.metadata,
+	        name = _ref.name,
 	        status = _ref.status,
 	        type = _ref.type,
 	        uploadIndex = _ref.uploadIndex;
@@ -3999,16 +4021,23 @@
 
 	    defineProperty$2(this, "deleteStatus", void 0);
 
+	    defineProperty$2(this, "metadata", void 0);
+
 	    defineProperty$2(this, "name", void 0);
 
 	    defineProperty$2(this, "progress", void 0);
+
+	    defineProperty$2(this, "render", void 0);
 
 	    defineProperty$2(this, "status", void 0);
 
 	    defineProperty$2(this, "type", void 0);
 
+	    defineProperty$2(this, "updateMetadata", void 0);
+
 	    defineProperty$2(this, "uploadIndex", void 0);
 
+	    this.metadata = metadata || {};
 	    this.name = name;
 	    this.status = status;
 	    this.type = type;
@@ -4059,31 +4088,23 @@
 
 	      return _delete;
 	    }()
+	  }, {
+	    key: "setMetadata",
+	    value: function setMetadata(metadata) {
+	      this.metadata = metadata;
+
+	      if (this.render) {
+	        this.render();
+	      }
+
+	      if (this.updateMetadata) {
+	        this.updateMetadata();
+	      }
+	    }
 	  }]);
 
 	  return BaseUpload;
 	}();
-
-	var $indexOf = arrayIncludes.indexOf;
-
-
-
-	var nativeIndexOf = [].indexOf;
-
-	var NEGATIVE_ZERO = !!nativeIndexOf && 1 / [1].indexOf(1, -0) < 0;
-	var STRICT_METHOD$3 = arrayMethodIsStrict('indexOf');
-	var USES_TO_LENGTH$8 = arrayMethodUsesToLength('indexOf', { ACCESSORS: true, 1: 0 });
-
-	// `Array.prototype.indexOf` method
-	// https://tc39.github.io/ecma262/#sec-array.prototype.indexof
-	_export({ target: 'Array', proto: true, forced: NEGATIVE_ZERO || !STRICT_METHOD$3 || !USES_TO_LENGTH$8 }, {
-	  indexOf: function indexOf(searchElement /* , fromIndex = 0 */) {
-	    return NEGATIVE_ZERO
-	      // convert -0 to +0
-	      ? nativeIndexOf.apply(this, arguments) || 0
-	      : $indexOf(this, searchElement, arguments.length > 1 ? arguments[1] : undefined);
-	  }
-	});
 
 	var nativeJoin = [].join;
 
@@ -5291,6 +5312,7 @@
 	    var _this;
 
 	    var id = _ref.id,
+	        metadata = _ref.metadata,
 	        name = _ref.name,
 	        size = _ref.size,
 	        type = _ref.type,
@@ -5299,6 +5321,7 @@
 	    classCallCheck(this, BaseUploadedFile);
 
 	    _this = _super.call(this, {
+	      metadata: metadata,
 	      name: name,
 	      status: "done",
 	      type: type,
@@ -5310,6 +5333,7 @@
 	    defineProperty$2(assertThisInitialized(_this), "size", void 0);
 
 	    _this.id = id;
+	    _this.metadata;
 	    _this.size = size;
 	    return _this;
 	  }
@@ -5377,11 +5401,15 @@
 
 	  var _super2 = _createSuper$1(PlaceholderFile);
 
-	  function PlaceholderFile(initialFile, uploadIndex) {
+	  function PlaceholderFile(_ref2) {
+	    var initialFile = _ref2.initialFile,
+	        uploadIndex = _ref2.uploadIndex;
+
 	    classCallCheck(this, PlaceholderFile);
 
 	    return _super2.call(this, {
 	      id: initialFile.id,
+	      metadata: initialFile.metadata,
 	      name: initialFile.name,
 	      size: initialFile.size,
 	      type: "placeholder",
@@ -5397,13 +5425,17 @@
 
 	  var _super3 = _createSuper$1(UploadedS3File);
 
-	  function UploadedS3File(initialFile, uploadIndex) {
+	  function UploadedS3File(_ref3) {
 	    var _this2;
+
+	    var initialFile = _ref3.initialFile,
+	        uploadIndex = _ref3.uploadIndex;
 
 	    classCallCheck(this, UploadedS3File);
 
 	    _this2 = _super3.call(this, {
 	      id: initialFile.id,
+	      metadata: initialFile.metadata,
 	      name: initialFile.original_name || initialFile.name,
 	      size: initialFile.size,
 	      type: "uploadedS3",
@@ -5435,18 +5467,19 @@
 
 	  var _super4 = _createSuper$1(UploadedTusFile);
 
-	  function UploadedTusFile(_ref2) {
+	  function UploadedTusFile(_ref4) {
 	    var _this3;
 
-	    var csrfToken = _ref2.csrfToken,
-	        initialFile = _ref2.initialFile,
-	        uploadUrl = _ref2.uploadUrl,
-	        uploadIndex = _ref2.uploadIndex;
+	    var csrfToken = _ref4.csrfToken,
+	        initialFile = _ref4.initialFile,
+	        uploadUrl = _ref4.uploadUrl,
+	        uploadIndex = _ref4.uploadIndex;
 
 	    classCallCheck(this, UploadedTusFile);
 
 	    _this3 = _super4.call(this, {
 	      id: initialFile.id,
+	      metadata: initialFile.metadata,
 	      name: initialFile.name,
 	      size: initialFile.size,
 	      type: "uploadedTus",
@@ -5491,16 +5524,22 @@
 
 	  return UploadedTusFile;
 	}(BaseUploadedFile);
-	var createUploadedFile = function createUploadedFile(_ref3) {
-	  var csrfToken = _ref3.csrfToken,
-	      initialFile = _ref3.initialFile,
-	      uploadUrl = _ref3.uploadUrl,
-	      uploadIndex = _ref3.uploadIndex;
+	var createUploadedFile = function createUploadedFile(_ref5) {
+	  var csrfToken = _ref5.csrfToken,
+	      initialFile = _ref5.initialFile,
+	      uploadUrl = _ref5.uploadUrl,
+	      uploadIndex = _ref5.uploadIndex;
 
 	  if (initialFile.placeholder === true) {
-	    return new PlaceholderFile(initialFile, uploadIndex);
+	    return new PlaceholderFile({
+	      initialFile: initialFile,
+	      uploadIndex: uploadIndex
+	    });
 	  } else if (initialFile.placeholder === false) {
-	    return new UploadedS3File(initialFile, uploadIndex);
+	    return new UploadedS3File({
+	      initialFile: initialFile,
+	      uploadIndex: uploadIndex
+	    });
 	  } else {
 	    return new UploadedTusFile({
 	      csrfToken: csrfToken,
@@ -16930,6 +16969,12 @@
 	        });
 
 	        _this2.uploads.push(upload);
+
+	        upload.render = _this2.render.bind(_this2);
+
+	        upload.updateMetadata = function () {
+	          _this2.updateMetadata(upload.name, upload.metadata);
+	        };
 	      };
 
 	      if (multiple) {
@@ -16940,6 +16985,21 @@
 	      } else {
 	        addInitialFile(initialFiles[0]);
 	      }
+	    }
+	  }, {
+	    key: "updateMetadata",
+	    value: function updateMetadata(fileName, metadata) {
+	      var metaDataFieldName = getMetadataFieldName(this.fieldName, this.prefix);
+	      var metaDataInput = findInput(this.form, metaDataFieldName, this.prefix);
+
+	      if (!metaDataInput) {
+	        return;
+	      }
+
+	      var data = metaDataInput.value;
+	      var metaDataPerFile = data ? JSON.parse(data) : {};
+	      metaDataPerFile[fileName] = metadata;
+	      metaDataInput.value = JSON.stringify(metaDataPerFile);
 	    }
 	  }, {
 	    key: "uploadFile",
@@ -17011,11 +17071,17 @@
 	                };
 
 	                upload.start();
+	                upload.render = this.render.bind(this);
+
+	                upload.updateMetadata = function () {
+	                  _this3.updateMetadata(upload.name, upload.metadata);
+	                };
+
 	                this.uploads.push(upload);
 	                this.render();
 	                this.emitEvent("addUpload", upload);
 
-	              case 17:
+	              case 19:
 	              case "end":
 	                return _context2.stop();
 	            }
@@ -17105,7 +17171,12 @@
 	  }, {
 	    key: "removeUploadFromList",
 	    value: function removeUploadFromList(upload) {
-	      this.uploads.splice(upload.uploadIndex, 1);
+	      var index = this.uploads.indexOf(upload);
+
+	      if (index >= 0) {
+	        this.uploads.splice(index, 1);
+	      }
+
 	      this.checkDropHint();
 	      var onDelete = this.callbacks.onDelete;
 
@@ -17179,18 +17250,12 @@
 	      input.value = JSON.stringify(uploadedInfo);
 	    }
 	  }, {
-	    key: "getMetaDataField",
-	    value: function getMetaDataField() {
-	      return findInput(this.form, getMetadataFieldName(this.fieldName, this.prefix), this.prefix);
-	    }
-	  }, {
 	    key: "emitEvent",
 	    value: function emitEvent(eventName, upload) {
 	      if (this.eventEmitter) {
 	        this.eventEmitter.emit(eventName, {
 	          fieldName: this.fieldName,
 	          fileName: upload.name,
-	          metaDataField: this.getMetaDataField(),
 	          upload: upload
 	        });
 	      }
@@ -17243,6 +17308,23 @@
 
 	  var getInputValue = function getInputValue(fieldName) {
 	    return getInputValueForFormAndPrefix(form, fieldName, getPrefix());
+	  };
+
+	  var getMetadataPerFile = function getMetadataPerFile(fieldName) {
+	    var data = getInputValue(getMetadataFieldName(fieldName, getPrefix()));
+
+	    if (!data) {
+	      return {};
+	    }
+
+	    return JSON.parse(data);
+	  };
+
+	  var setInitialMetadata = function setInitialMetadata(fieldName, initialFiles) {
+	    var metadataPerFilename = getMetadataPerFile(fieldName);
+	    initialFiles.forEach(function (initialFile) {
+	      initialFile.metadata = metadataPerFilename[initialFile.name];
+	    });
 	  };
 
 	  var getInitialFiles = function getInitialFiles(element) {
@@ -17306,6 +17388,7 @@
 	    var fieldName = input.name;
 	    var multiple = input.multiple;
 	    var initial = getInitialFiles(container).concat(getPlaceholders(fieldName)).concat(getS3Uploads(fieldName));
+	    setInitialMetadata(fieldName, initial);
 	    var dataTranslations = container.getAttribute("data-translations");
 	    var translations = dataTranslations ? JSON.parse(dataTranslations) : {};
 	    var supportDropArea = !(options.supportDropArea === false);
