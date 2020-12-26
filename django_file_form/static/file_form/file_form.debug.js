@@ -8800,9 +8800,9 @@
 	      return {
 	        id: this.uploadId || "",
 	        name: this.key || "",
-	        placeholder: false,
 	        size: this.file.size,
-	        original_name: this.file.name
+	        original_name: this.file.name,
+	        type: "s3"
 	      };
 	    }
 	  }, {
@@ -9236,7 +9236,8 @@
 	        id: this.id,
 	        name: this.key,
 	        original_name: this.name,
-	        size: this.size
+	        size: this.size,
+	        type: "s3"
 	      };
 	    }
 	  }]);
@@ -9310,17 +9311,23 @@
 	      uploadUrl = _ref3.uploadUrl,
 	      uploadIndex = _ref3.uploadIndex;
 
-	  if (initialFile.placeholder === true) {
-	    return new PlaceholderFile(initialFile, uploadIndex);
-	  } else if (initialFile.placeholder === false) {
-	    return new UploadedS3File(initialFile, uploadIndex);
-	  } else {
-	    return new UploadedTusFile({
-	      csrfToken: csrfToken,
-	      initialFile: initialFile,
-	      uploadUrl: uploadUrl,
-	      uploadIndex: uploadIndex
-	    });
+	  switch (initialFile.type) {
+	    case "placeholder":
+	      return new PlaceholderFile(initialFile, uploadIndex);
+
+	    case "s3":
+	      return new UploadedS3File(initialFile, uploadIndex);
+
+	    case "tus":
+	      return new UploadedTusFile({
+	        csrfToken: csrfToken,
+	        initialFile: initialFile,
+	        uploadUrl: uploadUrl,
+	        uploadIndex: uploadIndex
+	      });
+
+	    default:
+	      throw new Error("Unknown upload type ".concat(initialFile.type));
 	  }
 	};
 
