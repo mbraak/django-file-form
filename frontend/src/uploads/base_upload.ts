@@ -6,6 +6,15 @@ export type UploadType =
   | "uploadedS3"
   | "uploadedTus";
 
+export interface InitialFile {
+  id: string;
+  name: string;
+  size: number;
+  url?: string;
+  original_name?: string;
+  type: "placeholder" | "s3" | "tus";
+}
+
 interface UploadParameters {
   name: string;
   status: UploadStatus;
@@ -33,6 +42,8 @@ abstract class BaseUpload {
     //
   }
   public abstract getSize(): number;
+
+  public abstract getInitialFile(): InitialFile;
 }
 
 export default BaseUpload;

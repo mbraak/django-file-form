@@ -53,29 +53,31 @@ def get_placeholder_files(data: QueryDict, field_name: str):
     else:
         return [
             PlaceholderUploadedFile(
-                name=placeholder["name"],
-                size=placeholder["size"],
-                file_id=placeholder["id"],
+                name=upload["name"],
+                size=upload["size"],
+                file_id=upload["id"],
             )
-            for placeholder in json.loads(value)
+            for upload in json.loads(value)
+            if upload["type"] == "placeholder"
         ]
 
 
 def get_s3_uploaded_files(data: QueryDict, field_name: str):
-    s3uploaded_field_name = field_name + "-s3direct"
-    value = data.get(s3uploaded_field_name)
+    placeholder_field_name = field_name + "-placeholder"
+    value = data.get(placeholder_field_name)
 
     if not value:
         return []
     else:
         return [
             S3UploadedFileWithId(
-                name=s3uploaded["name"],
-                original_name=s3uploaded["original_name"],
-                size=s3uploaded["size"],
-                file_id=s3uploaded["id"],
+                name=upload["name"],
+                original_name=upload["original_name"],
+                size=upload["size"],
+                file_id=upload["id"],
             )
-            for s3uploaded in json.loads(value)
+            for upload in json.loads(value)
+            if upload["type"] == "s3"
         ]
 
 

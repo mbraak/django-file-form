@@ -3844,9 +3844,6 @@
 	var getPlaceholderFieldName = function getPlaceholderFieldName(fieldName, prefix) {
 	  return "".concat(getInputNameWithoutPrefix(fieldName, prefix), "-placeholder");
 	};
-	var getS3UploadedFieldName = function getS3UploadedFieldName(fieldName, prefix) {
-	  return "".concat(getInputNameWithoutPrefix(fieldName, prefix), "-s3direct");
-	};
 	var getInputValueForFormAndPrefix = function getInputValueForFormAndPrefix(form, fieldName, prefix) {
 	  var _findInput;
 
@@ -9202,6 +9199,18 @@
 	    });
 	  }
 
+	  createClass(PlaceholderFile, [{
+	    key: "getInitialFile",
+	    value: function getInitialFile() {
+	      return {
+	        id: this.id,
+	        name: this.name,
+	        size: this.size,
+	        type: "placeholder"
+	      };
+	    }
+	  }]);
+
 	  return PlaceholderFile;
 	}(BaseUploadedFile);
 
@@ -9301,6 +9310,16 @@
 
 	      return _delete;
 	    }()
+	  }, {
+	    key: "getInitialFile",
+	    value: function getInitialFile() {
+	      return {
+	        id: this.id,
+	        name: this.name,
+	        size: this.size,
+	        type: "tus"
+	      };
+	    }
 	  }]);
 
 	  return UploadedTusFile;
@@ -14088,6 +14107,16 @@
 	    value: function start() {
 	      this.upload.start();
 	    }
+	  }, {
+	    key: "getInitialFile",
+	    value: function getInitialFile() {
+	      return {
+	        id: this.name,
+	        name: this.name,
+	        size: this.getSize(),
+	        type: "tus"
+	      };
+	    }
 	  }]);
 
 	  return TusUpload;
@@ -14329,7 +14358,7 @@
 	    defineProperty$2(this, "handleSuccess", function (upload) {
 	      var renderer = _this.renderer;
 
-	      _this.updateS3UploadedInput();
+	      _this.updatePlaceholderInput();
 
 	      renderer.clearInput();
 	      renderer.setSuccess(upload.uploadIndex, upload.getSize());
@@ -14570,10 +14599,9 @@
 
 	              case 19:
 	                this.removeUploadFromList(upload);
-	                this.updateS3UploadedInput();
 	                this.updatePlaceholderInput();
 
-	              case 22:
+	              case 21:
 	              case "end":
 	                return _context3.stop();
 	            }
@@ -14664,25 +14692,11 @@
 	      }
 
 	      var placeholdersInfo = this.uploads.filter(function (upload) {
-	        return upload.type === "placeholder";
-	      });
-	      input.value = JSON.stringify(placeholdersInfo);
-	    }
-	  }, {
-	    key: "updateS3UploadedInput",
-	    value: function updateS3UploadedInput() {
-	      var input = findInput(this.form, getS3UploadedFieldName(this.fieldName, this.prefix), this.prefix);
-
-	      if (!input) {
-	        return;
-	      }
-
-	      var uploadedInfo = this.uploads.filter(function (upload) {
-	        return upload.type === "s3" || upload.type === "uploadedS3";
+	        return upload.type === "placeholder" || upload.type === "s3" || upload.type === "uploadedS3";
 	      }).map(function (upload) {
 	        return upload.getInitialFile();
 	      });
-	      input.value = JSON.stringify(uploadedInfo);
+	      input.value = JSON.stringify(placeholdersInfo);
 	    }
 	  }, {
 	    key: "getMetaDataField",
@@ -14752,16 +14766,6 @@
 	    return JSON.parse(data);
 	  };
 
-	  var getS3Uploads = function getS3Uploads(fieldName) {
-	    var data = getInputValue(getS3UploadedFieldName(fieldName, getPrefix()));
-
-	    if (!data) {
-	      return [];
-	    }
-
-	    return JSON.parse(data);
-	  };
-
 	  var uploadUrl = getInputValue("upload_url");
 	  var formId = getInputValue("form_id");
 	  var s3UploadDir = getInputValue("s3_upload_dir");
@@ -14792,7 +14796,7 @@
 
 	    var fieldName = input.name;
 	    var multiple = input.multiple;
-	    var initial = getInitialFiles(container).concat(getPlaceholders(fieldName)).concat(getS3Uploads(fieldName));
+	    var initial = getInitialFiles(container).concat(getPlaceholders(fieldName));
 	    var dataTranslations = container.getAttribute("data-translations");
 	    var translations = dataTranslations ? JSON.parse(dataTranslations) : {};
 	    var supportDropArea = !(options.supportDropArea === false);

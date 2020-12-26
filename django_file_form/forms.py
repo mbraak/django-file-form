@@ -19,7 +19,6 @@ class FileFormMixin(object):
 
         if s3_upload_dir is not None:
             self.add_hidden_field("s3_upload_dir", s3_upload_dir)
-            self.add_s3_uploaded_files()
             self.add_hidden_field("upload_url", reverse("s3_upload"))
         else:
             self.add_hidden_field("upload_url", reverse("tus_upload"))
@@ -75,12 +74,6 @@ class FileFormMixin(object):
                 if hasattr(field, "delete_file_data"):
                     prefixed_field_name = self.add_prefix(field_name)
                     field.delete_file_data(prefixed_field_name, form_id)
-
-    def add_s3_uploaded_files(self):
-        for field_name in self.file_form_field_names():
-            s3_uploaded_field_name = f"{field_name}-s3direct"
-            # the field is always empty initially
-            self.add_hidden_field(s3_uploaded_field_name, "[]")
 
     def add_placeholder_inputs(self):
         for field_name in self.file_form_field_names():

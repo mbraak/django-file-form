@@ -1,5 +1,5 @@
 import { HttpRequest, Upload } from "tus-js-client";
-import BaseUpload from "./base_upload";
+import BaseUpload, { InitialFile } from "./base_upload";
 import { deleteUpload } from "./tus_utils";
 
 interface Parameters {
@@ -97,4 +97,13 @@ export default class TusUpload extends BaseUpload {
   private addCsrTokenToRequest = (request: HttpRequest) => {
     request.setHeader("X-CSRFToken", this.csrfToken);
   };
+
+  getInitialFile(): InitialFile {
+    return {
+      id: this.name,
+      name: this.name,
+      size: this.getSize(),
+      type: "tus"
+    };
+  }
 }

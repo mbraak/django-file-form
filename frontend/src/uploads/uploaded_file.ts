@@ -1,14 +1,5 @@
-import BaseUpload, { UploadType } from "./base_upload";
+import BaseUpload, { InitialFile, UploadType } from "./base_upload";
 import { deleteUpload } from "./tus_utils";
-
-export interface InitialFile {
-  id: string;
-  name: string;
-  size: number;
-  url?: string;
-  original_name?: string;
-  type: "placeholder" | "s3" | "tus";
-}
 
 interface BaseUploadedFileParameters {
   id: string;
@@ -18,7 +9,7 @@ interface BaseUploadedFileParameters {
   uploadIndex: number;
 }
 
-export class BaseUploadedFile extends BaseUpload {
+export abstract class BaseUploadedFile extends BaseUpload {
   id: string;
   size: number;
 
@@ -57,6 +48,15 @@ class PlaceholderFile extends BaseUploadedFile {
       type: "placeholder",
       uploadIndex
     });
+  }
+
+  public getInitialFile(): InitialFile {
+    return {
+      id: this.id,
+      name: this.name,
+      size: this.size,
+      type: "placeholder"
+    };
   }
 }
 
@@ -117,6 +117,15 @@ export class UploadedTusFile extends BaseUploadedFile {
 
   public async delete(): Promise<void> {
     await deleteUpload(this.url, this.csrfToken);
+  }
+
+  getInitialFile(): InitialFile {
+    return {
+      id: this.id,
+      name: this.name,
+      size: this.size,
+      type: "tus"
+    };
   }
 }
 
