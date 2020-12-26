@@ -77,7 +77,6 @@ class TemporaryUploadedFile(models.Model):
     objects = TemporaryUploadedFileManager()
 
     class Meta(object):
-        # Query string to get back existing uploaded file is using form_id and field_name
         index_together = (("form_id", "field_name"),)
         db_table = "django_file_form_uploadedfile"
 
