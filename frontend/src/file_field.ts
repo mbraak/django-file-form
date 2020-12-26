@@ -360,7 +360,12 @@ class FileField {
 
   removeUploadFromList(upload: BaseUpload): void {
     this.renderer.deleteFile(upload.uploadIndex);
-    this.uploads.splice(upload.uploadIndex, 1);
+
+    const index = this.uploads.indexOf(upload);
+
+    if (index >= 0) {
+      this.uploads.splice(index, 1);
+    }
 
     this.checkDropHint();
 

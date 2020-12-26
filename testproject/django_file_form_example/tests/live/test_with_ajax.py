@@ -500,26 +500,36 @@ class LiveTestCase(BaseLiveTestCase):
         page = self.page
         page.open("/placeholder")
 
-        page.selenium.find_element_by_css_selector(
-            "#row-example-input_file .dff-file-id-0.dff-upload-success"
-        )
-        self.assertEqual(
-            len(
-                page.selenium.find_elements_by_css_selector(
-                    "#row-example-input_file .dff-files .dff-file"
-                )
-            ),
-            2,
+        container = page.selenium.find_element_by_css_selector('#row-example-input_file')
+
+        page.find_upload_success_with_filename(
+            filename="test_placeholder1.txt",
+            upload_index=0,
+            container_element=container
         )
 
-        # click 'delete'
-        page.delete_ajax_file()
-        page.wait_until_upload_is_removed(0, "#row-example-input_file")
+        page.find_upload_success_with_filename(
+            filename="test_placeholder2.txt",
+            upload_index=1,
+            container_element=container
+        )
 
         # upload file
         temp_file = page.create_temp_file("content1")
         page.upload_using_js(temp_file)
         page.find_upload_success(temp_file, upload_index=2)
+
+        # delete first placeholder
+        page.delete_ajax_file(upload_index=0)
+        page.wait_until_upload_is_removed(0, "#row-example-input_file")
+
+        # delete second placeholder
+        page.delete_ajax_file(upload_index=1)
+        page.wait_until_upload_is_removed(1, "#row-example-input_file")
+
+        # delete uploaded file
+        page.delete_ajax_file(upload_index=2)
+        page.wait_until_upload_is_removed(2, "#row-example-input_file")
 
         # submit form
         page.submit()
@@ -531,32 +541,12 @@ class LiveTestCase(BaseLiveTestCase):
                     "#row-example-input_file .dff-files .dff-file"
                 )
             ),
-            2,
-        )
-        self.assertEqual(
-            len(
-                page.selenium.find_elements_by_css_selector(
-                    "#row-example-input_file .dff-files .dff-file"
-                )
-            ),
-            2,
+            0,
         )
 
         container = page.selenium.find_element_by_css_selector(
             "#row-example-input_file"
         )
-
-        page.find_upload_success_with_filename(
-            temp_file.base_name(), upload_index=0, container_element=container
-        )
-        page.find_upload_success_with_filename(
-            "test_placeholder2.txt", upload_index=1, container_element=container
-        )
-
-        el = page.selenium.find_element_by_css_selector(
-            "#row-example-input_file .dff-file-id-1.dff-upload-success"
-        )
-        assert "2 KB" in el.text
 
     def test_accept_attribute(self):
         page = self.page
