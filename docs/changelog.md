@@ -1,5 +1,9 @@
 ## Changelog
 
+**Development version**
+
+  * Issue #418: correctly remove upload
+
 **3.1.1 (26 november 2020)**
 
   * Issue #388: add cross-site request forgery protection to tus uploads using the standard Django csrf token
