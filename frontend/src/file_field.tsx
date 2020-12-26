@@ -1,6 +1,5 @@
 import {
   findInput,
-  getInputValueForFormAndPrefix,
   getMetadataFieldName,
   getPlaceholderFieldName,
   getS3UploadedFieldName
