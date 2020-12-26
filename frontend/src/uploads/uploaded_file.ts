@@ -1,4 +1,4 @@
-import BaseUpload from "./base_upload";
+import BaseUpload, { UploadType } from "./base_upload";
 import { deleteUpload } from "./tus_utils";
 
 export interface InitialFile {
@@ -14,7 +14,7 @@ interface BaseUploadedFileParameters {
   id: string;
   name: string;
   size: number;
-  type: string;
+  type: UploadType;
   uploadIndex: number;
 }
 

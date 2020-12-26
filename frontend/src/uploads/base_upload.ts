@@ -1,16 +1,22 @@
 type UploadStatus = "done" | "error" | "uploading";
+export type UploadType =
+  | "placeholder"
+  | "s3"
+  | "tus"
+  | "uploadedS3"
+  | "uploadedTus";
 
 interface UploadParameters {
   name: string;
   status: UploadStatus;
-  type: string;
+  type: UploadType;
   uploadIndex: number;
 }
 
 abstract class BaseUpload {
   name: string;
   status: UploadStatus;
-  type: string;
+  type: UploadType;
   uploadIndex: number;
 
   constructor({ name, status, type, uploadIndex }: UploadParameters) {
