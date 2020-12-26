@@ -372,8 +372,6 @@ class FileField {
       this.uploads.splice(index, 1);
     }
 
-    //this.uploads.splice(upload.uploadIndex, 1);
-
     this.checkDropHint();
 
     const { onDelete } = this.callbacks;

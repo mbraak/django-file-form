@@ -14588,8 +14588,7 @@
 
 	      if (index >= 0) {
 	        this.uploads.splice(index, 1);
-	      } //this.uploads.splice(upload.uploadIndex, 1);
-
+	      }
 
 	      this.checkDropHint();
 	      var onDelete = this.callbacks.onDelete;
