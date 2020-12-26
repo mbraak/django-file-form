@@ -116,7 +116,9 @@ class UploadedFileWithId(uploadedfile.UploadedFile):
 
     def get_values(self):
         return dict(
-            id=self.file_id, name=self.name, size=self.size, metadata=self.metadata
+            id=self.file_id,
+            name=self.name,
+            size=self.size,
         )
 
 
@@ -176,7 +178,6 @@ try:
                 placeholder=False,
                 name=self.name,
                 size=self.size,
-                metadata=self.metadata,
             )
 
 
