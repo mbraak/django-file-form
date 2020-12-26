@@ -1,1 +1,1 @@
-python manage.py test django_file_form_example
+python manage.py test --failfast -v 2 django_file_form_example
