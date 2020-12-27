@@ -17,6 +17,8 @@ class FileFormMixin(object):
 
         super().__init__(*args, **kwargs)
 
+        self.update_files_data()
+
         if s3_upload_dir is not None:
             self.add_hidden_field("s3_upload_dir", s3_upload_dir)
             self.add_hidden_field("upload_url", reverse("s3_upload"))
@@ -31,17 +33,6 @@ class FileFormMixin(object):
         self.fields[name] = CharField(
             widget=HiddenInput, initial=initial, required=False
         )
-
-    def full_clean(self: Form):
-        if not self.is_bound:
-            # Form is unbound; just call super
-            super().full_clean()
-        else:
-            # Update file data of the form
-            self.update_files_data()
-
-            # Call super
-            super().full_clean()
 
     def file_form_field_names(self: Form):
         return [
