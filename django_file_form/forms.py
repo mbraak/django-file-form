@@ -68,9 +68,8 @@ class FileFormMixin(object):
 
     def add_upload_inputs(self):
         for field_name in self.file_form_field_names():
-            placeholder_field_name = f"{field_name}-uploads"
             self.add_hidden_field(
-                placeholder_field_name,
+                f"{field_name}-uploads",
                 json.dumps(self.get_placesholders_for_field(field_name)),
             )
 
@@ -85,9 +84,8 @@ class FileFormMixin(object):
 
     def add_metadata_inputs(self):
         for field_name in self.file_form_field_names():
-            metadata_field_name = f"{field_name}-metadata"
             self.add_hidden_field(
-                metadata_field_name, json.dumps(self.get_metadata_for_field(field_name))
+                f"{field_name}-metadata", json.dumps(self.get_metadata_for_field(field_name))
             )
 
     def get_metadata_for_field(self: Form, field_name: str):
