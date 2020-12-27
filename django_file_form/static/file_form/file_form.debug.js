@@ -3862,8 +3862,8 @@
 
 	  return input;
 	};
-	var getPlaceholderFieldName = function getPlaceholderFieldName(fieldName, prefix) {
-	  return "".concat(getInputNameWithoutPrefix(fieldName, prefix), "-placeholder");
+	var getUploadsFieldName = function getUploadsFieldName(fieldName, prefix) {
+	  return "".concat(getInputNameWithoutPrefix(fieldName, prefix), "-uploads");
 	};
 	var getInputValueForFormAndPrefix = function getInputValueForFormAndPrefix(form, fieldName, prefix) {
 	  var _findInput;
@@ -14690,7 +14690,7 @@
 	  }, {
 	    key: "updatePlaceholderInput",
 	    value: function updatePlaceholderInput() {
-	      var input = findInput(this.form, getPlaceholderFieldName(this.fieldName, this.prefix), this.prefix);
+	      var input = findInput(this.form, getUploadsFieldName(this.fieldName, this.prefix), this.prefix);
 
 	      if (!input) {
 	        return;
@@ -14762,7 +14762,7 @@
 	  };
 
 	  var getPlaceholders = function getPlaceholders(fieldName) {
-	    var data = getInputValue(getPlaceholderFieldName(fieldName, getPrefix()));
+	    var data = getInputValue(getUploadsFieldName(fieldName, getPrefix()));
 
 	    if (!data) {
 	      return [];

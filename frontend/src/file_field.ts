@@ -1,8 +1,4 @@
-import {
-  findInput,
-  getMetadataFieldName,
-  getPlaceholderFieldName
-} from "./util";
+import { findInput, getMetadataFieldName, getUploadsFieldName } from "./util";
 import RenderUploadFile from "./render_upload_file";
 import DropArea from "./drop_area";
 
@@ -407,7 +403,7 @@ class FileField {
   updatePlaceholderInput(): void {
     const input = findInput(
       this.form,
-      getPlaceholderFieldName(this.fieldName, this.prefix),
+      getUploadsFieldName(this.fieldName, this.prefix),
       this.prefix
     );
     if (!input) {

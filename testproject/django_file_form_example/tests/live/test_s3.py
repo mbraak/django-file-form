@@ -118,6 +118,7 @@ class S3TestCase(BaseLiveTestCase):
 
         page.fill_title_field("abc")
         page.submit()
+        page.assert_page_contains_text("Upload success")
 
         example2 = Example2.objects.get(title="abc")
         self.assertEqual(example2.files.count(), 1)

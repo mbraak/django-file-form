@@ -7,7 +7,7 @@ from django.template.loader import render_to_string
 from django.utils.datastructures import MultiValueDict
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
-from django_file_form.util import get_list
+from django_file_form.util import compact, get_list
 
 from django_file_form.models import (
     PlaceholderUploadedFile,
@@ -44,41 +44,37 @@ def get_uploaded_files(value: UploadedFileTypes):
     ]
 
 
-def get_placeholder_files(data: QueryDict, field_name: str):
-    placeholder_field_name = field_name + "-placeholder"
+def get_upload(upload_data: Dict):
+    upload_type = upload_data["type"]
+
+    if upload_type == "placeholder":
+        return PlaceholderUploadedFile(
+            file_id=upload_data["id"],
+            name=upload_data["name"],
+            size=upload_data["size"],
+        )
+    elif upload_type == "s3":
+        return S3UploadedFileWithId(
+            file_id=upload_data["id"],
+            name=upload_data["name"],
+            original_name=upload_data["original_name"],
+            size=upload_data["size"],
+        )
+    else:
+        return None
+
+
+def get_uploads(data: QueryDict, field_name: str):
+    placeholder_field_name = field_name + "-uploads"
     value = data.get(placeholder_field_name)
 
     if not value:
         return []
     else:
-        return [
-            PlaceholderUploadedFile(
-                name=upload["name"],
-                size=upload["size"],
-                file_id=upload["id"],
-            )
-            for upload in json.loads(value)
-            if upload["type"] == "placeholder"
-        ]
-
-
-def get_s3_uploaded_files(data: QueryDict, field_name: str):
-    placeholder_field_name = field_name + "-placeholder"
-    value = data.get(placeholder_field_name)
-
-    if not value:
-        return []
-    else:
-        return [
-            S3UploadedFileWithId(
-                name=upload["name"],
-                original_name=upload["original_name"],
-                size=upload["size"],
-                file_id=upload["id"],
-            )
-            for upload in json.loads(value)
-            if upload["type"] == "s3"
-        ]
+        return compact([
+            get_upload(upload_data)
+            for upload_data in json.loads(value)
+        ])
 
 
 def get_file_meta(data: QueryDict, field_name: str):
@@ -123,17 +119,14 @@ class UploadWidget(BaseUploadWidget):
         if upload:
             return upload
         else:
-            placeholders = get_placeholder_files(data, name)
-            s3uploaded = get_s3_uploaded_files(data, name)
+            uploads = get_uploads(data, name)
+
+            upload = uploads[0] if uploads else None
             metadata = get_file_meta(data, name)
-            obj = (
-                placeholders[0]
-                if placeholders
-                else (s3uploaded[0] if s3uploaded else None)
-            )
-            if obj is not None and obj.name in metadata:
-                obj.metadata = metadata[obj.name]
-            return obj
+
+            if upload and upload.name in metadata:
+                upload.metadata = metadata[upload.name]
+            return upload
 
 
 class UploadMultipleWidget(BaseUploadWidget):
@@ -141,16 +134,16 @@ class UploadMultipleWidget(BaseUploadWidget):
         self, data: QueryDict, files: Union[Dict, MultiValueDict], name: str
     ):
         if hasattr(files, "getlist"):
-            metadata = get_file_meta(data, name)
-            objs = (
+            uploads = (
                 files.getlist(name)
-                + get_placeholder_files(data, name)
-                + get_s3_uploaded_files(data, name)
+                + get_uploads(data, name)
             )
-            for obj in objs:
-                if obj.name in metadata:
-                    obj.metadata = metadata[obj.name]
-            return objs
+            metadata = get_file_meta(data, name)
+
+            for upload in uploads:
+                if upload.name in metadata:
+                    upload.metadata = metadata[upload.name]
+            return uploads
         else:
             # NB: django-formtools wizard uses dict instead of MultiValueDict
             return super().value_from_datadict(data, files, name)

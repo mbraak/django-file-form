@@ -5,7 +5,7 @@ import {
   findInput,
   getInputNameWithPrefix,
   getInputValueForFormAndPrefix,
-  getPlaceholderFieldName
+  getUploadsFieldName
 } from "./util";
 
 interface Options {
@@ -44,7 +44,7 @@ const initUploadFields = (form: Element, options: Options = {}): void => {
   };
 
   const getPlaceholders = (fieldName: string): InitialFile[] => {
-    const data = getInputValue(getPlaceholderFieldName(fieldName, getPrefix()));
+    const data = getInputValue(getUploadsFieldName(fieldName, getPrefix()));
 
     if (!data) {
       return [];

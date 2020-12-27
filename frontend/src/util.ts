@@ -38,10 +38,10 @@ export const findInput = (
   return input as HTMLInputElement;
 };
 
-export const getPlaceholderFieldName = (
+export const getUploadsFieldName = (
   fieldName: string,
   prefix: string | null
-): string => `${getInputNameWithoutPrefix(fieldName, prefix)}-placeholder`;
+): string => `${getInputNameWithoutPrefix(fieldName, prefix)}-uploads`;
 
 export const getInputValueForFormAndPrefix = (
   form: Element,
