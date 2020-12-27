@@ -71,10 +71,7 @@ def get_uploads(data: QueryDict, field_name: str):
     if not value:
         return []
     else:
-        return compact([
-            get_upload(upload_data)
-            for upload_data in json.loads(value)
-        ])
+        return compact([get_upload(upload_data) for upload_data in json.loads(value)])
 
 
 def get_file_meta(data: QueryDict, field_name: str):
@@ -134,10 +131,7 @@ class UploadMultipleWidget(BaseUploadWidget):
         self, data: QueryDict, files: Union[Dict, MultiValueDict], name: str
     ):
         if hasattr(files, "getlist"):
-            uploads = (
-                files.getlist(name)
-                + get_uploads(data, name)
-            )
+            uploads = files.getlist(name) + get_uploads(data, name)
             metadata = get_file_meta(data, name)
 
             for upload in uploads:

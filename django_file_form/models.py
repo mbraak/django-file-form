@@ -114,12 +114,7 @@ class UploadedFileWithId(uploadedfile.UploadedFile):
         self.metadata = metadata
 
     def get_values(self):
-        return dict(
-            id=self.file_id,
-            name=self.name,
-            size=self.size,
-            type="tus"
-        )
+        return dict(id=self.file_id, name=self.name, size=self.size, type="tus")
 
 
 class PlaceholderUploadedFile(object):
@@ -136,12 +131,7 @@ class PlaceholderUploadedFile(object):
         self.metadata = metadata
 
     def get_values(self):
-        return dict(
-            id=self.file_id,
-            name=self.name,
-            size=self.size,
-            type="placeholder"
-        )
+        return dict(id=self.file_id, name=self.name, size=self.size, type="placeholder")
 
 
 try:
@@ -173,12 +163,7 @@ try:
             self.metadata = metadata
 
         def get_values(self):
-            return dict(
-                id=self.file_id,
-                name=self.name,
-                size=self.size,
-                type="s3"
-            )
+            return dict(id=self.file_id, name=self.name, size=self.size, type="s3")
 
 
 except (ImportError, ImproperlyConfigured):

@@ -500,18 +500,20 @@ class LiveTestCase(BaseLiveTestCase):
         page = self.page
         page.open("/placeholder")
 
-        container = page.selenium.find_element_by_css_selector('#row-example-input_file')
+        container = page.selenium.find_element_by_css_selector(
+            "#row-example-input_file"
+        )
 
         page.find_upload_success_with_filename(
             filename="test_placeholder1.txt",
             upload_index=0,
-            container_element=container
+            container_element=container,
         )
 
         page.find_upload_success_with_filename(
             filename="test_placeholder2.txt",
             upload_index=1,
-            container_element=container
+            container_element=container,
         )
 
         # upload file
