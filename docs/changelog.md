@@ -1,6 +1,6 @@
 ## Changelog
 
-**Development version**
+**3.1.2 (27 december 2020)**
 
   * Issue #418: correctly remove upload
 
@@ -17,7 +17,7 @@
   * Issue #331: fix error in deleting files (thanks to Bo Peng)
   * Issue #333: replace existing uploaded file with the same name (thanks to Bo Peng)
   * Issue #341: add javascript events (experimental)
-  * Issue #346: allow define s3_upload_dir in form class (thanks to Bo Peng)
+  * Issue #346: allow definition of s3_upload_dir in form class (thanks to Bo Peng)
 
 **3.0.1 (4 september 2020)**
 
