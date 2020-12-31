@@ -17,32 +17,22 @@ class FileFormMixin(object):
 
         super().__init__(*args, **kwargs)
 
+        self.update_files_data()
+
         if s3_upload_dir is not None:
             self.add_hidden_field("s3_upload_dir", s3_upload_dir)
-            self.add_s3_uploaded_files()
             self.add_hidden_field("upload_url", reverse("s3_upload"))
         else:
             self.add_hidden_field("upload_url", reverse("tus_upload"))
 
         self.add_hidden_field("form_id", uuid.uuid4())
-        self.add_placeholder_inputs()
+        self.add_upload_inputs()
         self.add_metadata_inputs()
 
     def add_hidden_field(self: Form, name: str, initial):
         self.fields[name] = CharField(
             widget=HiddenInput, initial=initial, required=False
         )
-
-    def full_clean(self: Form):
-        if not self.is_bound:
-            # Form is unbound; just call super
-            super().full_clean()
-        else:
-            # Update file data of the form
-            self.update_files_data()
-
-            # Call super
-            super().full_clean()
 
     def file_form_field_names(self: Form):
         return [
@@ -76,17 +66,10 @@ class FileFormMixin(object):
                     prefixed_field_name = self.add_prefix(field_name)
                     field.delete_file_data(prefixed_field_name, form_id)
 
-    def add_s3_uploaded_files(self):
+    def add_upload_inputs(self):
         for field_name in self.file_form_field_names():
-            s3_uploaded_field_name = f"{field_name}-s3direct"
-            # the field is always empty initially
-            self.add_hidden_field(s3_uploaded_field_name, "[]")
-
-    def add_placeholder_inputs(self):
-        for field_name in self.file_form_field_names():
-            placeholder_field_name = f"{field_name}-placeholder"
             self.add_hidden_field(
-                placeholder_field_name,
+                f"{field_name}-uploads",
                 json.dumps(self.get_placesholders_for_field(field_name)),
             )
 
@@ -101,9 +84,8 @@ class FileFormMixin(object):
 
     def add_metadata_inputs(self):
         for field_name in self.file_form_field_names():
-            metadata_field_name = f"{field_name}-metadata"
             self.add_hidden_field(
-                metadata_field_name, json.dumps(self.get_metadata_for_field(field_name))
+                f"{field_name}-metadata", json.dumps(self.get_metadata_for_field(field_name))
             )
 
     def get_metadata_for_field(self: Form, field_name: str):

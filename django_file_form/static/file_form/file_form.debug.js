@@ -3862,11 +3862,8 @@
 
 	  return input;
 	};
-	var getPlaceholderFieldName = function getPlaceholderFieldName(fieldName, prefix) {
-	  return "".concat(getInputNameWithoutPrefix(fieldName, prefix), "-placeholder");
-	};
-	var getS3UploadedFieldName = function getS3UploadedFieldName(fieldName, prefix) {
-	  return "".concat(getInputNameWithoutPrefix(fieldName, prefix), "-s3direct");
+	var getUploadsFieldName = function getUploadsFieldName(fieldName, prefix) {
+	  return "".concat(getInputNameWithoutPrefix(fieldName, prefix), "-uploads");
 	};
 	var getInputValueForFormAndPrefix = function getInputValueForFormAndPrefix(form, fieldName, prefix) {
 	  var _findInput;
@@ -8800,9 +8797,9 @@
 	      return {
 	        id: this.uploadId || "",
 	        name: this.key || "",
-	        placeholder: false,
 	        size: this.file.size,
-	        original_name: this.file.name
+	        original_name: this.file.name,
+	        type: "s3"
 	      };
 	    }
 	  }, {
@@ -9202,6 +9199,18 @@
 	    });
 	  }
 
+	  createClass(PlaceholderFile, [{
+	    key: "getInitialFile",
+	    value: function getInitialFile() {
+	      return {
+	        id: this.id,
+	        name: this.name,
+	        size: this.size,
+	        type: "placeholder"
+	      };
+	    }
+	  }]);
+
 	  return PlaceholderFile;
 	}(BaseUploadedFile);
 
@@ -9236,7 +9245,8 @@
 	        id: this.id,
 	        name: this.key,
 	        original_name: this.name,
-	        size: this.size
+	        size: this.size,
+	        type: "s3"
 	      };
 	    }
 	  }]);
@@ -9300,6 +9310,16 @@
 
 	      return _delete;
 	    }()
+	  }, {
+	    key: "getInitialFile",
+	    value: function getInitialFile() {
+	      return {
+	        id: this.id,
+	        name: this.name,
+	        size: this.size,
+	        type: "tus"
+	      };
+	    }
 	  }]);
 
 	  return UploadedTusFile;
@@ -9310,17 +9330,23 @@
 	      uploadUrl = _ref3.uploadUrl,
 	      uploadIndex = _ref3.uploadIndex;
 
-	  if (initialFile.placeholder === true) {
-	    return new PlaceholderFile(initialFile, uploadIndex);
-	  } else if (initialFile.placeholder === false) {
-	    return new UploadedS3File(initialFile, uploadIndex);
-	  } else {
-	    return new UploadedTusFile({
-	      csrfToken: csrfToken,
-	      initialFile: initialFile,
-	      uploadUrl: uploadUrl,
-	      uploadIndex: uploadIndex
-	    });
+	  switch (initialFile.type) {
+	    case "placeholder":
+	      return new PlaceholderFile(initialFile, uploadIndex);
+
+	    case "s3":
+	      return new UploadedS3File(initialFile, uploadIndex);
+
+	    case "tus":
+	      return new UploadedTusFile({
+	        csrfToken: csrfToken,
+	        initialFile: initialFile,
+	        uploadUrl: uploadUrl,
+	        uploadIndex: uploadIndex
+	      });
+
+	    default:
+	      throw new Error("Unknown upload type ".concat(initialFile.type));
 	  }
 	};
 
@@ -14081,6 +14107,16 @@
 	    value: function start() {
 	      this.upload.start();
 	    }
+	  }, {
+	    key: "getInitialFile",
+	    value: function getInitialFile() {
+	      return {
+	        id: this.name,
+	        name: this.name,
+	        size: this.getSize(),
+	        type: "tus"
+	      };
+	    }
 	  }]);
 
 	  return TusUpload;
@@ -14322,7 +14358,7 @@
 	    defineProperty$2(this, "handleSuccess", function (upload) {
 	      var renderer = _this.renderer;
 
-	      _this.updateS3UploadedInput();
+	      _this.updatePlaceholderInput();
 
 	      renderer.clearInput();
 	      renderer.setSuccess(upload.uploadIndex, upload.getSize());
@@ -14563,10 +14599,9 @@
 
 	              case 19:
 	                this.removeUploadFromList(upload);
-	                this.updateS3UploadedInput();
 	                this.updatePlaceholderInput();
 
-	              case 22:
+	              case 21:
 	              case "end":
 	                return _context3.stop();
 	            }
@@ -14655,32 +14690,18 @@
 	  }, {
 	    key: "updatePlaceholderInput",
 	    value: function updatePlaceholderInput() {
-	      var input = findInput(this.form, getPlaceholderFieldName(this.fieldName, this.prefix), this.prefix);
+	      var input = findInput(this.form, getUploadsFieldName(this.fieldName, this.prefix), this.prefix);
 
 	      if (!input) {
 	        return;
 	      }
 
 	      var placeholdersInfo = this.uploads.filter(function (upload) {
-	        return upload.type === "placeholder";
-	      });
-	      input.value = JSON.stringify(placeholdersInfo);
-	    }
-	  }, {
-	    key: "updateS3UploadedInput",
-	    value: function updateS3UploadedInput() {
-	      var input = findInput(this.form, getS3UploadedFieldName(this.fieldName, this.prefix), this.prefix);
-
-	      if (!input) {
-	        return;
-	      }
-
-	      var uploadedInfo = this.uploads.filter(function (upload) {
-	        return upload.type === "s3" || upload.type === "uploadedS3";
+	        return upload.type === "placeholder" || upload.type === "s3" || upload.type === "uploadedS3";
 	      }).map(function (upload) {
 	        return upload.getInitialFile();
 	      });
-	      input.value = JSON.stringify(uploadedInfo);
+	      input.value = JSON.stringify(placeholdersInfo);
 	    }
 	  }, {
 	    key: "getMetaDataField",
@@ -14741,17 +14762,7 @@
 	  };
 
 	  var getPlaceholders = function getPlaceholders(fieldName) {
-	    var data = getInputValue(getPlaceholderFieldName(fieldName, getPrefix()));
-
-	    if (!data) {
-	      return [];
-	    }
-
-	    return JSON.parse(data);
-	  };
-
-	  var getS3Uploads = function getS3Uploads(fieldName) {
-	    var data = getInputValue(getS3UploadedFieldName(fieldName, getPrefix()));
+	    var data = getInputValue(getUploadsFieldName(fieldName, getPrefix()));
 
 	    if (!data) {
 	      return [];
@@ -14790,7 +14801,7 @@
 
 	    var fieldName = input.name;
 	    var multiple = input.multiple;
-	    var initial = getInitialFiles(container).concat(getPlaceholders(fieldName)).concat(getS3Uploads(fieldName));
+	    var initial = getInitialFiles(container).concat(getPlaceholders(fieldName));
 	    var dataTranslations = container.getAttribute("data-translations");
 	    var translations = dataTranslations ? JSON.parse(dataTranslations) : {};
 	    var supportDropArea = !(options.supportDropArea === false);

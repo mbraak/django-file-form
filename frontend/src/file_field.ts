@@ -1,21 +1,12 @@
-import {
-  findInput,
-  getMetadataFieldName,
-  getPlaceholderFieldName,
-  getS3UploadedFieldName
-} from "./util";
+import { findInput, getMetadataFieldName, getUploadsFieldName } from "./util";
 import RenderUploadFile from "./render_upload_file";
 import DropArea from "./drop_area";
 
 import S3Upload from "./uploads/s3_upload";
 import EventEmitter from "eventemitter3";
-import {
-  createUploadedFile,
-  InitialFile,
-  UploadedS3File
-} from "./uploads/uploaded_file";
+import { createUploadedFile } from "./uploads/uploaded_file";
 import TusUpload from "./uploads/tus_upload";
-import BaseUpload from "./uploads/base_upload";
+import BaseUpload, { InitialFile } from "./uploads/base_upload";
 
 export type Translations = { [key: string]: string };
 
@@ -264,7 +255,6 @@ class FileField {
     }
 
     this.removeUploadFromList(upload);
-    this.updateS3UploadedInput();
     this.updatePlaceholderInput();
   }
 
@@ -346,7 +336,8 @@ class FileField {
   handleSuccess = (upload: BaseUpload): void => {
     const { renderer } = this;
 
-    this.updateS3UploadedInput();
+    this.updatePlaceholderInput();
+
     renderer.clearInput();
     renderer.setSuccess(upload.uploadIndex, upload.getSize());
     upload.status = "done";
@@ -412,34 +403,23 @@ class FileField {
   updatePlaceholderInput(): void {
     const input = findInput(
       this.form,
-      getPlaceholderFieldName(this.fieldName, this.prefix),
+      getUploadsFieldName(this.fieldName, this.prefix),
       this.prefix
     );
     if (!input) {
       return;
     }
 
-    const placeholdersInfo = this.uploads.filter(
-      upload => upload.type === "placeholder"
-    );
+    const placeholdersInfo: InitialFile[] = this.uploads
+      .filter(
+        upload =>
+          upload.type === "placeholder" ||
+          upload.type === "s3" ||
+          upload.type === "uploadedS3"
+      )
+      .map(upload => upload.getInitialFile());
+
     input.value = JSON.stringify(placeholdersInfo);
-  }
-
-  updateS3UploadedInput(): void {
-    const input = findInput(
-      this.form,
-      getS3UploadedFieldName(this.fieldName, this.prefix),
-      this.prefix
-    );
-    if (!input) {
-      return;
-    }
-
-    const uploadedInfo: InitialFile[] = this.uploads
-      .filter(upload => upload.type === "s3" || upload.type === "uploadedS3")
-      .map(upload => (upload as S3Upload | UploadedS3File).getInitialFile());
-
-    input.value = JSON.stringify(uploadedInfo);
   }
 
   getMetaDataField(): HTMLElement | null {

@@ -1,12 +1,11 @@
 import EventEmitter from "eventemitter3";
 import FileField, { Callbacks, Translations } from "./file_field";
-import { InitialFile } from "./uploads/uploaded_file";
+import { InitialFile } from "./uploads/base_upload";
 import {
   findInput,
   getInputNameWithPrefix,
   getInputValueForFormAndPrefix,
-  getPlaceholderFieldName,
-  getS3UploadedFieldName
+  getUploadsFieldName
 } from "./util";
 
 interface Options {
@@ -45,17 +44,7 @@ const initUploadFields = (form: Element, options: Options = {}): void => {
   };
 
   const getPlaceholders = (fieldName: string): InitialFile[] => {
-    const data = getInputValue(getPlaceholderFieldName(fieldName, getPrefix()));
-
-    if (!data) {
-      return [];
-    }
-
-    return JSON.parse(data) as InitialFile[];
-  };
-
-  const getS3Uploads = (fieldName: string): InitialFile[] => {
-    const data = getInputValue(getS3UploadedFieldName(fieldName, getPrefix()));
+    const data = getInputValue(getUploadsFieldName(fieldName, getPrefix()));
 
     if (!data) {
       return [];
@@ -98,9 +87,9 @@ const initUploadFields = (form: Element, options: Options = {}): void => {
 
     const fieldName = input.name;
     const { multiple } = input;
-    const initial = getInitialFiles(container)
-      .concat(getPlaceholders(fieldName))
-      .concat(getS3Uploads(fieldName));
+    const initial = getInitialFiles(container).concat(
+      getPlaceholders(fieldName)
+    );
     const dataTranslations = container.getAttribute("data-translations");
     const translations: Translations = dataTranslations
       ? (JSON.parse(dataTranslations) as Translations)

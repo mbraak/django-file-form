@@ -20,6 +20,10 @@ def get_list(v):
         return [v]
 
 
+def compact(l):
+    return [v for v in l if v]
+
+
 def check_permission(request):
     must_login = getattr(settings, "FILE_FORM_MUST_LOGIN", False)
 

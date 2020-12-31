@@ -77,7 +77,6 @@ class TemporaryUploadedFile(models.Model):
     objects = TemporaryUploadedFileManager()
 
     class Meta(object):
-        # Query string to get back existing uploaded file is using form_id and field_name
         index_together = (("form_id", "field_name"),)
         db_table = "django_file_form_uploadedfile"
 
@@ -115,9 +114,7 @@ class UploadedFileWithId(uploadedfile.UploadedFile):
         self.metadata = metadata
 
     def get_values(self):
-        return dict(
-            id=self.file_id, name=self.name, size=self.size, metadata=self.metadata
-        )
+        return dict(id=self.file_id, name=self.name, size=self.size, type="tus")
 
 
 class PlaceholderUploadedFile(object):
@@ -134,12 +131,7 @@ class PlaceholderUploadedFile(object):
         self.metadata = metadata
 
     def get_values(self):
-        return dict(
-            id=self.file_id,
-            placeholder=True,
-            name=self.name,
-            size=self.size,
-        )
+        return dict(id=self.file_id, name=self.name, size=self.size, type="placeholder")
 
 
 try:
@@ -171,13 +163,7 @@ try:
             self.metadata = metadata
 
         def get_values(self):
-            return dict(
-                id=self.file_id,
-                placeholder=False,
-                name=self.name,
-                size=self.size,
-                metadata=self.metadata,
-            )
+            return dict(id=self.file_id, name=self.name, size=self.size, type="s3")
 
 
 except (ImportError, ImproperlyConfigured):
