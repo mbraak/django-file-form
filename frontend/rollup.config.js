@@ -19,26 +19,26 @@ const getOutputFilename = () => {
   }
 };
 
+const coveragePlugin = includeCoverage
+  ? coverage({
+      exclude: ["node_modules/**"]
+    })
+  : null;
+
 const plugins = [
   resolve({ browser: true, extensions: [".js", ".ts"] }),
   commonjs(),
+  coveragePlugin,
   babel({
     babelHelpers: "runtime",
     extensions: [".js", ".ts"],
     exclude: "node_modules/core-js/**"
   })
-];
+].filter(v => v !== null);
 
 if (minimize) {
   const terserPlugin = terser();
   plugins.push(terserPlugin);
-}
-
-if (includeCoverage) {
-  const coveragePlugin = coverage({
-    exclude: ["node_modules/**"]
-  });
-  plugins.push(coveragePlugin);
 }
 
 export default {
