@@ -1,5 +1,9 @@
 ## Changelog
 
+**3.1.3 (19 january 2021)**
+
+  * Issue #422: add model rename to migrations (thanks to Shrikrishna Singh)
+
 **3.1.2 (27 december 2020)**
 
   * Issue #418: correctly remove upload
