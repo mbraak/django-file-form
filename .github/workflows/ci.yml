@@ -68,7 +68,7 @@ jobs:
     - name: Run django check
       run: python testproject/manage.py check
     - name: Check migrations
-      run: python testproject/manage.py makemigrations --check --noinput --verbosity=1
+      run: python testproject/manage.py makemigrations django_file_form --check --noinput --verbosity=1
       env:
         CHECK_MIGRATIONS: true
     - name: Setup node
