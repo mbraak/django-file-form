@@ -24,6 +24,11 @@ jobs:
         ports:
           - 5432:5432
 
+    env:
+      POSTGRES_HOST: localhost
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_PORT: 5432
+
     steps:
     - name: Check out repository code
       uses: actions/checkout@v2
