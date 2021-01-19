@@ -64,6 +64,10 @@ jobs:
         POSTGRES_HOST: localhost
         POSTGRES_PASSWORD: postgres
         POSTGRES_PORT: 5432
+    - name: Run django check
+      run: python testproject/manage.py check
+    - name: Check migrations
+      run: python testproject/manage.py makemigrations --check --noinput --verbosity=1
     - name: Setup node
       uses: actions/setup-node@v1
       with:
