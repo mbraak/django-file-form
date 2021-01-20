@@ -6,9 +6,11 @@ import {
   formatBytes,
   getInputNameWithPrefix,
   getInputValueForFormAndPrefix,
+  getMetadataFieldName,
   getUploadsFieldName
 } from "./util";
 import { RenderFileInfo, Translations } from "./renderUploads/types";
+import { Metadata } from "./uploads/base_upload";
 
 interface Options {
   callbacks?: Callbacks;
@@ -35,6 +37,27 @@ const initUploadFields = (form: Element, options: Options = {}): void => {
 
   const getInputValue = (fieldName: string): string | undefined =>
     getInputValueForFormAndPrefix(form, fieldName, getPrefix());
+
+  const getMetadataPerFile = (fieldName: string): Record<string, Metadata> => {
+    const data = getInputValue(getMetadataFieldName(fieldName, getPrefix()));
+
+    if (!data) {
+      return {};
+    }
+
+    return JSON.parse(data) as Record<string, Metadata>;
+  };
+
+  const setInitialMetadata = (
+    fieldName: string,
+    initialFiles: InitialFile[]
+  ): void => {
+    const metadataPerFilename = getMetadataPerFile(fieldName);
+
+    initialFiles.forEach(initialFile => {
+      initialFile.metadata = metadataPerFilename[initialFile.name];
+    });
+  };
 
   const getInitialFiles = (element: HTMLElement): InitialFile[] => {
     const filesData = element.dataset.files;
@@ -93,6 +116,9 @@ const initUploadFields = (form: Element, options: Options = {}): void => {
     const initial = getInitialFiles(container).concat(
       getPlaceholders(fieldName)
     );
+
+    setInitialMetadata(fieldName, initial);
+
     const dataTranslations = container.getAttribute("data-translations");
     const translations: Translations = dataTranslations
       ? (JSON.parse(dataTranslations) as Translations)

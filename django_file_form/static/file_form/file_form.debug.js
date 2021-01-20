@@ -17345,6 +17345,23 @@
 	    return getInputValueForFormAndPrefix(form, fieldName, getPrefix());
 	  };
 
+	  var getMetadataPerFile = function getMetadataPerFile(fieldName) {
+	    var data = getInputValue(getMetadataFieldName(fieldName, getPrefix()));
+
+	    if (!data) {
+	      return {};
+	    }
+
+	    return JSON.parse(data);
+	  };
+
+	  var setInitialMetadata = function setInitialMetadata(fieldName, initialFiles) {
+	    var metadataPerFilename = getMetadataPerFile(fieldName);
+	    initialFiles.forEach(function (initialFile) {
+	      initialFile.metadata = metadataPerFilename[initialFile.name];
+	    });
+	  };
+
 	  var getInitialFiles = function getInitialFiles(element) {
 	    var filesData = element.dataset.files;
 
@@ -17396,6 +17413,7 @@
 	    var fieldName = input.name;
 	    var multiple = input.multiple;
 	    var initial = getInitialFiles(container).concat(getPlaceholders(fieldName));
+	    setInitialMetadata(fieldName, initial);
 	    var dataTranslations = container.getAttribute("data-translations");
 	    var translations = dataTranslations ? JSON.parse(dataTranslations) : {};
 	    var supportDropArea = !(options.supportDropArea === false);
