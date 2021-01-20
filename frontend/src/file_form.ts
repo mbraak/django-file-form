@@ -1,17 +1,14 @@
 import EventEmitter from "eventemitter3";
 import FileField, { Callbacks } from "./file_field";
-import { InitialFile } from "./uploads/uploaded_file";
+import { InitialFile } from "./uploads/base_upload";
 import {
   findInput,
   formatBytes,
   getInputNameWithPrefix,
   getInputValueForFormAndPrefix,
-  getMetadataFieldName,
-  getPlaceholderFieldName,
-  getS3UploadedFieldName
+  getUploadsFieldName
 } from "./util";
 import { RenderFileInfo, Translations } from "./renderUploads/types";
-import { Metadata } from "./uploads/base_upload";
 
 interface Options {
   callbacks?: Callbacks;
@@ -39,27 +36,6 @@ const initUploadFields = (form: Element, options: Options = {}): void => {
   const getInputValue = (fieldName: string): string | undefined =>
     getInputValueForFormAndPrefix(form, fieldName, getPrefix());
 
-  const getMetadataPerFile = (fieldName: string): Record<string, Metadata> => {
-    const data = getInputValue(getMetadataFieldName(fieldName, getPrefix()));
-
-    if (!data) {
-      return {};
-    }
-
-    return JSON.parse(data) as Record<string, Metadata>;
-  };
-
-  const setInitialMetadata = (
-    fieldName: string,
-    initialFiles: InitialFile[]
-  ): void => {
-    const metadataPerFilename = getMetadataPerFile(fieldName);
-
-    initialFiles.forEach(initialFile => {
-      initialFile.metadata = metadataPerFilename[initialFile.name];
-    });
-  };
-
   const getInitialFiles = (element: HTMLElement): InitialFile[] => {
     const filesData = element.dataset.files;
 
@@ -71,17 +47,7 @@ const initUploadFields = (form: Element, options: Options = {}): void => {
   };
 
   const getPlaceholders = (fieldName: string): InitialFile[] => {
-    const data = getInputValue(getPlaceholderFieldName(fieldName, getPrefix()));
-
-    if (!data) {
-      return [];
-    }
-
-    return JSON.parse(data) as InitialFile[];
-  };
-
-  const getS3Uploads = (fieldName: string): InitialFile[] => {
-    const data = getInputValue(getS3UploadedFieldName(fieldName, getPrefix()));
+    const data = getInputValue(getUploadsFieldName(fieldName, getPrefix()));
 
     if (!data) {
       return [];
@@ -124,13 +90,9 @@ const initUploadFields = (form: Element, options: Options = {}): void => {
 
     const fieldName = input.name;
     const { multiple } = input;
-
-    const initial = getInitialFiles(container)
-      .concat(getPlaceholders(fieldName))
-      .concat(getS3Uploads(fieldName));
-
-    setInitialMetadata(fieldName, initial);
-
+    const initial = getInitialFiles(container).concat(
+      getPlaceholders(fieldName)
+    );
     const dataTranslations = container.getAttribute("data-translations");
     const translations: Translations = dataTranslations
       ? (JSON.parse(dataTranslations) as Translations)

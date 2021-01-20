@@ -9,7 +9,7 @@ jobs:
 
     strategy:
       matrix:
-        django: ['2.2.17', '3.0.11', '3.1.4']
+        django: ['2.2.17', '3.0.11', '3.1.5']
 
     services:
       postgres:
@@ -23,6 +23,11 @@ jobs:
           --health-retries 5
         ports:
           - 5432:5432
+
+    env:
+      POSTGRES_HOST: localhost
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_PORT: 5432
 
     steps:
     - name: Check out repository code
@@ -60,10 +65,12 @@ jobs:
     - name: Run tests
       run: |
         python -Wd testproject/manage.py test django_file_form_example -v 2
+    - name: Run django check
+      run: python testproject/manage.py check
+    - name: Check migrations
+      run: python testproject/manage.py makemigrations django_file_form --check --noinput --verbosity=1
       env:
-        POSTGRES_HOST: localhost
-        POSTGRES_PASSWORD: postgres
-        POSTGRES_PORT: 5432
+        CHECK_MIGRATIONS: true
     - name: Setup node
       uses: actions/setup-node@v1
       with:
@@ -78,10 +85,6 @@ jobs:
     - name: Test with coverage
       run: |
         COVERAGE=true coverage run --source=django_file_form,testproject/django_file_form_example testproject/manage.py test django_file_form_example -v 2
-      env:
-        POSTGRES_HOST: localhost
-        POSTGRES_PASSWORD: postgres
-        POSTGRES_PORT: 5432
     - uses: actions/setup-ruby@v1
       with:
         ruby-version: '2.6'

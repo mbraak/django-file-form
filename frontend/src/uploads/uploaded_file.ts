@@ -1,26 +1,16 @@
-import BaseUpload, { Metadata } from "./base_upload";
+import BaseUpload, { InitialFile, Metadata, UploadType } from "./base_upload";
 import { deleteUpload } from "./tus_utils";
-
-export interface InitialFile {
-  id: string;
-  metadata?: Metadata;
-  name: string;
-  original_name?: string;
-  placeholder?: boolean | undefined;
-  size: number;
-  url?: string;
-}
 
 interface BaseUploadedFileParameters {
   id: string;
   metadata?: Metadata;
   name: string;
   size: number;
-  type: string;
+  type: UploadType;
   uploadIndex: number;
 }
 
-export class BaseUploadedFile extends BaseUpload {
+export abstract class BaseUploadedFile extends BaseUpload {
   id: string;
   size: number;
 
@@ -41,7 +31,6 @@ export class BaseUploadedFile extends BaseUpload {
     });
 
     this.id = id;
-    this.metadata;
     this.size = size;
   }
 
@@ -74,6 +63,15 @@ class PlaceholderFile extends BaseUploadedFile {
       uploadIndex
     });
   }
+
+  public getInitialFile(): InitialFile {
+    return {
+      id: this.id,
+      name: this.name,
+      size: this.size,
+      type: "placeholder"
+    };
+  }
 }
 
 interface UploadedS3FileParameters {
@@ -102,7 +100,8 @@ export class UploadedS3File extends BaseUploadedFile {
       id: this.id,
       name: this.key,
       original_name: this.name,
-      size: this.size
+      size: this.size,
+      type: "s3"
     };
   }
 }
@@ -140,6 +139,15 @@ export class UploadedTusFile extends BaseUploadedFile {
   public async delete(): Promise<void> {
     await deleteUpload(this.url, this.csrfToken);
   }
+
+  getInitialFile(): InitialFile {
+    return {
+      id: this.id,
+      name: this.name,
+      size: this.size,
+      type: "tus"
+    };
+  }
 }
 
 interface UploadedFileParameters {
@@ -155,22 +163,22 @@ export const createUploadedFile = ({
   uploadUrl,
   uploadIndex
 }: UploadedFileParameters): BaseUploadedFile => {
-  if (initialFile.placeholder === true) {
-    return new PlaceholderFile({
-      initialFile,
-      uploadIndex
-    });
-  } else if (initialFile.placeholder === false) {
-    return new UploadedS3File({
-      initialFile,
-      uploadIndex
-    });
-  } else {
-    return new UploadedTusFile({
-      csrfToken,
-      initialFile,
-      uploadUrl,
-      uploadIndex
-    });
+  switch (initialFile.type) {
+    case "placeholder":
+      return new PlaceholderFile({ initialFile, uploadIndex });
+
+    case "s3":
+      return new UploadedS3File({ initialFile, uploadIndex });
+
+    case "tus":
+      return new UploadedTusFile({
+        csrfToken,
+        initialFile,
+        uploadUrl,
+        uploadIndex
+      });
+
+    default:
+      throw new Error(`Unknown upload type ${initialFile.type as string}`);
   }
 };

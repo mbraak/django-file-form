@@ -3,11 +3,28 @@ export type Metadata = Record<string, unknown>;
 type UploadStatus = "done" | "error" | "uploading";
 type ActionStatus = "in_progress" | "error";
 
+export type UploadType =
+  | "placeholder"
+  | "s3"
+  | "tus"
+  | "uploadedS3"
+  | "uploadedTus";
+
+export interface InitialFile {
+  id: string;
+  metadata?: Metadata;
+  name: string;
+  size: number;
+  url?: string;
+  original_name?: string;
+  type: "placeholder" | "s3" | "tus";
+}
+
 interface UploadParameters {
   metadata?: Metadata;
   name: string;
   status: UploadStatus;
-  type: string;
+  type: UploadType;
   uploadIndex: number;
 }
 
@@ -18,7 +35,7 @@ abstract class BaseUpload {
   progress: number;
   render?: () => void;
   status: UploadStatus;
-  type: string;
+  type: UploadType;
   updateMetadata?: () => void;
   uploadIndex: number;
 
@@ -52,6 +69,7 @@ abstract class BaseUpload {
       this.updateMetadata();
     }
   }
+  public abstract getInitialFile(): InitialFile;
 }
 
 export default BaseUpload;

@@ -1,7 +1,7 @@
 // The following code is adapted from https://github.com/transloadit/uppy/blob/master/packages/%40uppy/aws-s3-multipart/src/MultipartUploader.js
 // which is released under a MIT License (https://github.com/transloadit/uppy/blob/master/LICENSE)
 
-import BaseUpload from "./base_upload";
+import BaseUpload, { InitialFile } from "./base_upload";
 import {
   abortMultipartUpload,
   completeMultipartUpload,
@@ -14,7 +14,6 @@ import {
   remove,
   UrlInfo
 } from "./s3_utils";
-import { InitialFile } from "./uploaded_file";
 
 interface ChunkState {
   busy: boolean;
@@ -112,9 +111,9 @@ class S3Upload extends BaseUpload {
     return {
       id: this.uploadId || "",
       name: this.key || "",
-      placeholder: false,
       size: this.file.size,
-      original_name: this.file.name
+      original_name: this.file.name,
+      type: "s3"
     };
   }
 
