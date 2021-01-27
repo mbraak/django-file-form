@@ -26,6 +26,6 @@ Settings in `settings.py`:
   * The cache is used to store data about files while they are being uploaded. If the default might be cleared while a file upload is in progress then using a different backend like django's database cache might be more appropriate. Note that `cache.clear()` will clear the whole cache at a specified `LOCATION` regardless what the `KEY_PREFIX` is.
 
 * **FILE_UPLOAD_PERMISSIONS** (octal) [django-setting]:
-  * This is a setting fomr the DJANGO core.
+  * This is a setting from the DJANGO core.
   * Sets the the permissions for the uploaded files, for example: 0o644.
   * See more details at: https://docs.djangoproject.com/en/3.1/ref/settings/#std:setting-FILE_UPLOAD_PERMISSIONS.
