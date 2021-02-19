@@ -95,8 +95,6 @@ class BaseUploadWidget(ClearableFileInput):
         context = super().get_context(name, value, attrs)
         context['translations'] = json.dumps(TRANSLATIONS)
         context['uploaded_files'] = json.dumps(get_uploaded_files(value))
-        # for backward compatibility
-        context['input'] = super().render(name, value, attrs, None)
         return context
 
 
