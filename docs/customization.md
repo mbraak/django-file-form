@@ -1,6 +1,6 @@
 ## Customization
 
-### Override upload widget
+### Customize upload widget
 
 The `UploadWidget` and `UploadMultipleWidget` is rendered by a template `django_file_form/upload_widget.html`, which contains the `<input type="file">` widget and a few hidden fields
 for additional information.
