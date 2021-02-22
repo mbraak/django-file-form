@@ -89,24 +89,13 @@ def get_file_meta(data: QueryDict, field_name: str):
 
 
 class BaseUploadWidget(ClearableFileInput):
-    def render(
-        self,
-        name: str,
-        value: UploadedFileTypes,
-        attrs=None,
-        renderer=None,
-    ):
-        upload_input = super().render(name, value, attrs, renderer)
-        return mark_safe(
-            render_to_string(
-                "django_file_form/upload_widget.html",
-                dict(
-                    input=upload_input,
-                    translations=json.dumps(TRANSLATIONS),
-                    uploaded_files=json.dumps(get_uploaded_files(value)),
-                ),
-            )
-        )
+    template_name = "django_file_form/upload_widget.html"
+
+    def get_context(self, name, value, attrs):
+        context = super().get_context(name, value, attrs)
+        context['translations'] = json.dumps(TRANSLATIONS)
+        context['uploaded_files'] = json.dumps(get_uploaded_files(value))
+        return context
 
 
 class UploadWidget(BaseUploadWidget):
