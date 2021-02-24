@@ -9,6 +9,7 @@ nav:
     - Javascript options: javascript_options.md
     - Form sets: form_sets.md
     - Translations: translations.md
+    - Customization: customization.md
     - Javascript events: javascript_events.md
     - Internals: internals.md
     - Changelog: changelog.md

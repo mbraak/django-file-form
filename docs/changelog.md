@@ -1,5 +1,9 @@
 ## Changelog
 
+**development**
+
+  * Issue #436: allow customization of the widget (thanks to Bo Peng)
+
 **3.1.3 (19 january 2021)**
 
   * Issue #422: add model rename to migrations (thanks to Shrikrishna Singh)
