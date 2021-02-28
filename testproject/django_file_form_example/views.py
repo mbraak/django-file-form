@@ -20,9 +20,9 @@ def file_form_js():
 
 
 class BaseFormView(generic.FormView):
-    template_name = "example_form.html"
     use_ajax = True
     custom_js_files = ["example_form.js"]
+    template_name = "example_form.html"
 
     def get_success_url(self):
         return reverse("example_success")
@@ -32,9 +32,10 @@ class BaseFormView(generic.FormView):
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
-        kwargs["use_ajax"] = self.use_ajax
         kwargs["custom_js_files"] = self.custom_js_files
         kwargs["file_form_js"] = file_form_js()
+        kwargs["use_ajax"] = self.use_ajax
+
         return super().get_context_data(**kwargs)
 
 
@@ -148,6 +149,21 @@ class WithCustomWidgetExample(PlaceholderView):
             ]
 
         return initial
+
+
+class ModelFormView(generic.CreateView):
+    template_name = "example_form.html"
+    form_class = forms.ExampleModelForm
+
+    def get_context_data(self, **kwargs):
+        kwargs["custom_js_files"] = ["example_form.js"]
+        kwargs["file_form_js"] = file_form_js()
+        kwargs["use_ajax"] = True
+
+        return super().get_context_data(**kwargs)
+
+    def get_success_url(self):
+        return reverse("example_success")
 
 
 def permission_denied(request, exception):
