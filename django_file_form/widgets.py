@@ -3,9 +3,7 @@ from typing import Dict, Union, List
 
 from django.forms import ClearableFileInput
 from django.http import QueryDict
-from django.template.loader import render_to_string
 from django.utils.datastructures import MultiValueDict
-from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
 from django_file_form.util import compact, get_list
 
