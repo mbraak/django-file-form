@@ -85,7 +85,8 @@ class FileFormMixin(object):
     def add_metadata_inputs(self):
         for field_name in self.file_form_field_names():
             self.add_hidden_field(
-                f"{field_name}-metadata", json.dumps(self.get_metadata_for_field(field_name))
+                f"{field_name}-metadata",
+                json.dumps(self.get_metadata_for_field(field_name)),
             )
 
     def get_metadata_for_field(self: Form, field_name: str):
