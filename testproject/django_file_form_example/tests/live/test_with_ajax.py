@@ -671,3 +671,26 @@ class LiveTestCase(BaseLiveTestCase):
         page.submit()
 
         self.assertEqual(Example2.objects.count(), 1)
+
+    def test_model_form(self):
+        page = self.page
+
+        temp_file = page.create_temp_file("content1")
+
+        page.open("/")
+
+        page.fill_title_field("abc")
+        page.upload_using_js(temp_file)
+
+        page.find_upload_success(temp_file)
+        page.assert_page_contains_text("8 Bytes")
+        self.assertEqual(TemporaryUploadedFile.objects.count(), 1)
+
+        page.submit()
+        page.assert_page_contains_text("Upload success")
+
+        self.assertEqual(temp_file.uploaded_file().read_text(), "content1")
+
+        example = Example.objects.get(title="abc")
+        self.assertEqual(example.input_file.name, f"example/{temp_file.base_name()}")
+        self.assertEqual(read_file(example.input_file), b"content1")
