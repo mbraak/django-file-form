@@ -89,8 +89,8 @@ export class UploadedS3File extends BaseUploadedFile {
 interface UploadedTusFileParameters {
   csrfToken: string;
   initialFile: InitialFile;
-  uploadUrl: string;
   uploadIndex: number;
+  uploadUrl: string;
 }
 
 export class UploadedTusFile extends BaseUploadedFile {
@@ -100,8 +100,8 @@ export class UploadedTusFile extends BaseUploadedFile {
   constructor({
     csrfToken,
     initialFile,
-    uploadUrl,
-    uploadIndex
+    uploadIndex,
+    uploadUrl
   }: UploadedTusFileParameters) {
     super({
       id: initialFile.id,
@@ -132,15 +132,15 @@ export class UploadedTusFile extends BaseUploadedFile {
 interface UploadedFileParameters {
   csrfToken: string;
   initialFile: InitialFile;
-  uploadUrl: string;
   uploadIndex: number;
+  uploadUrl: string;
 }
 
 export const createUploadedFile = ({
   csrfToken,
   initialFile,
-  uploadUrl,
-  uploadIndex
+  uploadIndex,
+  uploadUrl
 }: UploadedFileParameters): BaseUploadedFile => {
   switch (initialFile.type) {
     case "placeholder":
