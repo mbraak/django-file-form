@@ -79,7 +79,7 @@ class FileFormMixin(object):
         return [
             value.get_values()
             for value in initial_values
-            if getattr(value, "is_placeholder")
+            if hasattr(value, "is_placeholder")
         ]
 
     def add_metadata_inputs(self):
@@ -94,5 +94,5 @@ class FileFormMixin(object):
         return {
             value.name: value.metadata
             for value in initial_values
-            if value.metadata is not None
+            if hasattr(value, "metadata")
         }
