@@ -9,7 +9,7 @@ export type UploadType =
 export interface InitialFile {
   id: string;
   name: string;
-  size: number;
+  size?: number;
   url?: string;
   original_name?: string;
   type: "placeholder" | "s3" | "tus";
