@@ -4176,10 +4176,14 @@
 
         if (el) {
           el.classList.add("dff-upload-success");
-          var fileSizeInfo = document.createElement("span");
-          fileSizeInfo.innerHTML = formatBytes(size, 2);
-          fileSizeInfo.className = "dff-filesize";
-          el.appendChild(fileSizeInfo);
+
+          if (size != null) {
+            var fileSizeInfo = document.createElement("span");
+            fileSizeInfo.innerHTML = formatBytes(size, 2);
+            fileSizeInfo.className = "dff-filesize";
+            el.appendChild(fileSizeInfo);
+          }
+
           var deleteLink = document.createElement("a");
           deleteLink.innerHTML = translations.Delete;
           deleteLink.className = "dff-delete";
@@ -9227,10 +9231,41 @@
 
     return UploadedS3File;
   }(BaseUploadedFile);
-  var UploadedTusFile = /*#__PURE__*/function (_BaseUploadedFile3) {
-    _inherits$2(UploadedTusFile, _BaseUploadedFile3);
+  var ExistingFile = /*#__PURE__*/function (_BaseUploadedFile3) {
+    _inherits$2(ExistingFile, _BaseUploadedFile3);
 
-    var _super4 = _createSuper$3(UploadedTusFile);
+    var _super4 = _createSuper$3(ExistingFile);
+
+    function ExistingFile(initialFile, uploadIndex) {
+      _classCallCheck$7(this, ExistingFile);
+
+      return _super4.call(this, {
+        id: initialFile.id,
+        name: initialFile.name,
+        size: initialFile.size,
+        type: "existing",
+        uploadIndex: uploadIndex
+      });
+    }
+
+    _createClass$6(ExistingFile, [{
+      key: "getInitialFile",
+      value: function getInitialFile() {
+        return {
+          id: this.id,
+          name: this.name,
+          size: this.size,
+          type: "existing"
+        };
+      }
+    }]);
+
+    return ExistingFile;
+  }(BaseUploadedFile);
+  var UploadedTusFile = /*#__PURE__*/function (_BaseUploadedFile4) {
+    _inherits$2(UploadedTusFile, _BaseUploadedFile4);
+
+    var _super5 = _createSuper$3(UploadedTusFile);
 
     function UploadedTusFile(_ref2) {
       var _this3;
@@ -9242,7 +9277,7 @@
 
       _classCallCheck$7(this, UploadedTusFile);
 
-      _this3 = _super4.call(this, {
+      _this3 = _super5.call(this, {
         id: initialFile.id,
         name: initialFile.name,
         size: initialFile.size,
@@ -9255,7 +9290,7 @@
       _defineProperty$2(_assertThisInitialized$2(_this3), "url", void 0);
 
       _this3.csrfToken = csrfToken;
-      _this3.url = "".concat(uploadUrl).concat(initialFile.id);
+      _this3.url = initialFile.id ? "".concat(uploadUrl).concat(initialFile.id) : "";
       return _this3;
     }
 
@@ -9305,6 +9340,9 @@
         uploadUrl = _ref3.uploadUrl;
 
     switch (initialFile.type) {
+      case "existing":
+        return new ExistingFile(initialFile, uploadIndex);
+
       case "placeholder":
         return new PlaceholderFile(initialFile, uploadIndex);
 

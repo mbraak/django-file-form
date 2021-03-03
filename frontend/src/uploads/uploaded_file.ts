@@ -2,16 +2,16 @@ import BaseUpload, { InitialFile, UploadType } from "./base_upload";
 import { deleteUpload } from "./tus_utils";
 
 interface BaseUploadedFileParameters {
-  id: string;
+  id?: string;
   name: string;
-  size: number;
+  size?: number;
   type: UploadType;
   uploadIndex: number;
 }
 
 export abstract class BaseUploadedFile extends BaseUpload {
-  id: string;
-  size: number;
+  id?: string;
+  size?: number;
 
   constructor({
     id,
@@ -34,7 +34,7 @@ export abstract class BaseUploadedFile extends BaseUpload {
     return Promise.resolve();
   }
 
-  public getSize(): number {
+  public getSize(): number | undefined {
     return this.size;
   }
 }
@@ -86,6 +86,27 @@ export class UploadedS3File extends BaseUploadedFile {
   }
 }
 
+export class ExistingFile extends BaseUploadedFile {
+  constructor(initialFile: InitialFile, uploadIndex: number) {
+    super({
+      id: initialFile.id,
+      name: initialFile.name,
+      size: initialFile.size,
+      type: "existing",
+      uploadIndex
+    });
+  }
+
+  public getInitialFile(): InitialFile {
+    return {
+      id: this.id,
+      name: this.name,
+      size: this.size,
+      type: "existing"
+    };
+  }
+}
+
 interface UploadedTusFileParameters {
   csrfToken: string;
   initialFile: InitialFile;
@@ -112,7 +133,7 @@ export class UploadedTusFile extends BaseUploadedFile {
     });
 
     this.csrfToken = csrfToken;
-    this.url = `${uploadUrl}${initialFile.id}`;
+    this.url = initialFile.id ? `${uploadUrl}${initialFile.id}` : "";
   }
 
   public async delete(): Promise<void> {
@@ -143,6 +164,9 @@ export const createUploadedFile = ({
   uploadUrl
 }: UploadedFileParameters): BaseUploadedFile => {
   switch (initialFile.type) {
+    case "existing":
+      return new ExistingFile(initialFile, uploadIndex);
+
     case "placeholder":
       return new PlaceholderFile(initialFile, uploadIndex);
 

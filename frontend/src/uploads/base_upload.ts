@@ -1,5 +1,6 @@
 type UploadStatus = "done" | "error" | "uploading";
 export type UploadType =
+  | "existing"
   | "placeholder"
   | "s3"
   | "tus"
@@ -7,12 +8,12 @@ export type UploadType =
   | "uploadedTus";
 
 export interface InitialFile {
-  id: string;
+  id?: string;
   name: string;
   size?: number;
   url?: string;
   original_name?: string;
-  type: "placeholder" | "s3" | "tus";
+  type: "existing" | "placeholder" | "s3" | "tus";
 }
 
 interface UploadParameters {
@@ -41,7 +42,7 @@ abstract class BaseUpload {
   public async delete(): Promise<void> {
     //
   }
-  public abstract getSize(): number;
+  public abstract getSize(): number | undefined;
 
   public abstract getInitialFile(): InitialFile;
 }
