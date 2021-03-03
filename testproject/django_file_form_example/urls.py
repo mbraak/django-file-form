@@ -14,7 +14,8 @@ urlpatterns = (
     ),
     path("form_set", views.FormSetExampleView.as_view(), name="form_set_example"),
     path("login/", LoginView.as_view(template_name="admin/login.html")),
-    path("model_form", views.ModelFormView.as_view(), name="model_form"),
+    path("model_form", views.CreateModelFormView.as_view(), name="model_form"),
+    path("model_form/<int:pk>", views.EditModelFormView.as_view(), name="model_form"),
     path("multiple", views.MultipleExampleView.as_view(), name="multiple_example"),
     path(
         "multiple_without_js",

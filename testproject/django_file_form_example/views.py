@@ -10,6 +10,7 @@ from django_file_form.util import get_upload_path
 from django_file_form.models import PlaceholderUploadedFile
 
 from . import forms
+from .models import Example
 
 
 def file_form_js():
@@ -151,9 +152,10 @@ class WithCustomWidgetExample(PlaceholderView):
         return initial
 
 
-class ModelFormView(generic.CreateView):
+class FileModelFormMixin:
     template_name = "example_form.html"
     form_class = forms.ExampleModelForm
+    model = Example
 
     def get_context_data(self, **kwargs):
         kwargs["custom_js_files"] = ["example_form.js"]
@@ -164,6 +166,14 @@ class ModelFormView(generic.CreateView):
 
     def get_success_url(self):
         return reverse("example_success")
+
+
+class CreateModelFormView(FileModelFormMixin, generic.CreateView):
+    pass
+
+
+class EditModelFormView(FileModelFormMixin, generic.UpdateView):
+    pass
 
 
 def permission_denied(request, exception):
