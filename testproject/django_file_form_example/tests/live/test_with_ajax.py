@@ -672,12 +672,12 @@ class LiveTestCase(BaseLiveTestCase):
 
         self.assertEqual(Example2.objects.count(), 1)
 
-    def test_model_form(self):
+    def test_model_form_add(self):
         page = self.page
 
         temp_file = page.create_temp_file("content1")
 
-        page.open("/")
+        page.open("/model_form")
 
         page.fill_title_field("abc")
         page.upload_using_js(temp_file)
