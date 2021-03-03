@@ -1,28 +1,26 @@
-import BaseUpload, { InitialFile, UploadType } from "./base_upload";
+import BaseUpload, {
+  InitialExistingFile,
+  InitialFile,
+  InitialPlaceholderFile,
+  InitialS3File,
+  InitialTusFile,
+  UploadType
+} from "./base_upload";
 import { deleteUpload } from "./tus_utils";
 
 interface BaseUploadedFileParameters {
-  id?: string;
   name: string;
-  size?: number;
+  size: number;
   type: UploadType;
   uploadIndex: number;
 }
 
 export abstract class BaseUploadedFile extends BaseUpload {
-  id?: string;
-  size?: number;
+  size: number;
 
-  constructor({
-    id,
-    name,
-    size,
-    type,
-    uploadIndex
-  }: BaseUploadedFileParameters) {
+  constructor({ name, size, type, uploadIndex }: BaseUploadedFileParameters) {
     super({ name, status: "done", type, uploadIndex });
 
-    this.id = id;
     this.size = size;
   }
 
@@ -40,17 +38,20 @@ export abstract class BaseUploadedFile extends BaseUpload {
 }
 
 class PlaceholderFile extends BaseUploadedFile {
-  constructor(initialFile: InitialFile, uploadIndex: number) {
+  id: string;
+
+  constructor(initialFile: InitialPlaceholderFile, uploadIndex: number) {
     super({
-      id: initialFile.id,
       name: initialFile.name,
       size: initialFile.size,
       type: "placeholder",
       uploadIndex
     });
+
+    this.id = initialFile.id;
   }
 
-  public getInitialFile(): InitialFile {
+  public getInitialFile(): InitialPlaceholderFile {
     return {
       id: this.id,
       name: this.name,
@@ -61,21 +62,22 @@ class PlaceholderFile extends BaseUploadedFile {
 }
 
 export class UploadedS3File extends BaseUploadedFile {
+  id: string;
   key: string;
 
-  constructor(initialFile: InitialFile, uploadIndex: number) {
+  constructor(initialFile: InitialS3File, uploadIndex: number) {
     super({
-      id: initialFile.id,
       name: initialFile.original_name || initialFile.name,
       size: initialFile.size,
       type: "uploadedS3",
       uploadIndex
     });
 
+    this.id = initialFile.id;
     this.key = initialFile.name;
   }
 
-  getInitialFile(): InitialFile {
+  getInitialFile(): InitialS3File {
     return {
       id: this.id,
       name: this.key,
@@ -87,9 +89,8 @@ export class UploadedS3File extends BaseUploadedFile {
 }
 
 export class ExistingFile extends BaseUploadedFile {
-  constructor(initialFile: InitialFile, uploadIndex: number) {
+  constructor(initialFile: InitialExistingFile, uploadIndex: number) {
     super({
-      id: initialFile.id,
       name: initialFile.name,
       size: initialFile.size,
       type: "existing",
@@ -97,9 +98,8 @@ export class ExistingFile extends BaseUploadedFile {
     });
   }
 
-  public getInitialFile(): InitialFile {
+  public getInitialFile(): InitialExistingFile {
     return {
-      id: this.id,
       name: this.name,
       size: this.size,
       type: "existing"
@@ -109,13 +109,14 @@ export class ExistingFile extends BaseUploadedFile {
 
 interface UploadedTusFileParameters {
   csrfToken: string;
-  initialFile: InitialFile;
+  initialFile: InitialTusFile;
   uploadIndex: number;
   uploadUrl: string;
 }
 
 export class UploadedTusFile extends BaseUploadedFile {
   csrfToken: string;
+  id: string;
   url: string;
 
   constructor({
@@ -125,7 +126,6 @@ export class UploadedTusFile extends BaseUploadedFile {
     uploadUrl
   }: UploadedTusFileParameters) {
     super({
-      id: initialFile.id,
       name: initialFile.name,
       size: initialFile.size,
       type: "uploadedTus",
@@ -133,19 +133,21 @@ export class UploadedTusFile extends BaseUploadedFile {
     });
 
     this.csrfToken = csrfToken;
-    this.url = initialFile.id ? `${uploadUrl}${initialFile.id}` : "";
+    this.id = initialFile.id;
+    this.url = `${uploadUrl}${initialFile.id}`;
   }
 
   public async delete(): Promise<void> {
     await deleteUpload(this.url, this.csrfToken);
   }
 
-  getInitialFile(): InitialFile {
+  getInitialFile(): InitialTusFile {
     return {
       id: this.id,
       name: this.name,
       size: this.size,
-      type: "tus"
+      type: "tus",
+      url: ""
     };
   }
 }
@@ -180,8 +182,5 @@ export const createUploadedFile = ({
         uploadUrl,
         uploadIndex
       });
-
-    default:
-      throw new Error(`Unknown upload type ${initialFile.type as string}`);
   }
 };

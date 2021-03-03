@@ -9078,8 +9078,7 @@
     function BaseUploadedFile(_ref) {
       var _this;
 
-      var id = _ref.id,
-          name = _ref.name,
+      var name = _ref.name,
           size = _ref.size,
           type = _ref.type,
           uploadIndex = _ref.uploadIndex;
@@ -9093,11 +9092,8 @@
         uploadIndex: uploadIndex
       });
 
-      _defineProperty$2(_assertThisInitialized$2(_this), "id", void 0);
-
       _defineProperty$2(_assertThisInitialized$2(_this), "size", void 0);
 
-      _this.id = id;
       _this.size = size;
       return _this;
     }
@@ -9166,15 +9162,21 @@
     var _super2 = _createSuper$3(PlaceholderFile);
 
     function PlaceholderFile(initialFile, uploadIndex) {
+      var _this2;
+
       _classCallCheck$7(this, PlaceholderFile);
 
-      return _super2.call(this, {
-        id: initialFile.id,
+      _this2 = _super2.call(this, {
         name: initialFile.name,
         size: initialFile.size,
         type: "placeholder",
         uploadIndex: uploadIndex
       });
+
+      _defineProperty$2(_assertThisInitialized$2(_this2), "id", void 0);
+
+      _this2.id = initialFile.id;
+      return _this2;
     }
 
     _createClass$6(PlaceholderFile, [{
@@ -9198,22 +9200,24 @@
     var _super3 = _createSuper$3(UploadedS3File);
 
     function UploadedS3File(initialFile, uploadIndex) {
-      var _this2;
+      var _this3;
 
       _classCallCheck$7(this, UploadedS3File);
 
-      _this2 = _super3.call(this, {
-        id: initialFile.id,
+      _this3 = _super3.call(this, {
         name: initialFile.original_name || initialFile.name,
         size: initialFile.size,
         type: "uploadedS3",
         uploadIndex: uploadIndex
       });
 
-      _defineProperty$2(_assertThisInitialized$2(_this2), "key", void 0);
+      _defineProperty$2(_assertThisInitialized$2(_this3), "id", void 0);
 
-      _this2.key = initialFile.name;
-      return _this2;
+      _defineProperty$2(_assertThisInitialized$2(_this3), "key", void 0);
+
+      _this3.id = initialFile.id;
+      _this3.key = initialFile.name;
+      return _this3;
     }
 
     _createClass$6(UploadedS3File, [{
@@ -9240,7 +9244,6 @@
       _classCallCheck$7(this, ExistingFile);
 
       return _super4.call(this, {
-        id: initialFile.id,
         name: initialFile.name,
         size: initialFile.size,
         type: "existing",
@@ -9252,7 +9255,6 @@
       key: "getInitialFile",
       value: function getInitialFile() {
         return {
-          id: this.id,
           name: this.name,
           size: this.size,
           type: "existing"
@@ -9268,7 +9270,7 @@
     var _super5 = _createSuper$3(UploadedTusFile);
 
     function UploadedTusFile(_ref2) {
-      var _this3;
+      var _this4;
 
       var csrfToken = _ref2.csrfToken,
           initialFile = _ref2.initialFile,
@@ -9277,21 +9279,23 @@
 
       _classCallCheck$7(this, UploadedTusFile);
 
-      _this3 = _super5.call(this, {
-        id: initialFile.id,
+      _this4 = _super5.call(this, {
         name: initialFile.name,
         size: initialFile.size,
         type: "uploadedTus",
         uploadIndex: uploadIndex
       });
 
-      _defineProperty$2(_assertThisInitialized$2(_this3), "csrfToken", void 0);
+      _defineProperty$2(_assertThisInitialized$2(_this4), "csrfToken", void 0);
 
-      _defineProperty$2(_assertThisInitialized$2(_this3), "url", void 0);
+      _defineProperty$2(_assertThisInitialized$2(_this4), "id", void 0);
 
-      _this3.csrfToken = csrfToken;
-      _this3.url = initialFile.id ? "".concat(uploadUrl).concat(initialFile.id) : "";
-      return _this3;
+      _defineProperty$2(_assertThisInitialized$2(_this4), "url", void 0);
+
+      _this4.csrfToken = csrfToken;
+      _this4.id = initialFile.id;
+      _this4.url = "".concat(uploadUrl).concat(initialFile.id);
+      return _this4;
     }
 
     _createClass$6(UploadedTusFile, [{
@@ -9326,7 +9330,8 @@
           id: this.id,
           name: this.name,
           size: this.size,
-          type: "tus"
+          type: "tus",
+          url: ""
         };
       }
     }]);
@@ -9356,9 +9361,6 @@
           uploadUrl: uploadUrl,
           uploadIndex: uploadIndex
         });
-
-      default:
-        throw new Error("Unknown upload type ".concat(initialFile.type));
     }
   };
 
@@ -14059,7 +14061,8 @@
           id: this.name,
           name: this.name,
           size: this.getSize(),
-          type: "tus"
+          type: "tus",
+          url: ""
         };
       }
     }]);
@@ -14367,9 +14370,9 @@
             renderer = this.renderer;
 
         var addInitialFile = function addInitialFile(initialFile) {
-          var name = initialFile.name,
-              size = initialFile.size;
-          var element = renderer.addUploadedFile(initialFile.original_name ? initialFile.original_name : name, _this2.nextUploadIndex, size);
+          var size = initialFile.size;
+          var name = initialFile.type === "s3" && initialFile.original_name ? initialFile.original_name : initialFile.name;
+          var element = renderer.addUploadedFile(name, _this2.nextUploadIndex, size);
           var upload = createUploadedFile({
             csrfToken: _this2.csrfToken,
             initialFile: initialFile,

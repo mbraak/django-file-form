@@ -7,14 +7,40 @@ export type UploadType =
   | "uploadedS3"
   | "uploadedTus";
 
-export interface InitialFile {
-  id?: string;
+export interface InitialExistingFile {
   name: string;
-  size?: number;
-  url?: string;
-  original_name?: string;
-  type: "existing" | "placeholder" | "s3" | "tus";
+  size: number;
+  type: "existing";
 }
+
+export interface InitialPlaceholderFile {
+  id: string;
+  name: string;
+  size: number;
+  type: "placeholder";
+}
+
+export interface InitialS3File {
+  id: string;
+  name: string;
+  original_name: string;
+  size: number;
+  type: "s3";
+}
+
+export interface InitialTusFile {
+  id: string;
+  name: string;
+  size: number;
+  type: "tus";
+  url: string;
+}
+
+export type InitialFile =
+  | InitialExistingFile
+  | InitialPlaceholderFile
+  | InitialS3File
+  | InitialTusFile;
 
 interface UploadParameters {
   name: string;
