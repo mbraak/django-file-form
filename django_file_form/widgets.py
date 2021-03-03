@@ -1,6 +1,7 @@
 import json
 from typing import Dict, Union, List
 
+from django.db.models.fields.files import FieldFile
 from django.forms import ClearableFileInput
 from django.http import QueryDict
 from django.utils.datastructures import MultiValueDict
@@ -21,24 +22,38 @@ TRANSLATIONS = {
     "Drop your files here": _("Drop your files here"),
 }
 
-UploadedFileTypes = Union[
-    PlaceholderUploadedFile,
-    UploadedFileWithId,
-    List[Union[PlaceholderUploadedFile, UploadedFileWithId]],
+UploadedFileTypes = Union[FieldFile, PlaceholderUploadedFile, UploadedFileWithId]
+
+UploadedFileTypesOrList = Union[
+    UploadedFileTypes,
+    List[Union[UploadedFileTypes]],
 ]
 
 
-def get_uploaded_files(value: UploadedFileTypes):
+def get_uploaded_files(value: UploadedFileTypesOrList):
+    def must_include(file_info):
+        return (
+            not getattr(file_info, "is_placeholder", False) and
+            not getattr(file_info, "is_s3direct", False)
+        )
+
+    def get_values(file_info: UploadedFileTypes):
+        if hasattr(file_info, "file_id"):
+            return file_info.get_values()
+        else:
+            return dict(
+                name=file_info.name,
+                size=file_info.size,
+                type="existing",
+            )
+
     if not value:
         return []
 
     return [
-        file_info.get_values()
-        if hasattr(file_info, "file_id")
-        else dict(name=file_info.name)
+        get_values(file_info)
         for file_info in get_list(value)
-        if not getattr(file_info, "is_placeholder", False)
-        and not getattr(file_info, "is_s3direct", False)
+        if must_include(file_info)
     ]
 
 
@@ -91,8 +106,10 @@ class BaseUploadWidget(ClearableFileInput):
 
     def get_context(self, name, value, attrs):
         context = super().get_context(name, value, attrs)
+
         context["translations"] = json.dumps(TRANSLATIONS)
         context["uploaded_files"] = json.dumps(get_uploaded_files(value))
+
         return context
 
 
