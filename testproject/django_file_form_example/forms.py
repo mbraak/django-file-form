@@ -139,4 +139,4 @@ class ExampleModelForm(FileFormMixin, ModelForm):
             input_file=UploadedFileField,
         )
 
-    prefix = 'example'
+    prefix = "example"

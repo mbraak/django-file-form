@@ -698,7 +698,7 @@ class LiveTestCase(BaseLiveTestCase):
 
     def test_model_form_edit(self):
         example = Example.objects.create(
-            title='title1',
+            title="title1",
             input_file=ContentFile("original", "test1.txt"),
         )
 
@@ -725,4 +725,3 @@ class LiveTestCase(BaseLiveTestCase):
             self.assertEqual(read_file(example.input_file), b"new_content")
         finally:
             example.input_file.delete()
-

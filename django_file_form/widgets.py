@@ -32,9 +32,8 @@ UploadedFileTypesOrList = Union[
 
 def get_uploaded_files(value: UploadedFileTypesOrList):
     def must_include(file_info):
-        return (
-            not getattr(file_info, "is_placeholder", False) and
-            not getattr(file_info, "is_s3direct", False)
+        return not getattr(file_info, "is_placeholder", False) and not getattr(
+            file_info, "is_s3direct", False
         )
 
     def get_values(file_info: UploadedFileTypes):
