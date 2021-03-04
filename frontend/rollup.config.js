@@ -21,7 +21,10 @@ const getOutputFilename = () => {
 };
 
 const plugins = [
-  replace({ "process.env.NODE_ENV": JSON.stringify("production") }),
+  replace({
+    "process.env.NODE_ENV": JSON.stringify("production"),
+    preventAssignment: true
+  }),
   resolve({
     browser: true,
     extensions: [".js", ".ts", ".tsx"]
