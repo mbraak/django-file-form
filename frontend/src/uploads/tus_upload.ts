@@ -103,7 +103,8 @@ export default class TusUpload extends BaseUpload {
       id: this.name,
       name: this.name,
       size: this.getSize(),
-      type: "tus"
+      type: "tus",
+      url: ""
     };
   }
 }

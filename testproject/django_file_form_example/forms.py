@@ -1,7 +1,7 @@
 import os
 
 from django.core.exceptions import ValidationError
-from django.forms import formset_factory, BaseFormSet, Form, CharField
+from django.forms import formset_factory, BaseFormSet, Form, CharField, ModelForm
 
 from django_file_form.forms import (
     UploadedFileField,
@@ -129,3 +129,14 @@ class PlaceholderWidgetExampleForm(PlaceholderExampleForm):
 class WithAcceptExampleForm(BaseForm):
     prefix = "example"
     input_file = MultipleUploadedFileField(accept="image/*")
+
+
+class ExampleModelForm(FileFormMixin, ModelForm):
+    class Meta:
+        model = Example
+        fields = ("title", "input_file")
+        field_classes = dict(
+            input_file=UploadedFileField,
+        )
+
+    prefix = "example"

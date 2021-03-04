@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from django.conf import settings
+from django.core.files.base import ContentFile
 from django.test import override_settings
 
 from django_file_form.models import TemporaryUploadedFile
@@ -671,3 +672,56 @@ class LiveTestCase(BaseLiveTestCase):
         page.submit()
 
         self.assertEqual(Example2.objects.count(), 1)
+
+    def test_model_form_add(self):
+        page = self.page
+
+        temp_file = page.create_temp_file("content1")
+
+        page.open("/model_form")
+
+        page.fill_title_field("abc")
+        page.upload_using_js(temp_file)
+
+        page.find_upload_success(temp_file)
+        page.assert_page_contains_text("8 Bytes")
+        self.assertEqual(TemporaryUploadedFile.objects.count(), 1)
+
+        page.submit()
+        page.assert_page_contains_text("Upload success")
+
+        self.assertEqual(temp_file.uploaded_file().read_text(), "content1")
+
+        example = Example.objects.get(title="abc")
+        self.assertEqual(example.input_file.name, f"example/{temp_file.base_name()}")
+        self.assertEqual(read_file(example.input_file), b"content1")
+
+    def test_model_form_edit(self):
+        example = Example.objects.create(
+            title="title1",
+            input_file=ContentFile("original", "test1.txt"),
+        )
+
+        try:
+            page = self.page
+            temp_file = page.create_temp_file("new_content")
+
+            page.open(f"/model_form/{example.id}")
+
+            page.assert_page_contains_text("8 Bytes")
+            self.assertEqual(page.find_title_field().get_property("value"), "title1")
+
+            page.find_title_field().clear()
+            page.fill_title_field("changed title")
+
+            page.upload_using_js(temp_file)
+            page.assert_page_contains_text("11 Bytes")
+            page.submit()
+
+            page.assert_page_contains_text("Upload success")
+
+            example.refresh_from_db()
+            self.assertEqual(example.title, "changed title")
+            self.assertEqual(read_file(example.input_file), b"new_content")
+        finally:
+            example.input_file.delete()

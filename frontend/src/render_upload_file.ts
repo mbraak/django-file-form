@@ -51,7 +51,7 @@ class RenderUploadFile {
   public addUploadedFile(
     filename: string,
     uploadIndex: number,
-    filesize: number
+    filesize?: number
   ): HTMLElement {
     const element = this.addFile(filename, uploadIndex);
     this.setSuccess(uploadIndex, filesize);
@@ -130,18 +130,20 @@ class RenderUploadFile {
     this.removeCancel(index);
   }
 
-  public setSuccess(index: number, size: number): void {
+  public setSuccess(index: number, size?: number): void {
     const { translations } = this;
 
     const el = this.findFileDiv(index);
     if (el) {
       el.classList.add("dff-upload-success");
 
-      const fileSizeInfo = document.createElement("span");
-      fileSizeInfo.innerHTML = formatBytes(size, 2);
-      fileSizeInfo.className = "dff-filesize";
+      if (size != null) {
+        const fileSizeInfo = document.createElement("span");
+        fileSizeInfo.innerHTML = formatBytes(size, 2);
+        fileSizeInfo.className = "dff-filesize";
 
-      el.appendChild(fileSizeInfo);
+        el.appendChild(fileSizeInfo);
+      }
 
       const deleteLink = document.createElement("a");
       deleteLink.innerHTML = translations.Delete;

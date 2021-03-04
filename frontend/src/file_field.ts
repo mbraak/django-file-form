@@ -125,9 +125,14 @@ class FileField {
     const { multiple, renderer } = this;
 
     const addInitialFile = (initialFile: InitialFile): void => {
-      const { name, size } = initialFile;
+      const { size } = initialFile;
+      const name =
+        initialFile.type === "s3" && initialFile.original_name
+          ? initialFile.original_name
+          : initialFile.name;
+
       const element = renderer.addUploadedFile(
-        initialFile.original_name ? initialFile.original_name : name,
+        name,
         this.nextUploadIndex,
         size
       );
