@@ -29,12 +29,16 @@ const DeleteLink = ({ onDelete, translations, upload }: DeleteLinkProps) => {
   );
 };
 
-const DefaultFileInfo: RenderFileInfo = ({ upload }) => (
-  <>
-    <span>{upload.name}</span>
-    <span className="dff-filesize">{formatBytes(upload.getSize(), 2)}</span>
-  </>
-);
+const DefaultFileInfo: RenderFileInfo = ({ upload }) => {
+  const size = upload.getSize();
+
+  return (
+    <>
+      <span>{upload.name}</span>
+      { size != null && <span className="dff-filesize">{formatBytes(size, 2)}</span>}
+    </>
+  );
+};
 
 interface UploadDoneProps {
   CustomFileInfo?: RenderFileInfo;

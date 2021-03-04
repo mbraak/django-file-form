@@ -45,13 +45,16 @@ class Page(object):
         el.find_element_by_link_text(text).click()
 
     def fill_title_field(self, value, form_prefix="example"):
-        self.selenium.find_element_by_name(f"{form_prefix}-title").send_keys(value)
+        self.find_title_field(form_prefix).send_keys(value)
 
     def find_delete_failed(self, upload_index=0, text="Delete failed"):
         el = self.selenium.find_element_by_css_selector(
             f".dff-file-id-{upload_index}.dff-upload-success"
         )
         el.find_element_by_xpath(f"//*[contains(text(), '{text}')]")
+
+    def find_title_field(self, form_prefix="example"):
+        return self.selenium.find_element_by_name(f"{form_prefix}-title")
 
     def find_upload_element(self, upload_index=0, extra_class=None):
         classes = [f"dff-file-id-{upload_index}", extra_class]

@@ -4,21 +4,45 @@ type UploadStatus = "done" | "error" | "uploading";
 type ActionStatus = "in_progress" | "error";
 
 export type UploadType =
+  | "existing"
   | "placeholder"
   | "s3"
   | "tus"
   | "uploadedS3"
   | "uploadedTus";
 
-export interface InitialFile {
-  id: string;
+interface BaseInitialFile {
   metadata?: Metadata;
   name: string;
   size: number;
-  url?: string;
-  original_name?: string;
-  type: "placeholder" | "s3" | "tus";
 }
+
+export interface InitialExistingFile extends BaseInitialFile {
+  type: "existing";
+}
+
+export interface InitialPlaceholderFile extends BaseInitialFile {
+  id: string;
+  type: "placeholder";
+}
+
+export interface InitialS3File extends BaseInitialFile {
+  id: string;
+  original_name: string;
+  type: "s3";
+}
+
+export interface InitialTusFile extends BaseInitialFile {
+  id: string;
+  type: "tus";
+  url: string;
+}
+
+export type InitialFile =
+  | InitialExistingFile
+  | InitialPlaceholderFile
+  | InitialS3File
+  | InitialTusFile;
 
 interface UploadParameters {
   metadata?: Metadata;
@@ -56,7 +80,7 @@ abstract class BaseUpload {
   public async delete(): Promise<void> {
     //
   }
-  public abstract getSize(): number;
+  public abstract getSize(): number | undefined;
 
   public setMetadata(metadata: Metadata): void {
     this.metadata = metadata;

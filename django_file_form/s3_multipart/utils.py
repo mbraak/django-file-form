@@ -3,7 +3,6 @@ import time
 
 import boto3
 from botocore.exceptions import ClientError
-from django.core.exceptions import SuspiciousFileOperation
 from django.utils.crypto import get_random_string
 from storages.utils import setting, lookup_env
 

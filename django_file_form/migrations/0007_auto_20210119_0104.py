@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
             old_name="UploadedFile",
         ),
         migrations.AlterModelTable(
-            name='TemporaryUploadedFile',
-            table='django_file_form_uploadedfile',
+            name="TemporaryUploadedFile",
+            table="django_file_form_uploadedfile",
         ),
     ]

@@ -1,6 +1,6 @@
 import EventEmitter from "eventemitter3";
 import FileField, { Callbacks } from "./file_field";
-import { InitialFile } from "./uploads/base_upload";
+import { InitialFile, Metadata } from "./uploads/base_upload";
 import {
   findInput,
   formatBytes,
@@ -10,7 +10,6 @@ import {
   getUploadsFieldName
 } from "./util";
 import { RenderFileInfo, Translations } from "./renderUploads/types";
-import { Metadata } from "./uploads/base_upload";
 
 interface Options {
   callbacks?: Callbacks;
