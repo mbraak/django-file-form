@@ -79,7 +79,7 @@ class FileFormMixin(object):
         return [
             value.get_values()
             for value in initial_values
-            if hasattr(value, "is_placeholder")
+            if getattr(value, "is_placeholder", False)
         ]
 
     def add_metadata_inputs(self):
