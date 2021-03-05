@@ -3,19 +3,16 @@ from django.contrib.auth.models import User
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support.wait import WebDriverWait
 
+from .base_page import BasePage
 from .temp_file import TempFile
 from .test_utils import to_class_string
 
 
-class Page(object):
+class Page(BasePage):
     def __init__(self, selenium, live_server_url, on_submit):
-        self.selenium = selenium
-        self.live_server_url = live_server_url
-        self.on_submit = on_submit
-        self.temp_files = []
+        super().__init__(selenium, live_server_url, on_submit)
 
-    def assert_page_contains_text(self, text):
-        self.selenium.find_element_by_xpath(f"//*[contains(text(), '{text}')]")
+        self.temp_files = []
 
     def cancel_upload(self, upload_index=0):
         el = self.selenium.find_element_by_css_selector(f".dff-file-id-{upload_index}")
@@ -113,9 +110,6 @@ class Page(object):
         self.selenium.find_element_by_name("username").send_keys(username)
         self.selenium.find_element_by_name("password").send_keys(password)
         self.selenium.find_element_by_css_selector("input[type=submit]").click()
-
-    def open(self, page):
-        self.selenium.get(f"{self.live_server_url}{page}")
 
     def submit(self):
         self.on_submit()
