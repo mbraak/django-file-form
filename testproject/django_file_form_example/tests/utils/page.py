@@ -3,8 +3,8 @@ from django.contrib.auth.models import User
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support.wait import WebDriverWait
 
-from django_file_form_example.temp_file import TempFile
-from django_file_form_example.test_utils import to_class_string
+from .temp_file import TempFile
+from .test_utils import to_class_string
 
 
 class Page(object):
