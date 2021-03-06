@@ -1,15 +1,11 @@
 from django.contrib import admin
 
-from django_file_form.admin import FileFormAdminMixin
+from django_file_form.model_admin import FileFormAdmin
 from .models import Example, Example2, ExampleFile
 
 
-class ExampleAdmin(FileFormAdminMixin, admin.ModelAdmin):
-    class Media:
-        css = {
-            "all": ("file_form/file_form.css",)
-        }
-        js = ("file_form/file_form.js", "file_form/auto_init.js")
+class ExampleAdmin(FileFormAdmin):
+    pass
 
 
 class ExampleFileInline(admin.TabularInline):
