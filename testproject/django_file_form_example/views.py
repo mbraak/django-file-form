@@ -5,8 +5,9 @@ from django.http import HttpResponseForbidden, HttpResponseRedirect
 from django.views import generic
 from django.urls import reverse
 from django.conf import settings
+from django.views.generic.base import ContextMixin
 from formtools.wizard.views import SessionWizardView
-from django_file_form.util import get_upload_path
+from django_file_form.util import get_upload_path, with_typehint
 from django_file_form.models import PlaceholderUploadedFile
 
 from . import forms
@@ -152,7 +153,7 @@ class WithCustomWidgetExample(PlaceholderView):
         return initial
 
 
-class FileModelFormMixin:
+class FileModelFormMixin(with_typehint(ContextMixin)):
     template_name = "example_form.html"
     form_class = forms.ExampleModelForm
     model = Example

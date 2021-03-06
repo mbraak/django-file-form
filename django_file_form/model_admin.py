@@ -4,6 +4,7 @@ from django.contrib import admin
 
 from .fields import UploadedFileField
 from .forms import FileFormMixin
+from .util import with_typehint
 from .widgets import UploadWidget
 
 
@@ -11,7 +12,7 @@ class FileAdminForm(FileFormMixin, ModelForm):
     pass
 
 
-class FileFormAdminMixin:
+class FileFormAdminMixin(with_typehint(admin.ModelAdmin)):
     change_form_template = 'django_file_form/admin_change_form.html'
     form = FileAdminForm
     formfield_overrides = {

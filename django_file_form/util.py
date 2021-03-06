@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Type, TYPE_CHECKING, TypeVar
 from django.core.exceptions import PermissionDenied
 from django.db import models
 from django.conf import settings
@@ -39,3 +40,21 @@ def get_upload_path():
         return upload_path
     else:
         return Path(settings.MEDIA_ROOT).joinpath(upload_path)
+
+
+T = TypeVar('T')
+
+
+def with_typehint(baseclass: Type[T]) -> Type[T]:
+    """
+    Useful function to make mixins with baseclass typehint
+
+    ```
+    class ReadonlyMixin(with_typehint(BaseAdmin))):
+        ...
+    ```
+    """
+    if TYPE_CHECKING:
+        return baseclass
+
+    return object

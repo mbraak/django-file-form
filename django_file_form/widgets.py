@@ -14,6 +14,7 @@ from django_file_form.models import (
     UploadedFileWithId,
 )
 
+
 TRANSLATIONS = {
     "Cancel": _("Cancel"),
     "Delete": _("Delete"),
