@@ -9,7 +9,7 @@ class ExampleAdmin(FileFormAdminMixin, admin.ModelAdmin):
         css = {
             "all": ("file_form/file_form.css",)
         }
-        js = ("file_form/file_form.js", "example_admin.js")
+        js = ("file_form/file_form.js", "file_form/auto_init.js")
 
 
 class ExampleFileInline(admin.TabularInline):
