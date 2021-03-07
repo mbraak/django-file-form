@@ -1,10 +1,6 @@
 from .temp_file import TempFile
 
 
-def upload_js_for_input(temp_file, input_element):
-    return input_element.send_keys(temp_file.path())
-
-
 class BasePage(object):
     def __init__(self, selenium, live_server_url, on_submit):
         self.selenium = selenium
@@ -31,7 +27,10 @@ class BasePage(object):
     def open(self, page):
         self.selenium.get(f"{self.live_server_url}{page}")
 
+    def upload_js_for_input(self, temp_file, input_element):
+        return input_element.send_keys(temp_file.path())
+
     def upload_using_js(self, temp_file):
-        upload_js_for_input(
+        self.upload_js_for_input(
             temp_file, self.selenium.find_element_by_css_selector("input[type=file]")
         )
