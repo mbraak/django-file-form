@@ -4,31 +4,13 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support.wait import WebDriverWait
 
 from .base_page import BasePage
-from .temp_file import TempFile
 from .test_utils import to_class_string
 
 
 class Page(BasePage):
-    def __init__(self, selenium, live_server_url, on_submit):
-        super().__init__(selenium, live_server_url, on_submit)
-
-        self.temp_files = []
-
     def cancel_upload(self, upload_index=0):
         el = self.selenium.find_element_by_css_selector(f".dff-file-id-{upload_index}")
         el.find_element_by_link_text("Cancel").click()
-
-    def cleanup(self):
-        for temp_file in self.temp_files:
-            temp_file.destroy()
-
-    def create_temp_file(self, content, prefix=None, binary=False):
-        temp_file = TempFile()
-        temp_file.create(content, prefix=prefix, binary=binary)
-
-        self.temp_files.append(temp_file)
-
-        return temp_file
 
     def create_user(self, username, password):
         u = User.objects.create(username=username, email=f"{username}@test.nl")
@@ -118,17 +100,9 @@ class Page(BasePage):
     def set_slow_network_conditions(self):
         self.selenium.set_network_conditions(latency=5, throughput=50 * 1024)
 
-    def upload_js_for_input(self, temp_file, input_element):
-        return input_element.send_keys(temp_file.path())
-
     def upload_multiple_using_js(self, *temp_files):
         self.selenium.find_element_by_css_selector("input[type=file]").send_keys(
             "\n".join(temp_file.path() for temp_file in temp_files)
-        )
-
-    def upload_using_js(self, temp_file):
-        self.upload_js_for_input(
-            temp_file, self.selenium.find_element_by_css_selector("input[type=file]")
         )
 
     def upload_without_js(self, temp_file):

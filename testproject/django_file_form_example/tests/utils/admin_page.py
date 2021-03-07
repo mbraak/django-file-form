@@ -11,12 +11,23 @@ class AdminPage(BasePage):
 
         self.login()
 
+    def fill_input(self, name, value):
+        self.find_input(name).send_keys(value)
+
+    def find_input(self, name):
+        return self.selenium.find_element_by_name(name)
+
     def login(self):
         self.open("/admin/login/")
         self.assert_page_contains_text("Username:")
 
-        self.selenium.find_element_by_name("username").send_keys("admin")
-        self.selenium.find_element_by_name("password").send_keys("password")
+        self.fill_input("username", "admin")
+        self.fill_input("password", "password")
         self.selenium.find_element_by_css_selector("input[type=submit]").click()
 
         self.assert_page_contains_text("Site administration")
+
+    def submit(self):
+        self.on_submit()
+
+        self.find_input("_save").click()
