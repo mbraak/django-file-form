@@ -12,7 +12,9 @@ class AdminPage(BasePage):
         self.login()
 
     def fill_input(self, name, value):
-        self.find_input(name).send_keys(value)
+        input_element = self.find_input(name)
+        input_element.clear()
+        input_element.send_keys(value)
 
     def find_input(self, name):
         return self.selenium.find_element_by_name(name)

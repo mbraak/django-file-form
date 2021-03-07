@@ -1,5 +1,9 @@
+from django.core.files.base import ContentFile
+
+from django_file_form_example.models import Example
 from django_file_form_example.tests.utils.admin_page import AdminPage
 from django_file_form_example.tests.utils.base_live_testcase import BaseLiveTestCase
+from django_file_form_example.tests.utils.test_utils import read_file
 
 
 class AdminTestCase(BaseLiveTestCase):
@@ -21,3 +25,30 @@ class AdminTestCase(BaseLiveTestCase):
 
         page.submit()
         page.assert_page_contains_text("Select example to change")
+
+    def test_edit_record(self):
+        example = Example.objects.create(
+            title="title1",
+            input_file=ContentFile("original", "test1.txt"),
+        )
+
+        try:
+            page = self.page
+            temp_file = page.create_temp_file("new_content")
+
+            page.open(f"/admin/django_file_form_example/example/{example.id}/")
+            page.assert_page_contains_text("Change example")
+
+            page.fill_input("title", "changed title")
+            page.upload_using_js(temp_file)
+            page.assert_page_contains_text("11 Bytes")
+
+            page.submit()
+            page.assert_page_contains_text("Select example to change")
+
+            example.refresh_from_db()
+            self.assertEqual(example.title, "changed title")
+            self.assertEqual(read_file(example.input_file), b"new_content")
+        finally:
+            example.input_file.delete()
+
