@@ -74,11 +74,11 @@ There is also an uncompressed javascript version: `file_form/file_form.debug.js`
 If your form has a prefix, then call `initUploadFields` as follows:
 
 ```js
-  // for example, with prefix 'abc'
-  initUploadFields(
-    document.getElementById("example-form"),
-    { prefix: 'abc' }
-  );
+// for example, with prefix 'abc'
+initUploadFields(
+  document.getElementById("example-form"),
+  { prefix: 'abc' }
+);
 ```
 
 See the [Django documentation](https://docs.djangoproject.com/en/2.1/ref/forms/api/#prefixes-for-forms) for more information about form prefixes.

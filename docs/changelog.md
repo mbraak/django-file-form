@@ -2,7 +2,13 @@
 
 **development**
 
+  * Issue #211: auto initialize javascript
+  * Issue #339: Django admin support
+
+**3.1.4 (8 march 2021)**
+
   * Issue #436: allow customization of the widget (thanks to Bo Peng)
+  * Issue #439: support ModelForm
 
 **3.1.3 (19 january 2021)**
 

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from . import models
+from .models import TemporaryUploadedFile
 
 
 class TemporaryUploadedFileAdmin(admin.ModelAdmin):
@@ -8,4 +8,4 @@ class TemporaryUploadedFileAdmin(admin.ModelAdmin):
     date_hierarchy = "created"
 
 
-admin.site.register(models.TemporaryUploadedFile, TemporaryUploadedFileAdmin)
+admin.site.register(TemporaryUploadedFile, TemporaryUploadedFileAdmin)

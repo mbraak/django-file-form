@@ -3,35 +3,14 @@ from django.contrib.auth.models import User
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support.wait import WebDriverWait
 
-from django_file_form_example.temp_file import TempFile
-from django_file_form_example.test_utils import to_class_string
+from .base_page import BasePage
+from .test_utils import to_class_string
 
 
-class Page(object):
-    def __init__(self, selenium, live_server_url, on_submit):
-        self.selenium = selenium
-        self.live_server_url = live_server_url
-        self.on_submit = on_submit
-        self.temp_files = []
-
-    def assert_page_contains_text(self, text):
-        self.selenium.find_element_by_xpath(f"//*[contains(text(), '{text}')]")
-
+class Page(BasePage):
     def cancel_upload(self, upload_index=0):
         el = self.selenium.find_element_by_css_selector(f".dff-file-id-{upload_index}")
         el.find_element_by_link_text("Cancel").click()
-
-    def cleanup(self):
-        for temp_file in self.temp_files:
-            temp_file.destroy()
-
-    def create_temp_file(self, content, prefix=None, binary=False):
-        temp_file = TempFile()
-        temp_file.create(content, prefix=prefix, binary=binary)
-
-        self.temp_files.append(temp_file)
-
-        return temp_file
 
     def create_user(self, username, password):
         u = User.objects.create(username=username, email=f"{username}@test.nl")
@@ -45,13 +24,16 @@ class Page(object):
         el.find_element_by_link_text(text).click()
 
     def fill_title_field(self, value, form_prefix="example"):
-        self.selenium.find_element_by_name(f"{form_prefix}-title").send_keys(value)
+        self.find_title_field(form_prefix).send_keys(value)
 
     def find_delete_failed(self, upload_index=0, text="Delete failed"):
         el = self.selenium.find_element_by_css_selector(
             f".dff-file-id-{upload_index}.dff-upload-success"
         )
         el.find_element_by_xpath(f"//*[contains(text(), '{text}')]")
+
+    def find_title_field(self, form_prefix="example"):
+        return self.selenium.find_element_by_name(f"{form_prefix}-title")
 
     def find_upload_element(self, upload_index=0, extra_class=None):
         classes = [f"dff-file-id-{upload_index}", extra_class]
@@ -111,9 +93,6 @@ class Page(object):
         self.selenium.find_element_by_name("password").send_keys(password)
         self.selenium.find_element_by_css_selector("input[type=submit]").click()
 
-    def open(self, page):
-        self.selenium.get(f"{self.live_server_url}{page}")
-
     def submit(self):
         self.on_submit()
         self.selenium.find_element_by_css_selector("input[type=submit]").click()
@@ -121,17 +100,9 @@ class Page(object):
     def set_slow_network_conditions(self):
         self.selenium.set_network_conditions(latency=5, throughput=50 * 1024)
 
-    def upload_js_for_input(self, temp_file, input_element):
-        return input_element.send_keys(temp_file.path())
-
     def upload_multiple_using_js(self, *temp_files):
         self.selenium.find_element_by_css_selector("input[type=file]").send_keys(
             "\n".join(temp_file.path() for temp_file in temp_files)
-        )
-
-    def upload_using_js(self, temp_file):
-        self.upload_js_for_input(
-            temp_file, self.selenium.find_element_by_css_selector("input[type=file]")
         )
 
     def upload_without_js(self, temp_file):
