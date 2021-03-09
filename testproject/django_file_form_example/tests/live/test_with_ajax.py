@@ -5,10 +5,10 @@ from django.core.files.base import ContentFile
 from django.test import override_settings
 
 from django_file_form.models import TemporaryUploadedFile
-from django_file_form_example.base_live_testcase import BaseLiveTestCase
+from django_file_form_example.tests.utils.base_live_testcase import BaseLiveTestCase
 from django_file_form_example.models import Example, Example2
-from django_file_form_example.page import Page
-from django_file_form_example.test_utils import read_file, count_temp_uploads
+from django_file_form_example.tests.utils.page import Page
+from django_file_form_example.tests.utils.test_utils import read_file, count_temp_uploads
 
 media_root = Path(settings.MEDIA_ROOT)
 

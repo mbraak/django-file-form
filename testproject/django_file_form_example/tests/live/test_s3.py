@@ -6,10 +6,10 @@ from moto.server import DomainDispatcherApplication, create_backend_app
 from werkzeug.serving import make_server
 import boto3
 
-from django_file_form_example.base_live_testcase import BaseLiveTestCase
+from django_file_form_example.tests.utils.base_live_testcase import BaseLiveTestCase
 from django_file_form_example.models import Example2
-from django_file_form_example.page import Page
-from django_file_form_example.test_utils import read_file
+from django_file_form_example.tests.utils.page import Page
+from django_file_form_example.tests.utils.test_utils import read_file
 
 
 def create_backend_app_with_cors(service):

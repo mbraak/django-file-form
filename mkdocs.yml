@@ -7,8 +7,10 @@ nav:
     - Upgrade: upgrade.md
     - Python settings: python_settings.md
     - Javascript options: javascript_options.md
+    - Auto initialize javascript: auto_initialize.md
     - Form sets: form_sets.md
     - Model forms: model_forms.md
+    - Admin: admin.md
     - Translations: translations.md
     - Customization: customization.md
     - Javascript events: javascript_events.md
