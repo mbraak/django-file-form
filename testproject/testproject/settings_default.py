@@ -22,7 +22,7 @@ def create_media_paths(media_root):
 
 DEBUG = True
 
-DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
 DATABASES = dict(
     default=dict(
