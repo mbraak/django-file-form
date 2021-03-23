@@ -4,6 +4,7 @@
 
   * Issue #211: auto initialize javascript
   * Issue #339: Django admin support
+  * Issue #443: support Django 3.2
 
 **3.1.4 (8 march 2021)**
 
