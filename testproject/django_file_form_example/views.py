@@ -11,7 +11,7 @@ from django_file_form.util import get_upload_path, with_typehint
 from django_file_form.models import PlaceholderUploadedFile
 
 from . import forms
-from .models import Example
+from .models import Example, ExampleFile
 
 
 def file_form_js():
@@ -175,6 +175,23 @@ class CreateModelFormView(FileModelFormMixin, generic.CreateView):
 
 class EditModelFormView(FileModelFormMixin, generic.UpdateView):
     pass
+
+
+class CreateModelFormMultipleView(FileModelFormMixin, generic.CreateView):
+    form_class = forms.ExampleMultipleModelForm
+
+    def form_valid(self, form):
+        example = form.save()
+
+        for f in form.cleaned_data["input_file"]:
+            try:
+                ExampleFile.objects.create(example=example, input_file=f)
+            finally:
+                f.close()
+
+        form.delete_temporary_files()
+
+        return HttpResponseRedirect("example_success")
 
 
 def permission_denied(request, exception):
