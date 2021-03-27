@@ -37,7 +37,7 @@ def file_form_upload_dir():
 
 
 def get_client():
-    signature_version = setting("AWS_SIGNATURE_VERSION", None)
+    signature_version = setting("AWS_S3_SIGNATURE_VERSION", None)
 
     while True:
         try:
