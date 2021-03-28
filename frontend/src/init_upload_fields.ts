@@ -32,17 +32,7 @@ const initUploadFields = (form: Element, options: Options = {}): void => {
   const getInputValue = (fieldName: string): string | undefined =>
     getInputValueForFormAndPrefix(form, fieldName, getPrefix());
 
-  const getInitialFiles = (element: HTMLElement): InitialFile[] => {
-    const filesData = element.dataset.files;
-
-    if (!filesData) {
-      return [];
-    }
-
-    return JSON.parse(filesData) as InitialFile[];
-  };
-
-  const getPlaceholders = (fieldName: string): InitialFile[] => {
+  const getInitialFiles = (fieldName: string): InitialFile[] => {
     const data = getInputValue(getUploadsFieldName(fieldName, getPrefix()));
 
     if (!data) {
@@ -86,9 +76,7 @@ const initUploadFields = (form: Element, options: Options = {}): void => {
 
     const fieldName = input.name;
     const { multiple } = input;
-    const initial = getInitialFiles(container).concat(
-      getPlaceholders(fieldName)
-    );
+    const initial = getInitialFiles(fieldName);
     const dataTranslations = container.getAttribute("data-translations");
     const translations: Translations = dataTranslations
       ? (JSON.parse(dataTranslations) as Translations)

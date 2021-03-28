@@ -14676,9 +14676,7 @@
 	        return;
 	      }
 
-	      var placeholdersInfo = this.uploads.filter(function (upload) {
-	        return upload.type === "placeholder" || upload.type === "s3" || upload.type === "uploadedS3";
-	      }).map(function (upload) {
+	      var placeholdersInfo = this.uploads.map(function (upload) {
 	        return upload.getInitialFile();
 	      });
 	      input.value = JSON.stringify(placeholdersInfo);
@@ -14727,17 +14725,7 @@
 	    return getInputValueForFormAndPrefix(form, fieldName, getPrefix());
 	  };
 
-	  var getInitialFiles = function getInitialFiles(element) {
-	    var filesData = element.dataset.files;
-
-	    if (!filesData) {
-	      return [];
-	    }
-
-	    return JSON.parse(filesData);
-	  };
-
-	  var getPlaceholders = function getPlaceholders(fieldName) {
+	  var getInitialFiles = function getInitialFiles(fieldName) {
 	    var data = getInputValue(getUploadsFieldName(fieldName, getPrefix()));
 
 	    if (!data) {
@@ -14777,7 +14765,7 @@
 
 	    var fieldName = input.name;
 	    var multiple = input.multiple;
-	    var initial = getInitialFiles(container).concat(getPlaceholders(fieldName));
+	    var initial = getInitialFiles(fieldName);
 	    var dataTranslations = container.getAttribute("data-translations");
 	    var translations = dataTranslations ? JSON.parse(dataTranslations) : {};
 	    var supportDropArea = !(options.supportDropArea === false);

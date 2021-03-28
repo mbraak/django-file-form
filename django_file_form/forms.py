@@ -4,9 +4,11 @@ import uuid
 from django.urls import reverse
 from django.forms import CharField, Form, HiddenInput
 
+from .util import get_list
+from .uploaded_file import get_initial_data_from_uploaded_file
+
 # UploadedFileField and MultipleUploadedFileField must be in this module because they are in the api
 from .fields import UploadedFileField, MultipleUploadedFileField
-from .util import get_list
 
 
 class FileFormMixin(object):
@@ -44,42 +46,45 @@ class FileFormMixin(object):
     def update_files_data(self: Form):
         form_id = self.data.get(self.add_prefix("form_id"))
 
-        if form_id:
-            for field_name in self.file_form_field_names():
-                field = self.fields[field_name]
-                prefixed_field_name = self.add_prefix(field_name)
-                file_data = field.get_file_data(prefixed_field_name, form_id)
+        if not form_id:
+            return
 
-                if file_data:
-                    # NB: django-formtools wizard uses dict instead of MultiValueDict
-                    if isinstance(file_data, list) and hasattr(self.files, "setlist"):
-                        self.files.setlist(prefixed_field_name, file_data)
-                    else:
-                        self.files[prefixed_field_name] = file_data
+        for field_name in self.file_form_field_names():
+            field = self.fields[field_name]
+            prefixed_field_name = self.add_prefix(field_name)
+            file_data = field.get_file_data(prefixed_field_name, form_id)
+
+            if file_data:
+                # NB: django-formtools wizard uses dict instead of MultiValueDict
+                if isinstance(file_data, list) and hasattr(self.files, "setlist"):
+                    self.files.setlist(prefixed_field_name, file_data)
+                else:
+                    self.files[prefixed_field_name] = file_data
 
     def delete_temporary_files(self: Form):
         form_id = self.data.get(self.add_prefix("form_id"))
 
-        if form_id:
-            for field_name, field in self.fields.items():
-                if hasattr(field, "delete_file_data"):
-                    prefixed_field_name = self.add_prefix(field_name)
-                    field.delete_file_data(prefixed_field_name, form_id)
+        if not form_id:
+            return
 
-    def add_upload_inputs(self):
+        for field_name, field in self.fields.items():
+            if hasattr(field, "delete_file_data"):
+                prefixed_field_name = self.add_prefix(field_name)
+                field.delete_file_data(prefixed_field_name, form_id)
+
+    def add_upload_inputs(self: Form):
         for field_name in self.file_form_field_names():
             self.add_hidden_field(
                 f"{field_name}-uploads",
-                json.dumps(self.get_placesholders_for_field(field_name)),
+                json.dumps(self.get_initial_upload_data_for_field(field_name)),
             )
 
-    def get_placesholders_for_field(self: Form, field_name: str):
-        initial_values = get_list(self.initial.get(field_name, []))
+    def get_initial_upload_data_for_field(self: Form, field_name: str):
+        uploaded_files = get_list(self.initial.get(field_name, []))
 
         return [
-            value.get_values()
-            for value in initial_values
-            if getattr(value, "is_placeholder", False)
+            get_initial_data_from_uploaded_file(uploaded_file)
+            for uploaded_file in uploaded_files
         ]
 
     def add_metadata_inputs(self):

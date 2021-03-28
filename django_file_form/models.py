@@ -1,16 +1,16 @@
 import os
-import uuid
 from pathlib import Path
 
 from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
-from django.core.files import uploadedfile
 from django.core.files.storage import FileSystemStorage
 from django.db import models
 from django.utils import timezone
 from django.utils.module_loading import import_string
 
 from .util import ModelManager, get_upload_path
+
+# Import uploaded files for backward compatibility
+from .uploaded_file import PlaceholderUploadedFile, S3UploadedFileWithId, UploadedTusFile
 
 
 class TemporaryUploadedFileManager(ModelManager):
@@ -97,76 +97,6 @@ class TemporaryUploadedFile(models.Model):
         return (now - self.created).days >= 1
 
     def get_uploaded_file(self):
-        return UploadedFileWithId(
+        return UploadedTusFile(
             file=self.uploaded_file, name=self.original_filename, file_id=self.file_id
         )
-
-
-class UploadedFileWithId(uploadedfile.UploadedFile):
-    def __init__(self, file_id, metadata=None, **kwargs):
-        super().__init__(**kwargs)
-
-        self.file_id = file_id
-        self.size = self.file.size
-
-        self.is_placeholder = False
-        self.is_s3direct = False
-        self.metadata = metadata
-
-    def get_values(self):
-        return dict(id=self.file_id, name=self.name, size=self.size, type="tus")
-
-
-class PlaceholderUploadedFile(object):
-    def __init__(self, name, file_id=None, size=None, metadata=None):
-        self.name = name
-        self.file_id = file_id or uuid.uuid4().hex
-        if size is None:
-            self.size = os.path.getsize(self.name)
-        else:
-            self.size = size
-
-        self.is_placeholder = True
-        self.is_s3direct = False
-        self.metadata = metadata
-
-    def get_values(self):
-        return dict(id=self.file_id, name=self.name, size=self.size, type="placeholder")
-
-
-try:
-    from storages.backends.s3boto3 import S3Boto3Storage, S3Boto3StorageFile
-    from storages.utils import setting
-
-    class S3UploadedFileWithId(S3Boto3StorageFile):
-        def __init__(self, file_id, name, original_name, size, metadata=None, **kwargs):
-            boto_storage = S3Boto3Storage(
-                bucket_name=setting("AWS_STORAGE_BUCKET_NAME"),
-                endpoint_url=setting("AWS_S3_ENDPOINT_URL"),
-                access_key=setting(
-                    "AWS_S3_ACCESS_KEY_ID", setting("AWS_ACCESS_KEY_ID")
-                ),
-                secret_key=setting(
-                    "AWS_S3_SECRET_ACCESS_KEY", setting("AWS_SECRET_ACCESS_KEY")
-                ),
-            )
-
-            super().__init__(name=name, mode="rb", storage=boto_storage, **kwargs)
-
-            self.file_id = file_id
-            self.original_name = original_name
-            # self.size is derived from S3boto3StorageFile
-            # but size is passed for consistency, and potentially
-            # for validation
-            self.is_placeholder = False
-            self.is_s3direct = True
-            self.metadata = metadata
-
-        def get_values(self):
-            return dict(id=self.file_id, name=self.name, size=self.size, type="s3")
-
-
-except (ImportError, ImproperlyConfigured):
-    # S3 is an optional feature but we keep the symbol
-    class S3UploadedFileWithId(object):
-        pass
