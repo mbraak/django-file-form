@@ -4,6 +4,7 @@
 
   * Issue #211: auto initialize javascript
   * Issue #339: Django admin support
+  * Issue #446: add AWS_S3_REGION_NAME and AWS_S3_SIGNATURE_VERSION settings (thanks to Niklas Wahl)
 
 **3.1.4 (8 march 2021)**
 
