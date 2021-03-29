@@ -21,6 +21,9 @@ class Example2(models.Model):
 
 
 class ExampleFile(models.Model):
+    class Meta:
+        ordering = ["input_file"]
+
     fs = FileSystemStorage(location=settings.MEDIA_ROOT)
 
     example = models.ForeignKey(
