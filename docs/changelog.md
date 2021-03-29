@@ -1,5 +1,9 @@
 ## Changelog
 
+**development**
+
+  * Issue #449: add German translations (thanks to Niklas Wahl)
+
 **3.1.5 (29 march 2021)**
 
   * Issue #211: auto initialize javascript
