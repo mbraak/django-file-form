@@ -1,6 +1,6 @@
 ## Changelog
 
-**development**
+**3.1.5 (29 march 2021)**
 
   * Issue #211: auto initialize javascript
   * Issue #339: Django admin support
