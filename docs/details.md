@@ -73,14 +73,15 @@ You then need to define the following variables in `settings`
 AWS_ACCESS_KEY_ID
 AWS_SECRET_ACCESS_KEY
 AWS_STORAGE_BUCKET_NAME
-AWS_S3_REGION_NAME
-AWS_S3_ENDPOINT_URL
+AWS_S3_REGION_NAME (optional)
+AWS_S3_SIGNATURE_VERSION (optional)
+AWS_S3_ENDPOINT_URL (optional)
 ```
 
 or through environment variables with the same names as described
 in [`django-storage` documentation](https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html).
 
-The following CORS settings are also needed in `settings`
+If you are using `django-csp` for setting the Content Security Policy, then the following CORS settings are also needed in `settings`
 ```
 CSP_DEFAULT_SRC = ("'none'",)
 CSP_STYLE_SRC = ("'self'")
