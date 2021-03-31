@@ -121,5 +121,7 @@ class FileFormMixin(with_typehint(Form)):
         if isinstance(initial, list):
             return [initial_file for initial_file in initial if initial_file.name in existing_filenames_in_uploads]
         else:
-            # todo
-            return initial
+            if existing_filenames_in_uploads:
+                return initial
+            else:
+                return None
