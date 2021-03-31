@@ -726,7 +726,22 @@ class LiveTestCase(BaseLiveTestCase):
         finally:
             example.input_file.delete()
 
-    # test: test_model_form_edit - delete file
+    def test_model_form_edit_remove_file(self):
+        example = Example.objects.create(
+            title="title1",
+            input_file=ContentFile("original", get_random_id()),
+        )
+
+        page = self.page
+        page.open(f"/model_form/{example.id}")
+        page.assert_page_contains_text("8 Bytes")
+
+        page.delete_ajax_file()
+        page.wait_until_upload_is_removed()
+
+        page.submit()
+
+        page.assert_page_contains_text("This field is required")
 
     def test_model_form_multipe_add(self):
         page = self.page
@@ -801,3 +816,18 @@ class LiveTestCase(BaseLiveTestCase):
         finally:
             for example_file in ExampleFile.objects.all():
                 example_file.input_file.delete()
+
+    def test_model_form_multipe_edit_remove_all_files(self):
+        page = self.page
+
+        filename = 'test1_' + get_random_id()
+        example = Example2.objects.create(title="title1")
+        ExampleFile.objects.create(input_file=ContentFile("content1", filename), example=example)
+
+        page.open(f"/model_form_multiple/{example.id}")
+        page.find_upload_success_with_filename(filename=filename)
+        page.delete_ajax_file()
+        page.wait_until_upload_is_removed()
+        page.submit()
+
+        page.assert_page_contains_text("This field is required")
