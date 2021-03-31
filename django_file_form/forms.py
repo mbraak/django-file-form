@@ -116,10 +116,18 @@ class FileFormMixin(with_typehint(Form)):
             return initial
 
         file_info_list = json.loads(file_uploads_value)
-        existing_filenames_in_uploads = {file_info['name'] for file_info in file_info_list if file_info['type'] == 'existing'}
+        existing_filenames_in_uploads = {
+            file_info["name"]
+            for file_info in file_info_list
+            if file_info["type"] == "existing"
+        }
 
         if isinstance(initial, list):
-            return [initial_file for initial_file in initial if initial_file.name in existing_filenames_in_uploads]
+            return [
+                initial_file
+                for initial_file in initial
+                if initial_file.name in existing_filenames_in_uploads
+            ]
         else:
             if existing_filenames_in_uploads:
                 return initial

@@ -74,7 +74,9 @@ class BaseUploadWidget(ClearableFileInput):
 
 
 class UploadWidget(BaseUploadWidget):
-    def value_from_datadict(self, data: QueryDict, files: MultiValueDict, prefixed_field_name: str):
+    def value_from_datadict(
+        self, data: QueryDict, files: MultiValueDict, prefixed_field_name: str
+    ):
         upload = super().value_from_datadict(data, files, prefixed_field_name)
 
         if upload:
@@ -92,10 +94,15 @@ class UploadWidget(BaseUploadWidget):
 
 class UploadMultipleWidget(BaseUploadWidget):
     def value_from_datadict(
-        self, data: QueryDict, files: Union[Dict, MultiValueDict], prefixed_field_name: str
+        self,
+        data: QueryDict,
+        files: Union[Dict, MultiValueDict],
+        prefixed_field_name: str,
     ):
         if hasattr(files, "getlist"):
-            uploads = files.getlist(prefixed_field_name) + get_uploads(data, prefixed_field_name)
+            uploads = files.getlist(prefixed_field_name) + get_uploads(
+                data, prefixed_field_name
+            )
             metadata = get_file_meta(data, prefixed_field_name)
 
             for upload in uploads:

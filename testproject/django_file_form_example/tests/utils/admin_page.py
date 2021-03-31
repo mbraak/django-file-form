@@ -7,7 +7,7 @@ class AdminPage(BasePage):
     def __init__(self, selenium, live_server_url, on_submit):
         super().__init__(selenium, live_server_url, on_submit)
 
-        User.objects.create_superuser('admin', 'admin@admin.nl', 'password')
+        User.objects.create_superuser("admin", "admin@admin.nl", "password")
 
         self.login()
 

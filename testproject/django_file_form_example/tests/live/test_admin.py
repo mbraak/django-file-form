@@ -51,4 +51,3 @@ class AdminTestCase(BaseLiveTestCase):
             self.assertEqual(read_file(example.input_file), b"new_content")
         finally:
             example.input_file.delete()
-

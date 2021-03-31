@@ -86,11 +86,7 @@ UploadedFileTypesOrList = Union[
 
 
 def get_initial_data_from_field_file(field_file: FieldFile) -> Dict:
-    return dict(
-        name=field_file.name,
-        size=field_file.size,
-        type="existing"
-    )
+    return dict(name=field_file.name, size=field_file.size, type="existing")
 
 
 def get_initial_data_from_uploaded_file(uploaded_file: UploadedFileTypes) -> Dict:

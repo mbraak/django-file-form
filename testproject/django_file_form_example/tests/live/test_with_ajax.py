@@ -8,7 +8,11 @@ from django_file_form.models import TemporaryUploadedFile
 from django_file_form_example.tests.utils.base_live_testcase import BaseLiveTestCase
 from django_file_form_example.models import Example, Example2, ExampleFile
 from django_file_form_example.tests.utils.page import Page
-from django_file_form_example.tests.utils.test_utils import read_file, count_temp_uploads, get_random_id
+from django_file_form_example.tests.utils.test_utils import (
+    read_file,
+    count_temp_uploads,
+    get_random_id,
+)
 
 media_root = Path(settings.MEDIA_ROOT)
 
@@ -770,7 +774,10 @@ class LiveTestCase(BaseLiveTestCase):
 
             self.assertSetEqual(
                 {f.input_file.name for f in examples_files},
-                {f"example/{temp_file1.base_name()}", f"example/{temp_file2.base_name()}"},
+                {
+                    f"example/{temp_file1.base_name()}",
+                    f"example/{temp_file2.base_name()}",
+                },
             )
 
             self.assertSetEqual(
@@ -784,12 +791,16 @@ class LiveTestCase(BaseLiveTestCase):
     def test_model_form_multipe_edit(self):
         page = self.page
         try:
-            filename1 = 'test1_' + get_random_id()
-            filename2 = 'test2_' + get_random_id()
+            filename1 = "test1_" + get_random_id()
+            filename2 = "test2_" + get_random_id()
 
             example = Example2.objects.create(title="title1")
-            ExampleFile.objects.create(input_file=ContentFile("content1", filename1), example=example)
-            ExampleFile.objects.create(input_file=ContentFile("content2", filename2), example=example)
+            ExampleFile.objects.create(
+                input_file=ContentFile("content1", filename1), example=example
+            )
+            ExampleFile.objects.create(
+                input_file=ContentFile("content2", filename2), example=example
+            )
 
             page.open(f"/model_form_multiple/{example.id}")
             page.find_upload_success_with_filename(filename=filename1, upload_index=0)
@@ -820,9 +831,11 @@ class LiveTestCase(BaseLiveTestCase):
     def test_model_form_multipe_edit_remove_all_files(self):
         page = self.page
 
-        filename = 'test1_' + get_random_id()
+        filename = "test1_" + get_random_id()
         example = Example2.objects.create(title="title1")
-        ExampleFile.objects.create(input_file=ContentFile("content1", filename), example=example)
+        ExampleFile.objects.create(
+            input_file=ContentFile("content1", filename), example=example
+        )
 
         page.open(f"/model_form_multiple/{example.id}")
         page.find_upload_success_with_filename(filename=filename)

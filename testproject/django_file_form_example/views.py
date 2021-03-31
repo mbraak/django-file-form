@@ -187,8 +187,7 @@ class FileModelFormMultipleMixin(FileModelFormMixin):
 
         # remove deleted files
         not_deleted_original_filenames = {
-            f.name for f in form.cleaned_data["input_file"]
-            if isinstance(f, FieldFile)
+            f.name for f in form.cleaned_data["input_file"] if isinstance(f, FieldFile)
         }
 
         for example_file in instance.files.all():
@@ -217,7 +216,9 @@ class EditModelFormMultipleView(FileModelFormMultipleMixin, generic.UpdateView):
     def get_initial(self):
         initial = super().get_initial()
 
-        initial["input_file"] = [example_file.input_file for example_file in self.object.files.all()]
+        initial["input_file"] = [
+            example_file.input_file for example_file in self.object.files.all()
+        ]
         return initial
 
 

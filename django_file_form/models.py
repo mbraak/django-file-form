@@ -10,7 +10,11 @@ from django.utils.module_loading import import_string
 from .util import ModelManager, get_upload_path
 
 # Import uploaded files for backward compatibility
-from .uploaded_file import PlaceholderUploadedFile, S3UploadedFileWithId, UploadedTusFile
+from .uploaded_file import (
+    PlaceholderUploadedFile,
+    S3UploadedFileWithId,
+    UploadedTusFile,
+)
 
 
 class TemporaryUploadedFileManager(ModelManager):
