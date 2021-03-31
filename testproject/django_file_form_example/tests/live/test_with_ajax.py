@@ -8,7 +8,7 @@ from django_file_form.models import TemporaryUploadedFile
 from django_file_form_example.tests.utils.base_live_testcase import BaseLiveTestCase
 from django_file_form_example.models import Example, Example2, ExampleFile
 from django_file_form_example.tests.utils.page import Page
-from django_file_form_example.tests.utils.test_utils import read_file, count_temp_uploads
+from django_file_form_example.tests.utils.test_utils import read_file, count_temp_uploads, get_random_id
 
 media_root = Path(settings.MEDIA_ROOT)
 
@@ -699,7 +699,7 @@ class LiveTestCase(BaseLiveTestCase):
     def test_model_form_edit(self):
         example = Example.objects.create(
             title="title1",
-            input_file=ContentFile("original", "test1.txt"),
+            input_file=ContentFile("original", get_random_id()),
         )
 
         try:
@@ -725,6 +725,8 @@ class LiveTestCase(BaseLiveTestCase):
             self.assertEqual(read_file(example.input_file), b"new_content")
         finally:
             example.input_file.delete()
+
+    # test: test_model_form_edit - delete file
 
     def test_model_form_multipe_add(self):
         page = self.page
@@ -767,13 +769,16 @@ class LiveTestCase(BaseLiveTestCase):
     def test_model_form_multipe_edit(self):
         page = self.page
         try:
+            filename1 = 'test1_' + get_random_id()
+            filename2 = 'test2_' + get_random_id()
+
             example = Example2.objects.create(title="title1")
-            ExampleFile.objects.create(input_file=ContentFile("content1", "test1.txt"), example=example)
-            ExampleFile.objects.create(input_file=ContentFile("content2", "test2.txt"), example=example)
+            ExampleFile.objects.create(input_file=ContentFile("content1", filename1), example=example)
+            ExampleFile.objects.create(input_file=ContentFile("content2", filename2), example=example)
 
             page.open(f"/model_form_multiple/{example.id}")
-            page.find_upload_success_with_filename(filename='test1.txt', upload_index=0)
-            page.find_upload_success_with_filename(filename='test2.txt', upload_index=1)
+            page.find_upload_success_with_filename(filename=filename1, upload_index=0)
+            page.find_upload_success_with_filename(filename=filename2, upload_index=1)
 
             page.delete_ajax_file(upload_index=1)
             page.wait_until_upload_is_removed(upload_index=1)
@@ -786,7 +791,7 @@ class LiveTestCase(BaseLiveTestCase):
 
             self.assertSetEqual(
                 {f.input_file.name for f in examples_files},
-                {"example/test1.txt"},
+                {f"example/{filename1}"},
             )
 
             self.assertSetEqual(
