@@ -4,14 +4,14 @@ import uuid
 from django.urls import reverse
 from django.forms import CharField, Form, HiddenInput
 
-from .util import get_list
+from .util import get_list, with_typehint
 from .uploaded_file import get_initial_data_from_uploaded_file
 
 # UploadedFileField and MultipleUploadedFileField must be in this module because they are in the api
 from .fields import UploadedFileField, MultipleUploadedFileField
 
 
-class FileFormMixin(object):
+class FileFormMixin(with_typehint(Form)):
     s3_upload_dir = None
 
     def __init__(self, *args, **kwargs):
@@ -31,19 +31,19 @@ class FileFormMixin(object):
         self.add_upload_inputs()
         self.add_metadata_inputs()
 
-    def add_hidden_field(self: Form, name: str, initial):
+    def add_hidden_field(self, name: str, initial):
         self.fields[name] = CharField(
             widget=HiddenInput, initial=initial, required=False
         )
 
-    def file_form_field_names(self: Form):
+    def file_form_field_names(self):
         return [
             field_name
             for field_name, field in self.fields.items()
             if hasattr(field, "get_file_data")
         ]
 
-    def update_files_data(self: Form):
+    def update_files_data(self):
         form_id = self.data.get(self.add_prefix("form_id"))
 
         if not form_id:
@@ -52,6 +52,7 @@ class FileFormMixin(object):
         for field_name in self.file_form_field_names():
             field = self.fields[field_name]
             prefixed_field_name = self.add_prefix(field_name)
+
             file_data = field.get_file_data(prefixed_field_name, form_id)
 
             if file_data:
@@ -61,7 +62,7 @@ class FileFormMixin(object):
                 else:
                     self.files[prefixed_field_name] = file_data
 
-    def delete_temporary_files(self: Form):
+    def delete_temporary_files(self):
         form_id = self.data.get(self.add_prefix("form_id"))
 
         if not form_id:
@@ -72,14 +73,14 @@ class FileFormMixin(object):
                 prefixed_field_name = self.add_prefix(field_name)
                 field.delete_file_data(prefixed_field_name, form_id)
 
-    def add_upload_inputs(self: Form):
+    def add_upload_inputs(self):
         for field_name in self.file_form_field_names():
             self.add_hidden_field(
                 f"{field_name}-uploads",
-                json.dumps(self.get_initial_upload_data_for_field(field_name)),
+                json.dumps(self.get_upload_data_for_field(field_name)),
             )
 
-    def get_initial_upload_data_for_field(self: Form, field_name: str):
+    def get_upload_data_for_field(self, field_name: str):
         uploaded_files = get_list(self.initial.get(field_name, []))
 
         return [
@@ -94,10 +95,31 @@ class FileFormMixin(object):
                 json.dumps(self.get_metadata_for_field(field_name)),
             )
 
-    def get_metadata_for_field(self: Form, field_name: str):
+    def get_metadata_for_field(self, field_name: str):
         initial_values = get_list(self.initial.get(field_name, []))
         return {
             value.name: value.metadata
             for value in initial_values
             if hasattr(value, "metadata")
         }
+
+    def get_initial_for_field(self, field, field_name: str):
+        initial = super().get_initial_for_field(field, field_name)
+
+        if not hasattr(field, "get_file_data"):
+            return initial
+
+        placeholder_field_name = self.add_prefix(field_name) + "-uploads"
+        file_uploads_value = self.data.get(placeholder_field_name)
+
+        if not file_uploads_value:
+            return initial
+
+        file_info_list = json.loads(file_uploads_value)
+        existing_filenames_in_uploads = {file_info['name'] for file_info in file_info_list if file_info['type'] == 'existing'}
+
+        if isinstance(initial, list):
+            return [initial_file for initial_file in initial if initial_file.name in existing_filenames_in_uploads]
+        else:
+            # todo
+            return initial
