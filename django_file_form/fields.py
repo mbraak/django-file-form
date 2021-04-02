@@ -74,3 +74,6 @@ class MultipleUploadedFileField(UploadedFileField):
             result += get_list(data)
 
         return result
+
+    def clean(self, data, initial=None):
+        return super().clean(data + (initial or []))

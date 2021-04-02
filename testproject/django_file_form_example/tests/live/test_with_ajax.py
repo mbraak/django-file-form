@@ -788,7 +788,7 @@ class LiveTestCase(BaseLiveTestCase):
             for example_file in ExampleFile.objects.all():
                 example_file.input_file.delete()
 
-    def test_model_form_multipe_edit(self):
+    def test_model_form_multipe_edit_add_and_remove(self):
         page = self.page
         try:
             filename1 = "test1_" + get_random_id()
@@ -823,6 +823,41 @@ class LiveTestCase(BaseLiveTestCase):
             self.assertSetEqual(
                 {read_file(example_file.input_file) for example_file in examples_files},
                 {b"content1"},
+            )
+        finally:
+            for example_file in ExampleFile.objects.all():
+                example_file.input_file.delete()
+
+    def test_model_form_multipe_edit_add_file(self):
+        page = self.page
+        try:
+            filename1 = "test1_" + get_random_id()
+            temp_file = page.create_temp_file("content2")
+
+            example = Example2.objects.create(title="title1")
+            ExampleFile.objects.create(
+                input_file=ContentFile("content1", filename1), example=example
+            )
+
+            page.open(f"/model_form_multiple/{example.id}")
+            page.find_upload_success_with_filename(filename=filename1, upload_index=0)
+
+            page.upload_using_js(temp_file)
+            page.find_upload_success(temp_file, upload_index=1)
+            page.submit()
+
+            example = Example2.objects.get(pk=example.id)
+
+            examples_files = example.files.all()
+
+            self.assertSetEqual(
+                {f.input_file.name for f in examples_files},
+                {f"example/{filename1}", f"example/{temp_file.base_name()}"},
+            )
+
+            self.assertSetEqual(
+                {read_file(example_file.input_file) for example_file in examples_files},
+                {b"content1", b"content2"},
             )
         finally:
             for example_file in ExampleFile.objects.all():
