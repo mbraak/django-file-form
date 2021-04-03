@@ -3,6 +3,7 @@ import time
 
 import boto3
 from botocore.exceptions import ClientError
+from botocore.client import Config
 from django.utils.crypto import get_random_string
 from storages.utils import setting, lookup_env
 
@@ -36,6 +37,9 @@ def file_form_upload_dir():
 
 
 def get_client():
+    signature_version = setting("AWS_S3_SIGNATURE_VERSION", None)
+    region_name = setting("AWS_S3_REGION_NAME", None)
+
     while True:
         try:
             # https://github.com/boto/boto3/issues/801
@@ -44,6 +48,7 @@ def get_client():
                 endpoint_url=get_endpoint_url(),
                 aws_access_key_id=get_access_key_id(),
                 aws_secret_access_key=get_secret_access_key(),
+                config=Config(signature_version=signature_version, region_name=region_name)
             )
         except:
             time.sleep(0.01)
