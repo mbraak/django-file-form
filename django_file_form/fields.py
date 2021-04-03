@@ -25,27 +25,15 @@ class UploadedFileField(FileField):
     # new methods
 
     def delete_file_data(self, field_name, form_id):
-        qs = self._get_file_qs(field_name, form_id)
-
-        for f in qs:
+        for f in TemporaryUploadedFile.objects.for_field_and_form(field_name, form_id):
             f.delete()
 
     def get_file_data(self, field_name, form_id):
         try:
-            return (
-                self._get_file_qs(field_name, form_id)
-                .latest("created")
-                .get_uploaded_file()
-            )
+            return TemporaryUploadedFile.objects.for_field_and_form(field_name, form_id)\
+                .latest("created").get_uploaded_file()
         except TemporaryUploadedFile.DoesNotExist:
             return None
-
-    # private
-
-    def _get_file_qs(self, field_name, form_id):
-        return TemporaryUploadedFile.objects.filter(
-            form_id=form_id, field_name=field_name
-        )
 
 
 class MultipleUploadedFileField(UploadedFileField):
@@ -84,7 +72,7 @@ class MultipleUploadedFileField(UploadedFileField):
     # new methods
 
     def get_file_data(self, field_name, form_id):
-        qs = self._get_file_qs(field_name, form_id)
+        temporary_uploaded_files = TemporaryUploadedFile.objects.for_field_and_form(field_name, form_id)
 
-        return [f.get_uploaded_file() for f in qs]
+        return [f.get_uploaded_file() for f in temporary_uploaded_files]
 

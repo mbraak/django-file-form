@@ -107,6 +107,7 @@ class FileFormMixin(with_typehint(Form)):
 
     def _get_metadata_for_field(self, field_name: str):
         initial_values = get_list(self.initial.get(field_name, []))
+
         return {
             value.name: value.metadata
             for value in initial_values

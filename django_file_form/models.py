@@ -41,6 +41,9 @@ class TemporaryUploadedFileManager(ModelManager):
 
         return deleted_files
 
+    def for_field_and_form(self, field_name, form_id):
+        return self.filter(form_id=form_id, field_name=field_name)
+
     def get_for_file(self, filename):
         return self.try_get(uploaded_file=get_upload_to_for_filename(filename))
 
@@ -95,12 +98,12 @@ class TemporaryUploadedFile(models.Model):
 
         super().delete(*args, **kwargs)
 
-    def must_be_deleted(self, now=None):
-        now = now or timezone.now()
-
-        return (now - self.created).days >= 1
-
     def get_uploaded_file(self):
         return UploadedTusFile(
             file=self.uploaded_file, name=self.original_filename, file_id=self.file_id
         )
+
+    def must_be_deleted(self, now=None):
+        now = now or timezone.now()
+
+        return (now - self.created).days >= 1
