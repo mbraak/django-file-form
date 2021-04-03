@@ -13,9 +13,10 @@
 
 	// https://github.com/zloirock/core-js/issues/86#issuecomment-115759028
 	var global$1 =
-	  /* global globalThis -- safe */
+	  // eslint-disable-next-line es/no-global-this -- safe
 	  check(typeof globalThis == 'object' && globalThis) ||
 	  check(typeof window == 'object' && window) ||
+	  // eslint-disable-next-line no-restricted-globals -- safe
 	  check(typeof self == 'object' && self) ||
 	  check(typeof commonjsGlobal == 'object' && commonjsGlobal) ||
 	  // eslint-disable-next-line no-new-func -- fallback
@@ -31,21 +32,23 @@
 
 	// Detect IE8's incomplete defineProperty implementation
 	var descriptors = !fails(function () {
+	  // eslint-disable-next-line es/no-object-defineproperty -- required for testing
 	  return Object.defineProperty({}, 1, { get: function () { return 7; } })[1] != 7;
 	});
 
-	var nativePropertyIsEnumerable$1 = {}.propertyIsEnumerable;
+	var $propertyIsEnumerable$1 = {}.propertyIsEnumerable;
+	// eslint-disable-next-line es/no-object-getownpropertydescriptor -- safe
 	var getOwnPropertyDescriptor$3 = Object.getOwnPropertyDescriptor;
 
 	// Nashorn ~ JDK8 bug
-	var NASHORN_BUG = getOwnPropertyDescriptor$3 && !nativePropertyIsEnumerable$1.call({ 1: 2 }, 1);
+	var NASHORN_BUG = getOwnPropertyDescriptor$3 && !$propertyIsEnumerable$1.call({ 1: 2 }, 1);
 
 	// `Object.prototype.propertyIsEnumerable` method implementation
 	// https://tc39.es/ecma262/#sec-object.prototype.propertyisenumerable
 	var f$7 = NASHORN_BUG ? function propertyIsEnumerable(V) {
 	  var descriptor = getOwnPropertyDescriptor$3(this, V);
 	  return !!descriptor && descriptor.enumerable;
-	} : nativePropertyIsEnumerable$1;
+	} : $propertyIsEnumerable$1;
 
 	var objectPropertyIsEnumerable = {
 		f: f$7
@@ -125,20 +128,22 @@
 
 	// Thank's IE8 for his funny defineProperty
 	var ie8DomDefine = !descriptors && !fails(function () {
+	  // eslint-disable-next-line es/no-object-defineproperty -- requied for testing
 	  return Object.defineProperty(documentCreateElement('div'), 'a', {
 	    get: function () { return 7; }
 	  }).a != 7;
 	});
 
-	var nativeGetOwnPropertyDescriptor$2 = Object.getOwnPropertyDescriptor;
+	// eslint-disable-next-line es/no-object-getownpropertydescriptor -- safe
+	var $getOwnPropertyDescriptor$1 = Object.getOwnPropertyDescriptor;
 
 	// `Object.getOwnPropertyDescriptor` method
 	// https://tc39.es/ecma262/#sec-object.getownpropertydescriptor
-	var f$6 = descriptors ? nativeGetOwnPropertyDescriptor$2 : function getOwnPropertyDescriptor(O, P) {
+	var f$6 = descriptors ? $getOwnPropertyDescriptor$1 : function getOwnPropertyDescriptor(O, P) {
 	  O = toIndexedObject(O);
 	  P = toPrimitive(P, true);
 	  if (ie8DomDefine) try {
-	    return nativeGetOwnPropertyDescriptor$2(O, P);
+	    return $getOwnPropertyDescriptor$1(O, P);
 	  } catch (error) { /* empty */ }
 	  if (has$2(O, P)) return createPropertyDescriptor(!objectPropertyIsEnumerable.f.call(O, P), O[P]);
 	};
@@ -153,16 +158,17 @@
 	  } return it;
 	};
 
-	var nativeDefineProperty$1 = Object.defineProperty;
+	// eslint-disable-next-line es/no-object-defineproperty -- safe
+	var $defineProperty$1 = Object.defineProperty;
 
 	// `Object.defineProperty` method
 	// https://tc39.es/ecma262/#sec-object.defineproperty
-	var f$5 = descriptors ? nativeDefineProperty$1 : function defineProperty(O, P, Attributes) {
+	var f$5 = descriptors ? $defineProperty$1 : function defineProperty(O, P, Attributes) {
 	  anObject(O);
 	  P = toPrimitive(P, true);
 	  anObject(Attributes);
 	  if (ie8DomDefine) try {
-	    return nativeDefineProperty$1(O, P, Attributes);
+	    return $defineProperty$1(O, P, Attributes);
 	  } catch (error) { /* empty */ }
 	  if ('get' in Attributes || 'set' in Attributes) throw TypeError('Accessors not supported');
 	  if ('value' in Attributes) O[P] = Attributes.value;
@@ -212,7 +218,7 @@
 	(module.exports = function (key, value) {
 	  return sharedStore[key] || (sharedStore[key] = value !== undefined ? value : {});
 	})('versions', []).push({
-	  version: '3.9.1',
+	  version: '3.10.0',
 	  mode: 'global',
 	  copyright: '© 2021 Denis Pushkarev (zloirock.ru)'
 	});
@@ -424,6 +430,7 @@
 
 	// `Object.getOwnPropertyNames` method
 	// https://tc39.es/ecma262/#sec-object.getownpropertynames
+	// eslint-disable-next-line es/no-object-getownpropertynames -- safe
 	var f$4 = Object.getOwnPropertyNames || function getOwnPropertyNames(O) {
 	  return objectKeysInternal(O, hiddenKeys);
 	};
@@ -432,6 +439,7 @@
 		f: f$4
 	};
 
+	// eslint-disable-next-line es/no-object-getownpropertysymbols -- safe
 	var f$3 = Object.getOwnPropertySymbols;
 
 	var objectGetOwnPropertySymbols = {
@@ -604,16 +612,18 @@
 
 	var engineV8Version = version && +version;
 
+	// eslint-disable-next-line es/no-object-getownpropertysymbols -- required for testing
 	var nativeSymbol = !!Object.getOwnPropertySymbols && !fails(function () {
-	  /* global Symbol -- required for testing */
+	  // eslint-disable-next-line es/no-symbol -- required for testing
 	  return !Symbol.sham &&
 	    // Chrome 38 Symbol has incorrect toString conversion
 	    // Chrome 38-40 symbols are not inherited from DOM collections prototypes to instances
 	    (engineIsNode ? engineV8Version === 38 : engineV8Version > 37 && engineV8Version < 41);
 	});
 
+	/* eslint-disable es/no-symbol -- required for testing */
+
 	var useSymbolAsUid = nativeSymbol
-	  /* global Symbol -- safe */
 	  && !Symbol.sham
 	  && typeof Symbol.iterator == 'symbol';
 
@@ -734,7 +744,7 @@
 	  iteratorWithReturn[ITERATOR$4] = function () {
 	    return this;
 	  };
-	  // eslint-disable-next-line no-throw-literal -- required for testing
+	  // eslint-disable-next-line es/no-array-from, no-throw-literal -- required for testing
 	  Array.from(iteratorWithReturn, function () { throw 2; });
 	} catch (error) { /* empty */ }
 
@@ -756,6 +766,7 @@
 	};
 
 	var INCORRECT_ITERATION$1 = !checkCorrectnessOfIteration(function (iterable) {
+	  // eslint-disable-next-line es/no-array-from -- required for testing
 	  Array.from(iterable);
 	});
 
@@ -793,6 +804,7 @@
 	var correctPrototypeGetter = !fails(function () {
 	  function F() { /* empty */ }
 	  F.prototype.constructor = null;
+	  // eslint-disable-next-line es/no-object-getprototypeof -- required for testing
 	  return Object.getPrototypeOf(new F()) !== F.prototype;
 	});
 
@@ -801,6 +813,7 @@
 
 	// `Object.getPrototypeOf` method
 	// https://tc39.es/ecma262/#sec-object.getprototypeof
+	// eslint-disable-next-line es/no-object-getprototypeof -- safe
 	var objectGetPrototypeOf = correctPrototypeGetter ? Object.getPrototypeOf : function (O) {
 	  O = toObject(O);
 	  if (has$2(O, IE_PROTO$1)) return O[IE_PROTO$1];
@@ -818,6 +831,7 @@
 	// https://tc39.es/ecma262/#sec-%iteratorprototype%-object
 	var IteratorPrototype$2, PrototypeOfArrayIteratorPrototype, arrayIterator;
 
+	/* eslint-disable es/no-array-prototype-keys -- safe */
 	if ([].keys) {
 	  arrayIterator = [].keys();
 	  // Safari 8 has buggy iterators w/o `next`
@@ -848,12 +862,14 @@
 
 	// `Object.keys` method
 	// https://tc39.es/ecma262/#sec-object.keys
+	// eslint-disable-next-line es/no-object-keys -- safe
 	var objectKeys = Object.keys || function keys(O) {
 	  return objectKeysInternal(O, enumBugKeys);
 	};
 
 	// `Object.defineProperties` method
 	// https://tc39.es/ecma262/#sec-object.defineproperties
+	// eslint-disable-next-line es/no-object-defineproperties -- safe
 	var objectDefineProperties = descriptors ? Object.defineProperties : function defineProperties(O, Properties) {
 	  anObject(O);
 	  var keys = objectKeys(Properties);
@@ -976,11 +992,13 @@
 	// `Object.setPrototypeOf` method
 	// https://tc39.es/ecma262/#sec-object.setprototypeof
 	// Works with __proto__ only. Old v8 can't work with null proto objects.
+	// eslint-disable-next-line es/no-object-setprototypeof -- safe
 	var objectSetPrototypeOf = Object.setPrototypeOf || ('__proto__' in {} ? function () {
 	  var CORRECT_SETTER = false;
 	  var test = {};
 	  var setter;
 	  try {
+	    // eslint-disable-next-line es/no-object-getownpropertydescriptor -- safe
 	    setter = Object.getOwnPropertyDescriptor(Object.prototype, '__proto__').set;
 	    setter.call(test, []);
 	    CORRECT_SETTER = test instanceof Array;
@@ -1241,6 +1259,7 @@
 	}
 
 	var freezing = !fails(function () {
+	  // eslint-disable-next-line es/no-object-isextensible, es/no-object-preventextensions -- required for testing
 	  return Object.isExtensible(Object.preventExtensions({}));
 	});
 
@@ -1252,6 +1271,7 @@
 	var METADATA = uid('meta');
 	var id = 0;
 
+	// eslint-disable-next-line es/no-object-isextensible -- safe
 	var isExtensible = Object.isExtensible || function () {
 	  return true;
 	};
@@ -1681,6 +1701,7 @@
 
 	// `IsArray` abstract operation
 	// https://tc39.es/ecma262/#sec-isarray
+	// eslint-disable-next-line es/no-array-isarray -- safe
 	var isArray = Array.isArray || function isArray(arg) {
 	  return classofRaw(arg) == 'Array';
 	};
@@ -1816,6 +1837,7 @@
 	// https://tc39.es/ecma262/#sec-array.prototype.foreach
 	var arrayForEach = !STRICT_METHOD$3 ? function forEach(callbackfn /* , thisArg */) {
 	  return $forEach$2(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
+	// eslint-disable-next-line es/no-array-prototype-foreach -- safe
 	} : [].forEach;
 
 	for (var COLLECTION_NAME in domIterables) {
@@ -1865,7 +1887,9 @@
 	  }
 	});
 
-	var nativeGetOwnPropertyNames$1 = objectGetOwnPropertyNames.f;
+	/* eslint-disable es/no-object-getownpropertynames -- safe */
+
+	var $getOwnPropertyNames$1 = objectGetOwnPropertyNames.f;
 
 	var toString$1 = {}.toString;
 
@@ -1874,7 +1898,7 @@
 
 	var getWindowNames = function (it) {
 	  try {
-	    return nativeGetOwnPropertyNames$1(it);
+	    return $getOwnPropertyNames$1(it);
 	  } catch (error) {
 	    return windowNames.slice();
 	  }
@@ -1884,7 +1908,7 @@
 	var f$2 = function getOwnPropertyNames(it) {
 	  return windowNames && toString$1.call(it) == '[object Window]'
 	    ? getWindowNames(it)
-	    : nativeGetOwnPropertyNames$1(toIndexedObject(it));
+	    : $getOwnPropertyNames$1(toIndexedObject(it));
 	};
 
 	var objectGetOwnPropertyNamesExternal = {
@@ -2328,7 +2352,8 @@
 
 
 
-	var nativeStartsWith = ''.startsWith;
+	// eslint-disable-next-line es/no-string-prototype-startswith -- safe
+	var $startsWith = ''.startsWith;
 	var min$5 = Math.min;
 
 	var CORRECT_IS_REGEXP_LOGIC = correctIsRegexpLogic('startsWith');
@@ -2346,8 +2371,8 @@
 	    notARegexp(searchString);
 	    var index = toLength(min$5(arguments.length > 1 ? arguments[1] : undefined, that.length));
 	    var search = String(searchString);
-	    return nativeStartsWith
-	      ? nativeStartsWith.call(that, search, index)
+	    return $startsWith
+	      ? $startsWith.call(that, search, index)
 	      : that.slice(index, index + search.length) === search;
 	  }
 	});
@@ -3187,7 +3212,7 @@
 
 	// `String.prototype.repeat` method implementation
 	// https://tc39.es/ecma262/#sec-string.prototype.repeat
-	var stringRepeat = ''.repeat || function repeat(count) {
+	var stringRepeat = function repeat(count) {
 	  var str = String(requireObjectCoercible(this));
 	  var result = '';
 	  var n = toInteger(count);
@@ -4258,7 +4283,7 @@
 	// This always refers to the native implementation, because the
 	// String#replace polyfill uses ./fix-regexp-well-known-symbol-logic.js,
 	// which loads this file before patching the method.
-	var nativeReplace = String.prototype.replace;
+	var nativeReplace = shared('native-string-replace', String.prototype.replace);
 
 	var patchedExec = nativeExec;
 
@@ -4751,6 +4776,7 @@
 	// IE <= 11 replaces $0 with the whole match, as if it was $&
 	// https://stackoverflow.com/questions/6024666/getting-ie-to-replace-a-regex-with-the-literal-string-0
 	var REPLACE_KEEPS_$0 = (function () {
+	  // eslint-disable-next-line regexp/prefer-escape-replacement-dollar-char -- required for testing
 	  return 'a'.replace(/./, '$0') === '$0';
 	})();
 
@@ -5695,6 +5721,7 @@
 
 	// `RegExp.prototype.flags` getter
 	// https://tc39.es/ecma262/#sec-get-regexp.prototype.flags
+	// eslint-disable-next-line es/no-regexp-prototype-flags -- required for testing
 	if (descriptors && (/./g.flags != 'g' || UNSUPPORTED_Y)) {
 	  objectDefineProperty.f(RegExp.prototype, 'flags', {
 	    configurable: true,
@@ -9737,6 +9764,7 @@
 	  }
 	};
 
+	// eslint-disable-next-line es/no-typed-arrays -- safe
 	var arrayBufferNative = typeof ArrayBuffer !== 'undefined' && typeof DataView !== 'undefined';
 
 	var defineProperty$1 = objectDefineProperty.f;
@@ -10223,15 +10251,15 @@
 
 	  // iOS Safari 7.x bug
 	  var testView = new $DataView(new $ArrayBuffer(2));
-	  var nativeSetInt8 = $DataViewPrototype.setInt8;
+	  var $setInt8 = $DataViewPrototype.setInt8;
 	  testView.setInt8(0, 2147483648);
 	  testView.setInt8(1, 2147483649);
 	  if (testView.getInt8(0) || !testView.getInt8(1)) redefineAll($DataViewPrototype, {
 	    setInt8: function setInt8(byteOffset, value) {
-	      nativeSetInt8.call(this, byteOffset, value << 24 >> 24);
+	      $setInt8.call(this, byteOffset, value << 24 >> 24);
 	    },
 	    setUint8: function setUint8(byteOffset, value) {
-	      nativeSetInt8.call(this, byteOffset, value << 24 >> 24);
+	      $setInt8.call(this, byteOffset, value << 24 >> 24);
 	    }
 	  }, { unsafe: true });
 	}
@@ -10528,6 +10556,7 @@
 
 	// `Array.prototype.copyWithin` method implementation
 	// https://tc39.es/ecma262/#sec-array.prototype.copywithin
+	// eslint-disable-next-line es/no-array-prototype-copywithin -- safe
 	var arrayCopyWithin = [].copyWithin || function copyWithin(target /* = 0 */, start /* = 0, end = @length */) {
 	  var O = toObject(this);
 	  var len = toLength(O.length);
@@ -10703,9 +10732,15 @@
 	  return $join.apply(aTypedArray$b(this), arguments);
 	});
 
+	/* eslint-disable es/no-array-prototype-lastindexof -- safe */
+
+
+
+
+
 	var min = Math.min;
-	var nativeLastIndexOf = [].lastIndexOf;
-	var NEGATIVE_ZERO = !!nativeLastIndexOf && 1 / [1].lastIndexOf(1, -0) < 0;
+	var $lastIndexOf = [].lastIndexOf;
+	var NEGATIVE_ZERO = !!$lastIndexOf && 1 / [1].lastIndexOf(1, -0) < 0;
 	var STRICT_METHOD = arrayMethodIsStrict('lastIndexOf');
 	var FORCED$4 = NEGATIVE_ZERO || !STRICT_METHOD;
 
@@ -10713,7 +10748,7 @@
 	// https://tc39.es/ecma262/#sec-array.prototype.lastindexof
 	var arrayLastIndexOf = FORCED$4 ? function lastIndexOf(searchElement /* , fromIndex = @[*-1] */) {
 	  // convert -0 to +0
-	  if (NEGATIVE_ZERO) return nativeLastIndexOf.apply(this, arguments) || 0;
+	  if (NEGATIVE_ZERO) return $lastIndexOf.apply(this, arguments) || 0;
 	  var O = toIndexedObject(this);
 	  var length = toLength(O.length);
 	  var index = length - 1;
@@ -10721,7 +10756,7 @@
 	  if (index < 0) index = length + index;
 	  for (;index >= 0; index--) if (index in O && O[index] === searchElement) return index || 0;
 	  return -1;
-	} : nativeLastIndexOf;
+	} : $lastIndexOf;
 
 	var aTypedArray$a = arrayBufferViewCore.aTypedArray;
 	var exportTypedArrayMethod$b = arrayBufferViewCore.exportTypedArrayMethod;
@@ -10793,7 +10828,7 @@
 	var exportTypedArrayMethod$6 = arrayBufferViewCore.exportTypedArrayMethod;
 
 	var FORCED$3 = fails(function () {
-	  /* global Int8Array -- safe */
+	  // eslint-disable-next-line es/no-typed-arrays -- required for testing
 	  new Int8Array(1).set({});
 	});
 
@@ -10816,7 +10851,7 @@
 	var $slice$1 = [].slice;
 
 	var FORCED$2 = fails(function () {
-	  /* global Int8Array -- safe */
+	  // eslint-disable-next-line es/no-typed-arrays -- required for testing
 	  new Int8Array(1).slice();
 	});
 
@@ -11143,6 +11178,7 @@
 
 	var trimStart = FORCED ? function trimStart() {
 	  return $trimStart(this);
+	// eslint-disable-next-line es/no-string-prototype-trimstart-trimend -- safe
 	} : ''.trimStart;
 
 	// `String.prototype.{ trimStart, trimLeft }` methods
