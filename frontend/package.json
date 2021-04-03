@@ -34,7 +34,6 @@
     "@types/picomatch": "^2.2.1",
     "@typescript-eslint/eslint-plugin": "^4.0.1",
     "@typescript-eslint/parser": "^4.0.1",
-    "babel-eslint": "^10.0.3",
     "babel-plugin-inferno": "^6.1.1",
     "eslint": "^7.3.0",
     "eslint-plugin-import": "^2.21.2",
