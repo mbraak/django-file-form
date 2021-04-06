@@ -1,14 +1,15 @@
 ## Changelog
 
-**development**
+**3.2.0 (6 april 2021)**
 
+  * Issue #443: support Django 3.2
+  * Issue #446: add AWS_S3_REGION_NAME and AWS_S3_SIGNATURE_VERSION settings (thanks to Niklas Wahl)
   * Issue #449: add German translations (thanks to Niklas Wahl)
 
 **3.1.5 (29 march 2021)**
 
   * Issue #211: auto initialize javascript
   * Issue #339: Django admin support
-  * Issue #446: add AWS_S3_REGION_NAME and AWS_S3_SIGNATURE_VERSION settings (thanks to Niklas Wahl)
 
 **3.1.4 (8 march 2021)**
 

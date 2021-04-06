@@ -15,7 +15,7 @@ Features:
 
 The project is hosted on [github](https://github.com/mbraak/django-file-form).
 
-Works with Django 2.2 - 3.1. Also with Python 3.6 - 3.9
+Works with Django 2.2, 3.1 and 3.2. Also with Python 3.6 - 3.9
 
 Older versions:
 
