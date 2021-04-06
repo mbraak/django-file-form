@@ -1,6 +1,6 @@
 ## Changelog
 
-**development**
+**3.2.0 (6 april 2021)**
 
   * Issue #443: support Django 3.2
   * Issue #446: add AWS_S3_REGION_NAME and AWS_S3_SIGNATURE_VERSION settings (thanks to Niklas Wahl)
