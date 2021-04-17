@@ -218,7 +218,7 @@
 	(module.exports = function (key, value) {
 	  return sharedStore[key] || (sharedStore[key] = value !== undefined ? value : {});
 	})('versions', []).push({
-	  version: '3.10.0',
+	  version: '3.10.1',
 	  mode: 'global',
 	  copyright: '© 2021 Denis Pushkarev (zloirock.ru)'
 	});
@@ -1118,18 +1118,6 @@
 	  return { value: point, done: false };
 	});
 
-	// `Object.prototype.toString` method implementation
-	// https://tc39.es/ecma262/#sec-object.prototype.tostring
-	var objectToString = toStringTagSupport ? {}.toString : function toString() {
-	  return '[object ' + classof(this) + ']';
-	};
-
-	// `Object.prototype.toString` method
-	// https://tc39.es/ecma262/#sec-object.prototype.tostring
-	if (!toStringTagSupport) {
-	  redefine(Object.prototype, 'toString', objectToString, { unsafe: true });
-	}
-
 	var UNSCOPABLES = wellKnownSymbol('unscopables');
 	var ArrayPrototype = Array.prototype;
 
@@ -1193,6 +1181,18 @@
 	addToUnscopables('keys');
 	addToUnscopables('values');
 	addToUnscopables('entries');
+
+	// `Object.prototype.toString` method implementation
+	// https://tc39.es/ecma262/#sec-object.prototype.tostring
+	var objectToString = toStringTagSupport ? {}.toString : function toString() {
+	  return '[object ' + classof(this) + ']';
+	};
+
+	// `Object.prototype.toString` method
+	// https://tc39.es/ecma262/#sec-object.prototype.tostring
+	if (!toStringTagSupport) {
+	  redefine(Object.prototype, 'toString', objectToString, { unsafe: true });
+	}
 
 	// iterable DOM collections
 	// flag - `iterable` interface - 'entries', 'keys', 'values', 'forEach' methods
@@ -2530,7 +2530,7 @@
 	  return C === undefined || (S = anObject(C)[SPECIES$2]) == undefined ? defaultConstructor : aFunction(S);
 	};
 
-	var engineIsIos = /(iphone|ipod|ipad).*applewebkit/i.test(engineUserAgent);
+	var engineIsIos = /(?:iphone|ipod|ipad).*applewebkit/i.test(engineUserAgent);
 
 	var location = global$1.location;
 	var set$2 = global$1.setImmediate;
@@ -3439,13 +3439,13 @@
 	// https://tc39.es/ecma262/#sec-symbol.tostringtag
 	defineWellKnownSymbol('toStringTag');
 
-	// Math[@@toStringTag] property
-	// https://tc39.es/ecma262/#sec-math-@@tostringtag
-	setToStringTag(Math, 'Math', true);
-
 	// JSON[@@toStringTag] property
 	// https://tc39.es/ecma262/#sec-json-@@tostringtag
 	setToStringTag(global$1.JSON, 'JSON', true);
+
+	// Math[@@toStringTag] property
+	// https://tc39.es/ecma262/#sec-math-@@tostringtag
+	setToStringTag(Math, 'Math', true);
 
 	var FAILS_ON_PRIMITIVES = fails(function () { objectGetPrototypeOf(1); });
 
@@ -4260,7 +4260,7 @@
 	  return RegExp(s, f);
 	}
 
-	var UNSUPPORTED_Y$3 = fails(function () {
+	var UNSUPPORTED_Y$4 = fails(function () {
 	  // babel-minify transpiles RegExp('a', 'y') -> /a/y and it causes SyntaxError
 	  var re = RE('a', 'y');
 	  re.lastIndex = 2;
@@ -4275,14 +4275,11 @@
 	});
 
 	var regexpStickyHelpers = {
-		UNSUPPORTED_Y: UNSUPPORTED_Y$3,
+		UNSUPPORTED_Y: UNSUPPORTED_Y$4,
 		BROKEN_CARET: BROKEN_CARET
 	};
 
 	var nativeExec = RegExp.prototype.exec;
-	// This always refers to the native implementation, because the
-	// String#replace polyfill uses ./fix-regexp-well-known-symbol-logic.js,
-	// which loads this file before patching the method.
 	var nativeReplace = shared('native-string-replace', String.prototype.replace);
 
 	var patchedExec = nativeExec;
@@ -4295,19 +4292,19 @@
 	  return re1.lastIndex !== 0 || re2.lastIndex !== 0;
 	})();
 
-	var UNSUPPORTED_Y$2 = regexpStickyHelpers.UNSUPPORTED_Y || regexpStickyHelpers.BROKEN_CARET;
+	var UNSUPPORTED_Y$3 = regexpStickyHelpers.UNSUPPORTED_Y || regexpStickyHelpers.BROKEN_CARET;
 
 	// nonparticipating capturing group, copied from es5-shim's String#split patch.
 	// eslint-disable-next-line regexp/no-assertion-capturing-group, regexp/no-empty-group -- required for testing
 	var NPCG_INCLUDED = /()??/.exec('')[1] !== undefined;
 
-	var PATCH = UPDATES_LAST_INDEX_WRONG || NPCG_INCLUDED || UNSUPPORTED_Y$2;
+	var PATCH = UPDATES_LAST_INDEX_WRONG || NPCG_INCLUDED || UNSUPPORTED_Y$3;
 
 	if (PATCH) {
 	  patchedExec = function exec(str) {
 	    var re = this;
 	    var lastIndex, reCopy, match, i;
-	    var sticky = UNSUPPORTED_Y$2 && re.sticky;
+	    var sticky = UNSUPPORTED_Y$3 && re.sticky;
 	    var flags = regexpFlags.call(re);
 	    var source = re.source;
 	    var charsAdded = 0;
@@ -4757,7 +4754,6 @@
 
 
 
-
 	var SPECIES = wellKnownSymbol('species');
 
 	var REPLACE_SUPPORTS_NAMED_GROUPS = !fails(function () {
@@ -4846,7 +4842,7 @@
 	  ) {
 	    var nativeRegExpMethod = /./[SYMBOL];
 	    var methods = exec(SYMBOL, ''[KEY], function (nativeMethod, regexp, str, arg2, forceStringMethod) {
-	      if (regexp.exec === regexpExec) {
+	      if (regexp.exec === RegExp.prototype.exec) {
 	        if (DELEGATES_TO_SYMBOL && !forceStringMethod) {
 	          // The native String method already delegates to @@method (this
 	          // polyfilled function), leasing to infinite recursion.
@@ -4904,12 +4900,10 @@
 	  return regexpExec.call(R, S);
 	};
 
+	var UNSUPPORTED_Y$2 = regexpStickyHelpers.UNSUPPORTED_Y;
 	var arrayPush = [].push;
 	var min$3 = Math.min;
 	var MAX_UINT32 = 0xFFFFFFFF;
-
-	// babel-minify transpiles RegExp('x', 'y') -> /x/y and it causes SyntaxError
-	var SUPPORTS_Y = !fails(function () { return !RegExp(MAX_UINT32, 'y'); });
 
 	// @@split logic
 	fixRegexpWellKnownSymbolLogic('split', 2, function (SPLIT, nativeSplit, maybeCallNative) {
@@ -4993,11 +4987,11 @@
 	      var flags = (rx.ignoreCase ? 'i' : '') +
 	                  (rx.multiline ? 'm' : '') +
 	                  (rx.unicode ? 'u' : '') +
-	                  (SUPPORTS_Y ? 'y' : 'g');
+	                  (UNSUPPORTED_Y$2 ? 'g' : 'y');
 
 	      // ^(? + rx + ) is needed, in combination with some S slicing, to
 	      // simulate the 'y' flag.
-	      var splitter = new C(SUPPORTS_Y ? rx : '^(?:' + rx.source + ')', flags);
+	      var splitter = new C(UNSUPPORTED_Y$2 ? '^(?:' + rx.source + ')' : rx, flags);
 	      var lim = limit === undefined ? MAX_UINT32 : limit >>> 0;
 	      if (lim === 0) return [];
 	      if (S.length === 0) return regexpExecAbstract(splitter, S) === null ? [S] : [];
@@ -5005,12 +4999,12 @@
 	      var q = 0;
 	      var A = [];
 	      while (q < S.length) {
-	        splitter.lastIndex = SUPPORTS_Y ? q : 0;
-	        var z = regexpExecAbstract(splitter, SUPPORTS_Y ? S : S.slice(q));
+	        splitter.lastIndex = UNSUPPORTED_Y$2 ? 0 : q;
+	        var z = regexpExecAbstract(splitter, UNSUPPORTED_Y$2 ? S.slice(q) : S);
 	        var e;
 	        if (
 	          z === null ||
-	          (e = min$3(toLength(splitter.lastIndex + (SUPPORTS_Y ? 0 : q)), S.length)) === p
+	          (e = min$3(toLength(splitter.lastIndex + (UNSUPPORTED_Y$2 ? q : 0)), S.length)) === p
 	        ) {
 	          q = advanceStringIndex(S, q, unicodeMatching);
 	        } else {
@@ -5027,7 +5021,7 @@
 	      return A;
 	    }
 	  ];
-	}, !SUPPORTS_Y);
+	}, UNSUPPORTED_Y$2);
 
 	// a string of all valid unicode whitespaces
 	var whitespaces = '\u0009\u000A\u000B\u000C\u000D\u0020\u00A0\u1680\u2000\u2001\u2002' +
