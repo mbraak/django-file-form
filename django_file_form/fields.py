@@ -14,21 +14,7 @@ class UploadedFileField(FileField):
 
         super().__init__(**kwargs)
 
-    def get_file_data(self, field_name, form_id):
-        try:
-            return (
-                self._get_file_qs(field_name, form_id)
-                .latest("created")
-                .get_uploaded_file()
-            )
-        except TemporaryUploadedFile.DoesNotExist:
-            return None
-
-    def delete_file_data(self, field_name, form_id):
-        qs = self._get_file_qs(field_name, form_id)
-
-        for f in qs:
-            f.delete()
+    # override
 
     def widget_attrs(self, widget):
         if self.accept:
@@ -36,33 +22,24 @@ class UploadedFileField(FileField):
         else:
             return dict()
 
-    def _get_file_qs(self, field_name, form_id):
-        return TemporaryUploadedFile.objects.filter(
-            form_id=form_id, field_name=field_name
-        )
+    # new methods
+
+    def delete_file_data(self, field_name, form_id):
+        for f in TemporaryUploadedFile.objects.for_field_and_form(field_name, form_id):
+            f.delete()
+
+    def get_file_data(self, field_name, form_id):
+        try:
+            return TemporaryUploadedFile.objects.for_field_and_form(field_name, form_id)\
+                .latest("created").get_uploaded_file()
+        except TemporaryUploadedFile.DoesNotExist:
+            return None
 
 
 class MultipleUploadedFileField(UploadedFileField):
     widget = UploadMultipleWidget
 
-    def widget_attrs(self, widget):
-        attrs = super().widget_attrs(widget)
-
-        attrs["multiple"] = "multiple"
-        return attrs
-
-    def get_file_data(self, field_name, form_id):
-        qs = self._get_file_qs(field_name, form_id)
-
-        return [f.get_uploaded_file() for f in qs]
-
-    def to_python(self, data):
-        if data in validators.EMPTY_VALUES:
-            return None
-        elif isinstance(data, list):
-            return [super(MultipleUploadedFileField, self).to_python(f) for f in data]
-        else:
-            return [data]
+    # override
 
     def bound_data(self, data, initial):
         result = []
@@ -74,3 +51,28 @@ class MultipleUploadedFileField(UploadedFileField):
             result += get_list(data)
 
         return result
+
+    def clean(self, data, initial=None):
+        return super().clean(data + (initial or []))
+
+    def to_python(self, data):
+        if data in validators.EMPTY_VALUES:
+            return None
+        elif isinstance(data, list):
+            return [super(MultipleUploadedFileField, self).to_python(f) for f in data]
+        else:
+            return [data]
+
+    def widget_attrs(self, widget):
+        attrs = super().widget_attrs(widget)
+
+        attrs["multiple"] = "multiple"
+        return attrs
+
+    # new methods
+
+    def get_file_data(self, field_name, form_id):
+        temporary_uploaded_files = TemporaryUploadedFile.objects.for_field_and_form(field_name, form_id)
+
+        return [f.get_uploaded_file() for f in temporary_uploaded_files]
+

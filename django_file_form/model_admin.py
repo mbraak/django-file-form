@@ -13,19 +13,17 @@ class FileAdminForm(FileFormMixin, ModelForm):
 
 
 class FileFormAdminMixin(with_typehint(admin.ModelAdmin)):
-    change_form_template = 'django_file_form/admin_change_form.html'
+    change_form_template = "django_file_form/admin_change_form.html"
     form = FileAdminForm
     formfield_overrides = {
         models.FileField: {
-            'form_class': UploadedFileField,
-            'widget': UploadWidget,
+            "form_class": UploadedFileField,
+            "widget": UploadWidget,
         }
     }
 
     class Media:
-        css = {
-            "all": ("file_form/file_form.css",)
-        }
+        css = {"all": ("file_form/file_form.css",)}
         js = ("file_form/file_form.js", "file_form/auto_init.js")
 
     def save_model(self, request, obj, form, change):

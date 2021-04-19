@@ -48,7 +48,9 @@ def get_client():
                 endpoint_url=get_endpoint_url(),
                 aws_access_key_id=get_access_key_id(),
                 aws_secret_access_key=get_secret_access_key(),
-                config=Config(signature_version=signature_version, region_name=region_name)
+                config=Config(
+                    signature_version=signature_version, region_name=region_name
+                ),
             )
         except:
             time.sleep(0.01)

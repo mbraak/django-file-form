@@ -1,18 +1,12 @@
 import json
-from typing import Dict, Union, List
-
-from django.db.models.fields.files import FieldFile
+from typing import Dict, Union
 from django.forms import ClearableFileInput
 from django.http import QueryDict
 from django.utils.datastructures import MultiValueDict
 from django.utils.translation import gettext as _
-from django_file_form.util import compact, get_list
+from django_file_form.util import compact
 
-from django_file_form.models import (
-    PlaceholderUploadedFile,
-    S3UploadedFileWithId,
-    UploadedFileWithId,
-)
+from .uploaded_file import PlaceholderUploadedFile, S3UploadedFileWithId
 
 
 TRANSLATIONS = {
@@ -22,39 +16,6 @@ TRANSLATIONS = {
     "Upload failed": _("Upload failed"),
     "Drop your files here": _("Drop your files here"),
 }
-
-UploadedFileTypes = Union[FieldFile, PlaceholderUploadedFile, UploadedFileWithId]
-
-UploadedFileTypesOrList = Union[
-    UploadedFileTypes,
-    List[Union[UploadedFileTypes]],
-]
-
-
-def get_uploaded_files(value: UploadedFileTypesOrList):
-    def must_include(file_info):
-        return not getattr(file_info, "is_placeholder", False) and not getattr(
-            file_info, "is_s3direct", False
-        )
-
-    def get_values(file_info: UploadedFileTypes):
-        if hasattr(file_info, "file_id"):
-            return file_info.get_values()
-        else:
-            return dict(
-                name=file_info.name,
-                size=file_info.size,
-                type="existing",
-            )
-
-    if not value:
-        return []
-
-    return [
-        get_values(file_info)
-        for file_info in get_list(value)
-        if must_include(file_info)
-    ]
 
 
 def get_upload(upload_data: Dict):
@@ -77,8 +38,8 @@ def get_upload(upload_data: Dict):
         return None
 
 
-def get_uploads(data: QueryDict, field_name: str):
-    placeholder_field_name = field_name + "-uploads"
+def get_uploads(data: QueryDict, prefixed_field_name: str):
+    placeholder_field_name = prefixed_field_name + "-uploads"
     value = data.get(placeholder_field_name)
 
     if not value:
@@ -87,8 +48,8 @@ def get_uploads(data: QueryDict, field_name: str):
         return compact([get_upload(upload_data) for upload_data in json.loads(value)])
 
 
-def get_file_meta(data: QueryDict, field_name: str):
-    meta_field_name = field_name + "-metadata"
+def get_file_meta(data: QueryDict, prefixed_field_name: str):
+    meta_field_name = prefixed_field_name + "-metadata"
     value = data.get(meta_field_name)
     if not value:
         return {}
@@ -108,22 +69,23 @@ class BaseUploadWidget(ClearableFileInput):
         context = super().get_context(name, value, attrs)
 
         context["translations"] = json.dumps(TRANSLATIONS)
-        context["uploaded_files"] = json.dumps(get_uploaded_files(value))
 
         return context
 
 
 class UploadWidget(BaseUploadWidget):
-    def value_from_datadict(self, data: QueryDict, files: MultiValueDict, name: str):
-        upload = super().value_from_datadict(data, files, name)
+    def value_from_datadict(
+        self, data: QueryDict, files: MultiValueDict, prefixed_field_name: str
+    ):
+        upload = super().value_from_datadict(data, files, prefixed_field_name)
 
         if upload:
             return upload
         else:
-            uploads = get_uploads(data, name)
+            uploads = get_uploads(data, prefixed_field_name)
 
             upload = uploads[0] if uploads else None
-            metadata = get_file_meta(data, name)
+            metadata = get_file_meta(data, prefixed_field_name)
 
             if upload and upload.name in metadata:
                 upload.metadata = metadata[upload.name]
@@ -132,11 +94,16 @@ class UploadWidget(BaseUploadWidget):
 
 class UploadMultipleWidget(BaseUploadWidget):
     def value_from_datadict(
-        self, data: QueryDict, files: Union[Dict, MultiValueDict], name: str
+        self,
+        data: QueryDict,
+        files: Union[Dict, MultiValueDict],
+        prefixed_field_name: str,
     ):
         if hasattr(files, "getlist"):
-            uploads = files.getlist(name) + get_uploads(data, name)
-            metadata = get_file_meta(data, name)
+            uploads = files.getlist(prefixed_field_name) + get_uploads(
+                data, prefixed_field_name
+            )
+            metadata = get_file_meta(data, prefixed_field_name)
 
             for upload in uploads:
                 if upload.name in metadata:
@@ -144,4 +111,4 @@ class UploadMultipleWidget(BaseUploadWidget):
             return uploads
         else:
             # NB: django-formtools wizard uses dict instead of MultiValueDict
-            return super().value_from_datadict(data, files, name)
+            return super().value_from_datadict(data, files, prefixed_field_name)

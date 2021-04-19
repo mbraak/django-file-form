@@ -8,7 +8,11 @@ from django.core.files.base import ContentFile
 from django.test.utils import captured_stdout, override_settings
 from django.utils import timezone
 
-from django_file_form_example.tests.utils.test_utils import get_random_id, encode_datetime, remove_p
+from django_file_form_example.tests.utils.test_utils import (
+    get_random_id,
+    encode_datetime,
+    remove_p,
+)
 from django_file_form.models import TemporaryUploadedFile
 from django_file_form.util import get_list, get_upload_path
 
