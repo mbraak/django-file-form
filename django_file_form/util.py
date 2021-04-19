@@ -42,7 +42,7 @@ def get_upload_path():
         return Path(settings.MEDIA_ROOT).joinpath(upload_path)
 
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 def with_typehint(baseclass: Type[T]) -> Type[T]:

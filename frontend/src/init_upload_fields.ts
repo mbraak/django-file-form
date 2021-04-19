@@ -56,17 +56,7 @@ const initUploadFields = (form: Element, options: Options = {}): void => {
     });
   };
 
-  const getInitialFiles = (element: HTMLElement): InitialFile[] => {
-    const filesData = element.dataset.files;
-
-    if (!filesData) {
-      return [];
-    }
-
-    return JSON.parse(filesData) as InitialFile[];
-  };
-
-  const getPlaceholders = (fieldName: string): InitialFile[] => {
+  const getInitialFiles = (fieldName: string): InitialFile[] => {
     const data = getInputValue(getUploadsFieldName(fieldName, getPrefix()));
 
     if (!data) {
@@ -110,10 +100,7 @@ const initUploadFields = (form: Element, options: Options = {}): void => {
 
     const fieldName = input.name;
     const { multiple } = input;
-    const initial = getInitialFiles(container).concat(
-      getPlaceholders(fieldName)
-    );
-
+    const initial = getInitialFiles(fieldName);
     setInitialMetadata(fieldName, initial);
 
     const dataTranslations = container.getAttribute("data-translations");

@@ -140,3 +140,12 @@ class ExampleModelForm(FileFormMixin, ModelForm):
         )
 
     prefix = "example"
+
+
+class ExampleMultipleModelForm(FileFormMixin, ModelForm):
+    class Meta:
+        model = Example2
+        fields = ("title",)
+
+    input_file = MultipleUploadedFileField()
+    prefix = "example"
