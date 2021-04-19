@@ -12,4 +12,4 @@ class ExampleModelForm(FileFormMixin, ModelForm):
         )
 ```
 
-Also see `ExampleModelForm` in the test project.
+Also see `ExampleModelForm` and `ExampleMultipleModelForm` in the test project.
