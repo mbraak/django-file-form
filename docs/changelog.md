@@ -1,5 +1,9 @@
 ## Changelog
 
+**development**
+
+  * Issue #445: fix ModelForm update with multiple files (thanks to Arcuri Davide)
+
 **3.2.0 (6 april 2021)**
 
   * Issue #443: support Django 3.2

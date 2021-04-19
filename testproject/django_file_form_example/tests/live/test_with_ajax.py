@@ -6,9 +6,13 @@ from django.test import override_settings
 
 from django_file_form.models import TemporaryUploadedFile
 from django_file_form_example.tests.utils.base_live_testcase import BaseLiveTestCase
-from django_file_form_example.models import Example, Example2
+from django_file_form_example.models import Example, Example2, ExampleFile
 from django_file_form_example.tests.utils.page import Page
-from django_file_form_example.tests.utils.test_utils import read_file, count_temp_uploads
+from django_file_form_example.tests.utils.test_utils import (
+    read_file,
+    count_temp_uploads,
+    get_random_id,
+)
 
 media_root = Path(settings.MEDIA_ROOT)
 
@@ -699,7 +703,7 @@ class LiveTestCase(BaseLiveTestCase):
     def test_model_form_edit(self):
         example = Example.objects.create(
             title="title1",
-            input_file=ContentFile("original", "test1.txt"),
+            input_file=ContentFile("original", get_random_id()),
         )
 
         try:
@@ -725,3 +729,153 @@ class LiveTestCase(BaseLiveTestCase):
             self.assertEqual(read_file(example.input_file), b"new_content")
         finally:
             example.input_file.delete()
+
+    def test_model_form_edit_remove_file(self):
+        example = Example.objects.create(
+            title="title1",
+            input_file=ContentFile("original", get_random_id()),
+        )
+
+        page = self.page
+        page.open(f"/model_form/{example.id}")
+        page.assert_page_contains_text("8 Bytes")
+
+        page.delete_ajax_file()
+        page.wait_until_upload_is_removed()
+
+        page.submit()
+
+        page.assert_page_contains_text("This field is required")
+
+    def test_model_form_multipe_add(self):
+        page = self.page
+
+        try:
+            temp_file1 = page.create_temp_file("content1")
+            temp_file2 = page.create_temp_file("content2")
+
+            page.open("/model_form_multiple")
+
+            page.fill_title_field("abc")
+
+            page.upload_using_js(temp_file1)
+            page.find_upload_success(temp_file1, upload_index=0)
+
+            page.upload_using_js(temp_file2)
+            page.find_upload_success(temp_file2, upload_index=1)
+
+            page.submit()
+            page.assert_page_contains_text("Upload success")
+
+            example2 = Example2.objects.first()
+            self.assertEqual(example2.title, "abc")
+
+            examples_files = example2.files.all()
+
+            self.assertSetEqual(
+                {f.input_file.name for f in examples_files},
+                {
+                    f"example/{temp_file1.base_name()}",
+                    f"example/{temp_file2.base_name()}",
+                },
+            )
+
+            self.assertSetEqual(
+                {read_file(example_file.input_file) for example_file in examples_files},
+                {b"content1", b"content2"},
+            )
+        finally:
+            for example_file in ExampleFile.objects.all():
+                example_file.input_file.delete()
+
+    def test_model_form_multipe_edit_add_and_remove(self):
+        page = self.page
+        try:
+            filename1 = "test1_" + get_random_id()
+            filename2 = "test2_" + get_random_id()
+
+            example = Example2.objects.create(title="title1")
+            ExampleFile.objects.create(
+                input_file=ContentFile("content1", filename1), example=example
+            )
+            ExampleFile.objects.create(
+                input_file=ContentFile("content2", filename2), example=example
+            )
+
+            page.open(f"/model_form_multiple/{example.id}")
+            page.find_upload_success_with_filename(filename=filename1, upload_index=0)
+            page.find_upload_success_with_filename(filename=filename2, upload_index=1)
+
+            page.delete_ajax_file(upload_index=1)
+            page.wait_until_upload_is_removed(upload_index=1)
+
+            page.submit()
+
+            example = Example2.objects.get(pk=example.id)
+
+            examples_files = example.files.all()
+
+            self.assertSetEqual(
+                {f.input_file.name for f in examples_files},
+                {f"example/{filename1}"},
+            )
+
+            self.assertSetEqual(
+                {read_file(example_file.input_file) for example_file in examples_files},
+                {b"content1"},
+            )
+        finally:
+            for example_file in ExampleFile.objects.all():
+                example_file.input_file.delete()
+
+    def test_model_form_multipe_edit_add_file(self):
+        page = self.page
+        try:
+            filename1 = "test1_" + get_random_id()
+            temp_file = page.create_temp_file("content2")
+
+            example = Example2.objects.create(title="title1")
+            ExampleFile.objects.create(
+                input_file=ContentFile("content1", filename1), example=example
+            )
+
+            page.open(f"/model_form_multiple/{example.id}")
+            page.find_upload_success_with_filename(filename=filename1, upload_index=0)
+
+            page.upload_using_js(temp_file)
+            page.find_upload_success(temp_file, upload_index=1)
+            page.submit()
+
+            example = Example2.objects.get(pk=example.id)
+
+            examples_files = example.files.all()
+
+            self.assertSetEqual(
+                {f.input_file.name for f in examples_files},
+                {f"example/{filename1}", f"example/{temp_file.base_name()}"},
+            )
+
+            self.assertSetEqual(
+                {read_file(example_file.input_file) for example_file in examples_files},
+                {b"content1", b"content2"},
+            )
+        finally:
+            for example_file in ExampleFile.objects.all():
+                example_file.input_file.delete()
+
+    def test_model_form_multipe_edit_remove_all_files(self):
+        page = self.page
+
+        filename = "test1_" + get_random_id()
+        example = Example2.objects.create(title="title1")
+        ExampleFile.objects.create(
+            input_file=ContentFile("content1", filename), example=example
+        )
+
+        page.open(f"/model_form_multiple/{example.id}")
+        page.find_upload_success_with_filename(filename=filename)
+        page.delete_ajax_file()
+        page.wait_until_upload_is_removed()
+        page.submit()
+
+        page.assert_page_contains_text("This field is required")

@@ -1,17 +1,18 @@
 import json
-
 from django.core.files.storage import FileSystemStorage
+from django.db.models.fields.files import FieldFile
 from django.http import HttpResponseForbidden, HttpResponseRedirect
 from django.views import generic
 from django.urls import reverse
 from django.conf import settings
 from django.views.generic.base import ContextMixin
 from formtools.wizard.views import SessionWizardView
+
 from django_file_form.util import get_upload_path, with_typehint
-from django_file_form.models import PlaceholderUploadedFile
+from django_file_form.uploaded_file import PlaceholderUploadedFile
 
 from . import forms
-from .models import Example
+from .models import Example, Example2, ExampleFile
 
 
 def file_form_js():
@@ -175,6 +176,50 @@ class CreateModelFormView(FileModelFormMixin, generic.CreateView):
 
 class EditModelFormView(FileModelFormMixin, generic.UpdateView):
     pass
+
+
+class FileModelFormMultipleMixin(FileModelFormMixin):
+    form_class = forms.ExampleMultipleModelForm
+    model = Example2
+
+    def form_valid(self, form):
+        instance = form.save()
+
+        # remove deleted files
+        not_deleted_original_filenames = {
+            f.name for f in form.cleaned_data["input_file"] if isinstance(f, FieldFile)
+        }
+
+        for example_file in instance.files.all():
+            if example_file.input_file not in not_deleted_original_filenames:
+                example_file.input_file.delete()
+                example_file.delete()
+
+        # create new files
+        for f in form.cleaned_data["input_file"]:
+            if not isinstance(f, FieldFile):
+                try:
+                    ExampleFile.objects.create(example=instance, input_file=f)
+                finally:
+                    f.close()
+
+        form.delete_temporary_files()
+
+        return HttpResponseRedirect(reverse("example_success"))
+
+
+class CreateModelFormMultipleView(FileModelFormMultipleMixin, generic.CreateView):
+    pass
+
+
+class EditModelFormMultipleView(FileModelFormMultipleMixin, generic.UpdateView):
+    def get_initial(self):
+        initial = super().get_initial()
+
+        initial["input_file"] = [
+            example_file.input_file for example_file in self.object.files.all()
+        ]
+        return initial
 
 
 def permission_denied(request, exception):

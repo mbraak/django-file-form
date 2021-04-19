@@ -2,9 +2,6 @@
 <div class="dff-uploader">
     <div
         class="dff-container"
-        {% if uploaded_files %}
-            data-files='{{ uploaded_files }}'
-        {% endif %}
         data-translations="{{ translations }}"
     >
         {% include "django/forms/widgets/input.html" %}

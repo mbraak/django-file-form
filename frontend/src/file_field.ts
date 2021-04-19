@@ -415,14 +415,9 @@ class FileField {
       return;
     }
 
-    const placeholdersInfo: InitialFile[] = this.uploads
-      .filter(
-        upload =>
-          upload.type === "placeholder" ||
-          upload.type === "s3" ||
-          upload.type === "uploadedS3"
-      )
-      .map(upload => upload.getInitialFile());
+    const placeholdersInfo: InitialFile[] = this.uploads.map(upload =>
+      upload.getInitialFile()
+    );
 
     input.value = JSON.stringify(placeholdersInfo);
   }
