@@ -218,7 +218,7 @@
 	(module.exports = function (key, value) {
 	  return sharedStore[key] || (sharedStore[key] = value !== undefined ? value : {});
 	})('versions', []).push({
-	  version: '3.10.1',
+	  version: '3.10.2',
 	  mode: 'global',
 	  copyright: '© 2021 Denis Pushkarev (zloirock.ru)'
 	});
@@ -239,6 +239,7 @@
 
 	var hiddenKeys$1 = {};
 
+	var OBJECT_ALREADY_INITIALIZED = 'Object already initialized';
 	var WeakMap = global$1.WeakMap;
 	var set$3, get$1, has$1;
 
@@ -261,6 +262,7 @@
 	  var wmhas = store.has;
 	  var wmset = store.set;
 	  set$3 = function (it, metadata) {
+	    if (wmhas.call(store, it)) throw new TypeError(OBJECT_ALREADY_INITIALIZED);
 	    metadata.facade = it;
 	    wmset.call(store, it, metadata);
 	    return metadata;
@@ -275,6 +277,7 @@
 	  var STATE = sharedKey('state');
 	  hiddenKeys$1[STATE] = true;
 	  set$3 = function (it, metadata) {
+	    if (has$2(it, STATE)) throw new TypeError(OBJECT_ALREADY_INITIALIZED);
 	    metadata.facade = it;
 	    createNonEnumerableProperty(it, STATE, metadata);
 	    return metadata;
@@ -4295,7 +4298,7 @@
 	var UNSUPPORTED_Y$3 = regexpStickyHelpers.UNSUPPORTED_Y || regexpStickyHelpers.BROKEN_CARET;
 
 	// nonparticipating capturing group, copied from es5-shim's String#split patch.
-	// eslint-disable-next-line regexp/no-assertion-capturing-group, regexp/no-empty-group -- required for testing
+	// eslint-disable-next-line regexp/no-assertion-capturing-group, regexp/no-empty-group, regexp/no-lazy-ends -- testing
 	var NPCG_INCLUDED = /()??/.exec('')[1] !== undefined;
 
 	var PATCH = UPDATES_LAST_INDEX_WRONG || NPCG_INCLUDED || UNSUPPORTED_Y$3;
@@ -6131,7 +6134,8 @@
 	/**
 	 * Quickly scans a glob pattern and returns an object with a handful of
 	 * useful properties, like `isGlob`, `path` (the leading non-glob, if it exists),
-	 * `glob` (the actual pattern), and `negated` (true if the path starts with `!`).
+	 * `glob` (the actual pattern), `negated` (true if the path starts with `!` but not
+	 * with `!(`) and `negatedExtglob` (true if the path starts with `!(`).
 	 *
 	 * ```js
 	 * const pm = require('picomatch');
@@ -6164,6 +6168,7 @@
 	  var braceEscaped = false;
 	  var backslashes = false;
 	  var negated = false;
+	  var negatedExtglob = false;
 	  var finished = false;
 	  var braces = 0;
 	  var prev;
@@ -6287,6 +6292,10 @@
 	        isExtglob = token.isExtglob = true;
 	        finished = true;
 
+	        if (code === CHAR_EXCLAMATION_MARK && index === start) {
+	          negatedExtglob = true;
+	        }
+
 	        if (scanToEnd === true) {
 	          while (eos() !== true && (code = advance())) {
 	            if (code === CHAR_BACKWARD_SLASH) {
@@ -6344,14 +6353,15 @@
 	          isBracket = token.isBracket = true;
 	          isGlob = token.isGlob = true;
 	          finished = true;
-
-	          if (scanToEnd === true) {
-	            continue;
-	          }
-
 	          break;
 	        }
 	      }
+
+	      if (scanToEnd === true) {
+	        continue;
+	      }
+
+	      break;
 	    }
 
 	    if (opts.nonegate !== true && code === CHAR_EXCLAMATION_MARK && index === start) {
@@ -6444,7 +6454,8 @@
 	    isGlob: isGlob,
 	    isExtglob: isExtglob,
 	    isGlobstar: isGlobstar,
-	    negated: negated
+	    negated: negated,
+	    negatedExtglob: negatedExtglob
 	  };
 
 	  if (opts.tokens === true) {
@@ -6823,7 +6834,7 @@
 	        output = token.close = ")$))".concat(extglobStar);
 	      }
 
-	      if (token.prev.type === 'bos' && eos()) {
+	      if (token.prev.type === 'bos') {
 	        state.negatedExtglob = true;
 	      }
 	    }
