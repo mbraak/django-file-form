@@ -11,7 +11,7 @@ from django.utils import timezone
 from django_file_form_example.tests.utils.test_utils import (
     get_random_id,
     encode_datetime,
-    remove_p,
+    remove_p, remove_test_files,
 )
 from django_file_form.models import TemporaryUploadedFile
 from django_file_form.util import get_list, get_upload_path
@@ -23,6 +23,12 @@ media_root = Path(settings.MEDIA_ROOT)
 class ModelTests(TestCase):
     def setUp(self):
         self.temp_uploads_path = media_root.joinpath("temp_uploads")
+
+    def tearDown(self) -> None:
+        try:
+            remove_test_files()
+        finally:
+            super().tearDown()
 
     def test_delete_unused_files_command(self):
         def call_delete_unused_files_command():

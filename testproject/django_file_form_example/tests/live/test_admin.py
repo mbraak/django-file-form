@@ -3,7 +3,7 @@ from django.core.files.base import ContentFile
 from django_file_form_example.models import Example
 from django_file_form_example.tests.utils.admin_page import AdminPage
 from django_file_form_example.tests.utils.base_live_testcase import BaseLiveTestCase
-from django_file_form_example.tests.utils.test_utils import read_file, get_random_id
+from django_file_form_example.tests.utils.test_utils import read_file, get_random_id, remove_example_file
 
 
 class AdminTestCase(BaseLiveTestCase):
@@ -27,11 +27,11 @@ class AdminTestCase(BaseLiveTestCase):
         page.assert_page_contains_text("Select example to change")
 
     def test_edit_record(self):
+        original_filename = get_random_id()
         example = Example.objects.create(
             title="title1",
-            input_file=ContentFile("original", get_random_id()),
+            input_file=ContentFile("original", original_filename),
         )
-
         try:
             page = self.page
             temp_file = page.create_temp_file("new_content")
@@ -50,4 +50,4 @@ class AdminTestCase(BaseLiveTestCase):
             self.assertEqual(example.title, "changed title")
             self.assertEqual(read_file(example.input_file), b"new_content")
         finally:
-            example.input_file.delete()
+            remove_example_file(original_filename)

@@ -2,8 +2,16 @@ import re
 
 from django.test import TestCase, Client
 
+from django_file_form_example.tests.utils.test_utils import remove_test_files
 
-class ModelTests(TestCase):
+
+class ViewTests(TestCase):
+    def tearDown(self) -> None:
+        try:
+            remove_test_files()
+        finally:
+            super().tearDown()
+
     def test_post(self):
         self.do_post(Client())
 

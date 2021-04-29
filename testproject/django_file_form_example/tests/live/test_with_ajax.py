@@ -706,29 +706,26 @@ class LiveTestCase(BaseLiveTestCase):
             input_file=ContentFile("original", get_random_id()),
         )
 
-        try:
-            page = self.page
-            temp_file = page.create_temp_file("new_content")
+        page = self.page
+        temp_file = page.create_temp_file("new_content")
 
-            page.open(f"/model_form/{example.id}")
+        page.open(f"/model_form/{example.id}")
 
-            page.assert_page_contains_text("8 Bytes")
-            self.assertEqual(page.find_title_field().get_property("value"), "title1")
+        page.assert_page_contains_text("8 Bytes")
+        self.assertEqual(page.find_title_field().get_property("value"), "title1")
 
-            page.find_title_field().clear()
-            page.fill_title_field("changed title")
+        page.find_title_field().clear()
+        page.fill_title_field("changed title")
 
-            page.upload_using_js(temp_file)
-            page.assert_page_contains_text("11 Bytes")
-            page.submit()
+        page.upload_using_js(temp_file)
+        page.assert_page_contains_text("11 Bytes")
+        page.submit()
 
-            page.assert_page_contains_text("Upload success")
+        page.assert_page_contains_text("Upload success")
 
-            example.refresh_from_db()
-            self.assertEqual(example.title, "changed title")
-            self.assertEqual(read_file(example.input_file), b"new_content")
-        finally:
-            example.input_file.delete()
+        example.refresh_from_db()
+        self.assertEqual(example.title, "changed title")
+        self.assertEqual(read_file(example.input_file), b"new_content")
 
     def test_model_form_edit_remove_file(self):
         example = Example.objects.create(
@@ -750,118 +747,108 @@ class LiveTestCase(BaseLiveTestCase):
     def test_model_form_multipe_add(self):
         page = self.page
 
-        try:
-            temp_file1 = page.create_temp_file("content1")
-            temp_file2 = page.create_temp_file("content2")
+        temp_file1 = page.create_temp_file("content1")
+        temp_file2 = page.create_temp_file("content2")
 
-            page.open("/model_form_multiple")
+        page.open("/model_form_multiple")
 
-            page.fill_title_field("abc")
+        page.fill_title_field("abc")
 
-            page.upload_using_js(temp_file1)
-            page.find_upload_success(temp_file1, upload_index=0)
+        page.upload_using_js(temp_file1)
+        page.find_upload_success(temp_file1, upload_index=0)
 
-            page.upload_using_js(temp_file2)
-            page.find_upload_success(temp_file2, upload_index=1)
+        page.upload_using_js(temp_file2)
+        page.find_upload_success(temp_file2, upload_index=1)
 
-            page.submit()
-            page.assert_page_contains_text("Upload success")
+        page.submit()
+        page.assert_page_contains_text("Upload success")
 
-            example2 = Example2.objects.first()
-            self.assertEqual(example2.title, "abc")
+        example2 = Example2.objects.first()
+        self.assertEqual(example2.title, "abc")
 
-            examples_files = example2.files.all()
+        examples_files = example2.files.all()
 
-            self.assertSetEqual(
-                {f.input_file.name for f in examples_files},
-                {
-                    f"example/{temp_file1.base_name()}",
-                    f"example/{temp_file2.base_name()}",
-                },
-            )
+        self.assertSetEqual(
+            {f.input_file.name for f in examples_files},
+            {
+                f"example/{temp_file1.base_name()}",
+                f"example/{temp_file2.base_name()}",
+            },
+        )
 
-            self.assertSetEqual(
-                {read_file(example_file.input_file) for example_file in examples_files},
-                {b"content1", b"content2"},
-            )
-        finally:
-            for example_file in ExampleFile.objects.all():
-                example_file.input_file.delete()
+        self.assertSetEqual(
+            {read_file(example_file.input_file) for example_file in examples_files},
+            {b"content1", b"content2"},
+        )
 
     def test_model_form_multipe_edit_add_and_remove(self):
         page = self.page
-        try:
-            filename1 = "test1_" + get_random_id()
-            filename2 = "test2_" + get_random_id()
 
-            example = Example2.objects.create(title="title1")
-            ExampleFile.objects.create(
-                input_file=ContentFile("content1", filename1), example=example
-            )
-            ExampleFile.objects.create(
-                input_file=ContentFile("content2", filename2), example=example
-            )
+        filename1 = "test1_" + get_random_id()
+        filename2 = "test2_" + get_random_id()
 
-            page.open(f"/model_form_multiple/{example.id}")
-            page.find_upload_success_with_filename(filename=filename1, upload_index=0)
-            page.find_upload_success_with_filename(filename=filename2, upload_index=1)
+        example = Example2.objects.create(title="title1")
+        ExampleFile.objects.create(
+            input_file=ContentFile("content1", filename1), example=example
+        )
+        ExampleFile.objects.create(
+            input_file=ContentFile("content2", filename2), example=example
+        )
 
-            page.delete_ajax_file(upload_index=1)
-            page.wait_until_upload_is_removed(upload_index=1)
+        page.open(f"/model_form_multiple/{example.id}")
+        page.find_upload_success_with_filename(filename=filename1, upload_index=0)
+        page.find_upload_success_with_filename(filename=filename2, upload_index=1)
 
-            page.submit()
+        page.delete_ajax_file(upload_index=1)
+        page.wait_until_upload_is_removed(upload_index=1)
 
-            example = Example2.objects.get(pk=example.id)
+        page.submit()
 
-            examples_files = example.files.all()
+        example = Example2.objects.get(pk=example.id)
 
-            self.assertSetEqual(
-                {f.input_file.name for f in examples_files},
-                {f"example/{filename1}"},
-            )
+        examples_files = example.files.all()
 
-            self.assertSetEqual(
-                {read_file(example_file.input_file) for example_file in examples_files},
-                {b"content1"},
-            )
-        finally:
-            for example_file in ExampleFile.objects.all():
-                example_file.input_file.delete()
+        self.assertSetEqual(
+            {f.input_file.name for f in examples_files},
+            {f"example/{filename1}"},
+        )
+
+        self.assertSetEqual(
+            {read_file(example_file.input_file) for example_file in examples_files},
+            {b"content1"},
+        )
 
     def test_model_form_multipe_edit_add_file(self):
         page = self.page
-        try:
-            filename1 = "test1_" + get_random_id()
-            temp_file = page.create_temp_file("content2")
 
-            example = Example2.objects.create(title="title1")
-            ExampleFile.objects.create(
-                input_file=ContentFile("content1", filename1), example=example
-            )
+        filename1 = "test1_" + get_random_id()
+        temp_file = page.create_temp_file("content2")
 
-            page.open(f"/model_form_multiple/{example.id}")
-            page.find_upload_success_with_filename(filename=filename1, upload_index=0)
+        example = Example2.objects.create(title="title1")
+        ExampleFile.objects.create(
+            input_file=ContentFile("content1", filename1), example=example
+        )
 
-            page.upload_using_js(temp_file)
-            page.find_upload_success(temp_file, upload_index=1)
-            page.submit()
+        page.open(f"/model_form_multiple/{example.id}")
+        page.find_upload_success_with_filename(filename=filename1, upload_index=0)
 
-            example = Example2.objects.get(pk=example.id)
+        page.upload_using_js(temp_file)
+        page.find_upload_success(temp_file, upload_index=1)
+        page.submit()
 
-            examples_files = example.files.all()
+        example = Example2.objects.get(pk=example.id)
 
-            self.assertSetEqual(
-                {f.input_file.name for f in examples_files},
-                {f"example/{filename1}", f"example/{temp_file.base_name()}"},
-            )
+        examples_files = example.files.all()
 
-            self.assertSetEqual(
-                {read_file(example_file.input_file) for example_file in examples_files},
-                {b"content1", b"content2"},
-            )
-        finally:
-            for example_file in ExampleFile.objects.all():
-                example_file.input_file.delete()
+        self.assertSetEqual(
+            {f.input_file.name for f in examples_files},
+            {f"example/{filename1}", f"example/{temp_file.base_name()}"},
+        )
+
+        self.assertSetEqual(
+            {read_file(example_file.input_file) for example_file in examples_files},
+            {b"content1", b"content2"},
+        )
 
     def test_model_form_multipe_edit_remove_all_files(self):
         page = self.page
