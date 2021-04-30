@@ -8,7 +8,7 @@ from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.chrome.options import Options
 
-from .test_utils import write_json, remove_test_files
+from .test_utils import write_json
 
 
 class BaseLiveTestCase(StaticLiveServerTestCase):
@@ -60,7 +60,6 @@ class BaseLiveTestCase(StaticLiveServerTestCase):
             self.handle_coverage()
             self.handleErrors()
             self.page.cleanup()
-            remove_test_files()
         finally:
             super().tearDown()
 
