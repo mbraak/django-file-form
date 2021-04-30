@@ -1,8 +1,5 @@
-from pathlib import Path
-from django.conf import settings
-
-from django_file_form_example.models import Example, ExampleFile
 from .temp_file import TempFile
+from .test_utils import remove_test_files
 
 
 class BasePage(object):
@@ -20,23 +17,7 @@ class BasePage(object):
         for temp_file in self.temp_files:
             temp_file.destroy()
 
-        for example in Example.objects.all():
-            example.input_file.delete()
-
-        for example_file in ExampleFile.objects.all():
-            example_file.input_file.delete()
-
-        temp_uploads = Path(settings.MEDIA_ROOT).joinpath("temp_uploads")
-        if temp_uploads.exists():
-            for temp_file in temp_uploads.iterdir():
-                temp_file.unlink()
-
-        if temp_uploads.exists() and len(list(temp_uploads.iterdir())) > 0:
-            raise Exception("temp_uploads dir is not empty")
-
-        example_uploads = Path(settings.MEDIA_ROOT).joinpath("example")
-        if example_uploads.exists() and len(list(example_uploads.iterdir())) > 0:
-            raise Exception("example dir is not empty")
+        remove_test_files()
 
     def create_temp_file(self, content, prefix=None, binary=False):
         temp_file = TempFile()
