@@ -1,6 +1,6 @@
 ## Changelog
 
-**development**
+**3.2.1 (20 april 2021)**
 
   * Issue #445: fix ModelForm update with multiple files (thanks to Arcuri Davide)
 

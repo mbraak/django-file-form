@@ -1,4 +1,6 @@
 import json
+import os
+
 from django.core.files.storage import FileSystemStorage
 from django.db.models.fields.files import FieldFile
 from django.http import HttpResponseForbidden, HttpResponseRedirect
@@ -175,7 +177,22 @@ class CreateModelFormView(FileModelFormMixin, generic.CreateView):
 
 
 class EditModelFormView(FileModelFormMixin, generic.UpdateView):
-    pass
+    def form_valid(self, form):
+        initial_input_file = form.initial["input_file"]
+        initial_input_file_path = (
+            initial_input_file.path
+            if isinstance(initial_input_file, FieldFile)
+            else None
+        )
+
+        form.save()
+
+        input_file = form.cleaned_data["input_file"]
+
+        if initial_input_file_path and not isinstance(input_file, FieldFile):
+            os.unlink(initial_input_file_path)
+
+        return HttpResponseRedirect(self.get_success_url())
 
 
 class FileModelFormMultipleMixin(FileModelFormMixin):
