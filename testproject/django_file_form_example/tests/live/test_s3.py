@@ -3,7 +3,7 @@ import threading
 from django.test import override_settings
 from flask_cors import CORS
 from moto.server import DomainDispatcherApplication, create_backend_app
-from werkzeug.serving import make_server
+from werkzeug.serving import make_server, BaseWSGIServer
 import boto3
 
 from django_file_form_example.tests.utils.base_live_testcase import BaseLiveTestCase
@@ -19,6 +19,8 @@ def create_backend_app_with_cors(service):
 
 
 class S3ServerThread(threading.Thread):
+    server: BaseWSGIServer
+
     def run(self):
         application = DomainDispatcherApplication(
             create_backend_app_with_cors, service="s3"
