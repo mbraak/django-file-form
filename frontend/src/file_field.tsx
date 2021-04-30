@@ -1,12 +1,11 @@
 import { findInput, getMetadataFieldName, getUploadsFieldName } from "./util";
-import RenderUploadFile from "./render_upload_file";
-import DropArea from "./drop_area";
-
 import S3Upload from "./uploads/s3_upload";
 import EventEmitter from "eventemitter3";
 import { createUploadedFile } from "./uploads/uploaded_file";
 import TusUpload from "./uploads/tus_upload";
-import BaseUpload, { InitialFile } from "./uploads/base_upload";
+import BaseUpload, { InitialFile, Metadata } from "./uploads/base_upload";
+import renderUploads from "./renderUploads";
+import { RenderFileInfo } from "./renderUploads/types";
 
 export type Translations = { [key: string]: string };
 
@@ -21,21 +20,47 @@ export interface Callbacks {
   onSuccess?: (upload: BaseUpload) => void;
 }
 
-class FileField {
+interface FileFileParameters {
   callbacks: Callbacks;
   chunkSize: number;
   csrfToken: string;
+  CustomFileInfo?: RenderFileInfo;
   eventEmitter?: EventEmitter;
   fieldName: string;
   form: Element;
   formId: string;
+  initial: InitialFile[];
+  input: HTMLInputElement;
+  multiple: boolean;
+  parent: Element;
+  prefix: string | null;
+  retryDelays: number[] | null;
+  s3UploadDir: string | null;
+  skipRequired: boolean;
+  supportDropArea: boolean;
+  translations: Translations;
+  uploadUrl: string;
+}
+
+class FileField {
+  callbacks: Callbacks;
+  chunkSize: number;
+  container: HTMLElement;
+  csrfToken: string;
+  CustomFileInfo?: RenderFileInfo;
+  eventEmitter?: EventEmitter;
+  fieldName: string;
+  form: Element;
+  formId: string;
+  input: HTMLInputElement;
   multiple: boolean;
   nextUploadIndex: number;
   prefix: string | null;
-  renderer: RenderUploadFile;
   retryDelays: number[] | null;
   s3UploadDir: string | null;
+  skipRequired: boolean;
   supportDropArea: boolean;
+  translations: Translations;
   uploads: BaseUpload[];
   uploadUrl: string;
 
@@ -43,6 +68,7 @@ class FileField {
     callbacks,
     chunkSize,
     csrfToken,
+    CustomFileInfo,
     eventEmitter,
     fieldName,
     form,
@@ -58,54 +84,29 @@ class FileField {
     supportDropArea,
     translations,
     uploadUrl
-  }: {
-    callbacks: Callbacks;
-    chunkSize: number;
-    csrfToken: string;
-    eventEmitter?: EventEmitter;
-    fieldName: string;
-    form: Element;
-    formId: string;
-    initial: InitialFile[];
-    input: HTMLInputElement;
-    multiple: boolean;
-    parent: Element;
-    prefix: string | null;
-    retryDelays: number[] | null;
-    s3UploadDir: string | null;
-    skipRequired: boolean;
-    supportDropArea: boolean;
-    translations: Translations;
-    uploadUrl: string;
-  }) {
+  }: FileFileParameters) {
     this.callbacks = callbacks;
     this.chunkSize = chunkSize;
     this.csrfToken = csrfToken;
+    this.CustomFileInfo = CustomFileInfo;
     this.eventEmitter = eventEmitter;
     this.fieldName = fieldName;
     this.form = form;
     this.formId = formId;
+    this.input = input;
     this.multiple = multiple;
     this.prefix = prefix;
     this.retryDelays = retryDelays;
     this.s3UploadDir = s3UploadDir;
+    this.skipRequired = skipRequired;
     this.supportDropArea = supportDropArea;
+    this.translations = translations;
     this.uploadUrl = uploadUrl;
 
     this.uploads = [];
     this.nextUploadIndex = 0;
 
-    this.renderer = new RenderUploadFile({
-      parent,
-      input,
-      skipRequired,
-      translations
-    });
-    const filesContainer = this.renderer.container;
-
-    if (supportDropArea) {
-      this.initDropArea(filesContainer, input.accept);
-    }
+    this.container = this.createFilesContainer(parent);
 
     if (initial) {
       this.addInitialFiles(initial);
@@ -114,7 +115,8 @@ class FileField {
     this.checkDropHint();
 
     input.addEventListener("change", this.onChange);
-    filesContainer.addEventListener("click", this.onClick);
+
+    this.render();
   }
 
   addInitialFiles(initialFiles: InitialFile[]): void {
@@ -122,21 +124,9 @@ class FileField {
       return;
     }
 
-    const { multiple, renderer } = this;
+    const { multiple } = this;
 
     const addInitialFile = (initialFile: InitialFile): void => {
-      const { size } = initialFile;
-      const name =
-        initialFile.type === "s3" && initialFile.original_name
-          ? initialFile.original_name
-          : initialFile.name;
-
-      const element = renderer.addUploadedFile(
-        name,
-        this.nextUploadIndex,
-        size
-      );
-
       const upload = createUploadedFile({
         csrfToken: this.csrfToken,
         initialFile,
@@ -145,7 +135,10 @@ class FileField {
       });
       this.uploads.push(upload);
 
-      this.emitEvent("addUpload", element, upload);
+      upload.render = this.render.bind(this);
+      upload.updateMetadata = () => {
+        this.updateMetadata(upload.name, upload.metadata);
+      };
     };
 
     if (multiple) {
@@ -158,13 +151,30 @@ class FileField {
     }
   }
 
+  updateMetadata(fileName: string, metadata: Metadata): void {
+    const metaDataFieldName = getMetadataFieldName(this.fieldName, this.prefix);
+    const metaDataInput = findInput(this.form, metaDataFieldName, this.prefix);
+
+    if (!metaDataInput) {
+      return;
+    }
+
+    const data = metaDataInput.value;
+
+    const metaDataPerFile = data
+      ? (JSON.parse(data) as Record<string, Metadata>)
+      : {};
+
+    metaDataPerFile[fileName] = metadata;
+    metaDataInput.value = JSON.stringify(metaDataPerFile);
+  }
+
   uploadFiles = async (files: File[]): Promise<void> => {
     if (files.length === 0) {
       return;
     }
 
     if (!this.multiple && this.uploads.length !== 0) {
-      this.renderer.deleteFile(0);
       this.uploads = [];
     }
 
@@ -201,7 +211,7 @@ class FileField {
       }
     };
 
-    const { fieldName, formId, renderer, uploadUrl } = this;
+    const { fieldName, formId, uploadUrl } = this;
     const fileName = file.name;
     const existingUpload = this.findUploadByName(fileName);
     const newUploadIndex = existingUpload
@@ -224,14 +234,16 @@ class FileField {
     upload.onSuccess = () => this.handleSuccess(upload);
     upload.start();
 
+    upload.render = this.render.bind(this);
+    upload.updateMetadata = () => {
+      this.updateMetadata(upload.name, upload.metadata);
+    };
+
     this.uploads.push(upload);
 
-    const element = renderer.addNewUpload(fileName, newUploadIndex);
-    this.emitEvent("addUpload", element, upload);
-  }
+    this.render();
 
-  getUploadByIndex(uploadIndex: number): BaseUpload | undefined {
-    return this.uploads.find(upload => upload.uploadIndex === uploadIndex);
+    this.emitEvent("addUpload", upload);
   }
 
   findUploadByName(fileName: string): BaseUpload | undefined {
@@ -239,28 +251,26 @@ class FileField {
   }
 
   async removeExistingUpload(upload: BaseUpload): Promise<void> {
-    const element = this.renderer.findFileDiv(upload.uploadIndex);
-
-    if (element) {
-      this.emitEvent("removeUpload", element, upload);
-    }
+    this.emitEvent("removeUpload", upload);
 
     if (upload.status === "uploading") {
-      this.renderer.disableCancel(upload.uploadIndex);
+      this.render();
       await upload.abort();
     } else if (upload.status === "done") {
-      this.renderer.disableDelete(upload.uploadIndex);
-
       try {
+        upload.deleteStatus = "in_progress";
+        this.render();
         await upload.delete();
       } catch {
-        this.renderer.setDeleteFailed(upload.uploadIndex);
+        upload.deleteStatus = "error";
+        this.render();
         return;
       }
     }
 
     this.removeUploadFromList(upload);
     this.updatePlaceholderInput();
+    this.render();
   }
 
   onChange = (e: Event): void => {
@@ -271,50 +281,12 @@ class FileField {
     }
   };
 
-  onClick = (e: Event): void => {
-    const target = e.target as HTMLInputElement;
-
-    const getUpload = (): BaseUpload | undefined => {
-      const dataIndex = target.getAttribute("data-index");
-
-      if (!dataIndex) {
-        return undefined;
-      }
-
-      const uploadIndex = parseInt(dataIndex, 10);
-      return this.getUploadByIndex(uploadIndex);
-    };
-
-    if (
-      target.classList.contains("dff-delete") &&
-      !target.classList.contains("dff-disabled")
-    ) {
-      const upload = getUpload();
-
-      if (upload) {
-        void this.removeExistingUpload(upload);
-      }
-
-      e.preventDefault();
-    } else if (target.classList.contains("dff-cancel")) {
-      const upload = getUpload();
-
-      if (upload) {
-        void this.handleCancel(upload);
-      }
-
-      e.preventDefault();
-    }
-  };
-
   handleProgress = (
     upload: BaseUpload,
     bytesUploaded: number,
     bytesTotal: number
   ): void => {
-    const percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2);
-
-    this.renderer.updateProgress(upload.uploadIndex, percentage);
+    upload.progress = (bytesUploaded / bytesTotal) * 100;
 
     const { onProgress } = this.callbacks;
 
@@ -323,11 +295,13 @@ class FileField {
         onProgress(bytesUploaded, bytesTotal, upload);
       }
     }
+
+    this.render();
   };
 
   handleError = (upload: BaseUpload, error: Error): void => {
-    this.renderer.setError(upload.uploadIndex);
     upload.status = "error";
+    this.render();
 
     const { onError } = this.callbacks;
 
@@ -339,29 +313,21 @@ class FileField {
   };
 
   handleSuccess = (upload: BaseUpload): void => {
-    const { renderer } = this;
-
     this.updatePlaceholderInput();
-
-    renderer.clearInput();
-    renderer.setSuccess(upload.uploadIndex, upload.getSize());
+    this.input.value = "";
     upload.status = "done";
 
+    this.emitEvent("uploadComplete", upload);
+
     const { onSuccess } = this.callbacks;
-
-    const element = document.getElementsByClassName(
-      `dff-file-id-${upload.uploadIndex}`
-    )[0] as HTMLElement;
-    this.emitEvent("uploadComplete", element, upload);
-
     if (onSuccess && upload.type === "tus") {
       onSuccess(upload);
     }
+
+    this.render();
   };
 
   removeUploadFromList(upload: BaseUpload): void {
-    this.renderer.deleteFile(upload.uploadIndex);
-
     const index = this.uploads.indexOf(upload);
 
     if (index >= 0) {
@@ -378,30 +344,13 @@ class FileField {
   }
 
   async handleCancel(upload: BaseUpload): Promise<void> {
-    this.renderer.disableCancel(upload.uploadIndex);
     await upload.abort();
     this.removeUploadFromList(upload);
-  }
-
-  initDropArea(container: Element, inputAccept: string): void {
-    new DropArea({
-      container,
-      inputAccept,
-      onUploadFiles: this.uploadFiles
-    });
   }
 
   checkDropHint(): void {
     if (!this.supportDropArea) {
       return;
-    }
-
-    const nonEmptyUploads = this.uploads.filter(e => e);
-
-    if (nonEmptyUploads.length === 0) {
-      this.renderer.renderDropHint();
-    } else {
-      this.renderer.removeDropHint();
     }
   }
 
@@ -422,24 +371,45 @@ class FileField {
     input.value = JSON.stringify(placeholdersInfo);
   }
 
-  getMetaDataField(): HTMLElement | null {
-    return findInput(
-      this.form,
-      getMetadataFieldName(this.fieldName, this.prefix),
-      this.prefix
-    );
-  }
-
-  emitEvent(eventName: string, element: HTMLElement, upload: BaseUpload): void {
+  emitEvent(eventName: string, upload: BaseUpload): void {
     if (this.eventEmitter) {
       this.eventEmitter.emit(eventName, {
-        element,
         fieldName: this.fieldName,
         fileName: upload.name,
-        metaDataField: this.getMetaDataField(),
         upload
       });
     }
+  }
+
+  createFilesContainer = (parent: Element): HTMLElement => {
+    const div = document.createElement("div") as HTMLElement;
+    div.className = "dff-files";
+    parent.appendChild(div);
+
+    return div;
+  };
+
+  handleDelete = (upload: BaseUpload): void => {
+    void this.removeExistingUpload(upload);
+  };
+
+  render(): void {
+    this.updateInputRequired();
+
+    renderUploads({
+      container: this.container,
+      CustomFileInfo: this.CustomFileInfo,
+      inputAccept: this.input.accept,
+      onDelete: this.handleDelete,
+      onUploadFiles: this.uploadFiles,
+      supportDropArea: this.supportDropArea,
+      translations: this.translations,
+      uploads: this.uploads
+    });
+  }
+
+  updateInputRequired(): void {
+    this.input.required = !this.skipRequired && !this.uploads.length;
   }
 }
 

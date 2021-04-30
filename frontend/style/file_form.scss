@@ -3,17 +3,21 @@
     display: flex;
     flex-direction: column;
     margin: 16px 0 16px 0;
-    outline: solid 1px #ddd;
     max-width: 40em;
-    padding: 16px;
 
-    &:empty {
-      margin: 0;
-      outline: none;
-    }
+    .dff-drop-area {
+      width: 100%;
+      height: 100%;
+      padding: 16px;
+      outline: solid 1px #ddd;
 
-    &.dff-dropping {
-      outline: dashed 2px #ddd;
+      &.dff-dropping {
+        outline: dashed 2px #ddd;
+      }
+
+      &:empty {
+        margin: 0;
+      }
     }
 
     .dff-file {

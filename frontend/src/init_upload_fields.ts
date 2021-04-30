@@ -1,15 +1,18 @@
 import EventEmitter from "eventemitter3";
-import FileField, { Callbacks, Translations } from "./file_field";
-import { InitialFile } from "./uploads/base_upload";
+import FileField, { Callbacks } from "./file_field";
+import { InitialFile, Metadata } from "./uploads/base_upload";
 import {
   findInput,
   getInputValueForFormAndPrefix,
+  getMetadataFieldName,
   getUploadsFieldName
 } from "./util";
+import { RenderFileInfo, Translations } from "./renderUploads/types";
 
 export interface Options {
   callbacks?: Callbacks;
   chunkSize?: number;
+  CustomFileInfo?: RenderFileInfo;
   eventEmitter?: EventEmitter;
   prefix?: string;
   retryDelays?: number[];
@@ -31,6 +34,27 @@ const initUploadFields = (form: Element, options: Options = {}): void => {
 
   const getInputValue = (fieldName: string): string | undefined =>
     getInputValueForFormAndPrefix(form, fieldName, getPrefix());
+
+  const getMetadataPerFile = (fieldName: string): Record<string, Metadata> => {
+    const data = getInputValue(getMetadataFieldName(fieldName, getPrefix()));
+
+    if (!data) {
+      return {};
+    }
+
+    return JSON.parse(data) as Record<string, Metadata>;
+  };
+
+  const setInitialMetadata = (
+    fieldName: string,
+    initialFiles: InitialFile[]
+  ): void => {
+    const metadataPerFilename = getMetadataPerFile(fieldName);
+
+    initialFiles.forEach(initialFile => {
+      initialFile.metadata = metadataPerFilename[initialFile.name];
+    });
+  };
 
   const getInitialFiles = (fieldName: string): InitialFile[] => {
     const data = getInputValue(getUploadsFieldName(fieldName, getPrefix()));
@@ -77,6 +101,8 @@ const initUploadFields = (form: Element, options: Options = {}): void => {
     const fieldName = input.name;
     const { multiple } = input;
     const initial = getInitialFiles(fieldName);
+    setInitialMetadata(fieldName, initial);
+
     const dataTranslations = container.getAttribute("data-translations");
     const translations: Translations = dataTranslations
       ? (JSON.parse(dataTranslations) as Translations)
@@ -87,6 +113,7 @@ const initUploadFields = (form: Element, options: Options = {}): void => {
       callbacks: options.callbacks || {},
       chunkSize: options.chunkSize || 2621440,
       csrfToken,
+      CustomFileInfo: options.CustomFileInfo,
       eventEmitter: options.eventEmitter,
       fieldName,
       form,

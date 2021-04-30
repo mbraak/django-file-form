@@ -1,4 +1,8 @@
+export type Metadata = Record<string, unknown>;
+
 type UploadStatus = "done" | "error" | "uploading";
+type ActionStatus = "in_progress" | "error";
+
 export type UploadType =
   | "existing"
   | "placeholder"
@@ -7,31 +11,29 @@ export type UploadType =
   | "uploadedS3"
   | "uploadedTus";
 
-export interface InitialExistingFile {
+interface BaseInitialFile {
+  metadata?: Metadata;
   name: string;
   size: number;
+}
+
+export interface InitialExistingFile extends BaseInitialFile {
   type: "existing";
 }
 
-export interface InitialPlaceholderFile {
+export interface InitialPlaceholderFile extends BaseInitialFile {
   id: string;
-  name: string;
-  size: number;
   type: "placeholder";
 }
 
-export interface InitialS3File {
+export interface InitialS3File extends BaseInitialFile {
   id: string;
-  name: string;
   original_name: string;
-  size: number;
   type: "s3";
 }
 
-export interface InitialTusFile {
+export interface InitialTusFile extends BaseInitialFile {
   id: string;
-  name: string;
-  size: number;
   type: "tus";
   url: string;
 }
@@ -43,6 +45,7 @@ export type InitialFile =
   | InitialTusFile;
 
 interface UploadParameters {
+  metadata?: Metadata;
   name: string;
   status: UploadStatus;
   type: UploadType;
@@ -50,16 +53,25 @@ interface UploadParameters {
 }
 
 abstract class BaseUpload {
+  deleteStatus?: ActionStatus;
+  metadata: Metadata;
   name: string;
+  progress: number;
+  render?: () => void;
   status: UploadStatus;
   type: UploadType;
+  updateMetadata?: () => void;
   uploadIndex: number;
 
-  constructor({ name, status, type, uploadIndex }: UploadParameters) {
+  constructor({ metadata, name, status, type, uploadIndex }: UploadParameters) {
+    this.metadata = metadata || {};
     this.name = name;
     this.status = status;
     this.type = type;
     this.uploadIndex = uploadIndex;
+
+    this.progress = 0;
+    this.deleteStatus = undefined;
   }
 
   public async abort(): Promise<void> {
@@ -70,6 +82,17 @@ abstract class BaseUpload {
   }
   public abstract getSize(): number | undefined;
 
+  public setMetadata(metadata: Metadata): void {
+    this.metadata = metadata;
+
+    if (this.render) {
+      this.render();
+    }
+
+    if (this.updateMetadata) {
+      this.updateMetadata();
+    }
+  }
   public abstract getInitialFile(): InitialFile;
 }
 

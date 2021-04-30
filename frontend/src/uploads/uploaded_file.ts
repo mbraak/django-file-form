@@ -4,11 +4,13 @@ import BaseUpload, {
   InitialPlaceholderFile,
   InitialS3File,
   InitialTusFile,
+  Metadata,
   UploadType
 } from "./base_upload";
 import { deleteUpload } from "./tus_utils";
 
 interface BaseUploadedFileParameters {
+  metadata?: Metadata;
   name: string;
   size: number;
   type: UploadType;
@@ -18,8 +20,14 @@ interface BaseUploadedFileParameters {
 export abstract class BaseUploadedFile extends BaseUpload {
   size: number;
 
-  constructor({ name, size, type, uploadIndex }: BaseUploadedFileParameters) {
-    super({ name, status: "done", type, uploadIndex });
+  constructor({
+    metadata,
+    name,
+    size,
+    type,
+    uploadIndex
+  }: BaseUploadedFileParameters) {
+    super({ metadata, name, status: "done", type, uploadIndex });
 
     this.size = size;
   }
@@ -37,11 +45,17 @@ export abstract class BaseUploadedFile extends BaseUpload {
   }
 }
 
+interface PlaceholderFileParameters {
+  initialFile: InitialPlaceholderFile;
+  uploadIndex: number;
+}
+
 class PlaceholderFile extends BaseUploadedFile {
   id: string;
 
-  constructor(initialFile: InitialPlaceholderFile, uploadIndex: number) {
+  constructor({ initialFile, uploadIndex }: PlaceholderFileParameters) {
     super({
+      metadata: initialFile.metadata,
       name: initialFile.name,
       size: initialFile.size,
       type: "placeholder",
@@ -61,12 +75,18 @@ class PlaceholderFile extends BaseUploadedFile {
   }
 }
 
+interface UploadedS3FileParameters {
+  initialFile: InitialS3File;
+  uploadIndex: number;
+}
+
 export class UploadedS3File extends BaseUploadedFile {
   id: string;
   key: string;
 
-  constructor(initialFile: InitialS3File, uploadIndex: number) {
+  constructor({ initialFile, uploadIndex }: UploadedS3FileParameters) {
     super({
+      metadata: initialFile.metadata,
       name: initialFile.original_name || initialFile.name,
       size: initialFile.size,
       type: "uploadedS3",
@@ -126,6 +146,7 @@ export class UploadedTusFile extends BaseUploadedFile {
     uploadUrl
   }: UploadedTusFileParameters) {
     super({
+      metadata: initialFile.metadata,
       name: initialFile.name,
       size: initialFile.size,
       type: "uploadedTus",
@@ -170,10 +191,10 @@ export const createUploadedFile = ({
       return new ExistingFile(initialFile, uploadIndex);
 
     case "placeholder":
-      return new PlaceholderFile(initialFile, uploadIndex);
+      return new PlaceholderFile({ initialFile, uploadIndex });
 
     case "s3":
-      return new UploadedS3File(initialFile, uploadIndex);
+      return new UploadedS3File({ initialFile, uploadIndex });
 
     case "tus":
       return new UploadedTusFile({
