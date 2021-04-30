@@ -178,8 +178,12 @@ class CreateModelFormView(FileModelFormMixin, generic.CreateView):
 
 class EditModelFormView(FileModelFormMixin, generic.UpdateView):
     def form_valid(self, form):
-        initial_input_file = form.initial['input_file']
-        initial_input_file_path = initial_input_file.path if isinstance(initial_input_file, FieldFile) else None
+        initial_input_file = form.initial["input_file"]
+        initial_input_file_path = (
+            initial_input_file.path
+            if isinstance(initial_input_file, FieldFile)
+            else None
+        )
 
         form.save()
 

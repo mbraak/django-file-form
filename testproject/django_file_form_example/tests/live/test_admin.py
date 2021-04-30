@@ -3,7 +3,11 @@ from django.core.files.base import ContentFile
 from django_file_form_example.models import Example
 from django_file_form_example.tests.utils.admin_page import AdminPage
 from django_file_form_example.tests.utils.base_live_testcase import BaseLiveTestCase
-from django_file_form_example.tests.utils.test_utils import read_file, get_random_id, remove_example_file
+from django_file_form_example.tests.utils.test_utils import (
+    read_file,
+    get_random_id,
+    remove_example_file,
+)
 
 
 class AdminTestCase(BaseLiveTestCase):
