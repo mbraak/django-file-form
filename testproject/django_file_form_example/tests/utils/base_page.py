@@ -1,4 +1,5 @@
 from .temp_file import TempFile
+from .test_utils import remove_test_files
 
 
 class BasePage(object):
@@ -15,6 +16,8 @@ class BasePage(object):
     def cleanup(self):
         for temp_file in self.temp_files:
             temp_file.destroy()
+
+        remove_test_files()
 
     def create_temp_file(self, content, prefix=None, binary=False):
         temp_file = TempFile()

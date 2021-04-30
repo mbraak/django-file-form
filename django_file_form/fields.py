@@ -30,8 +30,11 @@ class UploadedFileField(FileField):
 
     def get_file_data(self, field_name, form_id):
         try:
-            return TemporaryUploadedFile.objects.for_field_and_form(field_name, form_id)\
-                .latest("created").get_uploaded_file()
+            return (
+                TemporaryUploadedFile.objects.for_field_and_form(field_name, form_id)
+                .latest("created")
+                .get_uploaded_file()
+            )
         except TemporaryUploadedFile.DoesNotExist:
             return None
 
@@ -72,7 +75,8 @@ class MultipleUploadedFileField(UploadedFileField):
     # new methods
 
     def get_file_data(self, field_name, form_id):
-        temporary_uploaded_files = TemporaryUploadedFile.objects.for_field_and_form(field_name, form_id)
+        temporary_uploaded_files = TemporaryUploadedFile.objects.for_field_and_form(
+            field_name, form_id
+        )
 
         return [f.get_uploaded_file() for f in temporary_uploaded_files]
-
