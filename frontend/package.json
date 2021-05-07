@@ -28,7 +28,7 @@
     "@babel/preset-typescript": "^7.9.0",
     "@rollup/plugin-babel": "^5.2.1",
     "@rollup/plugin-commonjs": "^18.0.0",
-    "@rollup/plugin-node-resolve": "^11.0.0",
+    "@rollup/plugin-node-resolve": "^13.0.0",
     "@types/escape-html": "^1.0.0",
     "@types/picomatch": "^2.2.1",
     "@typescript-eslint/eslint-plugin": "^4.0.1",
