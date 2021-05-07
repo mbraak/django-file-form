@@ -116,6 +116,16 @@ class PlaceholderExampleForm(BaseForm):
         self.delete_temporary_files()
 
 
+class PlaceholderS3ExampleForm(BaseForm):
+    prefix = "example"
+    input_file = MultipleUploadedFileField()
+    other_input_file = UploadedFileField()
+    s3_upload_dir = "s3_placeholder_example"
+
+    def save(self):
+        self.delete_temporary_files()
+
+
 class PlaceholderWidgetExampleForm(PlaceholderExampleForm):
     def save(self):
         Example2.objects.create(title=self.cleaned_data["title"])
