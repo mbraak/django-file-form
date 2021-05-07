@@ -121,11 +121,7 @@ class S3ExampleView(BaseFormView):
 
 
 class S3PlaceholderExampleView(PlaceholderView):
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-
-        kwargs.update({"s3_upload_dir": "s3_placeholder_example"})
-        return kwargs
+    form_class = forms.PlaceholderS3ExampleForm
 
 
 class WithAcceptExample(BaseFormView):
