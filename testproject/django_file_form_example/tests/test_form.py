@@ -4,7 +4,7 @@ from django.test import TestCase
 
 from django_file_form.fields import UploadedFileField, MultipleUploadedFileField
 from django_file_form.forms import FileFormMixin
-from django_file_form.uploaded_file import UploadedTusFile
+from django_file_form.uploaded_file import UploadedTusFile, PlaceholderUploadedFile
 
 
 class TestForm(FileFormMixin, Form):
@@ -27,12 +27,12 @@ class FormTests(TestCase):
         uploaded_tus_file = UploadedTusFile(
             file=ContentFile("xyz", "test.txt"), file_id="111"
         )
-        data = dict(main_notebook=uploaded_tus_file)
+        files = dict(main_notebook=uploaded_tus_file)
 
-        form = TestForm(data=data)
+        form = TestForm(data=dict(), files=files)
 
         self.assertTrue(form.is_valid())
-        self.assertEqual(form.data["main_notebook"].name, "test.txt")
+        self.assertEqual(form.cleaned_data["main_notebook"].name, "test.txt")
 
     def test_upload_attachments(self):
         uploaded_tus_file1 = UploadedTusFile(
@@ -41,12 +41,27 @@ class FormTests(TestCase):
         uploaded_tus_file2 = UploadedTusFile(
             file=ContentFile("def", "test2.txt"), file_id="113"
         )
-        data = dict(attachments=[uploaded_tus_file1, uploaded_tus_file2])
+        files = dict(attachments=[uploaded_tus_file1, uploaded_tus_file2])
 
-        form = TestForm(data=data)
+        form = TestForm(data=dict(), files=files)
 
         self.assertTrue(form.is_valid())
 
         self.assertSetEqual(
-            {file.name for file in form.data["attachments"]}, {"test2.txt", "test1.txt"}
+            {file.name for file in form.cleaned_data["attachments"]},
+            {"test2.txt", "test1.txt"},
+        )
+
+    def test_placeholder(self):
+        placeholder_uploaded_file = PlaceholderUploadedFile(
+            name="placeholder1.txt", size=100
+        )
+        initial = dict(attachments=[placeholder_uploaded_file])
+
+        form = TestForm(data=dict(), files=dict(), initial=initial)
+
+        self.assertTrue(form.is_valid())
+        self.assertEqual(
+            [file.name for file in form.cleaned_data["attachments"]],
+            ["placeholder1.txt"],
         )
