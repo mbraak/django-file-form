@@ -112,10 +112,16 @@
 	  throw TypeError("Can't convert object to primitive value");
 	};
 
+	// `ToObject` abstract operation
+	// https://tc39.es/ecma262/#sec-toobject
+	var toObject = function (argument) {
+	  return Object(requireObjectCoercible(argument));
+	};
+
 	var hasOwnProperty = {}.hasOwnProperty;
 
-	var has$2 = function (it, key) {
-	  return hasOwnProperty.call(it, key);
+	var has$2 = function hasOwn(it, key) {
+	  return hasOwnProperty.call(toObject(it), key);
 	};
 
 	var document$3 = global$1.document;
@@ -218,7 +224,7 @@
 	(module.exports = function (key, value) {
 	  return sharedStore[key] || (sharedStore[key] = value !== undefined ? value : {});
 	})('versions', []).push({
-	  version: '3.10.2',
+	  version: '3.12.0',
 	  mode: 'global',
 	  copyright: '© 2021 Denis Pushkarev (zloirock.ru)'
 	});
@@ -569,12 +575,6 @@
 	  };
 	};
 
-	// `ToObject` abstract operation
-	// https://tc39.es/ecma262/#sec-toobject
-	var toObject = function (argument) {
-	  return Object(requireObjectCoercible(argument));
-	};
-
 	var iteratorClose = function (iterator) {
 	  var returnMethod = iterator['return'];
 	  if (returnMethod !== undefined) {
@@ -593,8 +593,6 @@
 	  }
 	};
 
-	var engineIsNode = classofRaw(global$1.process) == 'process';
-
 	var engineUserAgent = getBuiltIn('navigator', 'userAgent') || '';
 
 	var process$3 = global$1.process;
@@ -604,7 +602,7 @@
 
 	if (v8) {
 	  match = v8.split('.');
-	  version = match[0] + match[1];
+	  version = match[0] < 4 ? 1 : match[0] + match[1];
 	} else if (engineUserAgent) {
 	  match = engineUserAgent.match(/Edge\/(\d+)/);
 	  if (!match || match[1] >= 74) {
@@ -615,13 +613,14 @@
 
 	var engineV8Version = version && +version;
 
+	/* eslint-disable es/no-symbol -- required for testing */
+
 	// eslint-disable-next-line es/no-object-getownpropertysymbols -- required for testing
 	var nativeSymbol = !!Object.getOwnPropertySymbols && !fails(function () {
-	  // eslint-disable-next-line es/no-symbol -- required for testing
-	  return !Symbol.sham &&
+	  return !String(Symbol()) ||
 	    // Chrome 38 Symbol has incorrect toString conversion
 	    // Chrome 38-40 symbols are not inherited from DOM collections prototypes to instances
-	    (engineIsNode ? engineV8Version === 38 : engineV8Version > 37 && engineV8Version < 41);
+	    !Symbol.sham && engineV8Version && engineV8Version < 41;
 	});
 
 	/* eslint-disable es/no-symbol -- required for testing */
@@ -1097,13 +1096,13 @@
 
 
 	var STRING_ITERATOR = 'String Iterator';
-	var setInternalState$6 = internalState.set;
+	var setInternalState$5 = internalState.set;
 	var getInternalState$4 = internalState.getterFor(STRING_ITERATOR);
 
 	// `String.prototype[@@iterator]` method
 	// https://tc39.es/ecma262/#sec-string.prototype-@@iterator
 	defineIterator(String, 'String', function (iterated) {
-	  setInternalState$6(this, {
+	  setInternalState$5(this, {
 	    type: STRING_ITERATOR,
 	    string: String(iterated),
 	    index: 0
@@ -1139,7 +1138,7 @@
 	};
 
 	var ARRAY_ITERATOR = 'Array Iterator';
-	var setInternalState$5 = internalState.set;
+	var setInternalState$4 = internalState.set;
 	var getInternalState$3 = internalState.getterFor(ARRAY_ITERATOR);
 
 	// `Array.prototype.entries` method
@@ -1153,7 +1152,7 @@
 	// `CreateArrayIterator` internal method
 	// https://tc39.es/ecma262/#sec-createarrayiterator
 	var es_array_iterator = defineIterator(Array, 'Array', function (iterated, kind) {
-	  setInternalState$5(this, {
+	  setInternalState$4(this, {
 	    type: ARRAY_ITERATOR,
 	    target: toIndexedObject(iterated), // target
 	    index: 0,                          // next index
@@ -1522,14 +1521,14 @@
 	var fastKey = internalMetadata.fastKey;
 
 
-	var setInternalState$4 = internalState.set;
+	var setInternalState$3 = internalState.set;
 	var internalStateGetterFor = internalState.getterFor;
 
 	var collectionStrong = {
 	  getConstructor: function (wrapper, CONSTRUCTOR_NAME, IS_MAP, ADDER) {
 	    var C = wrapper(function (that, iterable) {
 	      anInstance(that, C, CONSTRUCTOR_NAME);
-	      setInternalState$4(that, {
+	      setInternalState$3(that, {
 	        type: CONSTRUCTOR_NAME,
 	        index: objectCreate(null),
 	        first: undefined,
@@ -1666,7 +1665,7 @@
 	    // add .keys, .values, .entries, [@@iterator]
 	    // 23.1.3.4, 23.1.3.8, 23.1.3.11, 23.1.3.12, 23.2.3.5, 23.2.3.8, 23.2.3.10, 23.2.3.11
 	    defineIterator(C, CONSTRUCTOR_NAME, function (iterated, kind) {
-	      setInternalState$4(this, {
+	      setInternalState$3(this, {
 	        type: ITERATOR_NAME,
 	        target: iterated,
 	        state: getInternalCollectionState(iterated),
@@ -1834,11 +1833,11 @@
 	var $forEach$2 = arrayIteration.forEach;
 
 
-	var STRICT_METHOD$3 = arrayMethodIsStrict('forEach');
+	var STRICT_METHOD$2 = arrayMethodIsStrict('forEach');
 
 	// `Array.prototype.forEach` method implementation
 	// https://tc39.es/ecma262/#sec-array.prototype.foreach
-	var arrayForEach = !STRICT_METHOD$3 ? function forEach(callbackfn /* , thisArg */) {
+	var arrayForEach = !STRICT_METHOD$2 ? function forEach(callbackfn /* , thisArg */) {
 	  return $forEach$2(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
 	// eslint-disable-next-line es/no-array-prototype-foreach -- safe
 	} : [].forEach;
@@ -1939,7 +1938,7 @@
 	var SYMBOL = 'Symbol';
 	var PROTOTYPE$1 = 'prototype';
 	var TO_PRIMITIVE = wellKnownSymbol('toPrimitive');
-	var setInternalState$3 = internalState.set;
+	var setInternalState$2 = internalState.set;
 	var getInternalState$2 = internalState.getterFor(SYMBOL);
 	var ObjectPrototype$2 = Object[PROTOTYPE$1];
 	var $Symbol = global$1.Symbol;
@@ -1973,7 +1972,7 @@
 
 	var wrap = function (tag, description) {
 	  var symbol = AllSymbols[tag] = objectCreate($Symbol[PROTOTYPE$1]);
-	  setInternalState$3(symbol, {
+	  setInternalState$2(symbol, {
 	    type: SYMBOL,
 	    tag: tag,
 	    description: description
@@ -2464,7 +2463,7 @@
 	defineWellKnownSymbol('iterator');
 
 	function _iterableToArray(iter) {
-	  if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter);
+	  if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter);
 	}
 
 	var HAS_SPECIES_SUPPORT$1 = arrayMethodHasSpeciesSupport('slice');
@@ -2534,6 +2533,8 @@
 	};
 
 	var engineIsIos = /(?:iphone|ipod|ipad).*applewebkit/i.test(engineUserAgent);
+
+	var engineIsNode = classofRaw(global$1.process) == 'process';
 
 	var location = global$1.location;
 	var set$2 = global$1.setImmediate;
@@ -2685,6 +2686,8 @@
 	  } else if (Promise$1 && Promise$1.resolve) {
 	    // Promise.resolve without an argument throws an error in LG WebOS 2
 	    promise = Promise$1.resolve(undefined);
+	    // workaround of WebKit ~ iOS Safari 10.1 bug
+	    promise.constructor = Promise$1;
 	    then = promise.then;
 	    notify$1 = function () {
 	      then.call(promise, flush);
@@ -2761,7 +2764,10 @@
 	  }
 	};
 
+	var engineIsBrowser = typeof window == 'object';
+
 	var task = task$1.set;
+
 
 
 
@@ -2776,13 +2782,14 @@
 	var SPECIES$1 = wellKnownSymbol('species');
 	var PROMISE = 'Promise';
 	var getInternalState$1 = internalState.get;
-	var setInternalState$2 = internalState.set;
+	var setInternalState$1 = internalState.set;
 	var getInternalPromiseState = internalState.getterFor(PROMISE);
+	var NativePromisePrototype = nativePromiseConstructor && nativePromiseConstructor.prototype;
 	var PromiseConstructor = nativePromiseConstructor;
+	var PromiseConstructorPrototype = NativePromisePrototype;
 	var TypeError$1 = global$1.TypeError;
 	var document$1 = global$1.document;
 	var process = global$1.process;
-	var $fetch = getBuiltIn('fetch');
 	var newPromiseCapability = newPromiseCapability$1.f;
 	var newGenericPromiseCapability = newPromiseCapability;
 	var DISPATCH_EVENT = !!(document$1 && document$1.createEvent && global$1.dispatchEvent);
@@ -2794,30 +2801,30 @@
 	var REJECTED = 2;
 	var HANDLED = 1;
 	var UNHANDLED = 2;
+	var SUBCLASSING = false;
 	var Internal, OwnPromiseCapability, PromiseWrapper, nativeThen;
 
 	var FORCED$8 = isForced_1(PROMISE, function () {
 	  var GLOBAL_CORE_JS_PROMISE = inspectSource(PromiseConstructor) !== String(PromiseConstructor);
-	  if (!GLOBAL_CORE_JS_PROMISE) {
-	    // V8 6.6 (Node 10 and Chrome 66) have a bug with resolving custom thenables
-	    // https://bugs.chromium.org/p/chromium/issues/detail?id=830565
-	    // We can't detect it synchronously, so just check versions
-	    if (engineV8Version === 66) return true;
-	    // Unhandled rejections tracking support, NodeJS Promise without it fails @@species test
-	    if (!engineIsNode && !NATIVE_REJECTION_EVENT) return true;
-	  }
+	  // V8 6.6 (Node 10 and Chrome 66) have a bug with resolving custom thenables
+	  // https://bugs.chromium.org/p/chromium/issues/detail?id=830565
+	  // We can't detect it synchronously, so just check versions
+	  if (!GLOBAL_CORE_JS_PROMISE && engineV8Version === 66) return true;
 	  // We can't use @@species feature detection in V8 since it causes
 	  // deoptimization and performance degradation
 	  // https://github.com/zloirock/core-js/issues/679
 	  if (engineV8Version >= 51 && /native code/.test(PromiseConstructor)) return false;
 	  // Detect correctness of subclassing with @@species support
-	  var promise = PromiseConstructor.resolve(1);
+	  var promise = new PromiseConstructor(function (resolve) { resolve(1); });
 	  var FakePromise = function (exec) {
 	    exec(function () { /* empty */ }, function () { /* empty */ });
 	  };
 	  var constructor = promise.constructor = {};
 	  constructor[SPECIES$1] = FakePromise;
-	  return !(promise.then(function () { /* empty */ }) instanceof FakePromise);
+	  SUBCLASSING = promise.then(function () { /* empty */ }) instanceof FakePromise;
+	  if (!SUBCLASSING) return true;
+	  // Unhandled rejections tracking support, NodeJS Promise without it fails @@species test
+	  return !GLOBAL_CORE_JS_PROMISE && engineIsBrowser && !NATIVE_REJECTION_EVENT;
 	});
 
 	var INCORRECT_ITERATION = FORCED$8 || !checkCorrectnessOfIteration(function (iterable) {
@@ -2981,9 +2988,10 @@
 	      internalReject(state, error);
 	    }
 	  };
+	  PromiseConstructorPrototype = PromiseConstructor.prototype;
 	  // eslint-disable-next-line no-unused-vars -- required for `.length`
 	  Internal = function Promise(executor) {
-	    setInternalState$2(this, {
+	    setInternalState$1(this, {
 	      type: PROMISE,
 	      done: false,
 	      notified: false,
@@ -2994,7 +3002,7 @@
 	      value: undefined
 	    });
 	  };
-	  Internal.prototype = redefineAll(PromiseConstructor.prototype, {
+	  Internal.prototype = redefineAll(PromiseConstructorPrototype, {
 	    // `Promise.prototype.then` method
 	    // https://tc39.es/ecma262/#sec-promise.prototype.then
 	    then: function then(onFulfilled, onRejected) {
@@ -3027,25 +3035,32 @@
 	      : newGenericPromiseCapability(C);
 	  };
 
-	  if (typeof nativePromiseConstructor == 'function') {
-	    nativeThen = nativePromiseConstructor.prototype.then;
+	  if (typeof nativePromiseConstructor == 'function' && NativePromisePrototype !== Object.prototype) {
+	    nativeThen = NativePromisePrototype.then;
 
-	    // wrap native Promise#then for native async functions
-	    redefine(nativePromiseConstructor.prototype, 'then', function then(onFulfilled, onRejected) {
-	      var that = this;
-	      return new PromiseConstructor(function (resolve, reject) {
-	        nativeThen.call(that, resolve, reject);
-	      }).then(onFulfilled, onRejected);
-	    // https://github.com/zloirock/core-js/issues/640
-	    }, { unsafe: true });
+	    if (!SUBCLASSING) {
+	      // make `Promise#then` return a polyfilled `Promise` for native promise-based APIs
+	      redefine(NativePromisePrototype, 'then', function then(onFulfilled, onRejected) {
+	        var that = this;
+	        return new PromiseConstructor(function (resolve, reject) {
+	          nativeThen.call(that, resolve, reject);
+	        }).then(onFulfilled, onRejected);
+	      // https://github.com/zloirock/core-js/issues/640
+	      }, { unsafe: true });
 
-	    // wrap fetch result
-	    if (typeof $fetch == 'function') _export({ global: true, enumerable: true, forced: true }, {
-	      // eslint-disable-next-line no-unused-vars -- required for `.length`
-	      fetch: function fetch(input /* , init */) {
-	        return promiseResolve(PromiseConstructor, $fetch.apply(global$1, arguments));
-	      }
-	    });
+	      // makes sure that native promise-based APIs `Promise#catch` properly works with patched `Promise#then`
+	      redefine(NativePromisePrototype, 'catch', PromiseConstructorPrototype['catch'], { unsafe: true });
+	    }
+
+	    // make `.constructor === Promise` work for native promise-based APIs
+	    try {
+	      delete NativePromisePrototype.constructor;
+	    } catch (error) { /* empty */ }
+
+	    // make `instanceof Promise` work for native promise-based APIs
+	    if (objectSetPrototypeOf) {
+	      objectSetPrototypeOf(NativePromisePrototype, PromiseConstructorPrototype);
+	    }
 	  }
 	}
 
@@ -3190,18 +3205,14 @@
 	  var method;
 
 	  if (typeof Symbol !== "undefined") {
-	    if (Symbol.asyncIterator) {
-	      method = iterable[Symbol.asyncIterator];
-	      if (method != null) return method.call(iterable);
-	    }
-
-	    if (Symbol.iterator) {
-	      method = iterable[Symbol.iterator];
-	      if (method != null) return method.call(iterable);
-	    }
+	    if (Symbol.asyncIterator) method = iterable[Symbol.asyncIterator];
+	    if (method == null && Symbol.iterator) method = iterable[Symbol.iterator];
 	  }
 
-	  throw new TypeError("Object is not async iterable");
+	  if (method == null) method = iterable["@@asyncIterator"];
+	  if (method == null) method = iterable["@@iterator"];
+	  if (method == null) throw new TypeError("Object is not async iterable");
+	  return method.call(iterable);
 	}
 
 	// `thisNumberValue` abstract operation
@@ -4716,14 +4727,17 @@
 	}
 
 	function _iterableToArrayLimit(arr, i) {
-	  if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return;
+	  var _i = arr && (typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]);
+
+	  if (_i == null) return;
 	  var _arr = [];
 	  var _n = true;
 	  var _d = false;
-	  var _e = undefined;
+
+	  var _s, _e;
 
 	  try {
-	    for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+	    for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) {
 	      _arr.push(_s.value);
 
 	      if (i && _arr.length === i) break;
@@ -5212,7 +5226,7 @@
 
 
 
-	var setInternalState$1 = internalState.set;
+	var enforceInternalState = internalState.enforce;
 
 
 
@@ -5264,7 +5278,10 @@
 	      RegExpWrapper
 	    );
 
-	    if (UNSUPPORTED_Y$1 && sticky) setInternalState$1(result, { sticky: sticky });
+	    if (UNSUPPORTED_Y$1 && sticky) {
+	      var state = enforceInternalState(result);
+	      state.sticky = true;
+	    }
 
 	    return result;
 	  };
@@ -5759,7 +5776,7 @@
 	  basename: basename
 	};
 
-	function ownKeys$5(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+	function ownKeys$5(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
 
 	function _objectSpread$5(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys$5(Object(source), true).forEach(function (key) { _defineProperty$2(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys$5(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
@@ -6519,11 +6536,11 @@
 	var nativeJoin = [].join;
 
 	var ES3_STRINGS = indexedObject != Object;
-	var STRICT_METHOD$2 = arrayMethodIsStrict('join', ',');
+	var STRICT_METHOD$1 = arrayMethodIsStrict('join', ',');
 
 	// `Array.prototype.join` method
 	// https://tc39.es/ecma262/#sec-array.prototype.join
-	_export({ target: 'Array', proto: true, forced: ES3_STRINGS || !STRICT_METHOD$2 }, {
+	_export({ target: 'Array', proto: true, forced: ES3_STRINGS || !STRICT_METHOD$1 }, {
 	  join: function join(separator) {
 	    return nativeJoin.call(toIndexedObject(this), separator === undefined ? ',' : separator);
 	  }
@@ -6558,13 +6575,13 @@
 	  repeat: stringRepeat
 	});
 
-	function _createForOfIteratorHelper$1(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray$1(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+	function _createForOfIteratorHelper$1(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray$1(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
 
 	function _unsupportedIterableToArray$1(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray$1(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray$1(o, minLen); }
 
 	function _arrayLikeToArray$1(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
-	function ownKeys$4(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+	function ownKeys$4(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
 
 	function _objectSpread$4(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys$4(Object(source), true).forEach(function (key) { _defineProperty$2(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys$4(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 	/**
@@ -7817,11 +7834,11 @@
 
 	var parse_1 = parse$1;
 
-	function ownKeys$3(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+	function ownKeys$3(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
 
 	function _objectSpread$3(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys$3(Object(source), true).forEach(function (key) { _defineProperty$2(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys$3(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
-	function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+	function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
 
 	function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 
@@ -8717,60 +8734,6 @@
 	  };
 	  return _getPrototypeOf$2(o);
 	}
-
-	// `Array.prototype.{ reduce, reduceRight }` methods implementation
-	var createMethod = function (IS_RIGHT) {
-	  return function (that, callbackfn, argumentsLength, memo) {
-	    aFunction(callbackfn);
-	    var O = toObject(that);
-	    var self = indexedObject(O);
-	    var length = toLength(O.length);
-	    var index = IS_RIGHT ? length - 1 : 0;
-	    var i = IS_RIGHT ? -1 : 1;
-	    if (argumentsLength < 2) while (true) {
-	      if (index in self) {
-	        memo = self[index];
-	        index += i;
-	        break;
-	      }
-	      index += i;
-	      if (IS_RIGHT ? index < 0 : length <= index) {
-	        throw TypeError('Reduce of empty array with no initial value');
-	      }
-	    }
-	    for (;IS_RIGHT ? index >= 0 : length > index; index += i) if (index in self) {
-	      memo = callbackfn(memo, self[index], index, O);
-	    }
-	    return memo;
-	  };
-	};
-
-	var arrayReduce = {
-	  // `Array.prototype.reduce` method
-	  // https://tc39.es/ecma262/#sec-array.prototype.reduce
-	  left: createMethod(false),
-	  // `Array.prototype.reduceRight` method
-	  // https://tc39.es/ecma262/#sec-array.prototype.reduceright
-	  right: createMethod(true)
-	};
-
-	var $reduce$1 = arrayReduce.left;
-
-
-
-
-	var STRICT_METHOD$1 = arrayMethodIsStrict('reduce');
-	// Chrome 80-82 has a critical bug
-	// https://bugs.chromium.org/p/chromium/issues/detail?id=1049982
-	var CHROME_BUG = !engineIsNode && engineV8Version > 79 && engineV8Version < 83;
-
-	// `Array.prototype.reduce` method
-	// https://tc39.es/ecma262/#sec-array.prototype.reduce
-	_export({ target: 'Array', proto: true, forced: !STRICT_METHOD$1 || CHROME_BUG }, {
-	  reduce: function reduce(callbackfn /* , initialValue */) {
-	    return $reduce$1(this, callbackfn, arguments.length, arguments.length > 1 ? arguments[1] : undefined);
-	  }
-	});
 
 	var BaseUpload$1 = /*#__PURE__*/function () {
 	  function BaseUpload(_ref) {
@@ -9846,9 +9809,9 @@
 	  if (!descriptors) return;
 	  if (forced) for (var ARRAY in TypedArrayConstructorsList) {
 	    var TypedArrayConstructor = global$1[ARRAY];
-	    if (TypedArrayConstructor && has$2(TypedArrayConstructor.prototype, KEY)) {
+	    if (TypedArrayConstructor && has$2(TypedArrayConstructor.prototype, KEY)) try {
 	      delete TypedArrayConstructor.prototype[KEY];
-	    }
+	    } catch (error) { /* empty */ }
 	  }
 	  if (!TypedArrayPrototype[KEY] || forced) {
 	    redefine(TypedArrayPrototype, KEY, forced ? property
@@ -9862,14 +9825,14 @@
 	  if (objectSetPrototypeOf) {
 	    if (forced) for (ARRAY in TypedArrayConstructorsList) {
 	      TypedArrayConstructor = global$1[ARRAY];
-	      if (TypedArrayConstructor && has$2(TypedArrayConstructor, KEY)) {
+	      if (TypedArrayConstructor && has$2(TypedArrayConstructor, KEY)) try {
 	        delete TypedArrayConstructor[KEY];
-	      }
+	      } catch (error) { /* empty */ }
 	    }
 	    if (!TypedArray[KEY] || forced) {
 	      // V8 ~ Chrome 49-50 `%TypedArray%` methods are non-writable non-configurable
 	      try {
-	        return redefine(TypedArray, KEY, forced ? property : NATIVE_ARRAY_BUFFER_VIEWS$1 && Int8Array$3[KEY] || property);
+	        return redefine(TypedArray, KEY, forced ? property : NATIVE_ARRAY_BUFFER_VIEWS$1 && TypedArray[KEY] || property);
 	      } catch (error) { /* empty */ }
 	    } else return;
 	  }
@@ -10787,6 +10750,42 @@
 	    return new (aTypedArrayConstructor$1(speciesConstructor(O, O.constructor)))(length);
 	  });
 	});
+
+	// `Array.prototype.{ reduce, reduceRight }` methods implementation
+	var createMethod = function (IS_RIGHT) {
+	  return function (that, callbackfn, argumentsLength, memo) {
+	    aFunction(callbackfn);
+	    var O = toObject(that);
+	    var self = indexedObject(O);
+	    var length = toLength(O.length);
+	    var index = IS_RIGHT ? length - 1 : 0;
+	    var i = IS_RIGHT ? -1 : 1;
+	    if (argumentsLength < 2) while (true) {
+	      if (index in self) {
+	        memo = self[index];
+	        index += i;
+	        break;
+	      }
+	      index += i;
+	      if (IS_RIGHT ? index < 0 : length <= index) {
+	        throw TypeError('Reduce of empty array with no initial value');
+	      }
+	    }
+	    for (;IS_RIGHT ? index >= 0 : length > index; index += i) if (index in self) {
+	      memo = callbackfn(memo, self[index], index, O);
+	    }
+	    return memo;
+	  };
+	};
+
+	var arrayReduce = {
+	  // `Array.prototype.reduce` method
+	  // https://tc39.es/ecma262/#sec-array.prototype.reduce
+	  left: createMethod(false),
+	  // `Array.prototype.reduceRight` method
+	  // https://tc39.es/ecma262/#sec-array.prototype.reduceright
+	  right: createMethod(true)
+	};
 
 	var $reduce = arrayReduce.left;
 
@@ -11966,11 +11965,11 @@
 	    }
 
 	    if (req != null) {
-	      var requestId = req.getHeader("X-Request-ID") || "n/a";
+	      var requestId = req.getHeader('X-Request-ID') || 'n/a';
 	      var method = req.getMethod();
 	      var url = req.getURL();
-	      var status = res ? res.getStatus() : "n/a";
-	      var body = res ? res.getBody() || "" : "n/a";
+	      var status = res ? res.getStatus() : 'n/a';
+	      var body = res ? res.getBody() || '' : 'n/a';
 	      message += ", originated from request (method: ".concat(method, ", url: ").concat(url, ", response code: ").concat(status, ", response text: ").concat(body, ", request id: ").concat(requestId, ")");
 	    }
 
@@ -11999,9 +11998,9 @@
 	 * @return {string} The generate UUID
 	 */
 	function uuid() {
-	  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+	  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
 	    var r = Math.random() * 16 | 0,
-	        v = c == "x" ? r : r & 0x3 | 0x8;
+	        v = c == 'x' ? r : r & 0x3 | 0x8;
 	    return v.toString(16);
 	  });
 	}
@@ -12110,8 +12109,8 @@
 	    _classCallCheck$5(this, BaseUpload); // Warn about removed options from previous versions
 
 
-	    if ("resume" in options) {
-	      console.log("tus: The `resume` option has been removed in tus-js-client v2. Please use the URL storage API instead."); // eslint-disable-line no-console
+	    if ('resume' in options) {
+	      console.log('tus: The `resume` option has been removed in tus-js-client v2. Please use the URL storage API instead.'); // eslint-disable-line no-console
 	    } // The default options will already be added from the wrapper classes.
 
 
@@ -12187,28 +12186,28 @@
 	      var file = this.file;
 
 	      if (!file) {
-	        this._emitError(new Error("tus: no file or stream to upload provided"));
+	        this._emitError(new Error('tus: no file or stream to upload provided'));
 
 	        return;
 	      }
 
 	      if (!this.options.endpoint && !this.options.uploadUrl) {
-	        this._emitError(new Error("tus: neither an endpoint or an upload URL is provided"));
+	        this._emitError(new Error('tus: neither an endpoint or an upload URL is provided'));
 
 	        return;
 	      }
 
 	      var retryDelays = this.options.retryDelays;
 
-	      if (retryDelays != null && Object.prototype.toString.call(retryDelays) !== "[object Array]") {
-	        this._emitError(new Error("tus: the `retryDelays` option must either be an array or null"));
+	      if (retryDelays != null && Object.prototype.toString.call(retryDelays) !== '[object Array]') {
+	        this._emitError(new Error('tus: the `retryDelays` option must either be an array or null'));
 
 	        return;
 	      }
 
 	      if (this.options.parallelUploads > 1) {
 	        // Test which options are incompatible with parallel uploads.
-	        ["uploadUrl", "uploadSize", "uploadLengthDeferred"].forEach(function (optionName) {
+	        ['uploadUrl', 'uploadSize', 'uploadLengthDeferred'].forEach(function (optionName) {
 	          if (_this2.options[optionName]) {
 	            _this2._emitError(new Error("tus: cannot use the ".concat(optionName, " option when parallelUploads is enabled")));
 	          }
@@ -12221,9 +12220,9 @@
 
 	        if (_this2._source) {
 	          return _this2._source;
-	        } else {
-	          return _this2.options.fileReader.openFile(file, _this2.options.chunkSize);
 	        }
+
+	        return _this2.options.fileReader.openFile(file, _this2.options.chunkSize);
 	      }).then(function (source) {
 	        _this2._source = source; // If the upload was configured to use multiple requests or if we resume from
 	        // an upload which used multiple requests, we start a parallel upload.
@@ -12278,7 +12277,7 @@
 	              metadata: {},
 	              // Add the header to indicate the this is a partial upload.
 	              headers: _objectSpread$2({}, _this3.options.headers, {
-	                "Upload-Concat": "partial"
+	                'Upload-Concat': 'partial'
 	              }),
 	              // Reject or resolve the promise if the upload errors or completes.
 	              onSuccess: resolve,
@@ -12315,27 +12314,27 @@
 	      // creating the final upload.
 
 	      Promise.all(uploads).then(function () {
-	        req = _this3._openRequest("POST", _this3.options.endpoint);
-	        req.setHeader("Upload-Concat", "final;".concat(_this3._parallelUploadUrls.join(" "))); // Add metadata if values have been added
+	        req = _this3._openRequest('POST', _this3.options.endpoint);
+	        req.setHeader('Upload-Concat', "final;".concat(_this3._parallelUploadUrls.join(' '))); // Add metadata if values have been added
 
 	        var metadata = encodeMetadata(_this3.options.metadata);
 
-	        if (metadata !== "") {
-	          req.setHeader("Upload-Metadata", metadata);
+	        if (metadata !== '') {
+	          req.setHeader('Upload-Metadata', metadata);
 	        }
 
 	        return _this3._sendRequest(req, null);
 	      }).then(function (res) {
 	        if (!inStatusCategory(res.getStatus(), 200)) {
-	          _this3._emitHttpError(req, res, "tus: unexpected response while creating upload");
+	          _this3._emitHttpError(req, res, 'tus: unexpected response while creating upload');
 
 	          return;
 	        }
 
-	        var location = res.getHeader("Location");
+	        var location = res.getHeader('Location');
 
 	        if (location == null) {
-	          _this3._emitHttpError(req, res, "tus: invalid or missing Location header");
+	          _this3._emitHttpError(req, res, 'tus: invalid or missing Location header');
 
 	          return;
 	        }
@@ -12367,7 +12366,7 @@
 	        this._size = +this.options.uploadSize;
 
 	        if (isNaN(this._size)) {
-	          this._emitError(new Error("tus: cannot convert `uploadSize` option into a number"));
+	          this._emitError(new Error('tus: cannot convert `uploadSize` option into a number'));
 
 	          return;
 	        }
@@ -12419,11 +12418,13 @@
 
 	  }, {
 	    key: "abort",
-	    value: function abort(shouldTerminate, cb) {
-	      var _this4 = this;
+	    value: function abort(shouldTerminate) {
+	      var _this4 = this; // Count the number of arguments to see if a callback is being provided in the old style required by tus-js-client 1.x, then throw an error if it is.
+	      // `arguments` is a JavaScript built-in variable that contains all of the function's arguments.
 
-	      if (typeof cb === "function") {
-	        throw new Error("tus: the abort function does not accept a callback since v2 anymore; please use the returned Promise instead");
+
+	      if (arguments.length > 1 && typeof arguments[1] === 'function') {
+	        throw new Error('tus: the abort function does not accept a callback since v2 anymore; please use the returned Promise instead');
 	      } // Stop any parallel partial uploads, that have been started in _startParallelUploads.
 
 
@@ -12489,7 +12490,7 @@
 	        }
 	      }
 
-	      if (typeof this.options.onError === "function") {
+	      if (typeof this.options.onError === 'function') {
 	        this.options.onError(err);
 	      } else {
 	        throw err;
@@ -12510,7 +12511,7 @@
 	        this._removeFromUrlStorage();
 	      }
 
-	      if (typeof this.options.onSuccess === "function") {
+	      if (typeof this.options.onSuccess === 'function') {
 	        this.options.onSuccess();
 	      }
 	    }
@@ -12526,7 +12527,7 @@
 	  }, {
 	    key: "_emitProgress",
 	    value: function _emitProgress(bytesSent, bytesTotal) {
-	      if (typeof this.options.onProgress === "function") {
+	      if (typeof this.options.onProgress === 'function') {
 	        this.options.onProgress(bytesSent, bytesTotal);
 	      }
 	    }
@@ -12543,7 +12544,7 @@
 	  }, {
 	    key: "_emitChunkComplete",
 	    value: function _emitChunkComplete(chunkSize, bytesAccepted, bytesTotal) {
-	      if (typeof this.options.onChunkComplete === "function") {
+	      if (typeof this.options.onChunkComplete === 'function') {
 	        this.options.onChunkComplete(chunkSize, bytesAccepted, bytesTotal);
 	      }
 	    }
@@ -12561,24 +12562,24 @@
 	      var _this6 = this;
 
 	      if (!this.options.endpoint) {
-	        this._emitError(new Error("tus: unable to create upload because no endpoint is provided"));
+	        this._emitError(new Error('tus: unable to create upload because no endpoint is provided'));
 
 	        return;
 	      }
 
-	      var req = this._openRequest("POST", this.options.endpoint);
+	      var req = this._openRequest('POST', this.options.endpoint);
 
 	      if (this.options.uploadLengthDeferred) {
-	        req.setHeader("Upload-Defer-Length", 1);
+	        req.setHeader('Upload-Defer-Length', 1);
 	      } else {
-	        req.setHeader("Upload-Length", this._size);
+	        req.setHeader('Upload-Length', this._size);
 	      } // Add metadata if values have been added
 
 
 	      var metadata = encodeMetadata(this.options.metadata);
 
-	      if (metadata !== "") {
-	        req.setHeader("Upload-Metadata", metadata);
+	      if (metadata !== '') {
+	        req.setHeader('Upload-Metadata', metadata);
 	      }
 
 	      var promise;
@@ -12592,15 +12593,15 @@
 
 	      promise.then(function (res) {
 	        if (!inStatusCategory(res.getStatus(), 200)) {
-	          _this6._emitHttpError(req, res, "tus: unexpected response while creating upload");
+	          _this6._emitHttpError(req, res, 'tus: unexpected response while creating upload');
 
 	          return;
 	        }
 
-	        var location = res.getHeader("Location");
+	        var location = res.getHeader('Location');
 
 	        if (location == null) {
-	          _this6._emitHttpError(req, res, "tus: invalid or missing Location header");
+	          _this6._emitHttpError(req, res, 'tus: invalid or missing Location header');
 
 	          return;
 	        }
@@ -12608,7 +12609,7 @@
 	        _this6.url = resolveUrl(_this6.options.endpoint, location);
 	        log("Created upload at ".concat(_this6.url));
 
-	        if (typeof _this6.options._onUploadUrlAvailable === "function") {
+	        if (typeof _this6.options._onUploadUrlAvailable === 'function') {
 	          _this6.options._onUploadUrlAvailable();
 	        }
 
@@ -12631,7 +12632,7 @@
 	          _this6._performUpload();
 	        }
 	      })["catch"](function (err) {
-	        _this6._emitHttpError(req, null, "tus: failed to create upload", err);
+	        _this6._emitHttpError(req, null, 'tus: failed to create upload', err);
 	      });
 	    }
 	    /*
@@ -12647,7 +12648,7 @@
 	    value: function _resumeUpload() {
 	      var _this7 = this;
 
-	      var req = this._openRequest("HEAD", this.url);
+	      var req = this._openRequest('HEAD', this.url);
 
 	      var promise = this._sendRequest(req, null);
 
@@ -12667,14 +12668,14 @@
 
 
 	          if (status === 423) {
-	            _this7._emitHttpError(req, res, "tus: upload is currently locked; retry later");
+	            _this7._emitHttpError(req, res, 'tus: upload is currently locked; retry later');
 
 	            return;
 	          }
 
 	          if (!_this7.options.endpoint) {
 	            // Don't attempt to create a new upload if no endpoint is provided.
-	            _this7._emitHttpError(req, res, "tus: unable to resume upload (new upload cannot be created without an endpoint)");
+	            _this7._emitHttpError(req, res, 'tus: unable to resume upload (new upload cannot be created without an endpoint)');
 
 	            return;
 	          } // Try to create a new upload
@@ -12687,23 +12688,23 @@
 	          return;
 	        }
 
-	        var offset = parseInt(res.getHeader("Upload-Offset"), 10);
+	        var offset = parseInt(res.getHeader('Upload-Offset'), 10);
 
 	        if (isNaN(offset)) {
-	          _this7._emitHttpError(req, res, "tus: invalid or missing offset value");
+	          _this7._emitHttpError(req, res, 'tus: invalid or missing offset value');
 
 	          return;
 	        }
 
-	        var length = parseInt(res.getHeader("Upload-Length"), 10);
+	        var length = parseInt(res.getHeader('Upload-Length'), 10);
 
 	        if (isNaN(length) && !_this7.options.uploadLengthDeferred) {
-	          _this7._emitHttpError(req, res, "tus: invalid or missing length value");
+	          _this7._emitHttpError(req, res, 'tus: invalid or missing length value');
 
 	          return;
 	        }
 
-	        if (typeof _this7.options._onUploadUrlAvailable === "function") {
+	        if (typeof _this7.options._onUploadUrlAvailable === 'function') {
 	          _this7.options._onUploadUrlAvailable();
 	        } // Upload has already been completed and we do not need to send additional
 	        // data to the server
@@ -12721,7 +12722,7 @@
 
 	        _this7._performUpload();
 	      })["catch"](function (err) {
-	        _this7._emitHttpError(req, null, "tus: failed to resume upload", err);
+	        _this7._emitHttpError(req, null, 'tus: failed to resume upload', err);
 	      });
 	    }
 	    /**
@@ -12749,19 +12750,19 @@
 	      // X-HTTP-Method-Override header for simulating a PATCH request.
 
 	      if (this.options.overridePatchMethod) {
-	        req = this._openRequest("POST", this.url);
-	        req.setHeader("X-HTTP-Method-Override", "PATCH");
+	        req = this._openRequest('POST', this.url);
+	        req.setHeader('X-HTTP-Method-Override', 'PATCH');
 	      } else {
-	        req = this._openRequest("PATCH", this.url);
+	        req = this._openRequest('PATCH', this.url);
 	      }
 
-	      req.setHeader("Upload-Offset", this._offset);
+	      req.setHeader('Upload-Offset', this._offset);
 
 	      var promise = this._addChunkToRequest(req);
 
 	      promise.then(function (res) {
 	        if (!inStatusCategory(res.getStatus(), 200)) {
-	          _this8._emitHttpError(req, res, "tus: unexpected response while uploading chunk");
+	          _this8._emitHttpError(req, res, 'tus: unexpected response while uploading chunk');
 
 	          return;
 	        }
@@ -12773,7 +12774,7 @@
 	          return;
 	        }
 
-	        _this8._emitHttpError(req, null, "tus: failed to upload chunk at offset " + _this8._offset, err);
+	        _this8._emitHttpError(req, null, "tus: failed to upload chunk at offset ".concat(_this8._offset), err);
 	      });
 	    }
 	    /**
@@ -12793,7 +12794,7 @@
 	      req.setProgressHandler(function (bytesSent) {
 	        _this9._emitProgress(start + bytesSent, _this9._size);
 	      });
-	      req.setHeader("Content-Type", "application/offset+octet-stream"); // The specified chunkSize may be Infinity or the calcluated end position
+	      req.setHeader('Content-Type', 'application/offset+octet-stream'); // The specified chunkSize may be Infinity or the calcluated end position
 	      // may exceed the file's size. In both cases, we limit the end position to
 	      // the input's total size for simpler calculations and correctness.
 
@@ -12809,16 +12810,16 @@
 
 	        if (_this9.options.uploadLengthDeferred && done) {
 	          _this9._size = _this9._offset + (value && value.size ? value.size : 0);
-	          req.setHeader("Upload-Length", _this9._size);
+	          req.setHeader('Upload-Length', _this9._size);
 	        }
 
 	        if (value === null) {
 	          return _this9._sendRequest(req);
-	        } else {
-	          _this9._emitProgress(_this9._offset, _this9._size);
-
-	          return _this9._sendRequest(req, value);
 	        }
+
+	        _this9._emitProgress(_this9._offset, _this9._size);
+
+	        return _this9._sendRequest(req, value);
 	      });
 	    }
 	    /**
@@ -12831,10 +12832,10 @@
 	  }, {
 	    key: "_handleUploadResponse",
 	    value: function _handleUploadResponse(req, res) {
-	      var offset = parseInt(res.getHeader("Upload-Offset"), 10);
+	      var offset = parseInt(res.getHeader('Upload-Offset'), 10);
 
 	      if (isNaN(offset)) {
-	        this._emitHttpError(req, res, "tus: invalid or missing offset value");
+	        this._emitHttpError(req, res, 'tus: invalid or missing offset value');
 
 	        return;
 	      }
@@ -12938,25 +12939,31 @@
 	    }
 	  }], [{
 	    key: "terminate",
-	    value: function terminate(url) {
-	      var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-	      var cb = arguments.length > 2 ? arguments[2] : undefined;
+	    value: function terminate(url, options) {
+	      // Count the number of arguments to see if a callback is being provided as the last
+	      // argument in the old style required by tus-js-client 1.x, then throw an error if it is.
+	      // `arguments` is a JavaScript built-in variable that contains all of the function's arguments.
+	      if (arguments.length > 1 && typeof arguments[arguments.length - 1] === 'function') {
+	        throw new Error('tus: the terminate function does not accept a callback since v2 anymore; please use the returned Promise instead');
+	      } // Note that in order for the trick above to work, a default value cannot be set for `options`,
+	      // so the check below replaces the old default `{}`.
 
-	      if (typeof options === "function" || typeof cb === "function") {
-	        throw new Error("tus: the terminate function does not accept a callback since v2 anymore; please use the returned Promise instead");
+
+	      if (options === undefined) {
+	        options = {};
 	      }
 
-	      var req = openRequest("DELETE", url, options);
+	      var req = openRequest('DELETE', url, options);
 	      return sendRequest(req, null, options).then(function (res) {
 	        // A 204 response indicates a successfull request
 	        if (res.getStatus() === 204) {
 	          return;
 	        }
 
-	        throw new DetailedError("tus: unexpected response while terminating upload", null, req, res);
+	        throw new DetailedError('tus: unexpected response while terminating upload', null, req, res);
 	      })["catch"](function (err) {
 	        if (!(err instanceof DetailedError)) {
-	          err = new DetailedError("tus: failed to terminate upload", err, req, null);
+	          err = new DetailedError('tus: failed to terminate upload', err, req, null);
 	        }
 
 	        if (!shouldRetry(err, 0, options)) {
@@ -12989,10 +12996,10 @@
 	  var encoded = [];
 
 	  for (var key in metadata) {
-	    encoded.push(key + " " + base64.Base64.encode(metadata[key]));
+	    encoded.push("".concat(key, " ").concat(base64.Base64.encode(metadata[key])));
 	  }
 
-	  return encoded.join(",");
+	  return encoded.join(',');
 	}
 	/**
 	 * Checks whether a given status is in the range of the expected category.
@@ -13016,7 +13023,7 @@
 
 	function openRequest(method, url, options) {
 	  var req = options.httpStack.createRequest(method, url);
-	  req.setHeader("Tus-Resumable", "1.0.0");
+	  req.setHeader('Tus-Resumable', '1.0.0');
 	  var headers = options.headers || {};
 
 	  for (var name in headers) {
@@ -13025,7 +13032,7 @@
 
 	  if (options.addRequestId) {
 	    var requestId = uuid();
-	    req.setHeader("X-Request-ID", requestId);
+	    req.setHeader('X-Request-ID', requestId);
 	  }
 
 	  return req;
@@ -13039,10 +13046,10 @@
 
 
 	function sendRequest(req, body, options) {
-	  var onBeforeRequestPromise = typeof options.onBeforeRequest === "function" ? Promise.resolve(options.onBeforeRequest(req)) : Promise.resolve();
+	  var onBeforeRequestPromise = typeof options.onBeforeRequest === 'function' ? Promise.resolve(options.onBeforeRequest(req)) : Promise.resolve();
 	  return onBeforeRequestPromise.then(function () {
 	    return req.send(body).then(function (res) {
-	      var onAfterResponsePromise = typeof options.onAfterResponse === "function" ? Promise.resolve(options.onAfterResponse(req, res)) : Promise.resolve();
+	      var onAfterResponsePromise = typeof options.onAfterResponse === 'function' ? Promise.resolve(options.onAfterResponse(req, res)) : Promise.resolve();
 	      return onAfterResponsePromise.then(function () {
 	        return res;
 	      });
@@ -13060,7 +13067,7 @@
 	function isOnline() {
 	  var online = true;
 
-	  if (typeof window !== "undefined" && "navigator" in window && window.navigator.onLine === false) {
+	  if (typeof window !== 'undefined' && 'navigator' in window && window.navigator.onLine === false) {
 	    online = false;
 	  }
 
@@ -13088,7 +13095,7 @@
 	    return false;
 	  }
 
-	  if (options && typeof options.onShouldRetry === "function") {
+	  if (options && typeof options.onShouldRetry === 'function') {
 	    return options.onShouldRetry(err, retryAttempt, options);
 	  }
 
@@ -13223,10 +13230,10 @@
 	var hasStorage = false;
 
 	try {
-	  hasStorage = "localStorage" in window; // Attempt to store and read entries from the local storage to detect Private
+	  hasStorage = 'localStorage' in window; // Attempt to store and read entries from the local storage to detect Private
 	  // Mode on Safari on iOS (see #49)
 
-	  var key = "tusSupport";
+	  var key = 'tusSupport';
 	  localStorage.setItem(key, localStorage.getItem(key));
 	} catch (e) {
 	  // If we try to access localStorage inside a sandboxed iframe, a SecurityError
@@ -13248,7 +13255,7 @@
 	  _createClass$3(WebStorageUrlStorage, [{
 	    key: "findAllUploads",
 	    value: function findAllUploads() {
-	      var results = this._findEntries("tus::");
+	      var results = this._findEntries('tus::');
 
 	      return Promise.resolve(results);
 	    }
@@ -13336,7 +13343,7 @@
 	  }, {
 	    key: "getName",
 	    value: function getName() {
-	      return "XHRHttpStack";
+	      return 'XHRHttpStack';
 	    }
 	  }]);
 
@@ -13382,7 +13389,7 @@
 	    key: "setProgressHandler",
 	    value: function setProgressHandler(progressHandler) {
 	      // Test support for progress events before attaching an event listener
-	      if (!("upload" in this._xhr)) {
+	      if (!('upload' in this._xhr)) {
 	        return;
 	      }
 
@@ -13462,7 +13469,7 @@
 	}();
 
 	var isReactNative = function isReactNative() {
-	  return typeof navigator !== "undefined" && typeof navigator.product === "string" && navigator.product.toLowerCase() === "reactnative";
+	  return typeof navigator !== 'undefined' && typeof navigator.product === 'string' && navigator.product.toLowerCase() === 'reactnative';
 	};
 
 	/**
@@ -13473,7 +13480,7 @@
 	function uriToBlob(uri) {
 	  return new Promise(function (resolve, reject) {
 	    var xhr = new XMLHttpRequest();
-	    xhr.responseType = "blob";
+	    xhr.responseType = 'blob';
 
 	    xhr.onload = function () {
 	      var blob = xhr.response;
@@ -13484,13 +13491,13 @@
 	      reject(err);
 	    };
 
-	    xhr.open("GET", uri);
+	    xhr.open('GET', uri);
 	    xhr.send();
 	  });
 	}
 
 	var isCordova = function isCordova() {
-	  return typeof window != "undefined" && (typeof window.PhoneGap != "undefined" || typeof window.Cordova != "undefined" || typeof window.cordova != "undefined");
+	  return typeof window != 'undefined' && (typeof window.PhoneGap != 'undefined' || typeof window.Cordova != 'undefined' || typeof window.cordova != 'undefined');
 	};
 
 	/**
@@ -13690,7 +13697,7 @@
 	    return c;
 	  }
 
-	  throw new Error("Unknown data type");
+	  throw new Error('Unknown data type');
 	}
 
 	var FileReader$1 = /*#__PURE__*/function () {
@@ -13705,11 +13712,11 @@
 	      // you usually get a file object {} with a uri property that contains
 	      // a local path to the file. We use XMLHttpRequest to fetch
 	      // the file blob, before uploading with tus.
-	      if (isReactNative() && input && typeof input.uri !== "undefined") {
+	      if (isReactNative() && input && typeof input.uri !== 'undefined') {
 	        return uriToBlob(input.uri).then(function (blob) {
 	          return new FileSource(blob);
 	        })["catch"](function (err) {
-	          throw new Error("tus: cannot fetch `file.uri` as Blob, make sure the uri is correct and accessible. " + err);
+	          throw new Error("tus: cannot fetch `file.uri` as Blob, make sure the uri is correct and accessible. ".concat(err));
 	        });
 	      } // Since we emulate the Blob type in our tests (not all target browsers
 	      // support it), we cannot use `instanceof` for testing whether the input value
@@ -13717,21 +13724,21 @@
 	      // size property are available.
 
 
-	      if (typeof input.slice === "function" && typeof input.size !== "undefined") {
+	      if (typeof input.slice === 'function' && typeof input.size !== 'undefined') {
 	        return Promise.resolve(new FileSource(input));
 	      }
 
-	      if (typeof input.read === "function") {
+	      if (typeof input.read === 'function') {
 	        chunkSize = +chunkSize;
 
 	        if (!isFinite(chunkSize)) {
-	          return Promise.reject(new Error("cannot create source for stream without a finite value for the `chunkSize` option"));
+	          return Promise.reject(new Error('cannot create source for stream without a finite value for the `chunkSize` option'));
 	        }
 
 	        return Promise.resolve(new StreamSource(input, chunkSize));
 	      }
 
-	      return Promise.reject(new Error("source object may only be an instance of File, Blob, or Reader in this environment"));
+	      return Promise.reject(new Error('source object may only be an instance of File, Blob, or Reader in this environment'));
 	    }
 	  }]);
 
@@ -13751,12 +13758,12 @@
 	    return Promise.resolve(reactNativeFingerprint(file, options));
 	  }
 
-	  return Promise.resolve(["tus-br", file.name, file.type, file.size, file.lastModified, options.endpoint].join("-"));
+	  return Promise.resolve(['tus-br', file.name, file.type, file.size, file.lastModified, options.endpoint].join('-'));
 	}
 
 	function reactNativeFingerprint(file, options) {
-	  var exifHash = file.exif ? hashCode(JSON.stringify(file.exif)) : "noexif";
-	  return ["tus-rn", file.name || "noname", file.size || "nosize", exifHash, options.endpoint].join("/");
+	  var exifHash = file.exif ? hashCode(JSON.stringify(file.exif)) : 'noexif';
+	  return ['tus-rn', file.name || 'noname', file.size || 'nosize', exifHash, options.endpoint].join('/');
 	}
 
 	function hashCode(str) {
@@ -13771,7 +13778,7 @@
 	    var _char = str.charCodeAt(i);
 
 	    hash = (hash << 5) - hash + _char;
-	    hash = hash & hash; // Convert to 32bit integer
+	    hash &= hash; // Convert to 32bit integer
 	  }
 
 	  return hash;
@@ -14833,7 +14840,7 @@
 	  });
 	};
 
-	function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+	function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
 
 	function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty$2(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
