@@ -37,7 +37,8 @@ urlpatterns = (
         name="multiple_without_js_example",
     ),
     path("placeholder", views.PlaceholderView.as_view(), name="placeholder_example"),
-    path("s3multiple", views.S3ExampleView.as_view(), name="s3_example"),
+    path("s3single", views.S3SingleExampleView.as_view(), name="s3_example"),
+    path("s3multiple", views.S3MultipleExampleView.as_view(), name="s3_example"),
     path(
         "s3placeholder",
         views.S3PlaceholderExampleView.as_view(),

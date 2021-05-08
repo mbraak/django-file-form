@@ -7,7 +7,7 @@ from werkzeug.serving import make_server, BaseWSGIServer
 import boto3
 
 from django_file_form_example.tests.utils.base_live_testcase import BaseLiveTestCase
-from django_file_form_example.models import Example2
+from django_file_form_example.models import Example2, Example
 from django_file_form_example.tests.utils.page import Page
 from django_file_form_example.tests.utils.test_utils import read_file
 
@@ -75,7 +75,23 @@ class S3TestCase(BaseLiveTestCase):
         finally:
             super().tearDown()
 
-    def test_upload(self):
+    def test_single_upload(self):
+        page = self.page
+        page.open("/s3single")
+
+        temp_file = page.create_temp_file("content1")
+
+        page.fill_title_field("abc")
+        page.upload_using_js(temp_file)
+        page.find_upload_success(temp_file)
+
+        page.submit()
+        page.assert_page_contains_text("Upload success")
+
+        example = Example.objects.get(title="abc")
+        self.assertEqual(read_file(example.input_file), b"content1")
+
+    def test_multiple_upload(self):
         page = self.page
         page.open("/s3multiple")
 

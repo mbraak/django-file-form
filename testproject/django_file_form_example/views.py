@@ -116,8 +116,12 @@ class PlaceholderView(BaseFormView):
         )
 
 
-class S3ExampleView(BaseFormView):
-    form_class = forms.S3ExampleForm
+class S3SingleExampleView(BaseFormView):
+    form_class = forms.S3SingleExampleForm
+
+
+class S3MultipleExampleView(BaseFormView):
+    form_class = forms.S3MultipleExampleForm
 
 
 class S3PlaceholderExampleView(PlaceholderView):
