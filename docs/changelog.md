@@ -1,5 +1,9 @@
 ## Changelog
 
+**development version**
+
+  * Issue #456: handle data parameter with the None value
+
 **3.2.1 (20 april 2021)**
 
   * Issue #445: fix ModelForm update with multiple files (thanks to Arcuri Davide)

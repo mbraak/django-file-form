@@ -44,6 +44,8 @@ class MultipleUploadedFileField(UploadedFileField):
 
     # override
 
+    # These overrides are necessary to support multiple files. The FileField from Django doesn't support multiple files.
+
     def bound_data(self, data, initial):
         result = []
 
@@ -56,7 +58,13 @@ class MultipleUploadedFileField(UploadedFileField):
         return result
 
     def clean(self, data, initial=None):
-        return super().clean(data + (initial or []))
+        # Parameters:
+        # * data: new data
+        # * initial: initial data
+        #
+        # The original behaviour is to return either the new data or the initial data.
+        # The new behaviour is to return the new data plus the initial data.
+        return super().clean((data or []) + (initial or []))
 
     def to_python(self, data):
         if data in validators.EMPTY_VALUES:
