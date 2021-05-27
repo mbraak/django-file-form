@@ -11,10 +11,6 @@ Settings in `settings.py`:
     * The setting is relative to `MEDIA_ROOT`.
     * The default is `temp_uploads`.
 
-* **FILE_FORM_MAX_FILE_SIZE** (int)
-    * Maximum upload size in bytes
-    * Default is 4GB
-
 * **FILE_FORM_FILE_STORAGE** (string):
     * Dotted path to the class that is used to store temporary uploads.
     * The default is `django.core.files.storage.FileSystemStorage`.
