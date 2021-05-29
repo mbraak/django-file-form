@@ -3,6 +3,7 @@
 **development version**
 
   * Issue #456: handle data parameter with the None value
+  * Issue #465: remove unused FILE_FORM_MAX_FILE_SIZE setting
 
 **3.2.1 (20 april 2021)**
 
