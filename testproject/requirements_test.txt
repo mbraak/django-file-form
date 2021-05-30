@@ -1,6 +1,6 @@
 cryptography==3.4.7
-moto==2.0.5
-Flask==1.1.2
+moto==2.0.8
+Flask==2.0.1
 flask-cors==3.0.10
 psycopg2-binary==2.8.6
 selenium==3.141.0
