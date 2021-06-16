@@ -70,7 +70,6 @@ def get_tus_response():
     response["Tus-Resumable"] = tus_api_version
     response["Tus-Version"] = ",".join(tus_api_version_supported)
     response["Tus-Extension"] = ",".join(tus_api_extensions)
-    response["Tus-Max-Size"] = conf.MAX_FILE_SIZE
     response["Access-Control-Allow-Origin"] = "*"
     response["Access-Control-Allow-Methods"] = "PATCH,HEAD,GET,POST,OPTIONS"
     response[
