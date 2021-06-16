@@ -66,7 +66,26 @@ class MultipleFileExampleForm(BaseForm):
         self.delete_temporary_files()
 
 
-class S3ExampleForm(BaseForm):
+class S3SingleExampleForm(BaseForm):
+    prefix = "example"
+    input_file = UploadedFileField()
+    s3_upload_dir = "s3_example"
+
+    def save(self):
+        input_file = self.cleaned_data["input_file"]
+        try:
+            assert input_file.is_s3direct
+            filename = os.path.splitext(input_file.original_name)[0]
+
+            example = Example(title=self.cleaned_data["title"])
+            example.input_file.save(filename, input_file)
+        finally:
+            input_file.close()
+
+        self.delete_temporary_files()
+
+
+class S3MultipleExampleForm(BaseForm):
     prefix = "example"
     input_file = MultipleUploadedFileField()
     s3_upload_dir = "s3_example"
@@ -113,6 +132,16 @@ class PlaceholderExampleForm(BaseForm):
             finally:
                 f.close()
 
+        self.delete_temporary_files()
+
+
+class PlaceholderS3ExampleForm(BaseForm):
+    prefix = "example"
+    input_file = MultipleUploadedFileField()
+    other_input_file = UploadedFileField()
+    s3_upload_dir = "s3_placeholder_example"
+
+    def save(self):
         self.delete_temporary_files()
 
 
