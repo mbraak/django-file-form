@@ -1,7 +1,14 @@
 import os
 
 from django.core.exceptions import ValidationError
-from django.forms import formset_factory, BaseFormSet, Form, CharField, ModelForm
+from django.forms import (
+    formset_factory,
+    BaseFormSet,
+    Form,
+    CharField,
+    ModelForm,
+    modelformset_factory,
+)
 
 from django_file_form.forms import (
     UploadedFileField,
@@ -188,3 +195,10 @@ class ExampleMultipleModelS3Form(FileFormMixin, ModelForm):
     input_file = MultipleUploadedFileField()
     prefix = "example"
     s3_upload_dir = "s3_example"
+
+
+ExampleMultipleModelS3FormSet = modelformset_factory(
+    model=Example2,
+    form=ExampleMultipleModelS3Form,
+    extra=2,
+)
