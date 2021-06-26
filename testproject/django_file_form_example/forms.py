@@ -178,3 +178,13 @@ class ExampleMultipleModelForm(FileFormMixin, ModelForm):
 
     input_file = MultipleUploadedFileField()
     prefix = "example"
+
+
+class ExampleMultipleModelS3Form(FileFormMixin, ModelForm):
+    class Meta:
+        model = Example2
+        fields = ("title",)
+
+    input_file = MultipleUploadedFileField()
+    prefix = "example"
+    s3_upload_dir = "s3_example"
