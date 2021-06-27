@@ -30,6 +30,16 @@ urlpatterns = (
         views.EditModelFormMultipleView.as_view(),
         name="model_form_multiple_update",
     ),
+    path(
+        "model_form_multiple_s3",
+        views.CreateModelFormMultipleS3View.as_view(),
+        name="model_form_multiple_s3_create",
+    ),
+    path(
+        "model_form_multiple_s3_set",
+        views.ModelFormMultipleS3SetView.as_view(),
+        name="model_form_multiple_s3_set_create",
+    ),
     path("multiple", views.MultipleExampleView.as_view(), name="multiple_example"),
     path(
         "multiple_without_js",
