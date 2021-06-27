@@ -247,11 +247,6 @@ class ModelFormMultipleS3SetView(BaseFormView):
     form_class = forms.ExampleMultipleModelS3FormSet
     template_name = "form_set.html"
 
-    def form_valid(self, formset):
-        # todo: save and test
-
-        return HttpResponseRedirect(reverse("example_success"))
-
 
 def permission_denied(request, exception):
     return HttpResponseForbidden(

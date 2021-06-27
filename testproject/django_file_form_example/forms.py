@@ -196,6 +196,17 @@ class ExampleMultipleModelS3Form(FileFormMixin, ModelForm):
     prefix = "example"
     s3_upload_dir = "s3_example"
 
+    def save(self, commit=True):
+        example = Example2.objects.create(title=self.cleaned_data["title"])
+
+        for f in self.cleaned_data["input_file"]:
+            try:
+                ExampleFile.objects.create(example=example, input_file=f)
+            finally:
+                f.close()
+
+        self.delete_temporary_files()
+
 
 ExampleMultipleModelS3FormSet = modelformset_factory(
     model=Example2,
