@@ -1,5 +1,7 @@
 ## Changelog
 
+  * Issue #471: Fix security advice: uncontrolled data used in path expression
+
 **3.2.2 (17 june 2021)**
 
   * Issue #456: handle data parameter with the None value
