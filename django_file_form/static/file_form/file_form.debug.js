@@ -266,7 +266,7 @@
 	(shared$5.exports = function (key, value) {
 	  return store$1[key] || (store$1[key] = value !== undefined ? value : {});
 	})('versions', []).push({
-	  version: '3.15.1',
+	  version: '3.15.2',
 	  mode: 'global',
 	  copyright: '© 2021 Denis Pushkarev (zloirock.ru)'
 	});
@@ -1501,7 +1501,7 @@
 
 	var setMetadata = function (it) {
 	  defineProperty$7(it, METADATA, { value: {
-	    objectID: 'O' + ++id, // object ID
+	    objectID: 'O' + id++, // object ID
 	    weakData: {}          // weak collections IDs
 	  } });
 	};
@@ -3233,7 +3233,8 @@
 	var Internal, OwnPromiseCapability, PromiseWrapper, nativeThen;
 
 	var FORCED$9 = isForced$1(PROMISE, function () {
-	  var GLOBAL_CORE_JS_PROMISE = inspectSource(PromiseConstructor) !== String(PromiseConstructor);
+	  var PROMISE_CONSTRUCTOR_SOURCE = inspectSource(PromiseConstructor);
+	  var GLOBAL_CORE_JS_PROMISE = PROMISE_CONSTRUCTOR_SOURCE !== String(PromiseConstructor);
 	  // V8 6.6 (Node 10 and Chrome 66) have a bug with resolving custom thenables
 	  // https://bugs.chromium.org/p/chromium/issues/detail?id=830565
 	  // We can't detect it synchronously, so just check versions
@@ -3241,7 +3242,7 @@
 	  // We can't use @@species feature detection in V8 since it causes
 	  // deoptimization and performance degradation
 	  // https://github.com/zloirock/core-js/issues/679
-	  if (V8_VERSION >= 51 && /native code/.test(PromiseConstructor)) return false;
+	  if (V8_VERSION >= 51 && /native code/.test(PROMISE_CONSTRUCTOR_SOURCE)) return false;
 	  // Detect correctness of subclassing with @@species support
 	  var promise = new PromiseConstructor(function (resolve) { resolve(1); });
 	  var FakePromise = function (exec) {
