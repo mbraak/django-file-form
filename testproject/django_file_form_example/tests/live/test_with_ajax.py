@@ -401,7 +401,7 @@ class LiveTestCase(BaseLiveTestCase):
         page.submit()
         page.assert_page_contains_text("Page 1")
 
-    def test_form_set(self):
+    def test_formset(self):
         page = self.page
 
         temp_file1 = page.create_temp_file("content1")

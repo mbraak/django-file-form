@@ -99,16 +99,22 @@ class UploadMultipleWidget(BaseUploadWidget):
         files: Union[Dict, MultiValueDict],
         prefixed_field_name: str,
     ):
-        if hasattr(files, "getlist"):
-            uploads = files.getlist(prefixed_field_name) + get_uploads(
-                data, prefixed_field_name
-            )
-            metadata = get_file_meta(data, prefixed_field_name)
+        def get_uploads_from_files():
+            if hasattr(files, "getlist"):
+                return files.getlist(prefixed_field_name)
+            else:
+                # NB: django-formtools wizard uses dict instead of MultiValueDict
+                return (
+                    super(UploadMultipleWidget, self).value_from_datadict(
+                        data, files, prefixed_field_name
+                    )
+                    or []
+                )
 
-            for upload in uploads:
-                if upload.name in metadata:
-                    upload.metadata = metadata[upload.name]
-            return uploads
-        else:
-            # NB: django-formtools wizard uses dict instead of MultiValueDict
-            return super().value_from_datadict(data, files, prefixed_field_name)
+        uploads = get_uploads_from_files() + get_uploads(data, prefixed_field_name)
+        metadata = get_file_meta(data, prefixed_field_name)
+
+        for upload in uploads:
+            if upload.name in metadata:
+                upload.metadata = metadata[upload.name]
+        return uploads
