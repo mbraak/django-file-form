@@ -25,7 +25,7 @@ const plugins = [
   babel({
     babelHelpers: "runtime",
     extensions: [".js", ".ts"],
-    exclude: "node_modules/core-js/**"
+    exclude: ["node_modules/core-js/**", "node_modules/**/core-js*/**"]
   })
 ];
 

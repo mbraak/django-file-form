@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "lint": "eslint src/**/*.ts",
-    "build": "yarn run sass; rollup -c rollup.config.js; SKIP_COMPRESS_JS=true rollup -c rollup.config.js; COVERAGE=true rollup -c rollup.config.js",
+    "build": "pnpm run sass; rollup -c rollup.config.js; SKIP_COMPRESS_JS=true rollup -c rollup.config.js; COVERAGE=true rollup -c rollup.config.js",
     "sass": "sass --no-source-map style/file_form.scss ../django_file_form/static/file_form/file_form.css",
     "tsc": "tsc --noEmit",
     "watch": "rollup -c -w rollup.config.js"
@@ -45,6 +45,7 @@
     "typescript": "^4.3.5"
   },
   "dependencies": {
+    "@babel/runtime": "^7.14.8",
     "core-js": "^3.15.2",
     "escape-html": "^1.0.3",
     "eventemitter3": "^4.0.7",
