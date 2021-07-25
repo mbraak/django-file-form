@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "lint": "eslint src/**/*.ts",
-    "build": "pnpm run sass; rollup -c rollup.config.js; SKIP_COMPRESS_JS=true rollup -c rollup.config.js; COVERAGE=true rollup -c rollup.config.js",
+    "build": "npm run sass; rollup -c rollup.config.js; SKIP_COMPRESS_JS=true rollup -c rollup.config.js; COVERAGE=true rollup -c rollup.config.js",
     "sass": "sass --no-source-map style/file_form.scss ../django_file_form/static/file_form/file_form.css",
     "tsc": "tsc --noEmit",
     "watch": "rollup -c -w rollup.config.js"
