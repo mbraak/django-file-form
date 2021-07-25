@@ -3936,47 +3936,6 @@
 	  }
 	});
 
-	var anObject$5 = anObject$h;
-
-	// `RegExp.prototype.flags` getter implementation
-	// https://tc39.es/ecma262/#sec-get-regexp.prototype.flags
-	var regexpFlags$1 = function () {
-	  var that = anObject$5(this);
-	  var result = '';
-	  if (that.global) result += 'g';
-	  if (that.ignoreCase) result += 'i';
-	  if (that.multiline) result += 'm';
-	  if (that.dotAll) result += 's';
-	  if (that.unicode) result += 'u';
-	  if (that.sticky) result += 'y';
-	  return result;
-	};
-
-	var redefine$3 = redefine$b.exports;
-	var anObject$4 = anObject$h;
-	var fails$i = fails$B;
-	var flags = regexpFlags$1;
-
-	var TO_STRING = 'toString';
-	var RegExpPrototype$2 = RegExp.prototype;
-	var nativeToString = RegExpPrototype$2[TO_STRING];
-
-	var NOT_GENERIC = fails$i(function () { return nativeToString.call({ source: 'a', flags: 'b' }) != '/a/b'; });
-	// FF44- RegExp#toString has a wrong name
-	var INCORRECT_NAME = nativeToString.name != TO_STRING;
-
-	// `RegExp.prototype.toString` method
-	// https://tc39.es/ecma262/#sec-regexp.prototype.tostring
-	if (NOT_GENERIC || INCORRECT_NAME) {
-	  redefine$3(RegExp.prototype, TO_STRING, function toString() {
-	    var R = anObject$4(this);
-	    var p = String(R.source);
-	    var rf = R.flags;
-	    var f = String(rf === undefined && R instanceof RegExp && !('flags' in RegExpPrototype$2) ? flags.call(R) : rf);
-	    return '/' + p + '/' + f;
-	  }, { unsafe: true });
-	}
-
 	var runtime = {exports: {}};
 
 	(function (module) {
@@ -4066,11 +4025,9 @@
 
 
 	    var IteratorPrototype = {};
-
-	    IteratorPrototype[iteratorSymbol] = function () {
+	    define(IteratorPrototype, iteratorSymbol, function () {
 	      return this;
-	    };
-
+	    });
 	    var getProto = Object.getPrototypeOf;
 	    var NativeIteratorPrototype = getProto && getProto(getProto(values([])));
 
@@ -4081,8 +4038,9 @@
 	    }
 
 	    var Gp = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(IteratorPrototype);
-	    GeneratorFunction.prototype = Gp.constructor = GeneratorFunctionPrototype;
-	    GeneratorFunctionPrototype.constructor = GeneratorFunction;
+	    GeneratorFunction.prototype = GeneratorFunctionPrototype;
+	    define(Gp, "constructor", GeneratorFunctionPrototype);
+	    define(GeneratorFunctionPrototype, "constructor", GeneratorFunction);
 	    GeneratorFunction.displayName = define(GeneratorFunctionPrototype, toStringTagSymbol, "GeneratorFunction"); // Helper for defining the .next, .throw, and .return methods of the
 	    // Iterator interface in terms of a single ._invoke method.
 
@@ -4187,11 +4145,9 @@
 	    }
 
 	    defineIteratorMethods(AsyncIterator.prototype);
-
-	    AsyncIterator.prototype[asyncIteratorSymbol] = function () {
+	    define(AsyncIterator.prototype, asyncIteratorSymbol, function () {
 	      return this;
-	    };
-
+	    });
 	    exports.AsyncIterator = AsyncIterator; // Note that simple async functions are implemented on top of
 	    // AsyncIterator objects; they just return a Promise for the value of
 	    // the final result produced by the iterator.
@@ -4368,13 +4324,12 @@
 	    // object to not be returned from this call. This ensures that doesn't happen.
 	    // See https://github.com/facebook/regenerator/issues/274 for more details.
 
-	    Gp[iteratorSymbol] = function () {
+	    define(Gp, iteratorSymbol, function () {
 	      return this;
-	    };
-
-	    Gp.toString = function () {
+	    });
+	    define(Gp, "toString", function () {
 	      return "[object Generator]";
-	    };
+	    });
 
 	    function pushTryEntry(locs) {
 	      var entry = {
@@ -4686,14 +4641,19 @@
 	  } catch (accidentalStrictMode) {
 	    // This module should not be running in strict mode, so the above
 	    // assignment should always work unless something is misconfigured. Just
-	    // in case runtime.js accidentally runs in strict mode, we can escape
+	    // in case runtime.js accidentally runs in strict mode, in modern engines
+	    // we can explicitly access globalThis. In older engines we can escape
 	    // strict mode using a global Function call. This could conceivably fail
 	    // if a Content Security Policy forbids using Function, but in that case
 	    // the proper solution is to fix the accidental strict mode problem. If
 	    // you've misconfigured your bundler to force strict mode and applied a
 	    // CSP to forbid Function, and you're not willing to fix either of those
 	    // problems, please detail your unique predicament in a GitHub issue.
-	    Function("r", "regeneratorRuntime = r")(runtime);
+	    if ((typeof globalThis === "undefined" ? "undefined" : _typeof$2(globalThis)) === "object") {
+	      globalThis.regeneratorRuntime = runtime;
+	    } else {
+	      Function("r", "regeneratorRuntime = r")(runtime);
+	    }
 	  }
 	})(runtime);
 
@@ -4742,39 +4702,55 @@
 	  return "".concat(getInputNameWithoutPrefix(fieldName, prefix), "-metadata");
 	};
 
+	var anObject$5 = anObject$h;
+
+	// `RegExp.prototype.flags` getter implementation
+	// https://tc39.es/ecma262/#sec-get-regexp.prototype.flags
+	var regexpFlags$1 = function () {
+	  var that = anObject$5(this);
+	  var result = '';
+	  if (that.global) result += 'g';
+	  if (that.ignoreCase) result += 'i';
+	  if (that.multiline) result += 'm';
+	  if (that.dotAll) result += 's';
+	  if (that.unicode) result += 'u';
+	  if (that.sticky) result += 'y';
+	  return result;
+	};
+
 	var regexpStickyHelpers = {};
 
-	var fails$h = fails$B;
+	var fails$i = fails$B;
 
 	// babel-minify transpiles RegExp('a', 'y') -> /a/y and it causes SyntaxError,
 	var RE = function (s, f) {
 	  return RegExp(s, f);
 	};
 
-	regexpStickyHelpers.UNSUPPORTED_Y = fails$h(function () {
+	regexpStickyHelpers.UNSUPPORTED_Y = fails$i(function () {
 	  var re = RE('a', 'y');
 	  re.lastIndex = 2;
 	  return re.exec('abcd') != null;
 	});
 
-	regexpStickyHelpers.BROKEN_CARET = fails$h(function () {
+	regexpStickyHelpers.BROKEN_CARET = fails$i(function () {
 	  // https://bugzilla.mozilla.org/show_bug.cgi?id=773687
 	  var re = RE('^r', 'gy');
 	  re.lastIndex = 2;
 	  return re.exec('str') != null;
 	});
 
-	var fails$g = fails$B;
+	var fails$h = fails$B;
 
-	var regexpUnsupportedDotAll = fails$g(function () {
+	var regexpUnsupportedDotAll = fails$h(function () {
 	  // babel-minify transpiles RegExp('.', 's') -> /./s and it causes SyntaxError
 	  var re = RegExp('.', (typeof '').charAt(0));
 	  return !(re.dotAll && re.exec('\n') && re.flags === 's');
 	});
 
-	var fails$f = fails$B;
+	var fails$g = fails$B;
 
-	var regexpUnsupportedNcg = fails$f(function () {
+	var regexpUnsupportedNcg = fails$g(function () {
 	  // babel-minify transpiles RegExp('.', 'g') -> /./g and it causes SyntaxError
 	  var re = RegExp('(?<a>b)', (typeof '').charAt(5));
 	  return re.exec('b').groups.a !== 'b' ||
@@ -5285,26 +5261,26 @@
 
 	// TODO: Remove from `core-js@4` since it's moved to entry points
 
-	var redefine$2 = redefine$b.exports;
+	var redefine$3 = redefine$b.exports;
 	var regexpExec$2 = regexpExec$3;
-	var fails$e = fails$B;
+	var fails$f = fails$B;
 	var wellKnownSymbol$4 = wellKnownSymbol$q;
 	var createNonEnumerableProperty$4 = createNonEnumerableProperty$e;
 
 	var SPECIES = wellKnownSymbol$4('species');
-	var RegExpPrototype$1 = RegExp.prototype;
+	var RegExpPrototype$2 = RegExp.prototype;
 
 	var fixRegexpWellKnownSymbolLogic = function (KEY, exec, FORCED, SHAM) {
 	  var SYMBOL = wellKnownSymbol$4(KEY);
 
-	  var DELEGATES_TO_SYMBOL = !fails$e(function () {
+	  var DELEGATES_TO_SYMBOL = !fails$f(function () {
 	    // String methods call symbol-named RegEp methods
 	    var O = {};
 	    O[SYMBOL] = function () { return 7; };
 	    return ''[KEY](O) != 7;
 	  });
 
-	  var DELEGATES_TO_EXEC = DELEGATES_TO_SYMBOL && !fails$e(function () {
+	  var DELEGATES_TO_EXEC = DELEGATES_TO_SYMBOL && !fails$f(function () {
 	    // Symbol-named RegExp methods call .exec
 	    var execCalled = false;
 	    var re = /a/;
@@ -5336,7 +5312,7 @@
 	    var nativeRegExpMethod = /./[SYMBOL];
 	    var methods = exec(SYMBOL, ''[KEY], function (nativeMethod, regexp, str, arg2, forceStringMethod) {
 	      var $exec = regexp.exec;
-	      if ($exec === regexpExec$2 || $exec === RegExpPrototype$1.exec) {
+	      if ($exec === regexpExec$2 || $exec === RegExpPrototype$2.exec) {
 	        if (DELEGATES_TO_SYMBOL && !forceStringMethod) {
 	          // The native String method already delegates to @@method (this
 	          // polyfilled function), leasing to infinite recursion.
@@ -5348,11 +5324,11 @@
 	      return { done: false };
 	    });
 
-	    redefine$2(String.prototype, KEY, methods[0]);
-	    redefine$2(RegExpPrototype$1, SYMBOL, methods[1]);
+	    redefine$3(String.prototype, KEY, methods[0]);
+	    redefine$3(RegExpPrototype$2, SYMBOL, methods[1]);
 	  }
 
-	  if (SHAM) createNonEnumerableProperty$4(RegExpPrototype$1[SYMBOL], 'sham', true);
+	  if (SHAM) createNonEnumerableProperty$4(RegExpPrototype$2[SYMBOL], 'sham', true);
 	};
 
 	var charAt = stringMultibyte.charAt;
@@ -5387,7 +5363,7 @@
 
 	var fixRegExpWellKnownSymbolLogic$2 = fixRegexpWellKnownSymbolLogic;
 	var isRegExp$1 = isRegexp;
-	var anObject$3 = anObject$h;
+	var anObject$4 = anObject$h;
 	var requireObjectCoercible$4 = requireObjectCoercible$a;
 	var speciesConstructor$4 = speciesConstructor$6;
 	var advanceStringIndex$2 = advanceStringIndex$3;
@@ -5395,7 +5371,7 @@
 	var callRegExpExec = regexpExecAbstract;
 	var regexpExec = regexpExec$3;
 	var stickyHelpers$1 = regexpStickyHelpers;
-	var fails$d = fails$B;
+	var fails$e = fails$B;
 
 	var UNSUPPORTED_Y$1 = stickyHelpers$1.UNSUPPORTED_Y;
 	var arrayPush = [].push;
@@ -5404,7 +5380,7 @@
 
 	// Chrome 51 has a buggy "split" implementation when RegExp#exec !== nativeExec
 	// Weex JS has frozen built-in prototypes, so use try / catch wrapper
-	var SPLIT_WORKS_WITH_OVERWRITTEN_EXEC = !fails$d(function () {
+	var SPLIT_WORKS_WITH_OVERWRITTEN_EXEC = !fails$e(function () {
 	  // eslint-disable-next-line regexp/no-empty-group -- required for testing
 	  var re = /(?:)/;
 	  var originalExec = re.exec;
@@ -5487,7 +5463,7 @@
 	      var res = maybeCallNative(internalSplit, this, string, limit, internalSplit !== nativeSplit);
 	      if (res.done) return res.value;
 
-	      var rx = anObject$3(this);
+	      var rx = anObject$4(this);
 	      var S = String(string);
 	      var C = speciesConstructor$4(rx, RegExp);
 
@@ -5564,7 +5540,7 @@
 	  trim: createMethod$1(3)
 	};
 
-	var fails$c = fails$B;
+	var fails$d = fails$B;
 	var whitespaces = whitespaces$2;
 
 	var non = '\u200B\u0085\u180E';
@@ -5572,7 +5548,7 @@
 	// check that a method works with the correct list
 	// of whitespaces and has a correct name
 	var stringTrimForced = function (METHOD_NAME) {
-	  return fails$c(function () {
+	  return fails$d(function () {
 	    return !!whitespaces[METHOD_NAME]() || non[METHOD_NAME]() != non || whitespaces[METHOD_NAME].name !== METHOD_NAME;
 	  });
 	};
@@ -5632,8 +5608,8 @@
 	};
 
 	var fixRegExpWellKnownSymbolLogic$1 = fixRegexpWellKnownSymbolLogic;
-	var fails$b = fails$B;
-	var anObject$2 = anObject$h;
+	var fails$c = fails$B;
+	var anObject$3 = anObject$h;
 	var toLength$d = toLength$n;
 	var toInteger$4 = toInteger$b;
 	var requireObjectCoercible$2 = requireObjectCoercible$a;
@@ -5665,7 +5641,7 @@
 	  return false;
 	})();
 
-	var REPLACE_SUPPORTS_NAMED_GROUPS = !fails$b(function () {
+	var REPLACE_SUPPORTS_NAMED_GROUPS = !fails$c(function () {
 	  var re = /./;
 	  re.exec = function () {
 	    var result = [];
@@ -5701,7 +5677,7 @@
 	        if (res.done) return res.value;
 	      }
 
-	      var rx = anObject$2(this);
+	      var rx = anObject$3(this);
 	      var S = String(string);
 
 	      var functionalReplace = typeof replaceValue === 'function';
@@ -5766,8 +5742,8 @@
 	var isRegExp = isRegexp;
 	var getFlags = regexpFlags$1;
 	var stickyHelpers = regexpStickyHelpers;
-	var redefine$1 = redefine$b.exports;
-	var fails$a = fails$B;
+	var redefine$2 = redefine$b.exports;
+	var fails$b = fails$B;
 	var has$3 = has$h;
 	var enforceInternalState = internalState.enforce;
 	var setSpecies$1 = setSpecies$4;
@@ -5777,7 +5753,7 @@
 
 	var MATCH = wellKnownSymbol$2('match');
 	var NativeRegExp = global$9.RegExp;
-	var RegExpPrototype = NativeRegExp.prototype;
+	var RegExpPrototype$1 = NativeRegExp.prototype;
 	// TODO: Use only propper RegExpIdentifierName
 	var IS_NCG = /^\?<[^\s\d!#%&*+<=>@^][^\s!#%&*+<=>@^]*>/;
 	var re1 = /a/g;
@@ -5789,7 +5765,7 @@
 	var UNSUPPORTED_Y = stickyHelpers.UNSUPPORTED_Y;
 
 	var BASE_FORCED = DESCRIPTORS$4 &&
-	  (!CORRECT_NEW || UNSUPPORTED_Y || UNSUPPORTED_DOT_ALL || UNSUPPORTED_NCG || fails$a(function () {
+	  (!CORRECT_NEW || UNSUPPORTED_Y || UNSUPPORTED_DOT_ALL || UNSUPPORTED_NCG || fails$b(function () {
 	    re2[MATCH] = false;
 	    // RegExp constructor can alter flags and IsRegExp works correct with @@match
 	    return NativeRegExp(re1) != re1 || NativeRegExp(re2) == re2 || NativeRegExp(re1, 'i') != '/a/i';
@@ -5905,7 +5881,7 @@
 	      groups = handled[1];
 	    }
 
-	    result = inheritIfRequired$1(NativeRegExp(pattern, flags), thisIsRegExp ? this : RegExpPrototype, RegExpWrapper);
+	    result = inheritIfRequired$1(NativeRegExp(pattern, flags), thisIsRegExp ? this : RegExpPrototype$1, RegExpWrapper);
 
 	    if (dotAll || sticky || groups.length) {
 	      state = enforceInternalState(result);
@@ -5937,13 +5913,38 @@
 	    proxy(keys$1[index++]);
 	  }
 
-	  RegExpPrototype.constructor = RegExpWrapper;
-	  RegExpWrapper.prototype = RegExpPrototype;
-	  redefine$1(global$9, 'RegExp', RegExpWrapper);
+	  RegExpPrototype$1.constructor = RegExpWrapper;
+	  RegExpWrapper.prototype = RegExpPrototype$1;
+	  redefine$2(global$9, 'RegExp', RegExpWrapper);
 	}
 
 	// https://tc39.es/ecma262/#sec-get-regexp-@@species
 	setSpecies$1('RegExp');
+
+	var redefine$1 = redefine$b.exports;
+	var anObject$2 = anObject$h;
+	var fails$a = fails$B;
+	var flags = regexpFlags$1;
+
+	var TO_STRING = 'toString';
+	var RegExpPrototype = RegExp.prototype;
+	var nativeToString = RegExpPrototype[TO_STRING];
+
+	var NOT_GENERIC = fails$a(function () { return nativeToString.call({ source: 'a', flags: 'b' }) != '/a/b'; });
+	// FF44- RegExp#toString has a wrong name
+	var INCORRECT_NAME = nativeToString.name != TO_STRING;
+
+	// `RegExp.prototype.toString` method
+	// https://tc39.es/ecma262/#sec-regexp.prototype.tostring
+	if (NOT_GENERIC || INCORRECT_NAME) {
+	  redefine$1(RegExp.prototype, TO_STRING, function toString() {
+	    var R = anObject$2(this);
+	    var p = String(R.source);
+	    var rf = R.flags;
+	    var f = String(rf === undefined && R instanceof RegExp && !('flags' in RegExpPrototype) ? flags.call(R) : rf);
+	    return '/' + p + '/' + f;
+	  }, { unsafe: true });
+	}
 
 	/**
 	 * @param typeMap [Object] Map of MIME type -> Array[extensions]
