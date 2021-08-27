@@ -206,7 +206,7 @@
 	(shared$5.exports = function (key, value) {
 	  return store$2[key] || (store$2[key] = value !== undefined ? value : {});
 	})('versions', []).push({
-	  version: '3.16.2',
+	  version: '3.16.3',
 	  mode: 'global',
 	  copyright: '© 2021 Denis Pushkarev (zloirock.ru)'
 	});
