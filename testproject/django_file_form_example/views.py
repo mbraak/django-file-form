@@ -239,6 +239,15 @@ class EditModelFormMultipleView(FileModelFormMultipleMixin, generic.UpdateView):
         return initial
 
 
+class CreateModelFormMultipleS3View(FileModelFormMultipleMixin, generic.CreateView):
+    form_class = forms.ExampleMultipleModelS3Form
+
+
+class ModelFormMultipleS3SetView(BaseFormView):
+    form_class = forms.ExampleMultipleModelS3FormSet
+    template_name = "form_set.html"
+
+
 def permission_denied(request, exception):
     return HttpResponseForbidden(
         json.dumps(dict(status="permission denied")), content_type="application/json"

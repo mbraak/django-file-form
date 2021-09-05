@@ -1,9 +1,12 @@
 ## Changelog
 
-**development version**
+  * Issue #471: Fix security advice: uncontrolled data used in path expression
+
+**3.2.2 (17 june 2021)**
 
   * Issue #456: handle data parameter with the None value
   * Issue #465: remove unused FILE_FORM_MAX_FILE_SIZE setting
+  * Issue #468: fix modelformset with S3 upload
 
 **3.2.1 (20 april 2021)**
 

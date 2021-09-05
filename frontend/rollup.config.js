@@ -1,14 +1,12 @@
+import path from "path";
 import babel from "@rollup/plugin-babel";
 import commonjs from "@rollup/plugin-commonjs";
-import coverage from "rollup-plugin-istanbul2";
 import replace from "@rollup/plugin-replace";
 import resolve from "@rollup/plugin-node-resolve";
 import { terser } from "rollup-plugin-terser";
 
 const skipCompressJs = Boolean(process.env.SKIP_COMPRESS_JS);
 const includeCoverage = Boolean(process.env.COVERAGE);
-
-const minimize = !skipCompressJs && !includeCoverage;
 
 const getOutputFilename = () => {
   if (includeCoverage) {
@@ -19,6 +17,11 @@ const getOutputFilename = () => {
     return "file_form.js";
   }
 };
+
+const minimize = !skipCompressJs && !includeCoverage;
+const babelConfigFile = includeCoverage
+  ? "babel.coverage.config.json"
+  : "babel.config.json";
 
 const plugins = [
   replace({
@@ -32,21 +35,15 @@ const plugins = [
   commonjs(),
   babel({
     babelHelpers: "runtime",
+    configFile: path.resolve(__dirname, babelConfigFile),
     extensions: [".js", ".ts", ".tsx"],
-    exclude: "node_modules/core-js/**"
+    exclude: ["node_modules/core-js/**", "node_modules/**/core-js*/**"]
   })
 ];
 
 if (minimize) {
   const terserPlugin = terser();
   plugins.push(terserPlugin);
-}
-
-if (includeCoverage) {
-  const coveragePlugin = coverage({
-    exclude: ["node_modules/**"]
-  });
-  plugins.push(coveragePlugin);
 }
 
 export default {

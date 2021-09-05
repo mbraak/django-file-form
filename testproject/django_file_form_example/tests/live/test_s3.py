@@ -325,3 +325,42 @@ class S3TestCase(BaseLiveTestCase):
         page.find_upload_success_with_filename(
             "test_placeholder2.txt", upload_index=0, container_element=file_container
         )
+
+    def test_model_form_multiple_s3_set(self):
+        page = self.page
+        page.open("/model_form_multiple_s3_set")
+
+        # form 1
+        page.fill_title_field("abc", form_prefix="form-0")
+
+        temp_file1 = page.create_temp_file("123")
+        page.upload_js_for_input(
+            temp_file1,
+            page.selenium.find_element_by_css_selector("#id_form-0-input_file"),
+        )
+
+        page.assert_page_contains_text("3 Bytes")
+
+        # form 2
+        page.fill_title_field("def", form_prefix="form-1")
+
+        temp_file2 = page.create_temp_file("1234")
+        page.upload_js_for_input(
+            temp_file2,
+            page.selenium.find_element_by_css_selector("#id_form-1-input_file"),
+        )
+
+        page.assert_page_contains_text("4 Bytes")
+
+        # submit
+        page.submit()
+        page.assert_page_contains_text("Upload success")
+
+        # check results
+        example1 = Example2.objects.get(title="abc")
+        self.assertEqual(example1.files.count(), 1)
+        self.assertEqual(read_file(example1.files.all()[0].input_file), b"123")
+
+        example2 = Example2.objects.get(title="def")
+        self.assertEqual(example2.files.count(), 1)
+        self.assertEqual(read_file(example2.files.all()[0].input_file), b"1234")

@@ -1,13 +1,12 @@
 import base64
 import logging
 import uuid
-from pathlib import Path
 
 from django.views.decorators.http import require_POST, require_http_methods
 
 from django_file_form import conf
 from django_file_form.models import TemporaryUploadedFile
-from django_file_form.util import get_upload_path, check_permission
+from django_file_form.util import get_upload_path, check_permission, safe_join
 from .utils import (
     cache,
     create_uploaded_file_in_db,
@@ -56,7 +55,7 @@ def start_upload(request):
     cache.add("tus-uploads/{}/metadata".format(resource_id), metadata, conf.TIMEOUT)
 
     try:
-        with Path(get_upload_path()).joinpath(resource_id).open("wb") as f:
+        with safe_join(get_upload_path(), resource_id).open("wb") as f:
             pass
     except IOError as e:
         logger.error(
@@ -116,7 +115,7 @@ def upload_part(request, resource_id):
     file_offset = int(request.META.get("HTTP_UPLOAD_OFFSET", 0))
     chunk_size = int(request.META.get("CONTENT_LENGTH", 102400))
 
-    upload_file_path = get_upload_path().joinpath(resource_id)
+    upload_file_path = safe_join(get_upload_path(), resource_id)
     if filename is None or not upload_file_path.exists():
         response.status_code = 410
         return response
@@ -174,7 +173,7 @@ def cancel_upload(resource_id):
 
     remove_resource_from_cache(resource_id)
 
-    upload_file_path = get_upload_path().joinpath(resource_id)
+    upload_file_path = safe_join(get_upload_path(), resource_id)
 
     if upload_file_path.exists():
         upload_file_path.unlink()
