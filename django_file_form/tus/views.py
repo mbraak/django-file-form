@@ -149,10 +149,16 @@ def upload_part(request, resource_id):
         response.status_code = 404
         return response
 
+    file_size_string = cache.get("tus-uploads/{}/file_size".format(resource_id))
+
+    if file_size_string is None:
+        response.status_code = 404
+        return response
+
     response["Upload-Offset"] = new_offset
     response.status_code = 204
 
-    file_size = int(cache.get("tus-uploads/{}/file_size".format(resource_id)))
+    file_size = int(file_size_string)
 
     if file_size == new_offset:
         remove_resource_from_cache(resource_id)
