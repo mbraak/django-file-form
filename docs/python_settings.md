@@ -2,6 +2,10 @@
 
 Settings in `settings.py`:
 
+* **FILE_FORM_CACHE_TIMEOUT** (int)
+    * Cache timeout in seconds
+    * The Default is 24 hours
+
 * **FILE_FORM_MUST_LOGIN** (True / False):
     * Must the user be logged in to upload a file.
     * The default is `False`.

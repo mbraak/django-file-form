@@ -48,11 +48,11 @@ def start_upload(request):
     cache.add(
         "tus-uploads/{}/filename".format(resource_id),
         metadata.get("filename"),
-        conf.TIMEOUT,
+        conf.CACHE_TIMEOUT,
     )
-    cache.add("tus-uploads/{}/file_size".format(resource_id), file_size, conf.TIMEOUT)
-    cache.add("tus-uploads/{}/offset".format(resource_id), 0, conf.TIMEOUT)
-    cache.add("tus-uploads/{}/metadata".format(resource_id), metadata, conf.TIMEOUT)
+    cache.add("tus-uploads/{}/file_size".format(resource_id), file_size, conf.CACHE_TIMEOUT)
+    cache.add("tus-uploads/{}/offset".format(resource_id), 0, conf.CACHE_TIMEOUT)
+    cache.add("tus-uploads/{}/metadata".format(resource_id), metadata, conf.CACHE_TIMEOUT)
 
     try:
         with safe_join(get_upload_path(), resource_id).open("wb") as f:
@@ -149,10 +149,16 @@ def upload_part(request, resource_id):
         response.status_code = 404
         return response
 
+    file_size_string = cache.get("tus-uploads/{}/file_size".format(resource_id))
+
+    if file_size_string is None:
+        response.status_code = 404
+        return response
+
     response["Upload-Offset"] = new_offset
     response.status_code = 204
 
-    file_size = int(cache.get("tus-uploads/{}/file_size".format(resource_id)))
+    file_size = int(file_size_string)
 
     if file_size == new_offset:
         remove_resource_from_cache(resource_id)

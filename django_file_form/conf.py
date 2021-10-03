@@ -1,5 +1,5 @@
 from django.conf import settings
 
 
-# in seconds
-TIMEOUT = 3600
+# Cache timeout in seconds; default is 24 hours
+CACHE_TIMEOUT = getattr(settings, "FILE_FORM_CACHE_TIMEOUT", 3600 * 24)
