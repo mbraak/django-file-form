@@ -146,3 +146,13 @@ widgets and event handlers to update the `data` of this hidden field.
 
 Upon form submission, `django-file-form` retrieves the data and assign them to returned file
 objects with matching filename (could be of placeholder and other types) as `f.metadata`.
+
+
+## Cache
+
+Django-file-form uses the Django cache for storing data while uploading files.
+
+* Only meta data of the file is stored (including the upload progress), not contents of the file.
+* The default cache timeout is 24 hours. An upload will fail if it takes longer than that.
+* The timeout is configurable using the `FILE_FORM_CACHE_TIMEOUT` setting. See the 'Python settings' section.
+* The cache backed is configurable using `FILE_FORM_CACHE`.

@@ -1,6 +1,7 @@
 ## Changelog
 
   * Issue #471: Fix security advice: uncontrolled data used in path expression
+  * Issue #481: Make cache timeout configurable (thanks to Seb Haase)
 
 **3.2.2 (17 june 2021)**
 
