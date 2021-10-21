@@ -243,7 +243,7 @@
 	(shared$5.exports = function (key, value) {
 	  return store$2[key] || (store$2[key] = value !== undefined ? value : {});
 	})('versions', []).push({
-	  version: '3.18.1',
+	  version: '3.18.3',
 	  mode: 'global',
 	  copyright: '© 2021 Denis Pushkarev (zloirock.ru)'
 	});
@@ -260,7 +260,9 @@
 
 	var hasOwnProperty = {}.hasOwnProperty;
 
-	var has$h = Object.hasOwn || function hasOwn(it, key) {
+	// `HasOwnProperty` abstract operation
+	// https://tc39.es/ecma262/#sec-hasownproperty
+	var hasOwnProperty_1 = Object.hasOwn || function hasOwn(it, key) {
 	  return hasOwnProperty.call(toObject$f(it), key);
 	};
 
@@ -273,7 +275,7 @@
 
 	var global$x = global$C;
 	var shared$4 = shared$5.exports;
-	var has$g = has$h;
+	var hasOwn$f = hasOwnProperty_1;
 	var uid$4 = uid$5;
 	var NATIVE_SYMBOL$1 = nativeSymbol$1;
 	var USE_SYMBOL_AS_UID = useSymbolAsUid;
@@ -283,8 +285,8 @@
 	var createWellKnownSymbol = USE_SYMBOL_AS_UID ? Symbol$1 : Symbol$1 && Symbol$1.withoutSetter || uid$4;
 
 	var wellKnownSymbol$r = function (name) {
-	  if (!has$g(WellKnownSymbolsStore$1, name) || !(NATIVE_SYMBOL$1 || typeof WellKnownSymbolsStore$1[name] == 'string')) {
-	    if (NATIVE_SYMBOL$1 && has$g(Symbol$1, name)) {
+	  if (!hasOwn$f(WellKnownSymbolsStore$1, name) || !(NATIVE_SYMBOL$1 || typeof WellKnownSymbolsStore$1[name] == 'string')) {
+	    if (NATIVE_SYMBOL$1 && hasOwn$f(Symbol$1, name)) {
 	      WellKnownSymbolsStore$1[name] = Symbol$1[name];
 	    } else {
 	      WellKnownSymbolsStore$1[name] = createWellKnownSymbol('Symbol.' + name);
@@ -354,7 +356,7 @@
 	var createPropertyDescriptor$5 = createPropertyDescriptor$6;
 	var toIndexedObject$a = toIndexedObject$b;
 	var toPropertyKey$4 = toPropertyKey$5;
-	var has$f = has$h;
+	var hasOwn$e = hasOwnProperty_1;
 	var IE8_DOM_DEFINE$1 = ie8DomDefine;
 
 	// eslint-disable-next-line es/no-object-getownpropertydescriptor -- safe
@@ -368,7 +370,7 @@
 	  if (IE8_DOM_DEFINE$1) try {
 	    return $getOwnPropertyDescriptor$1(O, P);
 	  } catch (error) { /* empty */ }
-	  if (has$f(O, P)) return createPropertyDescriptor$5(!propertyIsEnumerableModule$1.f.call(O, P), O[P]);
+	  if (hasOwn$e(O, P)) return createPropertyDescriptor$5(!propertyIsEnumerableModule$1.f.call(O, P), O[P]);
 	};
 
 	var objectDefineProperty = {};
@@ -453,17 +455,17 @@
 	var global$u = global$C;
 	var isObject$h = isObject$m;
 	var createNonEnumerableProperty$a = createNonEnumerableProperty$b;
-	var objectHas = has$h;
+	var hasOwn$d = hasOwnProperty_1;
 	var shared$2 = sharedStore;
 	var sharedKey$3 = sharedKey$4;
 	var hiddenKeys$5 = hiddenKeys$6;
 
 	var OBJECT_ALREADY_INITIALIZED = 'Object already initialized';
 	var WeakMap = global$u.WeakMap;
-	var set$3, get$1, has$e;
+	var set$3, get$1, has$1;
 
 	var enforce = function (it) {
-	  return has$e(it) ? get$1(it) : set$3(it, {});
+	  return has$1(it) ? get$1(it) : set$3(it, {});
 	};
 
 	var getterFor = function (TYPE) {
@@ -489,42 +491,42 @@
 	  get$1 = function (it) {
 	    return wmget.call(store, it) || {};
 	  };
-	  has$e = function (it) {
+	  has$1 = function (it) {
 	    return wmhas.call(store, it);
 	  };
 	} else {
 	  var STATE = sharedKey$3('state');
 	  hiddenKeys$5[STATE] = true;
 	  set$3 = function (it, metadata) {
-	    if (objectHas(it, STATE)) throw new TypeError(OBJECT_ALREADY_INITIALIZED);
+	    if (hasOwn$d(it, STATE)) throw new TypeError(OBJECT_ALREADY_INITIALIZED);
 	    metadata.facade = it;
 	    createNonEnumerableProperty$a(it, STATE, metadata);
 	    return metadata;
 	  };
 	  get$1 = function (it) {
-	    return objectHas(it, STATE) ? it[STATE] : {};
+	    return hasOwn$d(it, STATE) ? it[STATE] : {};
 	  };
-	  has$e = function (it) {
-	    return objectHas(it, STATE);
+	  has$1 = function (it) {
+	    return hasOwn$d(it, STATE);
 	  };
 	}
 
 	var internalState = {
 	  set: set$3,
 	  get: get$1,
-	  has: has$e,
+	  has: has$1,
 	  enforce: enforce,
 	  getterFor: getterFor
 	};
 
 	var DESCRIPTORS$d = descriptors;
-	var has$d = has$h;
+	var hasOwn$c = hasOwnProperty_1;
 
 	var FunctionPrototype$1 = Function.prototype;
 	// eslint-disable-next-line es/no-object-getownpropertydescriptor -- safe
 	var getDescriptor = DESCRIPTORS$d && Object.getOwnPropertyDescriptor;
 
-	var EXISTS = has$d(FunctionPrototype$1, 'name');
+	var EXISTS = hasOwn$c(FunctionPrototype$1, 'name');
 	// additional protection from minified / mangled / dropped function names
 	var PROPER = EXISTS && (function something() { /* empty */ }).name === 'something';
 	var CONFIGURABLE = EXISTS && (!DESCRIPTORS$d || (DESCRIPTORS$d && getDescriptor(FunctionPrototype$1, 'name').configurable));
@@ -537,7 +539,7 @@
 
 	var global$t = global$C;
 	var isCallable$g = isCallable$o;
-	var has$c = has$h;
+	var hasOwn$b = hasOwnProperty_1;
 	var createNonEnumerableProperty$9 = createNonEnumerableProperty$b;
 	var setGlobal$1 = setGlobal$3;
 	var inspectSource$2 = inspectSource$4;
@@ -558,7 +560,7 @@
 	    if (String(name).slice(0, 7) === 'Symbol(') {
 	      name = '[' + String(name).replace(/^Symbol\(([^)]*)\)/, '$1') + ']';
 	    }
-	    if (!has$c(value, 'name') || (CONFIGURABLE_FUNCTION_NAME$2 && value.name !== name)) {
+	    if (!hasOwn$b(value, 'name') || (CONFIGURABLE_FUNCTION_NAME$2 && value.name !== name)) {
 	      createNonEnumerableProperty$9(value, 'name', name);
 	    }
 	    state = enforceInternalState$1(value);
@@ -587,44 +589,54 @@
 	var ceil = Math.ceil;
 	var floor$6 = Math.floor;
 
-	// `ToInteger` abstract operation
-	// https://tc39.es/ecma262/#sec-tointeger
-	var toInteger$b = function (argument) {
-	  return isNaN(argument = +argument) ? 0 : (argument > 0 ? floor$6 : ceil)(argument);
+	// `ToIntegerOrInfinity` abstract operation
+	// https://tc39.es/ecma262/#sec-tointegerorinfinity
+	var toIntegerOrInfinity$b = function (argument) {
+	  var number = +argument;
+	  // eslint-disable-next-line no-self-compare -- safe
+	  return number !== number || number === 0 ? 0 : (number > 0 ? floor$6 : ceil)(number);
 	};
 
-	var toInteger$a = toInteger$b;
-
-	var min$7 = Math.min;
-
-	// `ToLength` abstract operation
-	// https://tc39.es/ecma262/#sec-tolength
-	var toLength$n = function (argument) {
-	  return argument > 0 ? min$7(toInteger$a(argument), 0x1FFFFFFFFFFFFF) : 0; // 2 ** 53 - 1 == 9007199254740991
-	};
-
-	var toInteger$9 = toInteger$b;
+	var toIntegerOrInfinity$a = toIntegerOrInfinity$b;
 
 	var max$3 = Math.max;
-	var min$6 = Math.min;
+	var min$7 = Math.min;
 
 	// Helper for a popular repeating case of the spec:
 	// Let integer be ? ToInteger(index).
 	// If integer < 0, let result be max((length + integer), 0); else let result be min(integer, length).
 	var toAbsoluteIndex$6 = function (index, length) {
-	  var integer = toInteger$9(index);
-	  return integer < 0 ? max$3(integer + length, 0) : min$6(integer, length);
+	  var integer = toIntegerOrInfinity$a(index);
+	  return integer < 0 ? max$3(integer + length, 0) : min$7(integer, length);
+	};
+
+	var toIntegerOrInfinity$9 = toIntegerOrInfinity$b;
+
+	var min$6 = Math.min;
+
+	// `ToLength` abstract operation
+	// https://tc39.es/ecma262/#sec-tolength
+	var toLength$9 = function (argument) {
+	  return argument > 0 ? min$6(toIntegerOrInfinity$9(argument), 0x1FFFFFFFFFFFFF) : 0; // 2 ** 53 - 1 == 9007199254740991
+	};
+
+	var toLength$8 = toLength$9;
+
+	// `LengthOfArrayLike` abstract operation
+	// https://tc39.es/ecma262/#sec-lengthofarraylike
+	var lengthOfArrayLike$f = function (obj) {
+	  return toLength$8(obj.length);
 	};
 
 	var toIndexedObject$9 = toIndexedObject$b;
-	var toLength$m = toLength$n;
 	var toAbsoluteIndex$5 = toAbsoluteIndex$6;
+	var lengthOfArrayLike$e = lengthOfArrayLike$f;
 
 	// `Array.prototype.{ indexOf, includes }` methods implementation
 	var createMethod$4 = function (IS_INCLUDES) {
 	  return function ($this, el, fromIndex) {
 	    var O = toIndexedObject$9($this);
-	    var length = toLength$m(O.length);
+	    var length = lengthOfArrayLike$e(O);
 	    var index = toAbsoluteIndex$5(fromIndex, length);
 	    var value;
 	    // Array#includes uses SameValueZero equality algorithm
@@ -649,7 +661,7 @@
 	  indexOf: createMethod$4(false)
 	};
 
-	var has$b = has$h;
+	var hasOwn$a = hasOwnProperty_1;
 	var toIndexedObject$8 = toIndexedObject$b;
 	var indexOf = arrayIncludes.indexOf;
 	var hiddenKeys$4 = hiddenKeys$6;
@@ -659,9 +671,9 @@
 	  var i = 0;
 	  var result = [];
 	  var key;
-	  for (key in O) !has$b(hiddenKeys$4, key) && has$b(O, key) && result.push(key);
+	  for (key in O) !hasOwn$a(hiddenKeys$4, key) && hasOwn$a(O, key) && result.push(key);
 	  // Don't enum bug & hidden keys
-	  while (names.length > i) if (has$b(O, key = names[i++])) {
+	  while (names.length > i) if (hasOwn$a(O, key = names[i++])) {
 	    ~indexOf(result, key) || result.push(key);
 	  }
 	  return result;
@@ -707,7 +719,7 @@
 	  return getOwnPropertySymbols ? keys.concat(getOwnPropertySymbols(it)) : keys;
 	};
 
-	var has$a = has$h;
+	var hasOwn$9 = hasOwnProperty_1;
 	var ownKeys$7 = ownKeys$8;
 	var getOwnPropertyDescriptorModule$3 = objectGetOwnPropertyDescriptor;
 	var definePropertyModule$6 = objectDefineProperty;
@@ -718,7 +730,7 @@
 	  var getOwnPropertyDescriptor = getOwnPropertyDescriptorModule$3.f;
 	  for (var i = 0; i < keys.length; i++) {
 	    var key = keys[i];
-	    if (!has$a(target, key)) defineProperty(target, key, getOwnPropertyDescriptor(source, key));
+	    if (!hasOwn$9(target, key)) defineProperty(target, key, getOwnPropertyDescriptor(source, key));
 	  }
 	};
 
@@ -991,7 +1003,7 @@
 	var callWithSafeIterationClosing = callWithSafeIterationClosing$1;
 	var isArrayIteratorMethod$2 = isArrayIteratorMethod$3;
 	var isConstructor$3 = isConstructor$4;
-	var toLength$l = toLength$n;
+	var lengthOfArrayLike$d = lengthOfArrayLike$f;
 	var createProperty$4 = createProperty$5;
 	var getIterator$2 = getIterator$3;
 	var getIteratorMethod$2 = getIteratorMethod$4;
@@ -1018,7 +1030,7 @@
 	      createProperty$4(result, index, value);
 	    }
 	  } else {
-	    length = toLength$l(O.length);
+	    length = lengthOfArrayLike$d(O);
 	    result = IS_CONSTRUCTOR ? new this(length) : Array(length);
 	    for (;length > index; index++) {
 	      value = mapping ? mapfn(O[index], index) : O[index];
@@ -1090,15 +1102,14 @@
 	  return String(argument);
 	};
 
-	var toInteger$8 = toInteger$b;
+	var toIntegerOrInfinity$8 = toIntegerOrInfinity$b;
 	var toString$e = toString$f;
 	var requireObjectCoercible$7 = requireObjectCoercible$a;
 
-	// `String.prototype.codePointAt` methods implementation
 	var createMethod$3 = function (CONVERT_TO_STRING) {
 	  return function ($this, pos) {
 	    var S = toString$e(requireObjectCoercible$7($this));
-	    var position = toInteger$8(pos);
+	    var position = toIntegerOrInfinity$8(pos);
 	    var size = S.length;
 	    var first, second;
 	    if (position < 0 || position >= size) return CONVERT_TO_STRING ? '' : undefined;
@@ -1244,7 +1255,7 @@
 	  return Object.getPrototypeOf(new F()) !== F.prototype;
 	});
 
-	var has$9 = has$h;
+	var hasOwn$8 = hasOwnProperty_1;
 	var isCallable$c = isCallable$o;
 	var toObject$d = toObject$g;
 	var sharedKey$1 = sharedKey$4;
@@ -1258,7 +1269,7 @@
 	// eslint-disable-next-line es/no-object-getprototypeof -- safe
 	var objectGetPrototypeOf = CORRECT_PROTOTYPE_GETTER$1 ? Object.getPrototypeOf : function (O) {
 	  var object = toObject$d(O);
-	  if (has$9(object, IE_PROTO)) return object[IE_PROTO];
+	  if (hasOwn$8(object, IE_PROTO)) return object[IE_PROTO];
 	  var constructor = object.constructor;
 	  if (isCallable$c(constructor) && object instanceof constructor) {
 	    return constructor.prototype;
@@ -1311,13 +1322,13 @@
 	};
 
 	var defineProperty$8 = objectDefineProperty.f;
-	var has$8 = has$h;
+	var hasOwn$7 = hasOwnProperty_1;
 	var wellKnownSymbol$j = wellKnownSymbol$r;
 
 	var TO_STRING_TAG$2 = wellKnownSymbol$j('toStringTag');
 
 	var setToStringTag$8 = function (it, TAG, STATIC) {
-	  if (it && !has$8(it = STATIC ? it : it.prototype, TO_STRING_TAG$2)) {
+	  if (it && !hasOwn$7(it = STATIC ? it : it.prototype, TO_STRING_TAG$2)) {
 	    defineProperty$8(it, TO_STRING_TAG$2, { configurable: true, value: TAG });
 	  }
 	};
@@ -1714,7 +1725,7 @@
 	var $$r = _export;
 	var hiddenKeys$1 = hiddenKeys$6;
 	var isObject$g = isObject$m;
-	var has$7 = has$h;
+	var hasOwn$6 = hasOwnProperty_1;
 	var defineProperty$7 = objectDefineProperty.f;
 	var getOwnPropertyNamesModule$1 = objectGetOwnPropertyNames;
 	var getOwnPropertyNamesExternalModule = objectGetOwnPropertyNamesExternal;
@@ -1740,7 +1751,7 @@
 	var fastKey$1 = function (it, create) {
 	  // return a primitive with prefix
 	  if (!isObject$g(it)) return typeof it == 'symbol' ? it : (typeof it == 'string' ? 'S' : 'P') + it;
-	  if (!has$7(it, METADATA)) {
+	  if (!hasOwn$6(it, METADATA)) {
 	    // can't set metadata to uncaught frozen object
 	    if (!isExtensible(it)) return 'F';
 	    // not necessary to add metadata
@@ -1752,7 +1763,7 @@
 	};
 
 	var getWeakData = function (it, create) {
-	  if (!has$7(it, METADATA)) {
+	  if (!hasOwn$6(it, METADATA)) {
 	    // can't set metadata to uncaught frozen object
 	    if (!isExtensible(it)) return true;
 	    // not necessary to add metadata
@@ -1765,7 +1776,7 @@
 
 	// add metadata on freeze-family methods calling
 	var onFreeze = function (it) {
-	  if (FREEZING && REQUIRED && isExtensible(it) && !has$7(it, METADATA)) setMetadata(it);
+	  if (FREEZING && REQUIRED && isExtensible(it) && !hasOwn$6(it, METADATA)) setMetadata(it);
 	  return it;
 	};
 
@@ -1806,7 +1817,7 @@
 
 	var anObject$a = anObject$j;
 	var isArrayIteratorMethod$1 = isArrayIteratorMethod$3;
-	var toLength$k = toLength$n;
+	var lengthOfArrayLike$c = lengthOfArrayLike$f;
 	var bind$6 = functionBindContext;
 	var getIterator$1 = getIterator$3;
 	var getIteratorMethod$1 = getIteratorMethod$4;
@@ -1844,7 +1855,7 @@
 	    if (!iterFn) throw TypeError(String(iterable) + ' is not iterable');
 	    // optimisation for array iterators
 	    if (isArrayIteratorMethod$1(iterFn)) {
-	      for (index = 0, length = toLength$k(iterable.length); length > index; index++) {
+	      for (index = 0, length = lengthOfArrayLike$c(iterable); length > index; index++) {
 	        result = callFn(iterable[index]);
 	        if (result && result instanceof Result) return result;
 	      } return new Result(false);
@@ -2270,7 +2281,7 @@
 	var bind$4 = functionBindContext;
 	var IndexedObject$2 = indexedObject;
 	var toObject$c = toObject$g;
-	var toLength$j = toLength$n;
+	var lengthOfArrayLike$b = lengthOfArrayLike$f;
 	var arraySpeciesCreate$2 = arraySpeciesCreate$3;
 
 	var push = [].push;
@@ -2288,7 +2299,7 @@
 	    var O = toObject$c($this);
 	    var self = IndexedObject$2(O);
 	    var boundFunction = bind$4(callbackfn, that, 3);
-	    var length = toLength$j(self.length);
+	    var length = lengthOfArrayLike$b(self);
 	    var index = 0;
 	    var create = specificCreate || arraySpeciesCreate$2;
 	    var target = IS_MAP ? create($this, length) : IS_FILTER || IS_FILTER_REJECT ? create($this, 0) : undefined;
@@ -2472,13 +2483,13 @@
 	var path$3 = global$o;
 
 	var path$2 = path$3;
-	var has$6 = has$h;
+	var hasOwn$5 = hasOwnProperty_1;
 	var wrappedWellKnownSymbolModule$1 = wellKnownSymbolWrapped;
 	var defineProperty$5 = objectDefineProperty.f;
 
 	var defineWellKnownSymbol$4 = function (NAME) {
 	  var Symbol = path$2.Symbol || (path$2.Symbol = {});
-	  if (!has$6(Symbol, NAME)) defineProperty$5(Symbol, NAME, {
+	  if (!hasOwn$5(Symbol, NAME)) defineProperty$5(Symbol, NAME, {
 	    value: wrappedWellKnownSymbolModule$1.f(NAME)
 	  });
 	};
@@ -2489,7 +2500,7 @@
 	var DESCRIPTORS$9 = descriptors;
 	var NATIVE_SYMBOL = nativeSymbol$1;
 	var fails$o = fails$C;
-	var has$5 = has$h;
+	var hasOwn$4 = hasOwnProperty_1;
 	var isArray$2 = isArray$4;
 	var isCallable$6 = isCallable$o;
 	var isObject$c = isObject$m;
@@ -2572,12 +2583,12 @@
 	  anObject$9(O);
 	  var key = toPropertyKey$1(P);
 	  anObject$9(Attributes);
-	  if (has$5(AllSymbols, key)) {
+	  if (hasOwn$4(AllSymbols, key)) {
 	    if (!Attributes.enumerable) {
-	      if (!has$5(O, HIDDEN)) nativeDefineProperty$1(O, HIDDEN, createPropertyDescriptor$1(1, {}));
+	      if (!hasOwn$4(O, HIDDEN)) nativeDefineProperty$1(O, HIDDEN, createPropertyDescriptor$1(1, {}));
 	      O[HIDDEN][key] = true;
 	    } else {
-	      if (has$5(O, HIDDEN) && O[HIDDEN][key]) O[HIDDEN][key] = false;
+	      if (hasOwn$4(O, HIDDEN) && O[HIDDEN][key]) O[HIDDEN][key] = false;
 	      Attributes = nativeObjectCreate(Attributes, { enumerable: createPropertyDescriptor$1(0, false) });
 	    } return setSymbolDescriptor(O, key, Attributes);
 	  } return nativeDefineProperty$1(O, key, Attributes);
@@ -2600,16 +2611,17 @@
 	var $propertyIsEnumerable = function propertyIsEnumerable(V) {
 	  var P = toPropertyKey$1(V);
 	  var enumerable = nativePropertyIsEnumerable.call(this, P);
-	  if (this === ObjectPrototype$2 && has$5(AllSymbols, P) && !has$5(ObjectPrototypeSymbols, P)) return false;
-	  return enumerable || !has$5(this, P) || !has$5(AllSymbols, P) || has$5(this, HIDDEN) && this[HIDDEN][P] ? enumerable : true;
+	  if (this === ObjectPrototype$2 && hasOwn$4(AllSymbols, P) && !hasOwn$4(ObjectPrototypeSymbols, P)) return false;
+	  return enumerable || !hasOwn$4(this, P) || !hasOwn$4(AllSymbols, P) || hasOwn$4(this, HIDDEN) && this[HIDDEN][P]
+	    ? enumerable : true;
 	};
 
 	var $getOwnPropertyDescriptor = function getOwnPropertyDescriptor(O, P) {
 	  var it = toIndexedObject$5(O);
 	  var key = toPropertyKey$1(P);
-	  if (it === ObjectPrototype$2 && has$5(AllSymbols, key) && !has$5(ObjectPrototypeSymbols, key)) return;
+	  if (it === ObjectPrototype$2 && hasOwn$4(AllSymbols, key) && !hasOwn$4(ObjectPrototypeSymbols, key)) return;
 	  var descriptor = nativeGetOwnPropertyDescriptor$2(it, key);
-	  if (descriptor && has$5(AllSymbols, key) && !(has$5(it, HIDDEN) && it[HIDDEN][key])) {
+	  if (descriptor && hasOwn$4(AllSymbols, key) && !(hasOwn$4(it, HIDDEN) && it[HIDDEN][key])) {
 	    descriptor.enumerable = true;
 	  }
 	  return descriptor;
@@ -2619,7 +2631,7 @@
 	  var names = nativeGetOwnPropertyNames(toIndexedObject$5(O));
 	  var result = [];
 	  $forEach$1(names, function (key) {
-	    if (!has$5(AllSymbols, key) && !has$5(hiddenKeys, key)) result.push(key);
+	    if (!hasOwn$4(AllSymbols, key) && !hasOwn$4(hiddenKeys, key)) result.push(key);
 	  });
 	  return result;
 	};
@@ -2629,7 +2641,7 @@
 	  var names = nativeGetOwnPropertyNames(IS_OBJECT_PROTOTYPE ? ObjectPrototypeSymbols : toIndexedObject$5(O));
 	  var result = [];
 	  $forEach$1(names, function (key) {
-	    if (has$5(AllSymbols, key) && (!IS_OBJECT_PROTOTYPE || has$5(ObjectPrototype$2, key))) {
+	    if (hasOwn$4(AllSymbols, key) && (!IS_OBJECT_PROTOTYPE || hasOwn$4(ObjectPrototype$2, key))) {
 	      result.push(AllSymbols[key]);
 	    }
 	  });
@@ -2645,7 +2657,7 @@
 	    var tag = uid$1(description);
 	    var setter = function (value) {
 	      if (this === ObjectPrototype$2) setter.call(ObjectPrototypeSymbols, value);
-	      if (has$5(this, HIDDEN) && has$5(this[HIDDEN], tag)) this[HIDDEN][tag] = false;
+	      if (hasOwn$4(this, HIDDEN) && hasOwn$4(this[HIDDEN], tag)) this[HIDDEN][tag] = false;
 	      setSymbolDescriptor(this, tag, createPropertyDescriptor$1(1, value));
 	    };
 	    if (DESCRIPTORS$9 && USE_SETTER) setSymbolDescriptor(ObjectPrototype$2, tag, { configurable: true, set: setter });
@@ -2697,7 +2709,7 @@
 	  // https://tc39.es/ecma262/#sec-symbol.for
 	  'for': function (key) {
 	    var string = $toString$1(key);
-	    if (has$5(StringToSymbolRegistry, string)) return StringToSymbolRegistry[string];
+	    if (hasOwn$4(StringToSymbolRegistry, string)) return StringToSymbolRegistry[string];
 	    var symbol = $Symbol(string);
 	    StringToSymbolRegistry[string] = symbol;
 	    SymbolToStringRegistry[symbol] = string;
@@ -2707,7 +2719,7 @@
 	  // https://tc39.es/ecma262/#sec-symbol.keyfor
 	  keyFor: function keyFor(sym) {
 	    if (!isSymbol$1(sym)) throw TypeError(sym + ' is not a symbol');
-	    if (has$5(SymbolToStringRegistry, sym)) return SymbolToStringRegistry[sym];
+	    if (hasOwn$4(SymbolToStringRegistry, sym)) return SymbolToStringRegistry[sym];
 	  },
 	  useSetter: function () { USE_SETTER = true; },
 	  useSimple: function () { USE_SETTER = false; }
@@ -2868,7 +2880,7 @@
 	var isArray$1 = isArray$4;
 	var isObject$b = isObject$m;
 	var toObject$9 = toObject$g;
-	var toLength$i = toLength$n;
+	var lengthOfArrayLike$a = lengthOfArrayLike$f;
 	var createProperty$2 = createProperty$5;
 	var arraySpeciesCreate$1 = arraySpeciesCreate$3;
 	var arrayMethodHasSpeciesSupport$2 = arrayMethodHasSpeciesSupport$5;
@@ -2911,7 +2923,7 @@
 	    for (i = -1, length = arguments.length; i < length; i++) {
 	      E = i === -1 ? O : arguments[i];
 	      if (isConcatSpreadable(E)) {
-	        len = toLength$i(E.length);
+	        len = lengthOfArrayLike$a(E);
 	        if (n + len > MAX_SAFE_INTEGER$1) throw TypeError(MAXIMUM_ALLOWED_INDEX_EXCEEDED);
 	        for (k = 0; k < len; k++, n++) if (k in E) createProperty$2(A, n, E[k]);
 	      } else {
@@ -2963,7 +2975,7 @@
 
 	var $$i = _export;
 	var getOwnPropertyDescriptor$1 = objectGetOwnPropertyDescriptor.f;
-	var toLength$h = toLength$n;
+	var toLength$7 = toLength$9;
 	var toString$a = toString$f;
 	var notARegExp$1 = notARegexp;
 	var requireObjectCoercible$6 = requireObjectCoercible$a;
@@ -2986,7 +2998,7 @@
 	  startsWith: function startsWith(searchString /* , position = 0 */) {
 	    var that = toString$a(requireObjectCoercible$6(this));
 	    notARegExp$1(searchString);
-	    var index = toLength$h(min$5(arguments.length > 1 ? arguments[1] : undefined, that.length));
+	    var index = toLength$7(min$5(arguments.length > 1 ? arguments[1] : undefined, that.length));
 	    var search = toString$a(searchString);
 	    return $startsWith
 	      ? $startsWith.call(that, search, index)
@@ -3035,7 +3047,7 @@
 	var $$h = _export;
 	var DESCRIPTORS$5 = descriptors;
 	var global$m = global$C;
-	var has$4 = has$h;
+	var hasOwn$3 = hasOwnProperty_1;
 	var isCallable$5 = isCallable$o;
 	var isObject$9 = isObject$m;
 	var defineProperty$3 = objectDefineProperty.f;
@@ -3070,7 +3082,7 @@
 	    get: function description() {
 	      var symbol = isObject$9(this) ? this.valueOf() : this;
 	      var string = symbolToString.call(symbol);
-	      if (has$4(EmptyStringDescriptionStore, symbol)) return '';
+	      if (hasOwn$3(EmptyStringDescriptionStore, symbol)) return '';
 	      var desc = nativeSymbol ? string.slice(7, -1) : string.replace(regexp, '$1');
 	      return desc === '' ? undefined : desc;
 	    }
@@ -3096,7 +3108,7 @@
 	var isConstructor$1 = isConstructor$4;
 	var isObject$8 = isObject$m;
 	var toAbsoluteIndex$4 = toAbsoluteIndex$6;
-	var toLength$g = toLength$n;
+	var lengthOfArrayLike$9 = lengthOfArrayLike$f;
 	var toIndexedObject$2 = toIndexedObject$b;
 	var createProperty$1 = createProperty$5;
 	var wellKnownSymbol$7 = wellKnownSymbol$r;
@@ -3114,7 +3126,7 @@
 	$$g({ target: 'Array', proto: true, forced: !HAS_SPECIES_SUPPORT$1 }, {
 	  slice: function slice(start, end) {
 	    var O = toIndexedObject$2(this);
-	    var length = toLength$g(O.length);
+	    var length = lengthOfArrayLike$9(O);
 	    var k = toAbsoluteIndex$4(start, length);
 	    var fin = toAbsoluteIndex$4(end === undefined ? length : end, length);
 	    // inline `ArraySpeciesCreate` for usage native `Array#slice` where it's possible
@@ -3929,7 +3941,7 @@
 	  return valueOf.call(value);
 	};
 
-	var toInteger$7 = toInteger$b;
+	var toIntegerOrInfinity$7 = toIntegerOrInfinity$b;
 	var toString$9 = toString$f;
 	var requireObjectCoercible$5 = requireObjectCoercible$a;
 
@@ -3938,14 +3950,14 @@
 	var stringRepeat = function repeat(count) {
 	  var str = toString$9(requireObjectCoercible$5(this));
 	  var result = '';
-	  var n = toInteger$7(count);
+	  var n = toIntegerOrInfinity$7(count);
 	  if (n < 0 || n == Infinity) throw RangeError('Wrong number of repetitions');
 	  for (;n > 0; (n >>>= 1) && (str += str)) if (n & 1) result += str;
 	  return result;
 	};
 
 	var $$e = _export;
-	var toInteger$6 = toInteger$b;
+	var toIntegerOrInfinity$6 = toIntegerOrInfinity$b;
 	var thisNumberValue = thisNumberValue$1;
 	var repeat$1 = stringRepeat;
 	var fails$k = fails$C;
@@ -4016,7 +4028,7 @@
 	$$e({ target: 'Number', proto: true, forced: FORCED$8 }, {
 	  toFixed: function toFixed(fractionDigits) {
 	    var number = thisNumberValue(this);
-	    var fractDigits = toInteger$6(fractionDigits);
+	    var fractDigits = toIntegerOrInfinity$6(fractionDigits);
 	    var data = [0, 0, 0, 0, 0, 0];
 	    var sign = '';
 	    var result = '0';
@@ -4092,8 +4104,8 @@
 
 	var $$c = _export;
 	var toAbsoluteIndex$3 = toAbsoluteIndex$6;
-	var toInteger$5 = toInteger$b;
-	var toLength$f = toLength$n;
+	var toIntegerOrInfinity$5 = toIntegerOrInfinity$b;
+	var lengthOfArrayLike$8 = lengthOfArrayLike$f;
 	var toObject$8 = toObject$g;
 	var arraySpeciesCreate = arraySpeciesCreate$3;
 	var createProperty = createProperty$5;
@@ -4112,7 +4124,7 @@
 	$$c({ target: 'Array', proto: true, forced: !HAS_SPECIES_SUPPORT }, {
 	  splice: function splice(start, deleteCount /* , ...items */) {
 	    var O = toObject$8(this);
-	    var len = toLength$f(O.length);
+	    var len = lengthOfArrayLike$8(O);
 	    var actualStart = toAbsoluteIndex$3(start, len);
 	    var argumentsLength = arguments.length;
 	    var insertCount, actualDeleteCount, A, k, from, to;
@@ -4123,7 +4135,7 @@
 	      actualDeleteCount = len - actualStart;
 	    } else {
 	      insertCount = argumentsLength - 2;
-	      actualDeleteCount = min$4(max$1(toInteger$5(deleteCount), 0), len - actualStart);
+	      actualDeleteCount = min$4(max$1(toIntegerOrInfinity$5(deleteCount), 0), len - actualStart);
 	    }
 	    if (len + insertCount - actualDeleteCount > MAX_SAFE_INTEGER) {
 	      throw TypeError(MAXIMUM_ALLOWED_LENGTH_EXCEEDED);
@@ -5652,7 +5664,7 @@
 	var requireObjectCoercible$4 = requireObjectCoercible$a;
 	var speciesConstructor$1 = speciesConstructor$3;
 	var advanceStringIndex$2 = advanceStringIndex$3;
-	var toLength$e = toLength$n;
+	var toLength$6 = toLength$9;
 	var toString$7 = toString$f;
 	var getMethod$2 = getMethod$6;
 	var callRegExpExec = regexpExecAbstract;
@@ -5776,7 +5788,7 @@
 	        var e;
 	        if (
 	          z === null ||
-	          (e = min$3(toLength$e(splitter.lastIndex + (UNSUPPORTED_Y$1 ? q : 0)), S.length)) === p
+	          (e = min$3(toLength$6(splitter.lastIndex + (UNSUPPORTED_Y$1 ? q : 0)), S.length)) === p
 	        ) {
 	          q = advanceStringIndex$2(S, q, unicodeMatching);
 	        } else {
@@ -5903,8 +5915,8 @@
 	var fails$c = fails$C;
 	var anObject$3 = anObject$j;
 	var isCallable$1 = isCallable$o;
-	var toInteger$4 = toInteger$b;
-	var toLength$d = toLength$n;
+	var toIntegerOrInfinity$4 = toIntegerOrInfinity$b;
+	var toLength$5 = toLength$9;
 	var toString$5 = toString$f;
 	var requireObjectCoercible$2 = requireObjectCoercible$a;
 	var advanceStringIndex$1 = advanceStringIndex$3;
@@ -5993,7 +6005,7 @@
 	        if (!global) break;
 
 	        var matchStr = toString$5(result[0]);
-	        if (matchStr === '') rx.lastIndex = advanceStringIndex$1(S, toLength$d(rx.lastIndex), fullUnicode);
+	        if (matchStr === '') rx.lastIndex = advanceStringIndex$1(S, toLength$5(rx.lastIndex), fullUnicode);
 	      }
 
 	      var accumulatedResult = '';
@@ -6002,7 +6014,7 @@
 	        result = results[i];
 
 	        var matched = toString$5(result[0]);
-	        var position = max(min$2(toInteger$4(result.index), S.length), 0);
+	        var position = max(min$2(toIntegerOrInfinity$4(result.index), S.length), 0);
 	        var captures = [];
 	        // NOTE: This is equivalent to
 	        //   captures = result.slice(1).map(maybeToString)
@@ -6041,7 +6053,7 @@
 	var stickyHelpers = regexpStickyHelpers;
 	var redefine$2 = redefine$c.exports;
 	var fails$b = fails$C;
-	var has$3 = has$h;
+	var hasOwn$2 = hasOwnProperty_1;
 	var enforceInternalState = internalState.enforce;
 	var setSpecies$1 = setSpecies$4;
 	var wellKnownSymbol$2 = wellKnownSymbol$r;
@@ -6122,7 +6134,7 @@
 	        groupid++;
 	        continue;
 	      case chr === '>' && ncg:
-	        if (groupname === '' || has$3(names, groupname)) {
+	        if (groupname === '' || hasOwn$2(names, groupname)) {
 	          throw new SyntaxError('Invalid capture group name');
 	        }
 	        names[groupname] = true;
@@ -6645,7 +6657,7 @@
 
 	var fixRegExpWellKnownSymbolLogic = fixRegexpWellKnownSymbolLogic;
 	var anObject$1 = anObject$j;
-	var toLength$c = toLength$n;
+	var toLength$4 = toLength$9;
 	var toString$3 = toString$f;
 	var requireObjectCoercible$1 = requireObjectCoercible$a;
 	var getMethod = getMethod$6;
@@ -6681,7 +6693,7 @@
 	      while ((result = regExpExec(rx, S)) !== null) {
 	        var matchStr = toString$3(result[0]);
 	        A[n] = matchStr;
-	        if (matchStr === '') rx.lastIndex = advanceStringIndex(S, toLength$c(rx.lastIndex), fullUnicode);
+	        if (matchStr === '') rx.lastIndex = advanceStringIndex(S, toLength$4(rx.lastIndex), fullUnicode);
 	        n++;
 	      }
 	      return n === 0 ? null : A;
@@ -7564,7 +7576,7 @@
 	var $$7 = _export;
 	var aCallable$3 = aCallable$9;
 	var toObject$5 = toObject$g;
-	var toLength$b = toLength$n;
+	var lengthOfArrayLike$7 = lengthOfArrayLike$f;
 	var toString$2 = toString$f;
 	var fails$8 = fails$C;
 	var internalSort$1 = arraySort;
@@ -7645,7 +7657,7 @@
 	    if (STABLE_SORT$1) return comparefn === undefined ? nativeSort$1.call(array) : nativeSort$1.call(array, comparefn);
 
 	    var items = [];
-	    var arrayLength = toLength$b(array.length);
+	    var arrayLength = lengthOfArrayLike$7(array);
 	    var itemsLength, index;
 
 	    for (index = 0; index < arrayLength; index++) {
@@ -10914,7 +10926,7 @@
 	var global$8 = global$C;
 	var isCallable = isCallable$o;
 	var isObject$2 = isObject$m;
-	var has$2 = has$h;
+	var hasOwn$1 = hasOwnProperty_1;
 	var classof$1 = classof$a;
 	var tryToString = tryToString$3;
 	var createNonEnumerableProperty$2 = createNonEnumerableProperty$b;
@@ -10963,15 +10975,15 @@
 	  if (!isObject$2(it)) return false;
 	  var klass = classof$1(it);
 	  return klass === 'DataView'
-	    || has$2(TypedArrayConstructorsList, klass)
-	    || has$2(BigIntArrayConstructorsList, klass);
+	    || hasOwn$1(TypedArrayConstructorsList, klass)
+	    || hasOwn$1(BigIntArrayConstructorsList, klass);
 	};
 
 	var isTypedArray$1 = function (it) {
 	  if (!isObject$2(it)) return false;
 	  var klass = classof$1(it);
-	  return has$2(TypedArrayConstructorsList, klass)
-	    || has$2(BigIntArrayConstructorsList, klass);
+	  return hasOwn$1(TypedArrayConstructorsList, klass)
+	    || hasOwn$1(BigIntArrayConstructorsList, klass);
 	};
 
 	var aTypedArray$m = function (it) {
@@ -10988,7 +11000,7 @@
 	  if (!DESCRIPTORS$2) return;
 	  if (forced) for (var ARRAY in TypedArrayConstructorsList) {
 	    var TypedArrayConstructor = global$8[ARRAY];
-	    if (TypedArrayConstructor && has$2(TypedArrayConstructor.prototype, KEY)) try {
+	    if (TypedArrayConstructor && hasOwn$1(TypedArrayConstructor.prototype, KEY)) try {
 	      delete TypedArrayConstructor.prototype[KEY];
 	    } catch (error) { /* empty */ }
 	  }
@@ -11004,7 +11016,7 @@
 	  if (setPrototypeOf$2) {
 	    if (forced) for (ARRAY in TypedArrayConstructorsList) {
 	      TypedArrayConstructor = global$8[ARRAY];
-	      if (TypedArrayConstructor && has$2(TypedArrayConstructor, KEY)) try {
+	      if (TypedArrayConstructor && hasOwn$1(TypedArrayConstructor, KEY)) try {
 	        delete TypedArrayConstructor[KEY];
 	      } catch (error) { /* empty */ }
 	    }
@@ -11059,7 +11071,7 @@
 	  setPrototypeOf$2(Uint8ClampedArrayPrototype, TypedArrayPrototype$1);
 	}
 
-	if (DESCRIPTORS$2 && !has$2(TypedArrayPrototype$1, TO_STRING_TAG)) {
+	if (DESCRIPTORS$2 && !hasOwn$1(TypedArrayPrototype$1, TO_STRING_TAG)) {
 	  TYPED_ARRAY_TAG_REQIRED = true;
 	  defineProperty$1(TypedArrayPrototype$1, TO_STRING_TAG, { get: function () {
 	    return isObject$2(this) ? this[TYPED_ARRAY_TAG$1] : undefined;
@@ -11107,15 +11119,15 @@
 	  return new Int8Array$2(new ArrayBuffer$2(2), 1, undefined).length !== 1;
 	});
 
-	var toInteger$3 = toInteger$b;
-	var toLength$a = toLength$n;
+	var toIntegerOrInfinity$3 = toIntegerOrInfinity$b;
+	var toLength$3 = toLength$9;
 
 	// `ToIndex` abstract operation
 	// https://tc39.es/ecma262/#sec-toindex
 	var toIndex$2 = function (it) {
 	  if (it === undefined) return 0;
-	  var number = toInteger$3(it);
-	  var length = toLength$a(number);
+	  var number = toIntegerOrInfinity$3(it);
+	  var length = toLength$3(number);
 	  if (number !== length) throw RangeError('Wrong length or index');
 	  return length;
 	};
@@ -11209,13 +11221,13 @@
 
 	var toObject$4 = toObject$g;
 	var toAbsoluteIndex$2 = toAbsoluteIndex$6;
-	var toLength$9 = toLength$n;
+	var lengthOfArrayLike$6 = lengthOfArrayLike$f;
 
 	// `Array.prototype.fill` method implementation
 	// https://tc39.es/ecma262/#sec-array.prototype.fill
 	var arrayFill$1 = function fill(value /* , start = 0, end = @length */) {
 	  var O = toObject$4(this);
-	  var length = toLength$9(O.length);
+	  var length = lengthOfArrayLike$6(O);
 	  var argumentsLength = arguments.length;
 	  var index = toAbsoluteIndex$2(argumentsLength > 1 ? arguments[1] : undefined, length);
 	  var end = argumentsLength > 2 ? arguments[2] : undefined;
@@ -11232,8 +11244,8 @@
 	var redefineAll = redefineAll$3;
 	var fails$5 = fails$C;
 	var anInstance$1 = anInstance$5;
-	var toInteger$2 = toInteger$b;
-	var toLength$8 = toLength$n;
+	var toIntegerOrInfinity$2 = toIntegerOrInfinity$b;
+	var toLength$2 = toLength$9;
 	var toIndex$1 = toIndex$2;
 	var IEEE754 = ieee754;
 	var getPrototypeOf = objectGetPrototypeOf;
@@ -11326,9 +11338,9 @@
 	    anInstance$1(this, $DataView, DATA_VIEW);
 	    anInstance$1(buffer, $ArrayBuffer, DATA_VIEW);
 	    var bufferLength = getInternalState$1(buffer).byteLength;
-	    var offset = toInteger$2(byteOffset);
+	    var offset = toIntegerOrInfinity$2(byteOffset);
 	    if (offset < 0 || offset > bufferLength) throw RangeError$2('Wrong offset');
-	    byteLength = byteLength === undefined ? bufferLength - offset : toLength$8(byteLength);
+	    byteLength = byteLength === undefined ? bufferLength - offset : toLength$2(byteLength);
 	    if (offset + byteLength > bufferLength) throw RangeError$2(WRONG_LENGTH$1);
 	    setInternalState$1(this, {
 	      buffer: buffer,
@@ -11462,16 +11474,17 @@
 
 	var floor$1 = Math.floor;
 
-	// `Number.isInteger` method implementation
-	// https://tc39.es/ecma262/#sec-number.isinteger
-	var isInteger$1 = function isInteger(it) {
+	// `IsIntegralNumber` abstract operation
+	// https://tc39.es/ecma262/#sec-isintegralnumber
+	// eslint-disable-next-line es/no-number-isinteger -- safe
+	var isIntegralNumber$1 = Number.isInteger || function isInteger(it) {
 	  return !isObject$1(it) && isFinite(it) && floor$1(it) === it;
 	};
 
-	var toInteger$1 = toInteger$b;
+	var toIntegerOrInfinity$1 = toIntegerOrInfinity$b;
 
 	var toPositiveInteger$1 = function (it) {
-	  var result = toInteger$1(it);
+	  var result = toIntegerOrInfinity$1(it);
 	  if (result < 0) throw RangeError("The argument can't be less than 0");
 	  return result;
 	};
@@ -11486,7 +11499,7 @@
 
 	var aConstructor = aConstructor$3;
 	var toObject$3 = toObject$g;
-	var toLength$7 = toLength$n;
+	var lengthOfArrayLike$5 = lengthOfArrayLike$f;
 	var getIterator = getIterator$3;
 	var getIteratorMethod = getIteratorMethod$4;
 	var isArrayIteratorMethod = isArrayIteratorMethod$3;
@@ -11512,7 +11525,7 @@
 	  if (mapping && argumentsLength > 2) {
 	    mapfn = bind(mapfn, arguments[2], 2);
 	  }
-	  length = toLength$7(O.length);
+	  length = lengthOfArrayLike$5(O);
 	  result = new (aTypedArrayConstructor$2(C))(length);
 	  for (i = 0; length > i; i++) {
 	    result[i] = mapping ? mapfn(O[i], i) : O[i];
@@ -11529,12 +11542,12 @@
 	var anInstance = anInstance$5;
 	var createPropertyDescriptor = createPropertyDescriptor$6;
 	var createNonEnumerableProperty = createNonEnumerableProperty$b;
-	var isInteger = isInteger$1;
-	var toLength$6 = toLength$n;
+	var isIntegralNumber = isIntegralNumber$1;
+	var toLength$1 = toLength$9;
 	var toIndex = toIndex$2;
 	var toOffset$1 = toOffset$2;
 	var toPropertyKey = toPropertyKey$5;
-	var has$1 = has$h;
+	var hasOwn = hasOwnProperty_1;
 	var classof = classof$a;
 	var isObject = isObject$m;
 	var isSymbol = isSymbol$4;
@@ -11590,7 +11603,7 @@
 	  return isTypedArray(target)
 	    && !isSymbol(key)
 	    && key in target
-	    && isInteger(+key)
+	    && isIntegralNumber(+key)
 	    && key >= 0;
 	};
 
@@ -11605,13 +11618,13 @@
 	  key = toPropertyKey(key);
 	  if (isTypedArrayIndex(target, key)
 	    && isObject(descriptor)
-	    && has$1(descriptor, 'value')
-	    && !has$1(descriptor, 'get')
-	    && !has$1(descriptor, 'set')
+	    && hasOwn(descriptor, 'value')
+	    && !hasOwn(descriptor, 'get')
+	    && !hasOwn(descriptor, 'set')
 	    // TODO: add validation descriptor w/o calling accessors
 	    && !descriptor.configurable
-	    && (!has$1(descriptor, 'writable') || descriptor.writable)
-	    && (!has$1(descriptor, 'enumerable') || descriptor.enumerable)
+	    && (!hasOwn(descriptor, 'writable') || descriptor.writable)
+	    && (!hasOwn(descriptor, 'enumerable') || descriptor.enumerable)
 	  ) {
 	    target[key] = descriptor.value;
 	    return target;
@@ -11685,7 +11698,7 @@
 	            byteLength = $len - byteOffset;
 	            if (byteLength < 0) throw RangeError$1(WRONG_LENGTH);
 	          } else {
-	            byteLength = toLength$6($length) * BYTES;
+	            byteLength = toLength$1($length) * BYTES;
 	            if (byteLength + byteOffset > $len) throw RangeError$1(WRONG_LENGTH);
 	          }
 	          length = byteLength / BYTES;
@@ -11770,7 +11783,7 @@
 
 	var toObject$2 = toObject$g;
 	var toAbsoluteIndex$1 = toAbsoluteIndex$6;
-	var toLength$5 = toLength$n;
+	var lengthOfArrayLike$4 = lengthOfArrayLike$f;
 
 	var min$1 = Math.min;
 
@@ -11779,7 +11792,7 @@
 	// eslint-disable-next-line es/no-array-prototype-copywithin -- safe
 	var arrayCopyWithin = [].copyWithin || function copyWithin(target /* = 0 */, start /* = 0, end = @length */) {
 	  var O = toObject$2(this);
-	  var len = toLength$5(O.length);
+	  var len = lengthOfArrayLike$4(O);
 	  var to = toAbsoluteIndex$1(target, len);
 	  var from = toAbsoluteIndex$1(start, len);
 	  var end = arguments.length > 2 ? arguments[2] : undefined;
@@ -11989,8 +12002,8 @@
 
 	/* eslint-disable es/no-array-prototype-lastindexof -- safe */
 	var toIndexedObject = toIndexedObject$b;
-	var toInteger = toInteger$b;
-	var toLength$4 = toLength$n;
+	var toIntegerOrInfinity = toIntegerOrInfinity$b;
+	var lengthOfArrayLike$3 = lengthOfArrayLike$f;
 	var arrayMethodIsStrict = arrayMethodIsStrict$4;
 
 	var min = Math.min;
@@ -12005,9 +12018,9 @@
 	  // convert -0 to +0
 	  if (NEGATIVE_ZERO) return $lastIndexOf$1.apply(this, arguments) || 0;
 	  var O = toIndexedObject(this);
-	  var length = toLength$4(O.length);
+	  var length = lengthOfArrayLike$3(O);
 	  var index = length - 1;
-	  if (arguments.length > 1) index = min(index, toInteger(arguments[1]));
+	  if (arguments.length > 1) index = min(index, toIntegerOrInfinity(arguments[1]));
 	  if (index < 0) index = length + index;
 	  for (;index >= 0; index--) if (index in O && O[index] === searchElement) return index || 0;
 	  return -1;
@@ -12044,7 +12057,7 @@
 	var aCallable$1 = aCallable$9;
 	var toObject$1 = toObject$g;
 	var IndexedObject = indexedObject;
-	var toLength$3 = toLength$n;
+	var lengthOfArrayLike$2 = lengthOfArrayLike$f;
 
 	// `Array.prototype.{ reduce, reduceRight }` methods implementation
 	var createMethod = function (IS_RIGHT) {
@@ -12052,7 +12065,7 @@
 	    aCallable$1(callbackfn);
 	    var O = toObject$1(that);
 	    var self = IndexedObject(O);
-	    var length = toLength$3(O.length);
+	    var length = lengthOfArrayLike$2(O);
 	    var index = IS_RIGHT ? length - 1 : 0;
 	    var i = IS_RIGHT ? -1 : 1;
 	    if (argumentsLength < 2) while (true) {
@@ -12128,7 +12141,7 @@
 	});
 
 	var ArrayBufferViewCore$5 = arrayBufferViewCore;
-	var toLength$2 = toLength$n;
+	var lengthOfArrayLike$1 = lengthOfArrayLike$f;
 	var toOffset = toOffset$2;
 	var toObject = toObject$g;
 	var fails$4 = fails$C;
@@ -12148,7 +12161,7 @@
 	  var offset = toOffset(arguments.length > 1 ? arguments[1] : undefined, 1);
 	  var length = this.length;
 	  var src = toObject(arrayLike);
-	  var len = toLength$2(src.length);
+	  var len = lengthOfArrayLike$1(src);
 	  var index = 0;
 	  if (len + offset > length) throw RangeError('Wrong length');
 	  while (index < len) this[offset + index] = src[index++];
@@ -12195,7 +12208,7 @@
 	var global$3 = global$C;
 	var fails$2 = fails$C;
 	var aCallable = aCallable$9;
-	var toLength$1 = toLength$n;
+	var lengthOfArrayLike = lengthOfArrayLike$f;
 	var internalSort = arraySort;
 	var FF = engineFfVersion;
 	var IE_OR_EDGE = engineIsIeOrEdge;
@@ -12260,7 +12273,7 @@
 	  if (STABLE_SORT) return nativeSort.call(array, comparefn);
 
 	  aTypedArray$2(array);
-	  var arrayLength = toLength$1(array.length);
+	  var arrayLength = lengthOfArrayLike(array);
 	  var items = Array(arrayLength);
 	  var index;
 
@@ -12278,7 +12291,7 @@
 	}, !STABLE_SORT || ACCEPT_INCORRECT_ARGUMENTS);
 
 	var ArrayBufferViewCore$1 = arrayBufferViewCore;
-	var toLength = toLength$n;
+	var toLength = toLength$9;
 	var toAbsoluteIndex = toAbsoluteIndex$6;
 	var typedArraySpeciesConstructor = typedArraySpeciesConstructor$4;
 
