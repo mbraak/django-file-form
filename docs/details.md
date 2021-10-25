@@ -64,6 +64,9 @@ for f in self.cleaned_data['my_field']:
 by clients directly to S3 through AJAX operations and return to the backend as `File` objects
 with [`S3Boto3Storage`](https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html).
 
+
+Required packages: `boto3` and `django_storages`.
+
 To use this method, you will first need to make sure your S3 bucket is configured
 to [allow upload to bucket directly](https://docs.aws.amazon.com/AmazonS3/latest/dev/cors.html),
 [allow `PUT` method, and expose `ETag` header](https://uppy.io/docs/aws-s3-multipart/#S3-Bucket-Configuration).
@@ -79,7 +82,7 @@ AWS_S3_ENDPOINT_URL (optional)
 ```
 
 or through environment variables with the same names as described
-in [`django-storage` documentation](https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html).
+in [`django-storages` documentation](https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html).
 
 If you are using `django-csp` for setting the Content Security Policy, then the following CORS settings are also needed in `settings`
 ```
