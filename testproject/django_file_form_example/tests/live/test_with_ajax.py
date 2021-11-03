@@ -3,6 +3,7 @@ from pathlib import Path
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.test import override_settings
+from selenium.webdriver.common.by import By
 
 from django_file_form.models import TemporaryUploadedFile
 from django_file_form_example.tests.utils.base_live_testcase import BaseLiveTestCase
@@ -29,7 +30,7 @@ class LiveTestCase(BaseLiveTestCase):
 
         page.open("/")
 
-        page.selenium.find_element_by_css_selector(".dff-files")
+        page.selenium.find_element(By.CSS_SELECTOR, ".dff-files")
 
         page.fill_title_field("abc")
         page.upload_using_js(temp_file)
@@ -66,7 +67,7 @@ class LiveTestCase(BaseLiveTestCase):
         page = self.page
         temp_file = page.create_temp_file(content, binary=True)
         page.open("/")
-        page.selenium.find_element_by_css_selector(".dff-files")
+        page.selenium.find_element(By.CSS_SELECTOR, ".dff-files")
         page.upload_using_js(temp_file)
 
         page.find_upload_success(temp_file)
@@ -177,7 +178,7 @@ class LiveTestCase(BaseLiveTestCase):
         page.open("/multiple")
         page.submit()
 
-        page.selenium.find_element_by_css_selector("#row-example-input_file.has-error")
+        page.selenium.find_element(By.CSS_SELECTOR, "#row-example-input_file.has-error")
 
     def test_form_error(self):
         page = self.page
@@ -300,7 +301,7 @@ class LiveTestCase(BaseLiveTestCase):
         page.upload_using_js(temp_file)
 
         el = page.find_upload_fail(temp_file)
-        self.assertEqual(el.find_elements_by_link_text("Delete"), [])
+        self.assertEqual(el.find_elements(By.LINK_TEXT, "Delete"), [])
 
     @override_settings(FILE_FORM_MUST_LOGIN=True)
     def test_permission_success(self):
@@ -388,7 +389,7 @@ class LiveTestCase(BaseLiveTestCase):
         page.submit()
         page.assert_page_contains_text("Page 2")
 
-        previous_button = page.selenium.find_element_by_css_selector("button")
+        previous_button = page.selenium.find_element(By.CSS_SELECTOR, "button")
         self.assertEqual(previous_button.text, "Previous")
 
         previous_button.click()
@@ -411,16 +412,16 @@ class LiveTestCase(BaseLiveTestCase):
 
         page.fill_title_field("title1", form_prefix="form-0")
 
-        file_input_element1 = page.selenium.find_element_by_css_selector(
-            "#id_form-0-input_file"
+        file_input_element1 = page.selenium.find_element(
+            By.CSS_SELECTOR, "#id_form-0-input_file"
         )
         page.upload_js_for_input(temp_file1, file_input_element1)
         page.find_upload_success_for_input(temp_file1, file_input_element1)
 
         page.fill_title_field("title2", form_prefix="form-1")
 
-        file_input_element2 = page.selenium.find_element_by_css_selector(
-            "#id_form-1-input_file"
+        file_input_element2 = page.selenium.find_element(
+            By.CSS_SELECTOR, "#id_form-1-input_file"
         )
         page.upload_js_for_input(temp_file2, file_input_element2)
         page.find_upload_success_for_input(temp_file2, file_input_element2)
@@ -454,14 +455,14 @@ class LiveTestCase(BaseLiveTestCase):
         page.open("/placeholder")
 
         # placeholders exist
-        el = page.selenium.find_element_by_css_selector(
-            ".dff-file-id-0.dff-upload-success"
+        el = page.selenium.find_element(
+            By.CSS_SELECTOR, ".dff-file-id-0.dff-upload-success"
         )
         assert "test_placeholder1.txt" in el.text
         assert "1 KB" in el.text
 
-        el = page.selenium.find_element_by_css_selector(
-            ".dff-file-id-1.dff-upload-success"
+        el = page.selenium.find_element(
+            By.CSS_SELECTOR, ".dff-file-id-1.dff-upload-success"
         )
         assert "test_placeholder2.txt" in el.text
         assert "2 KB" in el.text
@@ -505,8 +506,8 @@ class LiveTestCase(BaseLiveTestCase):
         page = self.page
         page.open("/placeholder")
 
-        container = page.selenium.find_element_by_css_selector(
-            "#row-example-input_file"
+        container = page.selenium.find_element(
+            By.CSS_SELECTOR, "#row-example-input_file"
         )
 
         page.find_upload_success_with_filename(
@@ -544,23 +545,23 @@ class LiveTestCase(BaseLiveTestCase):
 
         self.assertEqual(
             len(
-                page.selenium.find_elements_by_css_selector(
-                    "#row-example-input_file .dff-files .dff-file"
+                page.selenium.find_elements(
+                    By.CSS_SELECTOR, "#row-example-input_file .dff-files .dff-file"
                 )
             ),
             0,
         )
 
-        container = page.selenium.find_element_by_css_selector(
-            "#row-example-input_file"
+        container = page.selenium.find_element(
+            By.CSS_SELECTOR, "#row-example-input_file"
         )
 
     def test_accept_attribute(self):
         page = self.page
         page.open("/accept")
 
-        file_input = page.selenium.find_element_by_css_selector(
-            "#row-example-input_file input[type=file]"
+        file_input = page.selenium.find_element(
+            By.CSS_SELECTOR, "#row-example-input_file input[type=file]"
         )
         self.assertEqual(file_input.get_attribute("accept"), "image/*")
 
@@ -622,7 +623,7 @@ class LiveTestCase(BaseLiveTestCase):
 
         page.open("/")
 
-        page.selenium.find_element_by_css_selector(".dff-files")
+        page.selenium.find_element(By.CSS_SELECTOR, ".dff-files")
 
         page.fill_title_field("abc")
         page.upload_using_js(temp_file)
@@ -659,8 +660,8 @@ class LiveTestCase(BaseLiveTestCase):
         placeholder1_input_selector = (
             "#row-example-input_file .dff-file-id-0 input.dff-description"
         )
-        placeholder1_input = page.selenium.find_element_by_css_selector(
-            placeholder1_input_selector
+        placeholder1_input = page.selenium.find_element(
+            By.CSS_SELECTOR, placeholder1_input_selector
         )
         self.assertEqual(placeholder1_input.get_property("value"), "placeholder 1")
 
@@ -668,8 +669,8 @@ class LiveTestCase(BaseLiveTestCase):
         placeholder1_input.send_keys("new value")
         page.submit()
 
-        placeholder1_input = page.selenium.find_element_by_css_selector(
-            placeholder1_input_selector
+        placeholder1_input = page.selenium.find_element(
+            By.CSS_SELECTOR, placeholder1_input_selector
         )
         self.assertEqual(placeholder1_input.get_property("value"), "new value")
 

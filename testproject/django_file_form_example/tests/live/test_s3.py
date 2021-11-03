@@ -5,6 +5,7 @@ from flask_cors import CORS
 from moto.server import DomainDispatcherApplication, create_backend_app
 from werkzeug.serving import make_server, BaseWSGIServer
 import boto3
+from selenium.webdriver.common.by import By
 
 from django_file_form_example.tests.utils.base_live_testcase import BaseLiveTestCase
 from django_file_form_example.models import Example2, Example
@@ -210,8 +211,8 @@ class S3TestCase(BaseLiveTestCase):
         page = self.page
         page.open("/s3placeholder")
 
-        file_container = page.selenium.find_element_by_css_selector(
-            "#row-example-input_file"
+        file_container = page.selenium.find_element(
+            By.CSS_SELECTOR, "#row-example-input_file"
         )
         page.find_upload_success_with_filename(
             "test_placeholder1.txt", container_element=file_container
@@ -220,8 +221,8 @@ class S3TestCase(BaseLiveTestCase):
             "test_placeholder2.txt", upload_index=1, container_element=file_container
         )
 
-        other_file_container = page.selenium.find_element_by_css_selector(
-            "#row-example-other-input_file"
+        other_file_container = page.selenium.find_element(
+            By.CSS_SELECTOR, "#row-example-other-input_file"
         )
         page.find_upload_success_with_filename(
             "test_placeholder3.txt", container_element=other_file_container
@@ -234,8 +235,8 @@ class S3TestCase(BaseLiveTestCase):
         page = self.page
         page.open("/s3placeholder")
 
-        file_container = page.selenium.find_element_by_css_selector(
-            "#row-example-input_file"
+        file_container = page.selenium.find_element(
+            By.CSS_SELECTOR, "#row-example-input_file"
         )
 
         temp_file = page.create_temp_file("content1")
@@ -269,8 +270,8 @@ class S3TestCase(BaseLiveTestCase):
         page = self.page
         page.open("/s3placeholder")
 
-        file_container = page.selenium.find_element_by_css_selector(
-            "#row-example-input_file"
+        file_container = page.selenium.find_element(
+            By.CSS_SELECTOR, "#row-example-input_file"
         )
 
         temp_file = page.create_temp_file("content1")
@@ -284,8 +285,8 @@ class S3TestCase(BaseLiveTestCase):
 
         page.assert_page_contains_text("Title field is required")
 
-        file_container = page.selenium.find_element_by_css_selector(
-            "#row-example-input_file"
+        file_container = page.selenium.find_element(
+            By.CSS_SELECTOR, "#row-example-input_file"
         )
         page.find_upload_success_with_filename(
             "test_placeholder1.txt", container_element=file_container
@@ -297,8 +298,8 @@ class S3TestCase(BaseLiveTestCase):
             temp_file.base_name(), upload_index=2, container_element=file_container
         )
 
-        other_file_container = page.selenium.find_element_by_css_selector(
-            "#row-example-other-input_file"
+        other_file_container = page.selenium.find_element(
+            By.CSS_SELECTOR, "#row-example-other-input_file"
         )
         page.find_upload_success_with_filename(
             "test_placeholder3.txt", container_element=other_file_container
@@ -318,8 +319,8 @@ class S3TestCase(BaseLiveTestCase):
 
         page.assert_page_contains_text("Title field is required")
 
-        file_container = page.selenium.find_element_by_css_selector(
-            "#row-example-input_file"
+        file_container = page.selenium.find_element(
+            By.CSS_SELECTOR, "#row-example-input_file"
         )
 
         page.find_upload_success_with_filename(
@@ -336,7 +337,7 @@ class S3TestCase(BaseLiveTestCase):
         temp_file1 = page.create_temp_file("123")
         page.upload_js_for_input(
             temp_file1,
-            page.selenium.find_element_by_css_selector("#id_form-0-input_file"),
+            page.selenium.find_element(By.CSS_SELECTOR, "#id_form-0-input_file"),
         )
 
         page.assert_page_contains_text("3 Bytes")
@@ -347,7 +348,7 @@ class S3TestCase(BaseLiveTestCase):
         temp_file2 = page.create_temp_file("1234")
         page.upload_js_for_input(
             temp_file2,
-            page.selenium.find_element_by_css_selector("#id_form-1-input_file"),
+            page.selenium.find_element(By.CSS_SELECTOR, "#id_form-1-input_file"),
         )
 
         page.assert_page_contains_text("4 Bytes")
