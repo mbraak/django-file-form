@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from selenium.webdriver.common.by import By
 
 from django_file_form_example.tests.utils.base_page import BasePage
 
@@ -17,7 +18,7 @@ class AdminPage(BasePage):
         input_element.send_keys(value)
 
     def find_input(self, name):
-        return self.selenium.find_element_by_name(name)
+        return self.selenium.find_element(By.NAME, name)
 
     def login(self):
         self.open("/admin/login/")
@@ -25,7 +26,7 @@ class AdminPage(BasePage):
 
         self.fill_input("username", "admin")
         self.fill_input("password", "password")
-        self.selenium.find_element_by_css_selector("input[type=submit]").click()
+        self.selenium.find_element(By.CSS_SELECTOR, "input[type=submit]").click()
 
         self.assert_page_contains_text("Site administration")
 
