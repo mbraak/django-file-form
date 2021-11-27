@@ -41,7 +41,7 @@
     "rollup": "^2.60.1",
     "rollup-plugin-serve": "^1.1.0",
     "rollup-plugin-terser": "^7.0.2",
-    "sass": "^1.43.4",
+    "sass": "^1.43.5",
     "typescript": "^4.5.2"
   },
   "dependencies": {
