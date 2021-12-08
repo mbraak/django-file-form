@@ -1,5 +1,9 @@
 ## Changelog
 
+**development**
+
+  * Support Django 4.0.
+
 **3.2.3 (3 october 2021)**
 
   * Issue #471: Fix security advice: uncontrolled data used in path expression
