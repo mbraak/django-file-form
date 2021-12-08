@@ -1,6 +1,6 @@
 ## Changelog
 
-**development**
+**3.3.0 (8 december 2021)**
 
   * Support Django 4.0.
 
