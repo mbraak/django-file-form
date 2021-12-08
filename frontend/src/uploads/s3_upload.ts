@@ -236,7 +236,7 @@ class S3Upload extends BaseUpload {
           this.uploadPartBytes(index, url);
         },
         err => {
-          this.handleError(err);
+          this.handleError(err as Error);
         }
       );
   }
@@ -341,7 +341,7 @@ class S3Upload extends BaseUpload {
         }
       },
       err => {
-        this.handleError(err);
+        this.handleError(err as Error);
       }
     );
   }
