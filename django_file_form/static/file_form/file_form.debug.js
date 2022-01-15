@@ -8384,7 +8384,15 @@
 	      }
 
 	      if (token.inner.includes('*') && (rest = remaining()) && /^\.[^\\/.]+$/.test(rest)) {
-	        output = token.close = ")".concat(rest, ")").concat(extglobStar, ")");
+	        // Any non-magical string (`.ts`) or even nested expression (`.{ts,tsx}`) can follow after the closing parenthesis.
+	        // In this case, we need to parse the string and use it in the output of the original pattern.
+	        // Suitable patterns: `/!(*.d).ts`, `/!(*.d).{ts,tsx}`, `**/!(*-dbg).@(js)`.
+	        //
+	        // Disabling the `fastpaths` option due to a problem with parsing strings as `.ts` in the pattern like `**/!(*.d).ts`.
+	        var expression = parse(rest, _objectSpread$4(_objectSpread$4({}, options), {}, {
+	          fastpaths: false
+	        })).output;
+	        output = token.close = ")".concat(expression, ")").concat(extglobStar, ")");
 	      }
 
 	      if (token.prev.type === 'bos') {
