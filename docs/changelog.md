@@ -1,7 +1,17 @@
 ## Changelog
 
-  * Issue #471: Fix security advice: uncontrolled data used in path expression
-  * Issue #481: Make cache timeout configurable (thanks to Seb Haase)
+**Development version**
+
+  * Issue #498: added spanish translations (thanks to Juan Helios García Guzmán)
+
+**3.3.0 (8 december 2021)**
+
+  * Support Django 4.0
+
+**3.2.3 (3 october 2021)**
+
+  * Issue #471: fix security advice: uncontrolled data used in path expression
+  * Issue #481: make cache timeout configurable (thanks to Seb Haase)
 
 **3.2.2 (17 june 2021)**
 

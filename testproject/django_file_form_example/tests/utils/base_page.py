@@ -1,3 +1,4 @@
+from selenium.webdriver.common.by import By
 from .temp_file import TempFile
 from .test_utils import remove_test_files
 
@@ -11,7 +12,7 @@ class BasePage(object):
         self.temp_files = []
 
     def assert_page_contains_text(self, text):
-        self.selenium.find_element_by_xpath(f"//*[contains(text(), '{text}')]")
+        self.selenium.find_element(By.XPATH, f"//*[contains(text(), '{text}')]")
 
     def cleanup(self):
         for temp_file in self.temp_files:
@@ -35,5 +36,5 @@ class BasePage(object):
 
     def upload_using_js(self, temp_file):
         self.upload_js_for_input(
-            temp_file, self.selenium.find_element_by_css_selector("input[type=file]")
+            temp_file, self.selenium.find_element(By.CSS_SELECTOR, "input[type=file]")
         )
