@@ -5850,7 +5850,7 @@
 	        return;
 	      }
 
-	      var originalMessageSpan = document.querySelector(".dff-error");
+	      var originalMessageSpan = el.querySelector(".dff-error");
 
 	      if (originalMessageSpan) {
 	        originalMessageSpan.remove();
