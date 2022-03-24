@@ -3,6 +3,7 @@
 **Development version**
 
   * Issue #498: added spanish translations (thanks to Juan Helios García Guzmán)
+  * Issue #504: handle multiple 'upload failed' error messages (thanks to Krzysztof Kosiorek)
 
 **3.3.0 (8 december 2021)**
 
