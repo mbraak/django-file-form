@@ -244,7 +244,7 @@ class RenderUploadFile {
       return;
     }
 
-    const originalMessageSpan = document.querySelector(".dff-error");
+    const originalMessageSpan = el.querySelector(".dff-error");
     if (originalMessageSpan) {
       originalMessageSpan.remove();
     }
