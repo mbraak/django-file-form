@@ -1,6 +1,6 @@
 ## Changelog
 
-**Development version**
+**3.3.1 (2 april 2022)**
 
   * Issue #498: added spanish translations (thanks to Juan Helios García Guzmán)
   * Issue #504: handle multiple 'upload failed' error messages (thanks to Krzysztof Kosiorek)
