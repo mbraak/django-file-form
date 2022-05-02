@@ -1,5 +1,6 @@
 import threading
 
+from botocore.exceptions import ClientError
 from django.test import override_settings
 from flask_cors import CORS
 from moto.server import DomainDispatcherApplication, create_backend_app
@@ -48,13 +49,14 @@ class S3ServerThread(threading.Thread):
 class S3TestCase(BaseLiveTestCase):
     page_class = Page
 
-    def setUp(self):
-        super().setUp()
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
 
         thread = S3ServerThread()
         thread.daemon = True
         thread.start()
-        self.thread = thread
+        cls.thread = thread
 
         s3 = boto3.resource(
             "s3",
@@ -63,18 +65,32 @@ class S3TestCase(BaseLiveTestCase):
             aws_secret_access_key="test1",
         )
         bucket = s3.Bucket("mybucket")
-        bucket.create()
 
-        for file in bucket.objects.all():
-            s3.Object("mybucket", file.key).delete()
-
-        self.bucket = bucket
-
-    def tearDown(self):
         try:
-            self.thread.terminate()
+            bucket.create(
+                CreateBucketConfiguration={
+                    'LocationConstraint': 'us_east1'
+                },
+            )
+        except ClientError as e:
+            if e.response['Error']['Code'] != 'BucketAlreadyOwnedByYou2':
+                raise e
+
+        cls.bucket = bucket
+        cls.s3 = s3
+
+    def setUp(self):
+        super().setUp()
+
+        for file in self.bucket.objects.all():
+            self.s3.Object("mybucket", file.key).delete()
+
+    @classmethod
+    def tearDownClass(cls):
+        try:
+            cls.thread.terminate()
         finally:
-            super().tearDown()
+            super().tearDownClass()
 
     def test_single_upload(self):
         page = self.page
