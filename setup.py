@@ -4,24 +4,24 @@ from os import path
 from io import open
 
 this_directory = path.abspath(path.dirname(__file__))
-with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
+with open(path.join(this_directory, "README.md"), encoding="utf-8") as f:
     long_description = f.read()
 
-version = '3.3.1'
+version = "3.3.1"
 
 setup(
-    name='django-file-form',
+    name="django-file-form",
     version=version,
     packages=find_packages(),
-    license='Apache License, Version 2.0',
+    license="Apache License, Version 2.0",
     long_description=long_description,
-    long_description_content_type='text/markdown',
+    long_description_content_type="text/markdown",
     include_package_data=True,
     zip_safe=False,
-    author='Marco Braak',
-    author_email='mbraak@ridethepony.nl',
-    description='Django-file-form helps you to write forms with a pretty ajax upload',
-    url='https://github.com/mbraak/django-file-form',
+    author="Marco Braak",
+    author_email="marco.braak@ridethepony.nl",
+    description="Django-file-form helps you to write forms with a pretty ajax upload",
+    url="https://github.com/mbraak/django-file-form",
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Framework :: Django",
@@ -36,6 +36,6 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
-        "Programming Language :: Python :: Implementation :: CPython"
-    ]
+        "Programming Language :: Python :: Implementation :: CPython",
+    ],
 )

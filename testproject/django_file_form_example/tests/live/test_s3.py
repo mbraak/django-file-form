@@ -67,9 +67,7 @@ class S3TestCase(BaseLiveTestCase):
         bucket = s3.Bucket("mybucket")
 
         bucket.create(
-            CreateBucketConfiguration={
-                'LocationConstraint': 'us_east1'
-            },
+            CreateBucketConfiguration={"LocationConstraint": "us_east1"},
         )
 
         cls.bucket = bucket
