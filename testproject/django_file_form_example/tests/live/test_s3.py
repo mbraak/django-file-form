@@ -66,15 +66,11 @@ class S3TestCase(BaseLiveTestCase):
         )
         bucket = s3.Bucket("mybucket")
 
-        try:
-            bucket.create(
-                CreateBucketConfiguration={
-                    'LocationConstraint': 'us_east1'
-                },
-            )
-        except ClientError as e:
-            if e.response['Error']['Code'] != 'BucketAlreadyOwnedByYou2':
-                raise e
+        bucket.create(
+            CreateBucketConfiguration={
+                'LocationConstraint': 'us_east1'
+            },
+        )
 
         cls.bucket = bucket
         cls.s3 = s3
