@@ -1,6 +1,5 @@
 import threading
 
-from botocore.exceptions import ClientError
 from django.test import override_settings
 from flask_cors import CORS
 from moto.server import DomainDispatcherApplication, create_backend_app
