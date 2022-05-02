@@ -3,8 +3,6 @@ from uuid import uuid4
 
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.conf import settings
-from selenium.webdriver import DesiredCapabilities
-
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.chrome.options import Options
 
@@ -22,13 +20,9 @@ class BaseLiveTestCase(StaticLiveServerTestCase):
         options = Options()
         options.headless = True
         options.add_argument("--disable-dev-shm-usage")
+        options.set_capability('goog:loggingPrefs', {"browser": "ALL"})
 
-        desired_capabilities = DesiredCapabilities.CHROME.copy()
-        desired_capabilities["goog:loggingPrefs"] = {"browser": "ALL"}
-
-        cls.selenium = WebDriver(
-            desired_capabilities=desired_capabilities, options=options
-        )
+        cls.selenium = WebDriver(options=options)
         cls.selenium.implicitly_wait(10)
 
     @classmethod
