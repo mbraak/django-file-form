@@ -72,7 +72,7 @@ jobs:
       env:
         CHECK_MIGRATIONS: true
     - name: Setup node
-      uses: actions/setup-node@v1
+      uses: actions/setup-node@v3
       with:
         node-version: '14'
     - name: Setup coverage
@@ -85,7 +85,7 @@ jobs:
     - name: Test with coverage
       run: |
         COVERAGE=true coverage run --source=django_file_form,testproject/django_file_form_example testproject/manage.py test django_file_form_example -v 2
-    - uses: actions/setup-ruby@v1
+    - uses: ruby/setup-ruby@v1
       with:
         ruby-version: '2.6'
     - name: Merge coverage
