@@ -72,6 +72,7 @@ class TemporaryUploadedFile(models.Model):
     * Or removed later by 'python manage.py delete_unused_files'
     """
 
+    id = models.AutoField(primary_key=True)
     created = models.DateTimeField(default=timezone.now)
     uploaded_file = models.FileField(
         max_length=255, storage=storage_class(), upload_to=get_upload_to

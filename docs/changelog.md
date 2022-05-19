@@ -1,5 +1,10 @@
 ## Changelog
 
+**development**
+
+  * Issue #514: prevent migrations when the DEFAULT_AUTO_FIELD is set.
+    * The TemporaryUploadedFile model now uses AutoField. 
+
 **3.3.1 (2 april 2022)**
 
   * Issue #498: added spanish translations (thanks to Juan Helios García Guzmán)
