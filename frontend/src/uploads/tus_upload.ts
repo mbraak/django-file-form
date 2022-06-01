@@ -1,4 +1,4 @@
-import { HttpRequest, Upload, DetailedError } from "tus-js-client";
+import { HttpRequest, Upload } from "tus-js-client";
 import BaseUpload, { InitialFile } from "./base_upload";
 import { deleteUpload } from "./tus_utils";
 
@@ -74,13 +74,9 @@ export default class TusUpload extends BaseUpload {
     this.upload.start();
   }
 
-  private handleError = (error: Error | DetailedError) => {
+  private handleError = (error: Error) => {
     if (this.onError) {
-      if (error instanceof Error) {
-        this.onError(error);
-      } else {
-        this.onError(error.causingError);
-      }
+      this.onError(error);
     } else {
       throw error;
     }
