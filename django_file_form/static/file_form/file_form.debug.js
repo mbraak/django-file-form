@@ -190,10 +190,10 @@
 	(shared$4.exports = function (key, value) {
 	  return store$2[key] || (store$2[key] = value !== undefined ? value : {});
 	})('versions', []).push({
-	  version: '3.23.3',
+	  version: '3.24.1',
 	  mode: 'global',
 	  copyright: '© 2014-2022 Denis Pushkarev (zloirock.ru)',
-	  license: 'https://github.com/zloirock/core-js/blob/v3.23.3/LICENSE',
+	  license: 'https://github.com/zloirock/core-js/blob/v3.24.1/LICENSE',
 	  source: 'https://github.com/zloirock/core-js'
 	});
 
@@ -2140,7 +2140,7 @@
 	    }
 	    if (NPCG_INCLUDED && match && match.length > 1) {
 	      // Fix browsers whose `exec` methods don't consistently return `undefined`
-	      // for NPCG, like IE8. NOTE: This doesn' work for /(.?)?/
+	      // for NPCG, like IE8. NOTE: This doesn't work for /(.?)?/
 	      call$7(nativeReplace, match[0], reCopy, function () {
 	        for (i = 1; i < arguments.length - 2; i++) {
 	          if (arguments[i] === undefined) match[i] = undefined;
@@ -7475,11 +7475,73 @@
 	 * @return {string} The generate UUID
 	 */
 	function uuid() {
+	  /* eslint-disable no-bitwise */
 	  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
 	    var r = Math.random() * 16 | 0;
-	    var v = c == 'x' ? r : r & 0x3 | 0x8;
+	    var v = c === 'x' ? r : r & 0x3 | 0x8;
 	    return v.toString(16);
 	  });
+	}
+
+	function _slicedToArray(arr, i) {
+	  return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest();
+	}
+
+	function _nonIterableRest() {
+	  throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+	}
+
+	function _unsupportedIterableToArray(o, minLen) {
+	  if (!o) return;
+	  if (typeof o === "string") return _arrayLikeToArray(o, minLen);
+	  var n = Object.prototype.toString.call(o).slice(8, -1);
+	  if (n === "Object" && o.constructor) n = o.constructor.name;
+	  if (n === "Map" || n === "Set") return Array.from(o);
+	  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
+	}
+
+	function _arrayLikeToArray(arr, len) {
+	  if (len == null || len > arr.length) len = arr.length;
+
+	  for (var i = 0, arr2 = new Array(len); i < len; i++) {
+	    arr2[i] = arr[i];
+	  }
+
+	  return arr2;
+	}
+
+	function _iterableToArrayLimit(arr, i) {
+	  var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"];
+
+	  if (_i == null) return;
+	  var _arr = [];
+	  var _n = true;
+	  var _d = false;
+
+	  var _s, _e;
+
+	  try {
+	    for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) {
+	      _arr.push(_s.value);
+
+	      if (i && _arr.length === i) break;
+	    }
+	  } catch (err) {
+	    _d = true;
+	    _e = err;
+	  } finally {
+	    try {
+	      if (!_n && _i["return"] != null) _i["return"]();
+	    } finally {
+	      if (_d) throw _e;
+	    }
+	  }
+
+	  return _arr;
+	}
+
+	function _arrayWithHoles(arr) {
+	  if (Array.isArray(arr)) return arr;
 	}
 
 	function ownKeys$1(object, enumerableOnly) {
@@ -7567,6 +7629,7 @@
 	  chunkSize: Infinity,
 	  retryDelays: [0, 1000, 3000, 5000],
 	  parallelUploads: 1,
+	  parallelUploadBoundaries: null,
 	  storeFingerprintForResuming: true,
 	  removeFingerprintOnSuccess: false,
 	  uploadLengthDeferred: false,
@@ -7588,7 +7651,7 @@
 
 	    this.options = options; // Cast chunkSize to integer
 
-	    this.options.chunkSize = +this.options.chunkSize; // The storage module used to store URLs
+	    this.options.chunkSize = Number(this.options.chunkSize); // The storage module used to store URLs
 
 	    this._urlStorage = this.options.urlStorage; // The underlying File/Blob object
 
@@ -7665,7 +7728,7 @@
 	        return;
 	      }
 
-	      if (!this.options.endpoint && !this.options.uploadUrl) {
+	      if (!this.options.endpoint && !this.options.uploadUrl && !this.url) {
 	        this._emitError(new Error('tus: neither an endpoint or an upload URL is provided'));
 
 	        return;
@@ -7681,11 +7744,29 @@
 
 	      if (this.options.parallelUploads > 1) {
 	        // Test which options are incompatible with parallel uploads.
-	        ['uploadUrl', 'uploadSize', 'uploadLengthDeferred'].forEach(function (optionName) {
-	          if (_this2.options[optionName]) {
-	            _this2._emitError(new Error("tus: cannot use the ".concat(optionName, " option when parallelUploads is enabled")));
+	        for (var _i = 0, _arr = ['uploadUrl', 'uploadSize', 'uploadLengthDeferred']; _i < _arr.length; _i++) {
+	          var optionName = _arr[_i];
+
+	          if (this.options[optionName]) {
+	            this._emitError(new Error("tus: cannot use the ".concat(optionName, " option when parallelUploads is enabled")));
+
+	            return;
 	          }
-	        });
+	        }
+	      }
+
+	      if (this.options.parallelUploadBoundaries) {
+	        if (this.options.parallelUploads <= 1) {
+	          this._emitError(new Error('tus: cannot use the `parallelUploadBoundaries` option when `parallelUploads` is disabled'));
+
+	          return;
+	        }
+
+	        if (this.options.parallelUploads !== this.options.parallelUploadBoundaries.length) {
+	          this._emitError(new Error('tus: the `parallelUploadBoundaries` must have the same length as the value of `parallelUploads`'));
+
+	          return;
+	        }
 	      }
 
 	      this.options.fingerprint(file, this.options).then(function (fingerprint) {
@@ -7698,8 +7779,31 @@
 
 	        return _this2.options.fileReader.openFile(file, _this2.options.chunkSize);
 	      }).then(function (source) {
-	        _this2._source = source; // If the upload was configured to use multiple requests or if we resume from
+	        _this2._source = source; // First, we look at the uploadLengthDeferred option.
+	        // Next, we check if the caller has supplied a manual upload size.
+	        // Finally, we try to use the calculated size from the source object.
+
+	        if (_this2.options.uploadLengthDeferred) {
+	          _this2._size = null;
+	        } else if (_this2.options.uploadSize != null) {
+	          _this2._size = Number(_this2.options.uploadSize);
+
+	          if (Number.isNaN(_this2._size)) {
+	            _this2._emitError(new Error('tus: cannot convert `uploadSize` option into a number'));
+
+	            return;
+	          }
+	        } else {
+	          _this2._size = _this2._source.size;
+
+	          if (_this2._size == null) {
+	            _this2._emitError(new Error("tus: cannot automatically derive upload's size from input. Specify it manually using the `uploadSize` option or use the `uploadLengthDeferred` option"));
+
+	            return;
+	          }
+	        } // If the upload was configured to use multiple requests or if we resume from
 	        // an upload which used multiple requests, we start a parallel upload.
+
 
 	        if (_this2.options.parallelUploads > 1 || _this2._parallelUploadUrls != null) {
 	          _this2._startParallelUpload();
@@ -7720,15 +7824,23 @@
 	  }, {
 	    key: "_startParallelUpload",
 	    value: function _startParallelUpload() {
-	      var _this3 = this;
+	      var _this$options$paralle,
+	          _this3 = this;
 
-	      var totalSize = this._size = this._source.size;
+	      var totalSize = this._size;
 	      var totalProgress = 0;
 	      this._parallelUploads = [];
 	      var partCount = this._parallelUploadUrls != null ? this._parallelUploadUrls.length : this.options.parallelUploads; // The input file will be split into multiple slices which are uploaded in separate
-	      // requests. Here we generate the start and end position for the slices.
+	      // requests. Here we get the start and end position for the slices.
 
-	      var parts = splitSizeIntoParts(this._source.size, partCount, this._parallelUploadUrls); // Create an empty list for storing the upload URLs
+	      var parts = (_this$options$paralle = this.options.parallelUploadBoundaries) !== null && _this$options$paralle !== void 0 ? _this$options$paralle : splitSizeIntoParts(this._source.size, partCount); // Attach URLs from previous uploads, if available.
+
+	      if (this._parallelUploadUrls) {
+	        parts.forEach(function (part, index) {
+	          part.uploadUrl = _this3._parallelUploadUrls[index] || null;
+	        });
+	      } // Create an empty list for storing the upload URLs
+
 
 	      this._parallelUploadUrls = new Array(parts.length); // Generate a promise for each slice that will be resolve if the respective
 	      // upload is completed.
@@ -7748,6 +7860,8 @@
 	              removeFingerprintOnSuccess: false,
 	              // Reset the parallelUploads option to not cause recursion.
 	              parallelUploads: 1,
+	              // Reset this option as we are not doing a parallel upload.
+	              parallelUploadBoundaries: null,
 	              metadata: {},
 	              // Add the header to indicate the this is a partial upload.
 	              headers: _objectSpread$1(_objectSpread$1({}, _this3.options.headers), {}, {
@@ -7770,7 +7884,7 @@
 	                _this3._parallelUploadUrls[index] = upload.url; // Test if all uploads have received an URL
 
 	                if (_this3._parallelUploadUrls.filter(function (u) {
-	                  return !!u;
+	                  return Boolean(u);
 	                }).length === parts.length) {
 	                  _this3._saveUploadInUrlStorage();
 	                }
@@ -7831,32 +7945,9 @@
 	  }, {
 	    key: "_startSingleUpload",
 	    value: function _startSingleUpload() {
-	      // First, we look at the uploadLengthDeferred option.
-	      // Next, we check if the caller has supplied a manual upload size.
-	      // Finally, we try to use the calculated size from the source object.
-	      if (this.options.uploadLengthDeferred) {
-	        this._size = null;
-	      } else if (this.options.uploadSize != null) {
-	        this._size = +this.options.uploadSize;
-
-	        if (isNaN(this._size)) {
-	          this._emitError(new Error('tus: cannot convert `uploadSize` option into a number'));
-
-	          return;
-	        }
-	      } else {
-	        this._size = this._source.size;
-
-	        if (this._size == null) {
-	          this._emitError(new Error("tus: cannot automatically derive upload's size from input. Specify it manually using the `uploadSize` option or use the `uploadLengthDeferred` option"));
-
-	          return;
-	        }
-	      } // Reset the aborted flag when the upload is started or else the
+	      // Reset the aborted flag when the upload is started or else the
 	      // _performUpload will stop before sending a request if the upload has been
 	      // aborted previously.
-
-
 	      this._aborted = false; // The upload had been started previously and we should reuse this URL.
 
 	      if (this.url != null) {
@@ -7893,13 +7984,7 @@
 	  }, {
 	    key: "abort",
 	    value: function abort(shouldTerminate) {
-	      var _this4 = this; // Count the number of arguments to see if a callback is being provided in the old style required by tus-js-client 1.x, then throw an error if it is.
-	      // `arguments` is a JavaScript built-in variable that contains all of the function's arguments.
-
-
-	      if (arguments.length > 1 && typeof arguments[1] === 'function') {
-	        throw new Error('tus: the abort function does not accept a callback since v2 anymore; please use the returned Promise instead');
-	      } // Stop any parallel partial uploads, that have been started in _startParallelUploads.
+	      var _this4 = this; // Stop any parallel partial uploads, that have been started in _startParallelUploads.
 
 
 	      if (this._parallelUploads != null) {
@@ -7910,9 +7995,8 @@
 
 
 	      if (this._req !== null) {
-	        this._req.abort();
+	        this._req.abort(); // Note: We do not close the file source here, so the user can resume in the future.
 
-	        this._source.close();
 	      }
 
 	      this._aborted = true; // Stop any timeout used for initiating a retry.
@@ -8096,15 +8180,15 @@
 	          return;
 	        }
 
-	        _this6._saveUploadInUrlStorage();
+	        _this6._saveUploadInUrlStorage().then(function () {
+	          if (_this6.options.uploadDataDuringCreation) {
+	            _this6._handleUploadResponse(req, res);
+	          } else {
+	            _this6._offset = 0;
 
-	        if (_this6.options.uploadDataDuringCreation) {
-	          _this6._handleUploadResponse(req, res);
-	        } else {
-	          _this6._offset = 0;
-
-	          _this6._performUpload();
-	        }
+	            _this6._performUpload();
+	          }
+	        });
 	      })["catch"](function (err) {
 	        _this6._emitHttpError(req, null, 'tus: failed to create upload', err);
 	      });
@@ -8130,21 +8214,21 @@
 	        var status = res.getStatus();
 
 	        if (!inStatusCategory(status, 200)) {
-	          if (inStatusCategory(status, 400)) {
-	            // Remove stored fingerprint and corresponding endpoint,
-	            // on client errors since the file can not be found
-	            _this7._removeFromUrlStorage();
-	          } // If the upload is locked (indicated by the 423 Locked status code), we
+	          // If the upload is locked (indicated by the 423 Locked status code), we
 	          // emit an error instead of directly starting a new upload. This way the
 	          // retry logic can catch the error and will retry the upload. An upload
 	          // is usually locked for a short period of time and will be available
 	          // afterwards.
-
-
 	          if (status === 423) {
 	            _this7._emitHttpError(req, res, 'tus: upload is currently locked; retry later');
 
 	            return;
+	          }
+
+	          if (inStatusCategory(status, 400)) {
+	            // Remove stored fingerprint and corresponding endpoint,
+	            // on client errors since the file can not be found
+	            _this7._removeFromUrlStorage();
 	          }
 
 	          if (!_this7.options.endpoint) {
@@ -8164,7 +8248,7 @@
 
 	        var offset = parseInt(res.getHeader('Upload-Offset'), 10);
 
-	        if (isNaN(offset)) {
+	        if (Number.isNaN(offset)) {
 	          _this7._emitHttpError(req, res, 'tus: invalid or missing offset value');
 
 	          return;
@@ -8172,7 +8256,7 @@
 
 	        var length = parseInt(res.getHeader('Upload-Length'), 10);
 
-	        if (isNaN(length) && !_this7.options.uploadLengthDeferred) {
+	        if (Number.isNaN(length) && !_this7.options.uploadLengthDeferred) {
 	          _this7._emitHttpError(req, res, 'tus: invalid or missing length value');
 
 	          return;
@@ -8180,21 +8264,23 @@
 
 	        if (typeof _this7.options._onUploadUrlAvailable === 'function') {
 	          _this7.options._onUploadUrlAvailable();
-	        } // Upload has already been completed and we do not need to send additional
-	        // data to the server
-
-
-	        if (offset === length) {
-	          _this7._emitProgress(length, length);
-
-	          _this7._emitSuccess();
-
-	          return;
 	        }
 
-	        _this7._offset = offset;
+	        _this7._saveUploadInUrlStorage().then(function () {
+	          // Upload has already been completed and we do not need to send additional
+	          // data to the server
+	          if (offset === length) {
+	            _this7._emitProgress(length, length);
 
-	        _this7._performUpload();
+	            _this7._emitSuccess();
+
+	            return;
+	          }
+
+	          _this7._offset = offset;
+
+	          _this7._performUpload();
+	        });
 	      })["catch"](function (err) {
 	        _this7._emitHttpError(req, null, 'tus: failed to resume upload', err);
 	      });
@@ -8308,7 +8394,7 @@
 	    value: function _handleUploadResponse(req, res) {
 	      var offset = parseInt(res.getHeader('Upload-Offset'), 10);
 
-	      if (isNaN(offset)) {
+	      if (Number.isNaN(offset)) {
 	        this._emitHttpError(req, res, 'tus: invalid or missing offset value');
 
 	        return;
@@ -8320,7 +8406,7 @@
 
 	      this._offset = offset;
 
-	      if (offset == this._size) {
+	      if (offset === this._size) {
 	        // Yay, finally done :)
 	        this._emitSuccess();
 
@@ -8372,11 +8458,14 @@
 	  }, {
 	    key: "_saveUploadInUrlStorage",
 	    value: function _saveUploadInUrlStorage() {
-	      var _this11 = this; // Only if a fingerprint was calculated for the input (i.e. not a stream), we can store the upload URL.
+	      var _this11 = this; // We do not store the upload URL
+	      // - if it was disabled in the option, or
+	      // - if no fingerprint was calculated for the input (i.e. a stream), or
+	      // - if the URL is already stored (i.e. key is set alread).
 
 
-	      if (!this.options.storeFingerprintForResuming || !this._fingerprint) {
-	        return;
+	      if (!this.options.storeFingerprintForResuming || !this._fingerprint || this._urlStorageKey !== null) {
+	        return Promise.resolve();
 	      }
 
 	      var storedUpload = {
@@ -8393,10 +8482,8 @@
 	        storedUpload.uploadUrl = this.url;
 	      }
 
-	      this._urlStorage.addUpload(this._fingerprint, storedUpload).then(function (urlStorageKey) {
-	        return _this11._urlStorageKey = urlStorageKey;
-	      })["catch"](function (err) {
-	        _this11._emitError(err);
+	      return this._urlStorage.addUpload(this._fingerprint, storedUpload).then(function (urlStorageKey) {
+	        _this11._urlStorageKey = urlStorageKey;
 	      });
 	    }
 	    /**
@@ -8413,20 +8500,8 @@
 	    }
 	  }], [{
 	    key: "terminate",
-	    value: function terminate(url, options) {
-	      // Count the number of arguments to see if a callback is being provided as the last
-	      // argument in the old style required by tus-js-client 1.x, then throw an error if it is.
-	      // `arguments` is a JavaScript built-in variable that contains all of the function's arguments.
-	      if (arguments.length > 1 && typeof arguments[arguments.length - 1] === 'function') {
-	        throw new Error('tus: the terminate function does not accept a callback since v2 anymore; please use the returned Promise instead');
-	      } // Note that in order for the trick above to work, a default value cannot be set for `options`,
-	      // so the check below replaces the old default `{}`.
-
-
-	      if (options === undefined) {
-	        options = {};
-	      }
-
+	    value: function terminate(url) {
+	      var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 	      var req = openRequest('DELETE', url, options);
 	      return sendRequest(req, null, options).then(function (res) {
 	        // A 204 response indicates a successfull request
@@ -8467,13 +8542,13 @@
 	}();
 
 	function encodeMetadata(metadata) {
-	  var encoded = [];
+	  return Object.entries(metadata).map(function (_ref3) {
+	    var _ref4 = _slicedToArray(_ref3, 2),
+	        key = _ref4[0],
+	        value = _ref4[1];
 
-	  for (var key in metadata) {
-	    encoded.push("".concat(key, " ").concat(gBase64.encode(String(metadata[key]))));
-	  }
-
-	  return encoded.join(',');
+	    return "".concat(key, " ").concat(gBase64.encode(String(value)));
+	  }).join(',');
 	}
 	/**
 	 * Checks whether a given status is in the range of the expected category.
@@ -8499,10 +8574,13 @@
 	  var req = options.httpStack.createRequest(method, url);
 	  req.setHeader('Tus-Resumable', '1.0.0');
 	  var headers = options.headers || {};
+	  Object.entries(headers).forEach(function (_ref5) {
+	    var _ref6 = _slicedToArray(_ref5, 2),
+	        name = _ref6[0],
+	        value = _ref6[1];
 
-	  for (var name in headers) {
-	    req.setHeader(name, headers[name]);
-	  }
+	    req.setHeader(name, value);
+	  });
 
 	  if (options.addRequestId) {
 	    var requestId = uuid();
@@ -8593,13 +8671,12 @@
 	 *
 	 * @param {number} totalSize The byte size of the upload, which will be split.
 	 * @param {number} partCount The number in how many parts the upload will be split.
-	 * @param {string[]} previousUrls The upload URLs for previous parts.
 	 * @return {object[]}
 	 * @api private
 	 */
 
 
-	function splitSizeIntoParts(totalSize, partCount, previousUrls) {
+	function splitSizeIntoParts(totalSize, partCount) {
 	  var partSize = Math.floor(totalSize / partCount);
 	  var parts = [];
 
@@ -8610,14 +8687,7 @@
 	    });
 	  }
 
-	  parts[partCount - 1].end = totalSize; // Attach URLs from previous uploads, if available.
-
-	  if (previousUrls) {
-	    parts.forEach(function (part, index) {
-	      part.uploadUrl = previousUrls[index] || null;
-	    });
-	  }
-
+	  parts[partCount - 1].end = totalSize;
 	  return parts;
 	}
 
@@ -8704,8 +8774,6 @@
 	  });
 	  return Constructor;
 	}
-	/* global window, localStorage */
-
 
 	var hasStorage = false;
 
@@ -8980,7 +9048,7 @@
 	}
 
 	var isCordova = function isCordova() {
-	  return typeof window != 'undefined' && (typeof window.PhoneGap != 'undefined' || typeof window.Cordova != 'undefined' || typeof window.cordova != 'undefined');
+	  return typeof window !== 'undefined' && (typeof window.PhoneGap !== 'undefined' || typeof window.Cordova !== 'undefined' || typeof window.cordova !== 'undefined');
 	};
 
 	var typedArrayConstructor = {exports: {}};
@@ -10752,9 +10820,9 @@
 	      }
 
 	      if (typeof input.read === 'function') {
-	        chunkSize = +chunkSize;
+	        chunkSize = Number(chunkSize);
 
-	        if (!isFinite(chunkSize)) {
+	        if (!Number.isFinite(chunkSize)) {
 	          return Promise.reject(new Error('cannot create source for stream without a finite value for the `chunkSize` option'));
 	        }
 
@@ -10790,6 +10858,7 @@
 	}
 
 	function hashCode(str) {
+	  /* eslint-disable no-bitwise */
 	  // from https://stackoverflow.com/a/8831937/151666
 	  var hash = 0;
 
