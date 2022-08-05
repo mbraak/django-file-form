@@ -1,6 +1,6 @@
 ## Changelog
 
-**development version**
+**3.4.0 (5 august 2022)**
 
 - Issue #521: support Django 4.1
 
