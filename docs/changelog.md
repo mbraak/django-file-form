@@ -1,5 +1,9 @@
 ## Changelog
 
+**development version**
+
+- Issue #521: support Django 4.1
+
 **3.3.2 (1 june 2022)**
 
 - Issue #514: prevent migrations when the DEFAULT_AUTO_FIELD is set.
