@@ -11196,6 +11196,8 @@
 	      uploadUrl
 	    } = _ref;
 
+	    _defineProperty$2(this, "acceptedFileTypes", void 0);
+
 	    _defineProperty$2(this, "callbacks", void 0);
 
 	    _defineProperty$2(this, "chunkSize", void 0);
@@ -11246,10 +11248,27 @@
 	    });
 
 	    _defineProperty$2(this, "onChange", e => {
-	      const files = e.target.files;
+	      const files = e.target.files || [];
+	      const acceptedFiles = [];
+	      const invalidFiles = [];
 
-	      if (files) {
-	        void this.uploadFiles([...files]);
+	      for (const file of files) {
+	        if (this.acceptedFileTypes.isAccepted(file.name)) {
+	          acceptedFiles.push(file);
+	        } else {
+	          invalidFiles.push(file);
+	        }
+	      }
+
+	      if (invalidFiles) {
+	        for (const file of invalidFiles) {
+	          // @TODO: find a better way to expose the error.
+	          console.error("File name ".concat(file.name, ": Not a valid file type. Update your selection."));
+	        }
+	      }
+
+	      if (acceptedFiles) {
+	        void this.uploadFiles([...acceptedFiles]);
 	      }
 	    });
 
@@ -11346,6 +11365,7 @@
 	    this.s3UploadDir = s3UploadDir;
 	    this.supportDropArea = supportDropArea;
 	    this.uploadUrl = uploadUrl;
+	    this.acceptedFileTypes = new AcceptedFileTypes(input.accept);
 	    this.uploads = [];
 	    this.nextUploadIndex = 0;
 	    this.renderer = new RenderUploadFile({
