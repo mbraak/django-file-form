@@ -289,6 +289,8 @@ class FileField {
     if (acceptedFiles) {
       void this.uploadFiles([...acceptedFiles]);
     }
+
+    this.renderer.clearInput();
   };
 
   onClick = (e: Event): void => {
