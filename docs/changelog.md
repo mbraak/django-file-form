@@ -1,5 +1,10 @@
 ## Changelog
 
+**development version**
+
+- Issue #523: add package lock file (thanks to Saurabh Kumar)
+- Issue #524: add js validation for acceptable file types (thanks to Saurabh Kumar)
+
 **3.4.0 (5 august 2022)**
 
 - Issue #521: support Django 4.1
