@@ -52,7 +52,7 @@ const getFilesFromDataTransfer = async (
 class DropArea {
   acceptedFileTypes: AcceptedFileTypes;
   container: Element;
-  onUploadFiles: (files: File[]) => void;
+  onUploadFiles: (files: File[]) => Promise<void>;
 
   constructor({
     container,
@@ -61,7 +61,7 @@ class DropArea {
   }: {
     container: Element;
     inputAccept: string;
-    onUploadFiles: (files: File[]) => void;
+    onUploadFiles: (files: File[]) => Promise<void>;
   }) {
     this.container = container;
     this.onUploadFiles = onUploadFiles;
@@ -94,7 +94,7 @@ class DropArea {
             this.acceptedFileTypes.isAccepted(file.name)
           );
 
-          this.onUploadFiles(acceptedFiles);
+          void this.onUploadFiles(acceptedFiles);
         }
       } catch (error) {
         console.error(error);
