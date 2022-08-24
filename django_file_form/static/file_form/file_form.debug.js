@@ -11270,6 +11270,8 @@
 	      if (acceptedFiles) {
 	        void this.uploadFiles([...acceptedFiles]);
 	      }
+
+	      this.renderer.clearInput();
 	    });
 
 	    _defineProperty$2(this, "onClick", e => {
