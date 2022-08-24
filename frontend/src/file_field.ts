@@ -166,8 +166,11 @@ class FileField {
       return;
     }
 
-    if (!this.multiple && this.uploads.length !== 0) {
-      this.renderer.deleteFile(0);
+    if (!this.multiple) {
+      for (const upload of this.uploads) {
+        this.renderer.deleteFile(upload.uploadIndex);
+      }
+
       this.uploads = [];
     }
 
@@ -272,17 +275,19 @@ class FileField {
     const invalidFiles: File[] = [];
 
     for (const file of files) {
-      if(this.acceptedFileTypes.isAccepted(file.name)) {
+      if (this.acceptedFileTypes.isAccepted(file.name)) {
         acceptedFiles.push(file);
       } else {
         invalidFiles.push(file);
       }
     }
 
-    if (invalidFiles){
-      for (const file of invalidFiles){
+    if (invalidFiles) {
+      for (const file of invalidFiles) {
         // @TODO: find a better way to expose the error.
-        console.error(`File name ${file.name}: Not a valid file type. Update your selection.`)
+        console.error(
+          `File name ${file.name}: Not a valid file type. Update your selection.`
+        );
       }
     }
 
