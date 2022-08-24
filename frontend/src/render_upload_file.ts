@@ -5,6 +5,7 @@ class RenderUploadFile {
   container: Element;
   input: HTMLInputElement;
   translations: { [key: string]: string };
+  errors: Element;
 
   constructor({
     parent,
@@ -18,6 +19,7 @@ class RenderUploadFile {
     translations: { [key: string]: string };
   }) {
     this.container = this.createFilesContainer(parent);
+    this.errors = this.createErrorContainer(parent);
     this.input = input;
     this.translations = translations;
 
@@ -130,6 +132,20 @@ class RenderUploadFile {
     this.removeCancel(index);
   }
 
+  public setErrorInvalidFiles(files: File[]): void {
+    const errorsMessages = document.createElement("ul");
+
+    for (const file of files) {
+      const msg = document.createElement('li')
+      msg.innerHTML = `${file.name}: ${this.translations["Invalid file type"]}`
+      msg.className = 'dff-error'
+      errorsMessages.appendChild(msg);
+    }
+
+    this.errors.replaceChildren(errorsMessages);
+    this.clearInput();
+  }
+
   public setSuccess(index: number, size?: number): void {
     const { translations } = this;
 
@@ -167,6 +183,13 @@ class RenderUploadFile {
         (innerProgressSpan as HTMLElement).style.width = `${percentage}%`;
       }
     }
+  }
+
+  private createErrorContainer = (parent: Element): Element => {
+    const div = document.createElement("div");
+    div.className = "dff-invalid-files";
+    parent.appendChild(div);
+    return div;
   }
 
   private createFilesContainer = (parent: Element): Element => {
