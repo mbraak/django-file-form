@@ -283,12 +283,7 @@ class FileField {
     }
 
     if (invalidFiles) {
-      for (const file of invalidFiles) {
-        // @TODO: find a better way to expose the error.
-        console.error(
-          `File name ${file.name}: Not a valid file type. Update your selection.`
-        );
-      }
+      this.handleInvalidFiles([...invalidFiles]);
     }
 
     if (acceptedFiles) {
@@ -296,6 +291,10 @@ class FileField {
     }
 
     this.renderer.clearInput();
+  };
+
+  handleInvalidFiles = (files: File[]): void => {
+    this.renderer.setErrorInvalidFiles(files);
   };
 
   onClick = (e: Event): void => {
@@ -414,7 +413,8 @@ class FileField {
     new DropArea({
       container,
       inputAccept,
-      onUploadFiles: this.uploadFiles
+      onUploadFiles: this.uploadFiles,
+      renderer: this.renderer
     });
   }
 

@@ -9,3 +9,4 @@ testproject/t
 django_file_form/static/file_form/file_form.coverage.js
 django_file_form/static/file_form/file_form.coverage.js.map
 node_modules/
+build/
