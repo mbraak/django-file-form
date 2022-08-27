@@ -1684,6 +1684,15 @@
 
 	    _defineProperty$2(this, "translations", void 0);
 
+	    _defineProperty$2(this, "errors", void 0);
+
+	    _defineProperty$2(this, "createErrorContainer", parent => {
+	      const div = document.createElement("div");
+	      div.className = "dff-invalid-files";
+	      parent.appendChild(div);
+	      return div;
+	    });
+
 	    _defineProperty$2(this, "createFilesContainer", parent => {
 	      const div = document.createElement("div");
 	      div.className = "dff-files";
@@ -1692,6 +1701,7 @@
 	    });
 
 	    this.container = this.createFilesContainer(_parent);
+	    this.errors = this.createErrorContainer(_parent);
 	    this.input = input;
 	    this.translations = translations;
 
@@ -1792,6 +1802,20 @@
 
 	    this.removeProgress(index);
 	    this.removeCancel(index);
+	  }
+
+	  setErrorInvalidFiles(files) {
+	    const errorsMessages = document.createElement("ul");
+
+	    for (const file of files) {
+	      const msg = document.createElement('li');
+	      msg.innerHTML = "".concat(file.name, ": ").concat(this.translations["Invalid file type"]);
+	      msg.className = 'dff-error';
+	      errorsMessages.appendChild(msg);
+	    }
+
+	    this.errors.replaceChildren(errorsMessages);
+	    this.clearInput();
 	  }
 
 	  setSuccess(index, size) {
@@ -5508,7 +5532,8 @@
 	    let {
 	      container,
 	      inputAccept,
-	      onUploadFiles
+	      onUploadFiles,
+	      renderer
 	    } = _ref;
 
 	    _defineProperty$2(this, "acceptedFileTypes", void 0);
@@ -5516,6 +5541,8 @@
 	    _defineProperty$2(this, "container", void 0);
 
 	    _defineProperty$2(this, "onUploadFiles", void 0);
+
+	    _defineProperty$2(this, "renderer", void 0);
 
 	    _defineProperty$2(this, "onDrop", e => {
 	      const dragEvent = e;
@@ -5527,7 +5554,18 @@
 	        try {
 	          if (dragEvent.dataTransfer) {
 	            const files = await getFilesFromDataTransfer(dragEvent.dataTransfer);
-	            const acceptedFiles = files.filter(file => this.acceptedFileTypes.isAccepted(file.name));
+	            const acceptedFiles = [];
+	            const invalidFiles = [];
+
+	            for (const file of files) {
+	              if (this.acceptedFileTypes.isAccepted(file.name)) {
+	                acceptedFiles.push(file);
+	              } else {
+	                invalidFiles.push(file);
+	              }
+	            }
+
+	            this.renderer.setErrorInvalidFiles(invalidFiles);
 	            this.onUploadFiles(acceptedFiles);
 	          }
 	        } catch (error) {
@@ -5541,6 +5579,7 @@
 	    this.container = container;
 	    this.onUploadFiles = onUploadFiles;
 	    this.acceptedFileTypes = new AcceptedFileTypes(inputAccept);
+	    this.renderer = renderer;
 	    container.addEventListener("dragenter", () => {
 	      container.classList.add("dff-dropping");
 	    });
@@ -11261,10 +11300,7 @@
 	      }
 
 	      if (invalidFiles) {
-	        for (const file of invalidFiles) {
-	          // @TODO: find a better way to expose the error.
-	          console.error("File name ".concat(file.name, ": Not a valid file type. Update your selection."));
-	        }
+	        void this.handleInvalidFiles([...invalidFiles]);
 	      }
 
 	      if (acceptedFiles) {
@@ -11272,6 +11308,10 @@
 	      }
 
 	      this.renderer.clearInput();
+	    });
+
+	    _defineProperty$2(this, "handleInvalidFiles", files => {
+	      this.renderer.setErrorInvalidFiles(files);
 	    });
 
 	    _defineProperty$2(this, "onClick", e => {
@@ -11549,7 +11589,8 @@
 	    new DropArea({
 	      container,
 	      inputAccept,
-	      onUploadFiles: this.uploadFiles
+	      onUploadFiles: this.uploadFiles,
+	      renderer: this.renderer
 	    });
 	  }
 
