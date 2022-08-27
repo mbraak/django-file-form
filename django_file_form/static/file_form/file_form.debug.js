@@ -11274,8 +11274,11 @@
 	        return;
 	      }
 
-	      if (!this.multiple && this.uploads.length !== 0) {
-	        this.renderer.deleteFile(0);
+	      if (!this.multiple) {
+	        for (const upload of this.uploads) {
+	          this.renderer.deleteFile(upload.uploadIndex);
+	        }
+
 	        this.uploads = [];
 	      }
 
@@ -11300,7 +11303,7 @@
 	      }
 
 	      if (invalidFiles) {
-	        void this.handleInvalidFiles([...invalidFiles]);
+	        this.handleInvalidFiles([...invalidFiles]);
 	      }
 
 	      if (acceptedFiles) {
