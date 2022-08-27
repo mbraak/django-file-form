@@ -65,16 +65,23 @@
 
 	var isCallable$j = isCallable$k;
 
-	var isObject$b = function (it) {
+	var documentAll = typeof document == 'object' && document.all;
+
+	// https://tc39.es/ecma262/#sec-IsHTMLDDA-internal-slot
+	var SPECIAL_DOCUMENT_ALL = typeof documentAll == 'undefined' && documentAll !== undefined;
+
+	var isObject$c = SPECIAL_DOCUMENT_ALL ? function (it) {
+	  return typeof it == 'object' ? it !== null : isCallable$j(it) || it === documentAll;
+	} : function (it) {
 	  return typeof it == 'object' ? it !== null : isCallable$j(it);
 	};
 
 	var global$k = global$l;
-	var isObject$a = isObject$b;
+	var isObject$b = isObject$c;
 
 	var document$1 = global$k.document;
 	// typeof document.createElement is 'object' in old IE
-	var EXISTS$1 = isObject$a(document$1) && isObject$a(document$1.createElement);
+	var EXISTS$1 = isObject$b(document$1) && isObject$b(document$1.createElement);
 
 	var documentCreateElement$2 = function (it) {
 	  return EXISTS$1 ? document$1.createElement(it) : {};
@@ -145,12 +152,20 @@
 	  return classof$9(it) == 'String' ? split(it, '') : $Object$4(it);
 	} : $Object$4;
 
+	// we can't use just `it == null` since of `document.all` special case
+	// https://tc39.es/ecma262/#sec-IsHTMLDDA-internal-slot-aec
+	var isNullOrUndefined$4 = function (it) {
+	  return it === null || it === undefined;
+	};
+
+	var isNullOrUndefined$3 = isNullOrUndefined$4;
+
 	var $TypeError$b = TypeError;
 
 	// `RequireObjectCoercible` abstract operation
 	// https://tc39.es/ecma262/#sec-requireobjectcoercible
 	var requireObjectCoercible$4 = function (it) {
-	  if (it == undefined) throw $TypeError$b("Can't call method on " + it);
+	  if (isNullOrUndefined$3(it)) throw $TypeError$b("Can't call method on " + it);
 	  return it;
 	};
 
@@ -190,10 +205,10 @@
 	(shared$4.exports = function (key, value) {
 	  return store$2[key] || (store$2[key] = value !== undefined ? value : {});
 	})('versions', []).push({
-	  version: '3.24.1',
+	  version: '3.25.0',
 	  mode: 'global',
 	  copyright: '© 2014-2022 Denis Pushkarev (zloirock.ru)',
-	  license: 'https://github.com/zloirock/core-js/blob/v3.24.1/LICENSE',
+	  license: 'https://github.com/zloirock/core-js/blob/v3.25.0/LICENSE',
 	  source: 'https://github.com/zloirock/core-js'
 	});
 
@@ -278,7 +293,7 @@
 	var fails$k = fails$n;
 
 	// eslint-disable-next-line es-x/no-object-getownpropertysymbols -- required for testing
-	var nativeSymbol = !!Object.getOwnPropertySymbols && !fails$k(function () {
+	var symbolConstructorDetection = !!Object.getOwnPropertySymbols && !fails$k(function () {
 	  var symbol = Symbol();
 	  // Chrome 38 Symbol has incorrect toString conversion
 	  // `get-own-property-symbols` polyfill symbols converted to object are not Symbol instances
@@ -289,7 +304,7 @@
 
 	/* eslint-disable es-x/no-symbol -- required for testing */
 
-	var NATIVE_SYMBOL$1 = nativeSymbol;
+	var NATIVE_SYMBOL$1 = symbolConstructorDetection;
 
 	var useSymbolAsUid = NATIVE_SYMBOL$1
 	  && !Symbol.sham
@@ -299,7 +314,7 @@
 	var shared$3 = shared$4.exports;
 	var hasOwn$a = hasOwnProperty_1;
 	var uid$2 = uid$3;
-	var NATIVE_SYMBOL = nativeSymbol;
+	var NATIVE_SYMBOL = symbolConstructorDetection;
 	var USE_SYMBOL_AS_UID$1 = useSymbolAsUid;
 
 	var WellKnownSymbolsStore = shared$3('wks');
@@ -320,14 +335,14 @@
 	  } return WellKnownSymbolsStore[name];
 	};
 
-	var isObject$9 = isObject$b;
+	var isObject$a = isObject$c;
 
 	var $String$3 = String;
 	var $TypeError$a = TypeError;
 
 	// `Assert: Type(argument) is Object`
 	var anObject$9 = function (argument) {
-	  if (isObject$9(argument)) return argument;
+	  if (isObject$a(argument)) return argument;
 	  throw $TypeError$a($String$3(argument) + ' is not an object');
 	};
 
@@ -416,17 +431,18 @@
 	};
 
 	var aCallable$3 = aCallable$4;
+	var isNullOrUndefined$2 = isNullOrUndefined$4;
 
 	// `GetMethod` abstract operation
 	// https://tc39.es/ecma262/#sec-getmethod
 	var getMethod$3 = function (V, P) {
 	  var func = V[P];
-	  return func == null ? undefined : aCallable$3(func);
+	  return isNullOrUndefined$2(func) ? undefined : aCallable$3(func);
 	};
 
 	var call$c = functionCall;
 	var isCallable$f = isCallable$k;
-	var isObject$8 = isObject$b;
+	var isObject$9 = isObject$c;
 
 	var $TypeError$8 = TypeError;
 
@@ -434,14 +450,14 @@
 	// https://tc39.es/ecma262/#sec-ordinarytoprimitive
 	var ordinaryToPrimitive$1 = function (input, pref) {
 	  var fn, val;
-	  if (pref === 'string' && isCallable$f(fn = input.toString) && !isObject$8(val = call$c(fn, input))) return val;
-	  if (isCallable$f(fn = input.valueOf) && !isObject$8(val = call$c(fn, input))) return val;
-	  if (pref !== 'string' && isCallable$f(fn = input.toString) && !isObject$8(val = call$c(fn, input))) return val;
+	  if (pref === 'string' && isCallable$f(fn = input.toString) && !isObject$9(val = call$c(fn, input))) return val;
+	  if (isCallable$f(fn = input.valueOf) && !isObject$9(val = call$c(fn, input))) return val;
+	  if (pref !== 'string' && isCallable$f(fn = input.toString) && !isObject$9(val = call$c(fn, input))) return val;
 	  throw $TypeError$8("Can't convert object to primitive value");
 	};
 
 	var call$b = functionCall;
-	var isObject$7 = isObject$b;
+	var isObject$8 = isObject$c;
 	var isSymbol$2 = isSymbol$3;
 	var getMethod$2 = getMethod$3;
 	var ordinaryToPrimitive = ordinaryToPrimitive$1;
@@ -453,13 +469,13 @@
 	// `ToPrimitive` abstract operation
 	// https://tc39.es/ecma262/#sec-toprimitive
 	var toPrimitive$2 = function (input, pref) {
-	  if (!isObject$7(input) || isSymbol$2(input)) return input;
+	  if (!isObject$8(input) || isSymbol$2(input)) return input;
 	  var exoticToPrim = getMethod$2(input, TO_PRIMITIVE);
 	  var result;
 	  if (exoticToPrim) {
 	    if (pref === undefined) pref = 'default';
 	    result = call$b(exoticToPrim, input, pref);
-	    if (!isObject$7(result) || isSymbol$2(result)) return result;
+	    if (!isObject$8(result) || isSymbol$2(result)) return result;
 	    throw $TypeError$7("Can't convert object to primitive value");
 	  }
 	  if (pref === undefined) pref = 'number';
@@ -791,28 +807,12 @@
 
 	var iterators = {};
 
-	var uncurryThis$e = functionUncurryThis;
-	var isCallable$e = isCallable$k;
-	var store$1 = sharedStore;
-
-	var functionToString = uncurryThis$e(Function.toString);
-
-	// this helper broken in `core-js@3.4.1-3.4.4`, so we can't use `shared` helper
-	if (!isCallable$e(store$1.inspectSource)) {
-	  store$1.inspectSource = function (it) {
-	    return functionToString(it);
-	  };
-	}
-
-	var inspectSource$3 = store$1.inspectSource;
-
 	var global$e = global$l;
-	var isCallable$d = isCallable$k;
-	var inspectSource$2 = inspectSource$3;
+	var isCallable$e = isCallable$k;
 
 	var WeakMap$1 = global$e.WeakMap;
 
-	var nativeWeakMap = isCallable$d(WeakMap$1) && /native code/.test(inspectSource$2(WeakMap$1));
+	var weakMapBasicDetection = isCallable$e(WeakMap$1) && /native code/.test(String(WeakMap$1));
 
 	var createPropertyDescriptor$5 = function (bitmap, value) {
 	  return {
@@ -834,10 +834,10 @@
 	  return object;
 	};
 
-	var NATIVE_WEAK_MAP = nativeWeakMap;
+	var NATIVE_WEAK_MAP = weakMapBasicDetection;
 	var global$d = global$l;
-	var uncurryThis$d = functionUncurryThis;
-	var isObject$6 = isObject$b;
+	var uncurryThis$e = functionUncurryThis;
+	var isObject$7 = isObject$c;
 	var createNonEnumerableProperty$7 = createNonEnumerableProperty$8;
 	var hasOwn$8 = hasOwnProperty_1;
 	var shared$1 = sharedStore;
@@ -856,34 +856,34 @@
 	var getterFor = function (TYPE) {
 	  return function (it) {
 	    var state;
-	    if (!isObject$6(it) || (state = get$1(it)).type !== TYPE) {
+	    if (!isObject$7(it) || (state = get$1(it)).type !== TYPE) {
 	      throw TypeError$2('Incompatible receiver, ' + TYPE + ' required');
 	    } return state;
 	  };
 	};
 
 	if (NATIVE_WEAK_MAP || shared$1.state) {
-	  var store = shared$1.state || (shared$1.state = new WeakMap());
-	  var wmget = uncurryThis$d(store.get);
-	  var wmhas = uncurryThis$d(store.has);
-	  var wmset = uncurryThis$d(store.set);
+	  var store$1 = shared$1.state || (shared$1.state = new WeakMap());
+	  var wmget = uncurryThis$e(store$1.get);
+	  var wmhas = uncurryThis$e(store$1.has);
+	  var wmset = uncurryThis$e(store$1.set);
 	  set$2 = function (it, metadata) {
-	    if (wmhas(store, it)) throw new TypeError$2(OBJECT_ALREADY_INITIALIZED);
+	    if (wmhas(store$1, it)) throw TypeError$2(OBJECT_ALREADY_INITIALIZED);
 	    metadata.facade = it;
-	    wmset(store, it, metadata);
+	    wmset(store$1, it, metadata);
 	    return metadata;
 	  };
 	  get$1 = function (it) {
-	    return wmget(store, it) || {};
+	    return wmget(store$1, it) || {};
 	  };
 	  has$1 = function (it) {
-	    return wmhas(store, it);
+	    return wmhas(store$1, it);
 	  };
 	} else {
 	  var STATE = sharedKey$1('state');
 	  hiddenKeys$1[STATE] = true;
 	  set$2 = function (it, metadata) {
-	    if (hasOwn$8(it, STATE)) throw new TypeError$2(OBJECT_ALREADY_INITIALIZED);
+	    if (hasOwn$8(it, STATE)) throw TypeError$2(OBJECT_ALREADY_INITIALIZED);
 	    metadata.facade = it;
 	    createNonEnumerableProperty$7(it, STATE, metadata);
 	    return metadata;
@@ -965,12 +965,27 @@
 	  CONFIGURABLE: CONFIGURABLE
 	};
 
+	var uncurryThis$d = functionUncurryThis;
+	var isCallable$d = isCallable$k;
+	var store = sharedStore;
+
+	var functionToString = uncurryThis$d(Function.toString);
+
+	// this helper broken in `core-js@3.4.1-3.4.4`, so we can't use `shared` helper
+	if (!isCallable$d(store.inspectSource)) {
+	  store.inspectSource = function (it) {
+	    return functionToString(it);
+	  };
+	}
+
+	var inspectSource$2 = store.inspectSource;
+
 	var fails$g = fails$n;
 	var isCallable$c = isCallable$k;
 	var hasOwn$5 = hasOwnProperty_1;
 	var DESCRIPTORS$6 = descriptors;
 	var CONFIGURABLE_FUNCTION_NAME$2 = functionName.CONFIGURABLE;
-	var inspectSource$1 = inspectSource$3;
+	var inspectSource$1 = inspectSource$2;
 	var InternalStateModule$4 = internalState;
 
 	var enforceInternalState$2 = InternalStateModule$4.enforce;
@@ -1205,6 +1220,7 @@
 
 	var fails$d = fails$n;
 	var isCallable$8 = isCallable$k;
+	var isObject$6 = isObject$c;
 	var getPrototypeOf$3 = objectGetPrototypeOf;
 	var defineBuiltIn$4 = defineBuiltIn$6;
 	var wellKnownSymbol$d = wellKnownSymbol$g;
@@ -1227,7 +1243,7 @@
 	  }
 	}
 
-	var NEW_ITERATOR_PROTOTYPE = IteratorPrototype$2 == undefined || fails$d(function () {
+	var NEW_ITERATOR_PROTOTYPE = !isObject$6(IteratorPrototype$2) || fails$d(function () {
 	  var test = {};
 	  // FF44- legacy iterators case
 	  return IteratorPrototype$2[ITERATOR$5].call(test) !== test;
@@ -1269,7 +1285,7 @@
 
 	var returnThis$1 = function () { return this; };
 
-	var createIteratorConstructor$1 = function (IteratorConstructor, NAME, next, ENUMERABLE_NEXT) {
+	var iteratorCreateConstructor = function (IteratorConstructor, NAME, next, ENUMERABLE_NEXT) {
 	  var TO_STRING_TAG = NAME + ' Iterator';
 	  IteratorConstructor.prototype = create$2(IteratorPrototype$1, { next: createPropertyDescriptor$2(+!ENUMERABLE_NEXT, next) });
 	  setToStringTag$2(IteratorConstructor, TO_STRING_TAG, false);
@@ -1320,7 +1336,7 @@
 	var call$9 = functionCall;
 	var FunctionName$1 = functionName;
 	var isCallable$6 = isCallable$k;
-	var createIteratorConstructor = createIteratorConstructor$1;
+	var createIteratorConstructor = iteratorCreateConstructor;
 	var getPrototypeOf$2 = objectGetPrototypeOf;
 	var setPrototypeOf$4 = objectSetPrototypeOf;
 	var setToStringTag$1 = setToStringTag$3;
@@ -1341,7 +1357,7 @@
 
 	var returnThis = function () { return this; };
 
-	var defineIterator$1 = function (Iterable, NAME, IteratorConstructor, next, DEFAULT, IS_SET, FORCED) {
+	var iteratorDefine = function (Iterable, NAME, IteratorConstructor, next, DEFAULT, IS_SET, FORCED) {
 	  createIteratorConstructor(IteratorConstructor, NAME, next);
 
 	  var getIterationMethod = function (KIND) {
@@ -1418,7 +1434,7 @@
 	var Iterators$2 = iterators;
 	var InternalStateModule$3 = internalState;
 	var defineProperty$3 = objectDefineProperty.f;
-	var defineIterator = defineIterator$1;
+	var defineIterator = iteratorDefine;
 	var DESCRIPTORS$5 = descriptors;
 
 	var ARRAY_ITERATOR = 'Array Iterator';
@@ -2387,6 +2403,7 @@
 	var fails$8 = fails$n;
 	var anObject$1 = anObject$9;
 	var isCallable$3 = isCallable$k;
+	var isNullOrUndefined$1 = isNullOrUndefined$4;
 	var toIntegerOrInfinity$3 = toIntegerOrInfinity$7;
 	var toLength$3 = toLength$5;
 	var toString$1 = toString$4;
@@ -2444,7 +2461,7 @@
 	    // https://tc39.es/ecma262/#sec-string.prototype.replace
 	    function replace(searchValue, replaceValue) {
 	      var O = requireObjectCoercible(this);
-	      var replacer = searchValue == undefined ? undefined : getMethod$1(searchValue, REPLACE);
+	      var replacer = isNullOrUndefined$1(searchValue) ? undefined : getMethod$1(searchValue, REPLACE);
 	      return replacer
 	        ? call$5(replacer, searchValue, O, replaceValue)
 	        : call$5(nativeReplace, toString$1(O), searchValue, replaceValue);
@@ -9132,13 +9149,13 @@
 	};
 
 	// eslint-disable-next-line es-x/no-typed-arrays -- safe
-	var arrayBufferNative = typeof ArrayBuffer != 'undefined' && typeof DataView != 'undefined';
+	var arrayBufferBasicDetection = typeof ArrayBuffer != 'undefined' && typeof DataView != 'undefined';
 
-	var NATIVE_ARRAY_BUFFER$1 = arrayBufferNative;
+	var NATIVE_ARRAY_BUFFER$1 = arrayBufferBasicDetection;
 	var DESCRIPTORS$3 = descriptors;
 	var global$6 = global$l;
 	var isCallable$2 = isCallable$k;
-	var isObject$4 = isObject$b;
+	var isObject$4 = isObject$c;
 	var hasOwn$1 = hasOwnProperty_1;
 	var classof$5 = classof$8;
 	var tryToString$2 = tryToString$4;
@@ -9529,7 +9546,7 @@
 	var global$4 = global$l;
 	var uncurryThis$5 = functionUncurryThis;
 	var DESCRIPTORS$2 = descriptors;
-	var NATIVE_ARRAY_BUFFER = arrayBufferNative;
+	var NATIVE_ARRAY_BUFFER = arrayBufferBasicDetection;
 	var FunctionName = functionName;
 	var createNonEnumerableProperty$1 = createNonEnumerableProperty$8;
 	var defineBuiltIns = defineBuiltIns$1;
@@ -9724,9 +9741,9 @@
 	    new NativeArrayBuffer();
 	    new NativeArrayBuffer(1.5);
 	    new NativeArrayBuffer(NaN);
-	    return INCORRECT_ARRAY_BUFFER_NAME && !CONFIGURABLE_FUNCTION_NAME;
+	    return NativeArrayBuffer.length != 1 || INCORRECT_ARRAY_BUFFER_NAME && !CONFIGURABLE_FUNCTION_NAME;
 	  })) {
-	  /* eslint-enable no-new -- required for testing */
+	    /* eslint-enable no-new -- required for testing */
 	    $ArrayBuffer = function ArrayBuffer(length) {
 	      anInstance$1(this, ArrayBufferPrototype$1);
 	      return new NativeArrayBuffer(toIndex$1(length));
@@ -9773,7 +9790,7 @@
 	  DataView: $DataView
 	};
 
-	var isObject$3 = isObject$b;
+	var isObject$3 = isObject$c;
 
 	var floor$1 = Math.floor;
 
@@ -9823,7 +9840,7 @@
 	var isCallable$1 = isCallable$k;
 	var classof$4 = classof$8;
 	var getBuiltIn$1 = getBuiltIn$6;
-	var inspectSource = inspectSource$3;
+	var inspectSource = inspectSource$2;
 
 	var noop = function () { /* empty */ };
 	var empty = [];
@@ -9884,13 +9901,14 @@
 
 	var classof$3 = classof$8;
 	var getMethod = getMethod$3;
+	var isNullOrUndefined = isNullOrUndefined$4;
 	var Iterators$1 = iterators;
 	var wellKnownSymbol$3 = wellKnownSymbol$g;
 
 	var ITERATOR$1 = wellKnownSymbol$3('iterator');
 
 	var getIteratorMethod$2 = function (it) {
-	  if (it != undefined) return getMethod(it, ITERATOR$1)
+	  if (!isNullOrUndefined(it)) return getMethod(it, ITERATOR$1)
 	    || getMethod(it, '@@iterator')
 	    || Iterators$1[classof$3(it)];
 	};
@@ -9968,7 +9986,7 @@
 
 	var isArray = isArray$1;
 	var isConstructor = isConstructor$2;
-	var isObject$2 = isObject$b;
+	var isObject$2 = isObject$c;
 	var wellKnownSymbol$1 = wellKnownSymbol$g;
 
 	var SPECIES$1 = wellKnownSymbol$1('species');
@@ -10091,7 +10109,7 @@
 	};
 
 	var isCallable = isCallable$k;
-	var isObject$1 = isObject$b;
+	var isObject$1 = isObject$c;
 	var setPrototypeOf$1 = objectSetPrototypeOf;
 
 	// makes subclassing work correct for wrapped built-ins
@@ -10126,7 +10144,7 @@
 	var toPropertyKey = toPropertyKey$4;
 	var hasOwn = hasOwnProperty_1;
 	var classof$1 = classof$8;
-	var isObject = isObject$b;
+	var isObject = isObject$c;
 	var isSymbol = isSymbol$3;
 	var create = objectCreate;
 	var isPrototypeOf = objectIsPrototypeOf;
@@ -10522,16 +10540,16 @@
 	var aTypedArray = ArrayBufferViewCore.aTypedArray;
 	var exportTypedArrayMethod = ArrayBufferViewCore.exportTypedArrayMethod;
 	var Uint16Array = global$1.Uint16Array;
-	var un$Sort = Uint16Array && uncurryThis(Uint16Array.prototype.sort);
+	var nativeSort = Uint16Array && uncurryThis(Uint16Array.prototype.sort);
 
 	// WebKit
-	var ACCEPT_INCORRECT_ARGUMENTS = !!un$Sort && !(fails(function () {
-	  un$Sort(new Uint16Array(2), null);
+	var ACCEPT_INCORRECT_ARGUMENTS = !!nativeSort && !(fails(function () {
+	  nativeSort(new Uint16Array(2), null);
 	}) && fails(function () {
-	  un$Sort(new Uint16Array(2), {});
+	  nativeSort(new Uint16Array(2), {});
 	}));
 
-	var STABLE_SORT = !!un$Sort && !fails(function () {
+	var STABLE_SORT = !!nativeSort && !fails(function () {
 	  // feature detection can be too slow, so check engines versions
 	  if (V8) return V8 < 74;
 	  if (FF) return FF < 67;
@@ -10548,7 +10566,7 @@
 	    expected[index] = index - 2 * mod + 3;
 	  }
 
-	  un$Sort(array, function (a, b) {
+	  nativeSort(array, function (a, b) {
 	    return (a / 4 | 0) - (b / 4 | 0);
 	  });
 
@@ -10573,7 +10591,7 @@
 	// https://tc39.es/ecma262/#sec-%typedarray%.prototype.sort
 	exportTypedArrayMethod('sort', function sort(comparefn) {
 	  if (comparefn !== undefined) aCallable(comparefn);
-	  if (STABLE_SORT) return un$Sort(this, comparefn);
+	  if (STABLE_SORT) return nativeSort(this, comparefn);
 
 	  return internalSort(aTypedArray(this), getSortCompare(comparefn));
 	}, !STABLE_SORT || ACCEPT_INCORRECT_ARGUMENTS);
