@@ -166,8 +166,11 @@ class FileField {
       return;
     }
 
-    if (!this.multiple && this.uploads.length !== 0) {
-      this.renderer.deleteFile(0);
+    if (!this.multiple) {
+      for (const upload of this.uploads) {
+        this.renderer.deleteFile(upload.uploadIndex);
+      }
+
       this.uploads = [];
     }
 
@@ -272,15 +275,15 @@ class FileField {
     const invalidFiles: File[] = [];
 
     for (const file of files) {
-      if(this.acceptedFileTypes.isAccepted(file.name)) {
+      if (this.acceptedFileTypes.isAccepted(file.name)) {
         acceptedFiles.push(file);
       } else {
         invalidFiles.push(file);
       }
     }
 
-    if (invalidFiles){
-      void this.handleInvalidFiles([...invalidFiles]);
+    if (invalidFiles) {
+      this.handleInvalidFiles([...invalidFiles]);
     }
 
     if (acceptedFiles) {
@@ -292,7 +295,7 @@ class FileField {
 
   handleInvalidFiles = (files: File[]): void => {
     this.renderer.setErrorInvalidFiles(files);
-  }
+  };
 
   onClick = (e: Event): void => {
     const target = e.target as HTMLInputElement;
