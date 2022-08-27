@@ -53,7 +53,7 @@ const getFilesFromDataTransfer = async (
 class DropArea {
   acceptedFileTypes: AcceptedFileTypes;
   container: Element;
-  onUploadFiles: (files: File[]) => void;
+  onUploadFiles: (files: File[]) => Promise<void>;
   renderer: RenderUploadFile;
 
   constructor({
@@ -64,14 +64,14 @@ class DropArea {
   }: {
     container: Element;
     inputAccept: string;
-    onUploadFiles: (files: File[]) => void;
+    onUploadFiles: (files: File[]) => Promise<void>;
     renderer: RenderUploadFile;
   }) {
     this.container = container;
     this.onUploadFiles = onUploadFiles;
     this.acceptedFileTypes = new AcceptedFileTypes(inputAccept);
     this.renderer = renderer;
-     
+
     container.addEventListener("dragenter", () => {
       container.classList.add("dff-dropping");
     });
@@ -97,9 +97,9 @@ class DropArea {
           const files = await getFilesFromDataTransfer(dragEvent.dataTransfer);
           const acceptedFiles: File[] = [];
           const invalidFiles: File[] = [];
-          
+
           for (const file of files) {
-            if(this.acceptedFileTypes.isAccepted(file.name)){
+            if (this.acceptedFileTypes.isAccepted(file.name)) {
               acceptedFiles.push(file);
             } else {
               invalidFiles.push(file);
@@ -107,7 +107,7 @@ class DropArea {
           }
 
           this.renderer.setErrorInvalidFiles(invalidFiles);
-          this.onUploadFiles(acceptedFiles);
+          void this.onUploadFiles(acceptedFiles);
         }
       } catch (error) {
         console.error(error);
