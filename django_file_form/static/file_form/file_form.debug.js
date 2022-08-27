@@ -5566,7 +5566,7 @@
 	            }
 
 	            this.renderer.setErrorInvalidFiles(invalidFiles);
-	            this.onUploadFiles(acceptedFiles);
+	            void this.onUploadFiles(acceptedFiles);
 	          }
 	        } catch (error) {
 	          console.error(error);
