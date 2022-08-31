@@ -1,6 +1,6 @@
 ## Changelog
 
-**development version**
+**3.4.1 (31 august 2022)**
 
 - Issue #523: add package lock file (thanks to Saurabh Kumar)
 - Issue #524: add js validation for acceptable file types (thanks to Saurabh Kumar)
