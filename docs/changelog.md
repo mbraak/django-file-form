@@ -1,5 +1,9 @@
 ## Changelog
 
+**development version**
+
+- Issue #531: add Finnish translations (thanks to Tuomas Vihinen)
+
 **3.4.1 (31 august 2022)**
 
 - Issue #523: add package lock file (thanks to Saurabh Kumar)
