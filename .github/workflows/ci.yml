@@ -48,7 +48,7 @@ jobs:
     - name: Install javascript packages
       run: |
           cd frontend
-          npm install --prefer-offline
+          npm clean-install --audit=false --fund=false --loglevel=http
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
@@ -90,7 +90,7 @@ jobs:
     - name: Merge coverage
       run: |
         cd coveralls
-        npm i --prefer-offline && gem install coveralls-lcov
+        npm clean-install --audit=false --fund=false --loglevel=http && gem install coveralls-lcov
         npm run merge_coverage
         coveralls-lcov -v -n coverage/lcov.info > coverage.json
         cd ..
