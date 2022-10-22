@@ -2,21 +2,17 @@
 
   const findForm = element => {
     const parent = element.parentElement;
-
     if (!parent) {
       return null;
     }
-
     if (parent.tagName === "FORM") {
       return parent;
     }
-
     return findForm(parent);
   };
-
   const unique = values => Array.from(new Set(values).values());
-
   // eslint-disable-line @typescript-eslint/no-explicit-any
+
   const autoInitFileForms = () => {
     const initUploadFields = window.initUploadFields; // eslint-disable-line  @typescript-eslint/no-unsafe-member-access
 
@@ -35,7 +31,6 @@
     } else {
       obj[key] = value;
     }
-
     return obj;
   }
 
@@ -43,7 +38,6 @@
     if (bytes === 0) {
       return "0 Bytes";
     }
-
     const k = 1024;
     const dm = decimals <= 0 ? 0 : decimals || 2;
     const sizes = ["Bytes", "KB", "MB", "GB"];
@@ -53,23 +47,18 @@
     return `${n} ${size}`;
   };
   const getInputNameWithPrefix = (fieldName, prefix) => prefix ? `${prefix}-${fieldName}` : fieldName;
-
   const getInputNameWithoutPrefix = (fieldName, prefix) => prefix ? fieldName.slice(prefix.length + 1) : fieldName;
-
   const findInput = (form, fieldName, prefix) => {
     const inputNameWithPrefix = getInputNameWithPrefix(fieldName, prefix);
     const input = form.querySelector(`[name="${inputNameWithPrefix}"]`);
-
     if (!input) {
       return null;
     }
-
     return input;
   };
   const getUploadsFieldName = (fieldName, prefix) => `${getInputNameWithoutPrefix(fieldName, prefix)}-uploads`;
   const getInputValueForFormAndPrefix = (form, fieldName, prefix) => {
     var _findInput;
-
     return (_findInput = findInput(form, fieldName, prefix)) === null || _findInput === void 0 ? void 0 : _findInput.value;
   };
   const getMetadataFieldName = (fieldName, prefix) => `${getInputNameWithoutPrefix(fieldName, prefix)}-metadata`;
@@ -87,19 +76,21 @@
    * Copyright(c) 2015 Tiancheng "Timothy" Gu
    * MIT Licensed
    */
+
   /**
    * Module variables.
    * @private
    */
 
-
   var matchHtmlRegExp = /["'&<>]/;
+
   /**
    * Module exports.
    * @public
    */
 
   var escapeHtml_1 = escapeHtml;
+
   /**
    * Escape special characters in the given string of html.
    *
@@ -111,55 +102,44 @@
   function escapeHtml(string) {
     var str = '' + string;
     var match = matchHtmlRegExp.exec(str);
-
     if (!match) {
       return str;
     }
-
     var escape;
     var html = '';
     var index = 0;
     var lastIndex = 0;
-
     for (index = match.index; index < str.length; index++) {
       switch (str.charCodeAt(index)) {
         case 34:
           // "
           escape = '&quot;';
           break;
-
         case 38:
           // &
           escape = '&amp;';
           break;
-
         case 39:
           // '
           escape = '&#39;';
           break;
-
         case 60:
           // <
           escape = '&lt;';
           break;
-
         case 62:
           // >
           escape = '&gt;';
           break;
-
         default:
           continue;
       }
-
       if (lastIndex !== index) {
         html += str.substring(lastIndex, index);
       }
-
       lastIndex = index + 1;
       html += escape;
     }
-
     return lastIndex !== index ? html + str.substring(lastIndex, index) : html;
   }
 
@@ -171,39 +151,30 @@
         skipRequired,
         translations
       } = _ref;
-
       _defineProperty$2(this, "container", void 0);
-
       _defineProperty$2(this, "input", void 0);
-
       _defineProperty$2(this, "translations", void 0);
-
       _defineProperty$2(this, "errors", void 0);
-
       _defineProperty$2(this, "createErrorContainer", parent => {
         const div = document.createElement("div");
         div.className = "dff-invalid-files";
         parent.appendChild(div);
         return div;
       });
-
       _defineProperty$2(this, "createFilesContainer", parent => {
         const div = document.createElement("div");
         div.className = "dff-files";
         parent.appendChild(div);
         return div;
       });
-
       this.container = this.createFilesContainer(_parent);
       this.errors = this.createErrorContainer(_parent);
       this.input = input;
       this.translations = translations;
-
       if (skipRequired) {
         this.input.required = false;
       }
     }
-
     addNewUpload(filename, uploadIndex) {
       const div = this.addFile(filename, uploadIndex);
       const progressSpan = document.createElement("span");
@@ -220,114 +191,90 @@
       div.appendChild(cancelLink);
       return div;
     }
-
     addUploadedFile(filename, uploadIndex, filesize) {
       const element = this.addFile(filename, uploadIndex);
       this.setSuccess(uploadIndex, filesize);
       return element;
     }
-
     clearInput() {
       const {
         input
       } = this;
       input.value = "";
     }
-
     deleteFile(index) {
       const div = this.findFileDiv(index);
-
       if (div) {
         div.remove();
       }
     }
-
     disableCancel(index) {
       const cancelSpan = this.findCancelSpan(index);
-
       if (cancelSpan) {
         cancelSpan.classList.add("dff-disabled");
       }
     }
-
     disableDelete(index) {
       const deleteLink = this.findDeleteLink(index);
-
       if (deleteLink) {
         deleteLink.classList.add("dff-disabled");
       }
     }
-
     findFileDiv(index) {
       return this.container.querySelector(`.dff-file-id-${index}`);
     }
-
     removeDropHint() {
       const dropHint = this.container.querySelector(".dff-drop-hint");
-
       if (dropHint) {
         dropHint.remove();
       }
     }
-
     renderDropHint() {
       if (this.container.querySelector(".dff-drop-hint")) {
         return;
       }
-
       const dropHint = document.createElement("div");
       dropHint.className = "dff-drop-hint";
       dropHint.innerHTML = this.translations["Drop your files here"];
       this.container.appendChild(dropHint);
     }
-
     setDeleteFailed(index) {
       this.setErrorMessage(index, this.translations["Delete failed"]);
       this.enableDelete(index);
     }
-
     setError(index) {
       this.setErrorMessage(index, this.translations["Upload failed"]);
       const el = this.findFileDiv(index);
-
       if (el) {
         el.classList.add("dff-upload-fail");
       }
-
       this.removeProgress(index);
       this.removeCancel(index);
     }
-
     setErrorInvalidFiles(files) {
       const errorsMessages = document.createElement("ul");
-
       for (const file of files) {
         const msg = document.createElement('li');
         msg.innerHTML = `${file.name}: ${this.translations["Invalid file type"]}`;
         msg.className = 'dff-error';
         errorsMessages.appendChild(msg);
       }
-
       this.errors.replaceChildren(errorsMessages);
       this.clearInput();
     }
-
     setSuccess(index, size) {
       const {
         translations
       } = this;
       const el = this.findFileDiv(index);
-
       if (el) {
         el.classList.add("dff-upload-success");
-
         if (size != null) {
           const fileSizeInfo = document.createElement("span");
           fileSizeInfo.innerHTML = formatBytes(size, 2);
           fileSizeInfo.className = "dff-filesize";
           el.appendChild(fileSizeInfo);
         }
-
         const deleteLink = document.createElement("a");
         deleteLink.innerHTML = translations.Delete;
         deleteLink.className = "dff-delete";
@@ -335,23 +282,18 @@
         deleteLink.href = "#";
         el.appendChild(deleteLink);
       }
-
       this.removeProgress(index);
       this.removeCancel(index);
     }
-
     updateProgress(index, percentage) {
       const el = this.container.querySelector(`.dff-file-id-${index}`);
-
       if (el) {
         const innerProgressSpan = el.querySelector(".dff-progress-inner");
-
         if (innerProgressSpan) {
           innerProgressSpan.style.width = `${percentage}%`;
         }
       }
     }
-
     addFile(filename, uploadIndex) {
       const div = document.createElement("div");
       div.className = `dff-file dff-file-id-${uploadIndex}`;
@@ -362,94 +304,72 @@
       this.input.required = false;
       return div;
     }
-
     removeProgress(index) {
       const el = this.findFileDiv(index);
-
       if (el) {
         const progressSpan = el.querySelector(".dff-progress");
-
         if (progressSpan) {
           progressSpan.remove();
         }
       }
     }
-
     removeCancel(index) {
       const cancelSpan = this.findCancelSpan(index);
-
       if (cancelSpan) {
         cancelSpan.remove();
       }
     }
-
     findCancelSpan(index) {
       const el = this.findFileDiv(index);
-
       if (!el) {
         return null;
       }
-
       return el.querySelector(".dff-cancel");
     }
-
     enableDelete(index) {
       const deleteLink = this.findDeleteLink(index);
-
       if (deleteLink) {
         deleteLink.classList.remove("dff-disabled");
       }
     }
-
     findDeleteLink(index) {
       const div = this.findFileDiv(index);
-
       if (!div) {
         return div;
       }
-
       return div.querySelector(".dff-delete");
     }
-
     setErrorMessage(index, message) {
       const el = this.findFileDiv(index);
-
       if (!el) {
         return;
       }
-
       const originalMessageSpan = el.querySelector(".dff-error");
-
       if (originalMessageSpan) {
         originalMessageSpan.remove();
       }
-
       const span = document.createElement("span");
       span.classList.add("dff-error");
       span.innerHTML = message;
       el.appendChild(span);
     }
-
   }
 
   /**
    * @param typeMap [Object] Map of MIME type -> Array[extensions]
    * @param ...
    */
-
-
   function Mime$1() {
     this._types = Object.create(null);
     this._extensions = Object.create(null);
-
     for (let i = 0; i < arguments.length; i++) {
       this.define(arguments[i]);
     }
-
     this.define = this.define.bind(this);
     this.getType = this.getType.bind(this);
     this.getExtension = this.getExtension.bind(this);
   }
+
   /**
    * Define mimetype -> extension mappings.  Each key is a mime-type that maps
    * to an array of extensions associated with the type.  The first extension is
@@ -469,42 +389,37 @@
    * @param map (Object) type definitions
    * @param force (Boolean) if true, force overriding of existing definitions
    */
-
-
   Mime$1.prototype.define = function (typeMap, force) {
     for (let type in typeMap) {
       let extensions = typeMap[type].map(function (t) {
         return t.toLowerCase();
       });
       type = type.toLowerCase();
-
       for (let i = 0; i < extensions.length; i++) {
-        const ext = extensions[i]; // '*' prefix = not the preferred type for this extension.  So fixup the
-        // extension, and skip it.
+        const ext = extensions[i];
 
+        // '*' prefix = not the preferred type for this extension.  So fixup the
+        // extension, and skip it.
         if (ext[0] === '*') {
           continue;
         }
-
         if (!force && ext in this._types) {
           throw new Error('Attempt to change mapping for "' + ext + '" extension from "' + this._types[ext] + '" to "' + type + '". Pass `force=true` to allow this, otherwise remove "' + ext + '" from the list of extensions for "' + type + '".');
         }
-
         this._types[ext] = type;
-      } // Use first extension as default
+      }
 
-
+      // Use first extension as default
       if (force || !this._extensions[type]) {
         const ext = extensions[0];
         this._extensions[type] = ext[0] !== '*' ? ext : ext.substr(1);
       }
     }
   };
+
   /**
    * Lookup a mime type based on extension
    */
-
-
   Mime$1.prototype.getType = function (path) {
     path = String(path);
     let last = path.replace(/^.*[/\\]/, '').toLowerCase();
@@ -513,16 +428,14 @@
     let hasDot = ext.length < last.length - 1;
     return (hasDot || !hasPath) && this._types[ext] || null;
   };
+
   /**
    * Return file extension associated with a mime type
    */
-
-
   Mime$1.prototype.getExtension = function (type) {
     type = /^\s*([^;\s]*)/.test(type) && RegExp.$1;
     return type && this._extensions[type.toLowerCase()] || null;
   };
-
   var Mime_1 = Mime$1;
 
   var standard = {
@@ -901,16 +814,32 @@
   var NATIVE_BIND$1 = functionBindNative;
 
   var FunctionPrototype$1 = Function.prototype;
-  var bind = FunctionPrototype$1.bind;
   var call$3 = FunctionPrototype$1.call;
-  var uncurryThis$5 = NATIVE_BIND$1 && bind.bind(call$3, call$3);
+  var uncurryThisWithBind = NATIVE_BIND$1 && FunctionPrototype$1.bind.bind(call$3, call$3);
 
-  var functionUncurryThis = NATIVE_BIND$1 ? function (fn) {
-    return fn && uncurryThis$5(fn);
-  } : function (fn) {
-    return fn && function () {
+  var functionUncurryThisRaw = function (fn) {
+    return NATIVE_BIND$1 ? uncurryThisWithBind(fn) : function () {
       return call$3.apply(fn, arguments);
     };
+  };
+
+  var uncurryThisRaw$1 = functionUncurryThisRaw;
+
+  var toString$2 = uncurryThisRaw$1({}.toString);
+  var stringSlice = uncurryThisRaw$1(''.slice);
+
+  var classofRaw$1 = function (it) {
+    return stringSlice(toString$2(it), 8, -1);
+  };
+
+  var classofRaw = classofRaw$1;
+  var uncurryThisRaw = functionUncurryThisRaw;
+
+  var functionUncurryThis = function (fn) {
+    // Nashorn bug:
+    //   https://github.com/zloirock/core-js/issues/1128
+    //   https://github.com/zloirock/core-js/issues/1130
+    if (classofRaw(fn) === 'Function') return uncurryThisRaw(fn);
   };
 
   // we can't use just `it == null` since of `document.all` special case
@@ -940,10 +869,10 @@
     return $Object$1(requireObjectCoercible(argument));
   };
 
-  var uncurryThis$4 = functionUncurryThis;
+  var uncurryThis$3 = functionUncurryThis;
   var toObject = toObject$1;
 
-  var hasOwnProperty = uncurryThis$4({}.hasOwnProperty);
+  var hasOwnProperty = uncurryThis$3({}.hasOwnProperty);
 
   // `HasOwnProperty` abstract operation
   // https://tc39.es/ecma262/#sec-hasownproperty
@@ -991,11 +920,11 @@
 
   var sharedStore = store$3;
 
-  var uncurryThis$3 = functionUncurryThis;
+  var uncurryThis$2 = functionUncurryThis;
   var isCallable$7 = isCallable$8;
   var store$2 = sharedStore;
 
-  var functionToString = uncurryThis$3(Function.toString);
+  var functionToString = uncurryThis$2(Function.toString);
 
   // this helper broken in `core-js@3.4.1-3.4.4`, so we can't use `shared` helper
   if (!isCallable$7(store$2.inspectSource)) {
@@ -1092,9 +1021,9 @@
     return arguments.length < 2 ? aFunction(global$5[namespace]) : global$5[namespace] && global$5[namespace][method];
   };
 
-  var uncurryThis$2 = functionUncurryThis;
+  var uncurryThis$1 = functionUncurryThis;
 
-  var objectIsPrototypeOf = uncurryThis$2({}.isPrototypeOf);
+  var objectIsPrototypeOf = uncurryThis$1({}.isPrototypeOf);
 
   var getBuiltIn$1 = getBuiltIn$2;
 
@@ -1219,18 +1148,18 @@
   (shared$3.exports = function (key, value) {
     return store$1[key] || (store$1[key] = value !== undefined ? value : {});
   })('versions', []).push({
-    version: '3.25.3',
+    version: '3.25.5',
     mode: 'global',
     copyright: '© 2014-2022 Denis Pushkarev (zloirock.ru)',
-    license: 'https://github.com/zloirock/core-js/blob/v3.25.3/LICENSE',
+    license: 'https://github.com/zloirock/core-js/blob/v3.25.5/LICENSE',
     source: 'https://github.com/zloirock/core-js'
   });
 
-  var uncurryThis$1 = functionUncurryThis;
+  var uncurryThis = functionUncurryThis;
 
   var id = 0;
   var postfix = Math.random();
-  var toString$1 = uncurryThis$1(1.0.toString);
+  var toString$1 = uncurryThis(1.0.toString);
 
   var uid$2 = function (key) {
     return 'Symbol(' + (key === undefined ? '' : key) + ')_' + toString$1(++id + postfix, 36);
@@ -1372,7 +1301,6 @@
 
   var NATIVE_WEAK_MAP = weakMapBasicDetection;
   var global$2 = global$a;
-  var uncurryThis = functionUncurryThis;
   var isObject$1 = isObject$6;
   var createNonEnumerableProperty = createNonEnumerableProperty$1;
   var hasOwn$1 = hasOwnProperty_1;
@@ -1399,20 +1327,22 @@
 
   if (NATIVE_WEAK_MAP || shared.state) {
     var store = shared.state || (shared.state = new WeakMap());
-    var wmget = uncurryThis(store.get);
-    var wmhas = uncurryThis(store.has);
-    var wmset = uncurryThis(store.set);
+    /* eslint-disable no-self-assign -- prototype methods protection */
+    store.get = store.get;
+    store.has = store.has;
+    store.set = store.set;
+    /* eslint-enable no-self-assign -- prototype methods protection */
     set$1 = function (it, metadata) {
-      if (wmhas(store, it)) throw TypeError$1(OBJECT_ALREADY_INITIALIZED);
+      if (store.has(it)) throw TypeError$1(OBJECT_ALREADY_INITIALIZED);
       metadata.facade = it;
-      wmset(store, it, metadata);
+      store.set(it, metadata);
       return metadata;
     };
     get = function (it) {
-      return wmget(store, it) || {};
+      return store.get(it) || {};
     };
     has$1 = function (it) {
-      return wmhas(store, it);
+      return store.has(it);
     };
   } else {
     var STATE = sharedKey('state');
@@ -1576,7 +1506,6 @@
     var end = -1;
     var matchedSlash = true;
     var i;
-
     for (i = path.length - 1; i >= 0; --i) {
       if (path.charCodeAt(i) === 47) {
         // If we reached a path separator that was not part of a set of path
@@ -1592,14 +1521,11 @@
         end = i + 1;
       }
     }
-
     if (end === -1) {
       return '';
     }
-
     return path.slice(start, end);
   };
-
   var path$1 = {
     basename
   };
@@ -1608,6 +1534,7 @@
 
   const WIN_SLASH = '\\\\/';
   const WIN_NO_SLASH = `[^${WIN_SLASH}]`;
+
   /**
    * Posix glob regex
    */
@@ -1644,11 +1571,13 @@
     STAR,
     START_ANCHOR
   };
+
   /**
    * Windows glob regex
    */
 
-  const WINDOWS_CHARS = { ...POSIX_CHARS,
+  const WINDOWS_CHARS = {
+    ...POSIX_CHARS,
     SLASH_LITERAL: `[${WIN_SLASH}]`,
     QMARK: WIN_NO_SLASH,
     STAR: `${WIN_NO_SLASH}*?`,
@@ -1661,6 +1590,7 @@
     START_ANCHOR: `(?:^|[${WIN_SLASH}])`,
     END_ANCHOR: `(?:[${WIN_SLASH}]|$)`
   };
+
   /**
    * POSIX Bracket Regex
    */
@@ -1699,141 +1629,103 @@
     },
     // Digits
     CHAR_0: 48,
-
     /* 0 */
     CHAR_9: 57,
-
     /* 9 */
+
     // Alphabet chars.
     CHAR_UPPERCASE_A: 65,
-
     /* A */
     CHAR_LOWERCASE_A: 97,
-
     /* a */
     CHAR_UPPERCASE_Z: 90,
-
     /* Z */
     CHAR_LOWERCASE_Z: 122,
-
     /* z */
-    CHAR_LEFT_PARENTHESES: 40,
 
+    CHAR_LEFT_PARENTHESES: 40,
     /* ( */
     CHAR_RIGHT_PARENTHESES: 41,
-
     /* ) */
-    CHAR_ASTERISK: 42,
 
+    CHAR_ASTERISK: 42,
     /* * */
+
     // Non-alphabetic chars.
     CHAR_AMPERSAND: 38,
-
     /* & */
     CHAR_AT: 64,
-
     /* @ */
     CHAR_BACKWARD_SLASH: 92,
-
     /* \ */
     CHAR_CARRIAGE_RETURN: 13,
-
     /* \r */
     CHAR_CIRCUMFLEX_ACCENT: 94,
-
     /* ^ */
     CHAR_COLON: 58,
-
     /* : */
     CHAR_COMMA: 44,
-
     /* , */
     CHAR_DOT: 46,
-
     /* . */
     CHAR_DOUBLE_QUOTE: 34,
-
     /* " */
     CHAR_EQUAL: 61,
-
     /* = */
     CHAR_EXCLAMATION_MARK: 33,
-
     /* ! */
     CHAR_FORM_FEED: 12,
-
     /* \f */
     CHAR_FORWARD_SLASH: 47,
-
     /* / */
     CHAR_GRAVE_ACCENT: 96,
-
     /* ` */
     CHAR_HASH: 35,
-
     /* # */
     CHAR_HYPHEN_MINUS: 45,
-
     /* - */
     CHAR_LEFT_ANGLE_BRACKET: 60,
-
     /* < */
     CHAR_LEFT_CURLY_BRACE: 123,
-
     /* { */
     CHAR_LEFT_SQUARE_BRACKET: 91,
-
     /* [ */
     CHAR_LINE_FEED: 10,
-
     /* \n */
     CHAR_NO_BREAK_SPACE: 160,
-
     /* \u00A0 */
     CHAR_PERCENT: 37,
-
     /* % */
     CHAR_PLUS: 43,
-
     /* + */
     CHAR_QUESTION_MARK: 63,
-
     /* ? */
     CHAR_RIGHT_ANGLE_BRACKET: 62,
-
     /* > */
     CHAR_RIGHT_CURLY_BRACE: 125,
-
     /* } */
     CHAR_RIGHT_SQUARE_BRACKET: 93,
-
     /* ] */
     CHAR_SEMICOLON: 59,
-
     /* ; */
     CHAR_SINGLE_QUOTE: 39,
-
     /* ' */
     CHAR_SPACE: 32,
-
     /*   */
     CHAR_TAB: 9,
-
     /* \t */
     CHAR_UNDERSCORE: 95,
-
     /* _ */
     CHAR_VERTICAL_LINE: 124,
-
     /* | */
     CHAR_ZERO_WIDTH_NOBREAK_SPACE: 65279,
-
     /* \uFEFF */
-    SEP: '/',
 
+    SEP: '/',
     /**
      * Create EXTGLOB_CHARS
      */
+
     extglobChars(chars) {
       return {
         '!': {
@@ -1863,15 +1755,14 @@
         }
       };
     },
-
     /**
      * Create GLOB_CHARS
      */
+
     globChars() {
       let win32 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
       return win32 === true ? WINDOWS_CHARS : POSIX_CHARS;
     }
-
   };
 
   (function (exports) {
@@ -1882,61 +1773,46 @@
       REGEX_SPECIAL_CHARS,
       REGEX_SPECIAL_CHARS_GLOBAL
     } = constants$2;
-
     exports.isObject = val => val !== null && typeof val === 'object' && !Array.isArray(val);
-
     exports.hasRegexChars = str => REGEX_SPECIAL_CHARS.test(str);
-
     exports.isRegexChar = str => str.length === 1 && exports.hasRegexChars(str);
-
     exports.escapeRegex = str => str.replace(REGEX_SPECIAL_CHARS_GLOBAL, '\\$1');
-
     exports.toPosixSlashes = str => str.replace(REGEX_BACKSLASH, '/');
-
     exports.removeBackslashes = str => {
       return str.replace(REGEX_REMOVE_BACKSLASH, match => {
         return match === '\\' ? '' : match;
       });
     };
-
     exports.isWindows = options => {
       if (options && typeof options.windows === 'boolean') {
         return options.windows;
       }
-
       return false;
     };
-
     exports.escapeLast = (input, char, lastIdx) => {
       const idx = input.lastIndexOf(char, lastIdx);
       if (idx === -1) return input;
       if (input[idx - 1] === '\\') return exports.escapeLast(input, char, idx - 1);
       return `${input.slice(0, idx)}\\${input.slice(idx)}`;
     };
-
     exports.removePrefix = function (input) {
       let state = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
       let output = input;
-
       if (output.startsWith('./')) {
         output = output.slice(2);
         state.prefix = './';
       }
-
       return output;
     };
-
     exports.wrapOutput = function (input) {
       let state = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
       let options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
       const prepend = options.contains ? '' : '^';
       const append = options.contains ? '' : '$';
       let output = `${prepend}(?:${input})${append}`;
-
       if (state.negated === true) {
         output = `(?:^(?!${output}).*$)`;
       }
-
       return output;
     };
   })(utils$3);
@@ -1944,61 +1820,44 @@
   const utils$2 = utils$3;
   const {
     CHAR_ASTERISK,
-
     /* * */
     CHAR_AT,
-
     /* @ */
     CHAR_BACKWARD_SLASH,
-
     /* \ */
     CHAR_COMMA,
-
     /* , */
     CHAR_DOT,
-
     /* . */
     CHAR_EXCLAMATION_MARK,
-
     /* ! */
     CHAR_FORWARD_SLASH,
-
     /* / */
     CHAR_LEFT_CURLY_BRACE,
-
     /* { */
     CHAR_LEFT_PARENTHESES,
-
     /* ( */
     CHAR_LEFT_SQUARE_BRACKET,
-
     /* [ */
     CHAR_PLUS,
-
     /* + */
     CHAR_QUESTION_MARK,
-
     /* ? */
     CHAR_RIGHT_CURLY_BRACE,
-
     /* } */
     CHAR_RIGHT_PARENTHESES,
-
     /* ) */
-    CHAR_RIGHT_SQUARE_BRACKET
-    /* ] */
-
+    CHAR_RIGHT_SQUARE_BRACKET /* ] */
   } = constants$2;
-
   const isPathSeparator = code => {
     return code === CHAR_FORWARD_SLASH || code === CHAR_BACKWARD_SLASH;
   };
-
   const depth = token => {
     if (token.isPrefix !== true) {
       token.depth = token.isGlobstar ? Infinity : 1;
     }
   };
+
   /**
    * Quickly scans a glob pattern and returns an object with a handful of
    * useful properties, like `isGlob`, `path` (the leading non-glob, if it exists),
@@ -2015,7 +1874,6 @@
    * @return {Object} Returns an object with tokens and regex source string.
    * @api public
    */
-
 
   const scan$1 = (input, options) => {
     const opts = options || {};
@@ -2046,73 +1904,55 @@
       depth: 0,
       isGlob: false
     };
-
     const eos = () => index >= length;
-
     const peek = () => str.charCodeAt(index + 1);
-
     const advance = () => {
       prev = code;
       return str.charCodeAt(++index);
     };
-
     while (index < length) {
       code = advance();
       let next;
-
       if (code === CHAR_BACKWARD_SLASH) {
         backslashes = token.backslashes = true;
         code = advance();
-
         if (code === CHAR_LEFT_CURLY_BRACE) {
           braceEscaped = true;
         }
-
         continue;
       }
-
       if (braceEscaped === true || code === CHAR_LEFT_CURLY_BRACE) {
         braces++;
-
         while (eos() !== true && (code = advance())) {
           if (code === CHAR_BACKWARD_SLASH) {
             backslashes = token.backslashes = true;
             advance();
             continue;
           }
-
           if (code === CHAR_LEFT_CURLY_BRACE) {
             braces++;
             continue;
           }
-
           if (braceEscaped !== true && code === CHAR_DOT && (code = advance()) === CHAR_DOT) {
             isBrace = token.isBrace = true;
             isGlob = token.isGlob = true;
             finished = true;
-
             if (scanToEnd === true) {
               continue;
             }
-
             break;
           }
-
           if (braceEscaped !== true && code === CHAR_COMMA) {
             isBrace = token.isBrace = true;
             isGlob = token.isGlob = true;
             finished = true;
-
             if (scanToEnd === true) {
               continue;
             }
-
             break;
           }
-
           if (code === CHAR_RIGHT_CURLY_BRACE) {
             braces--;
-
             if (braces === 0) {
               braceEscaped = false;
               isBrace = token.isBrace = true;
@@ -2121,14 +1961,11 @@
             }
           }
         }
-
         if (scanToEnd === true) {
           continue;
         }
-
         break;
       }
-
       if (code === CHAR_FORWARD_SLASH) {
         slashes.push(index);
         tokens.push(token);
@@ -2138,28 +1975,22 @@
           isGlob: false
         };
         if (finished === true) continue;
-
         if (prev === CHAR_DOT && index === start + 1) {
           start += 2;
           continue;
         }
-
         lastIndex = index + 1;
         continue;
       }
-
       if (opts.noext !== true) {
         const isExtglobChar = code === CHAR_PLUS || code === CHAR_AT || code === CHAR_ASTERISK || code === CHAR_QUESTION_MARK || code === CHAR_EXCLAMATION_MARK;
-
         if (isExtglobChar === true && peek() === CHAR_LEFT_PARENTHESES) {
           isGlob = token.isGlob = true;
           isExtglob = token.isExtglob = true;
           finished = true;
-
           if (code === CHAR_EXCLAMATION_MARK && index === start) {
             negatedExtglob = true;
           }
-
           if (scanToEnd === true) {
             while (eos() !== true && (code = advance())) {
               if (code === CHAR_BACKWARD_SLASH) {
@@ -2167,44 +1998,34 @@
                 code = advance();
                 continue;
               }
-
               if (code === CHAR_RIGHT_PARENTHESES) {
                 isGlob = token.isGlob = true;
                 finished = true;
                 break;
               }
             }
-
             continue;
           }
-
           break;
         }
       }
-
       if (code === CHAR_ASTERISK) {
         if (prev === CHAR_ASTERISK) isGlobstar = token.isGlobstar = true;
         isGlob = token.isGlob = true;
         finished = true;
-
         if (scanToEnd === true) {
           continue;
         }
-
         break;
       }
-
       if (code === CHAR_QUESTION_MARK) {
         isGlob = token.isGlob = true;
         finished = true;
-
         if (scanToEnd === true) {
           continue;
         }
-
         break;
       }
-
       if (code === CHAR_LEFT_SQUARE_BRACKET) {
         while (eos() !== true && (next = advance())) {
           if (next === CHAR_BACKWARD_SLASH) {
@@ -2212,7 +2033,6 @@
             advance();
             continue;
           }
-
           if (next === CHAR_RIGHT_SQUARE_BRACKET) {
             isBracket = token.isBracket = true;
             isGlob = token.isGlob = true;
@@ -2220,23 +2040,18 @@
             break;
           }
         }
-
         if (scanToEnd === true) {
           continue;
         }
-
         break;
       }
-
       if (opts.nonegate !== true && code === CHAR_EXCLAMATION_MARK && index === start) {
         negated = token.negated = true;
         start++;
         continue;
       }
-
       if (opts.noparen !== true && code === CHAR_LEFT_PARENTHESES) {
         isGlob = token.isGlob = true;
-
         if (scanToEnd === true) {
           while (eos() !== true && (code = advance())) {
             if (code === CHAR_LEFT_PARENTHESES) {
@@ -2244,45 +2059,35 @@
               code = advance();
               continue;
             }
-
             if (code === CHAR_RIGHT_PARENTHESES) {
               finished = true;
               break;
             }
           }
-
           continue;
         }
-
         break;
       }
-
       if (isGlob === true) {
         finished = true;
-
         if (scanToEnd === true) {
           continue;
         }
-
         break;
       }
     }
-
     if (opts.noext === true) {
       isExtglob = false;
       isGlob = false;
     }
-
     let base = str;
     let prefix = '';
     let glob = '';
-
     if (start > 0) {
       prefix = str.slice(0, start);
       str = str.slice(start);
       lastIndex -= start;
     }
-
     if (base && isGlob === true && lastIndex > 0) {
       base = str.slice(0, lastIndex);
       glob = str.slice(lastIndex);
@@ -2292,21 +2097,17 @@
     } else {
       base = str;
     }
-
     if (base && base !== '' && base !== '/' && base !== str) {
       if (isPathSeparator(base.charCodeAt(base.length - 1))) {
         base = base.slice(0, -1);
       }
     }
-
     if (opts.unescape === true) {
       if (glob) glob = utils$2.removeBackslashes(glob);
-
       if (base && backslashes === true) {
         base = utils$2.removeBackslashes(base);
       }
     }
-
     const state = {
       prefix,
       input,
@@ -2321,25 +2122,19 @@
       negated,
       negatedExtglob
     };
-
     if (opts.tokens === true) {
       state.maxDepth = 0;
-
       if (!isPathSeparator(code)) {
         tokens.push(token);
       }
-
       state.tokens = tokens;
     }
-
     if (opts.parts === true || opts.tokens === true) {
       let prevIndex;
-
       for (let idx = 0; idx < slashes.length; idx++) {
         const n = prevIndex ? prevIndex + 1 : start;
         const i = slashes[idx];
         const value = input.slice(n, i);
-
         if (opts.tokens) {
           if (idx === 0 && start !== 0) {
             tokens[idx].isPrefix = true;
@@ -2347,40 +2142,33 @@
           } else {
             tokens[idx].value = value;
           }
-
           depth(tokens[idx]);
           state.maxDepth += tokens[idx].depth;
         }
-
         if (idx !== 0 || value !== '') {
           parts.push(value);
         }
-
         prevIndex = i;
       }
-
       if (prevIndex && prevIndex + 1 < input.length) {
         const value = input.slice(prevIndex + 1);
         parts.push(value);
-
         if (opts.tokens) {
           tokens[tokens.length - 1].value = value;
           depth(tokens[tokens.length - 1]);
           state.maxDepth += tokens[tokens.length - 1].depth;
         }
       }
-
       state.slashes = slashes;
       state.parts = parts;
     }
-
     return state;
   };
-
   var scan_1 = scan$1;
 
   const constants$1 = constants$2;
   const utils$1 = utils$3;
+
   /**
    * Constants
    */
@@ -2392,6 +2180,7 @@
     REGEX_SPECIAL_CHARS_BACKREF,
     REPLACEMENTS
   } = constants$1;
+
   /**
    * Helpers
    */
@@ -2400,27 +2189,25 @@
     if (typeof options.expandRange === 'function') {
       return options.expandRange(...args, options);
     }
-
     args.sort();
     const value = `[${args.join('-')}]`;
-
     try {
       /* eslint-disable-next-line no-new */
       new RegExp(value);
     } catch (ex) {
       return args.map(v => utils$1.escapeRegex(v)).join('..');
     }
-
     return value;
   };
+
   /**
    * Create the message for a syntax error
    */
 
-
   const syntaxError = (type, char) => {
     return `Missing ${type}: "${char}" - use "\\\\${char}" to match literal characters`;
   };
+
   /**
    * Parse the given input string.
    * @param {String} input
@@ -2428,22 +2215,19 @@
    * @return {Object}
    */
 
-
   const parse$1 = (input, options) => {
     if (typeof input !== 'string') {
       throw new TypeError('Expected a string');
     }
-
     input = REPLACEMENTS[input] || input;
-    const opts = { ...options
+    const opts = {
+      ...options
     };
     const max = typeof opts.maxLength === 'number' ? Math.min(MAX_LENGTH, opts.maxLength) : MAX_LENGTH;
     let len = input.length;
-
     if (len > max) {
       throw new SyntaxError(`Input length: ${len}, exceeds maximum allowed length: ${max}`);
     }
-
     const bos = {
       type: 'bos',
       value: '',
@@ -2467,24 +2251,20 @@
       STAR,
       START_ANCHOR
     } = PLATFORM_CHARS;
-
     const globstar = opts => {
       return `(${capture}(?:(?!${START_ANCHOR}${opts.dot ? DOTS_SLASH : DOT_LITERAL}).)*?)`;
     };
-
     const nodot = opts.dot ? '' : NO_DOT;
     const qmarkNoDot = opts.dot ? QMARK : QMARK_NO_DOT;
     let star = opts.bash === true ? globstar(opts) : STAR;
-
     if (opts.capture) {
       star = `(${star})`;
-    } // minimatch options support
+    }
 
-
+    // minimatch options support
     if (typeof opts.noext === 'boolean') {
       opts.noextglob = opts.noext;
     }
-
     const state = {
       input,
       index: -1,
@@ -2509,60 +2289,51 @@
     const stack = [];
     let prev = bos;
     let value;
+
     /**
      * Tokenizing helpers
      */
 
     const eos = () => state.index === len - 1;
-
     const peek = state.peek = function () {
       let n = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
       return input[state.index + n];
     };
-
     const advance = state.advance = () => input[++state.index] || '';
-
     const remaining = () => input.slice(state.index + 1);
-
     const consume = function () {
       let value = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
       let num = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
       state.consumed += value;
       state.index += num;
     };
-
     const append = token => {
       state.output += token.output != null ? token.output : token.value;
       consume(token.value);
     };
-
     const negate = () => {
       let count = 1;
-
       while (peek() === '!' && (peek(2) !== '(' || peek(3) === '?')) {
         advance();
         state.start++;
         count++;
       }
-
       if (count % 2 === 0) {
         return false;
       }
-
       state.negated = true;
       state.start++;
       return true;
     };
-
     const increment = type => {
       state[type]++;
       stack.push(type);
     };
-
     const decrement = type => {
       state[type]--;
       stack.pop();
     };
+
     /**
      * Push tokens onto the tokens array. This helper speeds up
      * tokenizing by 1) helping us avoid backtracking as much as possible,
@@ -2571,12 +2342,10 @@
      * lookbehinds.
      */
 
-
     const push = tok => {
       if (prev.type === 'globstar') {
         const isBrace = state.braces > 0 && (tok.type === 'comma' || tok.type === 'brace');
         const isExtglob = tok.extglob === true || extglobs.length && (tok.type === 'pipe' || tok.type === 'paren');
-
         if (tok.type !== 'slash' && tok.type !== 'paren' && !isBrace && !isExtglob) {
           state.output = state.output.slice(0, -prev.output.length);
           prev.type = 'star';
@@ -2585,26 +2354,22 @@
           state.output += prev.output;
         }
       }
-
       if (extglobs.length && tok.type !== 'paren') {
         extglobs[extglobs.length - 1].inner += tok.value;
       }
-
       if (tok.value || tok.output) append(tok);
-
       if (prev && prev.type === 'text' && tok.type === 'text') {
         prev.value += tok.value;
         prev.output = (prev.output || '') + tok.value;
         return;
       }
-
       tok.prev = prev;
       tokens.push(tok);
       prev = tok;
     };
-
     const extglobOpen = (type, value) => {
-      const token = { ...EXTGLOB_CHARS[value],
+      const token = {
+        ...EXTGLOB_CHARS[value],
         conditions: 1,
         inner: ''
       };
@@ -2626,39 +2391,33 @@
       });
       extglobs.push(token);
     };
-
     const extglobClose = token => {
       let output = token.close + (opts.capture ? ')' : '');
       let rest;
-
       if (token.type === 'negate') {
         let extglobStar = star;
-
         if (token.inner && token.inner.length > 1 && token.inner.includes('/')) {
           extglobStar = globstar(opts);
         }
-
         if (extglobStar !== star || eos() || /^\)+$/.test(remaining())) {
           output = token.close = `)$))${extglobStar}`;
         }
-
         if (token.inner.includes('*') && (rest = remaining()) && /^\.[^\\/.]+$/.test(rest)) {
           // Any non-magical string (`.ts`) or even nested expression (`.{ts,tsx}`) can follow after the closing parenthesis.
           // In this case, we need to parse the string and use it in the output of the original pattern.
           // Suitable patterns: `/!(*.d).ts`, `/!(*.d).{ts,tsx}`, `**/!(*-dbg).@(js)`.
           //
           // Disabling the `fastpaths` option due to a problem with parsing strings as `.ts` in the pattern like `**/!(*.d).ts`.
-          const expression = parse$1(rest, { ...options,
+          const expression = parse$1(rest, {
+            ...options,
             fastpaths: false
           }).output;
           output = token.close = `)${expression})${extglobStar})`;
         }
-
         if (token.prev.type === 'bos') {
           state.negatedExtglob = true;
         }
       }
-
       push({
         type: 'paren',
         extglob: true,
@@ -2667,10 +2426,10 @@
       });
       decrement('parens');
     };
+
     /**
      * Fast paths
      */
-
 
     if (opts.fastpaths !== false && !/(^[*!]|[/()[\]{}"])/.test(input)) {
       let backslashes = false;
@@ -2679,34 +2438,26 @@
           backslashes = true;
           return m;
         }
-
         if (first === '?') {
           if (esc) {
             return esc + first + (rest ? QMARK.repeat(rest.length) : '');
           }
-
           if (index === 0) {
             return qmarkNoDot + (rest ? QMARK.repeat(rest.length) : '');
           }
-
           return QMARK.repeat(chars.length);
         }
-
         if (first === '.') {
           return DOT_LITERAL.repeat(chars.length);
         }
-
         if (first === '*') {
           if (esc) {
             return esc + first + (rest ? star : '');
           }
-
           return star;
         }
-
         return esc ? m : `\\${m}`;
       });
-
       if (backslashes === true) {
         if (opts.unescape === true) {
           output = output.replace(/\\/g, '');
@@ -2716,42 +2467,36 @@
           });
         }
       }
-
       if (output === input && opts.contains === true) {
         state.output = input;
         return state;
       }
-
       state.output = utils$1.wrapOutput(output, state, options);
       return state;
     }
+
     /**
      * Tokenize input until we reach end-of-string
      */
 
-
     while (!eos()) {
       value = advance();
-
       if (value === '\u0000') {
         continue;
       }
+
       /**
        * Escaped characters
        */
 
-
       if (value === '\\') {
         const next = peek();
-
         if (next === '/' && opts.bash !== true) {
           continue;
         }
-
         if (next === '.' || next === ';') {
           continue;
         }
-
         if (!next) {
           value += '\\';
           push({
@@ -2759,27 +2504,23 @@
             value
           });
           continue;
-        } // collapse slashes to reduce potential for exploits
+        }
 
-
+        // collapse slashes to reduce potential for exploits
         const match = /^\\+/.exec(remaining());
         let slashes = 0;
-
         if (match && match[0].length > 2) {
           slashes = match[0].length;
           state.index += slashes;
-
           if (slashes % 2 !== 0) {
             value += '\\';
           }
         }
-
         if (opts.unescape === true) {
           value = advance();
         } else {
           value += advance();
         }
-
         if (state.brackets === 0) {
           push({
             type: 'text',
@@ -2788,63 +2529,54 @@
           continue;
         }
       }
+
       /**
        * If we're inside a regex character class, continue
        * until we reach the closing bracket.
        */
 
-
       if (state.brackets > 0 && (value !== ']' || prev.value === '[' || prev.value === '[^')) {
         if (opts.posix !== false && value === ':') {
           const inner = prev.value.slice(1);
-
           if (inner.includes('[')) {
             prev.posix = true;
-
             if (inner.includes(':')) {
               const idx = prev.value.lastIndexOf('[');
               const pre = prev.value.slice(0, idx);
               const rest = prev.value.slice(idx + 2);
               const posix = POSIX_REGEX_SOURCE[rest];
-
               if (posix) {
                 prev.value = pre + posix;
                 state.backtrack = true;
                 advance();
-
                 if (!bos.output && tokens.indexOf(prev) === 1) {
                   bos.output = ONE_CHAR;
                 }
-
                 continue;
               }
             }
           }
         }
-
         if (value === '[' && peek() !== ':' || value === '-' && peek() === ']') {
           value = `\\${value}`;
         }
-
         if (value === ']' && (prev.value === '[' || prev.value === '[^')) {
           value = `\\${value}`;
         }
-
         if (opts.posix === true && value === '!' && prev.value === '[') {
           value = '^';
         }
-
         prev.value += value;
         append({
           value
         });
         continue;
       }
+
       /**
        * If we're inside a quoted string, continue
        * until we reach the closing double quote.
        */
-
 
       if (state.quotes === 1 && value !== '"') {
         value = utils$1.escapeRegex(value);
@@ -2854,27 +2586,25 @@
         });
         continue;
       }
+
       /**
        * Double quotes
        */
 
-
       if (value === '"') {
         state.quotes = state.quotes === 1 ? 0 : 1;
-
         if (opts.keepQuotes === true) {
           push({
             type: 'text',
             value
           });
         }
-
         continue;
       }
+
       /**
        * Parentheses
        */
-
 
       if (value === '(') {
         increment('parens');
@@ -2884,19 +2614,15 @@
         });
         continue;
       }
-
       if (value === ')') {
         if (state.parens === 0 && opts.strictBrackets === true) {
           throw new SyntaxError(syntaxError('opening', '('));
         }
-
         const extglob = extglobs[extglobs.length - 1];
-
         if (extglob && state.parens === extglob.parens + 1) {
           extglobClose(extglobs.pop());
           continue;
         }
-
         push({
           type: 'paren',
           value,
@@ -2905,29 +2631,26 @@
         decrement('parens');
         continue;
       }
+
       /**
        * Square brackets
        */
-
 
       if (value === '[') {
         if (opts.nobracket === true || !remaining().includes(']')) {
           if (opts.nobracket !== true && opts.strictBrackets === true) {
             throw new SyntaxError(syntaxError('closing', ']'));
           }
-
           value = `\\${value}`;
         } else {
           increment('brackets');
         }
-
         push({
           type: 'bracket',
           value
         });
         continue;
       }
-
       if (value === ']') {
         if (opts.nobracket === true || prev && prev.type === 'bracket' && prev.value.length === 1) {
           push({
@@ -2937,12 +2660,10 @@
           });
           continue;
         }
-
         if (state.brackets === 0) {
           if (opts.strictBrackets === true) {
             throw new SyntaxError(syntaxError('opening', '['));
           }
-
           push({
             type: 'text',
             value,
@@ -2950,43 +2671,41 @@
           });
           continue;
         }
-
         decrement('brackets');
         const prevValue = prev.value.slice(1);
-
         if (prev.posix !== true && prevValue[0] === '^' && !prevValue.includes('/')) {
           value = `/${value}`;
         }
-
         prev.value += value;
         append({
           value
-        }); // when literal brackets are explicitly disabled
-        // assume we should match with a regex character class
+        });
 
+        // when literal brackets are explicitly disabled
+        // assume we should match with a regex character class
         if (opts.literalBrackets === false || utils$1.hasRegexChars(prevValue)) {
           continue;
         }
-
         const escaped = utils$1.escapeRegex(prev.value);
-        state.output = state.output.slice(0, -prev.value.length); // when literal brackets are explicitly enabled
-        // assume we should escape the brackets to match literal characters
+        state.output = state.output.slice(0, -prev.value.length);
 
+        // when literal brackets are explicitly enabled
+        // assume we should escape the brackets to match literal characters
         if (opts.literalBrackets === true) {
           state.output += escaped;
           prev.value = escaped;
           continue;
-        } // when the user specifies nothing, try to match both
+        }
 
-
+        // when the user specifies nothing, try to match both
         prev.value = `(${capture}${escaped}|${prev.value})`;
         state.output += prev.value;
         continue;
       }
+
       /**
        * Braces
        */
-
 
       if (value === '{' && opts.nobrace !== true) {
         increment('braces');
@@ -3001,10 +2720,8 @@
         push(open);
         continue;
       }
-
       if (value === '}') {
         const brace = braces[braces.length - 1];
-
         if (opts.nobrace === true || !brace) {
           push({
             type: 'text',
@@ -3013,41 +2730,32 @@
           });
           continue;
         }
-
         let output = ')';
-
         if (brace.dots === true) {
           const arr = tokens.slice();
           const range = [];
-
           for (let i = arr.length - 1; i >= 0; i--) {
             tokens.pop();
-
             if (arr[i].type === 'brace') {
               break;
             }
-
             if (arr[i].type !== 'dots') {
               range.unshift(arr[i].value);
             }
           }
-
           output = expandRange(range, opts);
           state.backtrack = true;
         }
-
         if (brace.comma !== true && brace.dots !== true) {
           const out = state.output.slice(0, brace.outputIndex);
           const toks = state.tokens.slice(brace.tokensIndex);
           brace.value = brace.output = '\\{';
           value = output = '\\}';
           state.output = out;
-
           for (const t of toks) {
             state.output += t.output || t.value;
           }
         }
-
         push({
           type: 'brace',
           value,
@@ -3057,36 +2765,33 @@
         braces.pop();
         continue;
       }
+
       /**
        * Pipes
        */
-
 
       if (value === '|') {
         if (extglobs.length > 0) {
           extglobs[extglobs.length - 1].conditions++;
         }
-
         push({
           type: 'text',
           value
         });
         continue;
       }
+
       /**
        * Commas
        */
 
-
       if (value === ',') {
         let output = value;
         const brace = braces[braces.length - 1];
-
         if (brace && stack[stack.length - 1] === 'braces') {
           brace.comma = true;
           output = '|';
         }
-
         push({
           type: 'comma',
           value,
@@ -3094,10 +2799,10 @@
         });
         continue;
       }
+
       /**
        * Slashes
        */
-
 
       if (value === '/') {
         // if the beginning of the glob is "./", advance the start
@@ -3110,10 +2815,8 @@
           state.output = '';
           tokens.pop();
           prev = bos; // reset "prev" to the first token
-
           continue;
         }
-
         push({
           type: 'slash',
           value,
@@ -3121,10 +2824,10 @@
         });
         continue;
       }
+
       /**
        * Dots
        */
-
 
       if (value === '.') {
         if (state.braces > 0 && prev.type === 'dot') {
@@ -3136,7 +2839,6 @@
           brace.dots = true;
           continue;
         }
-
         if (state.braces + state.parens === 0 && prev.type !== 'bos' && prev.type !== 'slash') {
           push({
             type: 'text',
@@ -3145,7 +2847,6 @@
           });
           continue;
         }
-
         push({
           type: 'dot',
           value,
@@ -3153,27 +2854,23 @@
         });
         continue;
       }
+
       /**
        * Question marks
        */
 
-
       if (value === '?') {
         const isGroup = prev && prev.value === '(';
-
         if (!isGroup && opts.noextglob !== true && peek() === '(' && peek(2) !== '?') {
           extglobOpen('qmark', value);
           continue;
         }
-
         if (prev && prev.type === 'paren') {
           const next = peek();
           let output = value;
-
           if (prev.value === '(' && !/[!=<:]/.test(next) || next === '<' && !/<([!=]|\w+>)/.test(remaining())) {
             output = `\\${value}`;
           }
-
           push({
             type: 'text',
             value,
@@ -3181,7 +2878,6 @@
           });
           continue;
         }
-
         if (opts.dot !== true && (prev.type === 'slash' || prev.type === 'bos')) {
           push({
             type: 'qmark',
@@ -3190,7 +2886,6 @@
           });
           continue;
         }
-
         push({
           type: 'qmark',
           value,
@@ -3198,10 +2893,10 @@
         });
         continue;
       }
+
       /**
        * Exclamation
        */
-
 
       if (value === '!') {
         if (opts.noextglob !== true && peek() === '(') {
@@ -3210,23 +2905,21 @@
             continue;
           }
         }
-
         if (opts.nonegate !== true && state.index === 0) {
           negate();
           continue;
         }
       }
+
       /**
        * Plus
        */
-
 
       if (value === '+') {
         if (opts.noextglob !== true && peek() === '(' && peek(2) !== '?') {
           extglobOpen('plus', value);
           continue;
         }
-
         if (prev && prev.value === '(' || opts.regex === false) {
           push({
             type: 'plus',
@@ -3235,7 +2928,6 @@
           });
           continue;
         }
-
         if (prev && (prev.type === 'bracket' || prev.type === 'paren' || prev.type === 'brace') || state.parens > 0) {
           push({
             type: 'plus',
@@ -3243,17 +2935,16 @@
           });
           continue;
         }
-
         push({
           type: 'plus',
           value: PLUS_LITERAL
         });
         continue;
       }
+
       /**
        * Plain text
        */
-
 
       if (value === '@') {
         if (opts.noextglob !== true && peek() === '(' && peek(2) !== '?') {
@@ -3265,40 +2956,36 @@
           });
           continue;
         }
-
         push({
           type: 'text',
           value
         });
         continue;
       }
+
       /**
        * Plain text
        */
-
 
       if (value !== '*') {
         if (value === '$' || value === '^') {
           value = `\\${value}`;
         }
-
         const match = REGEX_NON_SPECIAL_CHARS.exec(remaining());
-
         if (match) {
           value += match[0];
           state.index += match[0].length;
         }
-
         push({
           type: 'text',
           value
         });
         continue;
       }
+
       /**
        * Stars
        */
-
 
       if (prev && (prev.type === 'globstar' || prev.star === true)) {
         prev.type = 'star';
@@ -3310,25 +2997,20 @@
         consume(value);
         continue;
       }
-
       let rest = remaining();
-
       if (opts.noextglob !== true && /^\([^?]/.test(rest)) {
         extglobOpen('star', value);
         continue;
       }
-
       if (prev.type === 'star') {
         if (opts.noglobstar === true) {
           consume(value);
           continue;
         }
-
         const prior = prev.prev;
         const before = prior.prev;
         const isStart = prior.type === 'slash' || prior.type === 'bos';
         const afterStar = before && (before.type === 'star' || before.type === 'globstar');
-
         if (opts.bash === true && (!isStart || rest[0] && rest[0] !== '/')) {
           push({
             type: 'star',
@@ -3337,10 +3019,8 @@
           });
           continue;
         }
-
         const isBrace = state.braces > 0 && (prior.type === 'comma' || prior.type === 'brace');
         const isExtglob = extglobs.length && (prior.type === 'pipe' || prior.type === 'paren');
-
         if (!isStart && prior.type !== 'paren' && !isBrace && !isExtglob) {
           push({
             type: 'star',
@@ -3348,20 +3028,17 @@
             output: ''
           });
           continue;
-        } // strip consecutive `/**/`
+        }
 
-
+        // strip consecutive `/**/`
         while (rest.slice(0, 3) === '/**') {
           const after = input[state.index + 4];
-
           if (after && after !== '/') {
             break;
           }
-
           rest = rest.slice(3);
           consume('/**', 3);
         }
-
         if (prior.type === 'bos' && eos()) {
           prev.type = 'globstar';
           prev.value += value;
@@ -3371,7 +3048,6 @@
           consume(value);
           continue;
         }
-
         if (prior.type === 'slash' && prior.prev.type !== 'bos' && !afterStar && eos()) {
           state.output = state.output.slice(0, -(prior.output + prev.output).length);
           prior.output = `(?:${prior.output}`;
@@ -3383,7 +3059,6 @@
           consume(value);
           continue;
         }
-
         if (prior.type === 'slash' && prior.prev.type !== 'bos' && rest[0] === '/') {
           const end = rest[1] !== void 0 ? '|$' : '';
           state.output = state.output.slice(0, -(prior.output + prev.output).length);
@@ -3401,7 +3076,6 @@
           });
           continue;
         }
-
         if (prior.type === 'bos' && rest[0] === '/') {
           prev.type = 'globstar';
           prev.value += value;
@@ -3415,44 +3089,40 @@
             output: ''
           });
           continue;
-        } // remove single star from output
+        }
 
+        // remove single star from output
+        state.output = state.output.slice(0, -prev.output.length);
 
-        state.output = state.output.slice(0, -prev.output.length); // reset previous token to globstar
-
+        // reset previous token to globstar
         prev.type = 'globstar';
         prev.output = globstar(opts);
-        prev.value += value; // reset output with globstar
+        prev.value += value;
 
+        // reset output with globstar
         state.output += prev.output;
         state.globstar = true;
         consume(value);
         continue;
       }
-
       const token = {
         type: 'star',
         value,
         output: star
       };
-
       if (opts.bash === true) {
         token.output = '.*?';
-
         if (prev.type === 'bos' || prev.type === 'slash') {
           token.output = nodot + token.output;
         }
-
         push(token);
         continue;
       }
-
       if (prev && (prev.type === 'bracket' || prev.type === 'paren') && opts.regex === true) {
         token.output = value;
         push(token);
         continue;
       }
-
       if (state.index === state.start || prev.type === 'slash' || prev.type === 'dot') {
         if (prev.type === 'dot') {
           state.output += NO_DOT_SLASH;
@@ -3464,76 +3134,67 @@
           state.output += nodot;
           prev.output += nodot;
         }
-
         if (peek() !== '*') {
           state.output += ONE_CHAR;
           prev.output += ONE_CHAR;
         }
       }
-
       push(token);
     }
-
     while (state.brackets > 0) {
       if (opts.strictBrackets === true) throw new SyntaxError(syntaxError('closing', ']'));
       state.output = utils$1.escapeLast(state.output, '[');
       decrement('brackets');
     }
-
     while (state.parens > 0) {
       if (opts.strictBrackets === true) throw new SyntaxError(syntaxError('closing', ')'));
       state.output = utils$1.escapeLast(state.output, '(');
       decrement('parens');
     }
-
     while (state.braces > 0) {
       if (opts.strictBrackets === true) throw new SyntaxError(syntaxError('closing', '}'));
       state.output = utils$1.escapeLast(state.output, '{');
       decrement('braces');
     }
-
     if (opts.strictSlashes !== true && (prev.type === 'star' || prev.type === 'bracket')) {
       push({
         type: 'maybe_slash',
         value: '',
         output: `${SLASH_LITERAL}?`
       });
-    } // rebuild the output if we had to backtrack at any point
+    }
 
-
+    // rebuild the output if we had to backtrack at any point
     if (state.backtrack === true) {
       state.output = '';
-
       for (const token of state.tokens) {
         state.output += token.output != null ? token.output : token.value;
-
         if (token.suffix) {
           state.output += token.suffix;
         }
       }
     }
-
     return state;
   };
+
   /**
    * Fast paths for creating regular expressions for common glob patterns.
    * This can significantly speed up processing and has very little downside
    * impact when none of the fast paths match.
    */
 
-
   parse$1.fastpaths = (input, options) => {
-    const opts = { ...options
+    const opts = {
+      ...options
     };
     const max = typeof opts.maxLength === 'number' ? Math.min(MAX_LENGTH, opts.maxLength) : MAX_LENGTH;
     const len = input.length;
-
     if (len > max) {
       throw new SyntaxError(`Input length: ${len}, exceeds maximum allowed length: ${max}`);
     }
+    input = REPLACEMENTS[input] || input;
 
-    input = REPLACEMENTS[input] || input; // create constants based on platform, for windows or posix
-
+    // create constants based on platform, for windows or posix
     const {
       DOT_LITERAL,
       SLASH_LITERAL,
@@ -3553,42 +3214,31 @@
       prefix: ''
     };
     let star = opts.bash === true ? '.*?' : STAR;
-
     if (opts.capture) {
       star = `(${star})`;
     }
-
     const globstar = opts => {
       if (opts.noglobstar === true) return star;
       return `(${capture}(?:(?!${START_ANCHOR}${opts.dot ? DOTS_SLASH : DOT_LITERAL}).)*?)`;
     };
-
     const create = str => {
       switch (str) {
         case '*':
           return `${nodot}${ONE_CHAR}${star}`;
-
         case '.*':
           return `${DOT_LITERAL}${ONE_CHAR}${star}`;
-
         case '*.*':
           return `${nodot}${star}${DOT_LITERAL}${ONE_CHAR}${star}`;
-
         case '*/*':
           return `${nodot}${star}${SLASH_LITERAL}${ONE_CHAR}${slashDot}${star}`;
-
         case '**':
           return nodot + globstar(opts);
-
         case '**/*':
           return `(?:${nodot}${globstar(opts)}${SLASH_LITERAL})?${slashDot}${ONE_CHAR}${star}`;
-
         case '**/*.*':
           return `(?:${nodot}${globstar(opts)}${SLASH_LITERAL})?${slashDot}${star}${DOT_LITERAL}${ONE_CHAR}${star}`;
-
         case '**/.*':
           return `(?:${nodot}${globstar(opts)}${SLASH_LITERAL})?${DOT_LITERAL}${ONE_CHAR}${star}`;
-
         default:
           {
             const match = /^(.*?)\.(\w+)$/.exec(str);
@@ -3599,17 +3249,13 @@
           }
       }
     };
-
     const output = utils$1.removePrefix(input, state);
     let source = create(output);
-
     if (source && opts.strictSlashes !== true) {
       source += `${SLASH_LITERAL}?`;
     }
-
     return source;
   };
-
   var parse_1 = parse$1;
 
   const path = path$1;
@@ -3617,8 +3263,8 @@
   const parse = parse_1;
   const utils = utils$3;
   const constants = constants$2;
-
   const isObject = val => val && typeof val === 'object' && !Array.isArray(val);
+
   /**
    * Creates a matcher function from one or more glob patterns. The
    * returned function takes a string to match as its first argument,
@@ -3641,48 +3287,38 @@
    * @api public
    */
 
-
   const picomatch$1 = function (glob, options) {
     let returnState = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-
     if (Array.isArray(glob)) {
       const fns = glob.map(input => picomatch$1(input, options, returnState));
-
       const arrayMatcher = str => {
         for (const isMatch of fns) {
           const state = isMatch(str);
           if (state) return state;
         }
-
         return false;
       };
-
       return arrayMatcher;
     }
-
     const isState = isObject(glob) && glob.tokens && glob.input;
-
     if (glob === '' || typeof glob !== 'string' && !isState) {
       throw new TypeError('Expected pattern to be a non-empty string');
     }
-
     const opts = options || {};
     const posix = utils.isWindows(options);
     const regex = isState ? picomatch$1.compileRe(glob, options) : picomatch$1.makeRe(glob, options, false, true);
     const state = regex.state;
     delete regex.state;
-
     let isIgnored = () => false;
-
     if (opts.ignore) {
-      const ignoreOpts = { ...options,
+      const ignoreOpts = {
+        ...options,
         ignore: null,
         onMatch: null,
         onResult: null
       };
       isIgnored = picomatch$1(opts.ignore, ignoreOpts, returnState);
     }
-
     const matcher = function (input) {
       let returnObject = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
       const {
@@ -3703,38 +3339,31 @@
         match,
         isMatch
       };
-
       if (typeof opts.onResult === 'function') {
         opts.onResult(result);
       }
-
       if (isMatch === false) {
         result.isMatch = false;
         return returnObject ? result : false;
       }
-
       if (isIgnored(input)) {
         if (typeof opts.onIgnore === 'function') {
           opts.onIgnore(result);
         }
-
         result.isMatch = false;
         return returnObject ? result : false;
       }
-
       if (typeof opts.onMatch === 'function') {
         opts.onMatch(result);
       }
-
       return returnObject ? result : true;
     };
-
     if (returnState) {
       matcher.state = state;
     }
-
     return matcher;
   };
+
   /**
    * Test `input` with the given `regex`. This is used by the main
    * `picomatch()` function to test the input string.
@@ -3752,34 +3381,28 @@
    * @api public
    */
 
-
   picomatch$1.test = function (input, regex, options) {
     let {
       glob,
       posix
     } = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
-
     if (typeof input !== 'string') {
       throw new TypeError('Expected input to be a string');
     }
-
     if (input === '') {
       return {
         isMatch: false,
         output: ''
       };
     }
-
     const opts = options || {};
     const format = opts.format || (posix ? utils.toPosixSlashes : null);
     let match = input === glob;
     let output = match && format ? format(input) : input;
-
     if (match === false) {
       output = format ? format(input) : input;
       match = output === glob;
     }
-
     if (match === false || opts.capture === true) {
       if (opts.matchBase === true || opts.basename === true) {
         match = picomatch$1.matchBase(input, regex, options, posix);
@@ -3787,13 +3410,13 @@
         match = regex.exec(output);
       }
     }
-
     return {
       isMatch: Boolean(match),
       match,
       output
     };
   };
+
   /**
    * Match the basename of a filepath.
    *
@@ -3808,12 +3431,12 @@
    * @api public
    */
 
-
   picomatch$1.matchBase = function (input, glob, options) {
     arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : utils.isWindows(options);
     const regex = glob instanceof RegExp ? glob : picomatch$1.makeRe(glob, options);
     return regex.test(path.basename(input));
   };
+
   /**
    * Returns true if **any** of the given glob `patterns` match the specified `string`.
    *
@@ -3831,8 +3454,8 @@
    * @api public
    */
 
-
   picomatch$1.isMatch = (str, patterns, options) => picomatch$1(patterns, options)(str);
+
   /**
    * Parse a glob pattern to create the source string for a regular
    * expression.
@@ -3847,13 +3470,14 @@
    * @api public
    */
 
-
   picomatch$1.parse = (pattern, options) => {
     if (Array.isArray(pattern)) return pattern.map(p => picomatch$1.parse(p, options));
-    return parse(pattern, { ...options,
+    return parse(pattern, {
+      ...options,
       fastpaths: false
     });
   };
+
   /**
    * Scan a glob pattern to separate the pattern into segments.
    *
@@ -3881,8 +3505,8 @@
    * @api public
    */
 
-
   picomatch$1.scan = (input, options) => scan(input, options);
+
   /**
    * Compile a regular expression from the `state` object returned by the
    * [parse()](#parse) method.
@@ -3895,32 +3519,26 @@
    * @api public
    */
 
-
   picomatch$1.compileRe = function (state, options) {
     let returnOutput = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
     let returnState = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
-
     if (returnOutput === true) {
       return state.output;
     }
-
     const opts = options || {};
     const prepend = opts.contains ? '' : '^';
     const append = opts.contains ? '' : '$';
     let source = `${prepend}(?:${state.output})${append}`;
-
     if (state && state.negated === true) {
       source = `^(?!${source}).*$`;
     }
-
     const regex = picomatch$1.toRegex(source, options);
-
     if (returnState === true) {
       regex.state = state;
     }
-
     return regex;
   };
+
   /**
    * Create a regular expression from a parsed glob pattern.
    *
@@ -3940,31 +3558,26 @@
    * @api public
    */
 
-
   picomatch$1.makeRe = function (input) {
     let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
     let returnOutput = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
     let returnState = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
-
     if (!input || typeof input !== 'string') {
       throw new TypeError('Expected a non-empty string');
     }
-
     let parsed = {
       negated: false,
       fastpaths: true
     };
-
     if (options.fastpaths !== false && (input[0] === '.' || input[0] === '*')) {
       parsed.output = parse.fastpaths(input, options);
     }
-
     if (!parsed.output) {
       parsed = parse(input, options);
     }
-
     return picomatch$1.compileRe(parsed, options, returnOutput, returnState);
   };
+
   /**
    * Create a regular expression from the given regex source string.
    *
@@ -3982,7 +3595,6 @@
    * @api public
    */
 
-
   picomatch$1.toRegex = (source, options) => {
     try {
       const opts = options || {};
@@ -3992,13 +3604,14 @@
       return /$^/;
     }
   };
+
   /**
    * Picomatch constants.
    * @return {Object}
    */
 
-
   picomatch$1.constants = constants;
+
   /**
    * Expose "picomatch"
    */
@@ -4009,7 +3622,6 @@
 
     module.exports = picomatch_1;
   })(picomatch$2);
-
   var picomatch = /*@__PURE__*/getDefaultExportFromCjs(picomatch$2.exports);
 
   const parseInputAccept = inputAccept => {
@@ -4024,51 +3636,38 @@
     });
     return [extensions, mimeTypes];
   };
-
   class AcceptedFileTypes {
     constructor(inputAccept) {
       _defineProperty$2(this, "extensions", void 0);
-
       _defineProperty$2(this, "mimeTypes", void 0);
-
       const [extensions, mimeTypes] = parseInputAccept(inputAccept);
       this.extensions = extensions;
       this.mimeTypes = mimeTypes;
     }
-
     isAccepted(fileName) {
       if (this.extensions.length === 0 && this.mimeTypes.length === 0) {
         return true;
       }
-
       return this.isMimeTypeAccepted(lite.getType(fileName)) || this.isExtensionAccepted(fileName);
     }
-
     isMimeTypeAccepted(mimeType) {
       if (this.mimeTypes.length === 0) {
         return false;
       }
-
       return picomatch.isMatch(mimeType, this.mimeTypes);
     }
-
     isExtensionAccepted(fileName) {
       if (this.extensions.length === 0) {
         return false;
       }
-
       return picomatch.isMatch(fileName, this.extensions);
     }
-
   }
 
   const getEntriesFromDirectory = async directoryEntry => new Promise((resolve, reject) => directoryEntry.createReader().readEntries(resolve, reject));
-
   const getFileFromFileEntry = async fileEntry => new Promise((resolve, reject) => fileEntry.file(resolve, reject));
-
   const getFilesFromFileSystemEntries = async entries => {
     const result = [];
-
     for await (const entry of entries) {
       if (entry.isFile) {
         const file = await getFileFromFileEntry(entry);
@@ -4079,10 +3678,8 @@
         files.forEach(file => result.push(file));
       }
     }
-
     return result;
   };
-
   const getFilesFromDataTransfer = async dataTransfer => {
     if (dataTransfer.items) {
       const entries = [...dataTransfer.items].map(item => item.webkitGetAsEntry());
@@ -4093,7 +3690,6 @@
       return [...dataTransfer.files];
     }
   };
-
   class DropArea {
     constructor(_ref) {
       let {
@@ -4102,28 +3698,21 @@
         onUploadFiles,
         renderer
       } = _ref;
-
       _defineProperty$2(this, "acceptedFileTypes", void 0);
-
       _defineProperty$2(this, "container", void 0);
-
       _defineProperty$2(this, "onUploadFiles", void 0);
-
       _defineProperty$2(this, "renderer", void 0);
-
       _defineProperty$2(this, "onDrop", e => {
         const dragEvent = e;
         this.container.classList.remove("dff-dropping");
         dragEvent.preventDefault();
         dragEvent.stopPropagation();
-
         const uploadFiles = async () => {
           try {
             if (dragEvent.dataTransfer) {
               const files = await getFilesFromDataTransfer(dragEvent.dataTransfer);
               const acceptedFiles = [];
               const invalidFiles = [];
-
               for (const file of files) {
                 if (this.acceptedFileTypes.isAccepted(file.name)) {
                   acceptedFiles.push(file);
@@ -4131,7 +3720,6 @@
                   invalidFiles.push(file);
                 }
               }
-
               this.renderer.setErrorInvalidFiles(invalidFiles);
               void this.onUploadFiles(acceptedFiles);
             }
@@ -4139,10 +3727,8 @@
             console.error(error);
           }
         };
-
         void uploadFiles();
       });
-
       this.container = container;
       this.onUploadFiles = onUploadFiles;
       this.acceptedFileTypes = new AcceptedFileTypes(inputAccept);
@@ -4159,10 +3745,9 @@
       });
       container.addEventListener("drop", this.onDrop);
     }
-
   }
 
-  class BaseUpload$1 {
+  let BaseUpload$1 = class BaseUpload {
     constructor(_ref) {
       let {
         name,
@@ -4170,69 +3755,56 @@
         type,
         uploadIndex
       } = _ref;
-
       _defineProperty$2(this, "name", void 0);
-
       _defineProperty$2(this, "status", void 0);
-
       _defineProperty$2(this, "type", void 0);
-
       _defineProperty$2(this, "uploadIndex", void 0);
-
       this.name = name;
       this.status = status;
       this.type = type;
       this.uploadIndex = uploadIndex;
     }
-
-    async abort() {//
+    async abort() {
+      //
     }
-
-    async delete() {//
+    async delete() {
+      //
     }
-
-  }
+  };
 
   function normalize(strArray) {
     var resultArray = [];
-
     if (strArray.length === 0) {
       return '';
     }
-
     if (typeof strArray[0] !== 'string') {
       throw new TypeError('Url must be a string. Received ' + strArray[0]);
-    } // If the first part is a plain protocol, we combine it with the next part.
+    }
 
-
+    // If the first part is a plain protocol, we combine it with the next part.
     if (strArray[0].match(/^[^/:]+:\/*$/) && strArray.length > 1) {
       var first = strArray.shift();
       strArray[0] = first + strArray[0];
-    } // There must be two or three slashes in the file protocol, two slashes in anything else.
+    }
 
-
+    // There must be two or three slashes in the file protocol, two slashes in anything else.
     if (strArray[0].match(/^file:\/\/\//)) {
       strArray[0] = strArray[0].replace(/^([^/:]+):\/*/, '$1:///');
     } else {
       strArray[0] = strArray[0].replace(/^([^/:]+):\/*/, '$1://');
     }
-
     for (var i = 0; i < strArray.length; i++) {
       var component = strArray[i];
-
       if (typeof component !== 'string') {
         throw new TypeError('Url must be a string. Received ' + component);
       }
-
       if (component === '') {
         continue;
       }
-
       if (i > 0) {
         // Removing the starting slashes for each component but the first.
         component = component.replace(/^[\/]+/, '');
       }
-
       if (i < strArray.length - 1) {
         // Removing the ending slashes for each component but the last.
         component = component.replace(/[\/]+$/, '');
@@ -4240,29 +3812,26 @@
         // For the last component we will combine multiple slashes to a single one.
         component = component.replace(/[\/]+$/, '/');
       }
-
       resultArray.push(component);
     }
+    var str = resultArray.join('/');
+    // Each input component is now separated by a single slash except the possible first plain protocol part.
 
-    var str = resultArray.join('/'); // Each input component is now separated by a single slash except the possible first plain protocol part.
     // remove trailing slash before parameters or hash
+    str = str.replace(/\/(\?|&|#[^!])/g, '$1');
 
-    str = str.replace(/\/(\?|&|#[^!])/g, '$1'); // replace ? in parameters with &
-
+    // replace ? in parameters with &
     var parts = str.split('?');
     str = parts.shift() + (parts.length > 0 ? '?' : '') + parts.join('&');
     return str;
   }
-
   function urlJoin() {
     var input;
-
     if (typeof arguments[0] === 'object') {
       input = arguments[0];
     } else {
       input = [].slice.call(arguments);
     }
-
     return normalize(input);
   }
 
@@ -4364,7 +3933,6 @@
   };
   const remove = (arr, el) => {
     const i = arr.indexOf(el);
-
     if (i !== -1) {
       arr.splice(i, 1);
     }
@@ -4385,51 +3953,36 @@
         type: "s3",
         uploadIndex
       });
-
       _defineProperty$2(this, "onError", void 0);
-
       _defineProperty$2(this, "onProgress", void 0);
-
       _defineProperty$2(this, "onSuccess", void 0);
-
       _defineProperty$2(this, "chunkState", void 0);
-
       _defineProperty$2(this, "chunks", void 0);
-
       _defineProperty$2(this, "createdPromise", void 0);
-
       _defineProperty$2(this, "csrfToken", void 0);
-
       _defineProperty$2(this, "endpoint", void 0);
-
       _defineProperty$2(this, "file", void 0);
-
       _defineProperty$2(this, "key", void 0);
-
       _defineProperty$2(this, "parts", void 0);
-
       _defineProperty$2(this, "s3UploadDir", void 0);
-
       _defineProperty$2(this, "uploadId", void 0);
-
       _defineProperty$2(this, "uploading", void 0);
-
       this.csrfToken = csrfToken;
       this.endpoint = endpoint;
       this.file = file;
       this.s3UploadDir = s3UploadDir;
       this.key = null;
       this.uploadId = null;
-      this.parts = []; // Do `this.createdPromise.then(OP)` to execute an operation `OP` _only_ if the
+      this.parts = [];
+
+      // Do `this.createdPromise.then(OP)` to execute an operation `OP` _only_ if the
       // upload was created already. That also ensures that the sequencing is right
       // (so the `OP` definitely happens if the upload is created).
       //
       // This mostly exists to make `abortUpload` work well: only sending the abort request if
       // the upload was already created, and if the createMultipartUpload request is still in flight,
       // aborting it immediately after it finishes.
-
       this.createdPromise = Promise.reject(); // eslint-disable-line prefer-promise-reject-errors
-
       this.chunks = [];
       this.chunkState = [];
       this.uploading = [];
@@ -4446,7 +3999,6 @@
       });
       this.uploading = [];
       await this.createdPromise;
-
       if (this.key && this.uploadId) {
         await abortMultipartUpload({
           csrfToken: this.csrfToken,
@@ -4456,11 +4008,9 @@
         });
       }
     }
-
     async delete() {
       return Promise.resolve();
     }
-
     getInitialFile() {
       return {
         id: this.uploadId || "",
@@ -4470,27 +4020,22 @@
         type: "s3"
       };
     }
-
     getSize() {
       return this.file.size;
     }
-
     start() {
       void this.createUpload();
     }
-
     initChunks() {
       const chunks = [];
-      const desiredChunkSize = getChunkSize(this.file); // at least 5MB per request, at most 10k requests
-
+      const desiredChunkSize = getChunkSize(this.file);
+      // at least 5MB per request, at most 10k requests
       const minChunkSize = Math.max(5 * MB, Math.ceil(this.file.size / 10000));
       const chunkSize = Math.max(desiredChunkSize, minChunkSize);
-
       for (let i = 0; i < this.file.size; i += chunkSize) {
         const end = Math.min(this.file.size, i + chunkSize);
         chunks.push(this.file.slice(i, end));
       }
-
       this.chunks = chunks;
       this.chunkState = chunks.map(() => ({
         uploaded: 0,
@@ -4498,7 +4043,6 @@
         done: false
       }));
     }
-
     createUpload() {
       this.createdPromise = createMultipartUpload({
         csrfToken: this.csrfToken,
@@ -4508,11 +4052,9 @@
       });
       return this.createdPromise.then(result => {
         const valid = typeof result === "object" && result && typeof result.uploadId === "string" && typeof result.key === "string";
-
         if (!valid) {
           throw new TypeError("AwsS3/Multipart: Got incorrect result from `createMultipartUpload()`, expected an object `{ uploadId, key }`.");
         }
-
         this.key = result.key;
         this.uploadId = result.uploadId;
         this.uploadParts();
@@ -4520,48 +4062,37 @@
         this.handleError(err);
       });
     }
-
     uploadParts() {
       const need = 1 - this.uploading.length;
-
       if (need === 0) {
         return;
-      } // All parts are uploaded.
+      }
 
-
+      // All parts are uploaded.
       if (this.chunkState.every(state => state.done)) {
         void this.completeUpload();
         return;
       }
-
       const candidates = [];
-
       for (let i = 0; i < this.chunkState.length; i++) {
         const state = this.chunkState[i];
-
         if (state.done || state.busy) {
           continue;
         }
-
         candidates.push(i);
-
         if (candidates.length >= need) {
           break;
         }
       }
-
       candidates.forEach(index => {
         void this.uploadPart(index);
       });
     }
-
     uploadPart(index) {
       this.chunkState[index].busy = true;
-
       if (!this.key || !this.uploadId) {
         return Promise.resolve();
       }
-
       return prepareUploadPart({
         csrfToken: this.csrfToken,
         endpoint: this.endpoint,
@@ -4570,11 +4101,9 @@
         uploadId: this.uploadId
       }).then(result => {
         const valid = typeof result === "object" && result && typeof result.url === "string";
-
         if (!valid) {
           throw new TypeError("AwsS3/Multipart: Got incorrect result from `prepareUploadPart()`, expected an object `{ url }`.");
         }
-
         return result;
       }).then(_ref2 => {
         let {
@@ -4585,16 +4114,13 @@
         this.handleError(err);
       });
     }
-
     onPartProgress(index, sent) {
       this.chunkState[index].uploaded = sent;
-
       if (this.onProgress) {
         const totalUploaded = this.chunkState.reduce((n, c) => n + c.uploaded, 0);
         this.onProgress(totalUploaded, this.file.size);
       }
     }
-
     onPartComplete(index, etag) {
       this.chunkState[index].etag = etag;
       this.chunkState[index].done = true;
@@ -4605,7 +4131,6 @@
       this.parts.push(part);
       this.uploadParts();
     }
-
     uploadPartBytes(index, url) {
       const body = this.chunks[index];
       const xhr = new XMLHttpRequest();
@@ -4616,7 +4141,6 @@
         if (!ev.lengthComputable) {
           return;
         }
-
         this.onPartProgress(index, ev.loaded);
       });
       xhr.addEventListener("abort", ev => {
@@ -4627,41 +4151,35 @@
         const target = ev.target;
         remove(this.uploading, target);
         this.chunkState[index].busy = false;
-
         if (target.status < 200 || target.status >= 300) {
           this.handleError(new Error("Non 2xx"));
           return;
         }
+        this.onPartProgress(index, body.size);
 
-        this.onPartProgress(index, body.size); // NOTE This must be allowed by CORS.
-
+        // NOTE This must be allowed by CORS.
         const etag = target.getResponseHeader("ETag");
-
         if (etag === null) {
           this.handleError(new Error("AwsS3/Multipart: Could not read the ETag header. This likely means CORS is not configured correctly on the S3 Bucket. See https://uppy.io/docs/aws-s3-multipart#S3-Bucket-Configuration for instructions."));
           return;
         }
-
         this.onPartComplete(index, etag);
       });
       xhr.addEventListener("error", ev => {
         remove(this.uploading, ev.target);
         this.chunkState[index].busy = false;
-        const error = new Error("Unknown error"); // error.source = ev.target
-
+        const error = new Error("Unknown error");
+        // error.source = ev.target
         this.handleError(error);
       });
       xhr.send(body);
     }
-
     completeUpload() {
       // Parts may not have completed uploading in sorted order, if limit > 1.
       this.parts.sort((a, b) => a.PartNumber - b.PartNumber);
-
       if (!this.uploadId || !this.key) {
         return Promise.resolve();
       }
-
       return completeMultipartUpload({
         csrfToken: this.csrfToken,
         endpoint: this.endpoint,
@@ -4676,7 +4194,6 @@
         this.handleError(err);
       });
     }
-
     handleError(error) {
       if (this.onError) {
         this.onError(error);
@@ -4684,13 +4201,11 @@
         throw error;
       }
     }
-
   }
 
   const deleteUpload = async (url, csrfToken) => new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open("DELETE", url);
-
     xhr.onload = () => {
       if (xhr.status === 204) {
         resolve();
@@ -4698,7 +4213,6 @@
         reject();
       }
     };
-
     xhr.setRequestHeader("Tus-Resumable", "1.0.0");
     xhr.setRequestHeader("X-CSRFToken", csrfToken);
     xhr.send(null);
@@ -4718,26 +4232,19 @@
         type,
         uploadIndex
       });
-
       _defineProperty$2(this, "size", void 0);
-
       this.size = size;
     }
-
     async abort() {
       return Promise.resolve();
     }
-
     async delete() {
       return Promise.resolve();
     }
-
     getSize() {
       return this.size;
     }
-
   }
-
   class PlaceholderFile extends BaseUploadedFile {
     constructor(initialFile, uploadIndex) {
       super({
@@ -4746,12 +4253,9 @@
         type: "placeholder",
         uploadIndex
       });
-
       _defineProperty$2(this, "id", void 0);
-
       this.id = initialFile.id;
     }
-
     getInitialFile() {
       return {
         id: this.id,
@@ -4760,9 +4264,7 @@
         type: "placeholder"
       };
     }
-
   }
-
   class UploadedS3File extends BaseUploadedFile {
     constructor(initialFile, uploadIndex) {
       super({
@@ -4771,15 +4273,11 @@
         type: "uploadedS3",
         uploadIndex
       });
-
       _defineProperty$2(this, "id", void 0);
-
       _defineProperty$2(this, "key", void 0);
-
       this.id = initialFile.id;
       this.key = initialFile.name;
     }
-
     getInitialFile() {
       return {
         id: this.id,
@@ -4789,7 +4287,6 @@
         type: "s3"
       };
     }
-
   }
   class ExistingFile extends BaseUploadedFile {
     constructor(initialFile, uploadIndex) {
@@ -4800,7 +4297,6 @@
         uploadIndex
       });
     }
-
     getInitialFile() {
       return {
         name: this.name,
@@ -4808,7 +4304,6 @@
         type: "existing"
       };
     }
-
   }
   class UploadedTusFile extends BaseUploadedFile {
     constructor(_ref2) {
@@ -4824,22 +4319,16 @@
         type: "uploadedTus",
         uploadIndex
       });
-
       _defineProperty$2(this, "csrfToken", void 0);
-
       _defineProperty$2(this, "id", void 0);
-
       _defineProperty$2(this, "url", void 0);
-
       this.csrfToken = csrfToken;
       this.id = initialFile.id;
       this.url = `${uploadUrl}${initialFile.id}`;
     }
-
     async delete() {
       await deleteUpload(this.url, this.csrfToken);
     }
-
     getInitialFile() {
       return {
         id: this.id,
@@ -4849,7 +4338,6 @@
         url: ""
       };
     }
-
   }
   const createUploadedFile = _ref3 => {
     let {
@@ -4858,17 +4346,13 @@
       uploadIndex,
       uploadUrl
     } = _ref3;
-
     switch (initialFile.type) {
       case "existing":
         return new ExistingFile(initialFile, uploadIndex);
-
       case "placeholder":
         return new PlaceholderFile(initialFile, uploadIndex);
-
       case "s3":
         return new UploadedS3File(initialFile, uploadIndex);
-
       case "tus":
         return new UploadedTusFile({
           csrfToken,
@@ -5162,39 +4646,32 @@
    * @returns {Boolean} Is it a default port for the given protocol
    * @api private
    */
-
-
   var requiresPort = function required(port, protocol) {
     protocol = protocol.split(':')[0];
     port = +port;
     if (!port) return false;
-
     switch (protocol) {
       case 'http':
       case 'ws':
         return port !== 80;
-
       case 'https':
       case 'wss':
         return port !== 443;
-
       case 'ftp':
         return port !== 21;
-
       case 'gopher':
         return port !== 70;
-
       case 'file':
         return false;
     }
-
     return port !== 0;
   };
 
   var querystringify$1 = {};
 
   var has = Object.prototype.hasOwnProperty,
-      undef;
+    undef;
+
   /**
    * Decode a URI encoded string.
    *
@@ -5202,7 +4679,6 @@
    * @returns {String|Null} The decoded string.
    * @api private
    */
-
   function decode(input) {
     try {
       return decodeURIComponent(input.replace(/\+/g, ' '));
@@ -5210,6 +4686,7 @@
       return null;
     }
   }
+
   /**
    * Attempts to encode a given input.
    *
@@ -5217,8 +4694,6 @@
    * @returns {String|Null} The encoded string.
    * @api private
    */
-
-
   function encode(input) {
     try {
       return encodeURIComponent(input);
@@ -5226,6 +4701,7 @@
       return null;
     }
   }
+
   /**
    * Simple query string parser.
    *
@@ -5233,16 +4709,15 @@
    * @returns {Object}
    * @api public
    */
-
-
   function querystring(query) {
     var parser = /([^=?#&]+)=?([^&]*)/g,
-        result = {},
-        part;
-
+      result = {},
+      part;
     while (part = parser.exec(query)) {
       var key = decode(part[1]),
-          value = decode(part[2]); //
+        value = decode(part[2]);
+
+      //
       // Prevent overriding of existing properties. This ensures that build-in
       // methods like `toString` or __proto__ are not overriden by malicious
       // querystrings.
@@ -5250,13 +4725,12 @@
       // In the case if failed decoding, we want to omit the key/value pairs
       // from the result.
       //
-
       if (key === null || value === null || key in result) continue;
       result[key] = value;
     }
-
     return result;
   }
+
   /**
    * Transform a query string to an object.
    *
@@ -5265,57 +4739,56 @@
    * @returns {String}
    * @api public
    */
-
-
   function querystringify(obj, prefix) {
     prefix = prefix || '';
     var pairs = [],
-        value,
-        key; //
+      value,
+      key;
+
+    //
     // Optionally prefix with a '?' if needed
     //
-
     if ('string' !== typeof prefix) prefix = '?';
-
     for (key in obj) {
       if (has.call(obj, key)) {
-        value = obj[key]; //
+        value = obj[key];
+
+        //
         // Edge cases where we actually want to encode the value to an empty
         // string instead of the stringified value.
         //
-
         if (!value && (value === null || value === undef || isNaN(value))) {
           value = '';
         }
-
         key = encode(key);
-        value = encode(value); //
+        value = encode(value);
+
+        //
         // If we failed to encode the strings, we should bail out as we don't
         // want to add invalid strings to the query.
         //
-
         if (key === null || value === null) continue;
         pairs.push(key + '=' + value);
       }
     }
-
     return pairs.length ? prefix + pairs.join('&') : '';
-  } //
+  }
+
+  //
   // Expose the module.
   //
-
-
   querystringify$1.stringify = querystringify;
   querystringify$1.parse = querystring;
 
   var required = requiresPort,
-      qs = querystringify$1,
-      controlOrWhitespace = /^[\x00-\x20\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff]+/,
-      CRHTLF = /[\n\r\t]/g,
-      slashes = /^[A-Za-z][A-Za-z0-9+-.]*:\/\//,
-      port = /:\d+$/,
-      protocolre = /^([a-z][a-z0-9.+-]*:)?(\/\/)?([\\/]+)?([\S\s]*)/i,
-      windowsDriveLetter = /^[a-zA-Z]:/;
+    qs = querystringify$1,
+    controlOrWhitespace = /^[\x00-\x20\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff]+/,
+    CRHTLF = /[\n\r\t]/g,
+    slashes = /^[A-Za-z][A-Za-z0-9+-.]*:\/\//,
+    port = /:\d+$/,
+    protocolre = /^([a-z][a-z0-9.+-]*:)?(\/\/)?([\\/]+)?([\S\s]*)/i,
+    windowsDriveLetter = /^[a-zA-Z]:/;
+
   /**
    * Remove control characters and whitespace from the beginning of a string.
    *
@@ -5324,10 +4797,10 @@
    *     characters and whitespace from its beginning.
    * @public
    */
-
   function trimLeft(str) {
     return (str ? str : '').toString().replace(controlOrWhitespace, '');
   }
+
   /**
    * These are the parse rules for the URL parser, it informs the parser
    * about:
@@ -5340,19 +4813,24 @@
    * 3. Inherit from location if non existing in the parser.
    * 4. `toLowerCase` the resulting value.
    */
-
-
-  var rules = [['#', 'hash'], // Extract from the back.
-  ['?', 'query'], // Extract from the back.
+  var rules = [['#', 'hash'],
+  // Extract from the back.
+  ['?', 'query'],
+  // Extract from the back.
   function sanitize(address, url) {
     // Sanitize what is left of the address
     return isSpecial(url.protocol) ? address.replace(/\\/g, '/') : address;
-  }, ['/', 'pathname'], // Extract from the back.
-  ['@', 'auth', 1], // Extract from the front.
-  [NaN, 'host', undefined, 1, 1], // Set left over value.
-  [/:(\d*)$/, 'port', undefined, 1], // RegExp the back.
+  }, ['/', 'pathname'],
+  // Extract from the back.
+  ['@', 'auth', 1],
+  // Extract from the front.
+  [NaN, 'host', undefined, 1, 1],
+  // Set left over value.
+  [/:(\d*)$/, 'port', undefined, 1],
+  // RegExp the back.
   [NaN, 'hostname', undefined, 1, 1] // Set left over.
   ];
+
   /**
    * These properties should not be copied or inherited from. This is only needed
    * for all non blob URL's as a blob URL does not include a hash, only the
@@ -5361,11 +4839,11 @@
    * @type {Object}
    * @private
    */
-
   var ignore = {
     hash: 1,
     query: 1
   };
+
   /**
    * The location object differs when your code is loaded through a normal page,
    * Worker or through a worker using a blob. And with the blobble begins the
@@ -5378,35 +4856,31 @@
    * @returns {Object} lolcation object.
    * @public
    */
-
   function lolcation(loc) {
     var globalVar;
     if (typeof window !== 'undefined') globalVar = window;else if (typeof commonjsGlobal !== 'undefined') globalVar = commonjsGlobal;else if (typeof self !== 'undefined') globalVar = self;else globalVar = {};
     var location = globalVar.location || {};
     loc = loc || location;
     var finaldestination = {},
-        type = typeof loc,
-        key;
-
+      type = typeof loc,
+      key;
     if ('blob:' === loc.protocol) {
       finaldestination = new Url(unescape(loc.pathname), {});
     } else if ('string' === type) {
       finaldestination = new Url(loc, {});
-
       for (key in ignore) delete finaldestination[key];
     } else if ('object' === type) {
       for (key in loc) {
         if (key in ignore) continue;
         finaldestination[key] = loc[key];
       }
-
       if (finaldestination.slashes === undefined) {
         finaldestination.slashes = slashes.test(loc.href);
       }
     }
-
     return finaldestination;
   }
+
   /**
    * Check whether a protocol scheme is special.
    *
@@ -5414,11 +4888,10 @@
    * @return {Boolean} `true` if the protocol scheme is special, else `false`
    * @private
    */
-
-
   function isSpecial(scheme) {
     return scheme === 'file:' || scheme === 'ftp:' || scheme === 'http:' || scheme === 'https:' || scheme === 'ws:' || scheme === 'wss:';
   }
+
   /**
    * @typedef ProtocolExtract
    * @type Object
@@ -5435,8 +4908,6 @@
    * @return {ProtocolExtract} Extracted information.
    * @private
    */
-
-
   function extractProtocol(address, location) {
     address = trimLeft(address);
     address = address.replace(CRHTLF, '');
@@ -5447,7 +4918,6 @@
     var otherSlashes = !!match[3];
     var slashesCount = 0;
     var rest;
-
     if (forwardSlashes) {
       if (otherSlashes) {
         rest = match[2] + match[3] + match[4];
@@ -5464,7 +4934,6 @@
         rest = match[4];
       }
     }
-
     if (protocol === 'file:') {
       if (slashesCount >= 2) {
         rest = rest.slice(2);
@@ -5478,7 +4947,6 @@
     } else if (slashesCount >= 2 && isSpecial(location.protocol)) {
       rest = match[4];
     }
-
     return {
       protocol: protocol,
       slashes: forwardSlashes || isSpecial(protocol),
@@ -5486,6 +4954,7 @@
       rest: rest
     };
   }
+
   /**
    * Resolve a relative URL pathname against a base URL pathname.
    *
@@ -5494,16 +4963,13 @@
    * @return {String} Resolved pathname.
    * @private
    */
-
-
   function resolve(relative, base) {
     if (relative === '') return base;
     var path = (base || '/').split('/').slice(0, -1).concat(relative.split('/')),
-        i = path.length,
-        last = path[i - 1],
-        unshift = false,
-        up = 0;
-
+      i = path.length,
+      last = path[i - 1],
+      unshift = false,
+      up = 0;
     while (i--) {
       if (path[i] === '.') {
         path.splice(i, 1);
@@ -5516,11 +4982,11 @@
         up--;
       }
     }
-
     if (unshift) path.unshift('');
     if (last === '.' || last === '..') path.push('');
     return path.join('/');
   }
+
   /**
    * The actual URL instance. Instead of returning an object we've opted-in to
    * create an actual constructor as it's much more memory efficient and
@@ -5535,26 +5001,24 @@
    * @param {Boolean|Function} [parser] Parser for the query string.
    * @private
    */
-
-
   function Url(address, location, parser) {
     address = trimLeft(address);
     address = address.replace(CRHTLF, '');
-
     if (!(this instanceof Url)) {
       return new Url(address, location, parser);
     }
-
     var relative,
-        extracted,
-        parse,
-        instruction,
-        index,
-        key,
-        instructions = rules.slice(),
-        type = typeof location,
-        url = this,
-        i = 0; //
+      extracted,
+      parse,
+      instruction,
+      index,
+      key,
+      instructions = rules.slice(),
+      type = typeof location,
+      url = this,
+      i = 0;
+
+    //
     // The following if statements allows this module two have compatibility with
     // 2 different API:
     //
@@ -5565,46 +5029,41 @@
     //    arguments. The supplied object will be used as default values / fall-back
     //    for relative paths.
     //
-
     if ('object' !== type && 'string' !== type) {
       parser = location;
       location = null;
     }
-
     if (parser && 'function' !== typeof parser) parser = qs.parse;
-    location = lolcation(location); //
+    location = lolcation(location);
+
+    //
     // Extract protocol information before running the instructions.
     //
-
     extracted = extractProtocol(address || '', location);
     relative = !extracted.protocol && !extracted.slashes;
     url.slashes = extracted.slashes || relative && location.slashes;
     url.protocol = extracted.protocol || location.protocol || '';
-    address = extracted.rest; //
+    address = extracted.rest;
+
+    //
     // When the authority component is absent the URL starts with a path
     // component.
     //
-
     if (extracted.protocol === 'file:' && (extracted.slashesCount !== 2 || windowsDriveLetter.test(address)) || !extracted.slashes && (extracted.protocol || extracted.slashesCount < 2 || !isSpecial(url.protocol))) {
       instructions[3] = [/(.*)/, 'pathname'];
     }
-
     for (; i < instructions.length; i++) {
       instruction = instructions[i];
-
       if (typeof instruction === 'function') {
         address = instruction(address, url);
         continue;
       }
-
       parse = instruction[0];
       key = instruction[1];
-
       if (parse !== parse) {
         url[key] = address;
       } else if ('string' === typeof parse) {
         index = parse === '@' ? address.lastIndexOf(parse) : address.indexOf(parse);
-
         if (~index) {
           if ('number' === typeof instruction[2]) {
             url[key] = address.slice(0, index);
@@ -5618,54 +5077,53 @@
         url[key] = index[1];
         address = address.slice(0, index.index);
       }
+      url[key] = url[key] || (relative && instruction[3] ? location[key] || '' : '');
 
-      url[key] = url[key] || (relative && instruction[3] ? location[key] || '' : ''); //
+      //
       // Hostname, host and protocol should be lowercased so they can be used to
       // create a proper `origin`.
       //
-
       if (instruction[4]) url[key] = url[key].toLowerCase();
-    } //
+    }
+
+    //
     // Also parse the supplied query string in to an object. If we're supplied
     // with a custom parser as function use that instead of the default build-in
     // parser.
     //
+    if (parser) url.query = parser(url.query);
 
-
-    if (parser) url.query = parser(url.query); //
+    //
     // If the URL is relative, resolve the pathname against the base URL.
     //
-
     if (relative && location.slashes && url.pathname.charAt(0) !== '/' && (url.pathname !== '' || location.pathname !== '')) {
       url.pathname = resolve(url.pathname, location.pathname);
-    } //
+    }
+
+    //
     // Default to a / for pathname if none exists. This normalizes the URL
     // to always have a /
     //
-
-
     if (url.pathname.charAt(0) !== '/' && isSpecial(url.protocol)) {
       url.pathname = '/' + url.pathname;
-    } //
+    }
+
+    //
     // We should not add port numbers if they are already the default port number
     // for a given protocol. As the host also contains the port number we're going
     // override it with the hostname which contains no port number.
     //
-
-
     if (!required(url.port, url.protocol)) {
       url.host = url.hostname;
       url.port = '';
-    } //
+    }
+
+    //
     // Parse down the `auth` for the username and password.
     //
-
-
     url.username = url.password = '';
-
     if (url.auth) {
       index = url.auth.indexOf(':');
-
       if (~index) {
         url.username = url.auth.slice(0, index);
         url.username = encodeURIComponent(decodeURIComponent(url.username));
@@ -5674,16 +5132,16 @@
       } else {
         url.username = encodeURIComponent(decodeURIComponent(url.auth));
       }
-
       url.auth = url.password ? url.username + ':' + url.password : url.username;
     }
+    url.origin = url.protocol !== 'file:' && isSpecial(url.protocol) && url.host ? url.protocol + '//' + url.host : 'null';
 
-    url.origin = url.protocol !== 'file:' && isSpecial(url.protocol) && url.host ? url.protocol + '//' + url.host : 'null'; //
+    //
     // The href is just the compiled result.
     //
-
     url.href = url.toString();
   }
+
   /**
    * This is convenience method for changing properties in the URL instance to
    * insure that they all propagate correctly.
@@ -5697,41 +5155,31 @@
    * @returns {URL} URL instance for chaining.
    * @public
    */
-
-
   function set(part, value, fn) {
     var url = this;
-
     switch (part) {
       case 'query':
         if ('string' === typeof value && value.length) {
           value = (fn || qs.parse)(value);
         }
-
         url[part] = value;
         break;
-
       case 'port':
         url[part] = value;
-
         if (!required(value, url.protocol)) {
           url.host = url.hostname;
           url[part] = '';
         } else if (value) {
           url.host = url.hostname + ':' + value;
         }
-
         break;
-
       case 'hostname':
         url[part] = value;
         if (url.port) value += ':' + url.port;
         url.host = value;
         break;
-
       case 'host':
         url[part] = value;
-
         if (port.test(value)) {
           value = value.split(':');
           url.port = value.pop();
@@ -5740,14 +5188,11 @@
           url.hostname = value;
           url.port = '';
         }
-
         break;
-
       case 'protocol':
         url.protocol = value.toLowerCase();
         url.slashes = !fn;
         break;
-
       case 'pathname':
       case 'hash':
         if (value) {
@@ -5756,17 +5201,13 @@
         } else {
           url[part] = value;
         }
-
         break;
-
       case 'username':
       case 'password':
         url[part] = encodeURIComponent(value);
         break;
-
       case 'auth':
         var index = value.indexOf(':');
-
         if (~index) {
           url.username = value.slice(0, index);
           url.username = encodeURIComponent(decodeURIComponent(url.username));
@@ -5775,19 +5216,17 @@
         } else {
           url.username = encodeURIComponent(decodeURIComponent(value));
         }
-
     }
-
     for (var i = 0; i < rules.length; i++) {
       var ins = rules[i];
       if (ins[4]) url[ins[1]] = url[ins[1]].toLowerCase();
     }
-
     url.auth = url.password ? url.username + ':' + url.password : url.username;
     url.origin = url.protocol !== 'file:' && isSpecial(url.protocol) && url.host ? url.protocol + '//' + url.host : 'null';
     url.href = url.toString();
     return url;
   }
+
   /**
    * Transform the properties back in to a valid and full URL string.
    *
@@ -5795,17 +5234,14 @@
    * @returns {String} Compiled version of the URL.
    * @public
    */
-
-
   function toString(stringify) {
     if (!stringify || 'function' !== typeof stringify) stringify = qs.stringify;
     var query,
-        url = this,
-        host = url.host,
-        protocol = url.protocol;
+      url = this,
+      host = url.host,
+      protocol = url.protocol;
     if (protocol && protocol.charAt(protocol.length - 1) !== ':') protocol += ':';
     var result = protocol + (url.protocol && url.slashes || isSpecial(url.protocol) ? '//' : '');
-
     if (url.username) {
       result += url.username;
       if (url.password) result += ':' + url.password;
@@ -5819,32 +5255,31 @@
       // might be transformed into a valid one with `url.pathname` as host.
       //
       result += '@';
-    } //
+    }
+
+    //
     // Trailing colon is removed from `url.host` when it is parsed. If it still
     // ends with a colon, then add back the trailing colon that was removed. This
     // prevents an invalid URL from being transformed into a valid one.
     //
-
-
     if (host[host.length - 1] === ':' || port.test(url.hostname) && !url.port) {
       host += ':';
     }
-
     result += host + url.pathname;
     query = 'object' === typeof url.query ? stringify(url.query) : url.query;
     if (query) result += '?' !== query.charAt(0) ? '?' + query : query;
     if (url.hash) result += url.hash;
     return result;
   }
-
   Url.prototype = {
     set: set,
     toString: toString
-  }; //
+  };
+
+  //
   // Expose the URL parser and some additional properties that might be useful for
   // others or testing.
   //
-
   Url.extractProtocol = extractProtocol;
   Url.location = lolcation;
   Url.trimLeft = trimLeft;
@@ -5860,7 +5295,6 @@
       return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
     }, _typeof$1(obj);
   }
-
   function _defineProperties$8(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
@@ -5870,7 +5304,6 @@
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
-
   function _createClass$8(Constructor, protoProps, staticProps) {
     if (protoProps) _defineProperties$8(Constructor.prototype, protoProps);
     if (staticProps) _defineProperties$8(Constructor, staticProps);
@@ -5879,18 +5312,15 @@
     });
     return Constructor;
   }
-
   function _classCallCheck$8(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-
   function _inherits$1(subClass, superClass) {
     if (typeof superClass !== "function" && superClass !== null) {
       throw new TypeError("Super expression must either be null or a function");
     }
-
     subClass.prototype = Object.create(superClass && superClass.prototype, {
       constructor: {
         value: subClass,
@@ -5903,64 +5333,48 @@
     });
     if (superClass) _setPrototypeOf$1(subClass, superClass);
   }
-
   function _createSuper$1(Derived) {
     var hasNativeReflectConstruct = _isNativeReflectConstruct$1();
-
     return function _createSuperInternal() {
       var Super = _getPrototypeOf$1(Derived),
-          result;
-
+        result;
       if (hasNativeReflectConstruct) {
         var NewTarget = _getPrototypeOf$1(this).constructor;
-
         result = Reflect.construct(Super, arguments, NewTarget);
       } else {
         result = Super.apply(this, arguments);
       }
-
       return _possibleConstructorReturn$1(this, result);
     };
   }
-
   function _possibleConstructorReturn$1(self, call) {
     if (call && (_typeof$1(call) === "object" || typeof call === "function")) {
       return call;
     } else if (call !== void 0) {
       throw new TypeError("Derived constructors may only return object or undefined");
     }
-
     return _assertThisInitialized$1(self);
   }
-
   function _assertThisInitialized$1(self) {
     if (self === void 0) {
       throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
     }
-
     return self;
   }
-
   function _wrapNativeSuper(Class) {
     var _cache = typeof Map === "function" ? new Map() : undefined;
-
     _wrapNativeSuper = function _wrapNativeSuper(Class) {
       if (Class === null || !_isNativeFunction(Class)) return Class;
-
       if (typeof Class !== "function") {
         throw new TypeError("Super expression must either be null or a function");
       }
-
       if (typeof _cache !== "undefined") {
         if (_cache.has(Class)) return _cache.get(Class);
-
         _cache.set(Class, Wrapper);
       }
-
       function Wrapper() {
         return _construct(Class, arguments, _getPrototypeOf$1(this).constructor);
       }
-
       Wrapper.prototype = Object.create(Class.prototype, {
         constructor: {
           value: Wrapper,
@@ -5971,10 +5385,8 @@
       });
       return _setPrototypeOf$1(Wrapper, Class);
     };
-
     return _wrapNativeSuper(Class);
   }
-
   function _construct(Parent, args, Class) {
     if (_isNativeReflectConstruct$1()) {
       _construct = Reflect.construct.bind();
@@ -5988,15 +5400,12 @@
         return instance;
       };
     }
-
     return _construct.apply(null, arguments);
   }
-
   function _isNativeReflectConstruct$1() {
     if (typeof Reflect === "undefined" || !Reflect.construct) return false;
     if (Reflect.construct.sham) return false;
     if (typeof Proxy === "function") return true;
-
     try {
       Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {}));
       return true;
@@ -6004,11 +5413,9 @@
       return false;
     }
   }
-
   function _isNativeFunction(fn) {
     return Function.toString.call(fn).indexOf("[native code]") !== -1;
   }
-
   function _setPrototypeOf$1(o, p) {
     _setPrototypeOf$1 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf(o, p) {
       o.__proto__ = p;
@@ -6016,37 +5423,28 @@
     };
     return _setPrototypeOf$1(o, p);
   }
-
   function _getPrototypeOf$1(o) {
     _getPrototypeOf$1 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf(o) {
       return o.__proto__ || Object.getPrototypeOf(o);
     };
     return _getPrototypeOf$1(o);
   }
-
   var DetailedError = /*#__PURE__*/function (_Error) {
     _inherits$1(DetailedError, _Error);
-
     var _super = _createSuper$1(DetailedError);
-
     function DetailedError(message) {
       var _this;
-
       var causingErr = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
       var req = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
       var res = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
-
       _classCallCheck$8(this, DetailedError);
-
       _this = _super.call(this, message);
       _this.originalRequest = req;
       _this.originalResponse = res;
       _this.causingError = causingErr;
-
       if (causingErr != null) {
         message += ", caused by ".concat(causingErr.toString());
       }
-
       if (req != null) {
         var requestId = req.getHeader('X-Request-ID') || 'n/a';
         var method = req.getMethod();
@@ -6055,11 +5453,9 @@
         var body = res ? res.getBody() || '' : 'n/a';
         message += ", originated from request (method: ".concat(method, ", url: ").concat(url, ", response code: ").concat(status, ", response text: ").concat(body, ", request id: ").concat(requestId, ")");
       }
-
       _this.message = message;
       return _this;
     }
-
     return _createClass$8(DetailedError);
   }( /*#__PURE__*/_wrapNativeSuper(Error));
 
@@ -6092,11 +5488,9 @@
   function _slicedToArray(arr, i) {
     return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest();
   }
-
   function _nonIterableRest() {
     throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
-
   function _unsupportedIterableToArray(o, minLen) {
     if (!o) return;
     if (typeof o === "string") return _arrayLikeToArray(o, minLen);
@@ -6105,31 +5499,23 @@
     if (n === "Map" || n === "Set") return Array.from(o);
     if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
   }
-
   function _arrayLikeToArray(arr, len) {
     if (len == null || len > arr.length) len = arr.length;
-
     for (var i = 0, arr2 = new Array(len); i < len; i++) {
       arr2[i] = arr[i];
     }
-
     return arr2;
   }
-
   function _iterableToArrayLimit(arr, i) {
     var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"];
-
     if (_i == null) return;
     var _arr = [];
     var _n = true;
     var _d = false;
-
     var _s, _e;
-
     try {
       for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) {
         _arr.push(_s.value);
-
         if (i && _arr.length === i) break;
       }
     } catch (err) {
@@ -6142,27 +5528,21 @@
         if (_d) throw _e;
       }
     }
-
     return _arr;
   }
-
   function _arrayWithHoles(arr) {
     if (Array.isArray(arr)) return arr;
   }
-
   function ownKeys$1(object, enumerableOnly) {
     var keys = Object.keys(object);
-
     if (Object.getOwnPropertySymbols) {
       var symbols = Object.getOwnPropertySymbols(object);
       enumerableOnly && (symbols = symbols.filter(function (sym) {
         return Object.getOwnPropertyDescriptor(object, sym).enumerable;
       })), keys.push.apply(keys, symbols);
     }
-
     return keys;
   }
-
   function _objectSpread$1(target) {
     for (var i = 1; i < arguments.length; i++) {
       var source = null != arguments[i] ? arguments[i] : {};
@@ -6172,10 +5552,8 @@
         Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
       });
     }
-
     return target;
   }
-
   function _defineProperty$1(obj, key, value) {
     if (key in obj) {
       Object.defineProperty(obj, key, {
@@ -6187,16 +5565,13 @@
     } else {
       obj[key] = value;
     }
-
     return obj;
   }
-
   function _classCallCheck$7(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-
   function _defineProperties$7(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
@@ -6206,7 +5581,6 @@
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
-
   function _createClass$7(Constructor, protoProps, staticProps) {
     if (protoProps) _defineProperties$7(Constructor.prototype, protoProps);
     if (staticProps) _defineProperties$7(Constructor, staticProps);
@@ -6244,16 +5618,14 @@
     fileReader: null,
     httpStack: null
   };
-
   var BaseUpload = /*#__PURE__*/function () {
     function BaseUpload(file, options) {
-      _classCallCheck$7(this, BaseUpload); // Warn about removed options from previous versions
+      _classCallCheck$7(this, BaseUpload);
 
-
+      // Warn about removed options from previous versions
       if ('resume' in options) {
         console.log('tus: The `resume` option has been removed in tus-js-client v2. Please use the URL storage API instead.'); // eslint-disable-line no-console
       } // The default options will already be added from the wrapper classes.
-
 
       this.options = options; // Cast chunkSize to integer
 
@@ -6304,12 +5676,10 @@
      * @return {Promise} The Promise will be resolved/rejected when the requests finish.
      */
 
-
     _createClass$7(BaseUpload, [{
       key: "findPreviousUploads",
       value: function findPreviousUploads() {
         var _this = this;
-
         return this.options.fingerprint(this.file, this.options).then(function (fingerprint) {
           return _this._urlStorage.findUploadsByFingerprint(fingerprint);
         });
@@ -6325,64 +5695,45 @@
       key: "start",
       value: function start() {
         var _this2 = this;
-
         var file = this.file;
-
         if (!file) {
           this._emitError(new Error('tus: no file or stream to upload provided'));
-
           return;
         }
-
         if (!this.options.endpoint && !this.options.uploadUrl && !this.url) {
           this._emitError(new Error('tus: neither an endpoint or an upload URL is provided'));
-
           return;
         }
-
         var retryDelays = this.options.retryDelays;
-
         if (retryDelays != null && Object.prototype.toString.call(retryDelays) !== '[object Array]') {
           this._emitError(new Error('tus: the `retryDelays` option must either be an array or null'));
-
           return;
         }
-
         if (this.options.parallelUploads > 1) {
           // Test which options are incompatible with parallel uploads.
           for (var _i = 0, _arr = ['uploadUrl', 'uploadSize', 'uploadLengthDeferred']; _i < _arr.length; _i++) {
             var optionName = _arr[_i];
-
             if (this.options[optionName]) {
               this._emitError(new Error("tus: cannot use the ".concat(optionName, " option when parallelUploads is enabled")));
-
               return;
             }
           }
         }
-
         if (this.options.parallelUploadBoundaries) {
           if (this.options.parallelUploads <= 1) {
             this._emitError(new Error('tus: cannot use the `parallelUploadBoundaries` option when `parallelUploads` is disabled'));
-
             return;
           }
-
           if (this.options.parallelUploads !== this.options.parallelUploadBoundaries.length) {
             this._emitError(new Error('tus: the `parallelUploadBoundaries` must have the same length as the value of `parallelUploads`'));
-
             return;
           }
         }
-
         this.options.fingerprint(file, this.options).then(function (fingerprint) {
-
           _this2._fingerprint = fingerprint;
-
           if (_this2._source) {
             return _this2._source;
           }
-
           return _this2.options.fileReader.openFile(file, _this2.options.chunkSize);
         }).then(function (source) {
           _this2._source = source; // First, we look at the uploadLengthDeferred option.
@@ -6393,23 +5744,18 @@
             _this2._size = null;
           } else if (_this2.options.uploadSize != null) {
             _this2._size = Number(_this2.options.uploadSize);
-
             if (Number.isNaN(_this2._size)) {
               _this2._emitError(new Error('tus: cannot convert `uploadSize` option into a number'));
-
               return;
             }
           } else {
             _this2._size = _this2._source.size;
-
             if (_this2._size == null) {
               _this2._emitError(new Error("tus: cannot automatically derive upload's size from input. Specify it manually using the `uploadSize` option or use the `uploadLengthDeferred` option"));
-
               return;
             }
           } // If the upload was configured to use multiple requests or if we resume from
           // an upload which used multiple requests, we start a parallel upload.
-
 
           if (_this2.options.parallelUploads > 1 || _this2._parallelUploadUrls != null) {
             _this2._startParallelUpload();
@@ -6426,13 +5772,11 @@
        *
        * @api private
        */
-
     }, {
       key: "_startParallelUpload",
       value: function _startParallelUpload() {
         var _this$options$paralle,
-            _this3 = this;
-
+          _this3 = this;
         var totalSize = this._size;
         var totalProgress = 0;
         this._parallelUploads = [];
@@ -6446,7 +5790,6 @@
             part.uploadUrl = _this3._parallelUploadUrls[index] || null;
           });
         } // Create an empty list for storing the upload URLs
-
 
         this._parallelUploadUrls = new Array(parts.length); // Generate a promise for each slice that will be resolve if the respective
         // upload is completed.
@@ -6481,7 +5824,6 @@
                 onProgress: function onProgress(newPartProgress) {
                   totalProgress = totalProgress - lastPartProgress + newPartProgress;
                   lastPartProgress = newPartProgress;
-
                   _this3._emitProgress(totalProgress, totalSize);
                 },
                 // Wait until every partial upload has an upload URL, so we can add
@@ -6496,7 +5838,6 @@
                   }
                 }
               });
-
               var upload = new BaseUpload(value, options);
               upload.start(); // Store the upload in an array, so we can later abort them if necessary.
 
@@ -6512,30 +5853,22 @@
           req.setHeader('Upload-Concat', "final;".concat(_this3._parallelUploadUrls.join(' '))); // Add metadata if values have been added
 
           var metadata = encodeMetadata(_this3.options.metadata);
-
           if (metadata !== '') {
             req.setHeader('Upload-Metadata', metadata);
           }
-
           return _this3._sendRequest(req, null);
         }).then(function (res) {
           if (!inStatusCategory(res.getStatus(), 200)) {
             _this3._emitHttpError(req, res, 'tus: unexpected response while creating upload');
-
             return;
           }
-
           var location = res.getHeader('Location');
-
           if (location == null) {
             _this3._emitHttpError(req, res, 'tus: invalid or missing Location header');
-
             return;
           }
-
           _this3.url = resolveUrl(_this3.options.endpoint, location);
           log("Created upload at ".concat(_this3.url));
-
           _this3._emitSuccess();
         })["catch"](function (err) {
           _this3._emitError(err);
@@ -6547,7 +5880,6 @@
        *
        * @api private
        */
-
     }, {
       key: "_startSingleUpload",
       value: function _startSingleUpload() {
@@ -6558,22 +5890,16 @@
 
         if (this.url != null) {
           log("Resuming upload from previous URL: ".concat(this.url));
-
           this._resumeUpload();
-
           return;
         } // A URL has manually been specified, so we try to resume
-
 
         if (this.options.uploadUrl != null) {
           log("Resuming upload from provided URL: ".concat(this.options.uploadUrl));
           this.url = this.options.uploadUrl;
-
           this._resumeUpload();
-
           return;
         } // An upload has not started for the file yet, so we start a new one
-
         this._createUpload();
       }
       /**
@@ -6586,23 +5912,20 @@
        * @param {boolean} shouldTerminate True if the upload should be deleted from the server.
        * @return {Promise} The Promise will be resolved/rejected when the requests finish.
        */
-
     }, {
       key: "abort",
       value: function abort(shouldTerminate) {
-        var _this4 = this; // Stop any parallel partial uploads, that have been started in _startParallelUploads.
+        var _this4 = this;
 
-
+        // Stop any parallel partial uploads, that have been started in _startParallelUploads.
         if (this._parallelUploads != null) {
           this._parallelUploads.forEach(function (upload) {
             upload.abort(shouldTerminate);
           });
         } // Stop any current running request.
 
-
         if (this._req !== null) {
           this._req.abort(); // Note: We do not close the file source here, so the user can resume in the future.
-
         }
 
         this._aborted = true; // Stop any timeout used for initiating a retry.
@@ -6611,11 +5934,9 @@
           clearTimeout(this._retryTimeout);
           this._retryTimeout = null;
         }
-
         if (!shouldTerminate || this.url == null) {
           return Promise.resolve();
         }
-
         return BaseUpload.terminate(this.url, this.options) // Remove entry from the URL storage since the upload URL is no longer valid.
         .then(function () {
           return _this4._removeFromUrlStorage();
@@ -6629,9 +5950,9 @@
     }, {
       key: "_emitError",
       value: function _emitError(err) {
-        var _this5 = this; // Do not emit errors, e.g. from aborted HTTP requests, if the upload has been stopped.
+        var _this5 = this;
 
-
+        // Do not emit errors, e.g. from aborted HTTP requests, if the upload has been stopped.
         if (this._aborted) return; // Check if we should retry, when enabled, before sending the error to the user.
 
         if (this.options.retryDelays != null) {
@@ -6639,11 +5960,9 @@
           // - we were already able to connect to the server (offset != null) and
           // - we were able to upload a small chunk of data to the server
           var shouldResetDelays = this._offset != null && this._offset > this._offsetBeforeRetry;
-
           if (shouldResetDelays) {
             this._retryAttempt = 0;
           }
-
           if (shouldRetry(err, this._retryAttempt, this.options)) {
             var delay = this.options.retryDelays[this._retryAttempt++];
             this._offsetBeforeRetry = this._offset;
@@ -6653,7 +5972,6 @@
             return;
           }
         }
-
         if (typeof this.options.onError === 'function') {
           this.options.onError(err);
         } else {
@@ -6665,7 +5983,6 @@
        *
        * @api private
        */
-
     }, {
       key: "_emitSuccess",
       value: function _emitSuccess() {
@@ -6674,7 +5991,6 @@
           // new uploads of the same file to be treated as a different file.
           this._removeFromUrlStorage();
         }
-
         if (typeof this.options.onSuccess === 'function') {
           this.options.onSuccess();
         }
@@ -6687,7 +6003,6 @@
        * @param {number} bytesTotal Total number of bytes to be sent to the server.
        * @api private
        */
-
     }, {
       key: "_emitProgress",
       value: function _emitProgress(bytesSent, bytesTotal) {
@@ -6704,7 +6019,6 @@
        * @param {number} bytesTotal Total number of bytes to be sent to the server.
        * @api private
        */
-
     }, {
       key: "_emitChunkComplete",
       value: function _emitChunkComplete(chunkSize, bytesAccepted, bytesTotal) {
@@ -6719,79 +6033,58 @@
        *
        * @api private
        */
-
     }, {
       key: "_createUpload",
       value: function _createUpload() {
         var _this6 = this;
-
         if (!this.options.endpoint) {
           this._emitError(new Error('tus: unable to create upload because no endpoint is provided'));
-
           return;
         }
-
         var req = this._openRequest('POST', this.options.endpoint);
-
         if (this.options.uploadLengthDeferred) {
           req.setHeader('Upload-Defer-Length', 1);
         } else {
           req.setHeader('Upload-Length', this._size);
         } // Add metadata if values have been added
 
-
         var metadata = encodeMetadata(this.options.metadata);
-
         if (metadata !== '') {
           req.setHeader('Upload-Metadata', metadata);
         }
-
         var promise;
-
         if (this.options.uploadDataDuringCreation && !this.options.uploadLengthDeferred) {
           this._offset = 0;
           promise = this._addChunkToRequest(req);
         } else {
           promise = this._sendRequest(req, null);
         }
-
         promise.then(function (res) {
           if (!inStatusCategory(res.getStatus(), 200)) {
             _this6._emitHttpError(req, res, 'tus: unexpected response while creating upload');
-
             return;
           }
-
           var location = res.getHeader('Location');
-
           if (location == null) {
             _this6._emitHttpError(req, res, 'tus: invalid or missing Location header');
-
             return;
           }
-
           _this6.url = resolveUrl(_this6.options.endpoint, location);
           log("Created upload at ".concat(_this6.url));
-
           if (typeof _this6.options._onUploadUrlAvailable === 'function') {
             _this6.options._onUploadUrlAvailable();
           }
-
           if (_this6._size === 0) {
             // Nothing to upload and file was successfully created
             _this6._emitSuccess();
-
             _this6._source.close();
-
             return;
           }
-
           _this6._saveUploadInUrlStorage().then(function () {
             if (_this6.options.uploadDataDuringCreation) {
               _this6._handleUploadResponse(req, res);
             } else {
               _this6._offset = 0;
-
               _this6._performUpload();
             }
           });
@@ -6806,19 +6099,14 @@
        *
        * @api private
        */
-
     }, {
       key: "_resumeUpload",
       value: function _resumeUpload() {
         var _this7 = this;
-
         var req = this._openRequest('HEAD', this.url);
-
         var promise = this._sendRequest(req, null);
-
         promise.then(function (res) {
           var status = res.getStatus();
-
           if (!inStatusCategory(status, 200)) {
             // If the upload is locked (indicated by the 423 Locked status code), we
             // emit an error instead of directly starting a new upload. This way the
@@ -6827,64 +6115,45 @@
             // afterwards.
             if (status === 423) {
               _this7._emitHttpError(req, res, 'tus: upload is currently locked; retry later');
-
               return;
             }
-
             if (inStatusCategory(status, 400)) {
               // Remove stored fingerprint and corresponding endpoint,
               // on client errors since the file can not be found
               _this7._removeFromUrlStorage();
             }
-
             if (!_this7.options.endpoint) {
               // Don't attempt to create a new upload if no endpoint is provided.
               _this7._emitHttpError(req, res, 'tus: unable to resume upload (new upload cannot be created without an endpoint)');
-
               return;
             } // Try to create a new upload
 
-
             _this7.url = null;
-
             _this7._createUpload();
-
             return;
           }
-
           var offset = parseInt(res.getHeader('Upload-Offset'), 10);
-
           if (Number.isNaN(offset)) {
             _this7._emitHttpError(req, res, 'tus: invalid or missing offset value');
-
             return;
           }
-
           var length = parseInt(res.getHeader('Upload-Length'), 10);
-
           if (Number.isNaN(length) && !_this7.options.uploadLengthDeferred) {
             _this7._emitHttpError(req, res, 'tus: invalid or missing length value');
-
             return;
           }
-
           if (typeof _this7.options._onUploadUrlAvailable === 'function') {
             _this7.options._onUploadUrlAvailable();
           }
-
           _this7._saveUploadInUrlStorage().then(function () {
             // Upload has already been completed and we do not need to send additional
             // data to the server
             if (offset === length) {
               _this7._emitProgress(length, length);
-
               _this7._emitSuccess();
-
               return;
             }
-
             _this7._offset = offset;
-
             _this7._performUpload();
           });
         })["catch"](function (err) {
@@ -6898,19 +6167,17 @@
        *
        * @api private
        */
-
     }, {
       key: "_performUpload",
       value: function _performUpload() {
-        var _this8 = this; // If the upload has been aborted, we will not send the next PATCH request.
+        var _this8 = this;
+
+        // If the upload has been aborted, we will not send the next PATCH request.
         // This is important if the abort method was called during a callback, such
         // as onChunkComplete or onProgress.
-
-
         if (this._aborted) {
           return;
         }
-
         var req; // Some browser and servers may not support the PATCH method. For those
         // cases, you can tell tus-js-client to use a POST request with the
         // X-HTTP-Method-Override header for simulating a PATCH request.
@@ -6921,25 +6188,19 @@
         } else {
           req = this._openRequest('PATCH', this.url);
         }
-
         req.setHeader('Upload-Offset', this._offset);
-
         var promise = this._addChunkToRequest(req);
-
         promise.then(function (res) {
           if (!inStatusCategory(res.getStatus(), 200)) {
             _this8._emitHttpError(req, res, 'tus: unexpected response while uploading chunk');
-
             return;
           }
-
           _this8._handleUploadResponse(req, res);
         })["catch"](function (err) {
           // Don't emit an error if the upload was aborted manually
           if (_this8._aborted) {
             return;
           }
-
           _this8._emitHttpError(req, null, "tus: failed to upload chunk at offset ".concat(_this8._offset), err);
         });
       }
@@ -6949,12 +6210,10 @@
        *
        * @api private
        */
-
     }, {
       key: "_addChunkToRequest",
       value: function _addChunkToRequest(req) {
         var _this9 = this;
-
         var start = this._offset;
         var end = this._offset + this.options.chunkSize;
         req.setProgressHandler(function (bytesSent) {
@@ -6967,24 +6226,21 @@
         if ((end === Infinity || end > this._size) && !this.options.uploadLengthDeferred) {
           end = this._size;
         }
-
         return this._source.slice(start, end).then(function (_ref2) {
           var value = _ref2.value,
-              done = _ref2.done; // If the upload length is deferred, the upload size was not specified during
+            done = _ref2.done;
+
+          // If the upload length is deferred, the upload size was not specified during
           // upload creation. So, if the file reader is done reading, we know the total
           // upload size and can tell the tus server.
-
           if (_this9.options.uploadLengthDeferred && done) {
             _this9._size = _this9._offset + (value && value.size ? value.size : 0);
             req.setHeader('Upload-Length', _this9._size);
           }
-
           if (value === null) {
             return _this9._sendRequest(req);
           }
-
           _this9._emitProgress(_this9._offset, _this9._size);
-
           return _this9._sendRequest(req, value);
         });
       }
@@ -6994,33 +6250,23 @@
        *
        * @api private
        */
-
     }, {
       key: "_handleUploadResponse",
       value: function _handleUploadResponse(req, res) {
         var offset = parseInt(res.getHeader('Upload-Offset'), 10);
-
         if (Number.isNaN(offset)) {
           this._emitHttpError(req, res, 'tus: invalid or missing offset value');
-
           return;
         }
-
         this._emitProgress(offset, this._size);
-
         this._emitChunkComplete(offset - this._offset, offset, this._size);
-
         this._offset = offset;
-
         if (offset === this._size) {
           // Yay, finally done :)
           this._emitSuccess();
-
           this._source.close();
-
           return;
         }
-
         this._performUpload();
       }
       /**
@@ -7028,7 +6274,6 @@
        *
        * @api private
        */
-
     }, {
       key: "_openRequest",
       value: function _openRequest(method, url) {
@@ -7041,18 +6286,14 @@
        *
        * @api private
        */
-
     }, {
       key: "_removeFromUrlStorage",
       value: function _removeFromUrlStorage() {
         var _this10 = this;
-
         if (!this._urlStorageKey) return;
-
         this._urlStorage.removeUpload(this._urlStorageKey)["catch"](function (err) {
           _this10._emitError(err);
         });
-
         this._urlStorageKey = null;
       }
       /**
@@ -7060,26 +6301,23 @@
        *
        * @api private
        */
-
     }, {
       key: "_saveUploadInUrlStorage",
       value: function _saveUploadInUrlStorage() {
-        var _this11 = this; // We do not store the upload URL
+        var _this11 = this;
+
+        // We do not store the upload URL
         // - if it was disabled in the option, or
         // - if no fingerprint was calculated for the input (i.e. a stream), or
         // - if the URL is already stored (i.e. key is set alread).
-
-
         if (!this.options.storeFingerprintForResuming || !this._fingerprint || this._urlStorageKey !== null) {
           return Promise.resolve();
         }
-
         var storedUpload = {
           size: this._size,
           metadata: this.options.metadata,
           creationTime: new Date().toString()
         };
-
         if (this._parallelUploads) {
           // Save multiple URLs if the parallelUploads option is used ...
           storedUpload.parallelUploadUrls = this._parallelUploadUrls;
@@ -7087,7 +6325,6 @@
           // ... otherwise we just save the one available URL.
           storedUpload.uploadUrl = this.url;
         }
-
         return this._urlStorage.addUpload(this._fingerprint, storedUpload).then(function (urlStorageKey) {
           _this11._urlStorageKey = urlStorageKey;
         });
@@ -7097,7 +6334,6 @@
        *
        * @api private
        */
-
     }, {
       key: "_sendRequest",
       value: function _sendRequest(req) {
@@ -7114,27 +6350,22 @@
           if (res.getStatus() === 204) {
             return;
           }
-
           throw new DetailedError('tus: unexpected response while terminating upload', null, req, res);
         })["catch"](function (err) {
           if (!(err instanceof DetailedError)) {
             err = new DetailedError('tus: failed to terminate upload', err, req, null);
           }
-
           if (!shouldRetry(err, 0, options)) {
             throw err;
           } // Instead of keeping track of the retry attempts, we remove the first element from the delays
           // array. If the array is empty, all retry attempts are used up and we will bubble up the error.
           // We recursively call the terminate function will removing elements from the retryDelays array.
 
-
           var delay = options.retryDelays[0];
           var remainingDelays = options.retryDelays.slice(1);
-
           var newOptions = _objectSpread$1(_objectSpread$1({}, options), {}, {
             retryDelays: remainingDelays
           });
-
           return new Promise(function (resolve) {
             return setTimeout(resolve, delay);
           }).then(function () {
@@ -7143,16 +6374,13 @@
         });
       }
     }]);
-
     return BaseUpload;
   }();
-
   function encodeMetadata(metadata) {
     return Object.entries(metadata).map(function (_ref3) {
       var _ref4 = _slicedToArray(_ref3, 2),
-          key = _ref4[0],
-          value = _ref4[1];
-
+        key = _ref4[0],
+        value = _ref4[1];
       return "".concat(key, " ").concat(gBase64.encode(String(value)));
     }).join(',');
   }
@@ -7162,7 +6390,6 @@
    *
    * @api private
    */
-
 
   function inStatusCategory(status, category) {
     return status >= category && status < category + 100;
@@ -7175,24 +6402,20 @@
    * @api private
    */
 
-
   function openRequest(method, url, options) {
     var req = options.httpStack.createRequest(method, url);
     req.setHeader('Tus-Resumable', '1.0.0');
     var headers = options.headers || {};
     Object.entries(headers).forEach(function (_ref5) {
       var _ref6 = _slicedToArray(_ref5, 2),
-          name = _ref6[0],
-          value = _ref6[1];
-
+        name = _ref6[0],
+        value = _ref6[1];
       req.setHeader(name, value);
     });
-
     if (options.addRequestId) {
       var requestId = uuid();
       req.setHeader('X-Request-ID', requestId);
     }
-
     return req;
   }
   /**
@@ -7201,7 +6424,6 @@
    *
    * @api private
    */
-
 
   function sendRequest(req, body, options) {
     var onBeforeRequestPromise = typeof options.onBeforeRequest === 'function' ? Promise.resolve(options.onBeforeRequest(req)) : Promise.resolve();
@@ -7221,16 +6443,13 @@
    * @api private
    */
 
-
   function isOnline() {
     var online = true;
-
     if (typeof window !== 'undefined' && 'navigator' in window // eslint-disable-line no-undef
     && window.navigator.onLine === false) {
       // eslint-disable-line no-undef
       online = false;
     }
-
     return online;
   }
   /**
@@ -7241,7 +6460,6 @@
    *
    * @api private
    */
-
 
   function shouldRetry(err, retryAttempt, options) {
     // We only attempt a retry if
@@ -7254,11 +6472,9 @@
     if (options.retryDelays == null || retryAttempt >= options.retryDelays.length || err.originalRequest == null) {
       return false;
     }
-
     if (options && typeof options.onShouldRetry === 'function') {
       return options.onShouldRetry(err, retryAttempt, options);
     }
-
     var status = err.originalResponse ? err.originalResponse.getStatus() : 0;
     return (!inStatusCategory(status, 400) || status === 409 || status === 423) && isOnline();
   }
@@ -7268,7 +6484,6 @@
    * header with the value /upload/abc, the resolved URL will be:
    * http://example.com/upload/abc
    */
-
 
   function resolveUrl(origin, link) {
     return new urlParse(link, origin).toString();
@@ -7283,22 +6498,18 @@
    * @api private
    */
 
-
   function splitSizeIntoParts(totalSize, partCount) {
     var partSize = Math.floor(totalSize / partCount);
     var parts = [];
-
     for (var i = 0; i < partCount; i++) {
       parts.push({
         start: partSize * i,
         end: partSize * (i + 1)
       });
     }
-
     parts[partCount - 1].end = totalSize;
     return parts;
   }
-
   BaseUpload.defaultOptions = defaultOptions$1;
 
   function _classCallCheck$6(instance, Constructor) {
@@ -7306,7 +6517,6 @@
       throw new TypeError("Cannot call a class as a function");
     }
   }
-
   function _defineProperties$6(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
@@ -7316,7 +6526,6 @@
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
-
   function _createClass$6(Constructor, protoProps, staticProps) {
     if (protoProps) _defineProperties$6(Constructor.prototype, protoProps);
     if (staticProps) _defineProperties$6(Constructor, staticProps);
@@ -7325,14 +6534,12 @@
     });
     return Constructor;
   }
+
   /* eslint no-unused-vars: "off" */
-
-
   var NoopUrlStorage = /*#__PURE__*/function () {
     function NoopUrlStorage() {
       _classCallCheck$6(this, NoopUrlStorage);
     }
-
     _createClass$6(NoopUrlStorage, [{
       key: "listAllUploads",
       value: function listAllUploads() {
@@ -7354,7 +6561,6 @@
         return Promise.resolve(null);
       }
     }]);
-
     return NoopUrlStorage;
   }();
 
@@ -7363,7 +6569,6 @@
       throw new TypeError("Cannot call a class as a function");
     }
   }
-
   function _defineProperties$5(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
@@ -7373,7 +6578,6 @@
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
-
   function _createClass$5(Constructor, protoProps, staticProps) {
     if (protoProps) _defineProperties$5(Constructor.prototype, protoProps);
     if (staticProps) _defineProperties$5(Constructor, staticProps);
@@ -7382,9 +6586,7 @@
     });
     return Constructor;
   }
-
   var hasStorage = false;
-
   try {
     hasStorage = 'localStorage' in window; // Attempt to store and read entries from the local storage to detect Private
     // Mode on Safari on iOS (see #49)
@@ -7401,25 +6603,21 @@
       throw e;
     }
   }
-
   var canStoreURLs = hasStorage;
   var WebStorageUrlStorage = /*#__PURE__*/function () {
     function WebStorageUrlStorage() {
       _classCallCheck$5(this, WebStorageUrlStorage);
     }
-
     _createClass$5(WebStorageUrlStorage, [{
       key: "findAllUploads",
       value: function findAllUploads() {
         var results = this._findEntries('tus::');
-
         return Promise.resolve(results);
       }
     }, {
       key: "findUploadsByFingerprint",
       value: function findUploadsByFingerprint(fingerprint) {
         var results = this._findEntries("tus::".concat(fingerprint, "::"));
-
         return Promise.resolve(results);
       }
     }, {
@@ -7440,12 +6638,9 @@
       key: "_findEntries",
       value: function _findEntries(prefix) {
         var results = [];
-
         for (var i = 0; i < localStorage.length; i++) {
           var _key = localStorage.key(i);
-
           if (_key.indexOf(prefix) !== 0) continue;
-
           try {
             var upload = JSON.parse(localStorage.getItem(_key));
             upload.urlStorageKey = _key;
@@ -7454,11 +6649,9 @@
             // entry in the storage cannot prevent an upload.
           }
         }
-
         return results;
       }
     }]);
-
     return WebStorageUrlStorage;
   }();
 
@@ -7467,7 +6660,6 @@
       throw new TypeError("Cannot call a class as a function");
     }
   }
-
   function _defineProperties$4(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
@@ -7477,7 +6669,6 @@
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
-
   function _createClass$4(Constructor, protoProps, staticProps) {
     if (protoProps) _defineProperties$4(Constructor.prototype, protoProps);
     if (staticProps) _defineProperties$4(Constructor, staticProps);
@@ -7486,14 +6677,12 @@
     });
     return Constructor;
   }
+
   /* eslint-disable max-classes-per-file */
-
-
   var XHRHttpStack = /*#__PURE__*/function () {
     function XHRHttpStack() {
       _classCallCheck$4(this, XHRHttpStack);
     }
-
     _createClass$4(XHRHttpStack, [{
       key: "createRequest",
       value: function createRequest(method, url) {
@@ -7505,23 +6694,17 @@
         return 'XHRHttpStack';
       }
     }]);
-
     return XHRHttpStack;
   }();
-
   var Request = /*#__PURE__*/function () {
     function Request(method, url) {
       _classCallCheck$4(this, Request);
-
       this._xhr = new XMLHttpRequest();
-
       this._xhr.open(method, url, true);
-
       this._method = method;
       this._url = url;
       this._headers = {};
     }
-
     _createClass$4(Request, [{
       key: "getMethod",
       value: function getMethod() {
@@ -7536,7 +6719,6 @@
       key: "setHeader",
       value: function setHeader(header, value) {
         this._xhr.setRequestHeader(header, value);
-
         this._headers[header] = value;
       }
     }, {
@@ -7551,12 +6733,10 @@
         if (!('upload' in this._xhr)) {
           return;
         }
-
         this._xhr.upload.onprogress = function (e) {
           if (!e.lengthComputable) {
             return;
           }
-
           progressHandler(e.loaded);
         };
       }
@@ -7564,17 +6744,14 @@
       key: "send",
       value: function send() {
         var _this = this;
-
         var body = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
         return new Promise(function (resolve, reject) {
           _this._xhr.onload = function () {
             resolve(new Response(_this._xhr));
           };
-
           _this._xhr.onerror = function (err) {
             reject(err);
           };
-
           _this._xhr.send(body);
         });
       }
@@ -7582,7 +6759,6 @@
       key: "abort",
       value: function abort() {
         this._xhr.abort();
-
         return Promise.resolve();
       }
     }, {
@@ -7591,17 +6767,13 @@
         return this._xhr;
       }
     }]);
-
     return Request;
   }();
-
   var Response = /*#__PURE__*/function () {
     function Response(xhr) {
       _classCallCheck$4(this, Response);
-
       this._xhr = xhr;
     }
-
     _createClass$4(Response, [{
       key: "getStatus",
       value: function getStatus() {
@@ -7623,7 +6795,6 @@
         return this._xhr;
       }
     }]);
-
     return Response;
   }();
 
@@ -7640,16 +6811,13 @@
     return new Promise(function (resolve, reject) {
       var xhr = new XMLHttpRequest();
       xhr.responseType = 'blob';
-
       xhr.onload = function () {
         var blob = xhr.response;
         resolve(blob);
       };
-
       xhr.onerror = function (err) {
         reject(err);
       };
-
       xhr.open('GET', uri);
       xhr.send();
     });
@@ -7667,18 +6835,15 @@
   function readAsByteArray(chunk) {
     return new Promise(function (resolve, reject) {
       var reader = new FileReader();
-
       reader.onload = function () {
         var value = new Uint8Array(reader.result);
         resolve({
           value: value
         });
       };
-
       reader.onerror = function (err) {
         reject(err);
       };
-
       reader.readAsArrayBuffer(chunk);
     });
   }
@@ -7688,7 +6853,6 @@
       throw new TypeError("Cannot call a class as a function");
     }
   }
-
   function _defineProperties$3(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
@@ -7698,7 +6862,6 @@
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
-
   function _createClass$3(Constructor, protoProps, staticProps) {
     if (protoProps) _defineProperties$3(Constructor.prototype, protoProps);
     if (staticProps) _defineProperties$3(Constructor, staticProps);
@@ -7707,16 +6870,13 @@
     });
     return Constructor;
   }
-
   var FileSource = /*#__PURE__*/function () {
     // Make this.size a method
     function FileSource(file) {
       _classCallCheck$3(this, FileSource);
-
       this._file = file;
       this.size = file.size;
     }
-
     _createClass$3(FileSource, [{
       key: "slice",
       value: function slice(start, end) {
@@ -7726,9 +6886,7 @@
         if (isCordova()) {
           return readAsByteArray(this._file.slice(start, end));
         }
-
         var value = this._file.slice(start, end);
-
         return Promise.resolve({
           value: value
         });
@@ -7738,7 +6896,6 @@
       value: function close() {// Nothing to do here since we don't need to release any resources.
       }
     }]);
-
     return FileSource;
   }();
 
@@ -7747,7 +6904,6 @@
       throw new TypeError("Cannot call a class as a function");
     }
   }
-
   function _defineProperties$2(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
@@ -7757,7 +6913,6 @@
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
-
   function _createClass$2(Constructor, protoProps, staticProps) {
     if (protoProps) _defineProperties$2(Constructor.prototype, protoProps);
     if (staticProps) _defineProperties$2(Constructor, staticProps);
@@ -7766,7 +6921,6 @@
     });
     return Constructor;
   }
-
   function len(blobOrArray) {
     if (blobOrArray === undefined) return 0;
     if (blobOrArray.size !== undefined) return blobOrArray.size;
@@ -7777,19 +6931,16 @@
     This function helps StreamSource accumulate data to reach chunkSize.
   */
 
-
   function concat(a, b) {
     if (a.concat) {
       // Is `a` an Array?
       return a.concat(b);
     }
-
     if (a instanceof Blob) {
       return new Blob([a, b], {
         type: a.type
       });
     }
-
     if (a.set) {
       // Is `a` a typed array?
       var c = new a.constructor(a.length + b.length);
@@ -7797,50 +6948,40 @@
       c.set(b, a.length);
       return c;
     }
-
     throw new Error('Unknown data type');
   }
-
   var StreamSource = /*#__PURE__*/function () {
     function StreamSource(reader) {
       _classCallCheck$2(this, StreamSource);
-
       this._buffer = undefined;
       this._bufferOffset = 0;
       this._reader = reader;
       this._done = false;
     }
-
     _createClass$2(StreamSource, [{
       key: "slice",
       value: function slice(start, end) {
         if (start < this._bufferOffset) {
           return Promise.reject(new Error("Requested data is before the reader's current offset"));
         }
-
         return this._readUntilEnoughDataOrDone(start, end);
       }
     }, {
       key: "_readUntilEnoughDataOrDone",
       value: function _readUntilEnoughDataOrDone(start, end) {
         var _this = this;
-
         var hasEnoughData = end <= this._bufferOffset + len(this._buffer);
-
         if (this._done || hasEnoughData) {
           var value = this._getDataFromBuffer(start, end);
-
           var done = value == null ? this._done : false;
           return Promise.resolve({
             value: value,
             done: done
           });
         }
-
         return this._reader.read().then(function (_ref) {
           var value = _ref.value,
-              done = _ref.done;
-
+            done = _ref.done;
           if (done) {
             _this._done = true;
           } else if (_this._buffer === undefined) {
@@ -7848,7 +6989,6 @@
           } else {
             _this._buffer = concat(_this._buffer, value);
           }
-
           return _this._readUntilEnoughDataOrDone(start, end);
         });
       }
@@ -7863,14 +7003,11 @@
           this._bufferOffset = start;
         } // If the buffer is empty after removing old data, all data has been read.
 
-
         var hasAllDataBeenRead = len(this._buffer) === 0;
-
         if (this._done && hasAllDataBeenRead) {
           return null;
         } // We already removed data before `start`, so we just return the first
         // chunk from the buffer.
-
 
         return this._buffer.slice(0, end - start);
       }
@@ -7882,7 +7019,6 @@
         }
       }
     }]);
-
     return StreamSource;
   }();
 
@@ -7891,7 +7027,6 @@
       throw new TypeError("Cannot call a class as a function");
     }
   }
-
   function _defineProperties$1(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
@@ -7901,7 +7036,6 @@
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
-
   function _createClass$1(Constructor, protoProps, staticProps) {
     if (protoProps) _defineProperties$1(Constructor.prototype, protoProps);
     if (staticProps) _defineProperties$1(Constructor, staticProps);
@@ -7910,12 +7044,10 @@
     });
     return Constructor;
   }
-
   var FileReader$1 = /*#__PURE__*/function () {
     function FileReader() {
       _classCallCheck$1(this, FileReader);
     }
-
     _createClass$1(FileReader, [{
       key: "openFile",
       value: function openFile(input, chunkSize) {
@@ -7934,25 +7066,19 @@
         // can be handled. Instead, we simply check is the slice() function and the
         // size property are available.
 
-
         if (typeof input.slice === 'function' && typeof input.size !== 'undefined') {
           return Promise.resolve(new FileSource(input));
         }
-
         if (typeof input.read === 'function') {
           chunkSize = Number(chunkSize);
-
           if (!Number.isFinite(chunkSize)) {
             return Promise.reject(new Error('cannot create source for stream without a finite value for the `chunkSize` option'));
           }
-
           return Promise.resolve(new StreamSource(input, chunkSize));
         }
-
         return Promise.reject(new Error('source object may only be an instance of File, Blob, or Reader in this environment'));
       }
     }]);
-
     return FileReader;
   }();
 
@@ -7968,27 +7094,21 @@
     if (isReactNative()) {
       return Promise.resolve(reactNativeFingerprint(file, options));
     }
-
     return Promise.resolve(['tus-br', file.name, file.type, file.size, file.lastModified, options.endpoint].join('-'));
   }
-
   function reactNativeFingerprint(file, options) {
     var exifHash = file.exif ? hashCode(JSON.stringify(file.exif)) : 'noexif';
     return ['tus-rn', file.name || 'noname', file.size || 'nosize', exifHash, options.endpoint].join('/');
   }
-
   function hashCode(str) {
     /* eslint-disable no-bitwise */
     // from https://stackoverflow.com/a/8831937/151666
     var hash = 0;
-
     if (str.length === 0) {
       return hash;
     }
-
     for (var i = 0; i < str.length; i++) {
       var _char = str.charCodeAt(i);
-
       hash = (hash << 5) - hash + _char;
       hash &= hash; // Convert to 32bit integer
     }
@@ -8005,13 +7125,11 @@
       return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
     }, _typeof(obj);
   }
-
   function _classCallCheck(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-
   function _defineProperties(target, props) {
     for (var i = 0; i < props.length; i++) {
       var descriptor = props[i];
@@ -8021,7 +7139,6 @@
       Object.defineProperty(target, descriptor.key, descriptor);
     }
   }
-
   function _createClass(Constructor, protoProps, staticProps) {
     if (protoProps) _defineProperties(Constructor.prototype, protoProps);
     if (staticProps) _defineProperties(Constructor, staticProps);
@@ -8030,12 +7147,10 @@
     });
     return Constructor;
   }
-
   function _inherits(subClass, superClass) {
     if (typeof superClass !== "function" && superClass !== null) {
       throw new TypeError("Super expression must either be null or a function");
     }
-
     subClass.prototype = Object.create(superClass && superClass.prototype, {
       constructor: {
         value: subClass,
@@ -8048,7 +7163,6 @@
     });
     if (superClass) _setPrototypeOf(subClass, superClass);
   }
-
   function _setPrototypeOf(o, p) {
     _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf(o, p) {
       o.__proto__ = p;
@@ -8056,49 +7170,38 @@
     };
     return _setPrototypeOf(o, p);
   }
-
   function _createSuper(Derived) {
     var hasNativeReflectConstruct = _isNativeReflectConstruct();
-
     return function _createSuperInternal() {
       var Super = _getPrototypeOf(Derived),
-          result;
-
+        result;
       if (hasNativeReflectConstruct) {
         var NewTarget = _getPrototypeOf(this).constructor;
-
         result = Reflect.construct(Super, arguments, NewTarget);
       } else {
         result = Super.apply(this, arguments);
       }
-
       return _possibleConstructorReturn(this, result);
     };
   }
-
   function _possibleConstructorReturn(self, call) {
     if (call && (_typeof(call) === "object" || typeof call === "function")) {
       return call;
     } else if (call !== void 0) {
       throw new TypeError("Derived constructors may only return object or undefined");
     }
-
     return _assertThisInitialized(self);
   }
-
   function _assertThisInitialized(self) {
     if (self === void 0) {
       throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
     }
-
     return self;
   }
-
   function _isNativeReflectConstruct() {
     if (typeof Reflect === "undefined" || !Reflect.construct) return false;
     if (Reflect.construct.sham) return false;
     if (typeof Proxy === "function") return true;
-
     try {
       Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {}));
       return true;
@@ -8106,27 +7209,22 @@
       return false;
     }
   }
-
   function _getPrototypeOf(o) {
     _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf(o) {
       return o.__proto__ || Object.getPrototypeOf(o);
     };
     return _getPrototypeOf(o);
   }
-
   function ownKeys(object, enumerableOnly) {
     var keys = Object.keys(object);
-
     if (Object.getOwnPropertySymbols) {
       var symbols = Object.getOwnPropertySymbols(object);
       enumerableOnly && (symbols = symbols.filter(function (sym) {
         return Object.getOwnPropertyDescriptor(object, sym).enumerable;
       })), keys.push.apply(keys, symbols);
     }
-
     return keys;
   }
-
   function _objectSpread(target) {
     for (var i = 1; i < arguments.length; i++) {
       var source = null != arguments[i] ? arguments[i] : {};
@@ -8136,10 +7234,8 @@
         Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
       });
     }
-
     return target;
   }
-
   function _defineProperty(obj, key, value) {
     if (key in obj) {
       Object.defineProperty(obj, key, {
@@ -8151,32 +7247,24 @@
     } else {
       obj[key] = value;
     }
-
     return obj;
   }
-
   var defaultOptions = _objectSpread(_objectSpread({}, BaseUpload.defaultOptions), {}, {
     httpStack: new XHRHttpStack(),
     fileReader: new FileReader$1(),
     urlStorage: canStoreURLs ? new WebStorageUrlStorage() : new NoopUrlStorage(),
     fingerprint: fingerprint
   });
-
   var Upload = /*#__PURE__*/function (_BaseUpload) {
     _inherits(Upload, _BaseUpload);
-
     var _super = _createSuper(Upload);
-
     function Upload() {
       var file = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
       var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
       _classCallCheck(this, Upload);
-
       options = _objectSpread(_objectSpread({}, defaultOptions), options);
       return _super.call(this, file, options);
     }
-
     _createClass(Upload, null, [{
       key: "terminate",
       value: function terminate(url) {
@@ -8185,7 +7273,6 @@
         return BaseUpload.terminate(url, options);
       }
     }]);
-
     return Upload;
   }(BaseUpload);
 
@@ -8207,17 +7294,11 @@
         type: "tus",
         uploadIndex
       });
-
       _defineProperty$2(this, "onError", void 0);
-
       _defineProperty$2(this, "onProgress", void 0);
-
       _defineProperty$2(this, "onSuccess", void 0);
-
       _defineProperty$2(this, "upload", void 0);
-
       _defineProperty$2(this, "csrfToken", void 0);
-
       _defineProperty$2(this, "handleError", error => {
         if (this.onError) {
           this.onError(error);
@@ -8225,23 +7306,19 @@
           throw error;
         }
       });
-
       _defineProperty$2(this, "handleProgress", (bytesUploaded, bytesTotal) => {
         if (this.onProgress) {
           this.onProgress(bytesUploaded, bytesTotal);
         }
       });
-
       _defineProperty$2(this, "handleSucces", () => {
         if (this.onSuccess) {
           this.onSuccess();
         }
       });
-
       _defineProperty$2(this, "addCsrTokenToRequest", request => {
         request.setHeader("X-CSRFToken", this.csrfToken);
       });
-
       this.csrfToken = csrfToken;
       this.upload = new Upload(file, {
         chunkSize,
@@ -8261,27 +7338,21 @@
       this.onProgress = undefined;
       this.onSuccess = undefined;
     }
-
     async abort() {
       await this.upload.abort(true);
     }
-
     async delete() {
       if (!this.upload.url) {
         return Promise.resolve();
       }
-
       await deleteUpload(this.upload.url, this.csrfToken);
     }
-
     getSize() {
       return this.upload.file.size;
     }
-
     start() {
       this.upload.start();
     }
-
     getInitialFile() {
       return {
         id: this.name,
@@ -8291,7 +7362,6 @@
         url: ""
       };
     }
-
   }
 
   class FileField {
@@ -8316,66 +7386,42 @@
         translations,
         uploadUrl
       } = _ref;
-
       _defineProperty$2(this, "acceptedFileTypes", void 0);
-
       _defineProperty$2(this, "callbacks", void 0);
-
       _defineProperty$2(this, "chunkSize", void 0);
-
       _defineProperty$2(this, "csrfToken", void 0);
-
       _defineProperty$2(this, "eventEmitter", void 0);
-
       _defineProperty$2(this, "fieldName", void 0);
-
       _defineProperty$2(this, "form", void 0);
-
       _defineProperty$2(this, "formId", void 0);
-
       _defineProperty$2(this, "multiple", void 0);
-
       _defineProperty$2(this, "nextUploadIndex", void 0);
-
       _defineProperty$2(this, "prefix", void 0);
-
       _defineProperty$2(this, "renderer", void 0);
-
       _defineProperty$2(this, "retryDelays", void 0);
-
       _defineProperty$2(this, "s3UploadDir", void 0);
-
       _defineProperty$2(this, "supportDropArea", void 0);
-
       _defineProperty$2(this, "uploads", void 0);
-
       _defineProperty$2(this, "uploadUrl", void 0);
-
       _defineProperty$2(this, "uploadFiles", async files => {
         if (files.length === 0) {
           return;
         }
-
         if (!this.multiple) {
           for (const upload of this.uploads) {
             this.renderer.deleteFile(upload.uploadIndex);
           }
-
           this.uploads = [];
         }
-
         for await (const file of files) {
           await this.uploadFile(file);
         }
-
         this.checkDropHint();
       });
-
       _defineProperty$2(this, "onChange", e => {
         const files = e.target.files || [];
         const acceptedFiles = [];
         const invalidFiles = [];
-
         for (const file of files) {
           if (this.acceptedFileTypes.isAccepted(file.name)) {
             acceptedFiles.push(file);
@@ -8383,83 +7429,65 @@
             invalidFiles.push(file);
           }
         }
-
         if (invalidFiles) {
           this.handleInvalidFiles([...invalidFiles]);
         }
-
         if (acceptedFiles) {
           void this.uploadFiles([...acceptedFiles]);
         }
-
         this.renderer.clearInput();
       });
-
       _defineProperty$2(this, "handleInvalidFiles", files => {
         this.renderer.setErrorInvalidFiles(files);
       });
-
       _defineProperty$2(this, "onClick", e => {
         const target = e.target;
-
         const getUpload = () => {
           const dataIndex = target.getAttribute("data-index");
-
           if (!dataIndex) {
             return undefined;
           }
-
           const uploadIndex = parseInt(dataIndex, 10);
           return this.getUploadByIndex(uploadIndex);
         };
-
         if (target.classList.contains("dff-delete") && !target.classList.contains("dff-disabled")) {
           const upload = getUpload();
-
           if (upload) {
             void this.removeExistingUpload(upload);
           }
-
           e.preventDefault();
         } else if (target.classList.contains("dff-cancel")) {
           const upload = getUpload();
-
           if (upload) {
             void this.handleCancel(upload);
           }
-
           e.preventDefault();
         }
       });
-
       _defineProperty$2(this, "handleProgress", (upload, bytesUploaded, bytesTotal) => {
         const percentage = (bytesUploaded / bytesTotal * 100).toFixed(2);
         this.renderer.updateProgress(upload.uploadIndex, percentage);
         const {
           onProgress
         } = this.callbacks;
-
         if (onProgress) {
           if (upload instanceof TusUpload) {
             onProgress(bytesUploaded, bytesTotal, upload);
           }
         }
       });
-
       _defineProperty$2(this, "handleError", (upload, error) => {
         this.renderer.setError(upload.uploadIndex);
         upload.status = "error";
         const {
           onError
         } = this.callbacks;
-
         if (onError) {
           if (upload instanceof TusUpload) {
             onError(error, upload);
           }
         }
       });
-
       _defineProperty$2(this, "handleSuccess", upload => {
         const {
           renderer
@@ -8473,12 +7501,10 @@
         } = this.callbacks;
         const element = document.getElementsByClassName(`dff-file-id-${upload.uploadIndex}`)[0];
         this.emitEvent("uploadComplete", element, upload);
-
         if (onSuccess && upload.type === "tus") {
           onSuccess(upload);
         }
       });
-
       this.callbacks = callbacks;
       this.chunkSize = chunkSize;
       this.csrfToken = csrfToken;
@@ -8502,30 +7528,24 @@
         translations
       });
       const filesContainer = this.renderer.container;
-
       if (supportDropArea) {
         this.initDropArea(filesContainer, input.accept);
       }
-
       if (initial) {
         this.addInitialFiles(initial);
       }
-
       this.checkDropHint();
       input.addEventListener("change", this.onChange);
       filesContainer.addEventListener("click", this.onClick);
     }
-
     addInitialFiles(initialFiles) {
       if (initialFiles.length === 0) {
         return;
       }
-
       const {
         multiple,
         renderer
       } = this;
-
       const addInitialFile = initialFile => {
         const {
           size
@@ -8541,7 +7561,6 @@
         this.uploads.push(upload);
         this.emitEvent("addUpload", element, upload);
       };
-
       if (multiple) {
         initialFiles.forEach(file => {
           addInitialFile(file);
@@ -8551,14 +7570,12 @@
         addInitialFile(initialFiles[0]);
       }
     }
-
     async uploadFile(file) {
       const createUpload = () => {
         const {
           csrfToken,
           s3UploadDir
         } = this;
-
         if (s3UploadDir != null) {
           return new S3Upload({
             csrfToken,
@@ -8580,7 +7597,6 @@
           });
         }
       };
-
       const {
         fieldName,
         formId,
@@ -8590,50 +7606,37 @@
       const fileName = file.name;
       const existingUpload = this.findUploadByName(fileName);
       const newUploadIndex = existingUpload ? existingUpload.uploadIndex : this.nextUploadIndex;
-
       if (!existingUpload) {
         this.nextUploadIndex += 1;
       }
-
       if (existingUpload) {
         await this.removeExistingUpload(existingUpload);
       }
-
       const upload = createUpload();
-
       upload.onError = error => this.handleError(upload, error);
-
       upload.onProgress = (bytesUploaded, bytesTotal) => this.handleProgress(upload, bytesUploaded, bytesTotal);
-
       upload.onSuccess = () => this.handleSuccess(upload);
-
       upload.start();
       this.uploads.push(upload);
       const element = renderer.addNewUpload(fileName, newUploadIndex);
       this.emitEvent("addUpload", element, upload);
     }
-
     getUploadByIndex(uploadIndex) {
       return this.uploads.find(upload => upload.uploadIndex === uploadIndex);
     }
-
     findUploadByName(fileName) {
       return this.uploads.find(upload => upload.name === fileName);
     }
-
     async removeExistingUpload(upload) {
       const element = this.renderer.findFileDiv(upload.uploadIndex);
-
       if (element) {
         this.emitEvent("removeUpload", element, upload);
       }
-
       if (upload.status === "uploading") {
         this.renderer.disableCancel(upload.uploadIndex);
         await upload.abort();
       } else if (upload.status === "done") {
         this.renderer.disableDelete(upload.uploadIndex);
-
         try {
           await upload.delete();
         } catch {
@@ -8641,35 +7644,28 @@
           return;
         }
       }
-
       this.removeUploadFromList(upload);
       this.updatePlaceholderInput();
     }
-
     removeUploadFromList(upload) {
       this.renderer.deleteFile(upload.uploadIndex);
       const index = this.uploads.indexOf(upload);
-
       if (index >= 0) {
         this.uploads.splice(index, 1);
       }
-
       this.checkDropHint();
       const {
         onDelete
       } = this.callbacks;
-
       if (onDelete) {
         onDelete(upload);
       }
     }
-
     async handleCancel(upload) {
       this.renderer.disableCancel(upload.uploadIndex);
       await upload.abort();
       this.removeUploadFromList(upload);
     }
-
     initDropArea(container, inputAccept) {
       new DropArea({
         container,
@@ -8678,36 +7674,28 @@
         renderer: this.renderer
       });
     }
-
     checkDropHint() {
       if (!this.supportDropArea) {
         return;
       }
-
       const nonEmptyUploads = this.uploads.filter(e => e);
-
       if (nonEmptyUploads.length === 0) {
         this.renderer.renderDropHint();
       } else {
         this.renderer.removeDropHint();
       }
     }
-
     updatePlaceholderInput() {
       const input = findInput(this.form, getUploadsFieldName(this.fieldName, this.prefix), this.prefix);
-
       if (!input) {
         return;
       }
-
       const placeholdersInfo = this.uploads.map(upload => upload.getInitialFile());
       input.value = JSON.stringify(placeholdersInfo);
     }
-
     getMetaDataField() {
       return findInput(this.form, getMetadataFieldName(this.fieldName, this.prefix), this.prefix);
     }
-
     emitEvent(eventName, element, upload) {
       if (this.eventEmitter) {
         this.eventEmitter.emit(eventName, {
@@ -8719,64 +7707,47 @@
         });
       }
     }
-
   }
 
   const initUploadFields = function (form) {
     var _findInput;
-
     let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
     const matchesPrefix = fieldName => {
       if (!(options && options.prefix)) {
         return true;
       }
-
       return fieldName.startsWith(`${options.prefix}-`);
     };
-
     const getPrefix = () => options && options.prefix ? options.prefix : null;
-
     const getInputValue = fieldName => getInputValueForFormAndPrefix(form, fieldName, getPrefix());
-
     const getInitialFiles = fieldName => {
       const data = getInputValue(getUploadsFieldName(fieldName, getPrefix()));
-
       if (!data) {
         return [];
       }
-
       return JSON.parse(data);
     };
-
     const uploadUrl = getInputValue("upload_url");
     const formId = getInputValue("form_id");
     const s3UploadDir = getInputValue("s3_upload_dir");
     const skipRequired = options.skipRequired || false;
     const prefix = getPrefix();
     const csrfToken = (_findInput = findInput(form, "csrfmiddlewaretoken", null)) === null || _findInput === void 0 ? void 0 : _findInput.value;
-
     if (!csrfToken) {
       throw Error("Csrf token not found");
     }
-
     if (!formId || !uploadUrl) {
       return;
     }
-
     form.querySelectorAll(".dff-uploader").forEach(uploaderDiv => {
       const container = uploaderDiv.querySelector(".dff-container");
-
       if (!container) {
         return;
       }
-
       const input = container.querySelector("input[type=file]");
-
       if (!(input && matchesPrefix(input.name))) {
         return;
       }
-
       const fieldName = input.name;
       const {
         multiple
@@ -8810,7 +7781,6 @@
 
   const initFormSet = (form, optionsParam) => {
     let options;
-
     if (typeof optionsParam === "string") {
       options = {
         prefix: optionsParam
@@ -8818,29 +7788,25 @@
     } else {
       options = optionsParam;
     }
-
     const prefix = options.prefix || "form";
     const totalFormsValue = getInputValueForFormAndPrefix(form, "TOTAL_FORMS", prefix);
-
     if (!totalFormsValue) {
       return;
     }
-
     const formCount = parseInt(totalFormsValue, 10);
-
     for (let i = 0; i < formCount; i += 1) {
       const subFormPrefix = getInputNameWithPrefix(`${i}`, null);
-      initUploadFields(form, { ...options,
+      initUploadFields(form, {
+        ...options,
         prefix: `${prefix}-${subFormPrefix}`
       });
     }
   };
 
   // eslint-disable-line @typescript-eslint/no-explicit-any
+
   window.autoInitFileForms = autoInitFileForms; // eslint-disable-line  @typescript-eslint/no-unsafe-member-access
-
   window.initFormSet = initFormSet; // eslint-disable-line  @typescript-eslint/no-unsafe-member-access
-
   window.initUploadFields = initUploadFields; // eslint-disable-line  @typescript-eslint/no-unsafe-member-access
 
 })();
