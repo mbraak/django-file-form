@@ -9,7 +9,7 @@ jobs:
 
     strategy:
       matrix:
-        django: ['django==2.2.28', 'django==3.2.14', 'django==4.0.6']
+        django: ['django==3.2.16', 'django==4.0.8', 'django==4.1.2']
 
     services:
       postgres:
@@ -39,18 +39,18 @@ jobs:
         key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements**.txt') }}
         restore-keys: |
           ${{ runner.os }}-pip-
-    - name: Get yarn cache directory path
-      id: yarn-cache-dir-path
-      run: echo "::set-output name=dir::$(yarn cache dir)"
-    - name: Cache javascript packages
-      uses: actions/cache@v3
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
       with:
-        path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-        key: ${{ runner.os }}-yarn-${{ hashFiles('**/package.json') }}
-        restore-keys: |
-         ${{ runner.os }}-yarn-
+        node-version: '16'
+        cache: 'npm'
+        cache-dependency-path: 'frontend/package-lock.json'
+    - name: Install javascript packages
+      run: |
+          cd frontend
+          npm clean-install --audit=false --fund=false --loglevel=http
     - name: Set up Python
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v4
       with:
         python-version: '3.10'
     - name: Install python packages
@@ -78,8 +78,7 @@ jobs:
     - name: Setup coverage
       run: |
         cd frontend
-        yarn --prefer-offline
-        yarn run build
+        npm run build
         cd ..
         mkdir js_coverage
     - name: Test with coverage
@@ -91,8 +90,8 @@ jobs:
     - name: Merge coverage
       run: |
         cd coveralls
-        yarn && gem install coveralls-lcov
-        yarn run merge_coverage
+        npm clean-install --audit=false --fund=false --loglevel=http && gem install coveralls-lcov
+        npm run merge_coverage
         coveralls-lcov -v -n coverage/lcov.info > coverage.json
         cd ..
         coverage report

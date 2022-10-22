@@ -7,6 +7,7 @@ import EventEmitter from "eventemitter3";
 import { createUploadedFile } from "./uploads/uploaded_file";
 import TusUpload from "./uploads/tus_upload";
 import BaseUpload, { InitialFile } from "./uploads/base_upload";
+import AcceptedFileTypes from "./accepted_file_types";
 
 export type Translations = { [key: string]: string };
 
@@ -22,6 +23,7 @@ export interface Callbacks {
 }
 
 class FileField {
+  acceptedFileTypes: AcceptedFileTypes;
   callbacks: Callbacks;
   chunkSize: number;
   csrfToken: string;
@@ -91,6 +93,7 @@ class FileField {
     this.s3UploadDir = s3UploadDir;
     this.supportDropArea = supportDropArea;
     this.uploadUrl = uploadUrl;
+    this.acceptedFileTypes = new AcceptedFileTypes(input.accept);
 
     this.uploads = [];
     this.nextUploadIndex = 0;
@@ -163,8 +166,11 @@ class FileField {
       return;
     }
 
-    if (!this.multiple && this.uploads.length !== 0) {
-      this.renderer.deleteFile(0);
+    if (!this.multiple) {
+      for (const upload of this.uploads) {
+        this.renderer.deleteFile(upload.uploadIndex);
+      }
+
       this.uploads = [];
     }
 
@@ -264,11 +270,31 @@ class FileField {
   }
 
   onChange = (e: Event): void => {
-    const files = (e.target as HTMLInputElement).files;
+    const files = (e.target as HTMLInputElement).files || [];
+    const acceptedFiles: File[] = [];
+    const invalidFiles: File[] = [];
 
-    if (files) {
-      void this.uploadFiles([...files]);
+    for (const file of files) {
+      if (this.acceptedFileTypes.isAccepted(file.name)) {
+        acceptedFiles.push(file);
+      } else {
+        invalidFiles.push(file);
+      }
     }
+
+    if (invalidFiles) {
+      this.handleInvalidFiles([...invalidFiles]);
+    }
+
+    if (acceptedFiles) {
+      void this.uploadFiles([...acceptedFiles]);
+    }
+
+    this.renderer.clearInput();
+  };
+
+  handleInvalidFiles = (files: File[]): void => {
+    this.renderer.setErrorInvalidFiles(files);
   };
 
   onClick = (e: Event): void => {
@@ -387,7 +413,8 @@ class FileField {
     new DropArea({
       container,
       inputAccept,
-      onUploadFiles: this.uploadFiles
+      onUploadFiles: this.uploadFiles,
+      renderer: this.renderer
     });
   }
 

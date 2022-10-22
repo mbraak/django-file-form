@@ -1,5 +1,19 @@
 ## Changelog
 
+**development version**
+
+- Issue #531: add Finnish translations (thanks to Tuomas Vihinen)
+
+**3.4.1 (31 august 2022)**
+
+- Issue #523: add package lock file (thanks to Saurabh Kumar)
+- Issue #524: add js validation for acceptable file types (thanks to Saurabh Kumar)
+- Issue #528: fix single upload input
+
+**3.4.0 (5 august 2022)**
+
+- Issue #521: support Django 4.1
+
 **3.3.2 (1 june 2022)**
 
 - Issue #514: prevent migrations when the DEFAULT_AUTO_FIELD is set.

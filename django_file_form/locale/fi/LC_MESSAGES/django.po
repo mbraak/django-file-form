@@ -1,0 +1,42 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-09-09 11:30+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Tuomas Vihinen <tuomas.vihinen@gmail.com>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+#: django_file_form/widgets.py:13
+msgid "Cancel"
+msgstr "Peruuta"
+
+#: django_file_form/widgets.py:14
+msgid "Delete"
+msgstr "Poista"
+
+#: django_file_form/widgets.py:15
+msgid "Delete failed"
+msgstr "Poisto epäonnistui"
+
+#: django_file_form/widgets.py:16
+msgid "Upload failed"
+msgstr "Lataus epäonnistui"
+
+#: django_file_form/widgets.py:17
+msgid "Drop your files here"
+msgstr "Pudota tiedostosi tähän"
+
+#: django_file_form/widgets.py:18
+msgid "Invalid file type. Try again"
+msgstr "Väärä tiedostotyyppi. Yritä uudelleen"
