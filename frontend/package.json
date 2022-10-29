@@ -51,7 +51,7 @@
     "core-js": "^3.24.1",
     "escape-html": "^1.0.3",
     "eventemitter3": "^4.0.7",
-    "inferno": "^7.4.6",
+    "inferno": "^8",
     "mime": "^3.0.0",
     "picomatch": "github:mbraak/picomatch#browser-version",
     "tus-js-client": "^3",
