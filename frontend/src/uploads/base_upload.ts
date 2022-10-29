@@ -1,10 +1,11 @@
 export type Metadata = Record<string, unknown>;
 
-type UploadStatus = "done" | "error" | "uploading";
+type UploadStatus = "done" | "error" | "invalid" | "uploading";
 type ActionStatus = "in_progress" | "error";
 
 export type UploadType =
   | "existing"
+  | "invalid"
   | "placeholder"
   | "s3"
   | "tus"
@@ -14,7 +15,7 @@ export type UploadType =
 interface BaseInitialFile {
   metadata?: Metadata;
   name: string;
-  size: number;
+  size?: number;
 }
 
 export interface InitialExistingFile extends BaseInitialFile {
@@ -93,7 +94,9 @@ abstract class BaseUpload {
       this.updateMetadata();
     }
   }
-  public abstract getInitialFile(): InitialFile;
+  public getInitialFile(): InitialFile | null {
+    return null;
+  }
 }
 
 export default BaseUpload;

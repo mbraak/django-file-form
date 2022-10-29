@@ -9,7 +9,7 @@ jobs:
 
     strategy:
       matrix:
-        django: ['django==2.2.27', 'django==3.2.12', 'django==4.0.2']
+        django: ['django==3.2.16', 'django==4.0.8', 'django==4.1.2']
 
     services:
       postgres:
@@ -31,26 +31,26 @@ jobs:
 
     steps:
     - name: Check out repository code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: Cache python packages
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: ~/.cache/pip
         key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements**.txt') }}
         restore-keys: |
           ${{ runner.os }}-pip-
-    - name: Get yarn cache directory path
-      id: yarn-cache-dir-path
-      run: echo "::set-output name=dir::$(yarn cache dir)"
-    - name: Cache javascript packages
-      uses: actions/cache@v2
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
       with:
-        path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-        key: ${{ runner.os }}-yarn-${{ hashFiles('**/package.json') }}
-        restore-keys: |
-         ${{ runner.os }}-yarn-
+        node-version: '16'
+        cache: 'npm'
+        cache-dependency-path: 'frontend/package-lock.json'
+    - name: Install javascript packages
+      run: |
+          cd frontend
+          npm clean-install --audit=false --fund=false --loglevel=http
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: '3.10'
     - name: Install python packages
@@ -72,27 +72,26 @@ jobs:
       env:
         CHECK_MIGRATIONS: true
     - name: Setup node
-      uses: actions/setup-node@v1
+      uses: actions/setup-node@v3
       with:
         node-version: '14'
     - name: Setup coverage
       run: |
         cd frontend
-        yarn --prefer-offline
-        yarn run build
+        npm run build
         cd ..
         mkdir js_coverage
     - name: Test with coverage
       run: |
         COVERAGE=true coverage run --source=django_file_form,testproject/django_file_form_example testproject/manage.py test django_file_form_example -v 2
-    - uses: actions/setup-ruby@v1
+    - uses: ruby/setup-ruby@v1
       with:
         ruby-version: '2.6'
     - name: Merge coverage
       run: |
         cd coveralls
-        yarn && gem install coveralls-lcov
-        yarn run merge_coverage
+        npm clean-install --audit=false --fund=false --loglevel=http && gem install coveralls-lcov
+        npm run merge_coverage
         coveralls-lcov -v -n coverage/lcov.info > coverage.json
         cd ..
         coverage report

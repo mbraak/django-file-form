@@ -29,6 +29,7 @@ const Upload = ({
       );
 
     case "error":
+    case "invalid":
       return <UploadError translations={translations} upload={upload} />;
 
     case "uploading":

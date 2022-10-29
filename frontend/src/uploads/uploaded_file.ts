@@ -12,13 +12,13 @@ import { deleteUpload } from "./tus_utils";
 interface BaseUploadedFileParameters {
   metadata?: Metadata;
   name: string;
-  size: number;
+  size?: number;
   type: UploadType;
   uploadIndex: number;
 }
 
 export abstract class BaseUploadedFile extends BaseUpload {
-  size: number;
+  size?: number;
 
   constructor({
     metadata,
@@ -170,6 +170,19 @@ export class UploadedTusFile extends BaseUploadedFile {
       type: "tus",
       url: ""
     };
+  }
+}
+
+interface InvalidFileParameters {
+  name: string;
+  uploadIndex: number;
+}
+
+export class InvalidFile extends BaseUploadedFile {
+  constructor({ name, uploadIndex }: InvalidFileParameters) {
+    super({ name, uploadIndex, type: "invalid" });
+
+    this.status = "invalid";
   }
 }
 

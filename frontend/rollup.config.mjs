@@ -1,9 +1,8 @@
-import path from "path";
 import babel from "@rollup/plugin-babel";
 import commonjs from "@rollup/plugin-commonjs";
 import replace from "@rollup/plugin-replace";
 import resolve from "@rollup/plugin-node-resolve";
-import { terser } from "rollup-plugin-terser";
+import { terser } from "@el3um4s/rollup-plugin-terser";
 
 const skipCompressJs = Boolean(process.env.SKIP_COMPRESS_JS);
 const includeCoverage = Boolean(process.env.COVERAGE);
@@ -20,8 +19,8 @@ const getOutputFilename = () => {
 
 const minimize = !skipCompressJs && !includeCoverage;
 const babelConfigFile = includeCoverage
-  ? "babel.coverage.config.json"
-  : "babel.config.json";
+  ? "./babel.coverage.config.json"
+  : "./babel.config.json";
 
 const plugins = [
   replace({
@@ -35,7 +34,7 @@ const plugins = [
   commonjs(),
   babel({
     babelHelpers: "runtime",
-    configFile: path.resolve(__dirname, babelConfigFile),
+    configFile: babelConfigFile,
     extensions: [".js", ".ts", ".tsx"],
     exclude: ["node_modules/core-js/**", "node_modules/**/core-js*/**"]
   })

@@ -1,11 +1,12 @@
 import { findInput, getMetadataFieldName, getUploadsFieldName } from "./util";
 import S3Upload from "./uploads/s3_upload";
 import EventEmitter from "eventemitter3";
-import { createUploadedFile } from "./uploads/uploaded_file";
+import { createUploadedFile, InvalidFile } from "./uploads/uploaded_file";
 import TusUpload from "./uploads/tus_upload";
 import BaseUpload, { InitialFile, Metadata } from "./uploads/base_upload";
 import renderUploads from "./renderUploads";
 import { RenderFileInfo } from "./renderUploads/types";
+import AcceptedFileTypes from "./accepted_file_types";
 
 export type Translations = { [key: string]: string };
 
@@ -20,7 +21,7 @@ export interface Callbacks {
   onSuccess?: (upload: BaseUpload) => void;
 }
 
-interface FileFileParameters {
+interface FileFieldParameters {
   callbacks: Callbacks;
   chunkSize: number;
   csrfToken: string;
@@ -29,7 +30,7 @@ interface FileFileParameters {
   fieldName: string;
   form: Element;
   formId: string;
-  initial: InitialFile[];
+  initial?: InitialFile[];
   input: HTMLInputElement;
   multiple: boolean;
   parent: Element;
@@ -43,6 +44,7 @@ interface FileFileParameters {
 }
 
 class FileField {
+  acceptedFileTypes: AcceptedFileTypes;
   callbacks: Callbacks;
   chunkSize: number;
   container: HTMLElement;
@@ -84,7 +86,7 @@ class FileField {
     supportDropArea,
     translations,
     uploadUrl
-  }: FileFileParameters) {
+  }: FileFieldParameters) {
     this.callbacks = callbacks;
     this.chunkSize = chunkSize;
     this.csrfToken = csrfToken;
@@ -102,6 +104,7 @@ class FileField {
     this.supportDropArea = supportDropArea;
     this.translations = translations;
     this.uploadUrl = uploadUrl;
+    this.acceptedFileTypes = new AcceptedFileTypes(input.accept);
 
     this.uploads = [];
     this.nextUploadIndex = 0;
@@ -174,7 +177,7 @@ class FileField {
       return;
     }
 
-    if (!this.multiple && this.uploads.length !== 0) {
+    if (!this.multiple) {
       this.uploads = [];
     }
 
@@ -274,10 +277,33 @@ class FileField {
   }
 
   onChange = (e: Event): void => {
-    const files = (e.target as HTMLInputElement).files;
+    const files = (e.target as HTMLInputElement).files || [];
+    const acceptedFiles: File[] = [];
+    const invalidFiles: File[] = [];
 
-    if (files) {
-      void this.uploadFiles([...files]);
+    for (const file of files) {
+      if (this.acceptedFileTypes.isAccepted(file.name)) {
+        acceptedFiles.push(file);
+      } else {
+        invalidFiles.push(file);
+      }
+    }
+
+    if (invalidFiles) {
+      invalidFiles.forEach(file => {
+        this.uploads.push(
+          new InvalidFile({
+            name: file.name,
+            uploadIndex: this.nextUploadIndex
+          })
+        );
+        this.nextUploadIndex += 1;
+      });
+      this.render();
+    }
+
+    if (acceptedFiles) {
+      void this.uploadFiles([...acceptedFiles]);
     }
   };
 
@@ -364,9 +390,9 @@ class FileField {
       return;
     }
 
-    const placeholdersInfo: InitialFile[] = this.uploads.map(upload =>
-      upload.getInitialFile()
-    );
+    const placeholdersInfo = this.uploads
+      .map(upload => upload.getInitialFile())
+      .filter(upload => Boolean(upload)) as InitialFile[];
 
     input.value = JSON.stringify(placeholdersInfo);
   }

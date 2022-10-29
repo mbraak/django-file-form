@@ -8,7 +8,7 @@ interface RenderUploadParameters {
   CustomFileInfo?: RenderFileInfo;
   inputAccept: string;
   onDelete: (upload: BaseUpload) => void;
-  onUploadFiles: (files: File[]) => void;
+  onUploadFiles: (files: File[]) => Promise<void>;
   supportDropArea: boolean;
   translations: Translations;
   uploads: BaseUpload[];

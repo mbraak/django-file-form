@@ -9,7 +9,7 @@ interface UploadsProps {
   CustomFileInfo?: RenderFileInfo;
   inputAccept: string;
   onDelete: (upload: BaseUpload) => void;
-  onUploadFiles: (files: File[]) => void;
+  onUploadFiles: (files: File[]) => Promise<void>;
   supportDropArea: boolean;
   translations: Translations;
   uploads: BaseUpload[];
@@ -33,13 +33,8 @@ class Uploads extends Component<UploadsProps, UploadsState> {
   }
 
   render(): JSX.Element {
-    const {
-      CustomFileInfo,
-      onDelete,
-      supportDropArea,
-      translations,
-      uploads
-    } = this.props;
+    const { CustomFileInfo, onDelete, supportDropArea, translations, uploads } =
+      this.props;
     const dropping = this.state?.dropping;
 
     const dragProps = supportDropArea
@@ -101,7 +96,7 @@ class Uploads extends Component<UploadsProps, UploadsState> {
             this.acceptedFileTypes.isAccepted(file.name)
           );
 
-          this.props.onUploadFiles(acceptedFiles);
+          await this.props.onUploadFiles(acceptedFiles);
         }
       } catch (error) {
         console.error(error);
