@@ -20,7 +20,34 @@
     forms.forEach(initUploadFields);
   };
 
+  function _typeof$2(obj) {
+    "@babel/helpers - typeof";
+
+    return _typeof$2 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) {
+      return typeof obj;
+    } : function (obj) {
+      return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+    }, _typeof$2(obj);
+  }
+
+  function _toPrimitive(input, hint) {
+    if (_typeof$2(input) !== "object" || input === null) return input;
+    var prim = input[Symbol.toPrimitive];
+    if (prim !== undefined) {
+      var res = prim.call(input, hint || "default");
+      if (_typeof$2(res) !== "object") return res;
+      throw new TypeError("@@toPrimitive must return a primitive value.");
+    }
+    return (hint === "string" ? String : Number)(input);
+  }
+
+  function _toPropertyKey(arg) {
+    var key = _toPrimitive(arg, "string");
+    return _typeof$2(key) === "symbol" ? key : String(key);
+  }
+
   function _defineProperty$2(obj, key, value) {
+    key = _toPropertyKey(key);
     if (key in obj) {
       Object.defineProperty(obj, key, {
         value: value,
@@ -57,10 +84,7 @@
     return input;
   };
   const getUploadsFieldName = (fieldName, prefix) => `${getInputNameWithoutPrefix(fieldName, prefix)}-uploads`;
-  const getInputValueForFormAndPrefix = (form, fieldName, prefix) => {
-    var _findInput;
-    return (_findInput = findInput(form, fieldName, prefix)) === null || _findInput === void 0 ? void 0 : _findInput.value;
-  };
+  const getInputValueForFormAndPrefix = (form, fieldName, prefix) => findInput(form, fieldName, prefix)?.value;
   const getMetadataFieldName = (fieldName, prefix) => `${getInputNameWithoutPrefix(fieldName, prefix)}-metadata`;
 
   var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
@@ -817,29 +841,10 @@
   var call$3 = FunctionPrototype$1.call;
   var uncurryThisWithBind = NATIVE_BIND$1 && FunctionPrototype$1.bind.bind(call$3, call$3);
 
-  var functionUncurryThisRaw = NATIVE_BIND$1 ? uncurryThisWithBind : function (fn) {
+  var functionUncurryThis = NATIVE_BIND$1 ? uncurryThisWithBind : function (fn) {
     return function () {
       return call$3.apply(fn, arguments);
     };
-  };
-
-  var uncurryThisRaw$1 = functionUncurryThisRaw;
-
-  var toString$2 = uncurryThisRaw$1({}.toString);
-  var stringSlice = uncurryThisRaw$1(''.slice);
-
-  var classofRaw$1 = function (it) {
-    return stringSlice(toString$2(it), 8, -1);
-  };
-
-  var classofRaw = classofRaw$1;
-  var uncurryThisRaw = functionUncurryThisRaw;
-
-  var functionUncurryThis = function (fn) {
-    // Nashorn bug:
-    //   https://github.com/zloirock/core-js/issues/1128
-    //   https://github.com/zloirock/core-js/issues/1130
-    if (classofRaw(fn) === 'Function') return uncurryThisRaw(fn);
   };
 
   // we can't use just `it == null` since of `document.all` special case
@@ -1148,10 +1153,10 @@
   (shared$3.exports = function (key, value) {
     return store$1[key] || (store$1[key] = value !== undefined ? value : {});
   })('versions', []).push({
-    version: '3.26.0',
+    version: '3.26.1',
     mode: 'global',
     copyright: '© 2014-2022 Denis Pushkarev (zloirock.ru)',
-    license: 'https://github.com/zloirock/core-js/blob/v3.26.0/LICENSE',
+    license: 'https://github.com/zloirock/core-js/blob/v3.26.1/LICENSE',
     source: 'https://github.com/zloirock/core-js'
   });
 
@@ -4374,7 +4379,7 @@
    *
    * @author Dan Kogai (https://github.com/dankogai)
    */
-  const version = '3.7.2';
+  const version = '3.7.3';
   /**
    * @deprecated use lowercase `version`.
    */
@@ -7710,7 +7715,6 @@
   }
 
   const initUploadFields = function (form) {
-    var _findInput;
     let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
     const matchesPrefix = fieldName => {
       if (!(options && options.prefix)) {
@@ -7732,7 +7736,7 @@
     const s3UploadDir = getInputValue("s3_upload_dir");
     const skipRequired = options.skipRequired || false;
     const prefix = getPrefix();
-    const csrfToken = (_findInput = findInput(form, "csrfmiddlewaretoken", null)) === null || _findInput === void 0 ? void 0 : _findInput.value;
+    const csrfToken = findInput(form, "csrfmiddlewaretoken", null)?.value;
     if (!csrfToken) {
       throw Error("Csrf token not found");
     }
