@@ -279,7 +279,7 @@
       const errorsMessages = document.createElement("ul");
       for (const file of files) {
         const msg = document.createElement('li');
-        msg.innerHTML = `${file.name}: ${this.translations["Invalid file type"]}`;
+        msg.innerText = `${file.name}: ${this.translations["Invalid file type"]}`;
         msg.className = 'dff-error';
         errorsMessages.appendChild(msg);
       }

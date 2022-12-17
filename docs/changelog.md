@@ -1,8 +1,9 @@
 ## Changelog
 
-**development version**
+**3.4.2 (7 december 2022)**
 
 - Issue #531: add Finnish translations (thanks to Tuomas Vihinen)
+- Issue #555: code scanning alert
 
 **3.4.1 (31 august 2022)**
 
