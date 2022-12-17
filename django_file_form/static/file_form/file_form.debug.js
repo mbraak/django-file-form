@@ -769,7 +769,11 @@
   let Mime = Mime_1;
   var lite = new Mime(standard);
 
-  var picomatch$2 = {exports: {}};
+  var picomatchExports = {};
+  var picomatch$2 = {
+    get exports(){ return picomatchExports; },
+    set exports(v){ picomatchExports = v; },
+  };
 
   var check = function (it) {
     return it && it.Math == Math && it;
@@ -802,7 +806,11 @@
     return Object.defineProperty({}, 1, { get: function () { return 7; } })[1] != 7;
   });
 
-  var makeBuiltIn$2 = {exports: {}};
+  var makeBuiltInExports = {};
+  var makeBuiltIn$2 = {
+    get exports(){ return makeBuiltInExports; },
+    set exports(v){ makeBuiltInExports = v; },
+  };
 
   var documentAll$2 = typeof document == 'object' && document.all;
 
@@ -1146,7 +1154,11 @@
     throw $TypeError$2("Can't convert object to primitive value");
   };
 
-  var shared$3 = {exports: {}};
+  var sharedExports = {};
+  var shared$3 = {
+    get exports(){ return sharedExports; },
+    set exports(v){ sharedExports = v; },
+  };
 
   var store$1 = sharedStore;
 
@@ -1171,7 +1183,7 @@
   };
 
   var global$3 = global$a;
-  var shared$2 = shared$3.exports;
+  var shared$2 = sharedExports;
   var hasOwn$2 = hasOwnProperty_1;
   var uid$1 = uid$2;
   var NATIVE_SYMBOL = symbolConstructorDetection;
@@ -1295,7 +1307,7 @@
     return object;
   };
 
-  var shared$1 = shared$3.exports;
+  var shared$1 = sharedExports;
   var uid = uid$2;
 
   var keys = shared$1('keys');
@@ -1423,7 +1435,7 @@
     return isCallable(this) && getInternalState(this).source || inspectSource(this);
   }, 'toString');
 
-  var makeBuiltIn = makeBuiltIn$2.exports;
+  var makeBuiltIn = makeBuiltInExports;
   var defineProperty = objectDefineProperty;
 
   var defineBuiltInAccessor$1 = function (target, name, descriptor) {
@@ -3627,7 +3639,7 @@
 
     module.exports = picomatch_1;
   })(picomatch$2);
-  var picomatch = /*@__PURE__*/getDefaultExportFromCjs(picomatch$2.exports);
+  var picomatch = /*@__PURE__*/getDefaultExportFromCjs(picomatchExports);
 
   const parseInputAccept = inputAccept => {
     const extensions = [];
