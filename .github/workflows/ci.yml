@@ -74,7 +74,7 @@ jobs:
     - name: Setup node
       uses: actions/setup-node@v3
       with:
-        node-version: '14'
+        node-version: '16'
     - name: Setup coverage
       run: |
         cd frontend
@@ -86,16 +86,18 @@ jobs:
         COVERAGE=true coverage run --source=django_file_form,testproject/django_file_form_example testproject/manage.py test django_file_form_example -v 2
     - uses: ruby/setup-ruby@v1
       with:
-        ruby-version: '2.6'
+        ruby-version: '2.7'
     - name: Merge coverage
       run: |
         cd coveralls
         npm clean-install --audit=false --fund=false --loglevel=http && gem install coveralls-lcov
-        npm run merge_coverage
+        npm run merge_coverage_lcov
+        npm run merge_coverage_json
         coveralls-lcov -v -n coverage/lcov.info > coverage.json
         cd ..
         coverage report
-    - name: Upload coverage
+        coverage lcov
+    - name: Coveralls
       run: |
         coveralls --merge=coveralls/coverage.json
       env:
@@ -104,3 +106,8 @@ jobs:
         COVERALLS_GIT_COMMIT: ${{ github.sha }}
         COVERALLS_GIT_BRANCH: ${{ github.ref }}
         COVERALLS_SERVICE_JOB_ID: ${{ github.run_id }}
+    - name: Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: coveralls/coverage/lcov.info,coverage.lcov
+        verbose: true
