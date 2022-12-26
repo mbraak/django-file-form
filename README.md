@@ -1,6 +1,6 @@
 ![Continuous integration](https://github.com/mbraak/django-file-form/workflows/Continuous%20integration/badge.svg) [![Version](https://badge.fury.io/py/django-file-form.svg)](https://pypi.python.org/pypi/django-file-form/)
 
-[![Coverage Status](https://img.shields.io/coveralls/mbraak/django-file-form.svg)](https://coveralls.io/r/mbraak/django-file-form?branch=master)
+[![codecov](https://codecov.io/gh/mbraak/django-file-form/branch/master/graph/badge.svg?token=vyiybGWB54)](https://codecov.io/gh/mbraak/django-file-form)
 
 [![License](https://img.shields.io/pypi/l/django-file-form.svg)](https://pypi.python.org/pypi/django-file-form/)
 
