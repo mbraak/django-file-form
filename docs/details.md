@@ -174,5 +174,5 @@ Don't use local-memory caching in your Django configuration if you use a multi p
 Files are uploaded in chunks; the default size of a chunk is 2.5 MB. Your production setup must allow for uploads of this size.
 
 - It's possible that you use a reverse proxy server that has a maximum file upload size. E.g. Nginx has the `client_max_body_size` option.
-- Django has the `DATA_UPLOAD_MAX_MEMORY_SIZE` option, which also limits the uploads size.
+- Django has the `DATA_UPLOAD_MAX_MEMORY_SIZE` option, which also limits the upload size.
 - You can change the maximum chunk size with the `chunkSize` option in Javascript. See the 'javascript options' section in this documentation.
