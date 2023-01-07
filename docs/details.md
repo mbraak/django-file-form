@@ -10,7 +10,7 @@ Make sure that hidden form fields are included:
 {% endfor %}
 ```
 
-NB: it's possible that the hidden fields are already included; for example if you use ``form.as_p``. Do not include the hidden fields twice.
+NB: it's possible that the hidden fields are already included; for example if you use `form.as_p`. Do not include the hidden fields twice.
 
 Also see the testproject in the repository.
 
@@ -64,7 +64,6 @@ for f in self.cleaned_data['my_field']:
 by clients directly to S3 through AJAX operations and return to the backend as `File` objects
 with [`S3Boto3Storage`](https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html).
 
-
 Required packages: `boto3` and `django_storages`.
 
 To use this method, you will first need to make sure your S3 bucket is configured
@@ -85,6 +84,7 @@ or through environment variables with the same names as described
 in [`django-storages` documentation](https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html).
 
 If you are using `django-csp` for setting the Content Security Policy, then the following CORS settings are also needed in `settings`
+
 ```
 CSP_DEFAULT_SRC = ("'none'",)
 CSP_STYLE_SRC = ("'self'")
@@ -93,13 +93,14 @@ CSP_FONT_SRC = ("'self'")
 CSP_IMG_SRC = ("'self'",)
 CSP_CONNECT_SRC = ("'self'", AWS_S3_ENDPOINT_URL)
 ```
+
 where `AWS_S3_ENDPOINT_URL` is the AWS endpoint defined above.
 
 Finally, you will need to define
 
-  ```
-  s3_upload_dir = "user_or_form_specific_id"
-  ```
+```
+s3_upload_dir = "user_or_form_specific_id"
+```
 
 in the form class or passed parameter `s3_upload_dir` to the constructor of the
 form to inform the frontend to use the AJAX uploader for S3. The files will be
@@ -114,8 +115,8 @@ specific to user or form to avoid conflicts on the AWS side. If the object
 already exists in the S3 bucket, a random string will be added to filename.
 
 After form submission, the files will be returned as customized `S3Boto3StorageFile`
-objects  with `S3Boto3Storage` as its underlying storage. The objects will have attributes
-`is_s3direct=True`,  `is_placeholder=False`, and `original_name` which is the
+objects with `S3Boto3Storage` as its underlying storage. The objects will have attributes
+`is_s3direct=True`, `is_placeholder=False`, and `original_name` which is the
 name of the file that was uploaded that can be different from the basename
 of the object on S3 (`f.name`). Reading from these objects will download the files
 from S3.
@@ -150,12 +151,28 @@ widgets and event handlers to update the `data` of this hidden field.
 Upon form submission, `django-file-form` retrieves the data and assign them to returned file
 objects with matching filename (could be of placeholder and other types) as `f.metadata`.
 
-
 ## Cache
 
 Django-file-form uses the Django cache for storing data while uploading files.
 
-* Only meta data of the file is stored (including the upload progress), not contents of the file.
-* The default cache timeout is 24 hours. An upload will fail if it takes longer than that.
-* The timeout is configurable using the `FILE_FORM_CACHE_TIMEOUT` setting. See the 'Python settings' section.
-* The cache backed is configurable using `FILE_FORM_CACHE`.
+- Only meta data of the file is stored (including the upload progress), not contents of the file.
+- The default cache timeout is 24 hours. An upload will fail if it takes longer than that.
+- The timeout is configurable using the `FILE_FORM_CACHE_TIMEOUT` setting. See the 'Python settings' section.
+- The cache backed is configurable using `FILE_FORM_CACHE`.
+
+## Production
+
+### Local-memory caching
+
+Don't use local-memory caching in your Django configuration if you use a multi process WSGI server. It will break file uploads, because file uploads use the Django cache and might hit different WSGI processes.
+
+- The default cache option in Django is local-memory caching.
+- Most WSGI servers are multi process.
+
+### Maximum size of uploaded chunk
+
+Files are uploaded in chunks; the default size of a chunk is 2.5 MB. Your production setup must allow for uploads of this size.
+
+- It's possible that you use a reverse proxy server that has a maximum file upload size. E.g. Nginx has the `client_max_body_size` option.
+- Django has the `DATA_UPLOAD_MAX_MEMORY_SIZE` option, which also limits the uploads size.
+- You can change the maximum chunk size with the `chunkSize` option in Javascript. See the 'javascript options' setting in this documentation.
