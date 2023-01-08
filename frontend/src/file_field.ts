@@ -12,6 +12,13 @@ import AcceptedFileTypes from "./accepted_file_types";
 export type Translations = { [key: string]: string };
 
 export interface Callbacks {
+  onClick?: ({
+    fileName,
+    fieldName
+  }: {
+    fileName: string;
+    fieldName: string;
+  }) => void;
   onDelete?: (upload: BaseUpload) => void;
   onError?: (error: Error, upload: BaseUpload) => void;
   onProgress?: (
@@ -117,7 +124,7 @@ class FileField {
     this.checkDropHint();
 
     input.addEventListener("change", this.onChange);
-    filesContainer.addEventListener("click", this.onClick);
+    filesContainer.addEventListener("click", this.handleClick);
   }
 
   addInitialFiles(initialFiles: InitialFile[]): void {
@@ -297,8 +304,8 @@ class FileField {
     this.renderer.setErrorInvalidFiles(files);
   };
 
-  onClick = (e: Event): void => {
-    const target = e.target as HTMLInputElement;
+  handleClick = (e: Event): void => {
+    const target = e.target as HTMLElement;
 
     const getUpload = (): BaseUpload | undefined => {
       const dataIndex = target.getAttribute("data-index");
@@ -315,21 +322,32 @@ class FileField {
       target.classList.contains("dff-delete") &&
       !target.classList.contains("dff-disabled")
     ) {
+      e.preventDefault();
+
       const upload = getUpload();
 
       if (upload) {
         void this.removeExistingUpload(upload);
       }
-
-      e.preventDefault();
     } else if (target.classList.contains("dff-cancel")) {
+      e.preventDefault();
+
       const upload = getUpload();
 
       if (upload) {
         void this.handleCancel(upload);
       }
-
+    } else if (target.classList.contains("dff-filename")) {
       e.preventDefault();
+
+      const upload = getUpload();
+
+      if (upload && this.callbacks.onClick) {
+        this.callbacks.onClick({
+          fileName: upload.name,
+          fieldName: this.fieldName
+        });
+      }
     }
   };
 
