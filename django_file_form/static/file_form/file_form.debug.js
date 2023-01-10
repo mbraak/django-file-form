@@ -7470,7 +7470,8 @@
           if (upload && this.callbacks.onClick) {
             this.callbacks.onClick({
               fileName: upload.name,
-              fieldName: this.fieldName
+              fieldName: this.fieldName,
+              type: upload.type
             });
           }
         }
