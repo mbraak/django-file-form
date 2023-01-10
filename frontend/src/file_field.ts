@@ -6,19 +6,19 @@ import S3Upload from "./uploads/s3_upload";
 import EventEmitter from "eventemitter3";
 import { createUploadedFile } from "./uploads/uploaded_file";
 import TusUpload from "./uploads/tus_upload";
-import BaseUpload, { InitialFile } from "./uploads/base_upload";
+import BaseUpload, { InitialFile, UploadType } from "./uploads/base_upload";
 import AcceptedFileTypes from "./accepted_file_types";
 
 export type Translations = { [key: string]: string };
 
+interface ClickEvent {
+  fileName: string;
+  fieldName: string;
+  type: UploadType;
+}
+
 export interface Callbacks {
-  onClick?: ({
-    fileName,
-    fieldName
-  }: {
-    fileName: string;
-    fieldName: string;
-  }) => void;
+  onClick?: ({ fileName, fieldName }: ClickEvent) => void;
   onDelete?: (upload: BaseUpload) => void;
   onError?: (error: Error, upload: BaseUpload) => void;
   onProgress?: (
@@ -345,7 +345,8 @@ class FileField {
       if (upload && this.callbacks.onClick) {
         this.callbacks.onClick({
           fileName: upload.name,
-          fieldName: this.fieldName
+          fieldName: this.fieldName,
+          type: upload.type
         });
       }
     }
