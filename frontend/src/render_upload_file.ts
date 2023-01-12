@@ -136,9 +136,9 @@ class RenderUploadFile {
     const errorsMessages = document.createElement("ul");
 
     for (const file of files) {
-      const msg = document.createElement('li');
+      const msg = document.createElement("li");
       msg.innerText = `${file.name}: ${this.translations["Invalid file type"]}`;
-      msg.className = 'dff-error';
+      msg.className = "dff-error";
       errorsMessages.appendChild(msg);
     }
 
@@ -190,7 +190,7 @@ class RenderUploadFile {
     div.className = "dff-invalid-files";
     parent.appendChild(div);
     return div;
-  }
+  };
 
   private createFilesContainer = (parent: Element): Element => {
     const div = document.createElement("div");
@@ -206,6 +206,8 @@ class RenderUploadFile {
 
     const nameSpan = document.createElement("span");
     nameSpan.innerHTML = escape(filename);
+    nameSpan.className = "dff-filename";
+    nameSpan.setAttribute("data-index", `${uploadIndex}`);
 
     div.appendChild(nameSpan);
     this.container.appendChild(div);

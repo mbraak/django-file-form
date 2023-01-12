@@ -868,3 +868,18 @@ class LiveTestCase(BaseLiveTestCase):
         page.submit()
 
         page.assert_page_contains_text("This field is required")
+
+    def test_click_handler(self):
+        page = self.page
+
+        page.open("/")
+        page.assert_page_contains_text("Drop your files here")
+
+        temp_file = page.create_temp_file("content1")        
+        page.upload_using_js(temp_file)
+        page.find_upload_success(temp_file)
+
+        page.selenium.find_element(By.CSS_SELECTOR, '.dff-filename').click()
+
+        filename = temp_file.base_name()
+        page.assert_page_contains_text(f"Clicked {filename} on field example-input_file")

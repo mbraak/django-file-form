@@ -1,5 +1,9 @@
 ## Changelog
 
+**development**
+
+- Issue #579: onClick handler (thanks to mi01)
+
 **3.4.2 (7 december 2022)**
 
 - Issue #531: add Finnish translations (thanks to Tuomas Vihinen)
