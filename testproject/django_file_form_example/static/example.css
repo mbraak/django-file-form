@@ -9,3 +9,7 @@ body {
 form > div {
     margin-top: 16px;
 }
+
+#messages {
+    margin-top: 16px;
+}

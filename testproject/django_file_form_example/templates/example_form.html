@@ -7,7 +7,6 @@
     {{ block.super }}
     <link rel="stylesheet" href="{% static "file_form/file_form.css" %}">
     <link rel="stylesheet" href="{% static "example.css" %}">
-
 {% endblock %}
 
 {% block body %}
@@ -35,6 +34,8 @@
         {% endblock %}
         <input type="submit" value="Save" />
     </form>
+
+    <div id="messages"></div>
 
     {% if use_ajax %}
         <script src="{% static file_form_js|safe %}"></script>

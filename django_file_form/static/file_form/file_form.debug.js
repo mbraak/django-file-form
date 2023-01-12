@@ -278,9 +278,9 @@
     setErrorInvalidFiles(files) {
       const errorsMessages = document.createElement("ul");
       for (const file of files) {
-        const msg = document.createElement('li');
+        const msg = document.createElement("li");
         msg.innerText = `${file.name}: ${this.translations["Invalid file type"]}`;
-        msg.className = 'dff-error';
+        msg.className = "dff-error";
         errorsMessages.appendChild(msg);
       }
       this.errors.replaceChildren(errorsMessages);
@@ -323,6 +323,8 @@
       div.className = `dff-file dff-file-id-${uploadIndex}`;
       const nameSpan = document.createElement("span");
       nameSpan.innerHTML = escapeHtml_1(filename);
+      nameSpan.className = "dff-filename";
+      nameSpan.setAttribute("data-index", `${uploadIndex}`);
       div.appendChild(nameSpan);
       this.container.appendChild(div);
       this.input.required = false;
@@ -7458,7 +7460,7 @@
       _defineProperty$2(this, "handleInvalidFiles", files => {
         this.renderer.setErrorInvalidFiles(files);
       });
-      _defineProperty$2(this, "onClick", e => {
+      _defineProperty$2(this, "handleClick", e => {
         const target = e.target;
         const getUpload = () => {
           const dataIndex = target.getAttribute("data-index");
@@ -7469,17 +7471,27 @@
           return this.getUploadByIndex(uploadIndex);
         };
         if (target.classList.contains("dff-delete") && !target.classList.contains("dff-disabled")) {
+          e.preventDefault();
           const upload = getUpload();
           if (upload) {
             void this.removeExistingUpload(upload);
           }
-          e.preventDefault();
         } else if (target.classList.contains("dff-cancel")) {
+          e.preventDefault();
           const upload = getUpload();
           if (upload) {
             void this.handleCancel(upload);
           }
+        } else if (target.classList.contains("dff-filename")) {
           e.preventDefault();
+          const upload = getUpload();
+          if (upload && this.callbacks.onClick) {
+            this.callbacks.onClick({
+              fileName: upload.name,
+              fieldName: this.fieldName,
+              type: upload.type
+            });
+          }
         }
       });
       _defineProperty$2(this, "handleProgress", (upload, bytesUploaded, bytesTotal) => {
@@ -7554,7 +7566,7 @@
       }
       this.checkDropHint();
       input.addEventListener("change", this.onChange);
-      filesContainer.addEventListener("click", this.onClick);
+      filesContainer.addEventListener("click", this.handleClick);
     }
     addInitialFiles(initialFiles) {
       if (initialFiles.length === 0) {
