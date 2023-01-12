@@ -21,11 +21,23 @@ initUploadFields(formDomElement, options);
 
 The callbacks are:
 
+- `onClick`
+
+  - Called when the filename of an uploaded file is clicked
+  - Signature of callback is `function({ fileName, fieldName, type })`
+    - fileName: the file name
+    - fieldName: the name of the form field
+    - type:
+      - `tus` or `uploadedTus`: uploaded file
+      - `placeholder`: placeholder
+      - `existing`: existing file
+    - The filename is rendered with the `dff-filename` class. You can use this class to change the styling.
+
 - `onDelete`
-  - called when file is deleted
+  - Called when file is deleted
   - Signature of callback is `function(upload)`
 - `onError`:
-  - called when an upload error occurs
+  - Called when an upload error occurs
   - Signature of callback is `function(error, upload)`
     - `error`: javascript Error
 - `onProgress`:
