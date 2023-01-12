@@ -18,7 +18,7 @@ interface ClickEvent {
 }
 
 export interface Callbacks {
-  onClick?: ({ fileName, fieldName }: ClickEvent) => void;
+  onClick?: ({ fileName, fieldName, type }: ClickEvent) => void;
   onDelete?: (upload: BaseUpload) => void;
   onError?: (error: Error, upload: BaseUpload) => void;
   onProgress?: (
