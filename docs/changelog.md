@@ -1,6 +1,6 @@
 ## Changelog
 
-**development**
+**3.4.3 (14 january 2023)**
 
 - Issue #579: onClick handler (thanks to mi01)
 
