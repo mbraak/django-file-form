@@ -51,6 +51,10 @@ class PlaceholderFile extends BaseUploadedFile {
     this.id = initialFile.id;
   }
 
+  public getId(): string | undefined {
+    return undefined;
+  }
+
   public getInitialFile(): InitialPlaceholderFile {
     return {
       id: this.id,
@@ -77,6 +81,10 @@ export class UploadedS3File extends BaseUploadedFile {
     this.key = initialFile.name;
   }
 
+  public getId(): string | undefined {
+    return this.id;
+  }
+
   getInitialFile(): InitialS3File {
     return {
       id: this.id,
@@ -96,6 +104,10 @@ export class ExistingFile extends BaseUploadedFile {
       type: "existing",
       uploadIndex
     });
+  }
+
+  public getId(): string | undefined {
+    return undefined;
   }
 
   public getInitialFile(): InitialExistingFile {
@@ -139,6 +151,10 @@ export class UploadedTusFile extends BaseUploadedFile {
 
   public async delete(): Promise<void> {
     await deleteUpload(this.url, this.csrfToken);
+  }
+
+  public getId(): string | undefined {
+    return this.id;
   }
 
   getInitialFile(): InitialTusFile {

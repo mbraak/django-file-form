@@ -107,6 +107,10 @@ class S3Upload extends BaseUpload {
     return Promise.resolve();
   }
 
+  public getId(): string | undefined {
+    return this.uploadId || undefined;
+  }
+
   public getInitialFile(): InitialFile {
     return {
       id: this.uploadId || "",

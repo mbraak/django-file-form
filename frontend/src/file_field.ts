@@ -14,6 +14,7 @@ export type Translations = { [key: string]: string };
 interface ClickEvent {
   fileName: string;
   fieldName: string;
+  id?: string;
   type: UploadType;
 }
 
@@ -346,6 +347,7 @@ class FileField {
         this.callbacks.onClick({
           fileName: upload.name,
           fieldName: this.fieldName,
+          id: upload.getId(),
           type: upload.type
         });
       }
