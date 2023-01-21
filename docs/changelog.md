@@ -1,5 +1,9 @@
 ## Changelog
 
+**development**
+
+- Issue #588: remove temporary uploaded file when deleting a submitted upload
+
 **3.4.3 (14 january 2023)**
 
 - Issue #579: onClick handler (thanks to mi01)
