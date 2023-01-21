@@ -224,11 +224,7 @@ class LiveTestCase(BaseLiveTestCase):
         page.assert_page_contains_text("Title field is required")
 
         self.assertEqual(
-            json.loads(
-                self.page.selenium.find_element(
-                    By.NAME, "example-input_file-uploads"
-                ).get_property("value")
-            ),
+            json.loads(self.page.get_hidden_uploads_value()),
             [
                 {
                     "id": TemporaryUploadedFile.objects.first().file_id,

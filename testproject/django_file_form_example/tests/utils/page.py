@@ -89,6 +89,11 @@ class Page(BasePage):
     def get_upload_count(self):
         return len(self.selenium.find_elements(By.CSS_SELECTOR, ".dff-upload-success"))
 
+    def get_hidden_uploads_value(self, form_prefix="example"):
+        return self.selenium.find_element(
+            By.NAME, f"{form_prefix}-input_file-uploads"
+        ).get_property("value")
+
     def login(self, username, password):
         self.open("/login/?next=/")
         self.selenium.find_element(By.NAME, "username").send_keys(username)
