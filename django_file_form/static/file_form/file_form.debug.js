@@ -4031,6 +4031,9 @@
     async delete() {
       return Promise.resolve();
     }
+    getId() {
+      return this.uploadId || undefined;
+    }
     getInitialFile() {
       return {
         id: this.uploadId || "",
@@ -4276,6 +4279,9 @@
       _defineProperty$2(this, "id", void 0);
       this.id = initialFile.id;
     }
+    getId() {
+      return undefined;
+    }
     getInitialFile() {
       return {
         id: this.id,
@@ -4298,6 +4304,9 @@
       this.id = initialFile.id;
       this.key = initialFile.name;
     }
+    getId() {
+      return this.id;
+    }
     getInitialFile() {
       return {
         id: this.id,
@@ -4316,6 +4325,9 @@
         type: "existing",
         uploadIndex
       });
+    }
+    getId() {
+      return undefined;
     }
     getInitialFile() {
       return {
@@ -4348,6 +4360,9 @@
     }
     async delete() {
       await deleteUpload(this.url, this.csrfToken);
+    }
+    getId() {
+      return this.id;
     }
     getInitialFile() {
       return {
@@ -7375,6 +7390,9 @@
       }
       await deleteUpload(this.upload.url, this.csrfToken);
     }
+    getId() {
+      return this.id;
+    }
     getSize() {
       return this.upload.file.size;
     }
@@ -7497,6 +7515,7 @@
             this.callbacks.onClick({
               fileName: upload.name,
               fieldName: this.fieldName,
+              id: upload.getId(),
               type: upload.type
             });
           }
