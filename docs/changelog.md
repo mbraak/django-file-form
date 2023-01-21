@@ -3,6 +3,7 @@
 **development**
 
 - Issue #588: remove temporary uploaded file when deleting a submitted upload
+- Issue #590: add the file id to the onClick handler
 
 **3.4.3 (14 january 2023)**
 
