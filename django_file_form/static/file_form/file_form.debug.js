@@ -7317,6 +7317,7 @@
       _defineProperty$2(this, "onError", void 0);
       _defineProperty$2(this, "onProgress", void 0);
       _defineProperty$2(this, "onSuccess", void 0);
+      _defineProperty$2(this, "id", void 0);
       _defineProperty$2(this, "upload", void 0);
       _defineProperty$2(this, "csrfToken", void 0);
       _defineProperty$2(this, "handleError", error => {
@@ -7339,6 +7340,12 @@
       _defineProperty$2(this, "addCsrTokenToRequest", request => {
         request.setHeader("X-CSRFToken", this.csrfToken);
       });
+      _defineProperty$2(this, "handleAfterReponse", (_request, response) => {
+        const resourceId = response.getHeader("ResourceId");
+        if (resourceId) {
+          this.id = resourceId;
+        }
+      });
       this.csrfToken = csrfToken;
       this.upload = new Upload(file, {
         chunkSize,
@@ -7348,6 +7355,7 @@
           filename: file.name,
           formId: formId
         },
+        onAfterResponse: this.handleAfterReponse,
         onBeforeRequest: this.addCsrTokenToRequest,
         onError: this.handleError,
         onProgress: this.handleProgress,
@@ -7375,7 +7383,7 @@
     }
     getInitialFile() {
       return {
-        id: this.name,
+        id: this.id,
         name: this.name,
         size: this.getSize(),
         type: "tus",
