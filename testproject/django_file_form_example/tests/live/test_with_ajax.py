@@ -909,3 +909,13 @@ class LiveTestCase(BaseLiveTestCase):
         page.assert_page_contains_text(
             f"Clicked {filename} on field example-input_file"
         )
+
+    def test_click_handler_for_placeholder_file(self):
+        page = self.page
+        page.open("/placeholder")
+
+        page.selenium.find_element(By.CSS_SELECTOR, ".dff-filename").click()
+
+        page.assert_page_contains_text(
+            "Clicked test_placeholder1.txt on field example-input_file"
+        )
