@@ -7511,7 +7511,7 @@
         } else if (target.classList.contains("dff-filename")) {
           e.preventDefault();
           const upload = getUpload();
-          if (upload && this.callbacks.onClick) {
+          if (upload?.status === "done" && this.callbacks.onClick) {
             this.callbacks.onClick({
               fileName: upload.name,
               fieldName: this.fieldName,
