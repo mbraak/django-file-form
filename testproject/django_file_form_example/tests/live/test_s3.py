@@ -390,3 +390,22 @@ class S3TestCase(BaseLiveTestCase):
         page.assert_page_contains_text(
             f"Clicked {filename} on field example-input_file"
         )
+
+    def test_click_handler_for_submitted_file(self):
+        page = self.page
+        page.open("/s3single")
+
+        temp_file = page.create_temp_file("content1")
+
+        page.upload_using_js(temp_file)
+        page.find_upload_success(temp_file)
+
+        page.submit()
+        page.assert_page_contains_text("Title field is required")
+
+        page.selenium.find_element(By.CSS_SELECTOR, ".dff-filename").click()
+
+        filename = temp_file.base_name()
+        page.assert_page_contains_text(
+            f"Clicked {filename} on field example-input_file"
+        )
