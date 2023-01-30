@@ -68,6 +68,10 @@ export default class TusUpload extends BaseUpload {
     await deleteUpload(this.upload.url, this.csrfToken);
   }
 
+  public getId(): string | undefined {
+    return this.id;
+  }
+
   public getSize(): number {
     return (this.upload.file as File).size;
   }
