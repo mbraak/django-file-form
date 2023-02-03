@@ -27,6 +27,7 @@ The callbacks are:
   - Signature of callback is `function({ fileName, fieldName, type })`
     - fileName: the file name
     - fieldName: the name of the form field
+    - id: the id of the temporary uploaded file
     - type:
       - `tus` or `uploadedTus`: uploaded file
       - `placeholder`: placeholder

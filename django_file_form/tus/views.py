@@ -74,6 +74,7 @@ def start_upload(request):
 
     response.status_code = 201
     response["Location"] = "{}{}".format(request.build_absolute_uri(), resource_id)
+    response["ResourceId"] = resource_id
     return response
 
 

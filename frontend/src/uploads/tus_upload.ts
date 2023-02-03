@@ -1,4 +1,4 @@
-import { HttpRequest, Upload } from "tus-js-client";
+import { HttpRequest, HttpResponse, Upload } from "tus-js-client";
 import BaseUpload, { InitialFile } from "./base_upload";
 import { deleteUpload } from "./tus_utils";
 
@@ -17,6 +17,7 @@ export default class TusUpload extends BaseUpload {
   public onError?: (error: Error) => void;
   public onProgress?: (bytesUploaded: number, bytesTotal: number) => void;
   public onSuccess?: () => void;
+  private id: string;
   private upload: Upload;
   private csrfToken: string;
 
@@ -42,6 +43,7 @@ export default class TusUpload extends BaseUpload {
         filename: file.name,
         formId: formId
       },
+      onAfterResponse: this.handleAfterReponse,
       onBeforeRequest: this.addCsrTokenToRequest,
       onError: this.handleError,
       onProgress: this.handleProgress,
@@ -64,6 +66,10 @@ export default class TusUpload extends BaseUpload {
     }
 
     await deleteUpload(this.upload.url, this.csrfToken);
+  }
+
+  public getId(): string | undefined {
+    return this.id;
   }
 
   public getSize(): number {
@@ -98,9 +104,20 @@ export default class TusUpload extends BaseUpload {
     request.setHeader("X-CSRFToken", this.csrfToken);
   };
 
+  private handleAfterReponse = (
+    _request: HttpRequest,
+    response: HttpResponse
+  ) => {
+    const resourceId = response.getHeader("ResourceId");
+
+    if (resourceId) {
+      this.id = resourceId;
+    }
+  };
+
   getInitialFile(): InitialFile {
     return {
-      id: this.name,
+      id: this.id,
       name: this.name,
       size: this.getSize(),
       type: "tus",

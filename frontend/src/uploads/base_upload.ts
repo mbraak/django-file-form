@@ -68,9 +68,10 @@ abstract class BaseUpload {
   public async delete(): Promise<void> {
     //
   }
-  public abstract getSize(): number | undefined;
 
+  public abstract getId(): string | undefined;
   public abstract getInitialFile(): InitialFile;
+  public abstract getSize(): number | undefined;
 }
 
 export default BaseUpload;

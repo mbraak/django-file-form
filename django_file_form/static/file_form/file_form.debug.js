@@ -4028,6 +4028,9 @@
     async delete() {
       return Promise.resolve();
     }
+    getId() {
+      return this.uploadId || undefined;
+    }
     getInitialFile() {
       return {
         id: this.uploadId || "",
@@ -4273,6 +4276,9 @@
       _defineProperty$2(this, "id", void 0);
       this.id = initialFile.id;
     }
+    getId() {
+      return undefined;
+    }
     getInitialFile() {
       return {
         id: this.id,
@@ -4295,6 +4301,9 @@
       this.id = initialFile.id;
       this.key = initialFile.name;
     }
+    getId() {
+      return this.id;
+    }
     getInitialFile() {
       return {
         id: this.id,
@@ -4313,6 +4322,9 @@
         type: "existing",
         uploadIndex
       });
+    }
+    getId() {
+      return undefined;
     }
     getInitialFile() {
       return {
@@ -4345,6 +4357,9 @@
     }
     async delete() {
       await deleteUpload(this.url, this.csrfToken);
+    }
+    getId() {
+      return this.id;
     }
     getInitialFile() {
       return {
@@ -7314,6 +7329,7 @@
       _defineProperty$2(this, "onError", void 0);
       _defineProperty$2(this, "onProgress", void 0);
       _defineProperty$2(this, "onSuccess", void 0);
+      _defineProperty$2(this, "id", void 0);
       _defineProperty$2(this, "upload", void 0);
       _defineProperty$2(this, "csrfToken", void 0);
       _defineProperty$2(this, "handleError", error => {
@@ -7336,6 +7352,12 @@
       _defineProperty$2(this, "addCsrTokenToRequest", request => {
         request.setHeader("X-CSRFToken", this.csrfToken);
       });
+      _defineProperty$2(this, "handleAfterReponse", (_request, response) => {
+        const resourceId = response.getHeader("ResourceId");
+        if (resourceId) {
+          this.id = resourceId;
+        }
+      });
       this.csrfToken = csrfToken;
       this.upload = new Upload(file, {
         chunkSize,
@@ -7345,6 +7367,7 @@
           filename: file.name,
           formId: formId
         },
+        onAfterResponse: this.handleAfterReponse,
         onBeforeRequest: this.addCsrTokenToRequest,
         onError: this.handleError,
         onProgress: this.handleProgress,
@@ -7364,6 +7387,9 @@
       }
       await deleteUpload(this.upload.url, this.csrfToken);
     }
+    getId() {
+      return this.id;
+    }
     getSize() {
       return this.upload.file.size;
     }
@@ -7372,7 +7398,7 @@
     }
     getInitialFile() {
       return {
-        id: this.name,
+        id: this.id,
         name: this.name,
         size: this.getSize(),
         type: "tus",
@@ -7482,10 +7508,11 @@
         } else if (target.classList.contains("dff-filename")) {
           e.preventDefault();
           const upload = getUpload();
-          if (upload && this.callbacks.onClick) {
+          if (upload?.status === "done" && this.callbacks.onClick) {
             this.callbacks.onClick({
               fileName: upload.name,
               fieldName: this.fieldName,
+              id: upload.getId(),
               type: upload.type
             });
           }

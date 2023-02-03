@@ -1,4 +1,5 @@
 from pathlib import Path
+import json
 
 from django.conf import settings
 from django.core.files.base import ContentFile
@@ -208,6 +209,7 @@ class LiveTestCase(BaseLiveTestCase):
 
     def test_delete_after_submit(self):
         page = self.page
+        original_temp_file_count = count_temp_uploads()
 
         temp_file = page.create_temp_file("content1")
 
@@ -215,12 +217,34 @@ class LiveTestCase(BaseLiveTestCase):
         page.upload_using_js(temp_file)
         page.find_upload_success(temp_file)
 
+        self.assertEqual(TemporaryUploadedFile.objects.count(), 1)
+        self.assertEqual(count_temp_uploads(), original_temp_file_count + 1)
+
         page.submit()
         page.assert_page_contains_text("Title field is required")
+
+        self.assertEqual(
+            json.loads(self.page.get_hidden_uploads_value()),
+            [
+                {
+                    "id": TemporaryUploadedFile.objects.first().file_id,
+                    "name": temp_file.base_name(),
+                    "size": 8,
+                    "type": "tus",
+                    "url": "",
+                }
+            ],
+        )
+
+        self.assertEqual(TemporaryUploadedFile.objects.count(), 1)
+        self.assertEqual(count_temp_uploads(), original_temp_file_count + 1)
 
         page.find_upload_success(temp_file)
         page.delete_ajax_file()
         page.wait_until_upload_is_removed()
+
+        self.assertEqual(TemporaryUploadedFile.objects.count(), 0)
+        self.assertEqual(count_temp_uploads(), original_temp_file_count)
 
         page.submit()
         page.assert_page_contains_text("Title field is required")
@@ -604,7 +628,7 @@ class LiveTestCase(BaseLiveTestCase):
 
         page.set_slow_network_conditions()
 
-        temp_file = page.create_temp_file(b"a" * (2 ** 22), binary=True)
+        temp_file = page.create_temp_file(b"a" * (2**22), binary=True)
         page.upload_using_js(temp_file)
         page.wait_until_upload_starts()
         page.cancel_upload()
@@ -875,11 +899,42 @@ class LiveTestCase(BaseLiveTestCase):
         page.open("/")
         page.assert_page_contains_text("Drop your files here")
 
-        temp_file = page.create_temp_file("content1")        
+        temp_file = page.create_temp_file("content1")
         page.upload_using_js(temp_file)
         page.find_upload_success(temp_file)
 
-        page.selenium.find_element(By.CSS_SELECTOR, '.dff-filename').click()
+        page.selenium.find_element(By.CSS_SELECTOR, ".dff-filename").click()
 
         filename = temp_file.base_name()
-        page.assert_page_contains_text(f"Clicked {filename} on field example-input_file")
+        page.assert_page_contains_text(
+            f"Clicked {filename} on field example-input_file"
+        )
+
+    def test_click_handler_for_submitted_file(self):
+        page = self.page
+        page.open("/")
+        page.assert_page_contains_text("Drop your files here")
+
+        temp_file = page.create_temp_file("content1")
+        page.upload_using_js(temp_file)
+        page.find_upload_success(temp_file)
+
+        page.submit()
+        page.assert_page_contains_text("Title field is required")
+
+        page.selenium.find_element(By.CSS_SELECTOR, ".dff-filename").click()
+
+        filename = temp_file.base_name()
+        page.assert_page_contains_text(
+            f"Clicked {filename} on field example-input_file"
+        )
+
+    def test_click_handler_for_placeholder_file(self):
+        page = self.page
+        page.open("/placeholder")
+
+        page.selenium.find_element(By.CSS_SELECTOR, ".dff-filename").click()
+
+        page.assert_page_contains_text(
+            "Clicked test_placeholder1.txt on field example-input_file"
+        )
