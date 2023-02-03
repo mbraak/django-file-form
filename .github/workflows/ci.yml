@@ -46,25 +46,16 @@ jobs:
         cache: 'npm'
         cache-dependency-path: 'frontend/package-lock.json'
     - name: Install javascript packages
-      run: |
-          cd frontend
-          npm clean-install --audit=false --fund=false --loglevel=http
+      working-directory: ./frontend
+      run: npm clean-install --audit=false --fund=false --loglevel=http
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.10'
     - name: Install python packages
-      run: |
-        python -m pip install --upgrade pip
-        pip install wheel
-        pip install ${{ matrix.django }}
-        pip install -r testproject/requirements.txt
-        pip install -r testproject/requirements_test.txt
-        pip install -r testproject/requirements_ci.txt
-        pip install -e .
+      run: python -m pip install --upgrade pip && pip install wheel && pip install ${{ matrix.django }} && pip install -r testproject/requirements.txt && pip install -r testproject/requirements_test.txt && pip install -r testproject/requirements_ci.txt && pip install -e .
     - name: Run tests
-      run: |
-        python -Wd testproject/manage.py test django_file_form_example -v 2
+      run: python -Wd testproject/manage.py test django_file_form_example -v 2
     - name: Run django check
       run: python testproject/manage.py check
     - name: Check migrations
@@ -75,39 +66,19 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: '16'
-    - name: Setup coverage
-      run: |
-        cd frontend
-        npm run build
-        cd ..
-        mkdir js_coverage
+    - name: Build javascript
+      working-directory: ./frontend
+      run: npm run build
+    - name: Create javascript coverage directory
+      run: mkdir js_coverage
     - name: Test with coverage
-      run: |
-        COVERAGE=true coverage run --source=django_file_form,testproject/django_file_form_example testproject/manage.py test django_file_form_example -v 2
-    - uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: '2.7'
-    - name: Merge coverage
-      run: |
-        cd coveralls
-        npm clean-install --audit=false --fund=false --loglevel=http && gem install coveralls-lcov
-        npm run merge_coverage_lcov
-        npm run merge_coverage_json
-        coveralls-lcov -v -n coverage/lcov.info > coverage.json
-        cd ..
-        coverage report
-        coverage lcov
-    - name: Coveralls
-      run: |
-        coveralls --merge=coveralls/coverage.json
-      env:
-        COVERALLS_REPO_TOKEN: ${{ secrets.github_token }}
-        COVERALLS_SERVICE_NAME: github
-        COVERALLS_GIT_COMMIT: ${{ github.sha }}
-        COVERALLS_GIT_BRANCH: ${{ github.ref }}
-        COVERALLS_SERVICE_JOB_ID: ${{ github.run_id }}
+      run: COVERAGE=true coverage run --source=django_file_form,testproject/django_file_form_example testproject/manage.py test django_file_form_example -v 2
+    - name: Merge Python coverage
+      run: coverage report && coverage lcov
+    - name: Merge javascript coverage
+      working-directory: ./coverage 
+      run: npm clean-install --audit=false --fund=false --loglevel=http && npm run merge_coverage
     - name: Codecov
       uses: codecov/codecov-action@v3
       with:
-        file: coveralls/coverage/lcov.info,coverage.lcov
         verbose: true
