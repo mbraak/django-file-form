@@ -1,4 +1,5 @@
-const handleClick = ({ fileName, fieldName }) => {
+const handleClick = ({ fileName, fieldName, id }) => {
+  console.log("handleClick id", id);
   const div = document.createElement("div");
   div.innerText = `Clicked ${fileName} on field ${fieldName}`;
   document.querySelector("#messages").append(div);
