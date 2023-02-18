@@ -1166,10 +1166,10 @@
   (shared$3.exports = function (key, value) {
     return store$1[key] || (store$1[key] = value !== undefined ? value : {});
   })('versions', []).push({
-    version: '3.27.2',
+    version: '3.28.0',
     mode: 'global',
     copyright: '© 2014-2023 Denis Pushkarev (zloirock.ru)',
-    license: 'https://github.com/zloirock/core-js/blob/v3.27.2/LICENSE',
+    license: 'https://github.com/zloirock/core-js/blob/v3.28.0/LICENSE',
     source: 'https://github.com/zloirock/core-js'
   });
 
@@ -4406,7 +4406,7 @@
    *
    * @author Dan Kogai (https://github.com/dankogai)
    */
-  const version = '3.7.4';
+  const version = '3.7.5';
   /**
    * @deprecated use lowercase `version`.
    */
@@ -4427,7 +4427,7 @@
   const _fromCC = String.fromCharCode.bind(String);
   const _U8Afrom = typeof Uint8Array.from === 'function'
       ? Uint8Array.from.bind(Uint8Array)
-      : (it, fn = (x) => x) => new Uint8Array(Array.prototype.slice.call(it, 0).map(fn));
+      : (it) => new Uint8Array(Array.prototype.slice.call(it, 0));
   const _mkUriSafe = (src) => src
       .replace(/=/g, '').replace(/[+\/]/g, (m0) => m0 == '+' ? '-' : '_');
   const _tidyB64 = (s) => s.replace(/[^A-Za-z0-9\+\/]/g, '');
@@ -4585,7 +4585,7 @@
   //
   const _toUint8Array = _hasBuffer
       ? (a) => _U8Afrom(Buffer.from(a, 'base64'))
-      : (a) => _U8Afrom(_atob(a), c => c.charCodeAt(0));
+      : (a) => _U8Afrom(_atob(a).split('').map(c => c.charCodeAt(0)));
   /**
    * converts a Base64 string to a Uint8Array.
    */
@@ -5631,7 +5631,7 @@
     onChunkComplete: null,
     onSuccess: null,
     onError: null,
-    _onUploadUrlAvailable: null,
+    onUploadUrlAvailable: null,
     overridePatchMethod: false,
     headers: {},
     addRequestId: false,
@@ -5860,7 +5860,7 @@
                 },
                 // Wait until every partial upload has an upload URL, so we can add
                 // them to the URL storage.
-                _onUploadUrlAvailable: function _onUploadUrlAvailable() {
+                onUploadUrlAvailable: function onUploadUrlAvailable() {
                   _this3._parallelUploadUrls[index] = upload.url; // Test if all uploads have received an URL
 
                   if (_this3._parallelUploadUrls.filter(function (u) {
@@ -6103,8 +6103,8 @@
           }
           _this6.url = resolveUrl(_this6.options.endpoint, location);
           log("Created upload at ".concat(_this6.url));
-          if (typeof _this6.options._onUploadUrlAvailable === 'function') {
-            _this6.options._onUploadUrlAvailable();
+          if (typeof _this6.options.onUploadUrlAvailable === 'function') {
+            _this6.options.onUploadUrlAvailable();
           }
           if (_this6._size === 0) {
             // Nothing to upload and file was successfully created
@@ -6174,8 +6174,8 @@
             _this7._emitHttpError(req, res, 'tus: invalid or missing length value');
             return;
           }
-          if (typeof _this7.options._onUploadUrlAvailable === 'function') {
-            _this7.options._onUploadUrlAvailable();
+          if (typeof _this7.options.onUploadUrlAvailable === 'function') {
+            _this7.options.onUploadUrlAvailable();
           }
           _this7._saveUploadInUrlStorage().then(function () {
             // Upload has already been completed and we do not need to send additional
@@ -6622,9 +6622,13 @@
   try {
     hasStorage = 'localStorage' in window; // Attempt to store and read entries from the local storage to detect Private
     // Mode on Safari on iOS (see #49)
+    // If the key was not used before, we remove it from local storage again to
+    // not cause confusion where the entry came from.
 
     var key = 'tusSupport';
-    localStorage.setItem(key, localStorage.getItem(key));
+    var originalValue = localStorage.getItem(key);
+    localStorage.setItem(key, originalValue);
+    if (originalValue === null) localStorage.removeItem(key);
   } catch (e) {
     // If we try to access localStorage inside a sandboxed iframe, a SecurityError
     // is thrown. When in private mode on iOS Safari, a QuotaExceededError is
