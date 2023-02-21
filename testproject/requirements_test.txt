@@ -1,7 +1,7 @@
 cryptography==39.0.1
-moto==4.0.9
-Flask==2.2.2
+moto==4.1.2
+Flask==2.2.3
 flask-cors==3.0.10
 psycopg2-binary==2.9.5
-selenium==4.7.2
+selenium==4.8.2
 Werkzeug==2.2.3
