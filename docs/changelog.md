@@ -1,5 +1,9 @@
 ## Changelog
 
+**development version**
+
+- Isssue #614: prevent uploading multiple files for a single file upload (thanks to Krzysztof Kosiorek)
+
 **3.4.4 (30 january 2023)**
 
 - Issue #588: remove temporary uploaded file when deleting a submitted upload

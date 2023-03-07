@@ -1166,10 +1166,10 @@
   (shared$3.exports = function (key, value) {
     return store$1[key] || (store$1[key] = value !== undefined ? value : {});
   })('versions', []).push({
-    version: '3.28.0',
+    version: '3.29.0',
     mode: 'global',
     copyright: '© 2014-2023 Denis Pushkarev (zloirock.ru)',
-    license: 'https://github.com/zloirock/core-js/blob/v3.28.0/LICENSE',
+    license: 'https://github.com/zloirock/core-js/blob/v3.29.0/LICENSE',
     source: 'https://github.com/zloirock/core-js'
   });
 
@@ -7459,9 +7459,11 @@
             this.renderer.deleteFile(upload.uploadIndex);
           }
           this.uploads = [];
-        }
-        for await (const file of files) {
-          await this.uploadFile(file);
+          await this.uploadFile(files[0]);
+        } else {
+          for await (const file of files) {
+            await this.uploadFile(file);
+          }
         }
         this.checkDropHint();
       });
