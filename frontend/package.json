@@ -42,7 +42,7 @@
     "rollup": "^3",
     "rollup-plugin-serve": "^2.0.0",
     "sass": "^1.54.2",
-    "typescript": "^4.7.4"
+    "typescript": "^5"
   },
   "dependencies": {
     "@babel/runtime": "^7.18.9",
