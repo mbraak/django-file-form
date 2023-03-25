@@ -7458,9 +7458,11 @@
             this.renderer.deleteFile(upload.uploadIndex);
           }
           this.uploads = [];
-        }
-        for await (const file of files) {
-          await this.uploadFile(file);
+          await this.uploadFile(files[0]);
+        } else {
+          for await (const file of files) {
+            await this.uploadFile(file);
+          }
         }
         this.checkDropHint();
       });
