@@ -814,6 +814,27 @@
     set exports(v){ makeBuiltInExports = v; },
   };
 
+  var fails$5 = fails$7;
+
+  var functionBindNative = !fails$5(function () {
+    // eslint-disable-next-line es/no-function-prototype-bind -- safe
+    var test = (function () { /* empty */ }).bind();
+    // eslint-disable-next-line no-prototype-builtins -- safe
+    return typeof test != 'function' || test.hasOwnProperty('prototype');
+  });
+
+  var NATIVE_BIND$1 = functionBindNative;
+
+  var FunctionPrototype$1 = Function.prototype;
+  var call$3 = FunctionPrototype$1.call;
+  var uncurryThisWithBind = NATIVE_BIND$1 && FunctionPrototype$1.bind.bind(call$3, call$3);
+
+  var functionUncurryThis = NATIVE_BIND$1 ? uncurryThisWithBind : function (fn) {
+    return function () {
+      return call$3.apply(fn, arguments);
+    };
+  };
+
   var documentAll$2 = typeof document == 'object' && document.all;
 
   // https://tc39.es/ecma262/#sec-IsHTMLDDA-internal-slot
@@ -835,27 +856,6 @@
     return typeof argument == 'function' || argument === documentAll$1;
   } : function (argument) {
     return typeof argument == 'function';
-  };
-
-  var fails$5 = fails$7;
-
-  var functionBindNative = !fails$5(function () {
-    // eslint-disable-next-line es/no-function-prototype-bind -- safe
-    var test = (function () { /* empty */ }).bind();
-    // eslint-disable-next-line no-prototype-builtins -- safe
-    return typeof test != 'function' || test.hasOwnProperty('prototype');
-  });
-
-  var NATIVE_BIND$1 = functionBindNative;
-
-  var FunctionPrototype$1 = Function.prototype;
-  var call$3 = FunctionPrototype$1.call;
-  var uncurryThisWithBind = NATIVE_BIND$1 && FunctionPrototype$1.bind.bind(call$3, call$3);
-
-  var functionUncurryThis = NATIVE_BIND$1 ? uncurryThisWithBind : function (fn) {
-    return function () {
-      return call$3.apply(fn, arguments);
-    };
   };
 
   // we can't use just `it == null` since of `document.all` special case
@@ -885,10 +885,10 @@
     return $Object$1(requireObjectCoercible(argument));
   };
 
-  var uncurryThis$3 = functionUncurryThis;
+  var uncurryThis$4 = functionUncurryThis;
   var toObject = toObject$1;
 
-  var hasOwnProperty = uncurryThis$3({}.hasOwnProperty);
+  var hasOwnProperty = uncurryThis$4({}.hasOwnProperty);
 
   // `HasOwnProperty` abstract operation
   // https://tc39.es/ecma262/#sec-hasownproperty
@@ -936,11 +936,11 @@
 
   var sharedStore = store$3;
 
-  var uncurryThis$2 = functionUncurryThis;
+  var uncurryThis$3 = functionUncurryThis;
   var isCallable$7 = isCallable$8;
   var store$2 = sharedStore;
 
-  var functionToString = uncurryThis$2(Function.toString);
+  var functionToString = uncurryThis$3(Function.toString);
 
   // this helper broken in `core-js@3.4.1-3.4.4`, so we can't use `shared` helper
   if (!isCallable$7(store$2.inspectSource)) {
@@ -1009,13 +1009,13 @@
 
   var isObject$4 = isObject$6;
 
-  var $String$1 = String;
+  var $String$2 = String;
   var $TypeError$4 = TypeError;
 
   // `Assert: Type(argument) is Object`
   var anObject$2 = function (argument) {
     if (isObject$4(argument)) return argument;
-    throw $TypeError$4($String$1(argument) + ' is not an object');
+    throw $TypeError$4($String$2(argument) + ' is not an object');
   };
 
   var NATIVE_BIND = functionBindNative;
@@ -1033,17 +1033,15 @@
     return isCallable$4(argument) ? argument : undefined;
   };
 
-  var getBuiltIn$2 = function (namespace, method) {
+  var getBuiltIn$1 = function (namespace, method) {
     return arguments.length < 2 ? aFunction(global$5[namespace]) : global$5[namespace] && global$5[namespace][method];
   };
 
-  var uncurryThis$1 = functionUncurryThis;
+  var uncurryThis$2 = functionUncurryThis;
 
-  var objectIsPrototypeOf = uncurryThis$1({}.isPrototypeOf);
+  var objectIsPrototypeOf = uncurryThis$2({}.isPrototypeOf);
 
-  var getBuiltIn$1 = getBuiltIn$2;
-
-  var engineUserAgent = getBuiltIn$1('navigator', 'userAgent') || '';
+  var engineUserAgent = typeof navigator != 'undefined' && String(navigator.userAgent) || '';
 
   var global$4 = global$a;
   var userAgent = engineUserAgent;
@@ -1096,7 +1094,7 @@
     && !Symbol.sham
     && typeof Symbol.iterator == 'symbol';
 
-  var getBuiltIn = getBuiltIn$2;
+  var getBuiltIn = getBuiltIn$1;
   var isCallable$3 = isCallable$8;
   var isPrototypeOf = objectIsPrototypeOf;
   var USE_SYMBOL_AS_UID$1 = useSymbolAsUid;
@@ -1110,11 +1108,11 @@
     return isCallable$3($Symbol) && isPrototypeOf($Symbol.prototype, $Object(it));
   };
 
-  var $String = String;
+  var $String$1 = String;
 
   var tryToString$1 = function (argument) {
     try {
-      return $String(argument);
+      return $String$1(argument);
     } catch (error) {
       return 'Object';
     }
@@ -1168,18 +1166,18 @@
   (shared$3.exports = function (key, value) {
     return store$1[key] || (store$1[key] = value !== undefined ? value : {});
   })('versions', []).push({
-    version: '3.27.1',
+    version: '3.29.1',
     mode: 'global',
-    copyright: '© 2014-2022 Denis Pushkarev (zloirock.ru)',
-    license: 'https://github.com/zloirock/core-js/blob/v3.27.1/LICENSE',
+    copyright: '© 2014-2023 Denis Pushkarev (zloirock.ru)',
+    license: 'https://github.com/zloirock/core-js/blob/v3.29.1/LICENSE',
     source: 'https://github.com/zloirock/core-js'
   });
 
-  var uncurryThis = functionUncurryThis;
+  var uncurryThis$1 = functionUncurryThis;
 
   var id = 0;
   var postfix = Math.random();
-  var toString$1 = uncurryThis(1.0.toString);
+  var toString$1 = uncurryThis$1(1.0.toString);
 
   var uid$2 = function (key) {
     return 'Symbol(' + (key === undefined ? '' : key) + ')_' + toString$1(++id + postfix, 36);
@@ -1192,21 +1190,15 @@
   var NATIVE_SYMBOL = symbolConstructorDetection;
   var USE_SYMBOL_AS_UID = useSymbolAsUid;
 
-  var WellKnownSymbolsStore = shared$2('wks');
   var Symbol$1 = global$3.Symbol;
-  var symbolFor = Symbol$1 && Symbol$1['for'];
-  var createWellKnownSymbol = USE_SYMBOL_AS_UID ? Symbol$1 : Symbol$1 && Symbol$1.withoutSetter || uid$1;
+  var WellKnownSymbolsStore = shared$2('wks');
+  var createWellKnownSymbol = USE_SYMBOL_AS_UID ? Symbol$1['for'] || Symbol$1 : Symbol$1 && Symbol$1.withoutSetter || uid$1;
 
   var wellKnownSymbol$1 = function (name) {
-    if (!hasOwn$2(WellKnownSymbolsStore, name) || !(NATIVE_SYMBOL || typeof WellKnownSymbolsStore[name] == 'string')) {
-      var description = 'Symbol.' + name;
-      if (NATIVE_SYMBOL && hasOwn$2(Symbol$1, name)) {
-        WellKnownSymbolsStore[name] = Symbol$1[name];
-      } else if (USE_SYMBOL_AS_UID && symbolFor) {
-        WellKnownSymbolsStore[name] = symbolFor(description);
-      } else {
-        WellKnownSymbolsStore[name] = createWellKnownSymbol(description);
-      }
+    if (!hasOwn$2(WellKnownSymbolsStore, name)) {
+      WellKnownSymbolsStore[name] = NATIVE_SYMBOL && hasOwn$2(Symbol$1, name)
+        ? Symbol$1[name]
+        : createWellKnownSymbol('Symbol.' + name);
     } return WellKnownSymbolsStore[name];
   };
 
@@ -1388,6 +1380,7 @@
     getterFor: getterFor
   };
 
+  var uncurryThis = functionUncurryThis;
   var fails$1 = fails$7;
   var isCallable = isCallable$8;
   var hasOwn = hasOwnProperty_1;
@@ -1398,8 +1391,12 @@
 
   var enforceInternalState = InternalStateModule.enforce;
   var getInternalState = InternalStateModule.get;
+  var $String = String;
   // eslint-disable-next-line es/no-object-defineproperty -- safe
   var defineProperty$1 = Object.defineProperty;
+  var stringSlice = uncurryThis(''.slice);
+  var replace = uncurryThis(''.replace);
+  var join = uncurryThis([].join);
 
   var CONFIGURABLE_LENGTH = DESCRIPTORS$1 && !fails$1(function () {
     return defineProperty$1(function () { /* empty */ }, 'length', { value: 8 }).length !== 8;
@@ -1408,8 +1405,8 @@
   var TEMPLATE = String(String).split('String');
 
   var makeBuiltIn$1 = makeBuiltIn$2.exports = function (value, name, options) {
-    if (String(name).slice(0, 7) === 'Symbol(') {
-      name = '[' + String(name).replace(/^Symbol\(([^)]*)\)/, '$1') + ']';
+    if (stringSlice($String(name), 0, 7) === 'Symbol(') {
+      name = '[' + replace($String(name), /^Symbol\(([^)]*)\)/, '$1') + ']';
     }
     if (options && options.getter) name = 'get ' + name;
     if (options && options.setter) name = 'set ' + name;
@@ -1428,7 +1425,7 @@
     } catch (error) { /* empty */ }
     var state = enforceInternalState(value);
     if (!hasOwn(state, 'source')) {
-      state.source = TEMPLATE.join(typeof name == 'string' ? name : '');
+      state.source = join(TEMPLATE, typeof name == 'string' ? name : '');
     } return value;
   };
 
@@ -4409,7 +4406,7 @@
    *
    * @author Dan Kogai (https://github.com/dankogai)
    */
-  const version = '3.7.4';
+  const version = '3.7.5';
   /**
    * @deprecated use lowercase `version`.
    */
@@ -4430,7 +4427,7 @@
   const _fromCC = String.fromCharCode.bind(String);
   const _U8Afrom = typeof Uint8Array.from === 'function'
       ? Uint8Array.from.bind(Uint8Array)
-      : (it, fn = (x) => x) => new Uint8Array(Array.prototype.slice.call(it, 0).map(fn));
+      : (it) => new Uint8Array(Array.prototype.slice.call(it, 0));
   const _mkUriSafe = (src) => src
       .replace(/=/g, '').replace(/[+\/]/g, (m0) => m0 == '+' ? '-' : '_');
   const _tidyB64 = (s) => s.replace(/[^A-Za-z0-9\+\/]/g, '');
@@ -4588,7 +4585,7 @@
   //
   const _toUint8Array = _hasBuffer
       ? (a) => _U8Afrom(Buffer.from(a, 'base64'))
-      : (a) => _U8Afrom(_atob(a), c => c.charCodeAt(0));
+      : (a) => _U8Afrom(_atob(a).split('').map(c => c.charCodeAt(0)));
   /**
    * converts a Base64 string to a Uint8Array.
    */
@@ -5634,7 +5631,7 @@
     onChunkComplete: null,
     onSuccess: null,
     onError: null,
-    _onUploadUrlAvailable: null,
+    onUploadUrlAvailable: null,
     overridePatchMethod: false,
     headers: {},
     addRequestId: false,
@@ -5863,7 +5860,7 @@
                 },
                 // Wait until every partial upload has an upload URL, so we can add
                 // them to the URL storage.
-                _onUploadUrlAvailable: function _onUploadUrlAvailable() {
+                onUploadUrlAvailable: function onUploadUrlAvailable() {
                   _this3._parallelUploadUrls[index] = upload.url; // Test if all uploads have received an URL
 
                   if (_this3._parallelUploadUrls.filter(function (u) {
@@ -6106,8 +6103,8 @@
           }
           _this6.url = resolveUrl(_this6.options.endpoint, location);
           log("Created upload at ".concat(_this6.url));
-          if (typeof _this6.options._onUploadUrlAvailable === 'function') {
-            _this6.options._onUploadUrlAvailable();
+          if (typeof _this6.options.onUploadUrlAvailable === 'function') {
+            _this6.options.onUploadUrlAvailable();
           }
           if (_this6._size === 0) {
             // Nothing to upload and file was successfully created
@@ -6177,8 +6174,8 @@
             _this7._emitHttpError(req, res, 'tus: invalid or missing length value');
             return;
           }
-          if (typeof _this7.options._onUploadUrlAvailable === 'function') {
-            _this7.options._onUploadUrlAvailable();
+          if (typeof _this7.options.onUploadUrlAvailable === 'function') {
+            _this7.options.onUploadUrlAvailable();
           }
           _this7._saveUploadInUrlStorage().then(function () {
             // Upload has already been completed and we do not need to send additional
@@ -6625,9 +6622,13 @@
   try {
     hasStorage = 'localStorage' in window; // Attempt to store and read entries from the local storage to detect Private
     // Mode on Safari on iOS (see #49)
+    // If the key was not used before, we remove it from local storage again to
+    // not cause confusion where the entry came from.
 
     var key = 'tusSupport';
-    localStorage.setItem(key, localStorage.getItem(key));
+    var originalValue = localStorage.getItem(key);
+    localStorage.setItem(key, originalValue);
+    if (originalValue === null) localStorage.removeItem(key);
   } catch (e) {
     // If we try to access localStorage inside a sandboxed iframe, a SecurityError
     // is thrown. When in private mode on iOS Safari, a QuotaExceededError is
