@@ -1,8 +1,9 @@
 ## Changelog
 
-**development version**
+**3.5.0 (4 april 2023)**
 
 - Isssue #614: prevent uploading multiple files for a single file upload (thanks to Krzysztof Kosiorek)
+- Support Django 4.2
 
 **3.4.4 (30 january 2023)**
 
