@@ -1,4 +1,5 @@
 from django.forms import FileField
+from django.forms.widgets import FILE_INPUT_CONTRADICTION
 from django.core import validators
 
 from .widgets import UploadWidget, UploadMultipleWidget
@@ -37,6 +38,10 @@ class UploadedFileField(FileField):
             )
         except TemporaryUploadedFile.DoesNotExist:
             return None
+    def bound_data(self, data, initial):
+        if data in (None, FILE_INPUT_CONTRADICTION):
+            return initial
+        return data
 
 
 class MultipleUploadedFileField(UploadedFileField):
