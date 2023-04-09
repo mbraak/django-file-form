@@ -69,6 +69,9 @@ jobs:
     - name: Build javascript
       working-directory: ./frontend
       run: npm run build
+    - name: Javascript test
+      working-directory: ./frontend
+      run: npm run test
     - name: Create javascript coverage directory
       run: mkdir js_coverage
     - name: Test with coverage

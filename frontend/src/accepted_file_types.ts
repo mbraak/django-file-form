@@ -21,8 +21,8 @@ const parseInputAccept = (inputAccept: string): [string[], string[]] => {
 };
 
 class AcceptedFileTypes {
-  extensions: string[];
-  mimeTypes: string[];
+  private extensions: string[];
+  private mimeTypes: string[];
 
   constructor(inputAccept: string) {
     const [extensions, mimeTypes] = parseInputAccept(inputAccept);
@@ -35,22 +35,21 @@ class AcceptedFileTypes {
     if (this.extensions.length === 0 && this.mimeTypes.length === 0) {
       return true;
     }
-
     return (
       this.isMimeTypeAccepted(mime.getType(fileName)) ||
       this.isExtensionAccepted(fileName)
     );
   }
 
-  private isMimeTypeAccepted(mimeType: string): boolean {
-    if (this.mimeTypes.length === 0) {
+  private isMimeTypeAccepted(mimeType: string | null): boolean {
+    if (!mimeType || this.mimeTypes.length === 0) {
       return false;
     }
 
     return picomatch.isMatch(mimeType, this.mimeTypes);
   }
 
-  public isExtensionAccepted(fileName: string): boolean {
+  private isExtensionAccepted(fileName: string): boolean {
     if (this.extensions.length === 0) {
       return false;
     }
