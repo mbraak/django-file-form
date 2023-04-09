@@ -7,7 +7,7 @@
     "lint": "eslint src/**/*.ts",
     "build": "npm run sass; rollup -c rollup.config.mjs; SKIP_COMPRESS_JS=true rollup -c rollup.config.mjs; COVERAGE=true rollup -c rollup.config.mjs",
     "sass": "sass --no-source-map style/file_form.scss ../django_file_form/static/file_form/file_form.css",
-    "test": "jest",
+    "test": "jest --coverage",
     "test:watch": "jest --watch",
     "tsc": "tsc --noEmit",
     "watch": "rollup -w -c rollup.config.mjs"
