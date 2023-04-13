@@ -194,7 +194,8 @@ class S3Upload extends BaseUpload {
     const candidates = [];
     for (let i = 0; i < this.chunkState.length; i++) {
       const state = this.chunkState[i];
-      if (state.done || state.busy) {
+
+      if (!state || state.done || state.busy) {
         continue;
       }
 
@@ -210,7 +211,11 @@ class S3Upload extends BaseUpload {
   }
 
   private uploadPart(index: number): Promise<void> {
-    this.chunkState[index].busy = true;
+    const state = this.chunkState[index];
+
+    if (state) {
+      state.busy = true;
+    }
 
     if (!this.key || !this.uploadId) {
       return Promise.resolve();
@@ -246,7 +251,11 @@ class S3Upload extends BaseUpload {
   }
 
   private onPartProgress(index: number, sent: number): void {
-    this.chunkState[index].uploaded = sent;
+    const state = this.chunkState[index];
+
+    if (state) {
+      state.uploaded = sent;
+    }
 
     if (this.onProgress) {
       const totalUploaded = this.chunkState.reduce((n, c) => n + c.uploaded, 0);
@@ -255,8 +264,12 @@ class S3Upload extends BaseUpload {
   }
 
   private onPartComplete(index: number, etag: string): void {
-    this.chunkState[index].etag = etag;
-    this.chunkState[index].done = true;
+    const state = this.chunkState[index];
+
+    if (state) {
+      state.etag = etag;
+      state.done = true;
+    }
 
     const part = {
       PartNumber: index + 1,
@@ -285,20 +298,30 @@ class S3Upload extends BaseUpload {
 
     xhr.addEventListener("abort", ev => {
       remove(this.uploading, ev.target);
-      this.chunkState[index].busy = false;
+
+      const state = this.chunkState[index];
+
+      if (state) {
+        state.busy = false;
+      }
     });
 
     xhr.addEventListener("load", ev => {
       const target = ev.target as XMLHttpRequest;
       remove(this.uploading, target);
-      this.chunkState[index].busy = false;
+
+      const state = this.chunkState[index];
+
+      if (state) {
+        state.busy = false;
+      }
 
       if (target.status < 200 || target.status >= 300) {
         this.handleError(new Error("Non 2xx"));
         return;
       }
 
-      this.onPartProgress(index, body.size);
+      this.onPartProgress(index, body?.size || 0);
 
       // NOTE This must be allowed by CORS.
       const etag = target.getResponseHeader("ETag");
@@ -316,7 +339,13 @@ class S3Upload extends BaseUpload {
 
     xhr.addEventListener("error", ev => {
       remove(this.uploading, ev.target);
-      this.chunkState[index].busy = false;
+
+      const state = this.chunkState[index];
+
+      if (state) {
+        state.busy = false;
+      }
+
       const error = new Error("Unknown error");
       // error.source = ev.target
       this.handleError(error);
