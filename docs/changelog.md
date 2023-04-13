@@ -1,5 +1,9 @@
 ## Changelog
 
+**development version**
+
+- Issue #638: handle modelform field without associated file (thanks to Walter Lorenzetti)
+
 **3.5.0 (4 april 2023)**
 
 - Isssue #614: prevent uploading multiple files for a single file upload (thanks to Krzysztof Kosiorek)
