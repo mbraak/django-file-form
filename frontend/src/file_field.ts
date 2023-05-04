@@ -165,7 +165,11 @@ class FileField {
         this.nextUploadIndex += 1;
       });
     } else {
-      addInitialFile(initialFiles[0]);
+      const initialFile = initialFiles[0];
+
+      if (initialFile) {
+        addInitialFile(initialFile);
+      }
     }
   }
 
@@ -180,8 +184,11 @@ class FileField {
       }
 
       this.uploads = [];
+      const file = files[0];
 
-      await this.uploadFile(files[0]);
+      if (file) {
+        await this.uploadFile(file);
+      }
     } else {
       for await (const file of files) {
         await this.uploadFile(file);
@@ -280,7 +287,7 @@ class FileField {
   }
 
   onChange = (e: Event): void => {
-    const files = (e.target as HTMLInputElement).files || [];
+    const files = (e.target as HTMLInputElement).files || ([] as File[]);
     const acceptedFiles: File[] = [];
     const invalidFiles: File[] = [];
 

@@ -166,6 +166,7 @@
     }
     return lastIndex !== index ? html + str.substring(lastIndex, index) : html;
   }
+  var escape = /*@__PURE__*/getDefaultExportFromCjs(escapeHtml_1);
 
   class RenderUploadFile {
     constructor(_ref) {
@@ -209,7 +210,7 @@
       div.appendChild(progressSpan);
       const cancelLink = document.createElement("a");
       cancelLink.className = "dff-cancel";
-      cancelLink.innerHTML = this.translations.Cancel;
+      cancelLink.innerHTML = this.translations.Cancel || "";
       cancelLink.setAttribute("data-index", `${uploadIndex}`);
       cancelLink.href = "#";
       div.appendChild(cancelLink);
@@ -259,15 +260,15 @@
       }
       const dropHint = document.createElement("div");
       dropHint.className = "dff-drop-hint";
-      dropHint.innerHTML = this.translations["Drop your files here"];
+      dropHint.innerHTML = this.translations["Drop your files here"] || "";
       this.container.appendChild(dropHint);
     }
     setDeleteFailed(index) {
-      this.setErrorMessage(index, this.translations["Delete failed"]);
+      this.setErrorMessage(index, this.translations["Delete failed"] || "");
       this.enableDelete(index);
     }
     setError(index) {
-      this.setErrorMessage(index, this.translations["Upload failed"]);
+      this.setErrorMessage(index, this.translations["Upload failed"] || "");
       const el = this.findFileDiv(index);
       if (el) {
         el.classList.add("dff-upload-fail");
@@ -300,7 +301,7 @@
           el.appendChild(fileSizeInfo);
         }
         const deleteLink = document.createElement("a");
-        deleteLink.innerHTML = translations.Delete;
+        deleteLink.innerHTML = translations.Delete || "";
         deleteLink.className = "dff-delete";
         deleteLink.setAttribute("data-index", `${index}`);
         deleteLink.href = "#";
@@ -322,7 +323,7 @@
       const div = document.createElement("div");
       div.className = `dff-file dff-file-id-${uploadIndex}`;
       const nameSpan = document.createElement("span");
-      nameSpan.innerHTML = escapeHtml_1(filename);
+      nameSpan.innerHTML = escape(filename);
       nameSpan.className = "dff-filename";
       nameSpan.setAttribute("data-index", `${uploadIndex}`);
       div.appendChild(nameSpan);
@@ -770,12 +771,7 @@
 
   let Mime = Mime_1;
   var lite = new Mime(standard);
-
-  var picomatchExports = {};
-  var picomatch$2 = {
-    get exports(){ return picomatchExports; },
-    set exports(v){ picomatchExports = v; },
-  };
+  var mime = /*@__PURE__*/getDefaultExportFromCjs(lite);
 
   var check = function (it) {
     return it && it.Math == Math && it;
@@ -808,11 +804,7 @@
     return Object.defineProperty({}, 1, { get: function () { return 7; } })[1] != 7;
   });
 
-  var makeBuiltInExports = {};
-  var makeBuiltIn$2 = {
-    get exports(){ return makeBuiltInExports; },
-    set exports(v){ makeBuiltInExports = v; },
-  };
+  var makeBuiltIn$2 = {exports: {}};
 
   var fails$5 = fails$7;
 
@@ -1155,23 +1147,21 @@
     throw $TypeError$2("Can't convert object to primitive value");
   };
 
-  var sharedExports = {};
-  var shared$3 = {
-    get exports(){ return sharedExports; },
-    set exports(v){ sharedExports = v; },
-  };
+  var shared$3 = {exports: {}};
 
   var store$1 = sharedStore;
 
   (shared$3.exports = function (key, value) {
     return store$1[key] || (store$1[key] = value !== undefined ? value : {});
   })('versions', []).push({
-    version: '3.29.1',
+    version: '3.30.1',
     mode: 'global',
     copyright: '© 2014-2023 Denis Pushkarev (zloirock.ru)',
-    license: 'https://github.com/zloirock/core-js/blob/v3.29.1/LICENSE',
+    license: 'https://github.com/zloirock/core-js/blob/v3.30.1/LICENSE',
     source: 'https://github.com/zloirock/core-js'
   });
+
+  var sharedExports = shared$3.exports;
 
   var uncurryThis$1 = functionUncurryThis;
 
@@ -1311,6 +1301,8 @@
     return keys[key] || (keys[key] = uid(key));
   };
 
+  var hiddenKeys$1 = {};
+
   var NATIVE_WEAK_MAP = weakMapBasicDetection;
   var global$2 = global$a;
   var isObject$1 = isObject$6;
@@ -1318,6 +1310,7 @@
   var hasOwn$1 = hasOwnProperty_1;
   var shared = sharedStore;
   var sharedKey = sharedKey$1;
+  var hiddenKeys = hiddenKeys$1;
 
   var OBJECT_ALREADY_INITIALIZED = 'Object already initialized';
   var TypeError$1 = global$2.TypeError;
@@ -1358,6 +1351,7 @@
     };
   } else {
     var STATE = sharedKey('state');
+    hiddenKeys[STATE] = true;
     set$1 = function (it, metadata) {
       if (hasOwn$1(it, STATE)) throw TypeError$1(OBJECT_ALREADY_INITIALIZED);
       metadata.facade = it;
@@ -1434,6 +1428,8 @@
   Function.prototype.toString = makeBuiltIn$1(function toString() {
     return isCallable(this) && getInternalState(this).source || inspectSource(this);
   }, 'toString');
+
+  var makeBuiltInExports = makeBuiltIn$2.exports;
 
   var makeBuiltIn = makeBuiltInExports;
   var defineProperty = objectDefineProperty;
@@ -3304,10 +3300,10 @@
    * @api public
    */
 
-  const picomatch$1 = function (glob, options) {
+  const picomatch$2 = function (glob, options) {
     let returnState = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
     if (Array.isArray(glob)) {
-      const fns = glob.map(input => picomatch$1(input, options, returnState));
+      const fns = glob.map(input => picomatch$2(input, options, returnState));
       const arrayMatcher = str => {
         for (const isMatch of fns) {
           const state = isMatch(str);
@@ -3323,7 +3319,7 @@
     }
     const opts = options || {};
     const posix = utils.isWindows(options);
-    const regex = isState ? picomatch$1.compileRe(glob, options) : picomatch$1.makeRe(glob, options, false, true);
+    const regex = isState ? picomatch$2.compileRe(glob, options) : picomatch$2.makeRe(glob, options, false, true);
     const state = regex.state;
     delete regex.state;
     let isIgnored = () => false;
@@ -3334,7 +3330,7 @@
         onMatch: null,
         onResult: null
       };
-      isIgnored = picomatch$1(opts.ignore, ignoreOpts, returnState);
+      isIgnored = picomatch$2(opts.ignore, ignoreOpts, returnState);
     }
     const matcher = function (input) {
       let returnObject = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
@@ -3342,7 +3338,7 @@
         isMatch,
         match,
         output
-      } = picomatch$1.test(input, regex, options, {
+      } = picomatch$2.test(input, regex, options, {
         glob,
         posix
       });
@@ -3398,7 +3394,7 @@
    * @api public
    */
 
-  picomatch$1.test = function (input, regex, options) {
+  picomatch$2.test = function (input, regex, options) {
     let {
       glob,
       posix
@@ -3422,7 +3418,7 @@
     }
     if (match === false || opts.capture === true) {
       if (opts.matchBase === true || opts.basename === true) {
-        match = picomatch$1.matchBase(input, regex, options, posix);
+        match = picomatch$2.matchBase(input, regex, options, posix);
       } else {
         match = regex.exec(output);
       }
@@ -3448,9 +3444,9 @@
    * @api public
    */
 
-  picomatch$1.matchBase = function (input, glob, options) {
+  picomatch$2.matchBase = function (input, glob, options) {
     arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : utils.isWindows(options);
-    const regex = glob instanceof RegExp ? glob : picomatch$1.makeRe(glob, options);
+    const regex = glob instanceof RegExp ? glob : picomatch$2.makeRe(glob, options);
     return regex.test(path.basename(input));
   };
 
@@ -3471,7 +3467,7 @@
    * @api public
    */
 
-  picomatch$1.isMatch = (str, patterns, options) => picomatch$1(patterns, options)(str);
+  picomatch$2.isMatch = (str, patterns, options) => picomatch$2(patterns, options)(str);
 
   /**
    * Parse a glob pattern to create the source string for a regular
@@ -3487,8 +3483,8 @@
    * @api public
    */
 
-  picomatch$1.parse = (pattern, options) => {
-    if (Array.isArray(pattern)) return pattern.map(p => picomatch$1.parse(p, options));
+  picomatch$2.parse = (pattern, options) => {
+    if (Array.isArray(pattern)) return pattern.map(p => picomatch$2.parse(p, options));
     return parse(pattern, {
       ...options,
       fastpaths: false
@@ -3522,7 +3518,7 @@
    * @api public
    */
 
-  picomatch$1.scan = (input, options) => scan(input, options);
+  picomatch$2.scan = (input, options) => scan(input, options);
 
   /**
    * Compile a regular expression from the `state` object returned by the
@@ -3536,7 +3532,7 @@
    * @api public
    */
 
-  picomatch$1.compileRe = function (state, options) {
+  picomatch$2.compileRe = function (state, options) {
     let returnOutput = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
     let returnState = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
     if (returnOutput === true) {
@@ -3549,7 +3545,7 @@
     if (state && state.negated === true) {
       source = `^(?!${source}).*$`;
     }
-    const regex = picomatch$1.toRegex(source, options);
+    const regex = picomatch$2.toRegex(source, options);
     if (returnState === true) {
       regex.state = state;
     }
@@ -3575,7 +3571,7 @@
    * @api public
    */
 
-  picomatch$1.makeRe = function (input) {
+  picomatch$2.makeRe = function (input) {
     let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
     let returnOutput = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
     let returnState = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
@@ -3592,7 +3588,7 @@
     if (!parsed.output) {
       parsed = parse(input, options);
     }
-    return picomatch$1.compileRe(parsed, options, returnOutput, returnState);
+    return picomatch$2.compileRe(parsed, options, returnOutput, returnState);
   };
 
   /**
@@ -3612,7 +3608,7 @@
    * @api public
    */
 
-  picomatch$1.toRegex = (source, options) => {
+  picomatch$2.toRegex = (source, options) => {
     try {
       const opts = options || {};
       return new RegExp(source, opts.flags || (opts.nocase ? 'i' : ''));
@@ -3627,19 +3623,16 @@
    * @return {Object}
    */
 
-  picomatch$1.constants = constants;
+  picomatch$2.constants = constants;
 
   /**
    * Expose "picomatch"
    */
 
-  var picomatch_1 = picomatch$1;
+  var picomatch_1 = picomatch$2;
 
-  (function (module) {
-
-    module.exports = picomatch_1;
-  })(picomatch$2);
-  var picomatch = /*@__PURE__*/getDefaultExportFromCjs(picomatchExports);
+  var picomatch = picomatch_1;
+  var picomatch$1 = /*@__PURE__*/getDefaultExportFromCjs(picomatch);
 
   const parseInputAccept = inputAccept => {
     const extensions = [];
@@ -3665,19 +3658,19 @@
       if (this.extensions.length === 0 && this.mimeTypes.length === 0) {
         return true;
       }
-      return this.isMimeTypeAccepted(lite.getType(fileName)) || this.isExtensionAccepted(fileName);
+      return this.isMimeTypeAccepted(mime.getType(fileName)) || this.isExtensionAccepted(fileName);
     }
     isMimeTypeAccepted(mimeType) {
-      if (this.mimeTypes.length === 0) {
+      if (!mimeType || this.mimeTypes.length === 0) {
         return false;
       }
-      return picomatch.isMatch(mimeType, this.mimeTypes);
+      return picomatch$1.isMatch(mimeType, this.mimeTypes);
     }
     isExtensionAccepted(fileName) {
       if (this.extensions.length === 0) {
         return false;
       }
-      return picomatch.isMatch(fileName, this.extensions);
+      return picomatch$1.isMatch(fileName, this.extensions);
     }
   }
 
@@ -4096,7 +4089,7 @@
       const candidates = [];
       for (let i = 0; i < this.chunkState.length; i++) {
         const state = this.chunkState[i];
-        if (state.done || state.busy) {
+        if (!state || state.done || state.busy) {
           continue;
         }
         candidates.push(i);
@@ -4109,7 +4102,10 @@
       });
     }
     uploadPart(index) {
-      this.chunkState[index].busy = true;
+      const state = this.chunkState[index];
+      if (state) {
+        state.busy = true;
+      }
       if (!this.key || !this.uploadId) {
         return Promise.resolve();
       }
@@ -4135,15 +4131,21 @@
       });
     }
     onPartProgress(index, sent) {
-      this.chunkState[index].uploaded = sent;
+      const state = this.chunkState[index];
+      if (state) {
+        state.uploaded = sent;
+      }
       if (this.onProgress) {
         const totalUploaded = this.chunkState.reduce((n, c) => n + c.uploaded, 0);
         this.onProgress(totalUploaded, this.file.size);
       }
     }
     onPartComplete(index, etag) {
-      this.chunkState[index].etag = etag;
-      this.chunkState[index].done = true;
+      const state = this.chunkState[index];
+      if (state) {
+        state.etag = etag;
+        state.done = true;
+      }
       const part = {
         PartNumber: index + 1,
         ETag: etag
@@ -4165,17 +4167,23 @@
       });
       xhr.addEventListener("abort", ev => {
         remove(this.uploading, ev.target);
-        this.chunkState[index].busy = false;
+        const state = this.chunkState[index];
+        if (state) {
+          state.busy = false;
+        }
       });
       xhr.addEventListener("load", ev => {
         const target = ev.target;
         remove(this.uploading, target);
-        this.chunkState[index].busy = false;
+        const state = this.chunkState[index];
+        if (state) {
+          state.busy = false;
+        }
         if (target.status < 200 || target.status >= 300) {
           this.handleError(new Error("Non 2xx"));
           return;
         }
-        this.onPartProgress(index, body.size);
+        this.onPartProgress(index, body?.size || 0);
 
         // NOTE This must be allowed by CORS.
         const etag = target.getResponseHeader("ETag");
@@ -4187,7 +4195,10 @@
       });
       xhr.addEventListener("error", ev => {
         remove(this.uploading, ev.target);
-        this.chunkState[index].busy = false;
+        const state = this.chunkState[index];
+        if (state) {
+          state.busy = false;
+        }
         const error = new Error("Unknown error");
         // error.source = ev.target
         this.handleError(error);
@@ -5317,6 +5328,7 @@
   Url.trimLeft = trimLeft;
   Url.qs = qs;
   var urlParse = Url;
+  var URL = /*@__PURE__*/getDefaultExportFromCjs(urlParse);
 
   function _typeof$1(obj) {
     "@babel/helpers - typeof";
@@ -6518,7 +6530,7 @@
    */
 
   function resolveUrl(origin, link) {
-    return new urlParse(link, origin).toString();
+    return new URL(link, origin).toString();
   }
   /**
    * Calculate the start and end positions for the parts if an upload
@@ -7459,7 +7471,10 @@
             this.renderer.deleteFile(upload.uploadIndex);
           }
           this.uploads = [];
-          await this.uploadFile(files[0]);
+          const file = files[0];
+          if (file) {
+            await this.uploadFile(file);
+          }
         } else {
           for await (const file of files) {
             await this.uploadFile(file);
@@ -7627,7 +7642,10 @@
           this.nextUploadIndex += 1;
         });
       } else {
-        addInitialFile(initialFiles[0]);
+        const initialFile = initialFiles[0];
+        if (initialFile) {
+          addInitialFile(initialFile);
+        }
       }
     }
     async uploadFile(file) {

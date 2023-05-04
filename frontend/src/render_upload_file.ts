@@ -42,7 +42,7 @@ class RenderUploadFile {
 
     const cancelLink = document.createElement("a");
     cancelLink.className = "dff-cancel";
-    cancelLink.innerHTML = this.translations.Cancel;
+    cancelLink.innerHTML = this.translations.Cancel || "";
     cancelLink.setAttribute("data-index", `${uploadIndex}`);
     cancelLink.href = "#";
     div.appendChild(cancelLink);
@@ -109,19 +109,19 @@ class RenderUploadFile {
 
     const dropHint = document.createElement("div");
     dropHint.className = "dff-drop-hint";
-    dropHint.innerHTML = this.translations["Drop your files here"];
+    dropHint.innerHTML = this.translations["Drop your files here"] || "";
 
     this.container.appendChild(dropHint);
   }
 
   public setDeleteFailed(index: number): void {
-    this.setErrorMessage(index, this.translations["Delete failed"]);
+    this.setErrorMessage(index, this.translations["Delete failed"] || "");
 
     this.enableDelete(index);
   }
 
   public setError(index: number): void {
-    this.setErrorMessage(index, this.translations["Upload failed"]);
+    this.setErrorMessage(index, this.translations["Upload failed"] || "");
 
     const el = this.findFileDiv(index);
     if (el) {
@@ -162,7 +162,7 @@ class RenderUploadFile {
       }
 
       const deleteLink = document.createElement("a");
-      deleteLink.innerHTML = translations.Delete;
+      deleteLink.innerHTML = translations.Delete || "";
       deleteLink.className = "dff-delete";
       deleteLink.setAttribute("data-index", `${index}`);
       deleteLink.href = "#";
