@@ -1,6 +1,6 @@
 ## Changelog
 
-**development version**
+**3.5.1 (4 may 2023)**
 
 - Issue #638: handle modelform field without associated file (thanks to Walter Lorenzetti)
 
