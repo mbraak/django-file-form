@@ -10,7 +10,8 @@
     "test": "jest --coverage",
     "test:watch": "jest --watch",
     "tsc": "tsc --noEmit",
-    "watch": "rollup -w -c rollup.config.mjs"
+    "watch": "rollup -w -c rollup.config.mjs",
+    "ci": "npm run lint && npm run tsc && npm run test"
   },
   "repository": {
     "type": "git",
@@ -29,7 +30,7 @@
     "@babel/preset-env": "^7.18.10",
     "@babel/preset-typescript": "^7.18.6",
     "@rollup/plugin-babel": "^6",
-    "@rollup/plugin-commonjs": "^24",
+    "@rollup/plugin-commonjs": "^25",
     "@rollup/plugin-node-resolve": "^15",
     "@rollup/plugin-terser": "^0.4.0",
     "@types/escape-html": "^1.0.2",
