@@ -3,5 +3,5 @@ moto==4.1.8
 Flask==2.2.3
 flask-cors==3.0.10
 psycopg2-binary==2.9.6
-selenium==4.9.0
+selenium==4.9.1
 Werkzeug==2.3.4
