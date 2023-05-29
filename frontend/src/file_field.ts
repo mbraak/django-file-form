@@ -405,9 +405,9 @@ class FileField {
 
     const { onSuccess } = this.callbacks;
 
-    const element = document.getElementsByClassName(
-      `dff-file-id-${upload.uploadIndex}`
-    )[0] as HTMLElement;
+    const element = this.renderer.findFileDiv(
+      upload.uploadIndex
+    ) as HTMLElement;
     this.emitEvent("uploadComplete", element, upload);
 
     if (onSuccess && upload.type === "tus") {
