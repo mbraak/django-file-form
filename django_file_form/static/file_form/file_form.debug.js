@@ -7574,7 +7574,7 @@
         const {
           onSuccess
         } = this.callbacks;
-        const element = document.getElementsByClassName(`dff-file-id-${upload.uploadIndex}`)[0];
+        const element = this.renderer.findFileDiv(upload.uploadIndex);
         this.emitEvent("uploadComplete", element, upload);
         if (onSuccess && upload.type === "tus") {
           onSuccess(upload);
