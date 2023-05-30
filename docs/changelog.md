@@ -1,5 +1,9 @@
 ## Changelog
 
+**development version**
+
+- Issue #667: uploadComplete sends wrong element with multiple file forms on a page
+
 **3.5.1 (4 may 2023)**
 
 - Issue #638: handle modelform field without associated file (thanks to Walter Lorenzetti)
