@@ -3,6 +3,7 @@
 **development version**
 
 - Issue #667: uploadComplete sends wrong element with multiple file forms on a page
+- Issue #669: rename the minified version to file_form.min.js
 
 **3.5.1 (4 may 2023)**
 
