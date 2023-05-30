@@ -10,9 +10,9 @@ const getOutputFilename = () => {
   if (includeCoverage) {
     return "file_form.coverage.js";
   } else if (skipCompressJs) {
-    return "file_form.debug.js";
-  } else {
     return "file_form.js";
+  } else {
+    return "file_form.min.js";
   }
 };
 
