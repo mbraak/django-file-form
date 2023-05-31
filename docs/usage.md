@@ -50,24 +50,21 @@ Import and use `MultipleUploadedFileField` if you intent to add multiple files.
 **6 Include javascript and css in your template**
 
 ```js
-<script src="{% static "file_form/file_form.js" %}"></script>
+<script src="{% static "file_form/file_form.min.min.js" %}"></script>
 <link rel="stylesheet" href="{% static "file_form/file_form.css" %}">
 ```
 
-There is also an uncompressed javascript version: `file_form/file_form.debug.js`.
+There is also an uncompressed javascript version: `file_form/file_form.js`.
 
 **7 Call the initUploadFields javascript function**
 
 ```html
 <form id="example-form" method="POST" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form }}
+  {% csrf_token %} {{ form }}
 </form>
 
 <script>
-   initUploadFields(
-      document.getElementById("example-form")
-   );
+  initUploadFields(document.getElementById("example-form"));
 </script>
 ```
 
@@ -75,10 +72,7 @@ If your form has a prefix, then call `initUploadFields` as follows:
 
 ```js
 // for example, with prefix 'abc'
-initUploadFields(
-  document.getElementById("example-form"),
-  { prefix: 'abc' }
-);
+initUploadFields(document.getElementById("example-form"), { prefix: "abc" });
 ```
 
 See the [Django documentation](https://docs.djangoproject.com/en/2.1/ref/forms/api/#prefixes-for-forms) for more information about form prefixes.
