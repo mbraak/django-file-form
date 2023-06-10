@@ -4,7 +4,7 @@ from django.contrib import admin
 
 from .fields import UploadedFileField
 from .forms import FileFormMixin
-from .util import with_typehint
+from .type_util import with_typehint
 from .widgets import UploadWidget
 
 
