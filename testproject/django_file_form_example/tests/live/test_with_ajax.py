@@ -945,3 +945,5 @@ class LiveTestCase(BaseLiveTestCase):
 
         file_input = page.selenium.find_element(By.NAME, "example-input_file")
         self.assertTrue(file_input.get_attribute("disabled"))
+
+        self.assertEqual(len(page.find_elements_by_text("Drop your files here")), 0)
