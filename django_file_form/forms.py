@@ -4,7 +4,8 @@ import uuid
 from django.urls import reverse
 from django.forms import CharField, Form, HiddenInput
 
-from .type_util import get_list, with_typehint
+from .util import get_list
+from .type_util import with_typehint
 from .uploaded_file import get_initial_data_from_uploaded_file
 
 # UploadedFileField and MultipleUploadedFileField must be in this module because they are in the api
