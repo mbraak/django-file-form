@@ -7,7 +7,9 @@ from django.db import models
 from django.utils import timezone
 from django.utils.module_loading import import_string
 
-from .util import ModelManager, get_upload_path
+from .model_manager import ModelManager
+from .util import get_upload_path
+
 
 # Import uploaded files for backward compatibility
 from .uploaded_file import (

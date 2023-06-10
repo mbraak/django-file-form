@@ -2,18 +2,8 @@ from os.path import normcase, sep
 from pathlib import Path
 from typing import List, Type, TYPE_CHECKING, TypeVar
 from django.core.exceptions import PermissionDenied
-from django.db import models
 from django.conf import settings
 from django.core.exceptions import SuspiciousFileOperation
-
-
-class ModelManager(models.Manager):
-    def try_get(self, **kwargs):
-        qs = self.get_queryset().filter(**kwargs)
-        if qs.exists():
-            return qs.get()
-        else:
-            return None
 
 
 def get_list(v):
