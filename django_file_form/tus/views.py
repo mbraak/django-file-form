@@ -6,7 +6,7 @@ from django.views.decorators.http import require_POST, require_http_methods
 
 from django_file_form import conf
 from django_file_form.models import TemporaryUploadedFile
-from django_file_form.util import get_upload_path, check_permission, safe_join
+from django_file_form.django_util import get_upload_path, check_permission, safe_join
 from .utils import (
     cache,
     create_uploaded_file_in_db,

@@ -20,7 +20,7 @@ class BaseLiveTestCase(StaticLiveServerTestCase):
         options = Options()
         options.headless = True
         options.add_argument("--disable-dev-shm-usage")
-        options.set_capability('goog:loggingPrefs', {"browser": "ALL"})
+        options.set_capability("goog:loggingPrefs", {"browser": "ALL"})
 
         cls.selenium = WebDriver(options=options)
         cls.selenium.implicitly_wait(10)
@@ -47,7 +47,7 @@ class BaseLiveTestCase(StaticLiveServerTestCase):
         write_json(f"js_coverage/{filename}.json", coverage)
 
     def did_test_have_errors(self):
-        return any(error for (_, error) in self._outcome.errors if error)
+        return not self._outcome.success
 
     def tearDown(self):
         try:

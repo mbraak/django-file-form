@@ -10,7 +10,8 @@ from django.conf import settings
 from django.views.generic.base import ContextMixin
 from formtools.wizard.views import SessionWizardView
 
-from django_file_form.util import get_upload_path, with_typehint
+from django_file_form.type_util import with_typehint
+from django_file_form.django_util import get_upload_path
 from django_file_form.uploaded_file import PlaceholderUploadedFile
 
 from . import forms
