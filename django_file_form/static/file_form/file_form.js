@@ -7596,7 +7596,7 @@
       this.prefix = prefix;
       this.retryDelays = retryDelays;
       this.s3UploadDir = s3UploadDir;
-      this.supportDropArea = supportDropArea;
+      this.supportDropArea = supportDropArea && !input.disabled;
       this.uploadUrl = uploadUrl;
       this.acceptedFileTypes = new AcceptedFileTypes(input.accept);
       this.uploads = [];
