@@ -1,36 +1,29 @@
 from pathlib import Path
 from uuid import uuid4
-
-from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.conf import settings
-from selenium.webdriver.chrome.webdriver import WebDriver
-from selenium.webdriver.chrome.options import Options
+from django.test.selenium import SeleniumTestCase, SeleniumTestCaseBase
 
 from .test_utils import write_json
 
 
-class BaseLiveTestCase(StaticLiveServerTestCase):
-    selenium = None
-    page_class = None
+class SeleniumTestMetaClass(SeleniumTestCaseBase):
+    def create_options(self):
+        options = super().create_options()
 
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-
-        options = Options()
-        options.headless = True
         options.add_argument("--disable-dev-shm-usage")
         options.set_capability("goog:loggingPrefs", {"browser": "ALL"})
 
-        cls.selenium = WebDriver(options=options)
-        cls.selenium.implicitly_wait(10)
+        return options
 
-    @classmethod
-    def tearDownClass(cls):
-        cls.selenium.quit()
-        super().tearDownClass()
+
+class BaseLiveTestCase(SeleniumTestCase, metaclass=SeleniumTestMetaClass):
+    browsers = ['chrome']
+    headless = True
+    page_class = None
 
     def setUp(self):
+        super().setUp()
+
         self.page = self.page_class(
             self.selenium, self.live_server_url, self.handle_coverage
         )
