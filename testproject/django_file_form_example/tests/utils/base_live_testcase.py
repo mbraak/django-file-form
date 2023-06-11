@@ -1,6 +1,7 @@
 from pathlib import Path
 from uuid import uuid4
 from django.conf import settings
+from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.test.selenium import SeleniumTestCase, SeleniumTestCaseBase
 
 from .test_utils import write_json
@@ -16,7 +17,7 @@ class SeleniumTestMetaClass(SeleniumTestCaseBase):
         return options
 
 
-class BaseLiveTestCase(SeleniumTestCase, metaclass=SeleniumTestMetaClass):
+class BaseLiveTestCase(SeleniumTestCase, StaticLiveServerTestCase, metaclass=SeleniumTestMetaClass):
     browsers = ['chrome']
     headless = True
     page_class = None
