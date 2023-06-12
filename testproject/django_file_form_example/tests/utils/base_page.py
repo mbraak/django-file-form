@@ -14,6 +14,9 @@ class BasePage(object):
     def assert_page_contains_text(self, text):
         self.selenium.find_element(By.XPATH, f"//*[contains(text(), '{text}')]")
 
+    def find_elements_by_text(self, text):
+        return self.selenium.find_elements(By.XPATH, f"//*[contains(text(), '{text}')]")
+
     def cleanup(self):
         for temp_file in self.temp_files:
             temp_file.destroy()

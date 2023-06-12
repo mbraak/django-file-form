@@ -30,6 +30,27 @@ export interface Callbacks {
   onSuccess?: (upload: BaseUpload) => void;
 }
 
+interface ConstructorParams {
+  callbacks: Callbacks;
+  chunkSize: number;
+  csrfToken: string;
+  eventEmitter?: EventEmitter;
+  fieldName: string;
+  form: Element;
+  formId: string;
+  initial: InitialFile[];
+  input: HTMLInputElement;
+  multiple: boolean;
+  parent: Element;
+  prefix: string | null;
+  retryDelays: number[] | null;
+  s3UploadDir: string | null;
+  skipRequired: boolean;
+  supportDropArea: boolean;
+  translations: Translations;
+  uploadUrl: string;
+}
+
 class FileField {
   acceptedFileTypes: AcceptedFileTypes;
   callbacks: Callbacks;
@@ -68,26 +89,7 @@ class FileField {
     supportDropArea,
     translations,
     uploadUrl
-  }: {
-    callbacks: Callbacks;
-    chunkSize: number;
-    csrfToken: string;
-    eventEmitter?: EventEmitter;
-    fieldName: string;
-    form: Element;
-    formId: string;
-    initial: InitialFile[];
-    input: HTMLInputElement;
-    multiple: boolean;
-    parent: Element;
-    prefix: string | null;
-    retryDelays: number[] | null;
-    s3UploadDir: string | null;
-    skipRequired: boolean;
-    supportDropArea: boolean;
-    translations: Translations;
-    uploadUrl: string;
-  }) {
+  }: ConstructorParams) {
     this.callbacks = callbacks;
     this.chunkSize = chunkSize;
     this.csrfToken = csrfToken;
@@ -99,7 +101,7 @@ class FileField {
     this.prefix = prefix;
     this.retryDelays = retryDelays;
     this.s3UploadDir = s3UploadDir;
-    this.supportDropArea = supportDropArea;
+    this.supportDropArea = supportDropArea && !input.disabled;
     this.uploadUrl = uploadUrl;
     this.acceptedFileTypes = new AcceptedFileTypes(input.accept);
 

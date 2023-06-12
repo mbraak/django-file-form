@@ -253,3 +253,7 @@ def permission_denied(request, exception):
     return HttpResponseForbidden(
         json.dumps(dict(status="permission denied")), content_type="application/json"
     )
+
+
+class DisabledExampleView(ExampleView):
+    form_class = forms.DisabledExampleForm

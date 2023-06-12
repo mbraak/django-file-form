@@ -160,6 +160,24 @@ Django-file-form uses the Django cache for storing data while uploading files.
 - The timeout is configurable using the `FILE_FORM_CACHE_TIMEOUT` setting. See the 'Python settings' section.
 - The cache backed is configurable using `FILE_FORM_CACHE`.
 
+## Disabled property
+
+Make the input disabled by setting the `disabled` attribute.
+
+```python
+class ExampleForm(FileFormMixin, Form):
+    input_file = UploadedFileField(disabled=True)
+```
+
+Also possibe: make the field disabled in the constructor.
+
+```python
+def __init__(self, *args, **kwargs):
+    super().__init__(*args, **kwargs)
+
+    self.fields["input_file"].disabled = True
+```
+
 ## Production
 
 ### Local-memory caching

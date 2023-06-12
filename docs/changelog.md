@@ -1,5 +1,9 @@
 ## Changelog
 
+**development**
+
+- Issue #680: support the disabled property
+
 **3.5.2 (31 may 2023)**
 
 - Issue #667: uploadComplete sends wrong element with multiple file forms on a page

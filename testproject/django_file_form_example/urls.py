@@ -12,6 +12,7 @@ urlpatterns = (
         views.WithCustomWidgetExample.as_view(),
         name="with_custom_widget",
     ),
+    path("disabled", views.DisabledExampleView.as_view(), name="disabled"),
     path("form_set", views.FormSetExampleView.as_view(), name="form_set_example"),
     path("login/", LoginView.as_view(template_name="admin/login.html")),
     path("model_form", views.CreateModelFormView.as_view(), name="model_form_create"),
