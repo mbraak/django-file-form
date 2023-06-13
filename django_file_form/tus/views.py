@@ -1,7 +1,9 @@
 import logging
 import uuid
-
+import json
 from django.views.decorators.http import require_POST, require_http_methods
+from django.core.exceptions import PermissionDenied
+from django.http import HttpResponseForbidden
 
 from django_file_form import conf
 from django_file_form.models import TemporaryUploadedFile
@@ -18,9 +20,32 @@ from .utils import (
 logger = logging.getLogger(__name__)
 
 
+def handle_permissions(request):
+    try:
+        check_permission(request)
+    except PermissionDenied as e:
+        if len(e.args) > 0:
+            message = e.args[0]
+        else:
+            message = None
+
+        return HttpResponseForbidden(
+            json.dumps(
+                dict(
+                    message=message,
+                    status="permission denied"
+                )
+            ),
+            content_type="application/json"
+        )
+
+
 @require_POST
 def start_upload(request):
-    check_permission(request)
+    permission_denied_response = handle_permissions(request)
+
+    if permission_denied_response:
+        return permission_denied_response
 
     response = get_tus_response()
 
@@ -74,7 +99,10 @@ def start_upload(request):
 
 @require_http_methods(["DELETE", "HEAD", "PATCH"])
 def handle_upload(request, resource_id):
-    check_permission(request)
+    permission_denied_response = handle_permissions(request)
+
+    if permission_denied_response:
+        return permission_denied_response
 
     if request.method == "DELETE":
         return cancel_upload(resource_id)
