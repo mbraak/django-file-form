@@ -1,4 +1,5 @@
 import os
+import base64
 from pathlib import Path
 from django.conf import settings
 from django.core.cache import caches
@@ -81,3 +82,15 @@ def get_tus_response():
     response["Cache-Control"] = "no-store"
 
     return response
+
+
+def get_metadata_from_request(request):
+    metadata = {}
+    upload_metadata = request.META.get("HTTP_UPLOAD_METADATA", None)
+
+    if upload_metadata:
+        for kv in upload_metadata.split(","):
+            (key, value) = kv.split(" ")
+            metadata[key] = base64.b64decode(value).decode("utf-8")
+
+    return metadata

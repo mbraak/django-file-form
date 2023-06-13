@@ -1,4 +1,3 @@
-import base64
 import logging
 import uuid
 
@@ -10,6 +9,7 @@ from django_file_form.django_util import get_upload_path, check_permission, safe
 from .utils import (
     cache,
     create_uploaded_file_in_db,
+    get_metadata_from_request,
     get_tus_response,
     remove_resource_from_cache,
 )
@@ -32,13 +32,7 @@ def start_upload(request):
         )
         return response
 
-    metadata = {}
-    upload_metadata = request.META.get("HTTP_UPLOAD_METADATA", None)
-
-    if upload_metadata:
-        for kv in upload_metadata.split(","):
-            (key, value) = kv.split(" ")
-            metadata[key] = base64.b64decode(value).decode("utf-8")
+    metadata = get_metadata_from_request(request)
 
     logger.info(f"TUS post metadata={metadata}")
 
