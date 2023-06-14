@@ -41,7 +41,7 @@ class ViewTests(TestCase):
         response = client.post("/upload/", HTTP_TUS_RESUMABLE=True)
         self.assertEqual(response.status_code, 201)
 
-        re_url_upload_resource = re.compile(r"http://testserver/upload/(.*)")
+        re_url_upload_resource = re.compile(r"/upload/(.*)")
 
         self.assertRegex(response["Location"], re_url_upload_resource)
 
