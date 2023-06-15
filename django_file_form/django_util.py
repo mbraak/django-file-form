@@ -1,16 +1,8 @@
 from os.path import normcase, sep
 from pathlib import Path
 from typing import List
-from django.core.exceptions import PermissionDenied
 from django.conf import settings
 from django.core.exceptions import SuspiciousFileOperation
-
-
-def check_permission(request):
-    must_login = getattr(settings, "FILE_FORM_MUST_LOGIN", False)
-
-    if must_login and not request.user.is_authenticated:
-        raise PermissionDenied()
 
 
 def get_upload_path():

@@ -4,10 +4,12 @@ import json
 from django.views.decorators.http import require_POST, require_http_methods
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseForbidden
+from django.utils.module_loading import import_string
+from django.conf import settings
 
 from django_file_form import conf
 from django_file_form.models import TemporaryUploadedFile
-from django_file_form.django_util import get_upload_path, check_permission, safe_join
+from django_file_form.django_util import get_upload_path, safe_join
 from .utils import (
     cache,
     create_uploaded_file_in_db,
@@ -20,9 +22,22 @@ from .utils import (
 logger = logging.getLogger(__name__)
 
 
-def handle_permissions(request):
+def handle_permissions(request, metadata):
+    check_permissions_setting = getattr(
+        settings,
+        "FILE_FORM_CHECK_PERMISSIONS",
+        "django_file_form.default_check_permissions.check_permissions"
+    )
+
+    if not check_permissions_setting:
+        return
+
+    check_permissions = import_string(check_permissions_setting)
+
     try:
-        check_permission(request)
+        field_name = metadata.get("fieldName", None) if metadata else None
+
+        check_permissions(request, field_name)
     except PermissionDenied as e:
         if len(e.args) > 0:
             message = e.args[0]
@@ -42,7 +57,9 @@ def handle_permissions(request):
 
 @require_POST
 def start_upload(request):
-    permission_denied_response = handle_permissions(request)
+    metadata = get_metadata_from_request(request)
+
+    permission_denied_response = handle_permissions(request, metadata)
 
     if permission_denied_response:
         return permission_denied_response
@@ -56,8 +73,6 @@ def start_upload(request):
             "Received File upload for unsupported file transfer protocol"
         )
         return response
-
-    metadata = get_metadata_from_request(request)
 
     logger.info(f"TUS post metadata={metadata}")
 
@@ -99,7 +114,8 @@ def start_upload(request):
 
 @require_http_methods(["DELETE", "HEAD", "PATCH"])
 def handle_upload(request, resource_id):
-    permission_denied_response = handle_permissions(request)
+    metadata = cache.get("tus-uploads/{}/metadata".format(resource_id))
+    permission_denied_response = handle_permissions(request, metadata)
 
     if permission_denied_response:
         return permission_denied_response
