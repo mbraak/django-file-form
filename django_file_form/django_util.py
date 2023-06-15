@@ -28,14 +28,14 @@ def safe_join(base: Path, *paths: List[str]) -> Path:
     Join one or more path components to the base path component intelligently.
     Return a normalized, absolute version of the final path.
 
-    Raise ValueError if the final path isn't located inside of the base path
+    Raise ValueError if the final path isn't located inside the base path
     component.
     """
     final_path = base.joinpath(*paths).resolve()
     base_path = base.resolve()
 
     # Ensure final_path starts with base_path (using normcase to ensure we
-    # don't false-negative on case insensitive operating systems like Windows),
+    # don't false-negative on case-insensitive operating systems like Windows),
     # further, one of the following conditions must be true:
     #  a) The next character is the path separator (to prevent conditions like
     #     safe_join("/dir", "/../d"))
