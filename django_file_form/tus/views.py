@@ -6,10 +6,11 @@ from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseForbidden
 from django.utils.module_loading import import_string
 from django.conf import settings
+from django.utils._os import safe_join, to_path
 
 from django_file_form import conf
 from django_file_form.models import TemporaryUploadedFile
-from django_file_form.django_util import get_upload_path, safe_join
+from django_file_form.django_util import get_upload_path
 from .utils import (
     cache,
     create_uploaded_file_in_db,
@@ -93,7 +94,7 @@ def start_upload(request):
     )
 
     try:
-        with safe_join(get_upload_path(), resource_id).open("wb") as f:
+        with to_path(safe_join(get_upload_path(), resource_id)).open("wb") as f:
             pass
     except IOError as e:
         logger.error(
@@ -158,7 +159,7 @@ def upload_part(request, resource_id):
     file_offset = int(request.META.get("HTTP_UPLOAD_OFFSET", 0))
     chunk_size = int(request.META.get("CONTENT_LENGTH", 102400))
 
-    upload_file_path = safe_join(get_upload_path(), resource_id)
+    upload_file_path = to_path(safe_join(get_upload_path(), resource_id))
     if filename is None or not upload_file_path.exists():
         response.status_code = 410
         return response
@@ -222,7 +223,7 @@ def cancel_upload(resource_id):
 
     remove_resource_from_cache(resource_id)
 
-    upload_file_path = safe_join(get_upload_path(), resource_id)
+    upload_file_path = to_path(safe_join(get_upload_path(), resource_id))
 
     if upload_file_path.exists():
         upload_file_path.unlink()
