@@ -120,8 +120,11 @@ class RenderUploadFile {
     this.enableDelete(index);
   }
 
-  public setError(index: number): void {
-    this.setErrorMessage(index, this.translations["Upload failed"] || "");
+  public setError(index: number, message?: string): void {
+    this.setErrorMessage(
+      index,
+      message || this.translations["Upload failed"] || ""
+    );
 
     const el = this.findFileDiv(index);
     if (el) {

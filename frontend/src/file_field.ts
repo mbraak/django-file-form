@@ -1,7 +1,8 @@
+import { DetailedError } from "tus-js-client";
+
 import { findInput, getMetadataFieldName, getUploadsFieldName } from "./util";
 import RenderUploadFile from "./render_upload_file";
 import DropArea from "./drop_area";
-
 import S3Upload from "./uploads/s3_upload";
 import EventEmitter from "eventemitter3";
 import { createUploadedFile } from "./uploads/uploaded_file";
@@ -384,7 +385,20 @@ class FileField {
   };
 
   handleError = (upload: BaseUpload, error: Error): void => {
-    this.renderer.setError(upload.uploadIndex);
+    const getMessage = () => {
+      if (error instanceof DetailedError && error.originalResponse) {
+        try {
+          const body = JSON.parse(error.originalResponse.getBody());
+          return body.message as string;
+        } catch {
+          return undefined;
+        }
+      }
+
+      return undefined;
+    };
+
+    this.renderer.setError(upload.uploadIndex, getMessage());
     upload.status = "error";
 
     const { onError } = this.callbacks;
