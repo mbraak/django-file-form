@@ -38,6 +38,7 @@ class UploadedFileField(FileField):
             )
         except TemporaryUploadedFile.DoesNotExist:
             return None
+
     def bound_data(self, data, initial):
         if data in (None, FILE_INPUT_CONTRADICTION):
             return initial
