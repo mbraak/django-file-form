@@ -68,15 +68,20 @@ class FileFormMixin(with_typehint(Form)):
     # new methods
 
     def delete_temporary_files(self):
+        for field_name in self.fields.keys():
+            self.delete_temporary_files_for_field(field_name)
+
+    def delete_temporary_files_for_field(self, field_name):
         form_id = self.data.get(self.add_prefix("form_id"))
 
         if not form_id:
             return
 
-        for field_name, field in self.fields.items():
-            if hasattr(field, "delete_file_data"):
-                prefixed_field_name = self.add_prefix(field_name)
-                field.delete_file_data(prefixed_field_name, form_id)
+        field = self.fields[field_name]
+
+        if hasattr(field, "delete_file_data"):
+            prefixed_field_name = self.add_prefix(field_name)
+            field.delete_file_data(prefixed_field_name, form_id)
 
     # private
 
