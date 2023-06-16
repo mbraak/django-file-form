@@ -1,7 +1,10 @@
 import base64
 import logging
 import uuid
+import json
 
+from django.core.exceptions import PermissionDenied
+from django.http import HttpResponseForbidden
 from django.views.decorators.http import require_POST, require_http_methods
 from django.utils._os import safe_join, to_path
 
@@ -21,7 +24,15 @@ logger = logging.getLogger(__name__)
 
 @require_POST
 def start_upload(request):
-    check_permission(request)
+    try:
+        check_permission(request)
+    except PermissionDenied:
+        return HttpResponseForbidden(
+            json.dumps(
+                dict(status="permission denied")
+            ),
+            content_type="application/json"
+        )
 
     response = get_tus_response()
 
