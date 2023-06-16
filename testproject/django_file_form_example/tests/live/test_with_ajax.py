@@ -938,3 +938,12 @@ class LiveTestCase(BaseLiveTestCase):
         page.assert_page_contains_text(
             "Clicked test_placeholder1.txt on field example-input_file"
         )
+
+    def test_disabled_field(self):
+        page = self.page
+        page.open("/disabled")
+
+        file_input = page.selenium.find_element(By.NAME, "example-input_file")
+        self.assertTrue(file_input.get_attribute("disabled"))
+
+        self.assertEqual(len(page.find_elements_by_text("Drop your files here")), 0)

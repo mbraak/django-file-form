@@ -213,3 +213,10 @@ ExampleMultipleModelS3FormSet = modelformset_factory(
     form=ExampleMultipleModelS3Form,
     extra=2,
 )
+
+
+class DisabledExampleForm(ExampleForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields["input_file"].disabled = True

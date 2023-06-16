@@ -1,36 +1,30 @@
 from pathlib import Path
 from uuid import uuid4
-
-from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.conf import settings
-from selenium.webdriver.chrome.webdriver import WebDriver
-from selenium.webdriver.chrome.options import Options
+from django.contrib.staticfiles.testing import StaticLiveServerTestCase
+from django.test.selenium import SeleniumTestCase, SeleniumTestCaseBase
 
 from .test_utils import write_json
 
 
-class BaseLiveTestCase(StaticLiveServerTestCase):
-    selenium = None
+class SeleniumTestMetaClass(SeleniumTestCaseBase):
+    def create_options(self):
+        options = super().create_options()
+
+        options.add_argument("--disable-dev-shm-usage")
+        options.set_capability("goog:loggingPrefs", {"browser": "ALL"})
+
+        return options
+
+
+class BaseLiveTestCase(SeleniumTestCase, StaticLiveServerTestCase, metaclass=SeleniumTestMetaClass):
+    browsers = ['chrome']
+    headless = True
     page_class = None
 
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-
-        options = Options()
-        options.headless = True
-        options.add_argument("--disable-dev-shm-usage")
-        options.set_capability('goog:loggingPrefs', {"browser": "ALL"})
-
-        cls.selenium = WebDriver(options=options)
-        cls.selenium.implicitly_wait(10)
-
-    @classmethod
-    def tearDownClass(cls):
-        cls.selenium.quit()
-        super().tearDownClass()
-
     def setUp(self):
+        super().setUp()
+
         self.page = self.page_class(
             self.selenium, self.live_server_url, self.handle_coverage
         )
@@ -47,7 +41,7 @@ class BaseLiveTestCase(StaticLiveServerTestCase):
         write_json(f"js_coverage/{filename}.json", coverage)
 
     def did_test_have_errors(self):
-        return any(error for (_, error) in self._outcome.errors if error)
+        return not self._outcome.success
 
     def tearDown(self):
         try:

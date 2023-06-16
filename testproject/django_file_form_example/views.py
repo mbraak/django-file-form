@@ -1,16 +1,16 @@
-import json
 import os
 
 from django.core.files.storage import FileSystemStorage
 from django.db.models.fields.files import FieldFile
-from django.http import HttpResponseForbidden, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.views import generic
 from django.urls import reverse
 from django.conf import settings
 from django.views.generic.base import ContextMixin
 from formtools.wizard.views import SessionWizardView
 
-from django_file_form.util import get_upload_path, with_typehint
+from django_file_form.type_util import with_typehint
+from django_file_form.django_util import get_upload_path
 from django_file_form.uploaded_file import PlaceholderUploadedFile
 
 from . import forms
@@ -248,7 +248,5 @@ class ModelFormMultipleS3SetView(BaseFormView):
     template_name = "form_set.html"
 
 
-def permission_denied(request, exception):
-    return HttpResponseForbidden(
-        json.dumps(dict(status="permission denied")), content_type="application/json"
-    )
+class DisabledExampleView(ExampleView):
+    form_class = forms.DisabledExampleForm

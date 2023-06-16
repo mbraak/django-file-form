@@ -15,7 +15,8 @@ from django_file_form_example.tests.utils.test_utils import (
     remove_test_files,
 )
 from django_file_form.models import TemporaryUploadedFile
-from django_file_form.util import get_list, get_upload_path
+from django_file_form.util import get_list
+from django_file_form.django_util import get_upload_path
 
 
 media_root = Path(settings.MEDIA_ROOT)

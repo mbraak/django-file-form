@@ -1,12 +1,16 @@
 import base64
 import logging
 import uuid
+import json
 
+from django.core.exceptions import PermissionDenied
+from django.http import HttpResponseForbidden
 from django.views.decorators.http import require_POST, require_http_methods
+from django.utils._os import safe_join, to_path
 
 from django_file_form import conf
 from django_file_form.models import TemporaryUploadedFile
-from django_file_form.util import get_upload_path, check_permission, safe_join
+from django_file_form.django_util import get_upload_path, check_permission
 from .utils import (
     cache,
     create_uploaded_file_in_db,
@@ -20,7 +24,15 @@ logger = logging.getLogger(__name__)
 
 @require_POST
 def start_upload(request):
-    check_permission(request)
+    try:
+        check_permission(request)
+    except PermissionDenied:
+        return HttpResponseForbidden(
+            json.dumps(
+                dict(status="permission denied")
+            ),
+            content_type="application/json"
+        )
 
     response = get_tus_response()
 
@@ -59,7 +71,7 @@ def start_upload(request):
     )
 
     try:
-        with safe_join(get_upload_path(), resource_id).open("wb") as f:
+        with to_path(safe_join(get_upload_path(), resource_id)).open("wb") as f:
             pass
     except IOError as e:
         logger.error(
@@ -73,7 +85,7 @@ def start_upload(request):
         return response
 
     response.status_code = 201
-    response["Location"] = "{}{}".format(request.build_absolute_uri(), resource_id)
+    response["Location"] = "{}{}".format(request.get_full_path(), resource_id)
     response["ResourceId"] = resource_id
     return response
 
@@ -120,7 +132,7 @@ def upload_part(request, resource_id):
     file_offset = int(request.META.get("HTTP_UPLOAD_OFFSET", 0))
     chunk_size = int(request.META.get("CONTENT_LENGTH", 102400))
 
-    upload_file_path = safe_join(get_upload_path(), resource_id)
+    upload_file_path = to_path(safe_join(get_upload_path(), resource_id))
     if filename is None or not upload_file_path.exists():
         response.status_code = 410
         return response
@@ -184,7 +196,7 @@ def cancel_upload(resource_id):
 
     remove_resource_from_cache(resource_id)
 
-    upload_file_path = safe_join(get_upload_path(), resource_id)
+    upload_file_path = to_path(safe_join(get_upload_path(), resource_id))
 
     if upload_file_path.exists():
         upload_file_path.unlink()

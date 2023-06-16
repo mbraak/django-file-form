@@ -1,5 +1,10 @@
 ## Changelog
 
+**development**
+
+- Issue #680: support the disabled property
+- Issue #685: use a path for the location header to prevent mixed content issues (thanks to Walter Lorenzetti)
+
 **3.5.2 (31 may 2023)**
 
 - Issue #667: uploadComplete sends wrong element with multiple file forms on a page
