@@ -1,7 +1,7 @@
 cryptography==41.0.1
 moto==4.1.12
 Flask==2.3.2
-flask-cors==3.0.10
+flask-cors==4.0.0
 psycopg2-binary==2.9.6
 selenium==4.10.0
 Werkzeug==2.3.6
