@@ -1064,7 +1064,6 @@
   var engineV8Version = version$1;
 
   /* eslint-disable es/no-symbol -- required for testing */
-
   var V8_VERSION = engineV8Version;
   var fails$2 = fails$7;
   var global$4 = global$b;
@@ -1084,7 +1083,6 @@
   });
 
   /* eslint-disable es/no-symbol -- required for testing */
-
   var NATIVE_SYMBOL$1 = symbolConstructorDetection;
 
   var useSymbolAsUid = NATIVE_SYMBOL$1
@@ -1159,10 +1157,10 @@
   (shared$3.exports = function (key, value) {
     return store$1[key] || (store$1[key] = value !== undefined ? value : {});
   })('versions', []).push({
-    version: '3.31.1',
+    version: '3.32.0',
     mode: 'global',
     copyright: '© 2014-2023 Denis Pushkarev (zloirock.ru)',
-    license: 'https://github.com/zloirock/core-js/blob/v3.31.1/LICENSE',
+    license: 'https://github.com/zloirock/core-js/blob/v3.32.0/LICENSE',
     source: 'https://github.com/zloirock/core-js'
   });
 
