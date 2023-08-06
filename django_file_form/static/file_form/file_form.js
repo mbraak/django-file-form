@@ -20,34 +20,34 @@
     forms.forEach(initUploadFields);
   };
 
-  function _typeof$2(obj) {
+  function _typeof$9(obj) {
     "@babel/helpers - typeof";
 
-    return _typeof$2 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) {
+    return _typeof$9 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) {
       return typeof obj;
     } : function (obj) {
       return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-    }, _typeof$2(obj);
+    }, _typeof$9(obj);
   }
 
-  function _toPrimitive(input, hint) {
-    if (_typeof$2(input) !== "object" || input === null) return input;
+  function _toPrimitive$9(input, hint) {
+    if (_typeof$9(input) !== "object" || input === null) return input;
     var prim = input[Symbol.toPrimitive];
     if (prim !== undefined) {
       var res = prim.call(input, hint || "default");
-      if (_typeof$2(res) !== "object") return res;
+      if (_typeof$9(res) !== "object") return res;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
     return (hint === "string" ? String : Number)(input);
   }
 
-  function _toPropertyKey(arg) {
-    var key = _toPrimitive(arg, "string");
-    return _typeof$2(key) === "symbol" ? key : String(key);
+  function _toPropertyKey$9(arg) {
+    var key = _toPrimitive$9(arg, "string");
+    return _typeof$9(key) === "symbol" ? key : String(key);
   }
 
   function _defineProperty$2(obj, key, value) {
-    key = _toPropertyKey(key);
+    key = _toPropertyKey$9(key);
     if (key in obj) {
       Object.defineProperty(obj, key, {
         value: value,
@@ -5333,14 +5333,14 @@
   var urlParse = Url;
   var URL = /*@__PURE__*/getDefaultExportFromCjs(urlParse);
 
-  function _typeof$1(obj) {
+  function _typeof$8(obj) {
     "@babel/helpers - typeof";
 
-    return _typeof$1 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) {
+    return _typeof$8 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) {
       return typeof obj;
     } : function (obj) {
       return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-    }, _typeof$1(obj);
+    }, _typeof$8(obj);
   }
   function _defineProperties$8(target, props) {
     for (var i = 0; i < props.length; i++) {
@@ -5348,7 +5348,7 @@
       descriptor.enumerable = descriptor.enumerable || false;
       descriptor.configurable = true;
       if ("value" in descriptor) descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
+      Object.defineProperty(target, _toPropertyKey$8(descriptor.key), descriptor);
     }
   }
   function _createClass$8(Constructor, protoProps, staticProps) {
@@ -5358,6 +5358,20 @@
       writable: false
     });
     return Constructor;
+  }
+  function _toPropertyKey$8(arg) {
+    var key = _toPrimitive$8(arg, "string");
+    return _typeof$8(key) === "symbol" ? key : String(key);
+  }
+  function _toPrimitive$8(input, hint) {
+    if (_typeof$8(input) !== "object" || input === null) return input;
+    var prim = input[Symbol.toPrimitive];
+    if (prim !== undefined) {
+      var res = prim.call(input, hint || "default");
+      if (_typeof$8(res) !== "object") return res;
+      throw new TypeError("@@toPrimitive must return a primitive value.");
+    }
+    return (hint === "string" ? String : Number)(input);
   }
   function _classCallCheck$8(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
@@ -5395,7 +5409,7 @@
     };
   }
   function _possibleConstructorReturn$1(self, call) {
-    if (call && (_typeof$1(call) === "object" || typeof call === "function")) {
+    if (call && (_typeof$8(call) === "object" || typeof call === "function")) {
       return call;
     } else if (call !== void 0) {
       throw new TypeError("Derived constructors may only return object or undefined");
@@ -5507,6 +5521,7 @@
   }( /*#__PURE__*/_wrapNativeSuper(Error));
 
   /* eslint no-console: "off" */
+
   function log(msg) {
     return;
   }
@@ -5532,6 +5547,339 @@
     });
   }
 
+  function _regeneratorRuntime$1() {
+
+    /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */
+    _regeneratorRuntime$1 = function _regeneratorRuntime() {
+      return exports;
+    };
+    var exports = {},
+      Op = Object.prototype,
+      hasOwn = Op.hasOwnProperty,
+      defineProperty = Object.defineProperty || function (obj, key, desc) {
+        obj[key] = desc.value;
+      },
+      $Symbol = "function" == typeof Symbol ? Symbol : {},
+      iteratorSymbol = $Symbol.iterator || "@@iterator",
+      asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator",
+      toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
+    function define(obj, key, value) {
+      return Object.defineProperty(obj, key, {
+        value: value,
+        enumerable: !0,
+        configurable: !0,
+        writable: !0
+      }), obj[key];
+    }
+    try {
+      define({}, "");
+    } catch (err) {
+      define = function define(obj, key, value) {
+        return obj[key] = value;
+      };
+    }
+    function wrap(innerFn, outerFn, self, tryLocsList) {
+      var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator,
+        generator = Object.create(protoGenerator.prototype),
+        context = new Context(tryLocsList || []);
+      return defineProperty(generator, "_invoke", {
+        value: makeInvokeMethod(innerFn, self, context)
+      }), generator;
+    }
+    function tryCatch(fn, obj, arg) {
+      try {
+        return {
+          type: "normal",
+          arg: fn.call(obj, arg)
+        };
+      } catch (err) {
+        return {
+          type: "throw",
+          arg: err
+        };
+      }
+    }
+    exports.wrap = wrap;
+    var ContinueSentinel = {};
+    function Generator() {}
+    function GeneratorFunction() {}
+    function GeneratorFunctionPrototype() {}
+    var IteratorPrototype = {};
+    define(IteratorPrototype, iteratorSymbol, function () {
+      return this;
+    });
+    var getProto = Object.getPrototypeOf,
+      NativeIteratorPrototype = getProto && getProto(getProto(values([])));
+    NativeIteratorPrototype && NativeIteratorPrototype !== Op && hasOwn.call(NativeIteratorPrototype, iteratorSymbol) && (IteratorPrototype = NativeIteratorPrototype);
+    var Gp = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(IteratorPrototype);
+    function defineIteratorMethods(prototype) {
+      ["next", "throw", "return"].forEach(function (method) {
+        define(prototype, method, function (arg) {
+          return this._invoke(method, arg);
+        });
+      });
+    }
+    function AsyncIterator(generator, PromiseImpl) {
+      function invoke(method, arg, resolve, reject) {
+        var record = tryCatch(generator[method], generator, arg);
+        if ("throw" !== record.type) {
+          var result = record.arg,
+            value = result.value;
+          return value && "object" == _typeof$7(value) && hasOwn.call(value, "__await") ? PromiseImpl.resolve(value.__await).then(function (value) {
+            invoke("next", value, resolve, reject);
+          }, function (err) {
+            invoke("throw", err, resolve, reject);
+          }) : PromiseImpl.resolve(value).then(function (unwrapped) {
+            result.value = unwrapped, resolve(result);
+          }, function (error) {
+            return invoke("throw", error, resolve, reject);
+          });
+        }
+        reject(record.arg);
+      }
+      var previousPromise;
+      defineProperty(this, "_invoke", {
+        value: function value(method, arg) {
+          function callInvokeWithMethodAndArg() {
+            return new PromiseImpl(function (resolve, reject) {
+              invoke(method, arg, resolve, reject);
+            });
+          }
+          return previousPromise = previousPromise ? previousPromise.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg();
+        }
+      });
+    }
+    function makeInvokeMethod(innerFn, self, context) {
+      var state = "suspendedStart";
+      return function (method, arg) {
+        if ("executing" === state) throw new Error("Generator is already running");
+        if ("completed" === state) {
+          if ("throw" === method) throw arg;
+          return doneResult();
+        }
+        for (context.method = method, context.arg = arg;;) {
+          var delegate = context.delegate;
+          if (delegate) {
+            var delegateResult = maybeInvokeDelegate(delegate, context);
+            if (delegateResult) {
+              if (delegateResult === ContinueSentinel) continue;
+              return delegateResult;
+            }
+          }
+          if ("next" === context.method) context.sent = context._sent = context.arg;else if ("throw" === context.method) {
+            if ("suspendedStart" === state) throw state = "completed", context.arg;
+            context.dispatchException(context.arg);
+          } else "return" === context.method && context.abrupt("return", context.arg);
+          state = "executing";
+          var record = tryCatch(innerFn, self, context);
+          if ("normal" === record.type) {
+            if (state = context.done ? "completed" : "suspendedYield", record.arg === ContinueSentinel) continue;
+            return {
+              value: record.arg,
+              done: context.done
+            };
+          }
+          "throw" === record.type && (state = "completed", context.method = "throw", context.arg = record.arg);
+        }
+      };
+    }
+    function maybeInvokeDelegate(delegate, context) {
+      var methodName = context.method,
+        method = delegate.iterator[methodName];
+      if (undefined === method) return context.delegate = null, "throw" === methodName && delegate.iterator["return"] && (context.method = "return", context.arg = undefined, maybeInvokeDelegate(delegate, context), "throw" === context.method) || "return" !== methodName && (context.method = "throw", context.arg = new TypeError("The iterator does not provide a '" + methodName + "' method")), ContinueSentinel;
+      var record = tryCatch(method, delegate.iterator, context.arg);
+      if ("throw" === record.type) return context.method = "throw", context.arg = record.arg, context.delegate = null, ContinueSentinel;
+      var info = record.arg;
+      return info ? info.done ? (context[delegate.resultName] = info.value, context.next = delegate.nextLoc, "return" !== context.method && (context.method = "next", context.arg = undefined), context.delegate = null, ContinueSentinel) : info : (context.method = "throw", context.arg = new TypeError("iterator result is not an object"), context.delegate = null, ContinueSentinel);
+    }
+    function pushTryEntry(locs) {
+      var entry = {
+        tryLoc: locs[0]
+      };
+      1 in locs && (entry.catchLoc = locs[1]), 2 in locs && (entry.finallyLoc = locs[2], entry.afterLoc = locs[3]), this.tryEntries.push(entry);
+    }
+    function resetTryEntry(entry) {
+      var record = entry.completion || {};
+      record.type = "normal", delete record.arg, entry.completion = record;
+    }
+    function Context(tryLocsList) {
+      this.tryEntries = [{
+        tryLoc: "root"
+      }], tryLocsList.forEach(pushTryEntry, this), this.reset(!0);
+    }
+    function values(iterable) {
+      if (iterable) {
+        var iteratorMethod = iterable[iteratorSymbol];
+        if (iteratorMethod) return iteratorMethod.call(iterable);
+        if ("function" == typeof iterable.next) return iterable;
+        if (!isNaN(iterable.length)) {
+          var i = -1,
+            next = function next() {
+              for (; ++i < iterable.length;) if (hasOwn.call(iterable, i)) return next.value = iterable[i], next.done = !1, next;
+              return next.value = undefined, next.done = !0, next;
+            };
+          return next.next = next;
+        }
+      }
+      return {
+        next: doneResult
+      };
+    }
+    function doneResult() {
+      return {
+        value: undefined,
+        done: !0
+      };
+    }
+    return GeneratorFunction.prototype = GeneratorFunctionPrototype, defineProperty(Gp, "constructor", {
+      value: GeneratorFunctionPrototype,
+      configurable: !0
+    }), defineProperty(GeneratorFunctionPrototype, "constructor", {
+      value: GeneratorFunction,
+      configurable: !0
+    }), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, toStringTagSymbol, "GeneratorFunction"), exports.isGeneratorFunction = function (genFun) {
+      var ctor = "function" == typeof genFun && genFun.constructor;
+      return !!ctor && (ctor === GeneratorFunction || "GeneratorFunction" === (ctor.displayName || ctor.name));
+    }, exports.mark = function (genFun) {
+      return Object.setPrototypeOf ? Object.setPrototypeOf(genFun, GeneratorFunctionPrototype) : (genFun.__proto__ = GeneratorFunctionPrototype, define(genFun, toStringTagSymbol, "GeneratorFunction")), genFun.prototype = Object.create(Gp), genFun;
+    }, exports.awrap = function (arg) {
+      return {
+        __await: arg
+      };
+    }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, asyncIteratorSymbol, function () {
+      return this;
+    }), exports.AsyncIterator = AsyncIterator, exports.async = function (innerFn, outerFn, self, tryLocsList, PromiseImpl) {
+      void 0 === PromiseImpl && (PromiseImpl = Promise);
+      var iter = new AsyncIterator(wrap(innerFn, outerFn, self, tryLocsList), PromiseImpl);
+      return exports.isGeneratorFunction(outerFn) ? iter : iter.next().then(function (result) {
+        return result.done ? result.value : iter.next();
+      });
+    }, defineIteratorMethods(Gp), define(Gp, toStringTagSymbol, "Generator"), define(Gp, iteratorSymbol, function () {
+      return this;
+    }), define(Gp, "toString", function () {
+      return "[object Generator]";
+    }), exports.keys = function (val) {
+      var object = Object(val),
+        keys = [];
+      for (var key in object) keys.push(key);
+      return keys.reverse(), function next() {
+        for (; keys.length;) {
+          var key = keys.pop();
+          if (key in object) return next.value = key, next.done = !1, next;
+        }
+        return next.done = !0, next;
+      };
+    }, exports.values = values, Context.prototype = {
+      constructor: Context,
+      reset: function reset(skipTempReset) {
+        if (this.prev = 0, this.next = 0, this.sent = this._sent = undefined, this.done = !1, this.delegate = null, this.method = "next", this.arg = undefined, this.tryEntries.forEach(resetTryEntry), !skipTempReset) for (var name in this) "t" === name.charAt(0) && hasOwn.call(this, name) && !isNaN(+name.slice(1)) && (this[name] = undefined);
+      },
+      stop: function stop() {
+        this.done = !0;
+        var rootRecord = this.tryEntries[0].completion;
+        if ("throw" === rootRecord.type) throw rootRecord.arg;
+        return this.rval;
+      },
+      dispatchException: function dispatchException(exception) {
+        if (this.done) throw exception;
+        var context = this;
+        function handle(loc, caught) {
+          return record.type = "throw", record.arg = exception, context.next = loc, caught && (context.method = "next", context.arg = undefined), !!caught;
+        }
+        for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+          var entry = this.tryEntries[i],
+            record = entry.completion;
+          if ("root" === entry.tryLoc) return handle("end");
+          if (entry.tryLoc <= this.prev) {
+            var hasCatch = hasOwn.call(entry, "catchLoc"),
+              hasFinally = hasOwn.call(entry, "finallyLoc");
+            if (hasCatch && hasFinally) {
+              if (this.prev < entry.catchLoc) return handle(entry.catchLoc, !0);
+              if (this.prev < entry.finallyLoc) return handle(entry.finallyLoc);
+            } else if (hasCatch) {
+              if (this.prev < entry.catchLoc) return handle(entry.catchLoc, !0);
+            } else {
+              if (!hasFinally) throw new Error("try statement without catch or finally");
+              if (this.prev < entry.finallyLoc) return handle(entry.finallyLoc);
+            }
+          }
+        }
+      },
+      abrupt: function abrupt(type, arg) {
+        for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+          var entry = this.tryEntries[i];
+          if (entry.tryLoc <= this.prev && hasOwn.call(entry, "finallyLoc") && this.prev < entry.finallyLoc) {
+            var finallyEntry = entry;
+            break;
+          }
+        }
+        finallyEntry && ("break" === type || "continue" === type) && finallyEntry.tryLoc <= arg && arg <= finallyEntry.finallyLoc && (finallyEntry = null);
+        var record = finallyEntry ? finallyEntry.completion : {};
+        return record.type = type, record.arg = arg, finallyEntry ? (this.method = "next", this.next = finallyEntry.finallyLoc, ContinueSentinel) : this.complete(record);
+      },
+      complete: function complete(record, afterLoc) {
+        if ("throw" === record.type) throw record.arg;
+        return "break" === record.type || "continue" === record.type ? this.next = record.arg : "return" === record.type ? (this.rval = this.arg = record.arg, this.method = "return", this.next = "end") : "normal" === record.type && afterLoc && (this.next = afterLoc), ContinueSentinel;
+      },
+      finish: function finish(finallyLoc) {
+        for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+          var entry = this.tryEntries[i];
+          if (entry.finallyLoc === finallyLoc) return this.complete(entry.completion, entry.afterLoc), resetTryEntry(entry), ContinueSentinel;
+        }
+      },
+      "catch": function _catch(tryLoc) {
+        for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+          var entry = this.tryEntries[i];
+          if (entry.tryLoc === tryLoc) {
+            var record = entry.completion;
+            if ("throw" === record.type) {
+              var thrown = record.arg;
+              resetTryEntry(entry);
+            }
+            return thrown;
+          }
+        }
+        throw new Error("illegal catch attempt");
+      },
+      delegateYield: function delegateYield(iterable, resultName, nextLoc) {
+        return this.delegate = {
+          iterator: values(iterable),
+          resultName: resultName,
+          nextLoc: nextLoc
+        }, "next" === this.method && (this.arg = undefined), ContinueSentinel;
+      }
+    }, exports;
+  }
+  function asyncGeneratorStep$1(gen, resolve, reject, _next, _throw, key, arg) {
+    try {
+      var info = gen[key](arg);
+      var value = info.value;
+    } catch (error) {
+      reject(error);
+      return;
+    }
+    if (info.done) {
+      resolve(value);
+    } else {
+      Promise.resolve(value).then(_next, _throw);
+    }
+  }
+  function _asyncToGenerator$1(fn) {
+    return function () {
+      var self = this,
+        args = arguments;
+      return new Promise(function (resolve, reject) {
+        var gen = fn.apply(self, args);
+        function _next(value) {
+          asyncGeneratorStep$1(gen, resolve, reject, _next, _throw, "next", value);
+        }
+        function _throw(err) {
+          asyncGeneratorStep$1(gen, resolve, reject, _next, _throw, "throw", err);
+        }
+        _next(undefined);
+      });
+    };
+  }
   function _slicedToArray(arr, i) {
     return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest();
   }
@@ -5548,37 +5896,47 @@
   }
   function _arrayLikeToArray(arr, len) {
     if (len == null || len > arr.length) len = arr.length;
-    for (var i = 0, arr2 = new Array(len); i < len; i++) {
-      arr2[i] = arr[i];
-    }
+    for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i];
     return arr2;
   }
   function _iterableToArrayLimit(arr, i) {
-    var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"];
-    if (_i == null) return;
-    var _arr = [];
-    var _n = true;
-    var _d = false;
-    var _s, _e;
-    try {
-      for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) {
-        _arr.push(_s.value);
-        if (i && _arr.length === i) break;
-      }
-    } catch (err) {
-      _d = true;
-      _e = err;
-    } finally {
+    var _i = null == arr ? null : "undefined" != typeof Symbol && arr[Symbol.iterator] || arr["@@iterator"];
+    if (null != _i) {
+      var _s,
+        _e,
+        _x,
+        _r,
+        _arr = [],
+        _n = !0,
+        _d = !1;
       try {
-        if (!_n && _i["return"] != null) _i["return"]();
+        if (_x = (_i = _i.call(arr)).next, 0 === i) {
+          if (Object(_i) !== _i) return;
+          _n = !1;
+        } else for (; !(_n = (_s = _x.call(_i)).done) && (_arr.push(_s.value), _arr.length !== i); _n = !0);
+      } catch (err) {
+        _d = !0, _e = err;
       } finally {
-        if (_d) throw _e;
+        try {
+          if (!_n && null != _i["return"] && (_r = _i["return"](), Object(_r) !== _r)) return;
+        } finally {
+          if (_d) throw _e;
+        }
       }
+      return _arr;
     }
-    return _arr;
   }
   function _arrayWithHoles(arr) {
     if (Array.isArray(arr)) return arr;
+  }
+  function _typeof$7(obj) {
+    "@babel/helpers - typeof";
+
+    return _typeof$7 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) {
+      return typeof obj;
+    } : function (obj) {
+      return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+    }, _typeof$7(obj);
   }
   function ownKeys$1(object, enumerableOnly) {
     var keys = Object.keys(object);
@@ -5602,6 +5960,7 @@
     return target;
   }
   function _defineProperty$1(obj, key, value) {
+    key = _toPropertyKey$7(key);
     if (key in obj) {
       Object.defineProperty(obj, key, {
         value: value,
@@ -5625,7 +5984,7 @@
       descriptor.enumerable = descriptor.enumerable || false;
       descriptor.configurable = true;
       if ("value" in descriptor) descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
+      Object.defineProperty(target, _toPropertyKey$7(descriptor.key), descriptor);
     }
   }
   function _createClass$7(Constructor, protoProps, staticProps) {
@@ -5635,6 +5994,20 @@
       writable: false
     });
     return Constructor;
+  }
+  function _toPropertyKey$7(arg) {
+    var key = _toPrimitive$7(arg, "string");
+    return _typeof$7(key) === "symbol" ? key : String(key);
+  }
+  function _toPrimitive$7(input, hint) {
+    if (_typeof$7(input) !== "object" || input === null) return input;
+    var prim = input[Symbol.toPrimitive];
+    if (prim !== undefined) {
+      var res = prim.call(input, hint || "default");
+      if (_typeof$7(res) !== "object") return res;
+      throw new TypeError("@@toPrimitive must return a primitive value.");
+    }
+    return (hint === "string" ? String : Number)(input);
   }
   var defaultOptions$1 = {
     endpoint: null,
@@ -5668,50 +6041,67 @@
   var BaseUpload = /*#__PURE__*/function () {
     function BaseUpload(file, options) {
       _classCallCheck$7(this, BaseUpload);
-
       // Warn about removed options from previous versions
       if ('resume' in options) {
         console.log('tus: The `resume` option has been removed in tus-js-client v2. Please use the URL storage API instead.'); // eslint-disable-line no-console
-      } // The default options will already be added from the wrapper classes.
+      }
 
-      this.options = options; // Cast chunkSize to integer
+      // The default options will already be added from the wrapper classes.
+      this.options = options;
 
-      this.options.chunkSize = Number(this.options.chunkSize); // The storage module used to store URLs
+      // Cast chunkSize to integer
+      this.options.chunkSize = Number(this.options.chunkSize);
 
-      this._urlStorage = this.options.urlStorage; // The underlying File/Blob object
+      // The storage module used to store URLs
+      this._urlStorage = this.options.urlStorage;
 
-      this.file = file; // The URL against which the file will be uploaded
+      // The underlying File/Blob object
+      this.file = file;
 
-      this.url = null; // The underlying request object for the current PATCH request
+      // The URL against which the file will be uploaded
+      this.url = null;
 
-      this._req = null; // The fingerpinrt for the current file (set after start())
+      // The underlying request object for the current PATCH request
+      this._req = null;
 
-      this._fingerprint = null; // The key that the URL storage returned when saving an URL with a fingerprint,
+      // The fingerpinrt for the current file (set after start())
+      this._fingerprint = null;
 
-      this._urlStorageKey = null; // The offset used in the current PATCH request
+      // The key that the URL storage returned when saving an URL with a fingerprint,
+      this._urlStorageKey = null;
 
-      this._offset = null; // True if the current PATCH request has been aborted
+      // The offset used in the current PATCH request
+      this._offset = null;
 
-      this._aborted = false; // The file's size in bytes
+      // True if the current PATCH request has been aborted
+      this._aborted = false;
 
-      this._size = null; // The Source object which will wrap around the given file and provides us
+      // The file's size in bytes
+      this._size = null;
+
+      // The Source object which will wrap around the given file and provides us
       // with a unified interface for getting its size and slice chunks from its
       // content allowing us to easily handle Files, Blobs, Buffers and Streams.
+      this._source = null;
 
-      this._source = null; // The current count of attempts which have been made. Zero indicates none.
+      // The current count of attempts which have been made. Zero indicates none.
+      this._retryAttempt = 0;
 
-      this._retryAttempt = 0; // The timeout's ID which is used to delay the next retry
+      // The timeout's ID which is used to delay the next retry
+      this._retryTimeout = null;
 
-      this._retryTimeout = null; // The offset of the remote upload before the latest attempt was started.
+      // The offset of the remote upload before the latest attempt was started.
+      this._offsetBeforeRetry = 0;
 
-      this._offsetBeforeRetry = 0; // An array of BaseUpload instances which are used for uploading the different
+      // An array of BaseUpload instances which are used for uploading the different
       // parts, if the parallelUploads option is used.
+      this._parallelUploads = null;
 
-      this._parallelUploads = null; // An array of upload URLs which are used for uploading the different
+      // An array of upload URLs which are used for uploading the different
       // parts, if the parallelUploads option is used.
-
       this._parallelUploadUrls = null;
     }
+
     /**
      * Use the Termination extension to delete an upload from the server by sending a DELETE
      * request to the specified upload URL. This is only possible if the server supports the
@@ -5722,7 +6112,6 @@
      * @param {object} options Optional options for influencing HTTP requests.
      * @return {Promise} The Promise will be resolved/rejected when the requests finish.
      */
-
     _createClass$7(BaseUpload, [{
       key: "findPreviousUploads",
       value: function findPreviousUploads() {
@@ -5783,10 +6172,11 @@
           }
           return _this2.options.fileReader.openFile(file, _this2.options.chunkSize);
         }).then(function (source) {
-          _this2._source = source; // First, we look at the uploadLengthDeferred option.
+          _this2._source = source;
+
+          // First, we look at the uploadLengthDeferred option.
           // Next, we check if the caller has supplied a manual upload size.
           // Finally, we try to use the calculated size from the source object.
-
           if (_this2.options.uploadLengthDeferred) {
             _this2._size = null;
           } else if (_this2.options.uploadSize != null) {
@@ -5801,9 +6191,10 @@
               _this2._emitError(new Error("tus: cannot automatically derive upload's size from input. Specify it manually using the `uploadSize` option or use the `uploadLengthDeferred` option"));
               return;
             }
-          } // If the upload was configured to use multiple requests or if we resume from
-          // an upload which used multiple requests, we start a parallel upload.
+          }
 
+          // If the upload was configured to use multiple requests or if we resume from
+          // an upload which used multiple requests, we start a parallel upload.
           if (_this2.options.parallelUploads > 1 || _this2._parallelUploadUrls != null) {
             _this2._startParallelUpload();
           } else {
@@ -5813,6 +6204,7 @@
           _this2._emitError(err);
         });
       }
+
       /**
        * Initiate the uploading procedure for a parallelized upload, where one file is split into
        * multiple request which are run in parallel.
@@ -5827,20 +6219,24 @@
         var totalSize = this._size;
         var totalProgress = 0;
         this._parallelUploads = [];
-        var partCount = this._parallelUploadUrls != null ? this._parallelUploadUrls.length : this.options.parallelUploads; // The input file will be split into multiple slices which are uploaded in separate
+        var partCount = this._parallelUploadUrls != null ? this._parallelUploadUrls.length : this.options.parallelUploads;
+
+        // The input file will be split into multiple slices which are uploaded in separate
         // requests. Here we get the start and end position for the slices.
+        var parts = (_this$options$paralle = this.options.parallelUploadBoundaries) !== null && _this$options$paralle !== void 0 ? _this$options$paralle : splitSizeIntoParts(this._source.size, partCount);
 
-        var parts = (_this$options$paralle = this.options.parallelUploadBoundaries) !== null && _this$options$paralle !== void 0 ? _this$options$paralle : splitSizeIntoParts(this._source.size, partCount); // Attach URLs from previous uploads, if available.
-
+        // Attach URLs from previous uploads, if available.
         if (this._parallelUploadUrls) {
           parts.forEach(function (part, index) {
             part.uploadUrl = _this3._parallelUploadUrls[index] || null;
           });
-        } // Create an empty list for storing the upload URLs
+        }
 
-        this._parallelUploadUrls = new Array(parts.length); // Generate a promise for each slice that will be resolve if the respective
+        // Create an empty list for storing the upload URLs
+        this._parallelUploadUrls = new Array(parts.length);
+
+        // Generate a promise for each slice that will be resolve if the respective
         // upload is completed.
-
         var uploads = parts.map(function (part, index) {
           var lastPartProgress = 0;
           return _this3._source.slice(part.start, part.end).then(function (_ref) {
@@ -5876,8 +6272,8 @@
                 // Wait until every partial upload has an upload URL, so we can add
                 // them to the URL storage.
                 onUploadUrlAvailable: function onUploadUrlAvailable() {
-                  _this3._parallelUploadUrls[index] = upload.url; // Test if all uploads have received an URL
-
+                  _this3._parallelUploadUrls[index] = upload.url;
+                  // Test if all uploads have received an URL
                   if (_this3._parallelUploadUrls.filter(function (u) {
                     return Boolean(u);
                   }).length === parts.length) {
@@ -5886,19 +6282,21 @@
                 }
               });
               var upload = new BaseUpload(value, options);
-              upload.start(); // Store the upload in an array, so we can later abort them if necessary.
+              upload.start();
 
+              // Store the upload in an array, so we can later abort them if necessary.
               _this3._parallelUploads.push(upload);
             });
           });
         });
-        var req; // Wait until all partial uploads are finished and we can send the POST request for
+        var req;
+        // Wait until all partial uploads are finished and we can send the POST request for
         // creating the final upload.
-
         Promise.all(uploads).then(function () {
           req = _this3._openRequest('POST', _this3.options.endpoint);
-          req.setHeader('Upload-Concat', "final;".concat(_this3._parallelUploadUrls.join(' '))); // Add metadata if values have been added
+          req.setHeader('Upload-Concat', "final;".concat(_this3._parallelUploadUrls.join(' ')));
 
+          // Add metadata if values have been added
           var metadata = encodeMetadata(_this3.options.metadata);
           if (metadata !== '') {
             req.setHeader('Upload-Metadata', metadata);
@@ -5921,6 +6319,7 @@
           _this3._emitError(err);
         });
       }
+
       /**
        * Initiate the uploading procedure for a non-parallel upload. Here the entire file is
        * uploaded in a sequential matter.
@@ -5933,22 +6332,25 @@
         // Reset the aborted flag when the upload is started or else the
         // _performUpload will stop before sending a request if the upload has been
         // aborted previously.
-        this._aborted = false; // The upload had been started previously and we should reuse this URL.
+        this._aborted = false;
 
+        // The upload had been started previously and we should reuse this URL.
         if (this.url != null) {
           log("Resuming upload from previous URL: ".concat(this.url));
           this._resumeUpload();
           return;
-        } // A URL has manually been specified, so we try to resume
+        }
 
+        // A URL has manually been specified, so we try to resume
         if (this.options.uploadUrl != null) {
           log("Resuming upload from provided URL: ".concat(this.options.uploadUrl));
           this.url = this.options.uploadUrl;
           this._resumeUpload();
           return;
-        } // An upload has not started for the file yet, so we start a new one
+        }
         this._createUpload();
       }
+
       /**
        * Abort any running request and stop the current upload. After abort is called, no event
        * handler will be invoked anymore. You can use the `start` method to resume the upload
@@ -5963,20 +6365,22 @@
       key: "abort",
       value: function abort(shouldTerminate) {
         var _this4 = this;
-
         // Stop any parallel partial uploads, that have been started in _startParallelUploads.
         if (this._parallelUploads != null) {
           this._parallelUploads.forEach(function (upload) {
             upload.abort(shouldTerminate);
           });
-        } // Stop any current running request.
-
-        if (this._req !== null) {
-          this._req.abort(); // Note: We do not close the file source here, so the user can resume in the future.
         }
 
-        this._aborted = true; // Stop any timeout used for initiating a retry.
+        // Stop any current running request.
+        if (this._req !== null) {
+          this._req.abort();
+          // Note: We do not close the file source here, so the user can resume in the future.
+        }
 
+        this._aborted = true;
+
+        // Stop any timeout used for initiating a retry.
         if (this._retryTimeout != null) {
           clearTimeout(this._retryTimeout);
           this._retryTimeout = null;
@@ -5984,7 +6388,8 @@
         if (!shouldTerminate || this.url == null) {
           return Promise.resolve();
         }
-        return BaseUpload.terminate(this.url, this.options) // Remove entry from the URL storage since the upload URL is no longer valid.
+        return BaseUpload.terminate(this.url, this.options)
+        // Remove entry from the URL storage since the upload URL is no longer valid.
         .then(function () {
           return _this4._removeFromUrlStorage();
         });
@@ -5998,10 +6403,10 @@
       key: "_emitError",
       value: function _emitError(err) {
         var _this5 = this;
-
         // Do not emit errors, e.g. from aborted HTTP requests, if the upload has been stopped.
-        if (this._aborted) return; // Check if we should retry, when enabled, before sending the error to the user.
+        if (this._aborted) return;
 
+        // Check if we should retry, when enabled, before sending the error to the user.
         if (this.options.retryDelays != null) {
           // We will reset the attempt counter if
           // - we were already able to connect to the server (offset != null) and
@@ -6025,6 +6430,7 @@
           throw err;
         }
       }
+
       /**
        * Publishes notification if the upload has been successfully completed.
        *
@@ -6042,6 +6448,7 @@
           this.options.onSuccess();
         }
       }
+
       /**
        * Publishes notification when data has been sent to the server. This
        * data may not have been accepted by the server yet.
@@ -6057,6 +6464,7 @@
           this.options.onProgress(bytesSent, bytesTotal);
         }
       }
+
       /**
        * Publishes notification when a chunk of data has been sent to the server
        * and accepted by the server.
@@ -6073,6 +6481,7 @@
           this.options.onChunkComplete(chunkSize, bytesAccepted, bytesTotal);
         }
       }
+
       /**
        * Create a new upload using the creation extension by sending a POST
        * request to the endpoint. After successful creation the file will be
@@ -6093,8 +6502,9 @@
           req.setHeader('Upload-Defer-Length', 1);
         } else {
           req.setHeader('Upload-Length', this._size);
-        } // Add metadata if values have been added
+        }
 
+        // Add metadata if values have been added
         var metadata = encodeMetadata(this.options.metadata);
         if (metadata !== '') {
           req.setHeader('Upload-Metadata', metadata);
@@ -6139,6 +6549,7 @@
           _this6._emitHttpError(req, null, 'tus: failed to create upload', err);
         });
       }
+
       /*
        * Try to resume an existing upload. First a HEAD request will be sent
        * to retrieve the offset. If the request fails a new upload will be
@@ -6173,8 +6584,9 @@
               // Don't attempt to create a new upload if no endpoint is provided.
               _this7._emitHttpError(req, res, 'tus: unable to resume upload (new upload cannot be created without an endpoint)');
               return;
-            } // Try to create a new upload
+            }
 
+            // Try to create a new upload
             _this7.url = null;
             _this7._createUpload();
             return;
@@ -6207,6 +6619,7 @@
           _this7._emitHttpError(req, null, 'tus: failed to resume upload', err);
         });
       }
+
       /**
        * Start uploading the file using PATCH requests. The file will be divided
        * into chunks as specified in the chunkSize option. During the upload
@@ -6218,17 +6631,17 @@
       key: "_performUpload",
       value: function _performUpload() {
         var _this8 = this;
-
         // If the upload has been aborted, we will not send the next PATCH request.
         // This is important if the abort method was called during a callback, such
         // as onChunkComplete or onProgress.
         if (this._aborted) {
           return;
         }
-        var req; // Some browser and servers may not support the PATCH method. For those
+        var req;
+
+        // Some browser and servers may not support the PATCH method. For those
         // cases, you can tell tus-js-client to use a POST request with the
         // X-HTTP-Method-Override header for simulating a PATCH request.
-
         if (this.options.overridePatchMethod) {
           req = this._openRequest('POST', this.url);
           req.setHeader('X-HTTP-Method-Override', 'PATCH');
@@ -6251,6 +6664,7 @@
           _this8._emitHttpError(req, null, "tus: failed to upload chunk at offset ".concat(_this8._offset), err);
         });
       }
+
       /**
        * _addChunktoRequest reads a chunk from the source and sends it using the
        * supplied request object. It will not handle the response.
@@ -6266,23 +6680,35 @@
         req.setProgressHandler(function (bytesSent) {
           _this9._emitProgress(start + bytesSent, _this9._size);
         });
-        req.setHeader('Content-Type', 'application/offset+octet-stream'); // The specified chunkSize may be Infinity or the calcluated end position
+        req.setHeader('Content-Type', 'application/offset+octet-stream');
+
+        // The specified chunkSize may be Infinity or the calcluated end position
         // may exceed the file's size. In both cases, we limit the end position to
         // the input's total size for simpler calculations and correctness.
-
         if ((end === Infinity || end > this._size) && !this.options.uploadLengthDeferred) {
           end = this._size;
         }
         return this._source.slice(start, end).then(function (_ref2) {
           var value = _ref2.value,
             done = _ref2.done;
+          var valueSize = value && value.size ? value.size : 0;
 
           // If the upload length is deferred, the upload size was not specified during
           // upload creation. So, if the file reader is done reading, we know the total
           // upload size and can tell the tus server.
           if (_this9.options.uploadLengthDeferred && done) {
-            _this9._size = _this9._offset + (value && value.size ? value.size : 0);
+            _this9._size = _this9._offset + valueSize;
             req.setHeader('Upload-Length', _this9._size);
+          }
+
+          // The specified uploadSize might not match the actual amount of data that a source
+          // provides. In these cases, we cannot successfully complete the upload, so we
+          // rather error out and let the user know. If not, tus-js-client will be stuck
+          // in a loop of repeating empty PATCH requests.
+          // See https://community.transloadit.com/t/how-to-abort-hanging-companion-uploads/16488/13
+          var newSize = _this9._offset + valueSize;
+          if (!_this9.options.uploadLengthDeferred && done && newSize !== _this9._size) {
+            return Promise.reject(new Error("upload was configured with a size of ".concat(_this9._size, " bytes, but the source is done after ").concat(newSize, " bytes")));
           }
           if (value === null) {
             return _this9._sendRequest(req);
@@ -6291,6 +6717,7 @@
           return _this9._sendRequest(req, value);
         });
       }
+
       /**
        * _handleUploadResponse is used by requests that haven been sent using _addChunkToRequest
        * and already have received a response.
@@ -6316,6 +6743,7 @@
         }
         this._performUpload();
       }
+
       /**
        * Create a new HTTP request object with the given method and URL.
        *
@@ -6328,6 +6756,7 @@
         this._req = req;
         return req;
       }
+
       /**
        * Remove the entry in the URL storage, if it has been saved before.
        *
@@ -6343,6 +6772,7 @@
         });
         this._urlStorageKey = null;
       }
+
       /**
        * Add the upload URL to the URL storage, if possible.
        *
@@ -6352,7 +6782,6 @@
       key: "_saveUploadInUrlStorage",
       value: function _saveUploadInUrlStorage() {
         var _this11 = this;
-
         // We do not store the upload URL
         // - if it was disabled in the option, or
         // - if no fingerprint was calculated for the input (i.e. a stream), or
@@ -6376,6 +6805,7 @@
           _this11._urlStorageKey = urlStorageKey;
         });
       }
+
       /**
        * Send a request with the provided body.
        *
@@ -6404,10 +6834,11 @@
           }
           if (!shouldRetry(err, 0, options)) {
             throw err;
-          } // Instead of keeping track of the retry attempts, we remove the first element from the delays
+          }
+
+          // Instead of keeping track of the retry attempts, we remove the first element from the delays
           // array. If the array is empty, all retry attempts are used up and we will bubble up the error.
           // We recursively call the terminate function will removing elements from the retryDelays array.
-
           var delay = options.retryDelays[0];
           var remainingDelays = options.retryDelays.slice(1);
           var newOptions = _objectSpread$1(_objectSpread$1({}, options), {}, {
@@ -6431,16 +6862,17 @@
       return "".concat(key, " ").concat(gBase64.encode(String(value)));
     }).join(',');
   }
+
   /**
    * Checks whether a given status is in the range of the expected category.
    * For example, only a status between 200 and 299 will satisfy the category 200.
    *
    * @api private
    */
-
   function inStatusCategory(status, category) {
     return status >= category && status < category + 100;
   }
+
   /**
    * Create a new HTTP request with the specified method and URL.
    * The necessary headers that are included in every request
@@ -6448,7 +6880,6 @@
    *
    * @api private
    */
-
   function openRequest(method, url, options) {
     var req = options.httpStack.createRequest(method, url);
     req.setHeader('Tus-Resumable', '1.0.0');
@@ -6465,23 +6896,15 @@
     }
     return req;
   }
+
   /**
    * Send a request with the provided body while invoking the onBeforeRequest
    * and onAfterResponse callbacks.
    *
    * @api private
    */
-
-  function sendRequest(req, body, options) {
-    var onBeforeRequestPromise = typeof options.onBeforeRequest === 'function' ? Promise.resolve(options.onBeforeRequest(req)) : Promise.resolve();
-    return onBeforeRequestPromise.then(function () {
-      return req.send(body).then(function (res) {
-        var onAfterResponsePromise = typeof options.onAfterResponse === 'function' ? Promise.resolve(options.onAfterResponse(req, res)) : Promise.resolve();
-        return onAfterResponsePromise.then(function () {
-          return res;
-        });
-      });
-    });
+  function sendRequest(_x2, _x3, _x4) {
+    return _sendRequest2.apply(this, arguments);
   }
   /**
    * Checks whether the browser running this code has internet access.
@@ -6489,16 +6912,52 @@
    *
    * @api private
    */
-
+  function _sendRequest2() {
+    _sendRequest2 = _asyncToGenerator$1( /*#__PURE__*/_regeneratorRuntime$1().mark(function _callee(req, body, options) {
+      var res;
+      return _regeneratorRuntime$1().wrap(function _callee$(_context) {
+        while (1) switch (_context.prev = _context.next) {
+          case 0:
+            if (!(typeof options.onBeforeRequest === 'function')) {
+              _context.next = 3;
+              break;
+            }
+            _context.next = 3;
+            return options.onBeforeRequest(req);
+          case 3:
+            _context.next = 5;
+            return req.send(body);
+          case 5:
+            res = _context.sent;
+            if (!(typeof options.onAfterResponse === 'function')) {
+              _context.next = 9;
+              break;
+            }
+            _context.next = 9;
+            return options.onAfterResponse(req, res);
+          case 9:
+            return _context.abrupt("return", res);
+          case 10:
+          case "end":
+            return _context.stop();
+        }
+      }, _callee);
+    }));
+    return _sendRequest2.apply(this, arguments);
+  }
   function isOnline() {
     var online = true;
-    if (typeof window !== 'undefined' && 'navigator' in window // eslint-disable-line no-undef
-    && window.navigator.onLine === false) {
+    if (typeof window !== 'undefined' &&
+    // eslint-disable-next-line no-undef
+    'navigator' in window &&
+    // eslint-disable-next-line no-undef
+    window.navigator.onLine === false) {
       // eslint-disable-line no-undef
       online = false;
     }
     return online;
   }
+
   /**
    * Checks whether or not it is ok to retry a request.
    * @param {Error} err the error returned from the last request
@@ -6507,7 +6966,6 @@
    *
    * @api private
    */
-
   function shouldRetry(err, retryAttempt, options) {
     // We only attempt a retry if
     // - retryDelays option is set
@@ -6525,16 +6983,17 @@
     var status = err.originalResponse ? err.originalResponse.getStatus() : 0;
     return (!inStatusCategory(status, 400) || status === 409 || status === 423) && isOnline();
   }
+
   /**
    * Resolve a relative link given the origin as source. For example,
    * if a HTTP request to http://example.com/files/ returns a Location
    * header with the value /upload/abc, the resolved URL will be:
    * http://example.com/upload/abc
    */
-
   function resolveUrl(origin, link) {
     return new URL(link, origin).toString();
   }
+
   /**
    * Calculate the start and end positions for the parts if an upload
    * is split into multiple parallel requests.
@@ -6544,7 +7003,6 @@
    * @return {object[]}
    * @api private
    */
-
   function splitSizeIntoParts(totalSize, partCount) {
     var partSize = Math.floor(totalSize / partCount);
     var parts = [];
@@ -6559,6 +7017,15 @@
   }
   BaseUpload.defaultOptions = defaultOptions$1;
 
+  function _typeof$6(obj) {
+    "@babel/helpers - typeof";
+
+    return _typeof$6 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) {
+      return typeof obj;
+    } : function (obj) {
+      return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+    }, _typeof$6(obj);
+  }
   function _classCallCheck$6(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
@@ -6570,7 +7037,7 @@
       descriptor.enumerable = descriptor.enumerable || false;
       descriptor.configurable = true;
       if ("value" in descriptor) descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
+      Object.defineProperty(target, _toPropertyKey$6(descriptor.key), descriptor);
     }
   }
   function _createClass$6(Constructor, protoProps, staticProps) {
@@ -6581,7 +7048,20 @@
     });
     return Constructor;
   }
-
+  function _toPropertyKey$6(arg) {
+    var key = _toPrimitive$6(arg, "string");
+    return _typeof$6(key) === "symbol" ? key : String(key);
+  }
+  function _toPrimitive$6(input, hint) {
+    if (_typeof$6(input) !== "object" || input === null) return input;
+    var prim = input[Symbol.toPrimitive];
+    if (prim !== undefined) {
+      var res = prim.call(input, hint || "default");
+      if (_typeof$6(res) !== "object") return res;
+      throw new TypeError("@@toPrimitive must return a primitive value.");
+    }
+    return (hint === "string" ? String : Number)(input);
+  }
   /* eslint no-unused-vars: "off" */
   var NoopUrlStorage = /*#__PURE__*/function () {
     function NoopUrlStorage() {
@@ -6611,6 +7091,15 @@
     return NoopUrlStorage;
   }();
 
+  function _typeof$5(obj) {
+    "@babel/helpers - typeof";
+
+    return _typeof$5 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) {
+      return typeof obj;
+    } : function (obj) {
+      return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+    }, _typeof$5(obj);
+  }
   function _classCallCheck$5(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
@@ -6622,7 +7111,7 @@
       descriptor.enumerable = descriptor.enumerable || false;
       descriptor.configurable = true;
       if ("value" in descriptor) descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
+      Object.defineProperty(target, _toPropertyKey$5(descriptor.key), descriptor);
     }
   }
   function _createClass$5(Constructor, protoProps, staticProps) {
@@ -6633,13 +7122,28 @@
     });
     return Constructor;
   }
+  function _toPropertyKey$5(arg) {
+    var key = _toPrimitive$5(arg, "string");
+    return _typeof$5(key) === "symbol" ? key : String(key);
+  }
+  function _toPrimitive$5(input, hint) {
+    if (_typeof$5(input) !== "object" || input === null) return input;
+    var prim = input[Symbol.toPrimitive];
+    if (prim !== undefined) {
+      var res = prim.call(input, hint || "default");
+      if (_typeof$5(res) !== "object") return res;
+      throw new TypeError("@@toPrimitive must return a primitive value.");
+    }
+    return (hint === "string" ? String : Number)(input);
+  }
   var hasStorage = false;
   try {
-    hasStorage = 'localStorage' in window; // Attempt to store and read entries from the local storage to detect Private
+    hasStorage = 'localStorage' in window;
+
+    // Attempt to store and read entries from the local storage to detect Private
     // Mode on Safari on iOS (see #49)
     // If the key was not used before, we remove it from local storage again to
     // not cause confusion where the entry came from.
-
     var key = 'tusSupport';
     var originalValue = localStorage.getItem(key);
     localStorage.setItem(key, originalValue);
@@ -6696,7 +7200,8 @@
             var upload = JSON.parse(localStorage.getItem(_key));
             upload.urlStorageKey = _key;
             results.push(upload);
-          } catch (e) {// The JSON parse error is intentionally ignored here, so a malformed
+          } catch (e) {
+            // The JSON parse error is intentionally ignored here, so a malformed
             // entry in the storage cannot prevent an upload.
           }
         }
@@ -6706,6 +7211,15 @@
     return WebStorageUrlStorage;
   }();
 
+  function _typeof$4(obj) {
+    "@babel/helpers - typeof";
+
+    return _typeof$4 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) {
+      return typeof obj;
+    } : function (obj) {
+      return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+    }, _typeof$4(obj);
+  }
   function _classCallCheck$4(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
@@ -6717,7 +7231,7 @@
       descriptor.enumerable = descriptor.enumerable || false;
       descriptor.configurable = true;
       if ("value" in descriptor) descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
+      Object.defineProperty(target, _toPropertyKey$4(descriptor.key), descriptor);
     }
   }
   function _createClass$4(Constructor, protoProps, staticProps) {
@@ -6728,7 +7242,20 @@
     });
     return Constructor;
   }
-
+  function _toPropertyKey$4(arg) {
+    var key = _toPrimitive$4(arg, "string");
+    return _typeof$4(key) === "symbol" ? key : String(key);
+  }
+  function _toPrimitive$4(input, hint) {
+    if (_typeof$4(input) !== "object" || input === null) return input;
+    var prim = input[Symbol.toPrimitive];
+    if (prim !== undefined) {
+      var res = prim.call(input, hint || "default");
+      if (_typeof$4(res) !== "object") return res;
+      throw new TypeError("@@toPrimitive must return a primitive value.");
+    }
+    return (hint === "string" ? String : Number)(input);
+  }
   /* eslint-disable max-classes-per-file */
   var XHRHttpStack = /*#__PURE__*/function () {
     function XHRHttpStack() {
@@ -6899,6 +7426,15 @@
     });
   }
 
+  function _typeof$3(obj) {
+    "@babel/helpers - typeof";
+
+    return _typeof$3 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) {
+      return typeof obj;
+    } : function (obj) {
+      return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+    }, _typeof$3(obj);
+  }
   function _classCallCheck$3(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
@@ -6910,7 +7446,7 @@
       descriptor.enumerable = descriptor.enumerable || false;
       descriptor.configurable = true;
       if ("value" in descriptor) descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
+      Object.defineProperty(target, _toPropertyKey$3(descriptor.key), descriptor);
     }
   }
   function _createClass$3(Constructor, protoProps, staticProps) {
@@ -6920,6 +7456,20 @@
       writable: false
     });
     return Constructor;
+  }
+  function _toPropertyKey$3(arg) {
+    var key = _toPrimitive$3(arg, "string");
+    return _typeof$3(key) === "symbol" ? key : String(key);
+  }
+  function _toPrimitive$3(input, hint) {
+    if (_typeof$3(input) !== "object" || input === null) return input;
+    var prim = input[Symbol.toPrimitive];
+    if (prim !== undefined) {
+      var res = prim.call(input, hint || "default");
+      if (_typeof$3(res) !== "object") return res;
+      throw new TypeError("@@toPrimitive must return a primitive value.");
+    }
+    return (hint === "string" ? String : Number)(input);
   }
   var FileSource = /*#__PURE__*/function () {
     // Make this.size a method
@@ -6938,18 +7488,30 @@
           return readAsByteArray(this._file.slice(start, end));
         }
         var value = this._file.slice(start, end);
+        var done = end >= this.size;
         return Promise.resolve({
-          value: value
+          value: value,
+          done: done
         });
       }
     }, {
       key: "close",
-      value: function close() {// Nothing to do here since we don't need to release any resources.
+      value: function close() {
+        // Nothing to do here since we don't need to release any resources.
       }
     }]);
     return FileSource;
   }();
 
+  function _typeof$2(obj) {
+    "@babel/helpers - typeof";
+
+    return _typeof$2 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) {
+      return typeof obj;
+    } : function (obj) {
+      return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+    }, _typeof$2(obj);
+  }
   function _classCallCheck$2(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
@@ -6961,7 +7523,7 @@
       descriptor.enumerable = descriptor.enumerable || false;
       descriptor.configurable = true;
       if ("value" in descriptor) descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
+      Object.defineProperty(target, _toPropertyKey$2(descriptor.key), descriptor);
     }
   }
   function _createClass$2(Constructor, protoProps, staticProps) {
@@ -6972,16 +7534,30 @@
     });
     return Constructor;
   }
+  function _toPropertyKey$2(arg) {
+    var key = _toPrimitive$2(arg, "string");
+    return _typeof$2(key) === "symbol" ? key : String(key);
+  }
+  function _toPrimitive$2(input, hint) {
+    if (_typeof$2(input) !== "object" || input === null) return input;
+    var prim = input[Symbol.toPrimitive];
+    if (prim !== undefined) {
+      var res = prim.call(input, hint || "default");
+      if (_typeof$2(res) !== "object") return res;
+      throw new TypeError("@@toPrimitive must return a primitive value.");
+    }
+    return (hint === "string" ? String : Number)(input);
+  }
   function len(blobOrArray) {
     if (blobOrArray === undefined) return 0;
     if (blobOrArray.size !== undefined) return blobOrArray.size;
     return blobOrArray.length;
   }
+
   /*
     Typed arrays and blobs don't have a concat method.
     This function helps StreamSource accumulate data to reach chunkSize.
   */
-
   function concat(a, b) {
     if (a.concat) {
       // Is `a` an Array?
@@ -7052,14 +7628,14 @@
         if (start > this._bufferOffset) {
           this._buffer = this._buffer.slice(start - this._bufferOffset);
           this._bufferOffset = start;
-        } // If the buffer is empty after removing old data, all data has been read.
-
+        }
+        // If the buffer is empty after removing old data, all data has been read.
         var hasAllDataBeenRead = len(this._buffer) === 0;
         if (this._done && hasAllDataBeenRead) {
           return null;
-        } // We already removed data before `start`, so we just return the first
+        }
+        // We already removed data before `start`, so we just return the first
         // chunk from the buffer.
-
         return this._buffer.slice(0, end - start);
       }
     }, {
@@ -7073,6 +7649,348 @@
     return StreamSource;
   }();
 
+  function _typeof$1(obj) {
+    "@babel/helpers - typeof";
+
+    return _typeof$1 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) {
+      return typeof obj;
+    } : function (obj) {
+      return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+    }, _typeof$1(obj);
+  }
+  function _regeneratorRuntime() {
+
+    /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */
+    _regeneratorRuntime = function _regeneratorRuntime() {
+      return exports;
+    };
+    var exports = {},
+      Op = Object.prototype,
+      hasOwn = Op.hasOwnProperty,
+      defineProperty = Object.defineProperty || function (obj, key, desc) {
+        obj[key] = desc.value;
+      },
+      $Symbol = "function" == typeof Symbol ? Symbol : {},
+      iteratorSymbol = $Symbol.iterator || "@@iterator",
+      asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator",
+      toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
+    function define(obj, key, value) {
+      return Object.defineProperty(obj, key, {
+        value: value,
+        enumerable: !0,
+        configurable: !0,
+        writable: !0
+      }), obj[key];
+    }
+    try {
+      define({}, "");
+    } catch (err) {
+      define = function define(obj, key, value) {
+        return obj[key] = value;
+      };
+    }
+    function wrap(innerFn, outerFn, self, tryLocsList) {
+      var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator,
+        generator = Object.create(protoGenerator.prototype),
+        context = new Context(tryLocsList || []);
+      return defineProperty(generator, "_invoke", {
+        value: makeInvokeMethod(innerFn, self, context)
+      }), generator;
+    }
+    function tryCatch(fn, obj, arg) {
+      try {
+        return {
+          type: "normal",
+          arg: fn.call(obj, arg)
+        };
+      } catch (err) {
+        return {
+          type: "throw",
+          arg: err
+        };
+      }
+    }
+    exports.wrap = wrap;
+    var ContinueSentinel = {};
+    function Generator() {}
+    function GeneratorFunction() {}
+    function GeneratorFunctionPrototype() {}
+    var IteratorPrototype = {};
+    define(IteratorPrototype, iteratorSymbol, function () {
+      return this;
+    });
+    var getProto = Object.getPrototypeOf,
+      NativeIteratorPrototype = getProto && getProto(getProto(values([])));
+    NativeIteratorPrototype && NativeIteratorPrototype !== Op && hasOwn.call(NativeIteratorPrototype, iteratorSymbol) && (IteratorPrototype = NativeIteratorPrototype);
+    var Gp = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(IteratorPrototype);
+    function defineIteratorMethods(prototype) {
+      ["next", "throw", "return"].forEach(function (method) {
+        define(prototype, method, function (arg) {
+          return this._invoke(method, arg);
+        });
+      });
+    }
+    function AsyncIterator(generator, PromiseImpl) {
+      function invoke(method, arg, resolve, reject) {
+        var record = tryCatch(generator[method], generator, arg);
+        if ("throw" !== record.type) {
+          var result = record.arg,
+            value = result.value;
+          return value && "object" == _typeof$1(value) && hasOwn.call(value, "__await") ? PromiseImpl.resolve(value.__await).then(function (value) {
+            invoke("next", value, resolve, reject);
+          }, function (err) {
+            invoke("throw", err, resolve, reject);
+          }) : PromiseImpl.resolve(value).then(function (unwrapped) {
+            result.value = unwrapped, resolve(result);
+          }, function (error) {
+            return invoke("throw", error, resolve, reject);
+          });
+        }
+        reject(record.arg);
+      }
+      var previousPromise;
+      defineProperty(this, "_invoke", {
+        value: function value(method, arg) {
+          function callInvokeWithMethodAndArg() {
+            return new PromiseImpl(function (resolve, reject) {
+              invoke(method, arg, resolve, reject);
+            });
+          }
+          return previousPromise = previousPromise ? previousPromise.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg();
+        }
+      });
+    }
+    function makeInvokeMethod(innerFn, self, context) {
+      var state = "suspendedStart";
+      return function (method, arg) {
+        if ("executing" === state) throw new Error("Generator is already running");
+        if ("completed" === state) {
+          if ("throw" === method) throw arg;
+          return doneResult();
+        }
+        for (context.method = method, context.arg = arg;;) {
+          var delegate = context.delegate;
+          if (delegate) {
+            var delegateResult = maybeInvokeDelegate(delegate, context);
+            if (delegateResult) {
+              if (delegateResult === ContinueSentinel) continue;
+              return delegateResult;
+            }
+          }
+          if ("next" === context.method) context.sent = context._sent = context.arg;else if ("throw" === context.method) {
+            if ("suspendedStart" === state) throw state = "completed", context.arg;
+            context.dispatchException(context.arg);
+          } else "return" === context.method && context.abrupt("return", context.arg);
+          state = "executing";
+          var record = tryCatch(innerFn, self, context);
+          if ("normal" === record.type) {
+            if (state = context.done ? "completed" : "suspendedYield", record.arg === ContinueSentinel) continue;
+            return {
+              value: record.arg,
+              done: context.done
+            };
+          }
+          "throw" === record.type && (state = "completed", context.method = "throw", context.arg = record.arg);
+        }
+      };
+    }
+    function maybeInvokeDelegate(delegate, context) {
+      var methodName = context.method,
+        method = delegate.iterator[methodName];
+      if (undefined === method) return context.delegate = null, "throw" === methodName && delegate.iterator["return"] && (context.method = "return", context.arg = undefined, maybeInvokeDelegate(delegate, context), "throw" === context.method) || "return" !== methodName && (context.method = "throw", context.arg = new TypeError("The iterator does not provide a '" + methodName + "' method")), ContinueSentinel;
+      var record = tryCatch(method, delegate.iterator, context.arg);
+      if ("throw" === record.type) return context.method = "throw", context.arg = record.arg, context.delegate = null, ContinueSentinel;
+      var info = record.arg;
+      return info ? info.done ? (context[delegate.resultName] = info.value, context.next = delegate.nextLoc, "return" !== context.method && (context.method = "next", context.arg = undefined), context.delegate = null, ContinueSentinel) : info : (context.method = "throw", context.arg = new TypeError("iterator result is not an object"), context.delegate = null, ContinueSentinel);
+    }
+    function pushTryEntry(locs) {
+      var entry = {
+        tryLoc: locs[0]
+      };
+      1 in locs && (entry.catchLoc = locs[1]), 2 in locs && (entry.finallyLoc = locs[2], entry.afterLoc = locs[3]), this.tryEntries.push(entry);
+    }
+    function resetTryEntry(entry) {
+      var record = entry.completion || {};
+      record.type = "normal", delete record.arg, entry.completion = record;
+    }
+    function Context(tryLocsList) {
+      this.tryEntries = [{
+        tryLoc: "root"
+      }], tryLocsList.forEach(pushTryEntry, this), this.reset(!0);
+    }
+    function values(iterable) {
+      if (iterable) {
+        var iteratorMethod = iterable[iteratorSymbol];
+        if (iteratorMethod) return iteratorMethod.call(iterable);
+        if ("function" == typeof iterable.next) return iterable;
+        if (!isNaN(iterable.length)) {
+          var i = -1,
+            next = function next() {
+              for (; ++i < iterable.length;) if (hasOwn.call(iterable, i)) return next.value = iterable[i], next.done = !1, next;
+              return next.value = undefined, next.done = !0, next;
+            };
+          return next.next = next;
+        }
+      }
+      return {
+        next: doneResult
+      };
+    }
+    function doneResult() {
+      return {
+        value: undefined,
+        done: !0
+      };
+    }
+    return GeneratorFunction.prototype = GeneratorFunctionPrototype, defineProperty(Gp, "constructor", {
+      value: GeneratorFunctionPrototype,
+      configurable: !0
+    }), defineProperty(GeneratorFunctionPrototype, "constructor", {
+      value: GeneratorFunction,
+      configurable: !0
+    }), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, toStringTagSymbol, "GeneratorFunction"), exports.isGeneratorFunction = function (genFun) {
+      var ctor = "function" == typeof genFun && genFun.constructor;
+      return !!ctor && (ctor === GeneratorFunction || "GeneratorFunction" === (ctor.displayName || ctor.name));
+    }, exports.mark = function (genFun) {
+      return Object.setPrototypeOf ? Object.setPrototypeOf(genFun, GeneratorFunctionPrototype) : (genFun.__proto__ = GeneratorFunctionPrototype, define(genFun, toStringTagSymbol, "GeneratorFunction")), genFun.prototype = Object.create(Gp), genFun;
+    }, exports.awrap = function (arg) {
+      return {
+        __await: arg
+      };
+    }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, asyncIteratorSymbol, function () {
+      return this;
+    }), exports.AsyncIterator = AsyncIterator, exports.async = function (innerFn, outerFn, self, tryLocsList, PromiseImpl) {
+      void 0 === PromiseImpl && (PromiseImpl = Promise);
+      var iter = new AsyncIterator(wrap(innerFn, outerFn, self, tryLocsList), PromiseImpl);
+      return exports.isGeneratorFunction(outerFn) ? iter : iter.next().then(function (result) {
+        return result.done ? result.value : iter.next();
+      });
+    }, defineIteratorMethods(Gp), define(Gp, toStringTagSymbol, "Generator"), define(Gp, iteratorSymbol, function () {
+      return this;
+    }), define(Gp, "toString", function () {
+      return "[object Generator]";
+    }), exports.keys = function (val) {
+      var object = Object(val),
+        keys = [];
+      for (var key in object) keys.push(key);
+      return keys.reverse(), function next() {
+        for (; keys.length;) {
+          var key = keys.pop();
+          if (key in object) return next.value = key, next.done = !1, next;
+        }
+        return next.done = !0, next;
+      };
+    }, exports.values = values, Context.prototype = {
+      constructor: Context,
+      reset: function reset(skipTempReset) {
+        if (this.prev = 0, this.next = 0, this.sent = this._sent = undefined, this.done = !1, this.delegate = null, this.method = "next", this.arg = undefined, this.tryEntries.forEach(resetTryEntry), !skipTempReset) for (var name in this) "t" === name.charAt(0) && hasOwn.call(this, name) && !isNaN(+name.slice(1)) && (this[name] = undefined);
+      },
+      stop: function stop() {
+        this.done = !0;
+        var rootRecord = this.tryEntries[0].completion;
+        if ("throw" === rootRecord.type) throw rootRecord.arg;
+        return this.rval;
+      },
+      dispatchException: function dispatchException(exception) {
+        if (this.done) throw exception;
+        var context = this;
+        function handle(loc, caught) {
+          return record.type = "throw", record.arg = exception, context.next = loc, caught && (context.method = "next", context.arg = undefined), !!caught;
+        }
+        for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+          var entry = this.tryEntries[i],
+            record = entry.completion;
+          if ("root" === entry.tryLoc) return handle("end");
+          if (entry.tryLoc <= this.prev) {
+            var hasCatch = hasOwn.call(entry, "catchLoc"),
+              hasFinally = hasOwn.call(entry, "finallyLoc");
+            if (hasCatch && hasFinally) {
+              if (this.prev < entry.catchLoc) return handle(entry.catchLoc, !0);
+              if (this.prev < entry.finallyLoc) return handle(entry.finallyLoc);
+            } else if (hasCatch) {
+              if (this.prev < entry.catchLoc) return handle(entry.catchLoc, !0);
+            } else {
+              if (!hasFinally) throw new Error("try statement without catch or finally");
+              if (this.prev < entry.finallyLoc) return handle(entry.finallyLoc);
+            }
+          }
+        }
+      },
+      abrupt: function abrupt(type, arg) {
+        for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+          var entry = this.tryEntries[i];
+          if (entry.tryLoc <= this.prev && hasOwn.call(entry, "finallyLoc") && this.prev < entry.finallyLoc) {
+            var finallyEntry = entry;
+            break;
+          }
+        }
+        finallyEntry && ("break" === type || "continue" === type) && finallyEntry.tryLoc <= arg && arg <= finallyEntry.finallyLoc && (finallyEntry = null);
+        var record = finallyEntry ? finallyEntry.completion : {};
+        return record.type = type, record.arg = arg, finallyEntry ? (this.method = "next", this.next = finallyEntry.finallyLoc, ContinueSentinel) : this.complete(record);
+      },
+      complete: function complete(record, afterLoc) {
+        if ("throw" === record.type) throw record.arg;
+        return "break" === record.type || "continue" === record.type ? this.next = record.arg : "return" === record.type ? (this.rval = this.arg = record.arg, this.method = "return", this.next = "end") : "normal" === record.type && afterLoc && (this.next = afterLoc), ContinueSentinel;
+      },
+      finish: function finish(finallyLoc) {
+        for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+          var entry = this.tryEntries[i];
+          if (entry.finallyLoc === finallyLoc) return this.complete(entry.completion, entry.afterLoc), resetTryEntry(entry), ContinueSentinel;
+        }
+      },
+      "catch": function _catch(tryLoc) {
+        for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+          var entry = this.tryEntries[i];
+          if (entry.tryLoc === tryLoc) {
+            var record = entry.completion;
+            if ("throw" === record.type) {
+              var thrown = record.arg;
+              resetTryEntry(entry);
+            }
+            return thrown;
+          }
+        }
+        throw new Error("illegal catch attempt");
+      },
+      delegateYield: function delegateYield(iterable, resultName, nextLoc) {
+        return this.delegate = {
+          iterator: values(iterable),
+          resultName: resultName,
+          nextLoc: nextLoc
+        }, "next" === this.method && (this.arg = undefined), ContinueSentinel;
+      }
+    }, exports;
+  }
+  function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
+    try {
+      var info = gen[key](arg);
+      var value = info.value;
+    } catch (error) {
+      reject(error);
+      return;
+    }
+    if (info.done) {
+      resolve(value);
+    } else {
+      Promise.resolve(value).then(_next, _throw);
+    }
+  }
+  function _asyncToGenerator(fn) {
+    return function () {
+      var self = this,
+        args = arguments;
+      return new Promise(function (resolve, reject) {
+        var gen = fn.apply(self, args);
+        function _next(value) {
+          asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);
+        }
+        function _throw(err) {
+          asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);
+        }
+        _next(undefined);
+      });
+    };
+  }
   function _classCallCheck$1(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
       throw new TypeError("Cannot call a class as a function");
@@ -7084,7 +8002,7 @@
       descriptor.enumerable = descriptor.enumerable || false;
       descriptor.configurable = true;
       if ("value" in descriptor) descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
+      Object.defineProperty(target, _toPropertyKey$1(descriptor.key), descriptor);
     }
   }
   function _createClass$1(Constructor, protoProps, staticProps) {
@@ -7095,43 +8013,83 @@
     });
     return Constructor;
   }
+  function _toPropertyKey$1(arg) {
+    var key = _toPrimitive$1(arg, "string");
+    return _typeof$1(key) === "symbol" ? key : String(key);
+  }
+  function _toPrimitive$1(input, hint) {
+    if (_typeof$1(input) !== "object" || input === null) return input;
+    var prim = input[Symbol.toPrimitive];
+    if (prim !== undefined) {
+      var res = prim.call(input, hint || "default");
+      if (_typeof$1(res) !== "object") return res;
+      throw new TypeError("@@toPrimitive must return a primitive value.");
+    }
+    return (hint === "string" ? String : Number)(input);
+  }
   var FileReader$1 = /*#__PURE__*/function () {
     function FileReader() {
       _classCallCheck$1(this, FileReader);
     }
     _createClass$1(FileReader, [{
       key: "openFile",
-      value: function openFile(input, chunkSize) {
-        // In React Native, when user selects a file, instead of a File or Blob,
-        // you usually get a file object {} with a uri property that contains
-        // a local path to the file. We use XMLHttpRequest to fetch
-        // the file blob, before uploading with tus.
-        if (isReactNative() && input && typeof input.uri !== 'undefined') {
-          return uriToBlob(input.uri).then(function (blob) {
-            return new FileSource(blob);
-          })["catch"](function (err) {
-            throw new Error("tus: cannot fetch `file.uri` as Blob, make sure the uri is correct and accessible. ".concat(err));
-          });
-        } // Since we emulate the Blob type in our tests (not all target browsers
-        // support it), we cannot use `instanceof` for testing whether the input value
-        // can be handled. Instead, we simply check is the slice() function and the
-        // size property are available.
-
-        if (typeof input.slice === 'function' && typeof input.size !== 'undefined') {
-          return Promise.resolve(new FileSource(input));
+      value: function () {
+        var _openFile = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee(input, chunkSize) {
+          var blob;
+          return _regeneratorRuntime().wrap(function _callee$(_context) {
+            while (1) switch (_context.prev = _context.next) {
+              case 0:
+                if (!(isReactNative() && input && typeof input.uri !== 'undefined')) {
+                  _context.next = 11;
+                  break;
+                }
+                _context.prev = 1;
+                _context.next = 4;
+                return uriToBlob(input.uri);
+              case 4:
+                blob = _context.sent;
+                return _context.abrupt("return", new FileSource(blob));
+              case 8:
+                _context.prev = 8;
+                _context.t0 = _context["catch"](1);
+                throw new Error("tus: cannot fetch `file.uri` as Blob, make sure the uri is correct and accessible. ".concat(_context.t0));
+              case 11:
+                if (!(typeof input.slice === 'function' && typeof input.size !== 'undefined')) {
+                  _context.next = 13;
+                  break;
+                }
+                return _context.abrupt("return", Promise.resolve(new FileSource(input)));
+              case 13:
+                if (!(typeof input.read === 'function')) {
+                  _context.next = 18;
+                  break;
+                }
+                chunkSize = Number(chunkSize);
+                if (Number.isFinite(chunkSize)) {
+                  _context.next = 17;
+                  break;
+                }
+                return _context.abrupt("return", Promise.reject(new Error('cannot create source for stream without a finite value for the `chunkSize` option')));
+              case 17:
+                return _context.abrupt("return", Promise.resolve(new StreamSource(input, chunkSize)));
+              case 18:
+                return _context.abrupt("return", Promise.reject(new Error('source object may only be an instance of File, Blob, or Reader in this environment')));
+              case 19:
+              case "end":
+                return _context.stop();
+            }
+          }, _callee, null, [[1, 8]]);
+        }));
+        function openFile(_x, _x2) {
+          return _openFile.apply(this, arguments);
         }
-        if (typeof input.read === 'function') {
-          chunkSize = Number(chunkSize);
-          if (!Number.isFinite(chunkSize)) {
-            return Promise.reject(new Error('cannot create source for stream without a finite value for the `chunkSize` option'));
-          }
-          return Promise.resolve(new StreamSource(input, chunkSize));
-        }
-        return Promise.reject(new Error('source object may only be an instance of File, Blob, or Reader in this environment'));
-      }
+        return openFile;
+      }()
     }]);
     return FileReader;
   }();
+
+  // TODO: Differenciate between input types
 
   /**
    * Generate a fingerprint for a file which will be used the store the endpoint
@@ -7140,7 +8098,6 @@
    * @param {Object} options
    * @param {Function} callback
    */
-
   function fingerprint(file, options) {
     if (isReactNative()) {
       return Promise.resolve(reactNativeFingerprint(file, options));
@@ -7187,7 +8144,7 @@
       descriptor.enumerable = descriptor.enumerable || false;
       descriptor.configurable = true;
       if ("value" in descriptor) descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
+      Object.defineProperty(target, _toPropertyKey(descriptor.key), descriptor);
     }
   }
   function _createClass(Constructor, protoProps, staticProps) {
@@ -7288,6 +8245,7 @@
     return target;
   }
   function _defineProperty(obj, key, value) {
+    key = _toPropertyKey(key);
     if (key in obj) {
       Object.defineProperty(obj, key, {
         value: value,
@@ -7299,6 +8257,20 @@
       obj[key] = value;
     }
     return obj;
+  }
+  function _toPropertyKey(arg) {
+    var key = _toPrimitive(arg, "string");
+    return _typeof(key) === "symbol" ? key : String(key);
+  }
+  function _toPrimitive(input, hint) {
+    if (_typeof(input) !== "object" || input === null) return input;
+    var prim = input[Symbol.toPrimitive];
+    if (prim !== undefined) {
+      var res = prim.call(input, hint || "default");
+      if (_typeof(res) !== "object") return res;
+      throw new TypeError("@@toPrimitive must return a primitive value.");
+    }
+    return (hint === "string" ? String : Number)(input);
   }
   var defaultOptions = _objectSpread(_objectSpread({}, BaseUpload.defaultOptions), {}, {
     httpStack: new XHRHttpStack(),
