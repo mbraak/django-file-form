@@ -20,14 +20,14 @@
     forms.forEach(initUploadFields);
   };
 
-  function _typeof$9(obj) {
+  function _typeof$9(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$9 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) {
-      return typeof obj;
-    } : function (obj) {
-      return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-    }, _typeof$9(obj);
+    return _typeof$9 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+      return typeof o;
+    } : function (o) {
+      return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
+    }, _typeof$9(o);
   }
 
   function _toPrimitive$9(input, hint) {
