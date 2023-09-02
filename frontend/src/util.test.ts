@@ -30,25 +30,21 @@ describe("getInputNameWithPrefix", () => {
 });
 
 describe("getUploadsFieldName", () => {
-  it("returns the name with a suffix when there is a prefix", () => {
-    expect(getUploadsFieldName("field1", "testprefix")).toBe(
-      "testprefix-field1-uploads"
-    );
+  it("returns the name without the prefix and with the 'uploads' suffix when there is a prefix", () => {
+    expect(getUploadsFieldName("abc-field1", "abc")).toBe("field1-uploads");
   });
 
-  it("returns the name with a suffix when there is no prefix", () => {
+  it("returns the name with the 'uploads' suffix when there is no prefix", () => {
     expect(getUploadsFieldName("field1", null)).toBe("field1-uploads");
   });
 });
 
 describe("getMetadataFieldName", () => {
-  it("returns the name with a suffix when there is a prefix", () => {
-    expect(getMetadataFieldName("field1", "testprefix")).toBe(
-      "testprefix-field1-metadata"
-    );
+  it("returns the name without the predix and with the 'metadata' suffix when there is a prefix", () => {
+    expect(getMetadataFieldName("abc-field1", "abc")).toBe("field1-metadata");
   });
 
-  it("returns the name with a suffix when there is no prefix", () => {
+  it("returns the name with the 'metadata' suffix when there is no prefix", () => {
     expect(getMetadataFieldName("field1", null)).toBe("field1-metadata");
   });
 });
