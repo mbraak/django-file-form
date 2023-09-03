@@ -1,6 +1,6 @@
 ## Changelog
 
-**development**
+**3.5.3 (3 september 2023)**
 
 - Issue #680: support the disabled property
 - Issue #685: use a path for the location header to prevent mixed content issues (thanks to Walter Lorenzetti)
