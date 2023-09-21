@@ -1,5 +1,4 @@
 site_name: django-file-form
-theme: readthedocs
 nav:
     - Home: index.md
     - Usage: usage.md
