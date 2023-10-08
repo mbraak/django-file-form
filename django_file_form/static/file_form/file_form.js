@@ -861,7 +861,7 @@
   // `RequireObjectCoercible` abstract operation
   // https://tc39.es/ecma262/#sec-requireobjectcoercible
   var requireObjectCoercible$1 = function (it) {
-    if (isNullOrUndefined$1(it)) throw $TypeError$5("Can't call method on " + it);
+    if (isNullOrUndefined$1(it)) throw new $TypeError$5("Can't call method on " + it);
     return it;
   };
 
@@ -995,7 +995,7 @@
   // `Assert: Type(argument) is Object`
   var anObject$2 = function (argument) {
     if (isObject$4(argument)) return argument;
-    throw $TypeError$4($String$3(argument) + ' is not an object');
+    throw new $TypeError$4($String$3(argument) + ' is not an object');
   };
 
   var NATIVE_BIND = functionBindNative;
@@ -1093,7 +1093,7 @@
   // `Assert: IsCallable(argument) is true`
   var aCallable$1 = function (argument) {
     if (isCallable$2(argument)) return argument;
-    throw $TypeError$3(tryToString(argument) + ' is not a function');
+    throw new $TypeError$3(tryToString(argument) + ' is not a function');
   };
 
   var aCallable = aCallable$1;
@@ -1118,7 +1118,7 @@
     if (pref === 'string' && isCallable$1(fn = input.toString) && !isObject$3(val = call$1(fn, input))) return val;
     if (isCallable$1(fn = input.valueOf) && !isObject$3(val = call$1(fn, input))) return val;
     if (pref !== 'string' && isCallable$1(fn = input.toString) && !isObject$3(val = call$1(fn, input))) return val;
-    throw $TypeError$2("Can't convert object to primitive value");
+    throw new $TypeError$2("Can't convert object to primitive value");
   };
 
   var shared$3 = {exports: {}};
@@ -1127,10 +1127,10 @@
   (shared$3.exports = function (key, value) {
     return store$1[key] || (store$1[key] = value !== undefined ? value : {});
   })('versions', []).push({
-    version: '3.32.2',
+    version: '3.33.0',
     mode: 'global',
     copyright: '© 2014-2023 Denis Pushkarev (zloirock.ru)',
-    license: 'https://github.com/zloirock/core-js/blob/v3.32.2/LICENSE',
+    license: 'https://github.com/zloirock/core-js/blob/v3.33.0/LICENSE',
     source: 'https://github.com/zloirock/core-js'
   });
   var sharedExports = shared$3.exports;
@@ -1178,7 +1178,7 @@
       if (pref === undefined) pref = 'default';
       result = call(exoticToPrim, input, pref);
       if (!isObject$2(result) || isSymbol$1(result)) return result;
-      throw $TypeError$1("Can't convert object to primitive value");
+      throw new $TypeError$1("Can't convert object to primitive value");
     }
     if (pref === undefined) pref = 'number';
     return ordinaryToPrimitive(input, pref);
@@ -1233,7 +1233,7 @@
     if (IE8_DOM_DEFINE) try {
       return $defineProperty(O, P, Attributes);
     } catch (error) {/* empty */}
-    if ('get' in Attributes || 'set' in Attributes) throw $TypeError('Accessors not supported');
+    if ('get' in Attributes || 'set' in Attributes) throw new $TypeError('Accessors not supported');
     if ('value' in Attributes) O[P] = Attributes.value;
     return O;
   };
@@ -1285,7 +1285,7 @@
     return function (it) {
       var state;
       if (!isObject$1(it) || (state = get(it)).type !== TYPE) {
-        throw TypeError$1('Incompatible receiver, ' + TYPE + ' required');
+        throw new TypeError$1('Incompatible receiver, ' + TYPE + ' required');
       }
       return state;
     };
@@ -1298,7 +1298,7 @@
     store.set = store.set;
     /* eslint-enable no-self-assign -- prototype methods protection */
     set$1 = function (it, metadata) {
-      if (store.has(it)) throw TypeError$1(OBJECT_ALREADY_INITIALIZED);
+      if (store.has(it)) throw new TypeError$1(OBJECT_ALREADY_INITIALIZED);
       metadata.facade = it;
       store.set(it, metadata);
       return metadata;
@@ -1313,7 +1313,7 @@
     var STATE = sharedKey('state');
     hiddenKeys[STATE] = true;
     set$1 = function (it, metadata) {
-      if (hasOwn$1(it, STATE)) throw TypeError$1(OBJECT_ALREADY_INITIALIZED);
+      if (hasOwn$1(it, STATE)) throw new TypeError$1(OBJECT_ALREADY_INITIALIZED);
       metadata.facade = it;
       createNonEnumerableProperty(it, STATE, metadata);
       return metadata;
