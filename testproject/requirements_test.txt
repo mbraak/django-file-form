@@ -4,4 +4,4 @@ Flask==2.3.3
 flask-cors==4.0.0
 psycopg2-binary==2.9.7
 selenium==4.12.0
-Werkzeug==2.3.7
+Werkzeug==3.0.0
