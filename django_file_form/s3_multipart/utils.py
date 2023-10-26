@@ -5,7 +5,18 @@ import boto3
 from botocore.exceptions import ClientError
 from botocore.client import Config
 from django.utils.crypto import get_random_string
-from storages.utils import setting, lookup_env
+from storages.utils import setting
+
+
+def lookup_env(names):
+    """
+    Look up for names in environment. Returns the first element
+    found.
+    """
+    for name in names:
+        value = os.environ.get(name)
+        if value:
+            return value
 
 
 def get_bucket_name():
