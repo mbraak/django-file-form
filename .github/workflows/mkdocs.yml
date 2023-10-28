@@ -3,7 +3,7 @@ name: Publish docs via GitHub Pages
 on:
   push:
     branches:
-      - main
+      - master
       - mkdocs-workflow
 
 jobs:
@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout main
+      - name: Checkout master
         uses: actions/checkout@v3
 
       - name: Set up Python
