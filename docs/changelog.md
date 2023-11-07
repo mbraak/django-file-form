@@ -1,5 +1,9 @@
 ## Changelog
 
+**3.5.4 (28 october 2023)**
+
+- Issue #760: support django storages 1.14
+
 **3.5.3 (3 september 2023)**
 
 - Issue #680: support the disabled property
