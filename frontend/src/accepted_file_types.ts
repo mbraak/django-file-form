@@ -1,5 +1,5 @@
 import mime from "mime/lite";
-import picomatch from "picomatch";
+import picomatch from "picomatch/posix";
 
 const parseInputAccept = (inputAccept: string): [string[], string[]] => {
   const extensions: string[] = [];
