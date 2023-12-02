@@ -782,11 +782,11 @@
   // eslint-disable-next-line es/no-global-this -- safe
   check(typeof globalThis == 'object' && globalThis) || check(typeof window == 'object' && window) ||
   // eslint-disable-next-line no-restricted-globals -- safe
-  check(typeof self == 'object' && self) || check(typeof commonjsGlobal == 'object' && commonjsGlobal) ||
+  check(typeof self == 'object' && self) || check(typeof commonjsGlobal == 'object' && commonjsGlobal) || check(typeof commonjsGlobal == 'object' && commonjsGlobal) ||
   // eslint-disable-next-line no-new-func -- fallback
   function () {
     return this;
-  }() || commonjsGlobal || Function('return this')();
+  }() || Function('return this')();
 
   var fails$7 = function (exec) {
     try {
@@ -1020,9 +1020,9 @@
 
   var global$5 = global$b;
   var userAgent = engineUserAgent;
-  var process = global$5.process;
+  var process$1 = global$5.process;
   var Deno = global$5.Deno;
-  var versions = process && process.versions || Deno && Deno.version;
+  var versions = process$1 && process$1.versions || Deno && Deno.version;
   var v8 = versions && versions.v8;
   var match, version$1;
   if (v8) {
@@ -1127,10 +1127,10 @@
   (shared$3.exports = function (key, value) {
     return store$1[key] || (store$1[key] = value !== undefined ? value : {});
   })('versions', []).push({
-    version: '3.33.2',
+    version: '3.33.3',
     mode: 'global',
     copyright: '© 2014-2023 Denis Pushkarev (zloirock.ru)',
-    license: 'https://github.com/zloirock/core-js/blob/v3.33.2/LICENSE',
+    license: 'https://github.com/zloirock/core-js/blob/v3.33.3/LICENSE',
     source: 'https://github.com/zloirock/core-js'
   });
   var sharedExports = shared$3.exports;
@@ -1475,35 +1475,6 @@
     get: regExpFlags
   });
 
-  const basename = path => {
-    var start = 0;
-    var end = -1;
-    var matchedSlash = true;
-    var i;
-    for (i = path.length - 1; i >= 0; --i) {
-      if (path.charCodeAt(i) === 47) {
-        // If we reached a path separator that was not part of a set of path
-        // separators at the end of the string, stop now
-        if (!matchedSlash) {
-          start = i + 1;
-          break;
-        }
-      } else if (end === -1) {
-        // We saw the first non-path separator, mark this as the end of our
-        // path component
-        matchedSlash = false;
-        end = i + 1;
-      }
-    }
-    if (end === -1) {
-      return '';
-    }
-    return path.slice(start, end);
-  };
-  var path$1 = {
-    basename
-  };
-
   var utils$3 = {};
 
   const WIN_SLASH = '\\\\/';
@@ -1528,6 +1499,7 @@
   const NO_DOTS_SLASH = `(?!${DOTS_SLASH})`;
   const QMARK_NO_DOT = `[^.${SLASH_LITERAL}]`;
   const STAR = `${QMARK}*?`;
+  const SEP = '/';
   const POSIX_CHARS = {
     DOT_LITERAL,
     PLUS_LITERAL,
@@ -1543,7 +1515,8 @@
     NO_DOTS_SLASH,
     QMARK_NO_DOT,
     STAR,
-    START_ANCHOR
+    START_ANCHOR,
+    SEP
   };
 
   /**
@@ -1562,7 +1535,8 @@
     NO_DOTS_SLASH: `(?!${DOT_LITERAL}{1,2}(?:[${WIN_SLASH}]|$))`,
     QMARK_NO_DOT: `[^.${WIN_SLASH}]`,
     START_ANCHOR: `(?:^|[${WIN_SLASH}])`,
-    END_ANCHOR: `(?:[${WIN_SLASH}]|$)`
+    END_ANCHOR: `(?:[${WIN_SLASH}]|$)`,
+    SEP: '\\'
   };
 
   /**
@@ -1695,7 +1669,6 @@
     CHAR_ZERO_WIDTH_NOBREAK_SPACE: 65279,
     /* \uFEFF */
 
-    SEP: '/',
     /**
      * Create EXTGLOB_CHARS
      */
@@ -1733,8 +1706,7 @@
      * Create GLOB_CHARS
      */
 
-    globChars() {
-      let win32 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+    globChars(win32) {
       return win32 === true ? WINDOWS_CHARS : POSIX_CHARS;
     }
   };
@@ -1757,9 +1729,12 @@
         return match === '\\' ? '' : match;
       });
     };
-    exports.isWindows = options => {
-      if (options && typeof options.windows === 'boolean') {
-        return options.windows;
+    exports.supportsLookbehinds = () => {
+      if (typeof process !== 'undefined') {
+        const segs = process.version.slice(1).split('.').map(Number);
+        if (segs.length === 3 && segs[0] >= 9 || segs[0] === 8 && segs[1] >= 10) {
+          return true;
+        }
       }
       return false;
     };
@@ -1788,6 +1763,17 @@
         output = `(?:^(?!${output}).*$)`;
       }
       return output;
+    };
+    exports.basename = function (path) {
+      let {
+        windows
+      } = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+      const segs = path.split(windows ? /[\\/]/ : '/');
+      const last = segs[segs.length - 1];
+      if (last === '') {
+        return segs[segs.length - 2];
+      }
+      return last;
     };
   })(utils$3);
 
@@ -2209,7 +2195,9 @@
     };
     const tokens = [bos];
     const capture = opts.capture ? '' : '?:';
-    const PLATFORM_CHARS = constants$1.globChars();
+
+    // create constants based on platform, for windows or posix
+    const PLATFORM_CHARS = constants$1.globChars(opts.windows);
     const EXTGLOB_CHARS = constants$1.extglobChars(PLATFORM_CHARS);
     const {
       DOT_LITERAL,
@@ -2842,6 +2830,9 @@
         if (prev && prev.type === 'paren') {
           const next = peek();
           let output = value;
+          if (next === '<' && !utils$1.supportsLookbehinds()) {
+            throw new Error('Node.js v10 or higher is required for regex lookbehinds');
+          }
           if (prev.value === '(' && !/[!=<:]/.test(next) || next === '<' && !/<([!=]|\w+>)/.test(remaining())) {
             output = `\\${value}`;
           }
@@ -3179,7 +3170,7 @@
       NO_DOTS_SLASH,
       STAR,
       START_ANCHOR
-    } = constants$1.globChars();
+    } = constants$1.globChars(opts.windows);
     const nodot = opts.dot ? NO_DOTS : NO_DOT;
     const slashDot = opts.dot ? NO_DOTS_SLASH : NO_DOT;
     const capture = opts.capture ? '' : '?:';
@@ -3232,7 +3223,6 @@
   };
   var parse_1 = parse$1;
 
-  const path = path$1;
   const scan = scan_1;
   const parse = parse_1;
   const utils = utils$3;
@@ -3261,10 +3251,10 @@
    * @api public
    */
 
-  const picomatch$2 = function (glob, options) {
+  const picomatch$1 = function (glob, options) {
     let returnState = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
     if (Array.isArray(glob)) {
-      const fns = glob.map(input => picomatch$2(input, options, returnState));
+      const fns = glob.map(input => picomatch$1(input, options, returnState));
       const arrayMatcher = str => {
         for (const isMatch of fns) {
           const state = isMatch(str);
@@ -3279,8 +3269,8 @@
       throw new TypeError('Expected pattern to be a non-empty string');
     }
     const opts = options || {};
-    const posix = utils.isWindows(options);
-    const regex = isState ? picomatch$2.compileRe(glob, options) : picomatch$2.makeRe(glob, options, false, true);
+    const posix = opts.windows;
+    const regex = isState ? picomatch$1.compileRe(glob, options) : picomatch$1.makeRe(glob, options, false, true);
     const state = regex.state;
     delete regex.state;
     let isIgnored = () => false;
@@ -3291,7 +3281,7 @@
         onMatch: null,
         onResult: null
       };
-      isIgnored = picomatch$2(opts.ignore, ignoreOpts, returnState);
+      isIgnored = picomatch$1(opts.ignore, ignoreOpts, returnState);
     }
     const matcher = function (input) {
       let returnObject = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
@@ -3299,7 +3289,7 @@
         isMatch,
         match,
         output
-      } = picomatch$2.test(input, regex, options, {
+      } = picomatch$1.test(input, regex, options, {
         glob,
         posix
       });
@@ -3355,7 +3345,7 @@
    * @api public
    */
 
-  picomatch$2.test = function (input, regex, options) {
+  picomatch$1.test = function (input, regex, options) {
     let {
       glob,
       posix
@@ -3379,7 +3369,7 @@
     }
     if (match === false || opts.capture === true) {
       if (opts.matchBase === true || opts.basename === true) {
-        match = picomatch$2.matchBase(input, regex, options, posix);
+        match = picomatch$1.matchBase(input, regex, options, posix);
       } else {
         match = regex.exec(output);
       }
@@ -3405,10 +3395,9 @@
    * @api public
    */
 
-  picomatch$2.matchBase = function (input, glob, options) {
-    arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : utils.isWindows(options);
-    const regex = glob instanceof RegExp ? glob : picomatch$2.makeRe(glob, options);
-    return regex.test(path.basename(input));
+  picomatch$1.matchBase = (input, glob, options) => {
+    const regex = glob instanceof RegExp ? glob : picomatch$1.makeRe(glob, options);
+    return regex.test(utils.basename(input));
   };
 
   /**
@@ -3428,7 +3417,7 @@
    * @api public
    */
 
-  picomatch$2.isMatch = (str, patterns, options) => picomatch$2(patterns, options)(str);
+  picomatch$1.isMatch = (str, patterns, options) => picomatch$1(patterns, options)(str);
 
   /**
    * Parse a glob pattern to create the source string for a regular
@@ -3444,8 +3433,8 @@
    * @api public
    */
 
-  picomatch$2.parse = (pattern, options) => {
-    if (Array.isArray(pattern)) return pattern.map(p => picomatch$2.parse(p, options));
+  picomatch$1.parse = (pattern, options) => {
+    if (Array.isArray(pattern)) return pattern.map(p => picomatch$1.parse(p, options));
     return parse(pattern, {
       ...options,
       fastpaths: false
@@ -3479,7 +3468,7 @@
    * @api public
    */
 
-  picomatch$2.scan = (input, options) => scan(input, options);
+  picomatch$1.scan = (input, options) => scan(input, options);
 
   /**
    * Compile a regular expression from the `state` object returned by the
@@ -3493,7 +3482,7 @@
    * @api public
    */
 
-  picomatch$2.compileRe = function (state, options) {
+  picomatch$1.compileRe = function (state, options) {
     let returnOutput = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
     let returnState = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
     if (returnOutput === true) {
@@ -3506,7 +3495,7 @@
     if (state && state.negated === true) {
       source = `^(?!${source}).*$`;
     }
-    const regex = picomatch$2.toRegex(source, options);
+    const regex = picomatch$1.toRegex(source, options);
     if (returnState === true) {
       regex.state = state;
     }
@@ -3532,7 +3521,7 @@
    * @api public
    */
 
-  picomatch$2.makeRe = function (input) {
+  picomatch$1.makeRe = function (input) {
     let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
     let returnOutput = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
     let returnState = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
@@ -3549,7 +3538,7 @@
     if (!parsed.output) {
       parsed = parse(input, options);
     }
-    return picomatch$2.compileRe(parsed, options, returnOutput, returnState);
+    return picomatch$1.compileRe(parsed, options, returnOutput, returnState);
   };
 
   /**
@@ -3569,7 +3558,7 @@
    * @api public
    */
 
-  picomatch$2.toRegex = (source, options) => {
+  picomatch$1.toRegex = (source, options) => {
     try {
       const opts = options || {};
       return new RegExp(source, opts.flags || (opts.nocase ? 'i' : ''));
@@ -3584,16 +3573,16 @@
    * @return {Object}
    */
 
-  picomatch$2.constants = constants;
+  picomatch$1.constants = constants;
 
   /**
    * Expose "picomatch"
    */
 
-  var picomatch_1 = picomatch$2;
+  var picomatch_1 = picomatch$1;
 
-  var picomatch = picomatch_1;
-  var picomatch$1 = /*@__PURE__*/getDefaultExportFromCjs(picomatch);
+  var posix = picomatch_1;
+  var picomatch = /*@__PURE__*/getDefaultExportFromCjs(posix);
 
   const parseInputAccept = inputAccept => {
     const extensions = [];
@@ -3625,13 +3614,13 @@
       if (!mimeType || this.mimeTypes.length === 0) {
         return false;
       }
-      return picomatch$1.isMatch(mimeType, this.mimeTypes);
+      return picomatch.isMatch(mimeType, this.mimeTypes);
     }
     isExtensionAccepted(fileName) {
       if (this.extensions.length === 0) {
         return false;
       }
-      return picomatch$1.isMatch(fileName, this.extensions);
+      return picomatch.isMatch(fileName, this.extensions);
     }
   }
 
@@ -3963,7 +3952,6 @@
       this.initChunks();
       this.createdPromise.catch(() => ({})); // silence uncaught rejection warning
     }
-
     async abort() {
       this.uploading.slice().forEach(xhr => {
         xhr.abort();
@@ -6335,7 +6323,6 @@
           this._req.abort();
           // Note: We do not close the file source here, so the user can resume in the future.
         }
-
         this._aborted = true;
 
         // Stop any timeout used for initiating a retry.
@@ -8078,7 +8065,6 @@
       hash = (hash << 5) - hash + _char;
       hash &= hash; // Convert to 32bit integer
     }
-
     return hash;
   }
 
