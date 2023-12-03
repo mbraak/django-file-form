@@ -10,12 +10,9 @@ from .test_utils import write_json
 class SeleniumTestMetaClass(SeleniumTestCaseBase):
     def create_options(self):
         options = self.import_options(self.browser)()
+
         if self.headless:
-            match self.browser:
-                case "chrome":
-                    options.add_argument("--headless=new")
-                case "firefox":
-                    options.add_argument("-headless")
+            options.add_argument("--headless=new")
 
         options.add_argument("--disable-dev-shm-usage")
         options.set_capability("goog:loggingPrefs", {"browser": "ALL"})
