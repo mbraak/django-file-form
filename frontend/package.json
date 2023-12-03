@@ -54,7 +54,7 @@
     "core-js": "^3.24.1",
     "escape-html": "^1.0.3",
     "eventemitter3": "^5",
-    "mime": "^3.0.0",
+    "mime": "^4",
     "picomatch": "^3",
     "tus-js-client": "^3",
     "url-join": "^5.0.0"
