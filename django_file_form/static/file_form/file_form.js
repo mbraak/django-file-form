@@ -382,92 +382,12 @@
     }
   }
 
-  /**
-   * @param typeMap [Object] Map of MIME type -> Array[extensions]
-   * @param ...
-   */
-  function Mime$1() {
-    this._types = Object.create(null);
-    this._extensions = Object.create(null);
-    for (let i = 0; i < arguments.length; i++) {
-      this.define(arguments[i]);
-    }
-    this.define = this.define.bind(this);
-    this.getType = this.getType.bind(this);
-    this.getExtension = this.getExtension.bind(this);
-  }
-
-  /**
-   * Define mimetype -> extension mappings.  Each key is a mime-type that maps
-   * to an array of extensions associated with the type.  The first extension is
-   * used as the default extension for the type.
-   *
-   * e.g. mime.define({'audio/ogg', ['oga', 'ogg', 'spx']});
-   *
-   * If a type declares an extension that has already been defined, an error will
-   * be thrown.  To suppress this error and force the extension to be associated
-   * with the new type, pass `force`=true.  Alternatively, you may prefix the
-   * extension with "*" to map the type to extension, without mapping the
-   * extension to the type.
-   *
-   * e.g. mime.define({'audio/wav', ['wav']}, {'audio/x-wav', ['*wav']});
-   *
-   *
-   * @param map (Object) type definitions
-   * @param force (Boolean) if true, force overriding of existing definitions
-   */
-  Mime$1.prototype.define = function (typeMap, force) {
-    for (let type in typeMap) {
-      let extensions = typeMap[type].map(function (t) {
-        return t.toLowerCase();
-      });
-      type = type.toLowerCase();
-      for (let i = 0; i < extensions.length; i++) {
-        const ext = extensions[i];
-
-        // '*' prefix = not the preferred type for this extension.  So fixup the
-        // extension, and skip it.
-        if (ext[0] === '*') {
-          continue;
-        }
-        if (!force && ext in this._types) {
-          throw new Error('Attempt to change mapping for "' + ext + '" extension from "' + this._types[ext] + '" to "' + type + '". Pass `force=true` to allow this, otherwise remove "' + ext + '" from the list of extensions for "' + type + '".');
-        }
-        this._types[ext] = type;
-      }
-
-      // Use first extension as default
-      if (force || !this._extensions[type]) {
-        const ext = extensions[0];
-        this._extensions[type] = ext[0] !== '*' ? ext : ext.substr(1);
-      }
-    }
-  };
-
-  /**
-   * Lookup a mime type based on extension
-   */
-  Mime$1.prototype.getType = function (path) {
-    path = String(path);
-    let last = path.replace(/^.*[/\\]/, '').toLowerCase();
-    let ext = last.replace(/^.*\./, '').toLowerCase();
-    let hasPath = last.length < path.length;
-    let hasDot = ext.length < last.length - 1;
-    return (hasDot || !hasPath) && this._types[ext] || null;
-  };
-
-  /**
-   * Return file extension associated with a mime type
-   */
-  Mime$1.prototype.getExtension = function (type) {
-    type = /^\s*([^;\s]*)/.test(type) && RegExp.$1;
-    return type && this._extensions[type.toLowerCase()] || null;
-  };
-  var Mime_1 = Mime$1;
-
-  var standard = {
+  const types = {
     "application/andrew-inset": ["ez"],
+    "application/appinstaller": ["appinstaller"],
     "application/applixware": ["aw"],
+    "application/appx": ["appx"],
+    "application/appxbundle": ["appxbundle"],
     "application/atom+xml": ["atom"],
     "application/atomcat+xml": ["atomcat"],
     "application/atomdeleted+xml": ["atomdeleted"],
@@ -475,6 +395,8 @@
     "application/atsc-dwd+xml": ["dwd"],
     "application/atsc-held+xml": ["held"],
     "application/atsc-rsat+xml": ["rsat"],
+    "application/automationml-aml+xml": ["aml"],
+    "application/automationml-amlx+zip": ["amlx"],
     "application/bdoc": ["bdoc"],
     "application/calendar+xml": ["xcs"],
     "application/ccxml+xml": ["ccxml"],
@@ -484,18 +406,22 @@
     "application/cdmi-domain": ["cdmid"],
     "application/cdmi-object": ["cdmio"],
     "application/cdmi-queue": ["cdmiq"],
+    "application/cpl+xml": ["cpl"],
     "application/cu-seeme": ["cu"],
+    "application/cwl": ["cwl"],
     "application/dash+xml": ["mpd"],
+    "application/dash-patch+xml": ["mpp"],
     "application/davmount+xml": ["davmount"],
     "application/docbook+xml": ["dbk"],
     "application/dssc+der": ["dssc"],
     "application/dssc+xml": ["xdssc"],
-    "application/ecmascript": ["es", "ecma"],
+    "application/ecmascript": ["ecma"],
     "application/emma+xml": ["emma"],
     "application/emotionml+xml": ["emotionml"],
     "application/epub+zip": ["epub"],
     "application/exi": ["exi"],
     "application/express": ["exp"],
+    "application/fdf": ["fdf"],
     "application/fdt+xml": ["fdt"],
     "application/font-tdpfr": ["pfr"],
     "application/geo+json": ["geojson"],
@@ -511,7 +437,7 @@
     "application/java-archive": ["jar", "war", "ear"],
     "application/java-serialized-object": ["ser"],
     "application/java-vm": ["class"],
-    "application/javascript": ["js", "mjs"],
+    "application/javascript": ["*js"],
     "application/json": ["json", "map"],
     "application/json5": ["json5"],
     "application/jsonml+json": ["jsonml"],
@@ -527,6 +453,7 @@
     "application/mathematica": ["ma", "nb", "mb"],
     "application/mathml+xml": ["mathml"],
     "application/mbox": ["mbox"],
+    "application/media-policy-dataset+xml": ["mpf"],
     "application/mediaservercontrol+xml": ["mscml"],
     "application/metalink+xml": ["metalink"],
     "application/metalink4+xml": ["meta4"],
@@ -535,7 +462,9 @@
     "application/mmt-usd+xml": ["musd"],
     "application/mods+xml": ["mods"],
     "application/mp21": ["m21", "mp21"],
-    "application/mp4": ["mp4s", "m4p"],
+    "application/mp4": ["mp4", "mpg4", "mp4s", "m4p"],
+    "application/msix": ["msix"],
+    "application/msixbundle": ["msixbundle"],
     "application/msword": ["doc", "dot"],
     "application/mxf": ["mxf"],
     "application/n-quads": ["nq"],
@@ -552,7 +481,8 @@
     "application/patch-ops-error+xml": ["xer"],
     "application/pdf": ["pdf"],
     "application/pgp-encrypted": ["pgp"],
-    "application/pgp-signature": ["asc", "sig"],
+    "application/pgp-keys": ["asc"],
+    "application/pgp-signature": ["sig", "*asc"],
     "application/pics-rules": ["prf"],
     "application/pkcs10": ["p10"],
     "application/pkcs7-mime": ["p7m", "p7c"],
@@ -598,6 +528,7 @@
     "application/smil+xml": ["smi", "smil"],
     "application/sparql-query": ["rq"],
     "application/sparql-results+xml": ["srx"],
+    "application/sql": ["sql"],
     "application/srgs": ["gram"],
     "application/srgs+xml": ["grxml"],
     "application/sru+xml": ["sru"],
@@ -615,6 +546,7 @@
     "application/urc-targetdesc+xml": ["td"],
     "application/voicexml+xml": ["vxml"],
     "application/wasm": ["wasm"],
+    "application/watcherinfo+xml": ["wif"],
     "application/widget": ["wgt"],
     "application/winhlp": ["hlp"],
     "application/wsdl+xml": ["wsdl"],
@@ -626,6 +558,7 @@
     "application/xcap-el+xml": ["xel"],
     "application/xcap-ns+xml": ["xns"],
     "application/xenc+xml": ["xenc"],
+    "application/xfdf": ["xfdf"],
     "application/xhtml+xml": ["xhtml", "xht"],
     "application/xliff+xml": ["xlf"],
     "application/xml": ["xml", "xsl", "xsd", "rng"],
@@ -639,6 +572,7 @@
     "application/yin+xml": ["yin"],
     "application/zip": ["zip"],
     "audio/3gpp": ["*3gpp"],
+    "audio/aac": ["adts", "aac"],
     "audio/adpcm": ["adp"],
     "audio/amr": ["amr"],
     "audio/basic": ["au", "snd"],
@@ -661,10 +595,13 @@
     "font/woff2": ["woff2"],
     "image/aces": ["exr"],
     "image/apng": ["apng"],
+    "image/avci": ["avci"],
+    "image/avcs": ["avcs"],
     "image/avif": ["avif"],
-    "image/bmp": ["bmp"],
+    "image/bmp": ["bmp", "dib"],
     "image/cgm": ["cgm"],
     "image/dicom-rle": ["drle"],
+    "image/dpx": ["dpx"],
     "image/emf": ["emf"],
     "image/fits": ["fits"],
     "image/g3fax": ["g3"],
@@ -681,7 +618,7 @@
     "image/jpeg": ["jpeg", "jpg", "jpe"],
     "image/jph": ["jph"],
     "image/jphc": ["jhc"],
-    "image/jpm": ["jpm"],
+    "image/jpm": ["jpm", "jpgm"],
     "image/jpx": ["jpx", "jpf"],
     "image/jxr": ["jxr"],
     "image/jxra": ["jxra"],
@@ -710,13 +647,16 @@
     "model/gltf+json": ["gltf"],
     "model/gltf-binary": ["glb"],
     "model/iges": ["igs", "iges"],
+    "model/jt": ["jt"],
     "model/mesh": ["msh", "mesh", "silo"],
     "model/mtl": ["mtl"],
     "model/obj": ["obj"],
+    "model/prc": ["prc"],
     "model/step+xml": ["stpx"],
     "model/step+zip": ["stpz"],
     "model/step-xml+zip": ["stpxz"],
     "model/stl": ["stl"],
+    "model/u3d": ["u3d"],
     "model/vrml": ["wrl", "vrml"],
     "model/x3d+binary": ["*x3db", "x3dbz"],
     "model/x3d+fastinfoset": ["x3db"],
@@ -730,9 +670,10 @@
     "text/csv": ["csv"],
     "text/html": ["html", "htm", "shtml"],
     "text/jade": ["jade"],
+    "text/javascript": ["js", "mjs"],
     "text/jsx": ["jsx"],
     "text/less": ["less"],
-    "text/markdown": ["markdown", "md"],
+    "text/markdown": ["md", "markdown"],
     "text/mathml": ["mml"],
     "text/mdx": ["mdx"],
     "text/n3": ["n3"],
@@ -750,6 +691,7 @@
     "text/uri-list": ["uri", "uris", "urls"],
     "text/vcard": ["vcard"],
     "text/vtt": ["vtt"],
+    "text/wgsl": ["wgsl"],
     "text/xml": ["*xml"],
     "text/yaml": ["yaml", "yml"],
     "video/3gpp": ["3gp", "3gpp"],
@@ -759,19 +701,101 @@
     "video/h264": ["h264"],
     "video/iso.segment": ["m4s"],
     "video/jpeg": ["jpgv"],
-    "video/jpm": ["*jpm", "jpgm"],
+    "video/jpm": ["*jpm", "*jpgm"],
     "video/mj2": ["mj2", "mjp2"],
     "video/mp2t": ["ts"],
-    "video/mp4": ["mp4", "mp4v", "mpg4"],
+    "video/mp4": ["*mp4", "mp4v", "*mpg4"],
     "video/mpeg": ["mpeg", "mpg", "mpe", "m1v", "m2v"],
     "video/ogg": ["ogv"],
     "video/quicktime": ["qt", "mov"],
     "video/webm": ["webm"]
   };
+  Object.freeze(types);
 
-  let Mime = Mime_1;
-  var lite = new Mime(standard);
-  var mime = /*@__PURE__*/getDefaultExportFromCjs(lite);
+  var __classPrivateFieldGet = window && window.__classPrivateFieldGet || function (receiver, state, kind, f) {
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+  };
+  var _Mime_extensionToType, _Mime_typeToExtension, _Mime_typeToExtensions;
+  class Mime {
+    constructor() {
+      _Mime_extensionToType.set(this, new Map());
+      _Mime_typeToExtension.set(this, new Map());
+      _Mime_typeToExtensions.set(this, new Map());
+      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+      for (const arg of args) {
+        this.define(arg);
+      }
+    }
+    define(typeMap) {
+      let force = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+      for (let [type, extensions] of Object.entries(typeMap)) {
+        type = type.toLowerCase();
+        extensions = extensions.map(ext => ext.toLowerCase());
+        if (!__classPrivateFieldGet(this, _Mime_typeToExtensions, "f").has(type)) {
+          __classPrivateFieldGet(this, _Mime_typeToExtensions, "f").set(type, new Set());
+        }
+        const allExtensions = __classPrivateFieldGet(this, _Mime_typeToExtensions, "f").get(type);
+        let first = true;
+        for (let extension of extensions) {
+          const starred = extension.startsWith('*');
+          extension = starred ? extension.slice(1) : extension;
+          allExtensions?.add(extension);
+          if (first) {
+            __classPrivateFieldGet(this, _Mime_typeToExtension, "f").set(type, extension);
+          }
+          first = false;
+          if (starred) continue;
+          const currentType = __classPrivateFieldGet(this, _Mime_extensionToType, "f").get(extension);
+          if (currentType && currentType != type && !force) {
+            throw new Error(`"${type} -> ${extension}" conflicts with "${currentType} -> ${extension}". Pass \`force=true\` to override this definition.`);
+          }
+          __classPrivateFieldGet(this, _Mime_extensionToType, "f").set(extension, type);
+        }
+      }
+      return this;
+    }
+    getType(path) {
+      if (typeof path !== 'string') return null;
+      const last = path.replace(/^.*[/\\]/, '').toLowerCase();
+      const ext = last.replace(/^.*\./, '').toLowerCase();
+      const hasPath = last.length < path.length;
+      const hasDot = ext.length < last.length - 1;
+      if (!hasDot && hasPath) return null;
+      return __classPrivateFieldGet(this, _Mime_extensionToType, "f").get(ext) ?? null;
+    }
+    getExtension(type) {
+      if (typeof type !== 'string') return null;
+      type = type?.split?.(';')[0];
+      return (type && __classPrivateFieldGet(this, _Mime_typeToExtension, "f").get(type.trim().toLowerCase())) ?? null;
+    }
+    getAllExtensions(type) {
+      if (typeof type !== 'string') return null;
+      return __classPrivateFieldGet(this, _Mime_typeToExtensions, "f").get(type.toLowerCase()) ?? null;
+    }
+    _freeze() {
+      this.define = () => {
+        throw new Error('define() not allowed for built-in Mime objects. See https://github.com/broofa/mime/blob/main/README.md#custom-mime-instances');
+      };
+      Object.freeze(this);
+      for (const extensions of __classPrivateFieldGet(this, _Mime_typeToExtensions, "f").values()) {
+        Object.freeze(extensions);
+      }
+      return this;
+    }
+    _getTestState() {
+      return {
+        types: __classPrivateFieldGet(this, _Mime_extensionToType, "f"),
+        extensions: __classPrivateFieldGet(this, _Mime_typeToExtension, "f")
+      };
+    }
+  }
+  _Mime_extensionToType = new WeakMap(), _Mime_typeToExtension = new WeakMap(), _Mime_typeToExtensions = new WeakMap();
+
+  var mime = new Mime(types)._freeze();
 
   var check = function (it) {
     return it && it.Math === Math && it;
@@ -938,8 +962,8 @@
 
   var global$8 = global$b;
   var isCallable$6 = isCallable$8;
-  var WeakMap$1 = global$8.WeakMap;
-  var weakMapBasicDetection = isCallable$6(WeakMap$1) && /native code/.test(String(WeakMap$1));
+  var WeakMap$2 = global$8.WeakMap;
+  var weakMapBasicDetection = isCallable$6(WeakMap$2) && /native code/.test(String(WeakMap$2));
 
   var isCallable$5 = isCallable$8;
   var $documentAll = documentAll_1;
@@ -1276,7 +1300,7 @@
   var hiddenKeys = hiddenKeys$1;
   var OBJECT_ALREADY_INITIALIZED = 'Object already initialized';
   var TypeError$1 = global$2.TypeError;
-  var WeakMap = global$2.WeakMap;
+  var WeakMap$1 = global$2.WeakMap;
   var set$1, get, has$1;
   var enforce = function (it) {
     return has$1(it) ? get(it) : set$1(it, {});
@@ -1291,7 +1315,7 @@
     };
   };
   if (NATIVE_WEAK_MAP || shared.state) {
-    var store = shared.state || (shared.state = new WeakMap());
+    var store = shared.state || (shared.state = new WeakMap$1());
     /* eslint-disable no-self-assign -- prototype methods protection */
     store.get = store.get;
     store.has = store.has;
