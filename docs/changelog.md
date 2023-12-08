@@ -1,5 +1,9 @@
 ## Changelog
 
+**development**
+
+- Issue #748: support Django 5.0
+
 **3.5.4 (28 october 2023)**
 
 - Issue #760: support django storages 1.14
