@@ -7,7 +7,7 @@ this_directory = path.abspath(path.dirname(__file__))
 with open(path.join(this_directory, "README.md"), encoding="utf-8") as f:
     long_description = f.read()
 
-version = "3.5.4"
+version = "3.6.0"
 
 setup(
     name="django-file-form",

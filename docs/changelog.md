@@ -1,6 +1,6 @@
 ## Changelog
 
-**development**
+**3.6.0 (december 8 2023)**
 
 - Issue #748: support Django 5.0
 
