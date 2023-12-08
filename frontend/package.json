@@ -56,7 +56,7 @@
     "eventemitter3": "^5",
     "mime": "^4",
     "picomatch": "^3",
-    "tus-js-client": "^3",
+    "tus-js-client": "^4",
     "url-join": "^5.0.0"
   }
 }
