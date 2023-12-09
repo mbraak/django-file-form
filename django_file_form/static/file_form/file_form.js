@@ -1151,10 +1151,10 @@
   (shared$3.exports = function (key, value) {
     return store$1[key] || (store$1[key] = value !== undefined ? value : {});
   })('versions', []).push({
-    version: '3.33.3',
+    version: '3.34.0',
     mode: 'global',
     copyright: '© 2014-2023 Denis Pushkarev (zloirock.ru)',
-    license: 'https://github.com/zloirock/core-js/blob/v3.33.3/LICENSE',
+    license: 'https://github.com/zloirock/core-js/blob/v3.34.0/LICENSE',
     source: 'https://github.com/zloirock/core-js'
   });
   var sharedExports = shared$3.exports;
