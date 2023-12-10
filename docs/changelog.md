@@ -1,5 +1,9 @@
 ## Changelog
 
+**development**
+
+- Issue #784: compile to es6. This reduces the size of the minified js file to 80k (from 119k)
+
 **3.6.0 (december 8 2023)**
 
 - Issue #748: support Django 5.0
