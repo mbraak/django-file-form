@@ -1,4 +1,8 @@
-import { HttpRequest, HttpResponse, Upload } from "tus-js-client";
+import {
+  HttpRequest,
+  HttpResponse,
+  Upload
+} from "tus-js-client/lib/browser/index.js";
 import BaseUpload, { InitialFile } from "./base_upload";
 import { deleteUpload } from "./tus_utils";
 
