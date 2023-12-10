@@ -14,6 +14,9 @@
     "noUnusedParameters": true,
     "strictNullChecks": true,
     "strictPropertyInitialization": false,
-    "strict": true
+    "strict": true,
+    "paths": {
+      "tus-js-client/lib/browser/index.js": ["./node_modules/tus-js-client"]
+    }
   }
 }

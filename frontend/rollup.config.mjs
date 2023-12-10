@@ -27,6 +27,7 @@ const plugins = [
   babel({
     babelHelpers: "runtime",
     configFile: babelConfigFile,
+    exclude: /node_modules\/(?!tus-js-client)/,
     extensions: [".js", ".ts"]
   })
 ];
