@@ -20,34 +20,34 @@
     forms.forEach(initUploadFields);
   };
 
-  function _typeof$9(o) {
+  function _typeof(o) {
     "@babel/helpers - typeof";
 
-    return _typeof$9 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+    return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
       return typeof o;
     } : function (o) {
       return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$9(o);
+    }, _typeof(o);
   }
 
-  function _toPrimitive$9(input, hint) {
-    if (_typeof$9(input) !== "object" || input === null) return input;
-    var prim = input[Symbol.toPrimitive];
-    if (prim !== undefined) {
-      var res = prim.call(input, hint || "default");
-      if (_typeof$9(res) !== "object") return res;
+  function toPrimitive(t, r) {
+    if ("object" != _typeof(t) || !t) return t;
+    var e = t[Symbol.toPrimitive];
+    if (void 0 !== e) {
+      var i = e.call(t, r || "default");
+      if ("object" != _typeof(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
-    return (hint === "string" ? String : Number)(input);
+    return ("string" === r ? String : Number)(t);
   }
 
-  function _toPropertyKey$9(arg) {
-    var key = _toPrimitive$9(arg, "string");
-    return _typeof$9(key) === "symbol" ? key : String(key);
+  function toPropertyKey(t) {
+    var i = toPrimitive(t, "string");
+    return "symbol" == _typeof(i) ? i : String(i);
   }
 
-  function _defineProperty$2(obj, key, value) {
-    key = _toPropertyKey$9(key);
+  function _defineProperty(obj, key, value) {
+    key = toPropertyKey(key);
     if (key in obj) {
       Object.defineProperty(obj, key, {
         value: value,
@@ -126,46 +126,50 @@
   function escapeHtml(string) {
     var str = '' + string;
     var match = matchHtmlRegExp.exec(str);
+
     if (!match) {
       return str;
     }
+
     var escape;
     var html = '';
     var index = 0;
     var lastIndex = 0;
+
     for (index = match.index; index < str.length; index++) {
       switch (str.charCodeAt(index)) {
-        case 34:
-          // "
+        case 34: // "
           escape = '&quot;';
           break;
-        case 38:
-          // &
+        case 38: // &
           escape = '&amp;';
           break;
-        case 39:
-          // '
+        case 39: // '
           escape = '&#39;';
           break;
-        case 60:
-          // <
+        case 60: // <
           escape = '&lt;';
           break;
-        case 62:
-          // >
+        case 62: // >
           escape = '&gt;';
           break;
         default:
           continue;
       }
+
       if (lastIndex !== index) {
         html += str.substring(lastIndex, index);
       }
+
       lastIndex = index + 1;
       html += escape;
     }
-    return lastIndex !== index ? html + str.substring(lastIndex, index) : html;
+
+    return lastIndex !== index
+      ? html + str.substring(lastIndex, index)
+      : html;
   }
+
   var escape = /*@__PURE__*/getDefaultExportFromCjs(escapeHtml_1);
 
   class RenderUploadFile {
@@ -176,17 +180,17 @@
         skipRequired,
         translations
       } = _ref;
-      _defineProperty$2(this, "container", void 0);
-      _defineProperty$2(this, "input", void 0);
-      _defineProperty$2(this, "translations", void 0);
-      _defineProperty$2(this, "errors", void 0);
-      _defineProperty$2(this, "createErrorContainer", parent => {
+      _defineProperty(this, "container", void 0);
+      _defineProperty(this, "input", void 0);
+      _defineProperty(this, "translations", void 0);
+      _defineProperty(this, "errors", void 0);
+      _defineProperty(this, "createErrorContainer", parent => {
         const div = document.createElement("div");
         div.className = "dff-invalid-files";
         parent.appendChild(div);
         return div;
       });
-      _defineProperty$2(this, "createFilesContainer", parent => {
+      _defineProperty(this, "createFilesContainer", parent => {
         const div = document.createElement("div");
         div.className = "dff-files";
         parent.appendChild(div);
@@ -382,1122 +386,94 @@
     }
   }
 
-  const types = {
-    "application/andrew-inset": ["ez"],
-    "application/appinstaller": ["appinstaller"],
-    "application/applixware": ["aw"],
-    "application/appx": ["appx"],
-    "application/appxbundle": ["appxbundle"],
-    "application/atom+xml": ["atom"],
-    "application/atomcat+xml": ["atomcat"],
-    "application/atomdeleted+xml": ["atomdeleted"],
-    "application/atomsvc+xml": ["atomsvc"],
-    "application/atsc-dwd+xml": ["dwd"],
-    "application/atsc-held+xml": ["held"],
-    "application/atsc-rsat+xml": ["rsat"],
-    "application/automationml-aml+xml": ["aml"],
-    "application/automationml-amlx+zip": ["amlx"],
-    "application/bdoc": ["bdoc"],
-    "application/calendar+xml": ["xcs"],
-    "application/ccxml+xml": ["ccxml"],
-    "application/cdfx+xml": ["cdfx"],
-    "application/cdmi-capability": ["cdmia"],
-    "application/cdmi-container": ["cdmic"],
-    "application/cdmi-domain": ["cdmid"],
-    "application/cdmi-object": ["cdmio"],
-    "application/cdmi-queue": ["cdmiq"],
-    "application/cpl+xml": ["cpl"],
-    "application/cu-seeme": ["cu"],
-    "application/cwl": ["cwl"],
-    "application/dash+xml": ["mpd"],
-    "application/dash-patch+xml": ["mpp"],
-    "application/davmount+xml": ["davmount"],
-    "application/docbook+xml": ["dbk"],
-    "application/dssc+der": ["dssc"],
-    "application/dssc+xml": ["xdssc"],
-    "application/ecmascript": ["ecma"],
-    "application/emma+xml": ["emma"],
-    "application/emotionml+xml": ["emotionml"],
-    "application/epub+zip": ["epub"],
-    "application/exi": ["exi"],
-    "application/express": ["exp"],
-    "application/fdf": ["fdf"],
-    "application/fdt+xml": ["fdt"],
-    "application/font-tdpfr": ["pfr"],
-    "application/geo+json": ["geojson"],
-    "application/gml+xml": ["gml"],
-    "application/gpx+xml": ["gpx"],
-    "application/gxf": ["gxf"],
-    "application/gzip": ["gz"],
-    "application/hjson": ["hjson"],
-    "application/hyperstudio": ["stk"],
-    "application/inkml+xml": ["ink", "inkml"],
-    "application/ipfix": ["ipfix"],
-    "application/its+xml": ["its"],
-    "application/java-archive": ["jar", "war", "ear"],
-    "application/java-serialized-object": ["ser"],
-    "application/java-vm": ["class"],
-    "application/javascript": ["*js"],
-    "application/json": ["json", "map"],
-    "application/json5": ["json5"],
-    "application/jsonml+json": ["jsonml"],
-    "application/ld+json": ["jsonld"],
-    "application/lgr+xml": ["lgr"],
-    "application/lost+xml": ["lostxml"],
-    "application/mac-binhex40": ["hqx"],
-    "application/mac-compactpro": ["cpt"],
-    "application/mads+xml": ["mads"],
-    "application/manifest+json": ["webmanifest"],
-    "application/marc": ["mrc"],
-    "application/marcxml+xml": ["mrcx"],
-    "application/mathematica": ["ma", "nb", "mb"],
-    "application/mathml+xml": ["mathml"],
-    "application/mbox": ["mbox"],
-    "application/media-policy-dataset+xml": ["mpf"],
-    "application/mediaservercontrol+xml": ["mscml"],
-    "application/metalink+xml": ["metalink"],
-    "application/metalink4+xml": ["meta4"],
-    "application/mets+xml": ["mets"],
-    "application/mmt-aei+xml": ["maei"],
-    "application/mmt-usd+xml": ["musd"],
-    "application/mods+xml": ["mods"],
-    "application/mp21": ["m21", "mp21"],
-    "application/mp4": ["mp4", "mpg4", "mp4s", "m4p"],
-    "application/msix": ["msix"],
-    "application/msixbundle": ["msixbundle"],
-    "application/msword": ["doc", "dot"],
-    "application/mxf": ["mxf"],
-    "application/n-quads": ["nq"],
-    "application/n-triples": ["nt"],
-    "application/node": ["cjs"],
-    "application/octet-stream": ["bin", "dms", "lrf", "mar", "so", "dist", "distz", "pkg", "bpk", "dump", "elc", "deploy", "exe", "dll", "deb", "dmg", "iso", "img", "msi", "msp", "msm", "buffer"],
-    "application/oda": ["oda"],
-    "application/oebps-package+xml": ["opf"],
-    "application/ogg": ["ogx"],
-    "application/omdoc+xml": ["omdoc"],
-    "application/onenote": ["onetoc", "onetoc2", "onetmp", "onepkg"],
-    "application/oxps": ["oxps"],
-    "application/p2p-overlay+xml": ["relo"],
-    "application/patch-ops-error+xml": ["xer"],
-    "application/pdf": ["pdf"],
-    "application/pgp-encrypted": ["pgp"],
-    "application/pgp-keys": ["asc"],
-    "application/pgp-signature": ["sig", "*asc"],
-    "application/pics-rules": ["prf"],
-    "application/pkcs10": ["p10"],
-    "application/pkcs7-mime": ["p7m", "p7c"],
-    "application/pkcs7-signature": ["p7s"],
-    "application/pkcs8": ["p8"],
-    "application/pkix-attr-cert": ["ac"],
-    "application/pkix-cert": ["cer"],
-    "application/pkix-crl": ["crl"],
-    "application/pkix-pkipath": ["pkipath"],
-    "application/pkixcmp": ["pki"],
-    "application/pls+xml": ["pls"],
-    "application/postscript": ["ai", "eps", "ps"],
-    "application/provenance+xml": ["provx"],
-    "application/pskc+xml": ["pskcxml"],
-    "application/raml+yaml": ["raml"],
-    "application/rdf+xml": ["rdf", "owl"],
-    "application/reginfo+xml": ["rif"],
-    "application/relax-ng-compact-syntax": ["rnc"],
-    "application/resource-lists+xml": ["rl"],
-    "application/resource-lists-diff+xml": ["rld"],
-    "application/rls-services+xml": ["rs"],
-    "application/route-apd+xml": ["rapd"],
-    "application/route-s-tsid+xml": ["sls"],
-    "application/route-usd+xml": ["rusd"],
-    "application/rpki-ghostbusters": ["gbr"],
-    "application/rpki-manifest": ["mft"],
-    "application/rpki-roa": ["roa"],
-    "application/rsd+xml": ["rsd"],
-    "application/rss+xml": ["rss"],
-    "application/rtf": ["rtf"],
-    "application/sbml+xml": ["sbml"],
-    "application/scvp-cv-request": ["scq"],
-    "application/scvp-cv-response": ["scs"],
-    "application/scvp-vp-request": ["spq"],
-    "application/scvp-vp-response": ["spp"],
-    "application/sdp": ["sdp"],
-    "application/senml+xml": ["senmlx"],
-    "application/sensml+xml": ["sensmlx"],
-    "application/set-payment-initiation": ["setpay"],
-    "application/set-registration-initiation": ["setreg"],
-    "application/shf+xml": ["shf"],
-    "application/sieve": ["siv", "sieve"],
-    "application/smil+xml": ["smi", "smil"],
-    "application/sparql-query": ["rq"],
-    "application/sparql-results+xml": ["srx"],
-    "application/sql": ["sql"],
-    "application/srgs": ["gram"],
-    "application/srgs+xml": ["grxml"],
-    "application/sru+xml": ["sru"],
-    "application/ssdl+xml": ["ssdl"],
-    "application/ssml+xml": ["ssml"],
-    "application/swid+xml": ["swidtag"],
-    "application/tei+xml": ["tei", "teicorpus"],
-    "application/thraud+xml": ["tfi"],
-    "application/timestamped-data": ["tsd"],
-    "application/toml": ["toml"],
-    "application/trig": ["trig"],
-    "application/ttml+xml": ["ttml"],
-    "application/ubjson": ["ubj"],
-    "application/urc-ressheet+xml": ["rsheet"],
-    "application/urc-targetdesc+xml": ["td"],
-    "application/voicexml+xml": ["vxml"],
-    "application/wasm": ["wasm"],
-    "application/watcherinfo+xml": ["wif"],
-    "application/widget": ["wgt"],
-    "application/winhlp": ["hlp"],
-    "application/wsdl+xml": ["wsdl"],
-    "application/wspolicy+xml": ["wspolicy"],
-    "application/xaml+xml": ["xaml"],
-    "application/xcap-att+xml": ["xav"],
-    "application/xcap-caps+xml": ["xca"],
-    "application/xcap-diff+xml": ["xdf"],
-    "application/xcap-el+xml": ["xel"],
-    "application/xcap-ns+xml": ["xns"],
-    "application/xenc+xml": ["xenc"],
-    "application/xfdf": ["xfdf"],
-    "application/xhtml+xml": ["xhtml", "xht"],
-    "application/xliff+xml": ["xlf"],
-    "application/xml": ["xml", "xsl", "xsd", "rng"],
-    "application/xml-dtd": ["dtd"],
-    "application/xop+xml": ["xop"],
-    "application/xproc+xml": ["xpl"],
-    "application/xslt+xml": ["*xsl", "xslt"],
-    "application/xspf+xml": ["xspf"],
-    "application/xv+xml": ["mxml", "xhvml", "xvml", "xvm"],
-    "application/yang": ["yang"],
-    "application/yin+xml": ["yin"],
-    "application/zip": ["zip"],
-    "audio/3gpp": ["*3gpp"],
-    "audio/aac": ["adts", "aac"],
-    "audio/adpcm": ["adp"],
-    "audio/amr": ["amr"],
-    "audio/basic": ["au", "snd"],
-    "audio/midi": ["mid", "midi", "kar", "rmi"],
-    "audio/mobile-xmf": ["mxmf"],
-    "audio/mp3": ["*mp3"],
-    "audio/mp4": ["m4a", "mp4a"],
-    "audio/mpeg": ["mpga", "mp2", "mp2a", "mp3", "m2a", "m3a"],
-    "audio/ogg": ["oga", "ogg", "spx", "opus"],
-    "audio/s3m": ["s3m"],
-    "audio/silk": ["sil"],
-    "audio/wav": ["wav"],
-    "audio/wave": ["*wav"],
-    "audio/webm": ["weba"],
-    "audio/xm": ["xm"],
-    "font/collection": ["ttc"],
-    "font/otf": ["otf"],
-    "font/ttf": ["ttf"],
-    "font/woff": ["woff"],
-    "font/woff2": ["woff2"],
-    "image/aces": ["exr"],
-    "image/apng": ["apng"],
-    "image/avci": ["avci"],
-    "image/avcs": ["avcs"],
-    "image/avif": ["avif"],
-    "image/bmp": ["bmp", "dib"],
-    "image/cgm": ["cgm"],
-    "image/dicom-rle": ["drle"],
-    "image/dpx": ["dpx"],
-    "image/emf": ["emf"],
-    "image/fits": ["fits"],
-    "image/g3fax": ["g3"],
-    "image/gif": ["gif"],
-    "image/heic": ["heic"],
-    "image/heic-sequence": ["heics"],
-    "image/heif": ["heif"],
-    "image/heif-sequence": ["heifs"],
-    "image/hej2k": ["hej2"],
-    "image/hsj2": ["hsj2"],
-    "image/ief": ["ief"],
-    "image/jls": ["jls"],
-    "image/jp2": ["jp2", "jpg2"],
-    "image/jpeg": ["jpeg", "jpg", "jpe"],
-    "image/jph": ["jph"],
-    "image/jphc": ["jhc"],
-    "image/jpm": ["jpm", "jpgm"],
-    "image/jpx": ["jpx", "jpf"],
-    "image/jxr": ["jxr"],
-    "image/jxra": ["jxra"],
-    "image/jxrs": ["jxrs"],
-    "image/jxs": ["jxs"],
-    "image/jxsc": ["jxsc"],
-    "image/jxsi": ["jxsi"],
-    "image/jxss": ["jxss"],
-    "image/ktx": ["ktx"],
-    "image/ktx2": ["ktx2"],
-    "image/png": ["png"],
-    "image/sgi": ["sgi"],
-    "image/svg+xml": ["svg", "svgz"],
-    "image/t38": ["t38"],
-    "image/tiff": ["tif", "tiff"],
-    "image/tiff-fx": ["tfx"],
-    "image/webp": ["webp"],
-    "image/wmf": ["wmf"],
-    "message/disposition-notification": ["disposition-notification"],
-    "message/global": ["u8msg"],
-    "message/global-delivery-status": ["u8dsn"],
-    "message/global-disposition-notification": ["u8mdn"],
-    "message/global-headers": ["u8hdr"],
-    "message/rfc822": ["eml", "mime"],
-    "model/3mf": ["3mf"],
-    "model/gltf+json": ["gltf"],
-    "model/gltf-binary": ["glb"],
-    "model/iges": ["igs", "iges"],
-    "model/jt": ["jt"],
-    "model/mesh": ["msh", "mesh", "silo"],
-    "model/mtl": ["mtl"],
-    "model/obj": ["obj"],
-    "model/prc": ["prc"],
-    "model/step+xml": ["stpx"],
-    "model/step+zip": ["stpz"],
-    "model/step-xml+zip": ["stpxz"],
-    "model/stl": ["stl"],
-    "model/u3d": ["u3d"],
-    "model/vrml": ["wrl", "vrml"],
-    "model/x3d+binary": ["*x3db", "x3dbz"],
-    "model/x3d+fastinfoset": ["x3db"],
-    "model/x3d+vrml": ["*x3dv", "x3dvz"],
-    "model/x3d+xml": ["x3d", "x3dz"],
-    "model/x3d-vrml": ["x3dv"],
-    "text/cache-manifest": ["appcache", "manifest"],
-    "text/calendar": ["ics", "ifb"],
-    "text/coffeescript": ["coffee", "litcoffee"],
-    "text/css": ["css"],
-    "text/csv": ["csv"],
-    "text/html": ["html", "htm", "shtml"],
-    "text/jade": ["jade"],
-    "text/javascript": ["js", "mjs"],
-    "text/jsx": ["jsx"],
-    "text/less": ["less"],
-    "text/markdown": ["md", "markdown"],
-    "text/mathml": ["mml"],
-    "text/mdx": ["mdx"],
-    "text/n3": ["n3"],
-    "text/plain": ["txt", "text", "conf", "def", "list", "log", "in", "ini"],
-    "text/richtext": ["rtx"],
-    "text/rtf": ["*rtf"],
-    "text/sgml": ["sgml", "sgm"],
-    "text/shex": ["shex"],
-    "text/slim": ["slim", "slm"],
-    "text/spdx": ["spdx"],
-    "text/stylus": ["stylus", "styl"],
-    "text/tab-separated-values": ["tsv"],
-    "text/troff": ["t", "tr", "roff", "man", "me", "ms"],
-    "text/turtle": ["ttl"],
-    "text/uri-list": ["uri", "uris", "urls"],
-    "text/vcard": ["vcard"],
-    "text/vtt": ["vtt"],
-    "text/wgsl": ["wgsl"],
-    "text/xml": ["*xml"],
-    "text/yaml": ["yaml", "yml"],
-    "video/3gpp": ["3gp", "3gpp"],
-    "video/3gpp2": ["3g2"],
-    "video/h261": ["h261"],
-    "video/h263": ["h263"],
-    "video/h264": ["h264"],
-    "video/iso.segment": ["m4s"],
-    "video/jpeg": ["jpgv"],
-    "video/jpm": ["*jpm", "*jpgm"],
-    "video/mj2": ["mj2", "mjp2"],
-    "video/mp2t": ["ts"],
-    "video/mp4": ["*mp4", "mp4v", "*mpg4"],
-    "video/mpeg": ["mpeg", "mpg", "mpe", "m1v", "m2v"],
-    "video/ogg": ["ogv"],
-    "video/quicktime": ["qt", "mov"],
-    "video/webm": ["webm"]
-  };
+  const types = { "application/andrew-inset": ["ez"], "application/appinstaller": ["appinstaller"], "application/applixware": ["aw"], "application/appx": ["appx"], "application/appxbundle": ["appxbundle"], "application/atom+xml": ["atom"], "application/atomcat+xml": ["atomcat"], "application/atomdeleted+xml": ["atomdeleted"], "application/atomsvc+xml": ["atomsvc"], "application/atsc-dwd+xml": ["dwd"], "application/atsc-held+xml": ["held"], "application/atsc-rsat+xml": ["rsat"], "application/automationml-aml+xml": ["aml"], "application/automationml-amlx+zip": ["amlx"], "application/bdoc": ["bdoc"], "application/calendar+xml": ["xcs"], "application/ccxml+xml": ["ccxml"], "application/cdfx+xml": ["cdfx"], "application/cdmi-capability": ["cdmia"], "application/cdmi-container": ["cdmic"], "application/cdmi-domain": ["cdmid"], "application/cdmi-object": ["cdmio"], "application/cdmi-queue": ["cdmiq"], "application/cpl+xml": ["cpl"], "application/cu-seeme": ["cu"], "application/cwl": ["cwl"], "application/dash+xml": ["mpd"], "application/dash-patch+xml": ["mpp"], "application/davmount+xml": ["davmount"], "application/docbook+xml": ["dbk"], "application/dssc+der": ["dssc"], "application/dssc+xml": ["xdssc"], "application/ecmascript": ["ecma"], "application/emma+xml": ["emma"], "application/emotionml+xml": ["emotionml"], "application/epub+zip": ["epub"], "application/exi": ["exi"], "application/express": ["exp"], "application/fdf": ["fdf"], "application/fdt+xml": ["fdt"], "application/font-tdpfr": ["pfr"], "application/geo+json": ["geojson"], "application/gml+xml": ["gml"], "application/gpx+xml": ["gpx"], "application/gxf": ["gxf"], "application/gzip": ["gz"], "application/hjson": ["hjson"], "application/hyperstudio": ["stk"], "application/inkml+xml": ["ink", "inkml"], "application/ipfix": ["ipfix"], "application/its+xml": ["its"], "application/java-archive": ["jar", "war", "ear"], "application/java-serialized-object": ["ser"], "application/java-vm": ["class"], "application/javascript": ["*js"], "application/json": ["json", "map"], "application/json5": ["json5"], "application/jsonml+json": ["jsonml"], "application/ld+json": ["jsonld"], "application/lgr+xml": ["lgr"], "application/lost+xml": ["lostxml"], "application/mac-binhex40": ["hqx"], "application/mac-compactpro": ["cpt"], "application/mads+xml": ["mads"], "application/manifest+json": ["webmanifest"], "application/marc": ["mrc"], "application/marcxml+xml": ["mrcx"], "application/mathematica": ["ma", "nb", "mb"], "application/mathml+xml": ["mathml"], "application/mbox": ["mbox"], "application/media-policy-dataset+xml": ["mpf"], "application/mediaservercontrol+xml": ["mscml"], "application/metalink+xml": ["metalink"], "application/metalink4+xml": ["meta4"], "application/mets+xml": ["mets"], "application/mmt-aei+xml": ["maei"], "application/mmt-usd+xml": ["musd"], "application/mods+xml": ["mods"], "application/mp21": ["m21", "mp21"], "application/mp4": ["mp4", "mpg4", "mp4s", "m4p"], "application/msix": ["msix"], "application/msixbundle": ["msixbundle"], "application/msword": ["doc", "dot"], "application/mxf": ["mxf"], "application/n-quads": ["nq"], "application/n-triples": ["nt"], "application/node": ["cjs"], "application/octet-stream": ["bin", "dms", "lrf", "mar", "so", "dist", "distz", "pkg", "bpk", "dump", "elc", "deploy", "exe", "dll", "deb", "dmg", "iso", "img", "msi", "msp", "msm", "buffer"], "application/oda": ["oda"], "application/oebps-package+xml": ["opf"], "application/ogg": ["ogx"], "application/omdoc+xml": ["omdoc"], "application/onenote": ["onetoc", "onetoc2", "onetmp", "onepkg"], "application/oxps": ["oxps"], "application/p2p-overlay+xml": ["relo"], "application/patch-ops-error+xml": ["xer"], "application/pdf": ["pdf"], "application/pgp-encrypted": ["pgp"], "application/pgp-keys": ["asc"], "application/pgp-signature": ["sig", "*asc"], "application/pics-rules": ["prf"], "application/pkcs10": ["p10"], "application/pkcs7-mime": ["p7m", "p7c"], "application/pkcs7-signature": ["p7s"], "application/pkcs8": ["p8"], "application/pkix-attr-cert": ["ac"], "application/pkix-cert": ["cer"], "application/pkix-crl": ["crl"], "application/pkix-pkipath": ["pkipath"], "application/pkixcmp": ["pki"], "application/pls+xml": ["pls"], "application/postscript": ["ai", "eps", "ps"], "application/provenance+xml": ["provx"], "application/pskc+xml": ["pskcxml"], "application/raml+yaml": ["raml"], "application/rdf+xml": ["rdf", "owl"], "application/reginfo+xml": ["rif"], "application/relax-ng-compact-syntax": ["rnc"], "application/resource-lists+xml": ["rl"], "application/resource-lists-diff+xml": ["rld"], "application/rls-services+xml": ["rs"], "application/route-apd+xml": ["rapd"], "application/route-s-tsid+xml": ["sls"], "application/route-usd+xml": ["rusd"], "application/rpki-ghostbusters": ["gbr"], "application/rpki-manifest": ["mft"], "application/rpki-roa": ["roa"], "application/rsd+xml": ["rsd"], "application/rss+xml": ["rss"], "application/rtf": ["rtf"], "application/sbml+xml": ["sbml"], "application/scvp-cv-request": ["scq"], "application/scvp-cv-response": ["scs"], "application/scvp-vp-request": ["spq"], "application/scvp-vp-response": ["spp"], "application/sdp": ["sdp"], "application/senml+xml": ["senmlx"], "application/sensml+xml": ["sensmlx"], "application/set-payment-initiation": ["setpay"], "application/set-registration-initiation": ["setreg"], "application/shf+xml": ["shf"], "application/sieve": ["siv", "sieve"], "application/smil+xml": ["smi", "smil"], "application/sparql-query": ["rq"], "application/sparql-results+xml": ["srx"], "application/sql": ["sql"], "application/srgs": ["gram"], "application/srgs+xml": ["grxml"], "application/sru+xml": ["sru"], "application/ssdl+xml": ["ssdl"], "application/ssml+xml": ["ssml"], "application/swid+xml": ["swidtag"], "application/tei+xml": ["tei", "teicorpus"], "application/thraud+xml": ["tfi"], "application/timestamped-data": ["tsd"], "application/toml": ["toml"], "application/trig": ["trig"], "application/ttml+xml": ["ttml"], "application/ubjson": ["ubj"], "application/urc-ressheet+xml": ["rsheet"], "application/urc-targetdesc+xml": ["td"], "application/voicexml+xml": ["vxml"], "application/wasm": ["wasm"], "application/watcherinfo+xml": ["wif"], "application/widget": ["wgt"], "application/winhlp": ["hlp"], "application/wsdl+xml": ["wsdl"], "application/wspolicy+xml": ["wspolicy"], "application/xaml+xml": ["xaml"], "application/xcap-att+xml": ["xav"], "application/xcap-caps+xml": ["xca"], "application/xcap-diff+xml": ["xdf"], "application/xcap-el+xml": ["xel"], "application/xcap-ns+xml": ["xns"], "application/xenc+xml": ["xenc"], "application/xfdf": ["xfdf"], "application/xhtml+xml": ["xhtml", "xht"], "application/xliff+xml": ["xlf"], "application/xml": ["xml", "xsl", "xsd", "rng"], "application/xml-dtd": ["dtd"], "application/xop+xml": ["xop"], "application/xproc+xml": ["xpl"], "application/xslt+xml": ["*xsl", "xslt"], "application/xspf+xml": ["xspf"], "application/xv+xml": ["mxml", "xhvml", "xvml", "xvm"], "application/yang": ["yang"], "application/yin+xml": ["yin"], "application/zip": ["zip"], "audio/3gpp": ["*3gpp"], "audio/aac": ["adts", "aac"], "audio/adpcm": ["adp"], "audio/amr": ["amr"], "audio/basic": ["au", "snd"], "audio/midi": ["mid", "midi", "kar", "rmi"], "audio/mobile-xmf": ["mxmf"], "audio/mp3": ["*mp3"], "audio/mp4": ["m4a", "mp4a"], "audio/mpeg": ["mpga", "mp2", "mp2a", "mp3", "m2a", "m3a"], "audio/ogg": ["oga", "ogg", "spx", "opus"], "audio/s3m": ["s3m"], "audio/silk": ["sil"], "audio/wav": ["wav"], "audio/wave": ["*wav"], "audio/webm": ["weba"], "audio/xm": ["xm"], "font/collection": ["ttc"], "font/otf": ["otf"], "font/ttf": ["ttf"], "font/woff": ["woff"], "font/woff2": ["woff2"], "image/aces": ["exr"], "image/apng": ["apng"], "image/avci": ["avci"], "image/avcs": ["avcs"], "image/avif": ["avif"], "image/bmp": ["bmp", "dib"], "image/cgm": ["cgm"], "image/dicom-rle": ["drle"], "image/dpx": ["dpx"], "image/emf": ["emf"], "image/fits": ["fits"], "image/g3fax": ["g3"], "image/gif": ["gif"], "image/heic": ["heic"], "image/heic-sequence": ["heics"], "image/heif": ["heif"], "image/heif-sequence": ["heifs"], "image/hej2k": ["hej2"], "image/hsj2": ["hsj2"], "image/ief": ["ief"], "image/jls": ["jls"], "image/jp2": ["jp2", "jpg2"], "image/jpeg": ["jpeg", "jpg", "jpe"], "image/jph": ["jph"], "image/jphc": ["jhc"], "image/jpm": ["jpm", "jpgm"], "image/jpx": ["jpx", "jpf"], "image/jxr": ["jxr"], "image/jxra": ["jxra"], "image/jxrs": ["jxrs"], "image/jxs": ["jxs"], "image/jxsc": ["jxsc"], "image/jxsi": ["jxsi"], "image/jxss": ["jxss"], "image/ktx": ["ktx"], "image/ktx2": ["ktx2"], "image/png": ["png"], "image/sgi": ["sgi"], "image/svg+xml": ["svg", "svgz"], "image/t38": ["t38"], "image/tiff": ["tif", "tiff"], "image/tiff-fx": ["tfx"], "image/webp": ["webp"], "image/wmf": ["wmf"], "message/disposition-notification": ["disposition-notification"], "message/global": ["u8msg"], "message/global-delivery-status": ["u8dsn"], "message/global-disposition-notification": ["u8mdn"], "message/global-headers": ["u8hdr"], "message/rfc822": ["eml", "mime"], "model/3mf": ["3mf"], "model/gltf+json": ["gltf"], "model/gltf-binary": ["glb"], "model/iges": ["igs", "iges"], "model/jt": ["jt"], "model/mesh": ["msh", "mesh", "silo"], "model/mtl": ["mtl"], "model/obj": ["obj"], "model/prc": ["prc"], "model/step+xml": ["stpx"], "model/step+zip": ["stpz"], "model/step-xml+zip": ["stpxz"], "model/stl": ["stl"], "model/u3d": ["u3d"], "model/vrml": ["wrl", "vrml"], "model/x3d+binary": ["*x3db", "x3dbz"], "model/x3d+fastinfoset": ["x3db"], "model/x3d+vrml": ["*x3dv", "x3dvz"], "model/x3d+xml": ["x3d", "x3dz"], "model/x3d-vrml": ["x3dv"], "text/cache-manifest": ["appcache", "manifest"], "text/calendar": ["ics", "ifb"], "text/coffeescript": ["coffee", "litcoffee"], "text/css": ["css"], "text/csv": ["csv"], "text/html": ["html", "htm", "shtml"], "text/jade": ["jade"], "text/javascript": ["js", "mjs"], "text/jsx": ["jsx"], "text/less": ["less"], "text/markdown": ["md", "markdown"], "text/mathml": ["mml"], "text/mdx": ["mdx"], "text/n3": ["n3"], "text/plain": ["txt", "text", "conf", "def", "list", "log", "in", "ini"], "text/richtext": ["rtx"], "text/rtf": ["*rtf"], "text/sgml": ["sgml", "sgm"], "text/shex": ["shex"], "text/slim": ["slim", "slm"], "text/spdx": ["spdx"], "text/stylus": ["stylus", "styl"], "text/tab-separated-values": ["tsv"], "text/troff": ["t", "tr", "roff", "man", "me", "ms"], "text/turtle": ["ttl"], "text/uri-list": ["uri", "uris", "urls"], "text/vcard": ["vcard"], "text/vtt": ["vtt"], "text/wgsl": ["wgsl"], "text/xml": ["*xml"], "text/yaml": ["yaml", "yml"], "video/3gpp": ["3gp", "3gpp"], "video/3gpp2": ["3g2"], "video/h261": ["h261"], "video/h263": ["h263"], "video/h264": ["h264"], "video/iso.segment": ["m4s"], "video/jpeg": ["jpgv"], "video/jpm": ["*jpm", "*jpgm"], "video/mj2": ["mj2", "mjp2"], "video/mp2t": ["ts"], "video/mp4": ["*mp4", "mp4v", "*mpg4"], "video/mpeg": ["mpeg", "mpg", "mpe", "m1v", "m2v"], "video/ogg": ["ogv"], "video/quicktime": ["qt", "mov"], "video/webm": ["webm"] };
   Object.freeze(types);
 
-  var __classPrivateFieldGet = window && window.__classPrivateFieldGet || function (receiver, state, kind, f) {
-    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
-    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
-    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+  var __classPrivateFieldGet = (window && window.__classPrivateFieldGet) || function (receiver, state, kind, f) {
+      if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+      if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+      return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
   };
   var _Mime_extensionToType, _Mime_typeToExtension, _Mime_typeToExtensions;
   class Mime {
-    constructor() {
-      _Mime_extensionToType.set(this, new Map());
-      _Mime_typeToExtension.set(this, new Map());
-      _Mime_typeToExtensions.set(this, new Map());
-      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-        args[_key] = arguments[_key];
-      }
-      for (const arg of args) {
-        this.define(arg);
-      }
-    }
-    define(typeMap) {
-      let force = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-      for (let [type, extensions] of Object.entries(typeMap)) {
-        type = type.toLowerCase();
-        extensions = extensions.map(ext => ext.toLowerCase());
-        if (!__classPrivateFieldGet(this, _Mime_typeToExtensions, "f").has(type)) {
-          __classPrivateFieldGet(this, _Mime_typeToExtensions, "f").set(type, new Set());
-        }
-        const allExtensions = __classPrivateFieldGet(this, _Mime_typeToExtensions, "f").get(type);
-        let first = true;
-        for (let extension of extensions) {
-          const starred = extension.startsWith('*');
-          extension = starred ? extension.slice(1) : extension;
-          allExtensions?.add(extension);
-          if (first) {
-            __classPrivateFieldGet(this, _Mime_typeToExtension, "f").set(type, extension);
+      constructor(...args) {
+          _Mime_extensionToType.set(this, new Map());
+          _Mime_typeToExtension.set(this, new Map());
+          _Mime_typeToExtensions.set(this, new Map());
+          for (const arg of args) {
+              this.define(arg);
           }
-          first = false;
-          if (starred) continue;
-          const currentType = __classPrivateFieldGet(this, _Mime_extensionToType, "f").get(extension);
-          if (currentType && currentType != type && !force) {
-            throw new Error(`"${type} -> ${extension}" conflicts with "${currentType} -> ${extension}". Pass \`force=true\` to override this definition.`);
+      }
+      define(typeMap, force = false) {
+          for (let [type, extensions] of Object.entries(typeMap)) {
+              type = type.toLowerCase();
+              extensions = extensions.map((ext) => ext.toLowerCase());
+              if (!__classPrivateFieldGet(this, _Mime_typeToExtensions, "f").has(type)) {
+                  __classPrivateFieldGet(this, _Mime_typeToExtensions, "f").set(type, new Set());
+              }
+              const allExtensions = __classPrivateFieldGet(this, _Mime_typeToExtensions, "f").get(type);
+              let first = true;
+              for (let extension of extensions) {
+                  const starred = extension.startsWith('*');
+                  extension = starred ? extension.slice(1) : extension;
+                  allExtensions?.add(extension);
+                  if (first) {
+                      __classPrivateFieldGet(this, _Mime_typeToExtension, "f").set(type, extension);
+                  }
+                  first = false;
+                  if (starred)
+                      continue;
+                  const currentType = __classPrivateFieldGet(this, _Mime_extensionToType, "f").get(extension);
+                  if (currentType && currentType != type && !force) {
+                      throw new Error(`"${type} -> ${extension}" conflicts with "${currentType} -> ${extension}". Pass \`force=true\` to override this definition.`);
+                  }
+                  __classPrivateFieldGet(this, _Mime_extensionToType, "f").set(extension, type);
+              }
           }
-          __classPrivateFieldGet(this, _Mime_extensionToType, "f").set(extension, type);
-        }
+          return this;
       }
-      return this;
-    }
-    getType(path) {
-      if (typeof path !== 'string') return null;
-      const last = path.replace(/^.*[/\\]/, '').toLowerCase();
-      const ext = last.replace(/^.*\./, '').toLowerCase();
-      const hasPath = last.length < path.length;
-      const hasDot = ext.length < last.length - 1;
-      if (!hasDot && hasPath) return null;
-      return __classPrivateFieldGet(this, _Mime_extensionToType, "f").get(ext) ?? null;
-    }
-    getExtension(type) {
-      if (typeof type !== 'string') return null;
-      type = type?.split?.(';')[0];
-      return (type && __classPrivateFieldGet(this, _Mime_typeToExtension, "f").get(type.trim().toLowerCase())) ?? null;
-    }
-    getAllExtensions(type) {
-      if (typeof type !== 'string') return null;
-      return __classPrivateFieldGet(this, _Mime_typeToExtensions, "f").get(type.toLowerCase()) ?? null;
-    }
-    _freeze() {
-      this.define = () => {
-        throw new Error('define() not allowed for built-in Mime objects. See https://github.com/broofa/mime/blob/main/README.md#custom-mime-instances');
-      };
-      Object.freeze(this);
-      for (const extensions of __classPrivateFieldGet(this, _Mime_typeToExtensions, "f").values()) {
-        Object.freeze(extensions);
+      getType(path) {
+          if (typeof path !== 'string')
+              return null;
+          const last = path.replace(/^.*[/\\]/, '').toLowerCase();
+          const ext = last.replace(/^.*\./, '').toLowerCase();
+          const hasPath = last.length < path.length;
+          const hasDot = ext.length < last.length - 1;
+          if (!hasDot && hasPath)
+              return null;
+          return __classPrivateFieldGet(this, _Mime_extensionToType, "f").get(ext) ?? null;
       }
-      return this;
-    }
-    _getTestState() {
-      return {
-        types: __classPrivateFieldGet(this, _Mime_extensionToType, "f"),
-        extensions: __classPrivateFieldGet(this, _Mime_typeToExtension, "f")
-      };
-    }
+      getExtension(type) {
+          if (typeof type !== 'string')
+              return null;
+          type = type?.split?.(';')[0];
+          return ((type && __classPrivateFieldGet(this, _Mime_typeToExtension, "f").get(type.trim().toLowerCase())) ?? null);
+      }
+      getAllExtensions(type) {
+          if (typeof type !== 'string')
+              return null;
+          return __classPrivateFieldGet(this, _Mime_typeToExtensions, "f").get(type.toLowerCase()) ?? null;
+      }
+      _freeze() {
+          this.define = () => {
+              throw new Error('define() not allowed for built-in Mime objects. See https://github.com/broofa/mime/blob/main/README.md#custom-mime-instances');
+          };
+          Object.freeze(this);
+          for (const extensions of __classPrivateFieldGet(this, _Mime_typeToExtensions, "f").values()) {
+              Object.freeze(extensions);
+          }
+          return this;
+      }
+      _getTestState() {
+          return {
+              types: __classPrivateFieldGet(this, _Mime_extensionToType, "f"),
+              extensions: __classPrivateFieldGet(this, _Mime_typeToExtension, "f"),
+          };
+      }
   }
   _Mime_extensionToType = new WeakMap(), _Mime_typeToExtension = new WeakMap(), _Mime_typeToExtensions = new WeakMap();
 
   var mime = new Mime(types)._freeze();
-
-  var check = function (it) {
-    return it && it.Math === Math && it;
-  };
-
-  // https://github.com/zloirock/core-js/issues/86#issuecomment-115759028
-  var global$b =
-  // eslint-disable-next-line es/no-global-this -- safe
-  check(typeof globalThis == 'object' && globalThis) || check(typeof window == 'object' && window) ||
-  // eslint-disable-next-line no-restricted-globals -- safe
-  check(typeof self == 'object' && self) || check(typeof commonjsGlobal == 'object' && commonjsGlobal) || check(typeof commonjsGlobal == 'object' && commonjsGlobal) ||
-  // eslint-disable-next-line no-new-func -- fallback
-  function () {
-    return this;
-  }() || Function('return this')();
-
-  var fails$7 = function (exec) {
-    try {
-      return !!exec();
-    } catch (error) {
-      return true;
-    }
-  };
-
-  var fails$6 = fails$7;
-
-  // Detect IE8's incomplete defineProperty implementation
-  var descriptors = !fails$6(function () {
-    // eslint-disable-next-line es/no-object-defineproperty -- required for testing
-    return Object.defineProperty({}, 1, {
-      get: function () {
-        return 7;
-      }
-    })[1] !== 7;
-  });
-
-  var makeBuiltIn$2 = {exports: {}};
-
-  var fails$5 = fails$7;
-  var functionBindNative = !fails$5(function () {
-    // eslint-disable-next-line es/no-function-prototype-bind -- safe
-    var test = function () {/* empty */}.bind();
-    // eslint-disable-next-line no-prototype-builtins -- safe
-    return typeof test != 'function' || test.hasOwnProperty('prototype');
-  });
-
-  var NATIVE_BIND$1 = functionBindNative;
-  var FunctionPrototype$1 = Function.prototype;
-  var call$3 = FunctionPrototype$1.call;
-  var uncurryThisWithBind = NATIVE_BIND$1 && FunctionPrototype$1.bind.bind(call$3, call$3);
-  var functionUncurryThis = NATIVE_BIND$1 ? uncurryThisWithBind : function (fn) {
-    return function () {
-      return call$3.apply(fn, arguments);
-    };
-  };
-
-  var documentAll$2 = typeof document == 'object' && document.all;
-
-  // https://tc39.es/ecma262/#sec-IsHTMLDDA-internal-slot
-  // eslint-disable-next-line unicorn/no-typeof-undefined -- required for testing
-  var IS_HTMLDDA = typeof documentAll$2 == 'undefined' && documentAll$2 !== undefined;
-  var documentAll_1 = {
-    all: documentAll$2,
-    IS_HTMLDDA: IS_HTMLDDA
-  };
-
-  var $documentAll$1 = documentAll_1;
-  var documentAll$1 = $documentAll$1.all;
-
-  // `IsCallable` abstract operation
-  // https://tc39.es/ecma262/#sec-iscallable
-  var isCallable$8 = $documentAll$1.IS_HTMLDDA ? function (argument) {
-    return typeof argument == 'function' || argument === documentAll$1;
-  } : function (argument) {
-    return typeof argument == 'function';
-  };
-
-  // we can't use just `it == null` since of `document.all` special case
-  // https://tc39.es/ecma262/#sec-IsHTMLDDA-internal-slot-aec
-  var isNullOrUndefined$2 = function (it) {
-    return it === null || it === undefined;
-  };
-
-  var isNullOrUndefined$1 = isNullOrUndefined$2;
-  var $TypeError$5 = TypeError;
-
-  // `RequireObjectCoercible` abstract operation
-  // https://tc39.es/ecma262/#sec-requireobjectcoercible
-  var requireObjectCoercible$1 = function (it) {
-    if (isNullOrUndefined$1(it)) throw new $TypeError$5("Can't call method on " + it);
-    return it;
-  };
-
-  var requireObjectCoercible = requireObjectCoercible$1;
-  var $Object$1 = Object;
-
-  // `ToObject` abstract operation
-  // https://tc39.es/ecma262/#sec-toobject
-  var toObject$1 = function (argument) {
-    return $Object$1(requireObjectCoercible(argument));
-  };
-
-  var uncurryThis$4 = functionUncurryThis;
-  var toObject = toObject$1;
-  var hasOwnProperty = uncurryThis$4({}.hasOwnProperty);
-
-  // `HasOwnProperty` abstract operation
-  // https://tc39.es/ecma262/#sec-hasownproperty
-  // eslint-disable-next-line es/no-object-hasown -- safe
-  var hasOwnProperty_1 = Object.hasOwn || function hasOwn(it, key) {
-    return hasOwnProperty(toObject(it), key);
-  };
-
-  var DESCRIPTORS$6 = descriptors;
-  var hasOwn$3 = hasOwnProperty_1;
-  var FunctionPrototype = Function.prototype;
-  // eslint-disable-next-line es/no-object-getownpropertydescriptor -- safe
-  var getDescriptor = DESCRIPTORS$6 && Object.getOwnPropertyDescriptor;
-  var EXISTS$1 = hasOwn$3(FunctionPrototype, 'name');
-  // additional protection from minified / mangled / dropped function names
-  var PROPER = EXISTS$1 && function something() {/* empty */}.name === 'something';
-  var CONFIGURABLE$1 = EXISTS$1 && (!DESCRIPTORS$6 || DESCRIPTORS$6 && getDescriptor(FunctionPrototype, 'name').configurable);
-  var functionName = {
-    EXISTS: EXISTS$1,
-    PROPER: PROPER,
-    CONFIGURABLE: CONFIGURABLE$1
-  };
-
-  var global$a = global$b;
-
-  // eslint-disable-next-line es/no-object-defineproperty -- safe
-  var defineProperty$2 = Object.defineProperty;
-  var defineGlobalProperty$1 = function (key, value) {
-    try {
-      defineProperty$2(global$a, key, {
-        value: value,
-        configurable: true,
-        writable: true
-      });
-    } catch (error) {
-      global$a[key] = value;
-    }
-    return value;
-  };
-
-  var global$9 = global$b;
-  var defineGlobalProperty = defineGlobalProperty$1;
-  var SHARED = '__core-js_shared__';
-  var store$3 = global$9[SHARED] || defineGlobalProperty(SHARED, {});
-  var sharedStore = store$3;
-
-  var uncurryThis$3 = functionUncurryThis;
-  var isCallable$7 = isCallable$8;
-  var store$2 = sharedStore;
-  var functionToString = uncurryThis$3(Function.toString);
-
-  // this helper broken in `core-js@3.4.1-3.4.4`, so we can't use `shared` helper
-  if (!isCallable$7(store$2.inspectSource)) {
-    store$2.inspectSource = function (it) {
-      return functionToString(it);
-    };
-  }
-  var inspectSource$1 = store$2.inspectSource;
-
-  var global$8 = global$b;
-  var isCallable$6 = isCallable$8;
-  var WeakMap$2 = global$8.WeakMap;
-  var weakMapBasicDetection = isCallable$6(WeakMap$2) && /native code/.test(String(WeakMap$2));
-
-  var isCallable$5 = isCallable$8;
-  var $documentAll = documentAll_1;
-  var documentAll = $documentAll.all;
-  var isObject$6 = $documentAll.IS_HTMLDDA ? function (it) {
-    return typeof it == 'object' ? it !== null : isCallable$5(it) || it === documentAll;
-  } : function (it) {
-    return typeof it == 'object' ? it !== null : isCallable$5(it);
-  };
-
-  var objectDefineProperty = {};
-
-  var global$7 = global$b;
-  var isObject$5 = isObject$6;
-  var document$1 = global$7.document;
-  // typeof document.createElement is 'object' in old IE
-  var EXISTS = isObject$5(document$1) && isObject$5(document$1.createElement);
-  var documentCreateElement = function (it) {
-    return EXISTS ? document$1.createElement(it) : {};
-  };
-
-  var DESCRIPTORS$5 = descriptors;
-  var fails$4 = fails$7;
-  var createElement = documentCreateElement;
-
-  // Thanks to IE8 for its funny defineProperty
-  var ie8DomDefine = !DESCRIPTORS$5 && !fails$4(function () {
-    // eslint-disable-next-line es/no-object-defineproperty -- required for testing
-    return Object.defineProperty(createElement('div'), 'a', {
-      get: function () {
-        return 7;
-      }
-    }).a !== 7;
-  });
-
-  var DESCRIPTORS$4 = descriptors;
-  var fails$3 = fails$7;
-
-  // V8 ~ Chrome 36-
-  // https://bugs.chromium.org/p/v8/issues/detail?id=3334
-  var v8PrototypeDefineBug = DESCRIPTORS$4 && fails$3(function () {
-    // eslint-disable-next-line es/no-object-defineproperty -- required for testing
-    return Object.defineProperty(function () {/* empty */}, 'prototype', {
-      value: 42,
-      writable: false
-    }).prototype !== 42;
-  });
-
-  var isObject$4 = isObject$6;
-  var $String$3 = String;
-  var $TypeError$4 = TypeError;
-
-  // `Assert: Type(argument) is Object`
-  var anObject$2 = function (argument) {
-    if (isObject$4(argument)) return argument;
-    throw new $TypeError$4($String$3(argument) + ' is not an object');
-  };
-
-  var NATIVE_BIND = functionBindNative;
-  var call$2 = Function.prototype.call;
-  var functionCall = NATIVE_BIND ? call$2.bind(call$2) : function () {
-    return call$2.apply(call$2, arguments);
-  };
-
-  var global$6 = global$b;
-  var isCallable$4 = isCallable$8;
-  var aFunction = function (argument) {
-    return isCallable$4(argument) ? argument : undefined;
-  };
-  var getBuiltIn$1 = function (namespace, method) {
-    return arguments.length < 2 ? aFunction(global$6[namespace]) : global$6[namespace] && global$6[namespace][method];
-  };
-
-  var uncurryThis$2 = functionUncurryThis;
-  var objectIsPrototypeOf = uncurryThis$2({}.isPrototypeOf);
-
-  var engineUserAgent = typeof navigator != 'undefined' && String(navigator.userAgent) || '';
-
-  var global$5 = global$b;
-  var userAgent = engineUserAgent;
-  var process$1 = global$5.process;
-  var Deno = global$5.Deno;
-  var versions = process$1 && process$1.versions || Deno && Deno.version;
-  var v8 = versions && versions.v8;
-  var match, version$1;
-  if (v8) {
-    match = v8.split('.');
-    // in old Chrome, versions of V8 isn't V8 = Chrome / 10
-    // but their correct versions are not interesting for us
-    version$1 = match[0] > 0 && match[0] < 4 ? 1 : +(match[0] + match[1]);
-  }
-
-  // BrowserFS NodeJS `process` polyfill incorrectly set `.v8` to `0.0`
-  // so check `userAgent` even if `.v8` exists, but 0
-  if (!version$1 && userAgent) {
-    match = userAgent.match(/Edge\/(\d+)/);
-    if (!match || match[1] >= 74) {
-      match = userAgent.match(/Chrome\/(\d+)/);
-      if (match) version$1 = +match[1];
-    }
-  }
-  var engineV8Version = version$1;
-
-  /* eslint-disable es/no-symbol -- required for testing */
-  var V8_VERSION = engineV8Version;
-  var fails$2 = fails$7;
-  var global$4 = global$b;
-  var $String$2 = global$4.String;
-
-  // eslint-disable-next-line es/no-object-getownpropertysymbols -- required for testing
-  var symbolConstructorDetection = !!Object.getOwnPropertySymbols && !fails$2(function () {
-    var symbol = Symbol('symbol detection');
-    // Chrome 38 Symbol has incorrect toString conversion
-    // `get-own-property-symbols` polyfill symbols converted to object are not Symbol instances
-    // nb: Do not call `String` directly to avoid this being optimized out to `symbol+''` which will,
-    // of course, fail.
-    return !$String$2(symbol) || !(Object(symbol) instanceof Symbol) ||
-    // Chrome 38-40 symbols are not inherited from DOM collections prototypes to instances
-    !Symbol.sham && V8_VERSION && V8_VERSION < 41;
-  });
-
-  /* eslint-disable es/no-symbol -- required for testing */
-  var NATIVE_SYMBOL$1 = symbolConstructorDetection;
-  var useSymbolAsUid = NATIVE_SYMBOL$1 && !Symbol.sham && typeof Symbol.iterator == 'symbol';
-
-  var getBuiltIn = getBuiltIn$1;
-  var isCallable$3 = isCallable$8;
-  var isPrototypeOf = objectIsPrototypeOf;
-  var USE_SYMBOL_AS_UID$1 = useSymbolAsUid;
-  var $Object = Object;
-  var isSymbol$2 = USE_SYMBOL_AS_UID$1 ? function (it) {
-    return typeof it == 'symbol';
-  } : function (it) {
-    var $Symbol = getBuiltIn('Symbol');
-    return isCallable$3($Symbol) && isPrototypeOf($Symbol.prototype, $Object(it));
-  };
-
-  var $String$1 = String;
-  var tryToString$1 = function (argument) {
-    try {
-      return $String$1(argument);
-    } catch (error) {
-      return 'Object';
-    }
-  };
-
-  var isCallable$2 = isCallable$8;
-  var tryToString = tryToString$1;
-  var $TypeError$3 = TypeError;
-
-  // `Assert: IsCallable(argument) is true`
-  var aCallable$1 = function (argument) {
-    if (isCallable$2(argument)) return argument;
-    throw new $TypeError$3(tryToString(argument) + ' is not a function');
-  };
-
-  var aCallable = aCallable$1;
-  var isNullOrUndefined = isNullOrUndefined$2;
-
-  // `GetMethod` abstract operation
-  // https://tc39.es/ecma262/#sec-getmethod
-  var getMethod$1 = function (V, P) {
-    var func = V[P];
-    return isNullOrUndefined(func) ? undefined : aCallable(func);
-  };
-
-  var call$1 = functionCall;
-  var isCallable$1 = isCallable$8;
-  var isObject$3 = isObject$6;
-  var $TypeError$2 = TypeError;
-
-  // `OrdinaryToPrimitive` abstract operation
-  // https://tc39.es/ecma262/#sec-ordinarytoprimitive
-  var ordinaryToPrimitive$1 = function (input, pref) {
-    var fn, val;
-    if (pref === 'string' && isCallable$1(fn = input.toString) && !isObject$3(val = call$1(fn, input))) return val;
-    if (isCallable$1(fn = input.valueOf) && !isObject$3(val = call$1(fn, input))) return val;
-    if (pref !== 'string' && isCallable$1(fn = input.toString) && !isObject$3(val = call$1(fn, input))) return val;
-    throw new $TypeError$2("Can't convert object to primitive value");
-  };
-
-  var shared$3 = {exports: {}};
-
-  var store$1 = sharedStore;
-  (shared$3.exports = function (key, value) {
-    return store$1[key] || (store$1[key] = value !== undefined ? value : {});
-  })('versions', []).push({
-    version: '3.34.0',
-    mode: 'global',
-    copyright: '© 2014-2023 Denis Pushkarev (zloirock.ru)',
-    license: 'https://github.com/zloirock/core-js/blob/v3.34.0/LICENSE',
-    source: 'https://github.com/zloirock/core-js'
-  });
-  var sharedExports = shared$3.exports;
-
-  var uncurryThis$1 = functionUncurryThis;
-  var id = 0;
-  var postfix = Math.random();
-  var toString$1 = uncurryThis$1(1.0.toString);
-  var uid$2 = function (key) {
-    return 'Symbol(' + (key === undefined ? '' : key) + ')_' + toString$1(++id + postfix, 36);
-  };
-
-  var global$3 = global$b;
-  var shared$2 = sharedExports;
-  var hasOwn$2 = hasOwnProperty_1;
-  var uid$1 = uid$2;
-  var NATIVE_SYMBOL = symbolConstructorDetection;
-  var USE_SYMBOL_AS_UID = useSymbolAsUid;
-  var Symbol$1 = global$3.Symbol;
-  var WellKnownSymbolsStore = shared$2('wks');
-  var createWellKnownSymbol = USE_SYMBOL_AS_UID ? Symbol$1['for'] || Symbol$1 : Symbol$1 && Symbol$1.withoutSetter || uid$1;
-  var wellKnownSymbol$1 = function (name) {
-    if (!hasOwn$2(WellKnownSymbolsStore, name)) {
-      WellKnownSymbolsStore[name] = NATIVE_SYMBOL && hasOwn$2(Symbol$1, name) ? Symbol$1[name] : createWellKnownSymbol('Symbol.' + name);
-    }
-    return WellKnownSymbolsStore[name];
-  };
-
-  var call = functionCall;
-  var isObject$2 = isObject$6;
-  var isSymbol$1 = isSymbol$2;
-  var getMethod = getMethod$1;
-  var ordinaryToPrimitive = ordinaryToPrimitive$1;
-  var wellKnownSymbol = wellKnownSymbol$1;
-  var $TypeError$1 = TypeError;
-  var TO_PRIMITIVE = wellKnownSymbol('toPrimitive');
-
-  // `ToPrimitive` abstract operation
-  // https://tc39.es/ecma262/#sec-toprimitive
-  var toPrimitive$1 = function (input, pref) {
-    if (!isObject$2(input) || isSymbol$1(input)) return input;
-    var exoticToPrim = getMethod(input, TO_PRIMITIVE);
-    var result;
-    if (exoticToPrim) {
-      if (pref === undefined) pref = 'default';
-      result = call(exoticToPrim, input, pref);
-      if (!isObject$2(result) || isSymbol$1(result)) return result;
-      throw new $TypeError$1("Can't convert object to primitive value");
-    }
-    if (pref === undefined) pref = 'number';
-    return ordinaryToPrimitive(input, pref);
-  };
-
-  var toPrimitive = toPrimitive$1;
-  var isSymbol = isSymbol$2;
-
-  // `ToPropertyKey` abstract operation
-  // https://tc39.es/ecma262/#sec-topropertykey
-  var toPropertyKey$1 = function (argument) {
-    var key = toPrimitive(argument, 'string');
-    return isSymbol(key) ? key : key + '';
-  };
-
-  var DESCRIPTORS$3 = descriptors;
-  var IE8_DOM_DEFINE = ie8DomDefine;
-  var V8_PROTOTYPE_DEFINE_BUG = v8PrototypeDefineBug;
-  var anObject$1 = anObject$2;
-  var toPropertyKey = toPropertyKey$1;
-  var $TypeError = TypeError;
-  // eslint-disable-next-line es/no-object-defineproperty -- safe
-  var $defineProperty = Object.defineProperty;
-  // eslint-disable-next-line es/no-object-getownpropertydescriptor -- safe
-  var $getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
-  var ENUMERABLE = 'enumerable';
-  var CONFIGURABLE = 'configurable';
-  var WRITABLE = 'writable';
-
-  // `Object.defineProperty` method
-  // https://tc39.es/ecma262/#sec-object.defineproperty
-  objectDefineProperty.f = DESCRIPTORS$3 ? V8_PROTOTYPE_DEFINE_BUG ? function defineProperty(O, P, Attributes) {
-    anObject$1(O);
-    P = toPropertyKey(P);
-    anObject$1(Attributes);
-    if (typeof O === 'function' && P === 'prototype' && 'value' in Attributes && WRITABLE in Attributes && !Attributes[WRITABLE]) {
-      var current = $getOwnPropertyDescriptor(O, P);
-      if (current && current[WRITABLE]) {
-        O[P] = Attributes.value;
-        Attributes = {
-          configurable: CONFIGURABLE in Attributes ? Attributes[CONFIGURABLE] : current[CONFIGURABLE],
-          enumerable: ENUMERABLE in Attributes ? Attributes[ENUMERABLE] : current[ENUMERABLE],
-          writable: false
-        };
-      }
-    }
-    return $defineProperty(O, P, Attributes);
-  } : $defineProperty : function defineProperty(O, P, Attributes) {
-    anObject$1(O);
-    P = toPropertyKey(P);
-    anObject$1(Attributes);
-    if (IE8_DOM_DEFINE) try {
-      return $defineProperty(O, P, Attributes);
-    } catch (error) {/* empty */}
-    if ('get' in Attributes || 'set' in Attributes) throw new $TypeError('Accessors not supported');
-    if ('value' in Attributes) O[P] = Attributes.value;
-    return O;
-  };
-
-  var createPropertyDescriptor$1 = function (bitmap, value) {
-    return {
-      enumerable: !(bitmap & 1),
-      configurable: !(bitmap & 2),
-      writable: !(bitmap & 4),
-      value: value
-    };
-  };
-
-  var DESCRIPTORS$2 = descriptors;
-  var definePropertyModule = objectDefineProperty;
-  var createPropertyDescriptor = createPropertyDescriptor$1;
-  var createNonEnumerableProperty$1 = DESCRIPTORS$2 ? function (object, key, value) {
-    return definePropertyModule.f(object, key, createPropertyDescriptor(1, value));
-  } : function (object, key, value) {
-    object[key] = value;
-    return object;
-  };
-
-  var shared$1 = sharedExports;
-  var uid = uid$2;
-  var keys = shared$1('keys');
-  var sharedKey$1 = function (key) {
-    return keys[key] || (keys[key] = uid(key));
-  };
-
-  var hiddenKeys$1 = {};
-
-  var NATIVE_WEAK_MAP = weakMapBasicDetection;
-  var global$2 = global$b;
-  var isObject$1 = isObject$6;
-  var createNonEnumerableProperty = createNonEnumerableProperty$1;
-  var hasOwn$1 = hasOwnProperty_1;
-  var shared = sharedStore;
-  var sharedKey = sharedKey$1;
-  var hiddenKeys = hiddenKeys$1;
-  var OBJECT_ALREADY_INITIALIZED = 'Object already initialized';
-  var TypeError$1 = global$2.TypeError;
-  var WeakMap$1 = global$2.WeakMap;
-  var set$1, get, has$1;
-  var enforce = function (it) {
-    return has$1(it) ? get(it) : set$1(it, {});
-  };
-  var getterFor = function (TYPE) {
-    return function (it) {
-      var state;
-      if (!isObject$1(it) || (state = get(it)).type !== TYPE) {
-        throw new TypeError$1('Incompatible receiver, ' + TYPE + ' required');
-      }
-      return state;
-    };
-  };
-  if (NATIVE_WEAK_MAP || shared.state) {
-    var store = shared.state || (shared.state = new WeakMap$1());
-    /* eslint-disable no-self-assign -- prototype methods protection */
-    store.get = store.get;
-    store.has = store.has;
-    store.set = store.set;
-    /* eslint-enable no-self-assign -- prototype methods protection */
-    set$1 = function (it, metadata) {
-      if (store.has(it)) throw new TypeError$1(OBJECT_ALREADY_INITIALIZED);
-      metadata.facade = it;
-      store.set(it, metadata);
-      return metadata;
-    };
-    get = function (it) {
-      return store.get(it) || {};
-    };
-    has$1 = function (it) {
-      return store.has(it);
-    };
-  } else {
-    var STATE = sharedKey('state');
-    hiddenKeys[STATE] = true;
-    set$1 = function (it, metadata) {
-      if (hasOwn$1(it, STATE)) throw new TypeError$1(OBJECT_ALREADY_INITIALIZED);
-      metadata.facade = it;
-      createNonEnumerableProperty(it, STATE, metadata);
-      return metadata;
-    };
-    get = function (it) {
-      return hasOwn$1(it, STATE) ? it[STATE] : {};
-    };
-    has$1 = function (it) {
-      return hasOwn$1(it, STATE);
-    };
-  }
-  var internalState = {
-    set: set$1,
-    get: get,
-    has: has$1,
-    enforce: enforce,
-    getterFor: getterFor
-  };
-
-  var uncurryThis = functionUncurryThis;
-  var fails$1 = fails$7;
-  var isCallable = isCallable$8;
-  var hasOwn = hasOwnProperty_1;
-  var DESCRIPTORS$1 = descriptors;
-  var CONFIGURABLE_FUNCTION_NAME = functionName.CONFIGURABLE;
-  var inspectSource = inspectSource$1;
-  var InternalStateModule = internalState;
-  var enforceInternalState = InternalStateModule.enforce;
-  var getInternalState = InternalStateModule.get;
-  var $String = String;
-  // eslint-disable-next-line es/no-object-defineproperty -- safe
-  var defineProperty$1 = Object.defineProperty;
-  var stringSlice = uncurryThis(''.slice);
-  var replace = uncurryThis(''.replace);
-  var join = uncurryThis([].join);
-  var CONFIGURABLE_LENGTH = DESCRIPTORS$1 && !fails$1(function () {
-    return defineProperty$1(function () {/* empty */}, 'length', {
-      value: 8
-    }).length !== 8;
-  });
-  var TEMPLATE = String(String).split('String');
-  var makeBuiltIn$1 = makeBuiltIn$2.exports = function (value, name, options) {
-    if (stringSlice($String(name), 0, 7) === 'Symbol(') {
-      name = '[' + replace($String(name), /^Symbol\(([^)]*)\)/, '$1') + ']';
-    }
-    if (options && options.getter) name = 'get ' + name;
-    if (options && options.setter) name = 'set ' + name;
-    if (!hasOwn(value, 'name') || CONFIGURABLE_FUNCTION_NAME && value.name !== name) {
-      if (DESCRIPTORS$1) defineProperty$1(value, 'name', {
-        value: name,
-        configurable: true
-      });else value.name = name;
-    }
-    if (CONFIGURABLE_LENGTH && options && hasOwn(options, 'arity') && value.length !== options.arity) {
-      defineProperty$1(value, 'length', {
-        value: options.arity
-      });
-    }
-    try {
-      if (options && hasOwn(options, 'constructor') && options.constructor) {
-        if (DESCRIPTORS$1) defineProperty$1(value, 'prototype', {
-          writable: false
-        });
-        // in V8 ~ Chrome 53, prototypes of some methods, like `Array.prototype.values`, are non-writable
-      } else if (value.prototype) value.prototype = undefined;
-    } catch (error) {/* empty */}
-    var state = enforceInternalState(value);
-    if (!hasOwn(state, 'source')) {
-      state.source = join(TEMPLATE, typeof name == 'string' ? name : '');
-    }
-    return value;
-  };
-
-  // add fake Function#toString for correct work wrapped methods / constructors with methods like LoDash isNative
-  // eslint-disable-next-line no-extend-native -- required
-  Function.prototype.toString = makeBuiltIn$1(function toString() {
-    return isCallable(this) && getInternalState(this).source || inspectSource(this);
-  }, 'toString');
-  var makeBuiltInExports = makeBuiltIn$2.exports;
-
-  var makeBuiltIn = makeBuiltInExports;
-  var defineProperty = objectDefineProperty;
-  var defineBuiltInAccessor$1 = function (target, name, descriptor) {
-    if (descriptor.get) makeBuiltIn(descriptor.get, name, {
-      getter: true
-    });
-    if (descriptor.set) makeBuiltIn(descriptor.set, name, {
-      setter: true
-    });
-    return defineProperty.f(target, name, descriptor);
-  };
-
-  var anObject = anObject$2;
-
-  // `RegExp.prototype.flags` getter implementation
-  // https://tc39.es/ecma262/#sec-get-regexp.prototype.flags
-  var regexpFlags = function () {
-    var that = anObject(this);
-    var result = '';
-    if (that.hasIndices) result += 'd';
-    if (that.global) result += 'g';
-    if (that.ignoreCase) result += 'i';
-    if (that.multiline) result += 'm';
-    if (that.dotAll) result += 's';
-    if (that.unicode) result += 'u';
-    if (that.unicodeSets) result += 'v';
-    if (that.sticky) result += 'y';
-    return result;
-  };
-
-  var global$1 = global$b;
-  var DESCRIPTORS = descriptors;
-  var defineBuiltInAccessor = defineBuiltInAccessor$1;
-  var regExpFlags = regexpFlags;
-  var fails = fails$7;
-
-  // babel-minify and Closure Compiler transpiles RegExp('.', 'd') -> /./d and it causes SyntaxError
-  var RegExp$1 = global$1.RegExp;
-  var RegExpPrototype = RegExp$1.prototype;
-  var FORCED = DESCRIPTORS && fails(function () {
-    var INDICES_SUPPORT = true;
-    try {
-      RegExp$1('.', 'd');
-    } catch (error) {
-      INDICES_SUPPORT = false;
-    }
-    var O = {};
-    // modern V8 bug
-    var calls = '';
-    var expected = INDICES_SUPPORT ? 'dgimsy' : 'gimsy';
-    var addGetter = function (key, chr) {
-      // eslint-disable-next-line es/no-object-defineproperty -- safe
-      Object.defineProperty(O, key, {
-        get: function () {
-          calls += chr;
-          return true;
-        }
-      });
-    };
-    var pairs = {
-      dotAll: 's',
-      global: 'g',
-      ignoreCase: 'i',
-      multiline: 'm',
-      sticky: 'y'
-    };
-    if (INDICES_SUPPORT) pairs.hasIndices = 'd';
-    for (var key in pairs) addGetter(key, pairs[key]);
-
-    // eslint-disable-next-line es/no-object-getownpropertydescriptor -- safe
-    var result = Object.getOwnPropertyDescriptor(RegExpPrototype, 'flags').get.call(O);
-    return result !== expected || calls !== expected;
-  });
-
-  // `RegExp.prototype.flags` getter
-  // https://tc39.es/ecma262/#sec-get-regexp.prototype.flags
-  if (FORCED) defineBuiltInAccessor(RegExpPrototype, 'flags', {
-    configurable: true,
-    get: regExpFlags
-  });
 
   var utils$3 = {};
 
@@ -1524,6 +500,7 @@
   const QMARK_NO_DOT = `[^.${SLASH_LITERAL}]`;
   const STAR = `${QMARK}*?`;
   const SEP = '/';
+
   const POSIX_CHARS = {
     DOT_LITERAL,
     PLUS_LITERAL,
@@ -1549,6 +526,7 @@
 
   const WINDOWS_CHARS = {
     ...POSIX_CHARS,
+
     SLASH_LITERAL: `[${WIN_SLASH}]`,
     QMARK: WIN_NO_SLASH,
     STAR: `${WIN_NO_SLASH}*?`,
@@ -1583,9 +561,11 @@
     word: 'A-Za-z0-9_',
     xdigit: 'A-Fa-f0-9'
   };
+
   var constants$2 = {
     MAX_LENGTH: 1024 * 64,
     POSIX_REGEX_SOURCE: POSIX_REGEX_SOURCE$1,
+
     // regular expressions
     REGEX_BACKSLASH: /\\(?![*+?^${}(|)[\]])/g,
     REGEX_NON_SPECIAL_CHARS: /^[^@![\].,$*+?^{}()|\\/]+/,
@@ -1593,105 +573,64 @@
     REGEX_SPECIAL_CHARS_BACKREF: /(\\?)((\W)(\3*))/g,
     REGEX_SPECIAL_CHARS_GLOBAL: /([-*+?.^${}(|)[\]])/g,
     REGEX_REMOVE_BACKSLASH: /(?:\[.*?[^\\]\]|\\(?=.))/g,
+
     // Replace globs with equivalent patterns to reduce parsing time.
     REPLACEMENTS: {
       '***': '*',
       '**/**': '**',
       '**/**/**': '**'
     },
+
     // Digits
-    CHAR_0: 48,
-    /* 0 */
-    CHAR_9: 57,
-    /* 9 */
+    CHAR_0: 48, /* 0 */
+    CHAR_9: 57, /* 9 */
 
     // Alphabet chars.
-    CHAR_UPPERCASE_A: 65,
-    /* A */
-    CHAR_LOWERCASE_A: 97,
-    /* a */
-    CHAR_UPPERCASE_Z: 90,
-    /* Z */
-    CHAR_LOWERCASE_Z: 122,
-    /* z */
+    CHAR_UPPERCASE_A: 65, /* A */
+    CHAR_LOWERCASE_A: 97, /* a */
+    CHAR_UPPERCASE_Z: 90, /* Z */
+    CHAR_LOWERCASE_Z: 122, /* z */
 
-    CHAR_LEFT_PARENTHESES: 40,
-    /* ( */
-    CHAR_RIGHT_PARENTHESES: 41,
-    /* ) */
+    CHAR_LEFT_PARENTHESES: 40, /* ( */
+    CHAR_RIGHT_PARENTHESES: 41, /* ) */
 
-    CHAR_ASTERISK: 42,
-    /* * */
+    CHAR_ASTERISK: 42, /* * */
 
     // Non-alphabetic chars.
-    CHAR_AMPERSAND: 38,
-    /* & */
-    CHAR_AT: 64,
-    /* @ */
-    CHAR_BACKWARD_SLASH: 92,
-    /* \ */
-    CHAR_CARRIAGE_RETURN: 13,
-    /* \r */
-    CHAR_CIRCUMFLEX_ACCENT: 94,
-    /* ^ */
-    CHAR_COLON: 58,
-    /* : */
-    CHAR_COMMA: 44,
-    /* , */
-    CHAR_DOT: 46,
-    /* . */
-    CHAR_DOUBLE_QUOTE: 34,
-    /* " */
-    CHAR_EQUAL: 61,
-    /* = */
-    CHAR_EXCLAMATION_MARK: 33,
-    /* ! */
-    CHAR_FORM_FEED: 12,
-    /* \f */
-    CHAR_FORWARD_SLASH: 47,
-    /* / */
-    CHAR_GRAVE_ACCENT: 96,
-    /* ` */
-    CHAR_HASH: 35,
-    /* # */
-    CHAR_HYPHEN_MINUS: 45,
-    /* - */
-    CHAR_LEFT_ANGLE_BRACKET: 60,
-    /* < */
-    CHAR_LEFT_CURLY_BRACE: 123,
-    /* { */
-    CHAR_LEFT_SQUARE_BRACKET: 91,
-    /* [ */
-    CHAR_LINE_FEED: 10,
-    /* \n */
-    CHAR_NO_BREAK_SPACE: 160,
-    /* \u00A0 */
-    CHAR_PERCENT: 37,
-    /* % */
-    CHAR_PLUS: 43,
-    /* + */
-    CHAR_QUESTION_MARK: 63,
-    /* ? */
-    CHAR_RIGHT_ANGLE_BRACKET: 62,
-    /* > */
-    CHAR_RIGHT_CURLY_BRACE: 125,
-    /* } */
-    CHAR_RIGHT_SQUARE_BRACKET: 93,
-    /* ] */
-    CHAR_SEMICOLON: 59,
-    /* ; */
-    CHAR_SINGLE_QUOTE: 39,
-    /* ' */
-    CHAR_SPACE: 32,
-    /*   */
-    CHAR_TAB: 9,
-    /* \t */
-    CHAR_UNDERSCORE: 95,
-    /* _ */
-    CHAR_VERTICAL_LINE: 124,
-    /* | */
-    CHAR_ZERO_WIDTH_NOBREAK_SPACE: 65279,
-    /* \uFEFF */
+    CHAR_AMPERSAND: 38, /* & */
+    CHAR_AT: 64, /* @ */
+    CHAR_BACKWARD_SLASH: 92, /* \ */
+    CHAR_CARRIAGE_RETURN: 13, /* \r */
+    CHAR_CIRCUMFLEX_ACCENT: 94, /* ^ */
+    CHAR_COLON: 58, /* : */
+    CHAR_COMMA: 44, /* , */
+    CHAR_DOT: 46, /* . */
+    CHAR_DOUBLE_QUOTE: 34, /* " */
+    CHAR_EQUAL: 61, /* = */
+    CHAR_EXCLAMATION_MARK: 33, /* ! */
+    CHAR_FORM_FEED: 12, /* \f */
+    CHAR_FORWARD_SLASH: 47, /* / */
+    CHAR_GRAVE_ACCENT: 96, /* ` */
+    CHAR_HASH: 35, /* # */
+    CHAR_HYPHEN_MINUS: 45, /* - */
+    CHAR_LEFT_ANGLE_BRACKET: 60, /* < */
+    CHAR_LEFT_CURLY_BRACE: 123, /* { */
+    CHAR_LEFT_SQUARE_BRACKET: 91, /* [ */
+    CHAR_LINE_FEED: 10, /* \n */
+    CHAR_NO_BREAK_SPACE: 160, /* \u00A0 */
+    CHAR_PERCENT: 37, /* % */
+    CHAR_PLUS: 43, /* + */
+    CHAR_QUESTION_MARK: 63, /* ? */
+    CHAR_RIGHT_ANGLE_BRACKET: 62, /* > */
+    CHAR_RIGHT_CURLY_BRACE: 125, /* } */
+    CHAR_RIGHT_SQUARE_BRACKET: 93, /* ] */
+    CHAR_SEMICOLON: 59, /* ; */
+    CHAR_SINGLE_QUOTE: 39, /* ' */
+    CHAR_SPACE: 32, /*   */
+    CHAR_TAB: 9, /* \t */
+    CHAR_UNDERSCORE: 95, /* _ */
+    CHAR_VERTICAL_LINE: 124, /* | */
+    CHAR_ZERO_WIDTH_NOBREAK_SPACE: 65279, /* \uFEFF */
 
     /**
      * Create EXTGLOB_CHARS
@@ -1699,33 +638,14 @@
 
     extglobChars(chars) {
       return {
-        '!': {
-          type: 'negate',
-          open: '(?:(?!(?:',
-          close: `))${chars.STAR})`
-        },
-        '?': {
-          type: 'qmark',
-          open: '(?:',
-          close: ')?'
-        },
-        '+': {
-          type: 'plus',
-          open: '(?:',
-          close: ')+'
-        },
-        '*': {
-          type: 'star',
-          open: '(?:',
-          close: ')*'
-        },
-        '@': {
-          type: 'at',
-          open: '(?:',
-          close: ')'
-        }
+        '!': { type: 'negate', open: '(?:(?!(?:', close: `))${chars.STAR})` },
+        '?': { type: 'qmark', open: '(?:', close: ')?' },
+        '+': { type: 'plus', open: '(?:', close: ')+' },
+        '*': { type: 'star', open: '(?:', close: ')*' },
+        '@': { type: 'at', open: '(?:', close: ')' }
       };
     },
+
     /**
      * Create GLOB_CHARS
      */
@@ -1737,105 +657,97 @@
 
   (function (exports) {
 
-    const {
-      REGEX_BACKSLASH,
-      REGEX_REMOVE_BACKSLASH,
-      REGEX_SPECIAL_CHARS,
-      REGEX_SPECIAL_CHARS_GLOBAL
-    } = constants$2;
-    exports.isObject = val => val !== null && typeof val === 'object' && !Array.isArray(val);
-    exports.hasRegexChars = str => REGEX_SPECIAL_CHARS.test(str);
-    exports.isRegexChar = str => str.length === 1 && exports.hasRegexChars(str);
-    exports.escapeRegex = str => str.replace(REGEX_SPECIAL_CHARS_GLOBAL, '\\$1');
-    exports.toPosixSlashes = str => str.replace(REGEX_BACKSLASH, '/');
-    exports.removeBackslashes = str => {
-      return str.replace(REGEX_REMOVE_BACKSLASH, match => {
-        return match === '\\' ? '' : match;
-      });
-    };
-    exports.supportsLookbehinds = () => {
-      if (typeof process !== 'undefined') {
-        const segs = process.version.slice(1).split('.').map(Number);
-        if (segs.length === 3 && segs[0] >= 9 || segs[0] === 8 && segs[1] >= 10) {
-          return true;
-        }
-      }
-      return false;
-    };
-    exports.escapeLast = (input, char, lastIdx) => {
-      const idx = input.lastIndexOf(char, lastIdx);
-      if (idx === -1) return input;
-      if (input[idx - 1] === '\\') return exports.escapeLast(input, char, idx - 1);
-      return `${input.slice(0, idx)}\\${input.slice(idx)}`;
-    };
-    exports.removePrefix = function (input) {
-      let state = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-      let output = input;
-      if (output.startsWith('./')) {
-        output = output.slice(2);
-        state.prefix = './';
-      }
-      return output;
-    };
-    exports.wrapOutput = function (input) {
-      let state = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-      let options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-      const prepend = options.contains ? '' : '^';
-      const append = options.contains ? '' : '$';
-      let output = `${prepend}(?:${input})${append}`;
-      if (state.negated === true) {
-        output = `(?:^(?!${output}).*$)`;
-      }
-      return output;
-    };
-    exports.basename = function (path) {
-      let {
-        windows
-      } = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-      const segs = path.split(windows ? /[\\/]/ : '/');
-      const last = segs[segs.length - 1];
-      if (last === '') {
-        return segs[segs.length - 2];
-      }
-      return last;
-    };
-  })(utils$3);
+  	const {
+  	  REGEX_BACKSLASH,
+  	  REGEX_REMOVE_BACKSLASH,
+  	  REGEX_SPECIAL_CHARS,
+  	  REGEX_SPECIAL_CHARS_GLOBAL
+  	} = constants$2;
+
+  	exports.isObject = val => val !== null && typeof val === 'object' && !Array.isArray(val);
+  	exports.hasRegexChars = str => REGEX_SPECIAL_CHARS.test(str);
+  	exports.isRegexChar = str => str.length === 1 && exports.hasRegexChars(str);
+  	exports.escapeRegex = str => str.replace(REGEX_SPECIAL_CHARS_GLOBAL, '\\$1');
+  	exports.toPosixSlashes = str => str.replace(REGEX_BACKSLASH, '/');
+
+  	exports.removeBackslashes = str => {
+  	  return str.replace(REGEX_REMOVE_BACKSLASH, match => {
+  	    return match === '\\' ? '' : match;
+  	  });
+  	};
+
+  	exports.supportsLookbehinds = () => {
+  	  if (typeof process !== 'undefined') {
+  	    const segs = process.version.slice(1).split('.').map(Number);
+  	    if (segs.length === 3 && segs[0] >= 9 || (segs[0] === 8 && segs[1] >= 10)) {
+  	      return true;
+  	    }
+  	  }
+  	  return false;
+  	};
+
+  	exports.escapeLast = (input, char, lastIdx) => {
+  	  const idx = input.lastIndexOf(char, lastIdx);
+  	  if (idx === -1) return input;
+  	  if (input[idx - 1] === '\\') return exports.escapeLast(input, char, idx - 1);
+  	  return `${input.slice(0, idx)}\\${input.slice(idx)}`;
+  	};
+
+  	exports.removePrefix = (input, state = {}) => {
+  	  let output = input;
+  	  if (output.startsWith('./')) {
+  	    output = output.slice(2);
+  	    state.prefix = './';
+  	  }
+  	  return output;
+  	};
+
+  	exports.wrapOutput = (input, state = {}, options = {}) => {
+  	  const prepend = options.contains ? '' : '^';
+  	  const append = options.contains ? '' : '$';
+
+  	  let output = `${prepend}(?:${input})${append}`;
+  	  if (state.negated === true) {
+  	    output = `(?:^(?!${output}).*$)`;
+  	  }
+  	  return output;
+  	};
+
+  	exports.basename = (path, { windows } = {}) => {
+  	  const segs = path.split(windows ? /[\\/]/ : '/');
+  	  const last = segs[segs.length - 1];
+
+  	  if (last === '') {
+  	    return segs[segs.length - 2];
+  	  }
+
+  	  return last;
+  	}; 
+  } (utils$3));
 
   const utils$2 = utils$3;
   const {
-    CHAR_ASTERISK,
-    /* * */
-    CHAR_AT,
-    /* @ */
-    CHAR_BACKWARD_SLASH,
-    /* \ */
-    CHAR_COMMA,
-    /* , */
-    CHAR_DOT,
-    /* . */
-    CHAR_EXCLAMATION_MARK,
-    /* ! */
-    CHAR_FORWARD_SLASH,
-    /* / */
-    CHAR_LEFT_CURLY_BRACE,
-    /* { */
-    CHAR_LEFT_PARENTHESES,
-    /* ( */
-    CHAR_LEFT_SQUARE_BRACKET,
-    /* [ */
-    CHAR_PLUS,
-    /* + */
-    CHAR_QUESTION_MARK,
-    /* ? */
-    CHAR_RIGHT_CURLY_BRACE,
-    /* } */
-    CHAR_RIGHT_PARENTHESES,
-    /* ) */
-    CHAR_RIGHT_SQUARE_BRACKET /* ] */
+    CHAR_ASTERISK,             /* * */
+    CHAR_AT,                   /* @ */
+    CHAR_BACKWARD_SLASH,       /* \ */
+    CHAR_COMMA,                /* , */
+    CHAR_DOT,                  /* . */
+    CHAR_EXCLAMATION_MARK,     /* ! */
+    CHAR_FORWARD_SLASH,        /* / */
+    CHAR_LEFT_CURLY_BRACE,     /* { */
+    CHAR_LEFT_PARENTHESES,     /* ( */
+    CHAR_LEFT_SQUARE_BRACKET,  /* [ */
+    CHAR_PLUS,                 /* + */
+    CHAR_QUESTION_MARK,        /* ? */
+    CHAR_RIGHT_CURLY_BRACE,    /* } */
+    CHAR_RIGHT_PARENTHESES,    /* ) */
+    CHAR_RIGHT_SQUARE_BRACKET  /* ] */
   } = constants$2;
+
   const isPathSeparator = code => {
     return code === CHAR_FORWARD_SLASH || code === CHAR_BACKWARD_SLASH;
   };
+
   const depth = token => {
     if (token.isPrefix !== true) {
       token.depth = token.isGlobstar ? Infinity : 1;
@@ -1861,11 +773,13 @@
 
   const scan$1 = (input, options) => {
     const opts = options || {};
+
     const length = input.length - 1;
     const scanToEnd = opts.parts === true || opts.scanToEnd === true;
     const slashes = [];
     const tokens = [];
     const parts = [];
+
     let str = input;
     let index = -1;
     let start = 0;
@@ -1883,60 +797,71 @@
     let braces = 0;
     let prev;
     let code;
-    let token = {
-      value: '',
-      depth: 0,
-      isGlob: false
-    };
+    let token = { value: '', depth: 0, isGlob: false };
+
     const eos = () => index >= length;
     const peek = () => str.charCodeAt(index + 1);
     const advance = () => {
       prev = code;
       return str.charCodeAt(++index);
     };
+
     while (index < length) {
       code = advance();
       let next;
+
       if (code === CHAR_BACKWARD_SLASH) {
         backslashes = token.backslashes = true;
         code = advance();
+
         if (code === CHAR_LEFT_CURLY_BRACE) {
           braceEscaped = true;
         }
         continue;
       }
+
       if (braceEscaped === true || code === CHAR_LEFT_CURLY_BRACE) {
         braces++;
+
         while (eos() !== true && (code = advance())) {
           if (code === CHAR_BACKWARD_SLASH) {
             backslashes = token.backslashes = true;
             advance();
             continue;
           }
+
           if (code === CHAR_LEFT_CURLY_BRACE) {
             braces++;
             continue;
           }
+
           if (braceEscaped !== true && code === CHAR_DOT && (code = advance()) === CHAR_DOT) {
             isBrace = token.isBrace = true;
             isGlob = token.isGlob = true;
             finished = true;
+
             if (scanToEnd === true) {
               continue;
             }
+
             break;
           }
+
           if (braceEscaped !== true && code === CHAR_COMMA) {
             isBrace = token.isBrace = true;
             isGlob = token.isGlob = true;
             finished = true;
+
             if (scanToEnd === true) {
               continue;
             }
+
             break;
           }
+
           if (code === CHAR_RIGHT_CURLY_BRACE) {
             braces--;
+
             if (braces === 0) {
               braceEscaped = false;
               isBrace = token.isBrace = true;
@@ -1945,29 +870,36 @@
             }
           }
         }
+
         if (scanToEnd === true) {
           continue;
         }
+
         break;
       }
+
       if (code === CHAR_FORWARD_SLASH) {
         slashes.push(index);
         tokens.push(token);
-        token = {
-          value: '',
-          depth: 0,
-          isGlob: false
-        };
+        token = { value: '', depth: 0, isGlob: false };
+
         if (finished === true) continue;
-        if (prev === CHAR_DOT && index === start + 1) {
+        if (prev === CHAR_DOT && index === (start + 1)) {
           start += 2;
           continue;
         }
+
         lastIndex = index + 1;
         continue;
       }
+
       if (opts.noext !== true) {
-        const isExtglobChar = code === CHAR_PLUS || code === CHAR_AT || code === CHAR_ASTERISK || code === CHAR_QUESTION_MARK || code === CHAR_EXCLAMATION_MARK;
+        const isExtglobChar = code === CHAR_PLUS
+          || code === CHAR_AT
+          || code === CHAR_ASTERISK
+          || code === CHAR_QUESTION_MARK
+          || code === CHAR_EXCLAMATION_MARK;
+
         if (isExtglobChar === true && peek() === CHAR_LEFT_PARENTHESES) {
           isGlob = token.isGlob = true;
           isExtglob = token.isExtglob = true;
@@ -1975,6 +907,7 @@
           if (code === CHAR_EXCLAMATION_MARK && index === start) {
             negatedExtglob = true;
           }
+
           if (scanToEnd === true) {
             while (eos() !== true && (code = advance())) {
               if (code === CHAR_BACKWARD_SLASH) {
@@ -1982,6 +915,7 @@
                 code = advance();
                 continue;
               }
+
               if (code === CHAR_RIGHT_PARENTHESES) {
                 isGlob = token.isGlob = true;
                 finished = true;
@@ -1993,23 +927,28 @@
           break;
         }
       }
+
       if (code === CHAR_ASTERISK) {
         if (prev === CHAR_ASTERISK) isGlobstar = token.isGlobstar = true;
         isGlob = token.isGlob = true;
         finished = true;
+
         if (scanToEnd === true) {
           continue;
         }
         break;
       }
+
       if (code === CHAR_QUESTION_MARK) {
         isGlob = token.isGlob = true;
         finished = true;
+
         if (scanToEnd === true) {
           continue;
         }
         break;
       }
+
       if (code === CHAR_LEFT_SQUARE_BRACKET) {
         while (eos() !== true && (next = advance())) {
           if (next === CHAR_BACKWARD_SLASH) {
@@ -2017,6 +956,7 @@
             advance();
             continue;
           }
+
           if (next === CHAR_RIGHT_SQUARE_BRACKET) {
             isBracket = token.isBracket = true;
             isGlob = token.isGlob = true;
@@ -2024,18 +964,23 @@
             break;
           }
         }
+
         if (scanToEnd === true) {
           continue;
         }
+
         break;
       }
+
       if (opts.nonegate !== true && code === CHAR_EXCLAMATION_MARK && index === start) {
         negated = token.negated = true;
         start++;
         continue;
       }
+
       if (opts.noparen !== true && code === CHAR_LEFT_PARENTHESES) {
         isGlob = token.isGlob = true;
+
         if (scanToEnd === true) {
           while (eos() !== true && (code = advance())) {
             if (code === CHAR_LEFT_PARENTHESES) {
@@ -2043,6 +988,7 @@
               code = advance();
               continue;
             }
+
             if (code === CHAR_RIGHT_PARENTHESES) {
               finished = true;
               break;
@@ -2052,26 +998,33 @@
         }
         break;
       }
+
       if (isGlob === true) {
         finished = true;
+
         if (scanToEnd === true) {
           continue;
         }
+
         break;
       }
     }
+
     if (opts.noext === true) {
       isExtglob = false;
       isGlob = false;
     }
+
     let base = str;
     let prefix = '';
     let glob = '';
+
     if (start > 0) {
       prefix = str.slice(0, start);
       str = str.slice(start);
       lastIndex -= start;
     }
+
     if (base && isGlob === true && lastIndex > 0) {
       base = str.slice(0, lastIndex);
       glob = str.slice(lastIndex);
@@ -2081,17 +1034,21 @@
     } else {
       base = str;
     }
+
     if (base && base !== '' && base !== '/' && base !== str) {
       if (isPathSeparator(base.charCodeAt(base.length - 1))) {
         base = base.slice(0, -1);
       }
     }
+
     if (opts.unescape === true) {
       if (glob) glob = utils$2.removeBackslashes(glob);
+
       if (base && backslashes === true) {
         base = utils$2.removeBackslashes(base);
       }
     }
+
     const state = {
       prefix,
       input,
@@ -2106,6 +1063,7 @@
       negated,
       negatedExtglob
     };
+
     if (opts.tokens === true) {
       state.maxDepth = 0;
       if (!isPathSeparator(code)) {
@@ -2113,8 +1071,10 @@
       }
       state.tokens = tokens;
     }
+
     if (opts.parts === true || opts.tokens === true) {
       let prevIndex;
+
       for (let idx = 0; idx < slashes.length; idx++) {
         const n = prevIndex ? prevIndex + 1 : start;
         const i = slashes[idx];
@@ -2134,20 +1094,25 @@
         }
         prevIndex = i;
       }
+
       if (prevIndex && prevIndex + 1 < input.length) {
         const value = input.slice(prevIndex + 1);
         parts.push(value);
+
         if (opts.tokens) {
           tokens[tokens.length - 1].value = value;
           depth(tokens[tokens.length - 1]);
           state.maxDepth += tokens[tokens.length - 1].depth;
         }
       }
+
       state.slashes = slashes;
       state.parts = parts;
     }
+
     return state;
   };
+
   var scan_1 = scan$1;
 
   const constants$1 = constants$2;
@@ -2173,14 +1138,17 @@
     if (typeof options.expandRange === 'function') {
       return options.expandRange(...args, options);
     }
+
     args.sort();
     const value = `[${args.join('-')}]`;
+
     try {
       /* eslint-disable-next-line no-new */
       new RegExp(value);
     } catch (ex) {
       return args.map(v => utils$1.escapeRegex(v)).join('..');
     }
+
     return value;
   };
 
@@ -2203,26 +1171,26 @@
     if (typeof input !== 'string') {
       throw new TypeError('Expected a string');
     }
+
     input = REPLACEMENTS[input] || input;
-    const opts = {
-      ...options
-    };
+
+    const opts = { ...options };
     const max = typeof opts.maxLength === 'number' ? Math.min(MAX_LENGTH, opts.maxLength) : MAX_LENGTH;
+
     let len = input.length;
     if (len > max) {
       throw new SyntaxError(`Input length: ${len}, exceeds maximum allowed length: ${max}`);
     }
-    const bos = {
-      type: 'bos',
-      value: '',
-      output: opts.prepend || ''
-    };
+
+    const bos = { type: 'bos', value: '', output: opts.prepend || '' };
     const tokens = [bos];
+
     const capture = opts.capture ? '' : '?:';
 
     // create constants based on platform, for windows or posix
     const PLATFORM_CHARS = constants$1.globChars(opts.windows);
     const EXTGLOB_CHARS = constants$1.extglobChars(PLATFORM_CHARS);
+
     const {
       DOT_LITERAL,
       PLUS_LITERAL,
@@ -2237,12 +1205,15 @@
       STAR,
       START_ANCHOR
     } = PLATFORM_CHARS;
+
     const globstar = opts => {
       return `(${capture}(?:(?!${START_ANCHOR}${opts.dot ? DOTS_SLASH : DOT_LITERAL}).)*?)`;
     };
+
     const nodot = opts.dot ? '' : NO_DOT;
     const qmarkNoDot = opts.dot ? QMARK : QMARK_NO_DOT;
     let star = opts.bash === true ? globstar(opts) : STAR;
+
     if (opts.capture) {
       star = `(${star})`;
     }
@@ -2251,6 +1222,7 @@
     if (typeof opts.noext === 'boolean') {
       opts.noextglob = opts.noext;
     }
+
     const state = {
       input,
       index: -1,
@@ -2268,8 +1240,10 @@
       globstar: false,
       tokens
     };
+
     input = utils$1.removePrefix(input, state);
     len = input.length;
+
     const extglobs = [];
     const braces = [];
     const stack = [];
@@ -2281,40 +1255,42 @@
      */
 
     const eos = () => state.index === len - 1;
-    const peek = state.peek = function () {
-      let n = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
-      return input[state.index + n];
-    };
+    const peek = state.peek = (n = 1) => input[state.index + n];
     const advance = state.advance = () => input[++state.index] || '';
     const remaining = () => input.slice(state.index + 1);
-    const consume = function () {
-      let value = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
-      let num = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+    const consume = (value = '', num = 0) => {
       state.consumed += value;
       state.index += num;
     };
+
     const append = token => {
       state.output += token.output != null ? token.output : token.value;
       consume(token.value);
     };
+
     const negate = () => {
       let count = 1;
+
       while (peek() === '!' && (peek(2) !== '(' || peek(3) === '?')) {
         advance();
         state.start++;
         count++;
       }
+
       if (count % 2 === 0) {
         return false;
       }
+
       state.negated = true;
       state.start++;
       return true;
     };
+
     const increment = type => {
       state[type]++;
       stack.push(type);
     };
+
     const decrement = type => {
       state[type]--;
       stack.pop();
@@ -2331,7 +1307,8 @@
     const push = tok => {
       if (prev.type === 'globstar') {
         const isBrace = state.braces > 0 && (tok.type === 'comma' || tok.type === 'brace');
-        const isExtglob = tok.extglob === true || extglobs.length && (tok.type === 'pipe' || tok.type === 'paren');
+        const isExtglob = tok.extglob === true || (extglobs.length && (tok.type === 'pipe' || tok.type === 'paren'));
+
         if (tok.type !== 'slash' && tok.type !== 'paren' && !isBrace && !isExtglob) {
           state.output = state.output.slice(0, -prev.output.length);
           prev.type = 'star';
@@ -2340,76 +1317,69 @@
           state.output += prev.output;
         }
       }
+
       if (extglobs.length && tok.type !== 'paren') {
         extglobs[extglobs.length - 1].inner += tok.value;
       }
+
       if (tok.value || tok.output) append(tok);
       if (prev && prev.type === 'text' && tok.type === 'text') {
         prev.value += tok.value;
         prev.output = (prev.output || '') + tok.value;
         return;
       }
+
       tok.prev = prev;
       tokens.push(tok);
       prev = tok;
     };
+
     const extglobOpen = (type, value) => {
-      const token = {
-        ...EXTGLOB_CHARS[value],
-        conditions: 1,
-        inner: ''
-      };
+      const token = { ...EXTGLOB_CHARS[value], conditions: 1, inner: '' };
+
       token.prev = prev;
       token.parens = state.parens;
       token.output = state.output;
       const output = (opts.capture ? '(' : '') + token.open;
+
       increment('parens');
-      push({
-        type,
-        value,
-        output: state.output ? '' : ONE_CHAR
-      });
-      push({
-        type: 'paren',
-        extglob: true,
-        value: advance(),
-        output
-      });
+      push({ type, value, output: state.output ? '' : ONE_CHAR });
+      push({ type: 'paren', extglob: true, value: advance(), output });
       extglobs.push(token);
     };
+
     const extglobClose = token => {
       let output = token.close + (opts.capture ? ')' : '');
       let rest;
+
       if (token.type === 'negate') {
         let extglobStar = star;
+
         if (token.inner && token.inner.length > 1 && token.inner.includes('/')) {
           extglobStar = globstar(opts);
         }
+
         if (extglobStar !== star || eos() || /^\)+$/.test(remaining())) {
           output = token.close = `)$))${extglobStar}`;
         }
+
         if (token.inner.includes('*') && (rest = remaining()) && /^\.[^\\/.]+$/.test(rest)) {
           // Any non-magical string (`.ts`) or even nested expression (`.{ts,tsx}`) can follow after the closing parenthesis.
           // In this case, we need to parse the string and use it in the output of the original pattern.
           // Suitable patterns: `/!(*.d).ts`, `/!(*.d).{ts,tsx}`, `**/!(*-dbg).@(js)`.
           //
           // Disabling the `fastpaths` option due to a problem with parsing strings as `.ts` in the pattern like `**/!(*.d).ts`.
-          const expression = parse$1(rest, {
-            ...options,
-            fastpaths: false
-          }).output;
+          const expression = parse$1(rest, { ...options, fastpaths: false }).output;
+
           output = token.close = `)${expression})${extglobStar})`;
         }
+
         if (token.prev.type === 'bos') {
           state.negatedExtglob = true;
         }
       }
-      push({
-        type: 'paren',
-        extglob: true,
-        value,
-        output
-      });
+
+      push({ type: 'paren', extglob: true, value, output });
       decrement('parens');
     };
 
@@ -2419,11 +1389,13 @@
 
     if (opts.fastpaths !== false && !/(^[*!]|[/()[\]{}"])/.test(input)) {
       let backslashes = false;
+
       let output = input.replace(REGEX_SPECIAL_CHARS_BACKREF, (m, esc, chars, first, rest, index) => {
         if (first === '\\') {
           backslashes = true;
           return m;
         }
+
         if (first === '?') {
           if (esc) {
             return esc + first + (rest ? QMARK.repeat(rest.length) : '');
@@ -2433,9 +1405,11 @@
           }
           return QMARK.repeat(chars.length);
         }
+
         if (first === '.') {
           return DOT_LITERAL.repeat(chars.length);
         }
+
         if (first === '*') {
           if (esc) {
             return esc + first + (rest ? star : '');
@@ -2444,19 +1418,22 @@
         }
         return esc ? m : `\\${m}`;
       });
+
       if (backslashes === true) {
         if (opts.unescape === true) {
           output = output.replace(/\\/g, '');
         } else {
           output = output.replace(/\\+/g, m => {
-            return m.length % 2 === 0 ? '\\\\' : m ? '\\' : '';
+            return m.length % 2 === 0 ? '\\\\' : (m ? '\\' : '');
           });
         }
       }
+
       if (output === input && opts.contains === true) {
         state.output = input;
         return state;
       }
+
       state.output = utils$1.wrapOutput(output, state, options);
       return state;
     }
@@ -2467,6 +1444,7 @@
 
     while (!eos()) {
       value = advance();
+
       if (value === '\u0000') {
         continue;
       }
@@ -2477,24 +1455,25 @@
 
       if (value === '\\') {
         const next = peek();
+
         if (next === '/' && opts.bash !== true) {
           continue;
         }
+
         if (next === '.' || next === ';') {
           continue;
         }
+
         if (!next) {
           value += '\\';
-          push({
-            type: 'text',
-            value
-          });
+          push({ type: 'text', value });
           continue;
         }
 
         // collapse slashes to reduce potential for exploits
         const match = /^\\+/.exec(remaining());
         let slashes = 0;
+
         if (match && match[0].length > 2) {
           slashes = match[0].length;
           state.index += slashes;
@@ -2502,16 +1481,15 @@
             value += '\\';
           }
         }
+
         if (opts.unescape === true) {
           value = advance();
         } else {
           value += advance();
         }
+
         if (state.brackets === 0) {
-          push({
-            type: 'text',
-            value
-          });
+          push({ type: 'text', value });
           continue;
         }
       }
@@ -2526,6 +1504,7 @@
           const inner = prev.value.slice(1);
           if (inner.includes('[')) {
             prev.posix = true;
+
             if (inner.includes(':')) {
               const idx = prev.value.lastIndexOf('[');
               const pre = prev.value.slice(0, idx);
@@ -2535,6 +1514,7 @@
                 prev.value = pre + posix;
                 state.backtrack = true;
                 advance();
+
                 if (!bos.output && tokens.indexOf(prev) === 1) {
                   bos.output = ONE_CHAR;
                 }
@@ -2543,19 +1523,21 @@
             }
           }
         }
-        if (value === '[' && peek() !== ':' || value === '-' && peek() === ']') {
+
+        if ((value === '[' && peek() !== ':') || (value === '-' && peek() === ']')) {
           value = `\\${value}`;
         }
+
         if (value === ']' && (prev.value === '[' || prev.value === '[^')) {
           value = `\\${value}`;
         }
+
         if (opts.posix === true && value === '!' && prev.value === '[') {
           value = '^';
         }
+
         prev.value += value;
-        append({
-          value
-        });
+        append({ value });
         continue;
       }
 
@@ -2567,9 +1549,7 @@
       if (state.quotes === 1 && value !== '"') {
         value = utils$1.escapeRegex(value);
         prev.value += value;
-        append({
-          value
-        });
+        append({ value });
         continue;
       }
 
@@ -2580,10 +1560,7 @@
       if (value === '"') {
         state.quotes = state.quotes === 1 ? 0 : 1;
         if (opts.keepQuotes === true) {
-          push({
-            type: 'text',
-            value
-          });
+          push({ type: 'text', value });
         }
         continue;
       }
@@ -2594,26 +1571,22 @@
 
       if (value === '(') {
         increment('parens');
-        push({
-          type: 'paren',
-          value
-        });
+        push({ type: 'paren', value });
         continue;
       }
+
       if (value === ')') {
         if (state.parens === 0 && opts.strictBrackets === true) {
           throw new SyntaxError(syntaxError('opening', '('));
         }
+
         const extglob = extglobs[extglobs.length - 1];
         if (extglob && state.parens === extglob.parens + 1) {
           extglobClose(extglobs.pop());
           continue;
         }
-        push({
-          type: 'paren',
-          value,
-          output: state.parens ? ')' : '\\)'
-        });
+
+        push({ type: 'paren', value, output: state.parens ? ')' : '\\)' });
         decrement('parens');
         continue;
       }
@@ -2627,51 +1600,47 @@
           if (opts.nobracket !== true && opts.strictBrackets === true) {
             throw new SyntaxError(syntaxError('closing', ']'));
           }
+
           value = `\\${value}`;
         } else {
           increment('brackets');
         }
-        push({
-          type: 'bracket',
-          value
-        });
+
+        push({ type: 'bracket', value });
         continue;
       }
+
       if (value === ']') {
-        if (opts.nobracket === true || prev && prev.type === 'bracket' && prev.value.length === 1) {
-          push({
-            type: 'text',
-            value,
-            output: `\\${value}`
-          });
+        if (opts.nobracket === true || (prev && prev.type === 'bracket' && prev.value.length === 1)) {
+          push({ type: 'text', value, output: `\\${value}` });
           continue;
         }
+
         if (state.brackets === 0) {
           if (opts.strictBrackets === true) {
             throw new SyntaxError(syntaxError('opening', '['));
           }
-          push({
-            type: 'text',
-            value,
-            output: `\\${value}`
-          });
+
+          push({ type: 'text', value, output: `\\${value}` });
           continue;
         }
+
         decrement('brackets');
+
         const prevValue = prev.value.slice(1);
         if (prev.posix !== true && prevValue[0] === '^' && !prevValue.includes('/')) {
           value = `/${value}`;
         }
+
         prev.value += value;
-        append({
-          value
-        });
+        append({ value });
 
         // when literal brackets are explicitly disabled
         // assume we should match with a regex character class
         if (opts.literalBrackets === false || utils$1.hasRegexChars(prevValue)) {
           continue;
         }
+
         const escaped = utils$1.escapeRegex(prev.value);
         state.output = state.output.slice(0, -prev.value.length);
 
@@ -2695,6 +1664,7 @@
 
       if (value === '{' && opts.nobrace !== true) {
         increment('braces');
+
         const open = {
           type: 'brace',
           value,
@@ -2702,24 +1672,26 @@
           outputIndex: state.output.length,
           tokensIndex: state.tokens.length
         };
+
         braces.push(open);
         push(open);
         continue;
       }
+
       if (value === '}') {
         const brace = braces[braces.length - 1];
+
         if (opts.nobrace === true || !brace) {
-          push({
-            type: 'text',
-            value,
-            output: value
-          });
+          push({ type: 'text', value, output: value });
           continue;
         }
+
         let output = ')';
+
         if (brace.dots === true) {
           const arr = tokens.slice();
           const range = [];
+
           for (let i = arr.length - 1; i >= 0; i--) {
             tokens.pop();
             if (arr[i].type === 'brace') {
@@ -2729,9 +1701,11 @@
               range.unshift(arr[i].value);
             }
           }
+
           output = expandRange(range, opts);
           state.backtrack = true;
         }
+
         if (brace.comma !== true && brace.dots !== true) {
           const out = state.output.slice(0, brace.outputIndex);
           const toks = state.tokens.slice(brace.tokensIndex);
@@ -2739,14 +1713,11 @@
           value = output = '\\}';
           state.output = out;
           for (const t of toks) {
-            state.output += t.output || t.value;
+            state.output += (t.output || t.value);
           }
         }
-        push({
-          type: 'brace',
-          value,
-          output
-        });
+
+        push({ type: 'brace', value, output });
         decrement('braces');
         braces.pop();
         continue;
@@ -2760,10 +1731,7 @@
         if (extglobs.length > 0) {
           extglobs[extglobs.length - 1].conditions++;
         }
-        push({
-          type: 'text',
-          value
-        });
+        push({ type: 'text', value });
         continue;
       }
 
@@ -2773,16 +1741,14 @@
 
       if (value === ',') {
         let output = value;
+
         const brace = braces[braces.length - 1];
         if (brace && stack[stack.length - 1] === 'braces') {
           brace.comma = true;
           output = '|';
         }
-        push({
-          type: 'comma',
-          value,
-          output
-        });
+
+        push({ type: 'comma', value, output });
         continue;
       }
 
@@ -2803,11 +1769,8 @@
           prev = bos; // reset "prev" to the first token
           continue;
         }
-        push({
-          type: 'slash',
-          value,
-          output: SLASH_LITERAL
-        });
+
+        push({ type: 'slash', value, output: SLASH_LITERAL });
         continue;
       }
 
@@ -2825,19 +1788,13 @@
           brace.dots = true;
           continue;
         }
-        if (state.braces + state.parens === 0 && prev.type !== 'bos' && prev.type !== 'slash') {
-          push({
-            type: 'text',
-            value,
-            output: DOT_LITERAL
-          });
+
+        if ((state.braces + state.parens) === 0 && prev.type !== 'bos' && prev.type !== 'slash') {
+          push({ type: 'text', value, output: DOT_LITERAL });
           continue;
         }
-        push({
-          type: 'dot',
-          value,
-          output: DOT_LITERAL
-        });
+
+        push({ type: 'dot', value, output: DOT_LITERAL });
         continue;
       }
 
@@ -2851,35 +1808,29 @@
           extglobOpen('qmark', value);
           continue;
         }
+
         if (prev && prev.type === 'paren') {
           const next = peek();
           let output = value;
+
           if (next === '<' && !utils$1.supportsLookbehinds()) {
             throw new Error('Node.js v10 or higher is required for regex lookbehinds');
           }
-          if (prev.value === '(' && !/[!=<:]/.test(next) || next === '<' && !/<([!=]|\w+>)/.test(remaining())) {
+
+          if ((prev.value === '(' && !/[!=<:]/.test(next)) || (next === '<' && !/<([!=]|\w+>)/.test(remaining()))) {
             output = `\\${value}`;
           }
-          push({
-            type: 'text',
-            value,
-            output
-          });
+
+          push({ type: 'text', value, output });
           continue;
         }
+
         if (opts.dot !== true && (prev.type === 'slash' || prev.type === 'bos')) {
-          push({
-            type: 'qmark',
-            value,
-            output: QMARK_NO_DOT
-          });
+          push({ type: 'qmark', value, output: QMARK_NO_DOT });
           continue;
         }
-        push({
-          type: 'qmark',
-          value,
-          output: QMARK
-        });
+
+        push({ type: 'qmark', value, output: QMARK });
         continue;
       }
 
@@ -2894,6 +1845,7 @@
             continue;
           }
         }
+
         if (opts.nonegate !== true && state.index === 0) {
           negate();
           continue;
@@ -2909,25 +1861,18 @@
           extglobOpen('plus', value);
           continue;
         }
-        if (prev && prev.value === '(' || opts.regex === false) {
-          push({
-            type: 'plus',
-            value,
-            output: PLUS_LITERAL
-          });
+
+        if ((prev && prev.value === '(') || opts.regex === false) {
+          push({ type: 'plus', value, output: PLUS_LITERAL });
           continue;
         }
-        if (prev && (prev.type === 'bracket' || prev.type === 'paren' || prev.type === 'brace') || state.parens > 0) {
-          push({
-            type: 'plus',
-            value
-          });
+
+        if ((prev && (prev.type === 'bracket' || prev.type === 'paren' || prev.type === 'brace')) || state.parens > 0) {
+          push({ type: 'plus', value });
           continue;
         }
-        push({
-          type: 'plus',
-          value: PLUS_LITERAL
-        });
+
+        push({ type: 'plus', value: PLUS_LITERAL });
         continue;
       }
 
@@ -2937,18 +1882,11 @@
 
       if (value === '@') {
         if (opts.noextglob !== true && peek() === '(' && peek(2) !== '?') {
-          push({
-            type: 'at',
-            extglob: true,
-            value,
-            output: ''
-          });
+          push({ type: 'at', extglob: true, value, output: '' });
           continue;
         }
-        push({
-          type: 'text',
-          value
-        });
+
+        push({ type: 'text', value });
         continue;
       }
 
@@ -2960,15 +1898,14 @@
         if (value === '$' || value === '^') {
           value = `\\${value}`;
         }
+
         const match = REGEX_NON_SPECIAL_CHARS.exec(remaining());
         if (match) {
           value += match[0];
           state.index += match[0].length;
         }
-        push({
-          type: 'text',
-          value
-        });
+
+        push({ type: 'text', value });
         continue;
       }
 
@@ -2986,36 +1923,33 @@
         consume(value);
         continue;
       }
+
       let rest = remaining();
       if (opts.noextglob !== true && /^\([^?]/.test(rest)) {
         extglobOpen('star', value);
         continue;
       }
+
       if (prev.type === 'star') {
         if (opts.noglobstar === true) {
           consume(value);
           continue;
         }
+
         const prior = prev.prev;
         const before = prior.prev;
         const isStart = prior.type === 'slash' || prior.type === 'bos';
         const afterStar = before && (before.type === 'star' || before.type === 'globstar');
-        if (opts.bash === true && (!isStart || rest[0] && rest[0] !== '/')) {
-          push({
-            type: 'star',
-            value,
-            output: ''
-          });
+
+        if (opts.bash === true && (!isStart || (rest[0] && rest[0] !== '/'))) {
+          push({ type: 'star', value, output: '' });
           continue;
         }
+
         const isBrace = state.braces > 0 && (prior.type === 'comma' || prior.type === 'brace');
         const isExtglob = extglobs.length && (prior.type === 'pipe' || prior.type === 'paren');
         if (!isStart && prior.type !== 'paren' && !isBrace && !isExtglob) {
-          push({
-            type: 'star',
-            value,
-            output: ''
-          });
+          push({ type: 'star', value, output: '' });
           continue;
         }
 
@@ -3028,6 +1962,7 @@
           rest = rest.slice(3);
           consume('/**', 3);
         }
+
         if (prior.type === 'bos' && eos()) {
           prev.type = 'globstar';
           prev.value += value;
@@ -3037,9 +1972,11 @@
           consume(value);
           continue;
         }
+
         if (prior.type === 'slash' && prior.prev.type !== 'bos' && !afterStar && eos()) {
           state.output = state.output.slice(0, -(prior.output + prev.output).length);
           prior.output = `(?:${prior.output}`;
+
           prev.type = 'globstar';
           prev.output = globstar(opts) + (opts.strictSlashes ? ')' : '|$)');
           prev.value += value;
@@ -3048,23 +1985,26 @@
           consume(value);
           continue;
         }
+
         if (prior.type === 'slash' && prior.prev.type !== 'bos' && rest[0] === '/') {
           const end = rest[1] !== void 0 ? '|$' : '';
+
           state.output = state.output.slice(0, -(prior.output + prev.output).length);
           prior.output = `(?:${prior.output}`;
+
           prev.type = 'globstar';
           prev.output = `${globstar(opts)}${SLASH_LITERAL}|${SLASH_LITERAL}${end})`;
           prev.value += value;
+
           state.output += prior.output + prev.output;
           state.globstar = true;
+
           consume(value + advance());
-          push({
-            type: 'slash',
-            value: '/',
-            output: ''
-          });
+
+          push({ type: 'slash', value: '/', output: '' });
           continue;
         }
+
         if (prior.type === 'bos' && rest[0] === '/') {
           prev.type = 'globstar';
           prev.value += value;
@@ -3072,11 +2012,7 @@
           state.output = prev.output;
           state.globstar = true;
           consume(value + advance());
-          push({
-            type: 'slash',
-            value: '/',
-            output: ''
-          });
+          push({ type: 'slash', value: '/', output: '' });
           continue;
         }
 
@@ -3094,11 +2030,9 @@
         consume(value);
         continue;
       }
-      const token = {
-        type: 'star',
-        value,
-        output: star
-      };
+
+      const token = { type: 'star', value, output: star };
+
       if (opts.bash === true) {
         token.output = '.*?';
         if (prev.type === 'bos' || prev.type === 'slash') {
@@ -3107,62 +2041,71 @@
         push(token);
         continue;
       }
+
       if (prev && (prev.type === 'bracket' || prev.type === 'paren') && opts.regex === true) {
         token.output = value;
         push(token);
         continue;
       }
+
       if (state.index === state.start || prev.type === 'slash' || prev.type === 'dot') {
         if (prev.type === 'dot') {
           state.output += NO_DOT_SLASH;
           prev.output += NO_DOT_SLASH;
+
         } else if (opts.dot === true) {
           state.output += NO_DOTS_SLASH;
           prev.output += NO_DOTS_SLASH;
+
         } else {
           state.output += nodot;
           prev.output += nodot;
         }
+
         if (peek() !== '*') {
           state.output += ONE_CHAR;
           prev.output += ONE_CHAR;
         }
       }
+
       push(token);
     }
+
     while (state.brackets > 0) {
       if (opts.strictBrackets === true) throw new SyntaxError(syntaxError('closing', ']'));
       state.output = utils$1.escapeLast(state.output, '[');
       decrement('brackets');
     }
+
     while (state.parens > 0) {
       if (opts.strictBrackets === true) throw new SyntaxError(syntaxError('closing', ')'));
       state.output = utils$1.escapeLast(state.output, '(');
       decrement('parens');
     }
+
     while (state.braces > 0) {
       if (opts.strictBrackets === true) throw new SyntaxError(syntaxError('closing', '}'));
       state.output = utils$1.escapeLast(state.output, '{');
       decrement('braces');
     }
+
     if (opts.strictSlashes !== true && (prev.type === 'star' || prev.type === 'bracket')) {
-      push({
-        type: 'maybe_slash',
-        value: '',
-        output: `${SLASH_LITERAL}?`
-      });
+      push({ type: 'maybe_slash', value: '', output: `${SLASH_LITERAL}?` });
     }
 
     // rebuild the output if we had to backtrack at any point
     if (state.backtrack === true) {
       state.output = '';
+
       for (const token of state.tokens) {
         state.output += token.output != null ? token.output : token.value;
+
         if (token.suffix) {
           state.output += token.suffix;
         }
       }
     }
+
     return state;
   };
 
@@ -3173,14 +2116,13 @@
    */
 
   parse$1.fastpaths = (input, options) => {
-    const opts = {
-      ...options
-    };
+    const opts = { ...options };
     const max = typeof opts.maxLength === 'number' ? Math.min(MAX_LENGTH, opts.maxLength) : MAX_LENGTH;
     const len = input.length;
     if (len > max) {
       throw new SyntaxError(`Input length: ${len}, exceeds maximum allowed length: ${max}`);
     }
+
     input = REPLACEMENTS[input] || input;
 
     // create constants based on platform, for windows or posix
@@ -3195,56 +2137,70 @@
       STAR,
       START_ANCHOR
     } = constants$1.globChars(opts.windows);
+
     const nodot = opts.dot ? NO_DOTS : NO_DOT;
     const slashDot = opts.dot ? NO_DOTS_SLASH : NO_DOT;
     const capture = opts.capture ? '' : '?:';
-    const state = {
-      negated: false,
-      prefix: ''
-    };
+    const state = { negated: false, prefix: '' };
     let star = opts.bash === true ? '.*?' : STAR;
+
     if (opts.capture) {
       star = `(${star})`;
     }
+
     const globstar = opts => {
       if (opts.noglobstar === true) return star;
       return `(${capture}(?:(?!${START_ANCHOR}${opts.dot ? DOTS_SLASH : DOT_LITERAL}).)*?)`;
     };
+
     const create = str => {
       switch (str) {
         case '*':
           return `${nodot}${ONE_CHAR}${star}`;
+
         case '.*':
           return `${DOT_LITERAL}${ONE_CHAR}${star}`;
+
         case '*.*':
           return `${nodot}${star}${DOT_LITERAL}${ONE_CHAR}${star}`;
+
         case '*/*':
           return `${nodot}${star}${SLASH_LITERAL}${ONE_CHAR}${slashDot}${star}`;
+
         case '**':
           return nodot + globstar(opts);
+
         case '**/*':
           return `(?:${nodot}${globstar(opts)}${SLASH_LITERAL})?${slashDot}${ONE_CHAR}${star}`;
+
         case '**/*.*':
           return `(?:${nodot}${globstar(opts)}${SLASH_LITERAL})?${slashDot}${star}${DOT_LITERAL}${ONE_CHAR}${star}`;
+
         case '**/.*':
           return `(?:${nodot}${globstar(opts)}${SLASH_LITERAL})?${DOT_LITERAL}${ONE_CHAR}${star}`;
-        default:
-          {
-            const match = /^(.*?)\.(\w+)$/.exec(str);
-            if (!match) return;
-            const source = create(match[1]);
-            if (!source) return;
-            return source + DOT_LITERAL + match[2];
-          }
+
+        default: {
+          const match = /^(.*?)\.(\w+)$/.exec(str);
+          if (!match) return;
+
+          const source = create(match[1]);
+          if (!source) return;
+
+          return source + DOT_LITERAL + match[2];
+        }
       }
     };
+
     const output = utils$1.removePrefix(input, state);
     let source = create(output);
+
     if (source && opts.strictSlashes !== true) {
       source += `${SLASH_LITERAL}?`;
     }
+
     return source;
   };
+
   var parse_1 = parse$1;
 
   const scan = scan_1;
@@ -3275,8 +2231,7 @@
    * @api public
    */
 
-  const picomatch$1 = function (glob, options) {
-    let returnState = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+  const picomatch$1 = (glob, options, returnState = false) => {
     if (Array.isArray(glob)) {
       const fns = glob.map(input => picomatch$1(input, options, returnState));
       const arrayMatcher = str => {
@@ -3288,52 +2243,41 @@
       };
       return arrayMatcher;
     }
+
     const isState = isObject(glob) && glob.tokens && glob.input;
-    if (glob === '' || typeof glob !== 'string' && !isState) {
+
+    if (glob === '' || (typeof glob !== 'string' && !isState)) {
       throw new TypeError('Expected pattern to be a non-empty string');
     }
+
     const opts = options || {};
     const posix = opts.windows;
-    const regex = isState ? picomatch$1.compileRe(glob, options) : picomatch$1.makeRe(glob, options, false, true);
+    const regex = isState
+      ? picomatch$1.compileRe(glob, options)
+      : picomatch$1.makeRe(glob, options, false, true);
+
     const state = regex.state;
     delete regex.state;
+
     let isIgnored = () => false;
     if (opts.ignore) {
-      const ignoreOpts = {
-        ...options,
-        ignore: null,
-        onMatch: null,
-        onResult: null
-      };
+      const ignoreOpts = { ...options, ignore: null, onMatch: null, onResult: null };
       isIgnored = picomatch$1(opts.ignore, ignoreOpts, returnState);
     }
-    const matcher = function (input) {
-      let returnObject = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-      const {
-        isMatch,
-        match,
-        output
-      } = picomatch$1.test(input, regex, options, {
-        glob,
-        posix
-      });
-      const result = {
-        glob,
-        state,
-        regex,
-        posix,
-        input,
-        output,
-        match,
-        isMatch
-      };
+
+    const matcher = (input, returnObject = false) => {
+      const { isMatch, match, output } = picomatch$1.test(input, regex, options, { glob, posix });
+      const result = { glob, state, regex, posix, input, output, match, isMatch };
+
       if (typeof opts.onResult === 'function') {
         opts.onResult(result);
       }
+
       if (isMatch === false) {
         result.isMatch = false;
         return returnObject ? result : false;
       }
+
       if (isIgnored(input)) {
         if (typeof opts.onIgnore === 'function') {
           opts.onIgnore(result);
@@ -3341,14 +2285,17 @@
         result.isMatch = false;
         return returnObject ? result : false;
       }
+
       if (typeof opts.onMatch === 'function') {
         opts.onMatch(result);
       }
       return returnObject ? result : true;
     };
+
     if (returnState) {
       matcher.state = state;
     }
+
     return matcher;
   };
 
@@ -3369,28 +2316,25 @@
    * @api public
    */
 
-  picomatch$1.test = function (input, regex, options) {
-    let {
-      glob,
-      posix
-    } = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
+  picomatch$1.test = (input, regex, options, { glob, posix } = {}) => {
     if (typeof input !== 'string') {
       throw new TypeError('Expected input to be a string');
     }
+
     if (input === '') {
-      return {
-        isMatch: false,
-        output: ''
-      };
+      return { isMatch: false, output: '' };
     }
+
     const opts = options || {};
     const format = opts.format || (posix ? utils.toPosixSlashes : null);
     let match = input === glob;
-    let output = match && format ? format(input) : input;
+    let output = (match && format) ? format(input) : input;
+
     if (match === false) {
       output = format ? format(input) : input;
       match = output === glob;
     }
+
     if (match === false || opts.capture === true) {
       if (opts.matchBase === true || opts.basename === true) {
         match = picomatch$1.matchBase(input, regex, options, posix);
@@ -3398,11 +2342,8 @@
         match = regex.exec(output);
       }
     }
-    return {
-      isMatch: Boolean(match),
-      match,
-      output
-    };
+
+    return { isMatch: Boolean(match), match, output };
   };
 
   /**
@@ -3459,10 +2400,7 @@
 
   picomatch$1.parse = (pattern, options) => {
     if (Array.isArray(pattern)) return pattern.map(p => picomatch$1.parse(p, options));
-    return parse(pattern, {
-      ...options,
-      fastpaths: false
-    });
+    return parse(pattern, { ...options, fastpaths: false });
   };
 
   /**
@@ -3506,23 +2444,25 @@
    * @api public
    */
 
-  picomatch$1.compileRe = function (state, options) {
-    let returnOutput = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-    let returnState = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+  picomatch$1.compileRe = (state, options, returnOutput = false, returnState = false) => {
     if (returnOutput === true) {
       return state.output;
     }
+
     const opts = options || {};
     const prepend = opts.contains ? '' : '^';
     const append = opts.contains ? '' : '$';
+
     let source = `${prepend}(?:${state.output})${append}`;
     if (state && state.negated === true) {
       source = `^(?!${source}).*$`;
     }
+
     const regex = picomatch$1.toRegex(source, options);
     if (returnState === true) {
       regex.state = state;
     }
+
     return regex;
   };
 
@@ -3545,23 +2485,21 @@
    * @api public
    */
 
-  picomatch$1.makeRe = function (input) {
-    let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-    let returnOutput = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-    let returnState = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+  picomatch$1.makeRe = (input, options = {}, returnOutput = false, returnState = false) => {
     if (!input || typeof input !== 'string') {
       throw new TypeError('Expected a non-empty string');
     }
-    let parsed = {
-      negated: false,
-      fastpaths: true
-    };
+
+    let parsed = { negated: false, fastpaths: true };
+
     if (options.fastpaths !== false && (input[0] === '.' || input[0] === '*')) {
       parsed.output = parse.fastpaths(input, options);
     }
+
     if (!parsed.output) {
       parsed = parse(input, options);
     }
+
     return picomatch$1.compileRe(parsed, options, returnOutput, returnState);
   };
 
@@ -3606,6 +2544,7 @@
   var picomatch_1 = picomatch$1;
 
   var posix = picomatch_1;
+
   var picomatch = /*@__PURE__*/getDefaultExportFromCjs(posix);
 
   const parseInputAccept = inputAccept => {
@@ -3622,8 +2561,8 @@
   };
   class AcceptedFileTypes {
     constructor(inputAccept) {
-      _defineProperty$2(this, "extensions", void 0);
-      _defineProperty$2(this, "mimeTypes", void 0);
+      _defineProperty(this, "extensions", void 0);
+      _defineProperty(this, "mimeTypes", void 0);
       const [extensions, mimeTypes] = parseInputAccept(inputAccept);
       this.extensions = extensions;
       this.mimeTypes = mimeTypes;
@@ -3682,11 +2621,11 @@
         onUploadFiles,
         renderer
       } = _ref;
-      _defineProperty$2(this, "acceptedFileTypes", void 0);
-      _defineProperty$2(this, "container", void 0);
-      _defineProperty$2(this, "onUploadFiles", void 0);
-      _defineProperty$2(this, "renderer", void 0);
-      _defineProperty$2(this, "onDrop", e => {
+      _defineProperty(this, "acceptedFileTypes", void 0);
+      _defineProperty(this, "container", void 0);
+      _defineProperty(this, "onUploadFiles", void 0);
+      _defineProperty(this, "renderer", void 0);
+      _defineProperty(this, "onDrop", e => {
         const dragEvent = e;
         this.container.classList.remove("dff-dropping");
         dragEvent.preventDefault();
@@ -3739,10 +2678,10 @@
         type,
         uploadIndex
       } = _ref;
-      _defineProperty$2(this, "name", void 0);
-      _defineProperty$2(this, "status", void 0);
-      _defineProperty$2(this, "type", void 0);
-      _defineProperty$2(this, "uploadIndex", void 0);
+      _defineProperty(this, "name", void 0);
+      _defineProperty(this, "status", void 0);
+      _defineProperty(this, "type", void 0);
+      _defineProperty(this, "uploadIndex", void 0);
       this.name = name;
       this.status = status;
       this.type = type;
@@ -3756,11 +2695,10 @@
     }
   };
 
-  function normalize(strArray) {
+  function normalize (strArray) {
     var resultArray = [];
-    if (strArray.length === 0) {
-      return '';
-    }
+    if (strArray.length === 0) { return ''; }
+
     if (typeof strArray[0] !== 'string') {
       throw new TypeError('Url must be a string. Received ' + strArray[0]);
     }
@@ -3777,14 +2715,16 @@
     } else {
       strArray[0] = strArray[0].replace(/^([^/:]+):\/*/, '$1://');
     }
+
     for (var i = 0; i < strArray.length; i++) {
       var component = strArray[i];
+
       if (typeof component !== 'string') {
         throw new TypeError('Url must be a string. Received ' + component);
       }
-      if (component === '') {
-        continue;
-      }
+
+      if (component === '') { continue; }
+
       if (i > 0) {
         // Removing the starting slashes for each component but the first.
         component = component.replace(/^[\/]+/, '');
@@ -3796,8 +2736,11 @@
         // For the last component we will combine multiple slashes to a single one.
         component = component.replace(/[\/]+$/, '/');
       }
+
       resultArray.push(component);
+
     }
+
     var str = resultArray.join('/');
     // Each input component is now separated by a single slash except the possible first plain protocol part.
 
@@ -3806,16 +2749,20 @@
 
     // replace ? in parameters with &
     var parts = str.split('?');
-    str = parts.shift() + (parts.length > 0 ? '?' : '') + parts.join('&');
+    str = parts.shift() + (parts.length > 0 ? '?': '') + parts.join('&');
+
     return str;
   }
+
   function urlJoin() {
     var input;
+
     if (typeof arguments[0] === 'object') {
       input = arguments[0];
     } else {
       input = [].slice.call(arguments);
     }
+
     return normalize(input);
   }
 
@@ -3937,20 +2884,20 @@
         type: "s3",
         uploadIndex
       });
-      _defineProperty$2(this, "onError", void 0);
-      _defineProperty$2(this, "onProgress", void 0);
-      _defineProperty$2(this, "onSuccess", void 0);
-      _defineProperty$2(this, "chunkState", void 0);
-      _defineProperty$2(this, "chunks", void 0);
-      _defineProperty$2(this, "createdPromise", void 0);
-      _defineProperty$2(this, "csrfToken", void 0);
-      _defineProperty$2(this, "endpoint", void 0);
-      _defineProperty$2(this, "file", void 0);
-      _defineProperty$2(this, "key", void 0);
-      _defineProperty$2(this, "parts", void 0);
-      _defineProperty$2(this, "s3UploadDir", void 0);
-      _defineProperty$2(this, "uploadId", void 0);
-      _defineProperty$2(this, "uploading", void 0);
+      _defineProperty(this, "onError", void 0);
+      _defineProperty(this, "onProgress", void 0);
+      _defineProperty(this, "onSuccess", void 0);
+      _defineProperty(this, "chunkState", void 0);
+      _defineProperty(this, "chunks", void 0);
+      _defineProperty(this, "createdPromise", void 0);
+      _defineProperty(this, "csrfToken", void 0);
+      _defineProperty(this, "endpoint", void 0);
+      _defineProperty(this, "file", void 0);
+      _defineProperty(this, "key", void 0);
+      _defineProperty(this, "parts", void 0);
+      _defineProperty(this, "s3UploadDir", void 0);
+      _defineProperty(this, "uploadId", void 0);
+      _defineProperty(this, "uploading", void 0);
       this.csrfToken = csrfToken;
       this.endpoint = endpoint;
       this.file = file;
@@ -4236,7 +3183,7 @@
         type,
         uploadIndex
       });
-      _defineProperty$2(this, "size", void 0);
+      _defineProperty(this, "size", void 0);
       this.size = size;
     }
     async abort() {
@@ -4257,7 +3204,7 @@
         type: "placeholder",
         uploadIndex
       });
-      _defineProperty$2(this, "id", void 0);
+      _defineProperty(this, "id", void 0);
       this.id = initialFile.id;
     }
     getId() {
@@ -4280,8 +3227,8 @@
         type: "uploadedS3",
         uploadIndex
       });
-      _defineProperty$2(this, "id", void 0);
-      _defineProperty$2(this, "key", void 0);
+      _defineProperty(this, "id", void 0);
+      _defineProperty(this, "key", void 0);
       this.id = initialFile.id;
       this.key = initialFile.name;
     }
@@ -4332,9 +3279,9 @@
         type: "uploadedTus",
         uploadIndex
       });
-      _defineProperty$2(this, "csrfToken", void 0);
-      _defineProperty$2(this, "id", void 0);
-      _defineProperty$2(this, "url", void 0);
+      _defineProperty(this, "csrfToken", void 0);
+      _defineProperty(this, "id", void 0);
+      _defineProperty(this, "url", void 0);
       this.csrfToken = csrfToken;
       this.id = initialFile.id;
       this.url = `${uploadUrl}${initialFile.id}`;
@@ -4665,28 +3612,35 @@
   var requiresPort = function required(port, protocol) {
     protocol = protocol.split(':')[0];
     port = +port;
+
     if (!port) return false;
+
     switch (protocol) {
       case 'http':
       case 'ws':
-        return port !== 80;
+      return port !== 80;
+
       case 'https':
       case 'wss':
-        return port !== 443;
+      return port !== 443;
+
       case 'ftp':
-        return port !== 21;
+      return port !== 21;
+
       case 'gopher':
-        return port !== 70;
+      return port !== 70;
+
       case 'file':
-        return false;
+      return false;
     }
+
     return port !== 0;
   };
 
   var querystringify$1 = {};
 
-  var has = Object.prototype.hasOwnProperty,
-    undef;
+  var has = Object.prototype.hasOwnProperty
+    , undef;
 
   /**
    * Decode a URI encoded string.
@@ -4726,12 +3680,13 @@
    * @api public
    */
   function querystring(query) {
-    var parser = /([^=?#&]+)=?([^&]*)/g,
-      result = {},
-      part;
+    var parser = /([^=?#&]+)=?([^&]*)/g
+      , result = {}
+      , part;
+
     while (part = parser.exec(query)) {
-      var key = decode(part[1]),
-        value = decode(part[2]);
+      var key = decode(part[1])
+        , value = decode(part[2]);
 
       //
       // Prevent overriding of existing properties. This ensures that build-in
@@ -4744,6 +3699,7 @@
       if (key === null || value === null || key in result) continue;
       result[key] = value;
     }
+
     return result;
   }
 
@@ -4757,14 +3713,16 @@
    */
   function querystringify(obj, prefix) {
     prefix = prefix || '';
-    var pairs = [],
-      value,
-      key;
+
+    var pairs = []
+      , value
+      , key;
 
     //
     // Optionally prefix with a '?' if needed
     //
     if ('string' !== typeof prefix) prefix = '?';
+
     for (key in obj) {
       if (has.call(obj, key)) {
         value = obj[key];
@@ -4776,6 +3734,7 @@
         if (!value && (value === null || value === undef || isNaN(value))) {
           value = '';
         }
+
         key = encode(key);
         value = encode(value);
 
@@ -4784,9 +3743,10 @@
         // want to add invalid strings to the query.
         //
         if (key === null || value === null) continue;
-        pairs.push(key + '=' + value);
+        pairs.push(key +'='+ value);
       }
     }
+
     return pairs.length ? prefix + pairs.join('&') : '';
   }
 
@@ -4796,14 +3756,14 @@
   querystringify$1.stringify = querystringify;
   querystringify$1.parse = querystring;
 
-  var required = requiresPort,
-    qs = querystringify$1,
-    controlOrWhitespace = /^[\x00-\x20\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff]+/,
-    CRHTLF = /[\n\r\t]/g,
-    slashes = /^[A-Za-z][A-Za-z0-9+-.]*:\/\//,
-    port = /:\d+$/,
-    protocolre = /^([a-z][a-z0-9.+-]*:)?(\/\/)?([\\/]+)?([\S\s]*)/i,
-    windowsDriveLetter = /^[a-zA-Z]:/;
+  var required = requiresPort
+    , qs = querystringify$1
+    , controlOrWhitespace = /^[\x00-\x20\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff]+/
+    , CRHTLF = /[\n\r\t]/g
+    , slashes = /^[A-Za-z][A-Za-z0-9+-.]*:\/\//
+    , port = /:\d+$/
+    , protocolre = /^([a-z][a-z0-9.+-]*:)?(\/\/)?([\\/]+)?([\S\s]*)/i
+    , windowsDriveLetter = /^[a-zA-Z]:/;
 
   /**
    * Remove control characters and whitespace from the beginning of a string.
@@ -4829,22 +3789,17 @@
    * 3. Inherit from location if non existing in the parser.
    * 4. `toLowerCase` the resulting value.
    */
-  var rules = [['#', 'hash'],
-  // Extract from the back.
-  ['?', 'query'],
-  // Extract from the back.
-  function sanitize(address, url) {
-    // Sanitize what is left of the address
-    return isSpecial(url.protocol) ? address.replace(/\\/g, '/') : address;
-  }, ['/', 'pathname'],
-  // Extract from the back.
-  ['@', 'auth', 1],
-  // Extract from the front.
-  [NaN, 'host', undefined, 1, 1],
-  // Set left over value.
-  [/:(\d*)$/, 'port', undefined, 1],
-  // RegExp the back.
-  [NaN, 'hostname', undefined, 1, 1] // Set left over.
+  var rules = [
+    ['#', 'hash'],                        // Extract from the back.
+    ['?', 'query'],                       // Extract from the back.
+    function sanitize(address, url) {     // Sanitize what is left of the address
+      return isSpecial(url.protocol) ? address.replace(/\\/g, '/') : address;
+    },
+    ['/', 'pathname'],                    // Extract from the back.
+    ['@', 'auth', 1],                     // Extract from the front.
+    [NaN, 'host', undefined, 1, 1],       // Set left over value.
+    [/:(\d*)$/, 'port', undefined, 1],    // RegExp the back.
+    [NaN, 'hostname', undefined, 1, 1]    // Set left over.
   ];
 
   /**
@@ -4855,10 +3810,7 @@
    * @type {Object}
    * @private
    */
-  var ignore = {
-    hash: 1,
-    query: 1
-  };
+  var ignore = { hash: 1, query: 1 };
 
   /**
    * The location object differs when your code is loaded through a normal page,
@@ -4874,12 +3826,19 @@
    */
   function lolcation(loc) {
     var globalVar;
-    if (typeof window !== 'undefined') globalVar = window;else if (typeof commonjsGlobal !== 'undefined') globalVar = commonjsGlobal;else if (typeof self !== 'undefined') globalVar = self;else globalVar = {};
+
+    if (typeof window !== 'undefined') globalVar = window;
+    else if (typeof commonjsGlobal !== 'undefined') globalVar = commonjsGlobal;
+    else if (typeof self !== 'undefined') globalVar = self;
+    else globalVar = {};
+
     var location = globalVar.location || {};
     loc = loc || location;
-    var finaldestination = {},
-      type = typeof loc,
-      key;
+
+    var finaldestination = {}
+      , type = typeof loc
+      , key;
+
     if ('blob:' === loc.protocol) {
       finaldestination = new Url(unescape(loc.pathname), {});
     } else if ('string' === type) {
@@ -4890,10 +3849,12 @@
         if (key in ignore) continue;
         finaldestination[key] = loc[key];
       }
+
       if (finaldestination.slashes === undefined) {
         finaldestination.slashes = slashes.test(loc.href);
       }
     }
+
     return finaldestination;
   }
 
@@ -4905,7 +3866,14 @@
    * @private
    */
   function isSpecial(scheme) {
-    return scheme === 'file:' || scheme === 'ftp:' || scheme === 'http:' || scheme === 'https:' || scheme === 'ws:' || scheme === 'wss:';
+    return (
+      scheme === 'file:' ||
+      scheme === 'ftp:' ||
+      scheme === 'http:' ||
+      scheme === 'https:' ||
+      scheme === 'ws:' ||
+      scheme === 'wss:'
+    );
   }
 
   /**
@@ -4928,12 +3896,14 @@
     address = trimLeft(address);
     address = address.replace(CRHTLF, '');
     location = location || {};
+
     var match = protocolre.exec(address);
     var protocol = match[1] ? match[1].toLowerCase() : '';
     var forwardSlashes = !!match[2];
     var otherSlashes = !!match[3];
     var slashesCount = 0;
     var rest;
+
     if (forwardSlashes) {
       if (otherSlashes) {
         rest = match[2] + match[3] + match[4];
@@ -4950,6 +3920,7 @@
         rest = match[4];
       }
     }
+
     if (protocol === 'file:') {
       if (slashesCount >= 2) {
         rest = rest.slice(2);
@@ -4963,6 +3934,7 @@
     } else if (slashesCount >= 2 && isSpecial(location.protocol)) {
       rest = match[4];
     }
+
     return {
       protocol: protocol,
       slashes: forwardSlashes || isSpecial(protocol),
@@ -4981,11 +3953,13 @@
    */
   function resolve(relative, base) {
     if (relative === '') return base;
-    var path = (base || '/').split('/').slice(0, -1).concat(relative.split('/')),
-      i = path.length,
-      last = path[i - 1],
-      unshift = false,
-      up = 0;
+
+    var path = (base || '/').split('/').slice(0, -1).concat(relative.split('/'))
+      , i = path.length
+      , last = path[i - 1]
+      , unshift = false
+      , up = 0;
+
     while (i--) {
       if (path[i] === '.') {
         path.splice(i, 1);
@@ -4998,8 +3972,10 @@
         up--;
       }
     }
+
     if (unshift) path.unshift('');
     if (last === '.' || last === '..') path.push('');
+
     return path.join('/');
   }
 
@@ -5020,19 +3996,16 @@
   function Url(address, location, parser) {
     address = trimLeft(address);
     address = address.replace(CRHTLF, '');
+
     if (!(this instanceof Url)) {
       return new Url(address, location, parser);
     }
-    var relative,
-      extracted,
-      parse,
-      instruction,
-      index,
-      key,
-      instructions = rules.slice(),
-      type = typeof location,
-      url = this,
-      i = 0;
+
+    var relative, extracted, parse, instruction, index, key
+      , instructions = rules.slice()
+      , type = typeof location
+      , url = this
+      , i = 0;
 
     //
     // The following if statements allows this module two have compatibility with
@@ -5049,7 +4022,9 @@
       parser = location;
       location = null;
     }
+
     if (parser && 'function' !== typeof parser) parser = qs.parse;
+
     location = lolcation(location);
 
     //
@@ -5065,21 +4040,35 @@
     // When the authority component is absent the URL starts with a path
     // component.
     //
-    if (extracted.protocol === 'file:' && (extracted.slashesCount !== 2 || windowsDriveLetter.test(address)) || !extracted.slashes && (extracted.protocol || extracted.slashesCount < 2 || !isSpecial(url.protocol))) {
+    if (
+      extracted.protocol === 'file:' && (
+        extracted.slashesCount !== 2 || windowsDriveLetter.test(address)) ||
+      (!extracted.slashes &&
+        (extracted.protocol ||
+          extracted.slashesCount < 2 ||
+          !isSpecial(url.protocol)))
+    ) {
       instructions[3] = [/(.*)/, 'pathname'];
     }
+
     for (; i < instructions.length; i++) {
       instruction = instructions[i];
+
       if (typeof instruction === 'function') {
         address = instruction(address, url);
         continue;
       }
+
       parse = instruction[0];
       key = instruction[1];
+
       if (parse !== parse) {
         url[key] = address;
       } else if ('string' === typeof parse) {
-        index = parse === '@' ? address.lastIndexOf(parse) : address.indexOf(parse);
+        index = parse === '@'
+          ? address.lastIndexOf(parse)
+          : address.indexOf(parse);
+
         if (~index) {
           if ('number' === typeof instruction[2]) {
             url[key] = address.slice(0, index);
@@ -5089,11 +4078,14 @@
             address = address.slice(0, index);
           }
         }
-      } else if (index = parse.exec(address)) {
+      } else if ((index = parse.exec(address))) {
         url[key] = index[1];
         address = address.slice(0, index.index);
       }
-      url[key] = url[key] || (relative && instruction[3] ? location[key] || '' : '');
+
+      url[key] = url[key] || (
+        relative && instruction[3] ? location[key] || '' : ''
+      );
 
       //
       // Hostname, host and protocol should be lowercased so they can be used to
@@ -5112,7 +4104,12 @@
     //
     // If the URL is relative, resolve the pathname against the base URL.
     //
-    if (relative && location.slashes && url.pathname.charAt(0) !== '/' && (url.pathname !== '' || location.pathname !== '')) {
+    if (
+        relative
+      && location.slashes
+      && url.pathname.charAt(0) !== '/'
+      && (url.pathname !== '' || location.pathname !== '')
+    ) {
       url.pathname = resolve(url.pathname, location.pathname);
     }
 
@@ -5138,19 +4135,26 @@
     // Parse down the `auth` for the username and password.
     //
     url.username = url.password = '';
+
     if (url.auth) {
       index = url.auth.indexOf(':');
+
       if (~index) {
         url.username = url.auth.slice(0, index);
         url.username = encodeURIComponent(decodeURIComponent(url.username));
+
         url.password = url.auth.slice(index + 1);
         url.password = encodeURIComponent(decodeURIComponent(url.password));
       } else {
         url.username = encodeURIComponent(decodeURIComponent(url.auth));
       }
-      url.auth = url.password ? url.username + ':' + url.password : url.username;
+
+      url.auth = url.password ? url.username +':'+ url.password : url.username;
     }
-    url.origin = url.protocol !== 'file:' && isSpecial(url.protocol) && url.host ? url.protocol + '//' + url.host : 'null';
+
+    url.origin = url.protocol !== 'file:' && isSpecial(url.protocol) && url.host
+      ? url.protocol +'//'+ url.host
+      : 'null';
 
     //
     // The href is just the compiled result.
@@ -5173,29 +4177,38 @@
    */
   function set(part, value, fn) {
     var url = this;
+
     switch (part) {
       case 'query':
         if ('string' === typeof value && value.length) {
           value = (fn || qs.parse)(value);
         }
+
         url[part] = value;
         break;
+
       case 'port':
         url[part] = value;
+
         if (!required(value, url.protocol)) {
           url.host = url.hostname;
           url[part] = '';
         } else if (value) {
-          url.host = url.hostname + ':' + value;
+          url.host = url.hostname +':'+ value;
         }
+
         break;
+
       case 'hostname':
         url[part] = value;
-        if (url.port) value += ':' + url.port;
+
+        if (url.port) value += ':'+ url.port;
         url.host = value;
         break;
+
       case 'host':
         url[part] = value;
+
         if (port.test(value)) {
           value = value.split(':');
           url.port = value.pop();
@@ -5204,11 +4217,14 @@
           url.hostname = value;
           url.port = '';
         }
+
         break;
+
       case 'protocol':
         url.protocol = value.toLowerCase();
         url.slashes = !fn;
         break;
+
       case 'pathname':
       case 'hash':
         if (value) {
@@ -5218,28 +4234,40 @@
           url[part] = value;
         }
         break;
+
       case 'username':
       case 'password':
         url[part] = encodeURIComponent(value);
         break;
+
       case 'auth':
         var index = value.indexOf(':');
+
         if (~index) {
           url.username = value.slice(0, index);
           url.username = encodeURIComponent(decodeURIComponent(url.username));
+
           url.password = value.slice(index + 1);
           url.password = encodeURIComponent(decodeURIComponent(url.password));
         } else {
           url.username = encodeURIComponent(decodeURIComponent(value));
         }
     }
+
     for (var i = 0; i < rules.length; i++) {
       var ins = rules[i];
+
       if (ins[4]) url[ins[1]] = url[ins[1]].toLowerCase();
     }
-    url.auth = url.password ? url.username + ':' + url.password : url.username;
-    url.origin = url.protocol !== 'file:' && isSpecial(url.protocol) && url.host ? url.protocol + '//' + url.host : 'null';
+
+    url.auth = url.password ? url.username +':'+ url.password : url.username;
+
+    url.origin = url.protocol !== 'file:' && isSpecial(url.protocol) && url.host
+      ? url.protocol +'//'+ url.host
+      : 'null';
+
     url.href = url.toString();
+
     return url;
   }
 
@@ -5252,20 +4280,31 @@
    */
   function toString(stringify) {
     if (!stringify || 'function' !== typeof stringify) stringify = qs.stringify;
-    var query,
-      url = this,
-      host = url.host,
-      protocol = url.protocol;
+
+    var query
+      , url = this
+      , host = url.host
+      , protocol = url.protocol;
+
     if (protocol && protocol.charAt(protocol.length - 1) !== ':') protocol += ':';
-    var result = protocol + (url.protocol && url.slashes || isSpecial(url.protocol) ? '//' : '');
+
+    var result =
+      protocol +
+      ((url.protocol && url.slashes) || isSpecial(url.protocol) ? '//' : '');
+
     if (url.username) {
       result += url.username;
-      if (url.password) result += ':' + url.password;
+      if (url.password) result += ':'+ url.password;
       result += '@';
     } else if (url.password) {
-      result += ':' + url.password;
+      result += ':'+ url.password;
       result += '@';
-    } else if (url.protocol !== 'file:' && isSpecial(url.protocol) && !host && url.pathname !== '/') {
+    } else if (
+      url.protocol !== 'file:' &&
+      isSpecial(url.protocol) &&
+      !host &&
+      url.pathname !== '/'
+    ) {
       //
       // Add back the empty userinfo, otherwise the original invalid URL
       // might be transformed into a valid one with `url.pathname` as host.
@@ -5278,19 +4317,21 @@
     // ends with a colon, then add back the trailing colon that was removed. This
     // prevents an invalid URL from being transformed into a valid one.
     //
-    if (host[host.length - 1] === ':' || port.test(url.hostname) && !url.port) {
+    if (host[host.length - 1] === ':' || (port.test(url.hostname) && !url.port)) {
       host += ':';
     }
+
     result += host + url.pathname;
+
     query = 'object' === typeof url.query ? stringify(url.query) : url.query;
-    if (query) result += '?' !== query.charAt(0) ? '?' + query : query;
+    if (query) result += '?' !== query.charAt(0) ? '?'+ query : query;
+
     if (url.hash) result += url.hash;
+
     return result;
   }
-  Url.prototype = {
-    set: set,
-    toString: toString
-  };
+
+  Url.prototype = { set: set, toString: toString };
 
   //
   // Expose the URL parser and some additional properties that might be useful for
@@ -5300,199 +4341,34 @@
   Url.location = lolcation;
   Url.trimLeft = trimLeft;
   Url.qs = qs;
+
   var urlParse = Url;
+
   var URL = /*@__PURE__*/getDefaultExportFromCjs(urlParse);
 
-  function _typeof$8(o) {
-    "@babel/helpers - typeof";
-
-    return _typeof$8 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
-      return typeof o;
-    } : function (o) {
-      return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$8(o);
-  }
-  function _defineProperties$8(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor) descriptor.writable = true;
-      Object.defineProperty(target, _toPropertyKey$8(descriptor.key), descriptor);
-    }
-  }
-  function _createClass$8(Constructor, protoProps, staticProps) {
-    if (protoProps) _defineProperties$8(Constructor.prototype, protoProps);
-    if (staticProps) _defineProperties$8(Constructor, staticProps);
-    Object.defineProperty(Constructor, "prototype", {
-      writable: false
-    });
-    return Constructor;
-  }
-  function _toPropertyKey$8(arg) {
-    var key = _toPrimitive$8(arg, "string");
-    return _typeof$8(key) === "symbol" ? key : String(key);
-  }
-  function _toPrimitive$8(input, hint) {
-    if (_typeof$8(input) !== "object" || input === null) return input;
-    var prim = input[Symbol.toPrimitive];
-    if (prim !== undefined) {
-      var res = prim.call(input, hint || "default");
-      if (_typeof$8(res) !== "object") return res;
-      throw new TypeError("@@toPrimitive must return a primitive value.");
-    }
-    return (hint === "string" ? String : Number)(input);
-  }
-  function _classCallCheck$8(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _inherits$1(subClass, superClass) {
-    if (typeof superClass !== "function" && superClass !== null) {
-      throw new TypeError("Super expression must either be null or a function");
-    }
-    subClass.prototype = Object.create(superClass && superClass.prototype, {
-      constructor: {
-        value: subClass,
-        writable: true,
-        configurable: true
-      }
-    });
-    Object.defineProperty(subClass, "prototype", {
-      writable: false
-    });
-    if (superClass) _setPrototypeOf$1(subClass, superClass);
-  }
-  function _createSuper$1(Derived) {
-    var hasNativeReflectConstruct = _isNativeReflectConstruct$1();
-    return function _createSuperInternal() {
-      var Super = _getPrototypeOf$1(Derived),
-        result;
-      if (hasNativeReflectConstruct) {
-        var NewTarget = _getPrototypeOf$1(this).constructor;
-        result = Reflect.construct(Super, arguments, NewTarget);
-      } else {
-        result = Super.apply(this, arguments);
-      }
-      return _possibleConstructorReturn$1(this, result);
-    };
-  }
-  function _possibleConstructorReturn$1(self, call) {
-    if (call && (_typeof$8(call) === "object" || typeof call === "function")) {
-      return call;
-    } else if (call !== void 0) {
-      throw new TypeError("Derived constructors may only return object or undefined");
-    }
-    return _assertThisInitialized$1(self);
-  }
-  function _assertThisInitialized$1(self) {
-    if (self === void 0) {
-      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-    }
-    return self;
-  }
-  function _wrapNativeSuper(Class) {
-    var _cache = typeof Map === "function" ? new Map() : undefined;
-    _wrapNativeSuper = function _wrapNativeSuper(Class) {
-      if (Class === null || !_isNativeFunction(Class)) return Class;
-      if (typeof Class !== "function") {
-        throw new TypeError("Super expression must either be null or a function");
-      }
-      if (typeof _cache !== "undefined") {
-        if (_cache.has(Class)) return _cache.get(Class);
-        _cache.set(Class, Wrapper);
-      }
-      function Wrapper() {
-        return _construct(Class, arguments, _getPrototypeOf$1(this).constructor);
-      }
-      Wrapper.prototype = Object.create(Class.prototype, {
-        constructor: {
-          value: Wrapper,
-          enumerable: false,
-          writable: true,
-          configurable: true
-        }
-      });
-      return _setPrototypeOf$1(Wrapper, Class);
-    };
-    return _wrapNativeSuper(Class);
-  }
-  function _construct(Parent, args, Class) {
-    if (_isNativeReflectConstruct$1()) {
-      _construct = Reflect.construct.bind();
-    } else {
-      _construct = function _construct(Parent, args, Class) {
-        var a = [null];
-        a.push.apply(a, args);
-        var Constructor = Function.bind.apply(Parent, a);
-        var instance = new Constructor();
-        if (Class) _setPrototypeOf$1(instance, Class.prototype);
-        return instance;
-      };
-    }
-    return _construct.apply(null, arguments);
-  }
-  function _isNativeReflectConstruct$1() {
-    if (typeof Reflect === "undefined" || !Reflect.construct) return false;
-    if (Reflect.construct.sham) return false;
-    if (typeof Proxy === "function") return true;
-    try {
-      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {}));
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-  function _isNativeFunction(fn) {
-    try {
-      return Function.toString.call(fn).indexOf("[native code]") !== -1;
-    } catch (e) {
-      return typeof fn === "function";
-    }
-  }
-  function _setPrototypeOf$1(o, p) {
-    _setPrototypeOf$1 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf(o, p) {
-      o.__proto__ = p;
-      return o;
-    };
-    return _setPrototypeOf$1(o, p);
-  }
-  function _getPrototypeOf$1(o) {
-    _getPrototypeOf$1 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf(o) {
-      return o.__proto__ || Object.getPrototypeOf(o);
-    };
-    return _getPrototypeOf$1(o);
-  }
-  var DetailedError = /*#__PURE__*/function (_Error) {
-    _inherits$1(DetailedError, _Error);
-    var _super = _createSuper$1(DetailedError);
-    function DetailedError(message) {
-      var _this;
-      var causingErr = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-      var req = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
-      var res = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
-      _classCallCheck$8(this, DetailedError);
-      _this = _super.call(this, message);
-      _this.originalRequest = req;
-      _this.originalResponse = res;
-      _this.causingError = causingErr;
+  class DetailedError extends Error {
+    constructor(message) {
+      let causingErr = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+      let req = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+      let res = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
+      super(message);
+      this.originalRequest = req;
+      this.originalResponse = res;
+      this.causingError = causingErr;
       if (causingErr != null) {
-        message += ", caused by ".concat(causingErr.toString());
+        message += `, caused by ${causingErr.toString()}`;
       }
       if (req != null) {
-        var requestId = req.getHeader('X-Request-ID') || 'n/a';
-        var method = req.getMethod();
-        var url = req.getURL();
-        var status = res ? res.getStatus() : 'n/a';
-        var body = res ? res.getBody() || '' : 'n/a';
-        message += ", originated from request (method: ".concat(method, ", url: ").concat(url, ", response code: ").concat(status, ", response text: ").concat(body, ", request id: ").concat(requestId, ")");
+        const requestId = req.getHeader('X-Request-ID') || 'n/a';
+        const method = req.getMethod();
+        const url = req.getURL();
+        const status = res ? res.getStatus() : 'n/a';
+        const body = res ? res.getBody() || '' : 'n/a';
+        message += `, originated from request (method: ${method}, url: ${url}, response code: ${status}, response text: ${body}, request id: ${requestId})`;
       }
-      _this.message = message;
-      return _this;
+      this.message = message;
     }
-    return _createClass$8(DetailedError);
-  }( /*#__PURE__*/_wrapNativeSuper(Error));
+  }
 
   /* eslint no-console: "off" */
 
@@ -5514,476 +4390,14 @@
    */
   function uuid() {
     /* eslint-disable no-bitwise */
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-      var r = Math.random() * 16 | 0;
-      var v = c === 'x' ? r : r & 0x3 | 0x8;
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+      const r = Math.random() * 16 | 0;
+      const v = c === 'x' ? r : r & 0x3 | 0x8;
       return v.toString(16);
     });
   }
 
-  function _regeneratorRuntime$1() {
-
-    /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */
-    _regeneratorRuntime$1 = function _regeneratorRuntime() {
-      return e;
-    };
-    var t,
-      e = {},
-      r = Object.prototype,
-      n = r.hasOwnProperty,
-      o = Object.defineProperty || function (t, e, r) {
-        t[e] = r.value;
-      },
-      i = "function" == typeof Symbol ? Symbol : {},
-      a = i.iterator || "@@iterator",
-      c = i.asyncIterator || "@@asyncIterator",
-      u = i.toStringTag || "@@toStringTag";
-    function define(t, e, r) {
-      return Object.defineProperty(t, e, {
-        value: r,
-        enumerable: !0,
-        configurable: !0,
-        writable: !0
-      }), t[e];
-    }
-    try {
-      define({}, "");
-    } catch (t) {
-      define = function define(t, e, r) {
-        return t[e] = r;
-      };
-    }
-    function wrap(t, e, r, n) {
-      var i = e && e.prototype instanceof Generator ? e : Generator,
-        a = Object.create(i.prototype),
-        c = new Context(n || []);
-      return o(a, "_invoke", {
-        value: makeInvokeMethod(t, r, c)
-      }), a;
-    }
-    function tryCatch(t, e, r) {
-      try {
-        return {
-          type: "normal",
-          arg: t.call(e, r)
-        };
-      } catch (t) {
-        return {
-          type: "throw",
-          arg: t
-        };
-      }
-    }
-    e.wrap = wrap;
-    var h = "suspendedStart",
-      l = "suspendedYield",
-      f = "executing",
-      s = "completed",
-      y = {};
-    function Generator() {}
-    function GeneratorFunction() {}
-    function GeneratorFunctionPrototype() {}
-    var p = {};
-    define(p, a, function () {
-      return this;
-    });
-    var d = Object.getPrototypeOf,
-      v = d && d(d(values([])));
-    v && v !== r && n.call(v, a) && (p = v);
-    var g = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(p);
-    function defineIteratorMethods(t) {
-      ["next", "throw", "return"].forEach(function (e) {
-        define(t, e, function (t) {
-          return this._invoke(e, t);
-        });
-      });
-    }
-    function AsyncIterator(t, e) {
-      function invoke(r, o, i, a) {
-        var c = tryCatch(t[r], t, o);
-        if ("throw" !== c.type) {
-          var u = c.arg,
-            h = u.value;
-          return h && "object" == _typeof$7(h) && n.call(h, "__await") ? e.resolve(h.__await).then(function (t) {
-            invoke("next", t, i, a);
-          }, function (t) {
-            invoke("throw", t, i, a);
-          }) : e.resolve(h).then(function (t) {
-            u.value = t, i(u);
-          }, function (t) {
-            return invoke("throw", t, i, a);
-          });
-        }
-        a(c.arg);
-      }
-      var r;
-      o(this, "_invoke", {
-        value: function value(t, n) {
-          function callInvokeWithMethodAndArg() {
-            return new e(function (e, r) {
-              invoke(t, n, e, r);
-            });
-          }
-          return r = r ? r.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg();
-        }
-      });
-    }
-    function makeInvokeMethod(e, r, n) {
-      var o = h;
-      return function (i, a) {
-        if (o === f) throw new Error("Generator is already running");
-        if (o === s) {
-          if ("throw" === i) throw a;
-          return {
-            value: t,
-            done: !0
-          };
-        }
-        for (n.method = i, n.arg = a;;) {
-          var c = n.delegate;
-          if (c) {
-            var u = maybeInvokeDelegate(c, n);
-            if (u) {
-              if (u === y) continue;
-              return u;
-            }
-          }
-          if ("next" === n.method) n.sent = n._sent = n.arg;else if ("throw" === n.method) {
-            if (o === h) throw o = s, n.arg;
-            n.dispatchException(n.arg);
-          } else "return" === n.method && n.abrupt("return", n.arg);
-          o = f;
-          var p = tryCatch(e, r, n);
-          if ("normal" === p.type) {
-            if (o = n.done ? s : l, p.arg === y) continue;
-            return {
-              value: p.arg,
-              done: n.done
-            };
-          }
-          "throw" === p.type && (o = s, n.method = "throw", n.arg = p.arg);
-        }
-      };
-    }
-    function maybeInvokeDelegate(e, r) {
-      var n = r.method,
-        o = e.iterator[n];
-      if (o === t) return r.delegate = null, "throw" === n && e.iterator["return"] && (r.method = "return", r.arg = t, maybeInvokeDelegate(e, r), "throw" === r.method) || "return" !== n && (r.method = "throw", r.arg = new TypeError("The iterator does not provide a '" + n + "' method")), y;
-      var i = tryCatch(o, e.iterator, r.arg);
-      if ("throw" === i.type) return r.method = "throw", r.arg = i.arg, r.delegate = null, y;
-      var a = i.arg;
-      return a ? a.done ? (r[e.resultName] = a.value, r.next = e.nextLoc, "return" !== r.method && (r.method = "next", r.arg = t), r.delegate = null, y) : a : (r.method = "throw", r.arg = new TypeError("iterator result is not an object"), r.delegate = null, y);
-    }
-    function pushTryEntry(t) {
-      var e = {
-        tryLoc: t[0]
-      };
-      1 in t && (e.catchLoc = t[1]), 2 in t && (e.finallyLoc = t[2], e.afterLoc = t[3]), this.tryEntries.push(e);
-    }
-    function resetTryEntry(t) {
-      var e = t.completion || {};
-      e.type = "normal", delete e.arg, t.completion = e;
-    }
-    function Context(t) {
-      this.tryEntries = [{
-        tryLoc: "root"
-      }], t.forEach(pushTryEntry, this), this.reset(!0);
-    }
-    function values(e) {
-      if (e || "" === e) {
-        var r = e[a];
-        if (r) return r.call(e);
-        if ("function" == typeof e.next) return e;
-        if (!isNaN(e.length)) {
-          var o = -1,
-            i = function next() {
-              for (; ++o < e.length;) if (n.call(e, o)) return next.value = e[o], next.done = !1, next;
-              return next.value = t, next.done = !0, next;
-            };
-          return i.next = i;
-        }
-      }
-      throw new TypeError(_typeof$7(e) + " is not iterable");
-    }
-    return GeneratorFunction.prototype = GeneratorFunctionPrototype, o(g, "constructor", {
-      value: GeneratorFunctionPrototype,
-      configurable: !0
-    }), o(GeneratorFunctionPrototype, "constructor", {
-      value: GeneratorFunction,
-      configurable: !0
-    }), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, u, "GeneratorFunction"), e.isGeneratorFunction = function (t) {
-      var e = "function" == typeof t && t.constructor;
-      return !!e && (e === GeneratorFunction || "GeneratorFunction" === (e.displayName || e.name));
-    }, e.mark = function (t) {
-      return Object.setPrototypeOf ? Object.setPrototypeOf(t, GeneratorFunctionPrototype) : (t.__proto__ = GeneratorFunctionPrototype, define(t, u, "GeneratorFunction")), t.prototype = Object.create(g), t;
-    }, e.awrap = function (t) {
-      return {
-        __await: t
-      };
-    }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, c, function () {
-      return this;
-    }), e.AsyncIterator = AsyncIterator, e.async = function (t, r, n, o, i) {
-      void 0 === i && (i = Promise);
-      var a = new AsyncIterator(wrap(t, r, n, o), i);
-      return e.isGeneratorFunction(r) ? a : a.next().then(function (t) {
-        return t.done ? t.value : a.next();
-      });
-    }, defineIteratorMethods(g), define(g, u, "Generator"), define(g, a, function () {
-      return this;
-    }), define(g, "toString", function () {
-      return "[object Generator]";
-    }), e.keys = function (t) {
-      var e = Object(t),
-        r = [];
-      for (var n in e) r.push(n);
-      return r.reverse(), function next() {
-        for (; r.length;) {
-          var t = r.pop();
-          if (t in e) return next.value = t, next.done = !1, next;
-        }
-        return next.done = !0, next;
-      };
-    }, e.values = values, Context.prototype = {
-      constructor: Context,
-      reset: function reset(e) {
-        if (this.prev = 0, this.next = 0, this.sent = this._sent = t, this.done = !1, this.delegate = null, this.method = "next", this.arg = t, this.tryEntries.forEach(resetTryEntry), !e) for (var r in this) "t" === r.charAt(0) && n.call(this, r) && !isNaN(+r.slice(1)) && (this[r] = t);
-      },
-      stop: function stop() {
-        this.done = !0;
-        var t = this.tryEntries[0].completion;
-        if ("throw" === t.type) throw t.arg;
-        return this.rval;
-      },
-      dispatchException: function dispatchException(e) {
-        if (this.done) throw e;
-        var r = this;
-        function handle(n, o) {
-          return a.type = "throw", a.arg = e, r.next = n, o && (r.method = "next", r.arg = t), !!o;
-        }
-        for (var o = this.tryEntries.length - 1; o >= 0; --o) {
-          var i = this.tryEntries[o],
-            a = i.completion;
-          if ("root" === i.tryLoc) return handle("end");
-          if (i.tryLoc <= this.prev) {
-            var c = n.call(i, "catchLoc"),
-              u = n.call(i, "finallyLoc");
-            if (c && u) {
-              if (this.prev < i.catchLoc) return handle(i.catchLoc, !0);
-              if (this.prev < i.finallyLoc) return handle(i.finallyLoc);
-            } else if (c) {
-              if (this.prev < i.catchLoc) return handle(i.catchLoc, !0);
-            } else {
-              if (!u) throw new Error("try statement without catch or finally");
-              if (this.prev < i.finallyLoc) return handle(i.finallyLoc);
-            }
-          }
-        }
-      },
-      abrupt: function abrupt(t, e) {
-        for (var r = this.tryEntries.length - 1; r >= 0; --r) {
-          var o = this.tryEntries[r];
-          if (o.tryLoc <= this.prev && n.call(o, "finallyLoc") && this.prev < o.finallyLoc) {
-            var i = o;
-            break;
-          }
-        }
-        i && ("break" === t || "continue" === t) && i.tryLoc <= e && e <= i.finallyLoc && (i = null);
-        var a = i ? i.completion : {};
-        return a.type = t, a.arg = e, i ? (this.method = "next", this.next = i.finallyLoc, y) : this.complete(a);
-      },
-      complete: function complete(t, e) {
-        if ("throw" === t.type) throw t.arg;
-        return "break" === t.type || "continue" === t.type ? this.next = t.arg : "return" === t.type ? (this.rval = this.arg = t.arg, this.method = "return", this.next = "end") : "normal" === t.type && e && (this.next = e), y;
-      },
-      finish: function finish(t) {
-        for (var e = this.tryEntries.length - 1; e >= 0; --e) {
-          var r = this.tryEntries[e];
-          if (r.finallyLoc === t) return this.complete(r.completion, r.afterLoc), resetTryEntry(r), y;
-        }
-      },
-      "catch": function _catch(t) {
-        for (var e = this.tryEntries.length - 1; e >= 0; --e) {
-          var r = this.tryEntries[e];
-          if (r.tryLoc === t) {
-            var n = r.completion;
-            if ("throw" === n.type) {
-              var o = n.arg;
-              resetTryEntry(r);
-            }
-            return o;
-          }
-        }
-        throw new Error("illegal catch attempt");
-      },
-      delegateYield: function delegateYield(e, r, n) {
-        return this.delegate = {
-          iterator: values(e),
-          resultName: r,
-          nextLoc: n
-        }, "next" === this.method && (this.arg = t), y;
-      }
-    }, e;
-  }
-  function asyncGeneratorStep$1(gen, resolve, reject, _next, _throw, key, arg) {
-    try {
-      var info = gen[key](arg);
-      var value = info.value;
-    } catch (error) {
-      reject(error);
-      return;
-    }
-    if (info.done) {
-      resolve(value);
-    } else {
-      Promise.resolve(value).then(_next, _throw);
-    }
-  }
-  function _asyncToGenerator$1(fn) {
-    return function () {
-      var self = this,
-        args = arguments;
-      return new Promise(function (resolve, reject) {
-        var gen = fn.apply(self, args);
-        function _next(value) {
-          asyncGeneratorStep$1(gen, resolve, reject, _next, _throw, "next", value);
-        }
-        function _throw(err) {
-          asyncGeneratorStep$1(gen, resolve, reject, _next, _throw, "throw", err);
-        }
-        _next(undefined);
-      });
-    };
-  }
-  function _slicedToArray(arr, i) {
-    return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest();
-  }
-  function _nonIterableRest() {
-    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
-  }
-  function _unsupportedIterableToArray(o, minLen) {
-    if (!o) return;
-    if (typeof o === "string") return _arrayLikeToArray(o, minLen);
-    var n = Object.prototype.toString.call(o).slice(8, -1);
-    if (n === "Object" && o.constructor) n = o.constructor.name;
-    if (n === "Map" || n === "Set") return Array.from(o);
-    if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
-  }
-  function _arrayLikeToArray(arr, len) {
-    if (len == null || len > arr.length) len = arr.length;
-    for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i];
-    return arr2;
-  }
-  function _iterableToArrayLimit(r, l) {
-    var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
-    if (null != t) {
-      var e,
-        n,
-        i,
-        u,
-        a = [],
-        f = !0,
-        o = !1;
-      try {
-        if (i = (t = t.call(r)).next, 0 === l) {
-          if (Object(t) !== t) return;
-          f = !1;
-        } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0);
-      } catch (r) {
-        o = !0, n = r;
-      } finally {
-        try {
-          if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return;
-        } finally {
-          if (o) throw n;
-        }
-      }
-      return a;
-    }
-  }
-  function _arrayWithHoles(arr) {
-    if (Array.isArray(arr)) return arr;
-  }
-  function _typeof$7(o) {
-    "@babel/helpers - typeof";
-
-    return _typeof$7 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
-      return typeof o;
-    } : function (o) {
-      return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$7(o);
-  }
-  function ownKeys$1(e, r) {
-    var t = Object.keys(e);
-    if (Object.getOwnPropertySymbols) {
-      var o = Object.getOwnPropertySymbols(e);
-      r && (o = o.filter(function (r) {
-        return Object.getOwnPropertyDescriptor(e, r).enumerable;
-      })), t.push.apply(t, o);
-    }
-    return t;
-  }
-  function _objectSpread$1(e) {
-    for (var r = 1; r < arguments.length; r++) {
-      var t = null != arguments[r] ? arguments[r] : {};
-      r % 2 ? ownKeys$1(Object(t), !0).forEach(function (r) {
-        _defineProperty$1(e, r, t[r]);
-      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$1(Object(t)).forEach(function (r) {
-        Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r));
-      });
-    }
-    return e;
-  }
-  function _defineProperty$1(obj, key, value) {
-    key = _toPropertyKey$7(key);
-    if (key in obj) {
-      Object.defineProperty(obj, key, {
-        value: value,
-        enumerable: true,
-        configurable: true,
-        writable: true
-      });
-    } else {
-      obj[key] = value;
-    }
-    return obj;
-  }
-  function _classCallCheck$7(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties$7(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor) descriptor.writable = true;
-      Object.defineProperty(target, _toPropertyKey$7(descriptor.key), descriptor);
-    }
-  }
-  function _createClass$7(Constructor, protoProps, staticProps) {
-    if (protoProps) _defineProperties$7(Constructor.prototype, protoProps);
-    if (staticProps) _defineProperties$7(Constructor, staticProps);
-    Object.defineProperty(Constructor, "prototype", {
-      writable: false
-    });
-    return Constructor;
-  }
-  function _toPropertyKey$7(arg) {
-    var key = _toPrimitive$7(arg, "string");
-    return _typeof$7(key) === "symbol" ? key : String(key);
-  }
-  function _toPrimitive$7(input, hint) {
-    if (_typeof$7(input) !== "object" || input === null) return input;
-    var prim = input[Symbol.toPrimitive];
-    if (prim !== undefined) {
-      var res = prim.call(input, hint || "default");
-      if (_typeof$7(res) !== "object") return res;
-      throw new TypeError("@@toPrimitive must return a primitive value.");
-    }
-    return (hint === "string" ? String : Number)(input);
-  }
-  var defaultOptions$1 = {
+  const defaultOptions$1 = {
     endpoint: null,
     uploadUrl: null,
     metadata: {},
@@ -6012,9 +4426,8 @@
     fileReader: null,
     httpStack: null
   };
-  var BaseUpload = /*#__PURE__*/function () {
-    function BaseUpload(file, options) {
-      _classCallCheck$7(this, BaseUpload);
+  class BaseUpload {
+    constructor(file, options) {
       // Warn about removed options from previous versions
       if ('resume' in options) {
         // eslint-disable-next-line no-console
@@ -6087,753 +4500,695 @@
      * @param {object} options Optional options for influencing HTTP requests.
      * @return {Promise} The Promise will be resolved/rejected when the requests finish.
      */
-    _createClass$7(BaseUpload, [{
-      key: "findPreviousUploads",
-      value: function findPreviousUploads() {
-        var _this = this;
-        return this.options.fingerprint(this.file, this.options).then(function (fingerprint) {
-          return _this._urlStorage.findUploadsByFingerprint(fingerprint);
-        });
-      }
-    }, {
-      key: "resumeFromPreviousUpload",
-      value: function resumeFromPreviousUpload(previousUpload) {
-        this.url = previousUpload.uploadUrl || null;
-        this._parallelUploadUrls = previousUpload.parallelUploadUrls || null;
-        this._urlStorageKey = previousUpload.urlStorageKey;
-      }
-    }, {
-      key: "start",
-      value: function start() {
-        var _this2 = this;
-        var file = this.file;
-        if (!file) {
-          this._emitError(new Error('tus: no file or stream to upload provided'));
+    static terminate(url) {
+      let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+      const req = openRequest('DELETE', url, options);
+      return sendRequest(req, null, options).then(res => {
+        // A 204 response indicates a successfull request
+        if (res.getStatus() === 204) {
           return;
         }
-        if (!this.options.endpoint && !this.options.uploadUrl && !this.url) {
-          this._emitError(new Error('tus: neither an endpoint or an upload URL is provided'));
-          return;
+        throw new DetailedError('tus: unexpected response while terminating upload', null, req, res);
+      }).catch(err => {
+        if (!(err instanceof DetailedError)) {
+          err = new DetailedError('tus: failed to terminate upload', err, req, null);
         }
-        var retryDelays = this.options.retryDelays;
-        if (retryDelays != null && Object.prototype.toString.call(retryDelays) !== '[object Array]') {
-          this._emitError(new Error('tus: the `retryDelays` option must either be an array or null'));
-          return;
-        }
-        if (this.options.parallelUploads > 1) {
-          // Test which options are incompatible with parallel uploads.
-          for (var _i = 0, _arr = ['uploadUrl', 'uploadSize', 'uploadLengthDeferred']; _i < _arr.length; _i++) {
-            var optionName = _arr[_i];
-            if (this.options[optionName]) {
-              this._emitError(new Error("tus: cannot use the ".concat(optionName, " option when parallelUploads is enabled")));
-              return;
-            }
-          }
-        }
-        if (this.options.parallelUploadBoundaries) {
-          if (this.options.parallelUploads <= 1) {
-            this._emitError(new Error('tus: cannot use the `parallelUploadBoundaries` option when `parallelUploads` is disabled'));
-            return;
-          }
-          if (this.options.parallelUploads !== this.options.parallelUploadBoundaries.length) {
-            this._emitError(new Error('tus: the `parallelUploadBoundaries` must have the same length as the value of `parallelUploads`'));
-            return;
-          }
-        }
-        this.options.fingerprint(file, this.options).then(function (fingerprint) {
-          _this2._fingerprint = fingerprint;
-          if (_this2._source) {
-            return _this2._source;
-          }
-          return _this2.options.fileReader.openFile(file, _this2.options.chunkSize);
-        }).then(function (source) {
-          _this2._source = source;
-
-          // First, we look at the uploadLengthDeferred option.
-          // Next, we check if the caller has supplied a manual upload size.
-          // Finally, we try to use the calculated size from the source object.
-          if (_this2.options.uploadLengthDeferred) {
-            _this2._size = null;
-          } else if (_this2.options.uploadSize != null) {
-            _this2._size = Number(_this2.options.uploadSize);
-            if (Number.isNaN(_this2._size)) {
-              _this2._emitError(new Error('tus: cannot convert `uploadSize` option into a number'));
-              return;
-            }
-          } else {
-            _this2._size = _this2._source.size;
-            if (_this2._size == null) {
-              _this2._emitError(new Error("tus: cannot automatically derive upload's size from input. Specify it manually using the `uploadSize` option or use the `uploadLengthDeferred` option"));
-              return;
-            }
-          }
-
-          // If the upload was configured to use multiple requests or if we resume from
-          // an upload which used multiple requests, we start a parallel upload.
-          if (_this2.options.parallelUploads > 1 || _this2._parallelUploadUrls != null) {
-            _this2._startParallelUpload();
-          } else {
-            _this2._startSingleUpload();
-          }
-        })["catch"](function (err) {
-          _this2._emitError(err);
-        });
-      }
-
-      /**
-       * Initiate the uploading procedure for a parallelized upload, where one file is split into
-       * multiple request which are run in parallel.
-       *
-       * @api private
-       */
-    }, {
-      key: "_startParallelUpload",
-      value: function _startParallelUpload() {
-        var _this$options$paralle,
-          _this3 = this;
-        var totalSize = this._size;
-        var totalProgress = 0;
-        this._parallelUploads = [];
-        var partCount = this._parallelUploadUrls != null ? this._parallelUploadUrls.length : this.options.parallelUploads;
-
-        // The input file will be split into multiple slices which are uploaded in separate
-        // requests. Here we get the start and end position for the slices.
-        var parts = (_this$options$paralle = this.options.parallelUploadBoundaries) !== null && _this$options$paralle !== void 0 ? _this$options$paralle : splitSizeIntoParts(this._source.size, partCount);
-
-        // Attach URLs from previous uploads, if available.
-        if (this._parallelUploadUrls) {
-          parts.forEach(function (part, index) {
-            part.uploadUrl = _this3._parallelUploadUrls[index] || null;
-          });
-        }
-
-        // Create an empty list for storing the upload URLs
-        this._parallelUploadUrls = new Array(parts.length);
-
-        // Generate a promise for each slice that will be resolve if the respective
-        // upload is completed.
-        var uploads = parts.map(function (part, index) {
-          var lastPartProgress = 0;
-          return _this3._source.slice(part.start, part.end).then(function (_ref) {
-            var value = _ref.value;
-            return new Promise(function (resolve, reject) {
-              // Merge with the user supplied options but overwrite some values.
-              var options = _objectSpread$1(_objectSpread$1({}, _this3.options), {}, {
-                // If available, the partial upload should be resumed from a previous URL.
-                uploadUrl: part.uploadUrl || null,
-                // We take manually care of resuming for partial uploads, so they should
-                // not be stored in the URL storage.
-                storeFingerprintForResuming: false,
-                removeFingerprintOnSuccess: false,
-                // Reset the parallelUploads option to not cause recursion.
-                parallelUploads: 1,
-                // Reset this option as we are not doing a parallel upload.
-                parallelUploadBoundaries: null,
-                metadata: {},
-                // Add the header to indicate the this is a partial upload.
-                headers: _objectSpread$1(_objectSpread$1({}, _this3.options.headers), {}, {
-                  'Upload-Concat': 'partial'
-                }),
-                // Reject or resolve the promise if the upload errors or completes.
-                onSuccess: resolve,
-                onError: reject,
-                // Based in the progress for this partial upload, calculate the progress
-                // for the entire final upload.
-                onProgress: function onProgress(newPartProgress) {
-                  totalProgress = totalProgress - lastPartProgress + newPartProgress;
-                  lastPartProgress = newPartProgress;
-                  _this3._emitProgress(totalProgress, totalSize);
-                },
-                // Wait until every partial upload has an upload URL, so we can add
-                // them to the URL storage.
-                onUploadUrlAvailable: function onUploadUrlAvailable() {
-                  _this3._parallelUploadUrls[index] = upload.url;
-                  // Test if all uploads have received an URL
-                  if (_this3._parallelUploadUrls.filter(function (u) {
-                    return Boolean(u);
-                  }).length === parts.length) {
-                    _this3._saveUploadInUrlStorage();
-                  }
-                }
-              });
-              var upload = new BaseUpload(value, options);
-              upload.start();
-
-              // Store the upload in an array, so we can later abort them if necessary.
-              _this3._parallelUploads.push(upload);
-            });
-          });
-        });
-        var req;
-        // Wait until all partial uploads are finished and we can send the POST request for
-        // creating the final upload.
-        Promise.all(uploads).then(function () {
-          req = _this3._openRequest('POST', _this3.options.endpoint);
-          req.setHeader('Upload-Concat', "final;".concat(_this3._parallelUploadUrls.join(' ')));
-
-          // Add metadata if values have been added
-          var metadata = encodeMetadata(_this3.options.metadata);
-          if (metadata !== '') {
-            req.setHeader('Upload-Metadata', metadata);
-          }
-          return _this3._sendRequest(req, null);
-        }).then(function (res) {
-          if (!inStatusCategory(res.getStatus(), 200)) {
-            _this3._emitHttpError(req, res, 'tus: unexpected response while creating upload');
-            return;
-          }
-          var location = res.getHeader('Location');
-          if (location == null) {
-            _this3._emitHttpError(req, res, 'tus: invalid or missing Location header');
-            return;
-          }
-          _this3.url = resolveUrl(_this3.options.endpoint, location);
-          log("Created upload at ".concat(_this3.url));
-          _this3._emitSuccess();
-        })["catch"](function (err) {
-          _this3._emitError(err);
-        });
-      }
-
-      /**
-       * Initiate the uploading procedure for a non-parallel upload. Here the entire file is
-       * uploaded in a sequential matter.
-       *
-       * @api private
-       */
-    }, {
-      key: "_startSingleUpload",
-      value: function _startSingleUpload() {
-        // Reset the aborted flag when the upload is started or else the
-        // _performUpload will stop before sending a request if the upload has been
-        // aborted previously.
-        this._aborted = false;
-
-        // The upload had been started previously and we should reuse this URL.
-        if (this.url != null) {
-          log("Resuming upload from previous URL: ".concat(this.url));
-          this._resumeUpload();
-          return;
-        }
-
-        // A URL has manually been specified, so we try to resume
-        if (this.options.uploadUrl != null) {
-          log("Resuming upload from provided URL: ".concat(this.options.uploadUrl));
-          this.url = this.options.uploadUrl;
-          this._resumeUpload();
-          return;
-        }
-        this._createUpload();
-      }
-
-      /**
-       * Abort any running request and stop the current upload. After abort is called, no event
-       * handler will be invoked anymore. You can use the `start` method to resume the upload
-       * again.
-       * If `shouldTerminate` is true, the `terminate` function will be called to remove the
-       * current upload from the server.
-       *
-       * @param {boolean} shouldTerminate True if the upload should be deleted from the server.
-       * @return {Promise} The Promise will be resolved/rejected when the requests finish.
-       */
-    }, {
-      key: "abort",
-      value: function abort(shouldTerminate) {
-        var _this4 = this;
-        // Stop any parallel partial uploads, that have been started in _startParallelUploads.
-        if (this._parallelUploads != null) {
-          this._parallelUploads.forEach(function (upload) {
-            upload.abort(shouldTerminate);
-          });
-        }
-
-        // Stop any current running request.
-        if (this._req !== null) {
-          this._req.abort();
-          // Note: We do not close the file source here, so the user can resume in the future.
-        }
-        this._aborted = true;
-
-        // Stop any timeout used for initiating a retry.
-        if (this._retryTimeout != null) {
-          clearTimeout(this._retryTimeout);
-          this._retryTimeout = null;
-        }
-        if (!shouldTerminate || this.url == null) {
-          return Promise.resolve();
-        }
-        return BaseUpload.terminate(this.url, this.options)
-        // Remove entry from the URL storage since the upload URL is no longer valid.
-        .then(function () {
-          return _this4._removeFromUrlStorage();
-        });
-      }
-    }, {
-      key: "_emitHttpError",
-      value: function _emitHttpError(req, res, message, causingErr) {
-        this._emitError(new DetailedError(message, causingErr, req, res));
-      }
-    }, {
-      key: "_emitError",
-      value: function _emitError(err) {
-        var _this5 = this;
-        // Do not emit errors, e.g. from aborted HTTP requests, if the upload has been stopped.
-        if (this._aborted) return;
-
-        // Check if we should retry, when enabled, before sending the error to the user.
-        if (this.options.retryDelays != null) {
-          // We will reset the attempt counter if
-          // - we were already able to connect to the server (offset != null) and
-          // - we were able to upload a small chunk of data to the server
-          var shouldResetDelays = this._offset != null && this._offset > this._offsetBeforeRetry;
-          if (shouldResetDelays) {
-            this._retryAttempt = 0;
-          }
-          if (shouldRetry(err, this._retryAttempt, this.options)) {
-            var delay = this.options.retryDelays[this._retryAttempt++];
-            this._offsetBeforeRetry = this._offset;
-            this._retryTimeout = setTimeout(function () {
-              _this5.start();
-            }, delay);
-            return;
-          }
-        }
-        if (typeof this.options.onError === 'function') {
-          this.options.onError(err);
-        } else {
+        if (!shouldRetry(err, 0, options)) {
           throw err;
         }
-      }
 
-      /**
-       * Publishes notification if the upload has been successfully completed.
-       *
-       * @api private
-       */
-    }, {
-      key: "_emitSuccess",
-      value: function _emitSuccess() {
-        if (this.options.removeFingerprintOnSuccess) {
-          // Remove stored fingerprint and corresponding endpoint. This causes
-          // new uploads of the same file to be treated as a different file.
-          this._removeFromUrlStorage();
-        }
-        if (typeof this.options.onSuccess === 'function') {
-          this.options.onSuccess();
-        }
+        // Instead of keeping track of the retry attempts, we remove the first element from the delays
+        // array. If the array is empty, all retry attempts are used up and we will bubble up the error.
+        // We recursively call the terminate function will removing elements from the retryDelays array.
+        const delay = options.retryDelays[0];
+        const remainingDelays = options.retryDelays.slice(1);
+        const newOptions = {
+          ...options,
+          retryDelays: remainingDelays
+        };
+        return new Promise(resolve => setTimeout(resolve, delay)).then(() => BaseUpload.terminate(url, newOptions));
+      });
+    }
+    findPreviousUploads() {
+      return this.options.fingerprint(this.file, this.options).then(fingerprint => this._urlStorage.findUploadsByFingerprint(fingerprint));
+    }
+    resumeFromPreviousUpload(previousUpload) {
+      this.url = previousUpload.uploadUrl || null;
+      this._parallelUploadUrls = previousUpload.parallelUploadUrls || null;
+      this._urlStorageKey = previousUpload.urlStorageKey;
+    }
+    start() {
+      const {
+        file
+      } = this;
+      if (!file) {
+        this._emitError(new Error('tus: no file or stream to upload provided'));
+        return;
       }
-
-      /**
-       * Publishes notification when data has been sent to the server. This
-       * data may not have been accepted by the server yet.
-       *
-       * @param {number} bytesSent  Number of bytes sent to the server.
-       * @param {number} bytesTotal Total number of bytes to be sent to the server.
-       * @api private
-       */
-    }, {
-      key: "_emitProgress",
-      value: function _emitProgress(bytesSent, bytesTotal) {
-        if (typeof this.options.onProgress === 'function') {
-          this.options.onProgress(bytesSent, bytesTotal);
-        }
+      if (!this.options.endpoint && !this.options.uploadUrl && !this.url) {
+        this._emitError(new Error('tus: neither an endpoint or an upload URL is provided'));
+        return;
       }
-
-      /**
-       * Publishes notification when a chunk of data has been sent to the server
-       * and accepted by the server.
-       * @param {number} chunkSize  Size of the chunk that was accepted by the server.
-       * @param {number} bytesAccepted Total number of bytes that have been
-       *                                accepted by the server.
-       * @param {number} bytesTotal Total number of bytes to be sent to the server.
-       * @api private
-       */
-    }, {
-      key: "_emitChunkComplete",
-      value: function _emitChunkComplete(chunkSize, bytesAccepted, bytesTotal) {
-        if (typeof this.options.onChunkComplete === 'function') {
-          this.options.onChunkComplete(chunkSize, bytesAccepted, bytesTotal);
+      const {
+        retryDelays
+      } = this.options;
+      if (retryDelays != null && Object.prototype.toString.call(retryDelays) !== '[object Array]') {
+        this._emitError(new Error('tus: the `retryDelays` option must either be an array or null'));
+        return;
+      }
+      if (this.options.parallelUploads > 1) {
+        // Test which options are incompatible with parallel uploads.
+        for (const optionName of ['uploadUrl', 'uploadSize', 'uploadLengthDeferred']) {
+          if (this.options[optionName]) {
+            this._emitError(new Error(`tus: cannot use the ${optionName} option when parallelUploads is enabled`));
+            return;
+          }
         }
       }
-
-      /**
-       * Create a new upload using the creation extension by sending a POST
-       * request to the endpoint. After successful creation the file will be
-       * uploaded
-       *
-       * @api private
-       */
-    }, {
-      key: "_createUpload",
-      value: function _createUpload() {
-        var _this6 = this;
-        if (!this.options.endpoint) {
-          this._emitError(new Error('tus: unable to create upload because no endpoint is provided'));
+      if (this.options.parallelUploadBoundaries) {
+        if (this.options.parallelUploads <= 1) {
+          this._emitError(new Error('tus: cannot use the `parallelUploadBoundaries` option when `parallelUploads` is disabled'));
           return;
         }
-        var req = this._openRequest('POST', this.options.endpoint);
+        if (this.options.parallelUploads !== this.options.parallelUploadBoundaries.length) {
+          this._emitError(new Error('tus: the `parallelUploadBoundaries` must have the same length as the value of `parallelUploads`'));
+          return;
+        }
+      }
+      this.options.fingerprint(file, this.options).then(fingerprint => {
+        this._fingerprint = fingerprint;
+        if (this._source) {
+          return this._source;
+        }
+        return this.options.fileReader.openFile(file, this.options.chunkSize);
+      }).then(source => {
+        this._source = source;
+
+        // First, we look at the uploadLengthDeferred option.
+        // Next, we check if the caller has supplied a manual upload size.
+        // Finally, we try to use the calculated size from the source object.
         if (this.options.uploadLengthDeferred) {
-          req.setHeader('Upload-Defer-Length', 1);
+          this._size = null;
+        } else if (this.options.uploadSize != null) {
+          this._size = Number(this.options.uploadSize);
+          if (Number.isNaN(this._size)) {
+            this._emitError(new Error('tus: cannot convert `uploadSize` option into a number'));
+            return;
+          }
         } else {
-          req.setHeader('Upload-Length', this._size);
+          this._size = this._source.size;
+          if (this._size == null) {
+            this._emitError(new Error("tus: cannot automatically derive upload's size from input. Specify it manually using the `uploadSize` option or use the `uploadLengthDeferred` option"));
+            return;
+          }
         }
 
+        // If the upload was configured to use multiple requests or if we resume from
+        // an upload which used multiple requests, we start a parallel upload.
+        if (this.options.parallelUploads > 1 || this._parallelUploadUrls != null) {
+          this._startParallelUpload();
+        } else {
+          this._startSingleUpload();
+        }
+      }).catch(err => {
+        this._emitError(err);
+      });
+    }
+
+    /**
+     * Initiate the uploading procedure for a parallelized upload, where one file is split into
+     * multiple request which are run in parallel.
+     *
+     * @api private
+     */
+    _startParallelUpload() {
+      const totalSize = this._size;
+      let totalProgress = 0;
+      this._parallelUploads = [];
+      const partCount = this._parallelUploadUrls != null ? this._parallelUploadUrls.length : this.options.parallelUploads;
+
+      // The input file will be split into multiple slices which are uploaded in separate
+      // requests. Here we get the start and end position for the slices.
+      const parts = this.options.parallelUploadBoundaries ?? splitSizeIntoParts(this._source.size, partCount);
+
+      // Attach URLs from previous uploads, if available.
+      if (this._parallelUploadUrls) {
+        parts.forEach((part, index) => {
+          part.uploadUrl = this._parallelUploadUrls[index] || null;
+        });
+      }
+
+      // Create an empty list for storing the upload URLs
+      this._parallelUploadUrls = new Array(parts.length);
+
+      // Generate a promise for each slice that will be resolve if the respective
+      // upload is completed.
+      const uploads = parts.map((part, index) => {
+        let lastPartProgress = 0;
+        return this._source.slice(part.start, part.end).then(_ref => {
+          let {
+            value
+          } = _ref;
+          return new Promise((resolve, reject) => {
+            // Merge with the user supplied options but overwrite some values.
+            const options = {
+              ...this.options,
+              // If available, the partial upload should be resumed from a previous URL.
+              uploadUrl: part.uploadUrl || null,
+              // We take manually care of resuming for partial uploads, so they should
+              // not be stored in the URL storage.
+              storeFingerprintForResuming: false,
+              removeFingerprintOnSuccess: false,
+              // Reset the parallelUploads option to not cause recursion.
+              parallelUploads: 1,
+              // Reset this option as we are not doing a parallel upload.
+              parallelUploadBoundaries: null,
+              metadata: {},
+              // Add the header to indicate the this is a partial upload.
+              headers: {
+                ...this.options.headers,
+                'Upload-Concat': 'partial'
+              },
+              // Reject or resolve the promise if the upload errors or completes.
+              onSuccess: resolve,
+              onError: reject,
+              // Based in the progress for this partial upload, calculate the progress
+              // for the entire final upload.
+              onProgress: newPartProgress => {
+                totalProgress = totalProgress - lastPartProgress + newPartProgress;
+                lastPartProgress = newPartProgress;
+                this._emitProgress(totalProgress, totalSize);
+              },
+              // Wait until every partial upload has an upload URL, so we can add
+              // them to the URL storage.
+              onUploadUrlAvailable: () => {
+                this._parallelUploadUrls[index] = upload.url;
+                // Test if all uploads have received an URL
+                if (this._parallelUploadUrls.filter(u => Boolean(u)).length === parts.length) {
+                  this._saveUploadInUrlStorage();
+                }
+              }
+            };
+            const upload = new BaseUpload(value, options);
+            upload.start();
+
+            // Store the upload in an array, so we can later abort them if necessary.
+            this._parallelUploads.push(upload);
+          });
+        });
+      });
+      let req;
+      // Wait until all partial uploads are finished and we can send the POST request for
+      // creating the final upload.
+      Promise.all(uploads).then(() => {
+        req = this._openRequest('POST', this.options.endpoint);
+        req.setHeader('Upload-Concat', `final;${this._parallelUploadUrls.join(' ')}`);
+
         // Add metadata if values have been added
-        var metadata = encodeMetadata(this.options.metadata);
+        const metadata = encodeMetadata(this.options.metadata);
         if (metadata !== '') {
           req.setHeader('Upload-Metadata', metadata);
         }
-        var promise;
-        if (this.options.uploadDataDuringCreation && !this.options.uploadLengthDeferred) {
-          this._offset = 0;
-          promise = this._addChunkToRequest(req);
-        } else {
-          promise = this._sendRequest(req, null);
-        }
-        promise.then(function (res) {
-          if (!inStatusCategory(res.getStatus(), 200)) {
-            _this6._emitHttpError(req, res, 'tus: unexpected response while creating upload');
-            return;
-          }
-          var location = res.getHeader('Location');
-          if (location == null) {
-            _this6._emitHttpError(req, res, 'tus: invalid or missing Location header');
-            return;
-          }
-          _this6.url = resolveUrl(_this6.options.endpoint, location);
-          log("Created upload at ".concat(_this6.url));
-          if (typeof _this6.options.onUploadUrlAvailable === 'function') {
-            _this6.options.onUploadUrlAvailable();
-          }
-          if (_this6._size === 0) {
-            // Nothing to upload and file was successfully created
-            _this6._emitSuccess();
-            _this6._source.close();
-            return;
-          }
-          _this6._saveUploadInUrlStorage().then(function () {
-            if (_this6.options.uploadDataDuringCreation) {
-              _this6._handleUploadResponse(req, res);
-            } else {
-              _this6._offset = 0;
-              _this6._performUpload();
-            }
-          });
-        })["catch"](function (err) {
-          _this6._emitHttpError(req, null, 'tus: failed to create upload', err);
-        });
-      }
-
-      /*
-       * Try to resume an existing upload. First a HEAD request will be sent
-       * to retrieve the offset. If the request fails a new upload will be
-       * created. In the case of a successful response the file will be uploaded.
-       *
-       * @api private
-       */
-    }, {
-      key: "_resumeUpload",
-      value: function _resumeUpload() {
-        var _this7 = this;
-        var req = this._openRequest('HEAD', this.url);
-        var promise = this._sendRequest(req, null);
-        promise.then(function (res) {
-          var status = res.getStatus();
-          if (!inStatusCategory(status, 200)) {
-            // If the upload is locked (indicated by the 423 Locked status code), we
-            // emit an error instead of directly starting a new upload. This way the
-            // retry logic can catch the error and will retry the upload. An upload
-            // is usually locked for a short period of time and will be available
-            // afterwards.
-            if (status === 423) {
-              _this7._emitHttpError(req, res, 'tus: upload is currently locked; retry later');
-              return;
-            }
-            if (inStatusCategory(status, 400)) {
-              // Remove stored fingerprint and corresponding endpoint,
-              // on client errors since the file can not be found
-              _this7._removeFromUrlStorage();
-            }
-            if (!_this7.options.endpoint) {
-              // Don't attempt to create a new upload if no endpoint is provided.
-              _this7._emitHttpError(req, res, 'tus: unable to resume upload (new upload cannot be created without an endpoint)');
-              return;
-            }
-
-            // Try to create a new upload
-            _this7.url = null;
-            _this7._createUpload();
-            return;
-          }
-          var offset = parseInt(res.getHeader('Upload-Offset'), 10);
-          if (Number.isNaN(offset)) {
-            _this7._emitHttpError(req, res, 'tus: invalid or missing offset value');
-            return;
-          }
-          var length = parseInt(res.getHeader('Upload-Length'), 10);
-          if (Number.isNaN(length) && !_this7.options.uploadLengthDeferred) {
-            _this7._emitHttpError(req, res, 'tus: invalid or missing length value');
-            return;
-          }
-          if (typeof _this7.options.onUploadUrlAvailable === 'function') {
-            _this7.options.onUploadUrlAvailable();
-          }
-          _this7._saveUploadInUrlStorage().then(function () {
-            // Upload has already been completed and we do not need to send additional
-            // data to the server
-            if (offset === length) {
-              _this7._emitProgress(length, length);
-              _this7._emitSuccess();
-              return;
-            }
-            _this7._offset = offset;
-            _this7._performUpload();
-          });
-        })["catch"](function (err) {
-          _this7._emitHttpError(req, null, 'tus: failed to resume upload', err);
-        });
-      }
-
-      /**
-       * Start uploading the file using PATCH requests. The file will be divided
-       * into chunks as specified in the chunkSize option. During the upload
-       * the onProgress event handler may be invoked multiple times.
-       *
-       * @api private
-       */
-    }, {
-      key: "_performUpload",
-      value: function _performUpload() {
-        var _this8 = this;
-        // If the upload has been aborted, we will not send the next PATCH request.
-        // This is important if the abort method was called during a callback, such
-        // as onChunkComplete or onProgress.
-        if (this._aborted) {
+        return this._sendRequest(req, null);
+      }).then(res => {
+        if (!inStatusCategory(res.getStatus(), 200)) {
+          this._emitHttpError(req, res, 'tus: unexpected response while creating upload');
           return;
         }
-        var req;
-
-        // Some browser and servers may not support the PATCH method. For those
-        // cases, you can tell tus-js-client to use a POST request with the
-        // X-HTTP-Method-Override header for simulating a PATCH request.
-        if (this.options.overridePatchMethod) {
-          req = this._openRequest('POST', this.url);
-          req.setHeader('X-HTTP-Method-Override', 'PATCH');
-        } else {
-          req = this._openRequest('PATCH', this.url);
-        }
-        req.setHeader('Upload-Offset', this._offset);
-        var promise = this._addChunkToRequest(req);
-        promise.then(function (res) {
-          if (!inStatusCategory(res.getStatus(), 200)) {
-            _this8._emitHttpError(req, res, 'tus: unexpected response while uploading chunk');
-            return;
-          }
-          _this8._handleUploadResponse(req, res);
-        })["catch"](function (err) {
-          // Don't emit an error if the upload was aborted manually
-          if (_this8._aborted) {
-            return;
-          }
-          _this8._emitHttpError(req, null, "tus: failed to upload chunk at offset ".concat(_this8._offset), err);
-        });
-      }
-
-      /**
-       * _addChunktoRequest reads a chunk from the source and sends it using the
-       * supplied request object. It will not handle the response.
-       *
-       * @api private
-       */
-    }, {
-      key: "_addChunkToRequest",
-      value: function _addChunkToRequest(req) {
-        var _this9 = this;
-        var start = this._offset;
-        var end = this._offset + this.options.chunkSize;
-        req.setProgressHandler(function (bytesSent) {
-          _this9._emitProgress(start + bytesSent, _this9._size);
-        });
-        req.setHeader('Content-Type', 'application/offset+octet-stream');
-
-        // The specified chunkSize may be Infinity or the calcluated end position
-        // may exceed the file's size. In both cases, we limit the end position to
-        // the input's total size for simpler calculations and correctness.
-        if ((end === Infinity || end > this._size) && !this.options.uploadLengthDeferred) {
-          end = this._size;
-        }
-        return this._source.slice(start, end).then(function (_ref2) {
-          var value = _ref2.value,
-            done = _ref2.done;
-          var valueSize = value && value.size ? value.size : 0;
-
-          // If the upload length is deferred, the upload size was not specified during
-          // upload creation. So, if the file reader is done reading, we know the total
-          // upload size and can tell the tus server.
-          if (_this9.options.uploadLengthDeferred && done) {
-            _this9._size = _this9._offset + valueSize;
-            req.setHeader('Upload-Length', _this9._size);
-          }
-
-          // The specified uploadSize might not match the actual amount of data that a source
-          // provides. In these cases, we cannot successfully complete the upload, so we
-          // rather error out and let the user know. If not, tus-js-client will be stuck
-          // in a loop of repeating empty PATCH requests.
-          // See https://community.transloadit.com/t/how-to-abort-hanging-companion-uploads/16488/13
-          var newSize = _this9._offset + valueSize;
-          if (!_this9.options.uploadLengthDeferred && done && newSize !== _this9._size) {
-            return Promise.reject(new Error("upload was configured with a size of ".concat(_this9._size, " bytes, but the source is done after ").concat(newSize, " bytes")));
-          }
-          if (value === null) {
-            return _this9._sendRequest(req);
-          }
-          _this9._emitProgress(_this9._offset, _this9._size);
-          return _this9._sendRequest(req, value);
-        });
-      }
-
-      /**
-       * _handleUploadResponse is used by requests that haven been sent using _addChunkToRequest
-       * and already have received a response.
-       *
-       * @api private
-       */
-    }, {
-      key: "_handleUploadResponse",
-      value: function _handleUploadResponse(req, res) {
-        var offset = parseInt(res.getHeader('Upload-Offset'), 10);
-        if (Number.isNaN(offset)) {
-          this._emitHttpError(req, res, 'tus: invalid or missing offset value');
+        const location = res.getHeader('Location');
+        if (location == null) {
+          this._emitHttpError(req, res, 'tus: invalid or missing Location header');
           return;
         }
-        this._emitProgress(offset, this._size);
-        this._emitChunkComplete(offset - this._offset, offset, this._size);
-        this._offset = offset;
-        if (offset === this._size) {
-          // Yay, finally done :)
+        this.url = resolveUrl(this.options.endpoint, location);
+        log(`Created upload at ${this.url}`);
+        this._emitSuccess();
+      }).catch(err => {
+        this._emitError(err);
+      });
+    }
+
+    /**
+     * Initiate the uploading procedure for a non-parallel upload. Here the entire file is
+     * uploaded in a sequential matter.
+     *
+     * @api private
+     */
+    _startSingleUpload() {
+      // Reset the aborted flag when the upload is started or else the
+      // _performUpload will stop before sending a request if the upload has been
+      // aborted previously.
+      this._aborted = false;
+
+      // The upload had been started previously and we should reuse this URL.
+      if (this.url != null) {
+        log(`Resuming upload from previous URL: ${this.url}`);
+        this._resumeUpload();
+        return;
+      }
+
+      // A URL has manually been specified, so we try to resume
+      if (this.options.uploadUrl != null) {
+        log(`Resuming upload from provided URL: ${this.options.uploadUrl}`);
+        this.url = this.options.uploadUrl;
+        this._resumeUpload();
+        return;
+      }
+      this._createUpload();
+    }
+
+    /**
+     * Abort any running request and stop the current upload. After abort is called, no event
+     * handler will be invoked anymore. You can use the `start` method to resume the upload
+     * again.
+     * If `shouldTerminate` is true, the `terminate` function will be called to remove the
+     * current upload from the server.
+     *
+     * @param {boolean} shouldTerminate True if the upload should be deleted from the server.
+     * @return {Promise} The Promise will be resolved/rejected when the requests finish.
+     */
+    abort(shouldTerminate) {
+      // Stop any parallel partial uploads, that have been started in _startParallelUploads.
+      if (this._parallelUploads != null) {
+        this._parallelUploads.forEach(upload => {
+          upload.abort(shouldTerminate);
+        });
+      }
+
+      // Stop any current running request.
+      if (this._req !== null) {
+        this._req.abort();
+        // Note: We do not close the file source here, so the user can resume in the future.
+      }
+      this._aborted = true;
+
+      // Stop any timeout used for initiating a retry.
+      if (this._retryTimeout != null) {
+        clearTimeout(this._retryTimeout);
+        this._retryTimeout = null;
+      }
+      if (!shouldTerminate || this.url == null) {
+        return Promise.resolve();
+      }
+      return BaseUpload.terminate(this.url, this.options)
+      // Remove entry from the URL storage since the upload URL is no longer valid.
+      .then(() => this._removeFromUrlStorage());
+    }
+    _emitHttpError(req, res, message, causingErr) {
+      this._emitError(new DetailedError(message, causingErr, req, res));
+    }
+    _emitError(err) {
+      // Do not emit errors, e.g. from aborted HTTP requests, if the upload has been stopped.
+      if (this._aborted) return;
+
+      // Check if we should retry, when enabled, before sending the error to the user.
+      if (this.options.retryDelays != null) {
+        // We will reset the attempt counter if
+        // - we were already able to connect to the server (offset != null) and
+        // - we were able to upload a small chunk of data to the server
+        const shouldResetDelays = this._offset != null && this._offset > this._offsetBeforeRetry;
+        if (shouldResetDelays) {
+          this._retryAttempt = 0;
+        }
+        if (shouldRetry(err, this._retryAttempt, this.options)) {
+          const delay = this.options.retryDelays[this._retryAttempt++];
+          this._offsetBeforeRetry = this._offset;
+          this._retryTimeout = setTimeout(() => {
+            this.start();
+          }, delay);
+          return;
+        }
+      }
+      if (typeof this.options.onError === 'function') {
+        this.options.onError(err);
+      } else {
+        throw err;
+      }
+    }
+
+    /**
+     * Publishes notification if the upload has been successfully completed.
+     *
+     * @api private
+     */
+    _emitSuccess() {
+      if (this.options.removeFingerprintOnSuccess) {
+        // Remove stored fingerprint and corresponding endpoint. This causes
+        // new uploads of the same file to be treated as a different file.
+        this._removeFromUrlStorage();
+      }
+      if (typeof this.options.onSuccess === 'function') {
+        this.options.onSuccess();
+      }
+    }
+
+    /**
+     * Publishes notification when data has been sent to the server. This
+     * data may not have been accepted by the server yet.
+     *
+     * @param {number} bytesSent  Number of bytes sent to the server.
+     * @param {number} bytesTotal Total number of bytes to be sent to the server.
+     * @api private
+     */
+    _emitProgress(bytesSent, bytesTotal) {
+      if (typeof this.options.onProgress === 'function') {
+        this.options.onProgress(bytesSent, bytesTotal);
+      }
+    }
+
+    /**
+     * Publishes notification when a chunk of data has been sent to the server
+     * and accepted by the server.
+     * @param {number} chunkSize  Size of the chunk that was accepted by the server.
+     * @param {number} bytesAccepted Total number of bytes that have been
+     *                                accepted by the server.
+     * @param {number} bytesTotal Total number of bytes to be sent to the server.
+     * @api private
+     */
+    _emitChunkComplete(chunkSize, bytesAccepted, bytesTotal) {
+      if (typeof this.options.onChunkComplete === 'function') {
+        this.options.onChunkComplete(chunkSize, bytesAccepted, bytesTotal);
+      }
+    }
+
+    /**
+     * Create a new upload using the creation extension by sending a POST
+     * request to the endpoint. After successful creation the file will be
+     * uploaded
+     *
+     * @api private
+     */
+    _createUpload() {
+      if (!this.options.endpoint) {
+        this._emitError(new Error('tus: unable to create upload because no endpoint is provided'));
+        return;
+      }
+      const req = this._openRequest('POST', this.options.endpoint);
+      if (this.options.uploadLengthDeferred) {
+        req.setHeader('Upload-Defer-Length', 1);
+      } else {
+        req.setHeader('Upload-Length', this._size);
+      }
+
+      // Add metadata if values have been added
+      const metadata = encodeMetadata(this.options.metadata);
+      if (metadata !== '') {
+        req.setHeader('Upload-Metadata', metadata);
+      }
+      let promise;
+      if (this.options.uploadDataDuringCreation && !this.options.uploadLengthDeferred) {
+        this._offset = 0;
+        promise = this._addChunkToRequest(req);
+      } else {
+        promise = this._sendRequest(req, null);
+      }
+      promise.then(res => {
+        if (!inStatusCategory(res.getStatus(), 200)) {
+          this._emitHttpError(req, res, 'tus: unexpected response while creating upload');
+          return;
+        }
+        const location = res.getHeader('Location');
+        if (location == null) {
+          this._emitHttpError(req, res, 'tus: invalid or missing Location header');
+          return;
+        }
+        this.url = resolveUrl(this.options.endpoint, location);
+        log(`Created upload at ${this.url}`);
+        if (typeof this.options.onUploadUrlAvailable === 'function') {
+          this.options.onUploadUrlAvailable();
+        }
+        if (this._size === 0) {
+          // Nothing to upload and file was successfully created
           this._emitSuccess();
           this._source.close();
           return;
         }
-        this._performUpload();
-      }
-
-      /**
-       * Create a new HTTP request object with the given method and URL.
-       *
-       * @api private
-       */
-    }, {
-      key: "_openRequest",
-      value: function _openRequest(method, url) {
-        var req = openRequest(method, url, this.options);
-        this._req = req;
-        return req;
-      }
-
-      /**
-       * Remove the entry in the URL storage, if it has been saved before.
-       *
-       * @api private
-       */
-    }, {
-      key: "_removeFromUrlStorage",
-      value: function _removeFromUrlStorage() {
-        var _this10 = this;
-        if (!this._urlStorageKey) return;
-        this._urlStorage.removeUpload(this._urlStorageKey)["catch"](function (err) {
-          _this10._emitError(err);
+        this._saveUploadInUrlStorage().then(() => {
+          if (this.options.uploadDataDuringCreation) {
+            this._handleUploadResponse(req, res);
+          } else {
+            this._offset = 0;
+            this._performUpload();
+          }
         });
-        this._urlStorageKey = null;
-      }
+      }).catch(err => {
+        this._emitHttpError(req, null, 'tus: failed to create upload', err);
+      });
+    }
 
-      /**
-       * Add the upload URL to the URL storage, if possible.
-       *
-       * @api private
-       */
-    }, {
-      key: "_saveUploadInUrlStorage",
-      value: function _saveUploadInUrlStorage() {
-        var _this11 = this;
-        // We do not store the upload URL
-        // - if it was disabled in the option, or
-        // - if no fingerprint was calculated for the input (i.e. a stream), or
-        // - if the URL is already stored (i.e. key is set alread).
-        if (!this.options.storeFingerprintForResuming || !this._fingerprint || this._urlStorageKey !== null) {
-          return Promise.resolve();
-        }
-        var storedUpload = {
-          size: this._size,
-          metadata: this.options.metadata,
-          creationTime: new Date().toString()
-        };
-        if (this._parallelUploads) {
-          // Save multiple URLs if the parallelUploads option is used ...
-          storedUpload.parallelUploadUrls = this._parallelUploadUrls;
-        } else {
-          // ... otherwise we just save the one available URL.
-          storedUpload.uploadUrl = this.url;
-        }
-        return this._urlStorage.addUpload(this._fingerprint, storedUpload).then(function (urlStorageKey) {
-          _this11._urlStorageKey = urlStorageKey;
-        });
-      }
-
-      /**
-       * Send a request with the provided body.
-       *
-       * @api private
-       */
-    }, {
-      key: "_sendRequest",
-      value: function _sendRequest(req) {
-        var body = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-        return sendRequest(req, body, this.options);
-      }
-    }], [{
-      key: "terminate",
-      value: function terminate(url) {
-        var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-        var req = openRequest('DELETE', url, options);
-        return sendRequest(req, null, options).then(function (res) {
-          // A 204 response indicates a successfull request
-          if (res.getStatus() === 204) {
+    /*
+     * Try to resume an existing upload. First a HEAD request will be sent
+     * to retrieve the offset. If the request fails a new upload will be
+     * created. In the case of a successful response the file will be uploaded.
+     *
+     * @api private
+     */
+    _resumeUpload() {
+      const req = this._openRequest('HEAD', this.url);
+      const promise = this._sendRequest(req, null);
+      promise.then(res => {
+        const status = res.getStatus();
+        if (!inStatusCategory(status, 200)) {
+          // If the upload is locked (indicated by the 423 Locked status code), we
+          // emit an error instead of directly starting a new upload. This way the
+          // retry logic can catch the error and will retry the upload. An upload
+          // is usually locked for a short period of time and will be available
+          // afterwards.
+          if (status === 423) {
+            this._emitHttpError(req, res, 'tus: upload is currently locked; retry later');
             return;
           }
-          throw new DetailedError('tus: unexpected response while terminating upload', null, req, res);
-        })["catch"](function (err) {
-          if (!(err instanceof DetailedError)) {
-            err = new DetailedError('tus: failed to terminate upload', err, req, null);
+          if (inStatusCategory(status, 400)) {
+            // Remove stored fingerprint and corresponding endpoint,
+            // on client errors since the file can not be found
+            this._removeFromUrlStorage();
           }
-          if (!shouldRetry(err, 0, options)) {
-            throw err;
+          if (!this.options.endpoint) {
+            // Don't attempt to create a new upload if no endpoint is provided.
+            this._emitHttpError(req, res, 'tus: unable to resume upload (new upload cannot be created without an endpoint)');
+            return;
           }
 
-          // Instead of keeping track of the retry attempts, we remove the first element from the delays
-          // array. If the array is empty, all retry attempts are used up and we will bubble up the error.
-          // We recursively call the terminate function will removing elements from the retryDelays array.
-          var delay = options.retryDelays[0];
-          var remainingDelays = options.retryDelays.slice(1);
-          var newOptions = _objectSpread$1(_objectSpread$1({}, options), {}, {
-            retryDelays: remainingDelays
-          });
-          return new Promise(function (resolve) {
-            return setTimeout(resolve, delay);
-          }).then(function () {
-            return BaseUpload.terminate(url, newOptions);
-          });
+          // Try to create a new upload
+          this.url = null;
+          this._createUpload();
+          return;
+        }
+        const offset = parseInt(res.getHeader('Upload-Offset'), 10);
+        if (Number.isNaN(offset)) {
+          this._emitHttpError(req, res, 'tus: invalid or missing offset value');
+          return;
+        }
+        const length = parseInt(res.getHeader('Upload-Length'), 10);
+        if (Number.isNaN(length) && !this.options.uploadLengthDeferred) {
+          this._emitHttpError(req, res, 'tus: invalid or missing length value');
+          return;
+        }
+        if (typeof this.options.onUploadUrlAvailable === 'function') {
+          this.options.onUploadUrlAvailable();
+        }
+        this._saveUploadInUrlStorage().then(() => {
+          // Upload has already been completed and we do not need to send additional
+          // data to the server
+          if (offset === length) {
+            this._emitProgress(length, length);
+            this._emitSuccess();
+            return;
+          }
+          this._offset = offset;
+          this._performUpload();
         });
+      }).catch(err => {
+        this._emitHttpError(req, null, 'tus: failed to resume upload', err);
+      });
+    }
+
+    /**
+     * Start uploading the file using PATCH requests. The file will be divided
+     * into chunks as specified in the chunkSize option. During the upload
+     * the onProgress event handler may be invoked multiple times.
+     *
+     * @api private
+     */
+    _performUpload() {
+      // If the upload has been aborted, we will not send the next PATCH request.
+      // This is important if the abort method was called during a callback, such
+      // as onChunkComplete or onProgress.
+      if (this._aborted) {
+        return;
       }
-    }]);
-    return BaseUpload;
-  }();
+      let req;
+
+      // Some browser and servers may not support the PATCH method. For those
+      // cases, you can tell tus-js-client to use a POST request with the
+      // X-HTTP-Method-Override header for simulating a PATCH request.
+      if (this.options.overridePatchMethod) {
+        req = this._openRequest('POST', this.url);
+        req.setHeader('X-HTTP-Method-Override', 'PATCH');
+      } else {
+        req = this._openRequest('PATCH', this.url);
+      }
+      req.setHeader('Upload-Offset', this._offset);
+      const promise = this._addChunkToRequest(req);
+      promise.then(res => {
+        if (!inStatusCategory(res.getStatus(), 200)) {
+          this._emitHttpError(req, res, 'tus: unexpected response while uploading chunk');
+          return;
+        }
+        this._handleUploadResponse(req, res);
+      }).catch(err => {
+        // Don't emit an error if the upload was aborted manually
+        if (this._aborted) {
+          return;
+        }
+        this._emitHttpError(req, null, `tus: failed to upload chunk at offset ${this._offset}`, err);
+      });
+    }
+
+    /**
+     * _addChunktoRequest reads a chunk from the source and sends it using the
+     * supplied request object. It will not handle the response.
+     *
+     * @api private
+     */
+    _addChunkToRequest(req) {
+      const start = this._offset;
+      let end = this._offset + this.options.chunkSize;
+      req.setProgressHandler(bytesSent => {
+        this._emitProgress(start + bytesSent, this._size);
+      });
+      req.setHeader('Content-Type', 'application/offset+octet-stream');
+
+      // The specified chunkSize may be Infinity or the calcluated end position
+      // may exceed the file's size. In both cases, we limit the end position to
+      // the input's total size for simpler calculations and correctness.
+      if ((end === Infinity || end > this._size) && !this.options.uploadLengthDeferred) {
+        end = this._size;
+      }
+      return this._source.slice(start, end).then(_ref2 => {
+        let {
+          value,
+          done
+        } = _ref2;
+        const valueSize = value && value.size ? value.size : 0;
+
+        // If the upload length is deferred, the upload size was not specified during
+        // upload creation. So, if the file reader is done reading, we know the total
+        // upload size and can tell the tus server.
+        if (this.options.uploadLengthDeferred && done) {
+          this._size = this._offset + valueSize;
+          req.setHeader('Upload-Length', this._size);
+        }
+
+        // The specified uploadSize might not match the actual amount of data that a source
+        // provides. In these cases, we cannot successfully complete the upload, so we
+        // rather error out and let the user know. If not, tus-js-client will be stuck
+        // in a loop of repeating empty PATCH requests.
+        // See https://community.transloadit.com/t/how-to-abort-hanging-companion-uploads/16488/13
+        const newSize = this._offset + valueSize;
+        if (!this.options.uploadLengthDeferred && done && newSize !== this._size) {
+          return Promise.reject(new Error(`upload was configured with a size of ${this._size} bytes, but the source is done after ${newSize} bytes`));
+        }
+        if (value === null) {
+          return this._sendRequest(req);
+        }
+        this._emitProgress(this._offset, this._size);
+        return this._sendRequest(req, value);
+      });
+    }
+
+    /**
+     * _handleUploadResponse is used by requests that haven been sent using _addChunkToRequest
+     * and already have received a response.
+     *
+     * @api private
+     */
+    _handleUploadResponse(req, res) {
+      const offset = parseInt(res.getHeader('Upload-Offset'), 10);
+      if (Number.isNaN(offset)) {
+        this._emitHttpError(req, res, 'tus: invalid or missing offset value');
+        return;
+      }
+      this._emitProgress(offset, this._size);
+      this._emitChunkComplete(offset - this._offset, offset, this._size);
+      this._offset = offset;
+      if (offset === this._size) {
+        // Yay, finally done :)
+        this._emitSuccess();
+        this._source.close();
+        return;
+      }
+      this._performUpload();
+    }
+
+    /**
+     * Create a new HTTP request object with the given method and URL.
+     *
+     * @api private
+     */
+    _openRequest(method, url) {
+      const req = openRequest(method, url, this.options);
+      this._req = req;
+      return req;
+    }
+
+    /**
+     * Remove the entry in the URL storage, if it has been saved before.
+     *
+     * @api private
+     */
+    _removeFromUrlStorage() {
+      if (!this._urlStorageKey) return;
+      this._urlStorage.removeUpload(this._urlStorageKey).catch(err => {
+        this._emitError(err);
+      });
+      this._urlStorageKey = null;
+    }
+
+    /**
+     * Add the upload URL to the URL storage, if possible.
+     *
+     * @api private
+     */
+    _saveUploadInUrlStorage() {
+      // We do not store the upload URL
+      // - if it was disabled in the option, or
+      // - if no fingerprint was calculated for the input (i.e. a stream), or
+      // - if the URL is already stored (i.e. key is set alread).
+      if (!this.options.storeFingerprintForResuming || !this._fingerprint || this._urlStorageKey !== null) {
+        return Promise.resolve();
+      }
+      const storedUpload = {
+        size: this._size,
+        metadata: this.options.metadata,
+        creationTime: new Date().toString()
+      };
+      if (this._parallelUploads) {
+        // Save multiple URLs if the parallelUploads option is used ...
+        storedUpload.parallelUploadUrls = this._parallelUploadUrls;
+      } else {
+        // ... otherwise we just save the one available URL.
+        storedUpload.uploadUrl = this.url;
+      }
+      return this._urlStorage.addUpload(this._fingerprint, storedUpload).then(urlStorageKey => {
+        this._urlStorageKey = urlStorageKey;
+      });
+    }
+
+    /**
+     * Send a request with the provided body.
+     *
+     * @api private
+     */
+    _sendRequest(req) {
+      let body = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+      return sendRequest(req, body, this.options);
+    }
+  }
   function encodeMetadata(metadata) {
-    return Object.entries(metadata).map(function (_ref3) {
-      var _ref4 = _slicedToArray(_ref3, 2),
-        key = _ref4[0],
-        value = _ref4[1];
-      return "".concat(key, " ").concat(gBase64.encode(String(value)));
+    return Object.entries(metadata).map(_ref3 => {
+      let [key, value] = _ref3;
+      return `${key} ${gBase64.encode(String(value))}`;
     }).join(',');
   }
 
@@ -6855,17 +5210,15 @@
    * @api private
    */
   function openRequest(method, url, options) {
-    var req = options.httpStack.createRequest(method, url);
+    const req = options.httpStack.createRequest(method, url);
     req.setHeader('Tus-Resumable', '1.0.0');
-    var headers = options.headers || {};
-    Object.entries(headers).forEach(function (_ref5) {
-      var _ref6 = _slicedToArray(_ref5, 2),
-        name = _ref6[0],
-        value = _ref6[1];
+    const headers = options.headers || {};
+    Object.entries(headers).forEach(_ref4 => {
+      let [name, value] = _ref4;
       req.setHeader(name, value);
     });
     if (options.addRequestId) {
-      var requestId = uuid();
+      const requestId = uuid();
       req.setHeader('X-Request-ID', requestId);
     }
     return req;
@@ -6877,50 +5230,25 @@
    *
    * @api private
    */
-  function sendRequest(_x, _x2, _x3) {
-    return _sendRequest2.apply(this, arguments);
+  async function sendRequest(req, body, options) {
+    if (typeof options.onBeforeRequest === 'function') {
+      await options.onBeforeRequest(req);
+    }
+    const res = await req.send(body);
+    if (typeof options.onAfterResponse === 'function') {
+      await options.onAfterResponse(req, res);
+    }
+    return res;
   }
+
   /**
    * Checks whether the browser running this code has internet access.
    * This function will always return true in the node.js environment
    *
    * @api private
    */
-  function _sendRequest2() {
-    _sendRequest2 = _asyncToGenerator$1( /*#__PURE__*/_regeneratorRuntime$1().mark(function _callee(req, body, options) {
-      var res;
-      return _regeneratorRuntime$1().wrap(function _callee$(_context) {
-        while (1) switch (_context.prev = _context.next) {
-          case 0:
-            if (!(typeof options.onBeforeRequest === 'function')) {
-              _context.next = 3;
-              break;
-            }
-            _context.next = 3;
-            return options.onBeforeRequest(req);
-          case 3:
-            _context.next = 5;
-            return req.send(body);
-          case 5:
-            res = _context.sent;
-            if (!(typeof options.onAfterResponse === 'function')) {
-              _context.next = 9;
-              break;
-            }
-            _context.next = 9;
-            return options.onAfterResponse(req, res);
-          case 9:
-            return _context.abrupt("return", res);
-          case 10:
-          case "end":
-            return _context.stop();
-        }
-      }, _callee);
-    }));
-    return _sendRequest2.apply(this, arguments);
-  }
   function isOnline() {
-    var online = true;
+    let online = true;
     if (typeof window !== 'undefined' &&
     // eslint-disable-next-line no-undef
     'navigator' in window &&
@@ -6963,7 +5291,7 @@
    * @returns {boolean}
    */
   function defaultOnShouldRetry(err) {
-    var status = err.originalResponse ? err.originalResponse.getStatus() : 0;
+    const status = err.originalResponse ? err.originalResponse.getStatus() : 0;
     return (!inStatusCategory(status, 400) || status === 409 || status === 423) && isOnline();
   }
 
@@ -6987,9 +5315,9 @@
    * @api private
    */
   function splitSizeIntoParts(totalSize, partCount) {
-    var partSize = Math.floor(totalSize / partCount);
-    var parts = [];
-    for (var i = 0; i < partCount; i++) {
+    const partSize = Math.floor(totalSize / partCount);
+    const parts = [];
+    for (let i = 0; i < partCount; i++) {
       parts.push({
         start: partSize * i,
         end: partSize * (i + 1)
@@ -7000,126 +5328,24 @@
   }
   BaseUpload.defaultOptions = defaultOptions$1;
 
-  function _typeof$6(o) {
-    "@babel/helpers - typeof";
-
-    return _typeof$6 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
-      return typeof o;
-    } : function (o) {
-      return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$6(o);
-  }
-  function _classCallCheck$6(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties$6(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor) descriptor.writable = true;
-      Object.defineProperty(target, _toPropertyKey$6(descriptor.key), descriptor);
-    }
-  }
-  function _createClass$6(Constructor, protoProps, staticProps) {
-    if (protoProps) _defineProperties$6(Constructor.prototype, protoProps);
-    if (staticProps) _defineProperties$6(Constructor, staticProps);
-    Object.defineProperty(Constructor, "prototype", {
-      writable: false
-    });
-    return Constructor;
-  }
-  function _toPropertyKey$6(arg) {
-    var key = _toPrimitive$6(arg, "string");
-    return _typeof$6(key) === "symbol" ? key : String(key);
-  }
-  function _toPrimitive$6(input, hint) {
-    if (_typeof$6(input) !== "object" || input === null) return input;
-    var prim = input[Symbol.toPrimitive];
-    if (prim !== undefined) {
-      var res = prim.call(input, hint || "default");
-      if (_typeof$6(res) !== "object") return res;
-      throw new TypeError("@@toPrimitive must return a primitive value.");
-    }
-    return (hint === "string" ? String : Number)(input);
-  }
   /* eslint no-unused-vars: "off" */
-  var NoopUrlStorage = /*#__PURE__*/function () {
-    function NoopUrlStorage() {
-      _classCallCheck$6(this, NoopUrlStorage);
-    }
-    _createClass$6(NoopUrlStorage, [{
-      key: "listAllUploads",
-      value: function listAllUploads() {
-        return Promise.resolve([]);
-      }
-    }, {
-      key: "findUploadsByFingerprint",
-      value: function findUploadsByFingerprint(fingerprint) {
-        return Promise.resolve([]);
-      }
-    }, {
-      key: "removeUpload",
-      value: function removeUpload(urlStorageKey) {
-        return Promise.resolve();
-      }
-    }, {
-      key: "addUpload",
-      value: function addUpload(fingerprint, upload) {
-        return Promise.resolve(null);
-      }
-    }]);
-    return NoopUrlStorage;
-  }();
 
-  function _typeof$5(o) {
-    "@babel/helpers - typeof";
+  class NoopUrlStorage {
+    listAllUploads() {
+      return Promise.resolve([]);
+    }
+    findUploadsByFingerprint(fingerprint) {
+      return Promise.resolve([]);
+    }
+    removeUpload(urlStorageKey) {
+      return Promise.resolve();
+    }
+    addUpload(fingerprint, upload) {
+      return Promise.resolve(null);
+    }
+  }
 
-    return _typeof$5 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
-      return typeof o;
-    } : function (o) {
-      return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$5(o);
-  }
-  function _classCallCheck$5(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties$5(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor) descriptor.writable = true;
-      Object.defineProperty(target, _toPropertyKey$5(descriptor.key), descriptor);
-    }
-  }
-  function _createClass$5(Constructor, protoProps, staticProps) {
-    if (protoProps) _defineProperties$5(Constructor.prototype, protoProps);
-    if (staticProps) _defineProperties$5(Constructor, staticProps);
-    Object.defineProperty(Constructor, "prototype", {
-      writable: false
-    });
-    return Constructor;
-  }
-  function _toPropertyKey$5(arg) {
-    var key = _toPrimitive$5(arg, "string");
-    return _typeof$5(key) === "symbol" ? key : String(key);
-  }
-  function _toPrimitive$5(input, hint) {
-    if (_typeof$5(input) !== "object" || input === null) return input;
-    var prim = input[Symbol.toPrimitive];
-    if (prim !== undefined) {
-      var res = prim.call(input, hint || "default");
-      if (_typeof$5(res) !== "object") return res;
-      throw new TypeError("@@toPrimitive must return a primitive value.");
-    }
-    return (hint === "string" ? String : Number)(input);
-  }
-  var hasStorage = false;
+  let hasStorage = false;
   try {
     hasStorage = 'localStorage' in window;
 
@@ -7127,8 +5353,8 @@
     // Mode on Safari on iOS (see #49)
     // If the key was not used before, we remove it from local storage again to
     // not cause confusion where the entry came from.
-    var key = 'tusSupport';
-    var originalValue = localStorage.getItem(key);
+    const key = 'tusSupport';
+    const originalValue = localStorage.getItem(key);
     localStorage.setItem(key, originalValue);
     if (originalValue === null) localStorage.removeItem(key);
   } catch (e) {
@@ -7141,227 +5367,125 @@
       throw e;
     }
   }
-  var canStoreURLs = hasStorage;
-  var WebStorageUrlStorage = /*#__PURE__*/function () {
-    function WebStorageUrlStorage() {
-      _classCallCheck$5(this, WebStorageUrlStorage);
+  const canStoreURLs = hasStorage;
+  class WebStorageUrlStorage {
+    findAllUploads() {
+      const results = this._findEntries('tus::');
+      return Promise.resolve(results);
     }
-    _createClass$5(WebStorageUrlStorage, [{
-      key: "findAllUploads",
-      value: function findAllUploads() {
-        var results = this._findEntries('tus::');
-        return Promise.resolve(results);
-      }
-    }, {
-      key: "findUploadsByFingerprint",
-      value: function findUploadsByFingerprint(fingerprint) {
-        var results = this._findEntries("tus::".concat(fingerprint, "::"));
-        return Promise.resolve(results);
-      }
-    }, {
-      key: "removeUpload",
-      value: function removeUpload(urlStorageKey) {
-        localStorage.removeItem(urlStorageKey);
-        return Promise.resolve();
-      }
-    }, {
-      key: "addUpload",
-      value: function addUpload(fingerprint, upload) {
-        var id = Math.round(Math.random() * 1e12);
-        var key = "tus::".concat(fingerprint, "::").concat(id);
-        localStorage.setItem(key, JSON.stringify(upload));
-        return Promise.resolve(key);
-      }
-    }, {
-      key: "_findEntries",
-      value: function _findEntries(prefix) {
-        var results = [];
-        for (var i = 0; i < localStorage.length; i++) {
-          var _key = localStorage.key(i);
-          if (_key.indexOf(prefix) !== 0) continue;
-          try {
-            var upload = JSON.parse(localStorage.getItem(_key));
-            upload.urlStorageKey = _key;
-            results.push(upload);
-          } catch (e) {
-            // The JSON parse error is intentionally ignored here, so a malformed
-            // entry in the storage cannot prevent an upload.
-          }
+    findUploadsByFingerprint(fingerprint) {
+      const results = this._findEntries(`tus::${fingerprint}::`);
+      return Promise.resolve(results);
+    }
+    removeUpload(urlStorageKey) {
+      localStorage.removeItem(urlStorageKey);
+      return Promise.resolve();
+    }
+    addUpload(fingerprint, upload) {
+      const id = Math.round(Math.random() * 1e12);
+      const key = `tus::${fingerprint}::${id}`;
+      localStorage.setItem(key, JSON.stringify(upload));
+      return Promise.resolve(key);
+    }
+    _findEntries(prefix) {
+      const results = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.indexOf(prefix) !== 0) continue;
+        try {
+          const upload = JSON.parse(localStorage.getItem(key));
+          upload.urlStorageKey = key;
+          results.push(upload);
+        } catch (e) {
+          // The JSON parse error is intentionally ignored here, so a malformed
+          // entry in the storage cannot prevent an upload.
         }
-        return results;
       }
-    }]);
-    return WebStorageUrlStorage;
-  }();
+      return results;
+    }
+  }
 
-  function _typeof$4(o) {
-    "@babel/helpers - typeof";
-
-    return _typeof$4 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
-      return typeof o;
-    } : function (o) {
-      return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$4(o);
-  }
-  function _classCallCheck$4(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties$4(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor) descriptor.writable = true;
-      Object.defineProperty(target, _toPropertyKey$4(descriptor.key), descriptor);
-    }
-  }
-  function _createClass$4(Constructor, protoProps, staticProps) {
-    if (protoProps) _defineProperties$4(Constructor.prototype, protoProps);
-    if (staticProps) _defineProperties$4(Constructor, staticProps);
-    Object.defineProperty(Constructor, "prototype", {
-      writable: false
-    });
-    return Constructor;
-  }
-  function _toPropertyKey$4(arg) {
-    var key = _toPrimitive$4(arg, "string");
-    return _typeof$4(key) === "symbol" ? key : String(key);
-  }
-  function _toPrimitive$4(input, hint) {
-    if (_typeof$4(input) !== "object" || input === null) return input;
-    var prim = input[Symbol.toPrimitive];
-    if (prim !== undefined) {
-      var res = prim.call(input, hint || "default");
-      if (_typeof$4(res) !== "object") return res;
-      throw new TypeError("@@toPrimitive must return a primitive value.");
-    }
-    return (hint === "string" ? String : Number)(input);
-  }
   /* eslint-disable max-classes-per-file */
-  var XHRHttpStack = /*#__PURE__*/function () {
-    function XHRHttpStack() {
-      _classCallCheck$4(this, XHRHttpStack);
+  class XHRHttpStack {
+    createRequest(method, url) {
+      return new Request(method, url);
     }
-    _createClass$4(XHRHttpStack, [{
-      key: "createRequest",
-      value: function createRequest(method, url) {
-        return new Request(method, url);
-      }
-    }, {
-      key: "getName",
-      value: function getName() {
-        return 'XHRHttpStack';
-      }
-    }]);
-    return XHRHttpStack;
-  }();
-  var Request = /*#__PURE__*/function () {
-    function Request(method, url) {
-      _classCallCheck$4(this, Request);
+    getName() {
+      return 'XHRHttpStack';
+    }
+  }
+  class Request {
+    constructor(method, url) {
       this._xhr = new XMLHttpRequest();
       this._xhr.open(method, url, true);
       this._method = method;
       this._url = url;
       this._headers = {};
     }
-    _createClass$4(Request, [{
-      key: "getMethod",
-      value: function getMethod() {
-        return this._method;
+    getMethod() {
+      return this._method;
+    }
+    getURL() {
+      return this._url;
+    }
+    setHeader(header, value) {
+      this._xhr.setRequestHeader(header, value);
+      this._headers[header] = value;
+    }
+    getHeader(header) {
+      return this._headers[header];
+    }
+    setProgressHandler(progressHandler) {
+      // Test support for progress events before attaching an event listener
+      if (!('upload' in this._xhr)) {
+        return;
       }
-    }, {
-      key: "getURL",
-      value: function getURL() {
-        return this._url;
-      }
-    }, {
-      key: "setHeader",
-      value: function setHeader(header, value) {
-        this._xhr.setRequestHeader(header, value);
-        this._headers[header] = value;
-      }
-    }, {
-      key: "getHeader",
-      value: function getHeader(header) {
-        return this._headers[header];
-      }
-    }, {
-      key: "setProgressHandler",
-      value: function setProgressHandler(progressHandler) {
-        // Test support for progress events before attaching an event listener
-        if (!('upload' in this._xhr)) {
+      this._xhr.upload.onprogress = e => {
+        if (!e.lengthComputable) {
           return;
         }
-        this._xhr.upload.onprogress = function (e) {
-          if (!e.lengthComputable) {
-            return;
-          }
-          progressHandler(e.loaded);
+        progressHandler(e.loaded);
+      };
+    }
+    send() {
+      let body = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+      return new Promise((resolve, reject) => {
+        this._xhr.onload = () => {
+          resolve(new Response(this._xhr));
         };
-      }
-    }, {
-      key: "send",
-      value: function send() {
-        var _this = this;
-        var body = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
-        return new Promise(function (resolve, reject) {
-          _this._xhr.onload = function () {
-            resolve(new Response(_this._xhr));
-          };
-          _this._xhr.onerror = function (err) {
-            reject(err);
-          };
-          _this._xhr.send(body);
-        });
-      }
-    }, {
-      key: "abort",
-      value: function abort() {
-        this._xhr.abort();
-        return Promise.resolve();
-      }
-    }, {
-      key: "getUnderlyingObject",
-      value: function getUnderlyingObject() {
-        return this._xhr;
-      }
-    }]);
-    return Request;
-  }();
-  var Response = /*#__PURE__*/function () {
-    function Response(xhr) {
-      _classCallCheck$4(this, Response);
+        this._xhr.onerror = err => {
+          reject(err);
+        };
+        this._xhr.send(body);
+      });
+    }
+    abort() {
+      this._xhr.abort();
+      return Promise.resolve();
+    }
+    getUnderlyingObject() {
+      return this._xhr;
+    }
+  }
+  class Response {
+    constructor(xhr) {
       this._xhr = xhr;
     }
-    _createClass$4(Response, [{
-      key: "getStatus",
-      value: function getStatus() {
-        return this._xhr.status;
-      }
-    }, {
-      key: "getHeader",
-      value: function getHeader(header) {
-        return this._xhr.getResponseHeader(header);
-      }
-    }, {
-      key: "getBody",
-      value: function getBody() {
-        return this._xhr.responseText;
-      }
-    }, {
-      key: "getUnderlyingObject",
-      value: function getUnderlyingObject() {
-        return this._xhr;
-      }
-    }]);
-    return Response;
-  }();
+    getStatus() {
+      return this._xhr.status;
+    }
+    getHeader(header) {
+      return this._xhr.getResponseHeader(header);
+    }
+    getBody() {
+      return this._xhr.responseText;
+    }
+    getUnderlyingObject() {
+      return this._xhr;
+    }
+  }
 
-  var isReactNative = function isReactNative() {
-    return typeof navigator !== 'undefined' && typeof navigator.product === 'string' && navigator.product.toLowerCase() === 'reactnative';
-  };
+  const isReactNative = () => typeof navigator !== 'undefined' && typeof navigator.product === 'string' && navigator.product.toLowerCase() === 'reactnative';
 
   /**
    * uriToBlob resolves a URI to a Blob object. This is used for
@@ -7369,14 +5493,14 @@
    * URI) as a blob.
    */
   function uriToBlob(uri) {
-    return new Promise(function (resolve, reject) {
-      var xhr = new XMLHttpRequest();
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
       xhr.responseType = 'blob';
-      xhr.onload = function () {
-        var blob = xhr.response;
+      xhr.onload = () => {
+        const blob = xhr.response;
         resolve(blob);
       };
-      xhr.onerror = function (err) {
+      xhr.onerror = err => {
         reject(err);
       };
       xhr.open('GET', uri);
@@ -7384,9 +5508,7 @@
     });
   }
 
-  var isCordova = function isCordova() {
-    return typeof window !== 'undefined' && (typeof window.PhoneGap !== 'undefined' || typeof window.Cordova !== 'undefined' || typeof window.cordova !== 'undefined');
-  };
+  const isCordova = () => typeof window !== 'undefined' && (typeof window.PhoneGap !== 'undefined' || typeof window.Cordova !== 'undefined' || typeof window.cordova !== 'undefined');
 
   /**
    * readAsByteArray converts a File object to a Uint8Array.
@@ -7394,143 +5516,46 @@
    * See https://cordova.apache.org/docs/en/latest/reference/cordova-plugin-file/index.html#read-a-file
    */
   function readAsByteArray(chunk) {
-    return new Promise(function (resolve, reject) {
-      var reader = new FileReader();
-      reader.onload = function () {
-        var value = new Uint8Array(reader.result);
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const value = new Uint8Array(reader.result);
         resolve({
-          value: value
+          value
         });
       };
-      reader.onerror = function (err) {
+      reader.onerror = err => {
         reject(err);
       };
       reader.readAsArrayBuffer(chunk);
     });
   }
 
-  function _typeof$3(o) {
-    "@babel/helpers - typeof";
-
-    return _typeof$3 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
-      return typeof o;
-    } : function (o) {
-      return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$3(o);
-  }
-  function _classCallCheck$3(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties$3(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor) descriptor.writable = true;
-      Object.defineProperty(target, _toPropertyKey$3(descriptor.key), descriptor);
-    }
-  }
-  function _createClass$3(Constructor, protoProps, staticProps) {
-    if (protoProps) _defineProperties$3(Constructor.prototype, protoProps);
-    if (staticProps) _defineProperties$3(Constructor, staticProps);
-    Object.defineProperty(Constructor, "prototype", {
-      writable: false
-    });
-    return Constructor;
-  }
-  function _toPropertyKey$3(arg) {
-    var key = _toPrimitive$3(arg, "string");
-    return _typeof$3(key) === "symbol" ? key : String(key);
-  }
-  function _toPrimitive$3(input, hint) {
-    if (_typeof$3(input) !== "object" || input === null) return input;
-    var prim = input[Symbol.toPrimitive];
-    if (prim !== undefined) {
-      var res = prim.call(input, hint || "default");
-      if (_typeof$3(res) !== "object") return res;
-      throw new TypeError("@@toPrimitive must return a primitive value.");
-    }
-    return (hint === "string" ? String : Number)(input);
-  }
-  var FileSource = /*#__PURE__*/function () {
+  class FileSource {
     // Make this.size a method
-    function FileSource(file) {
-      _classCallCheck$3(this, FileSource);
+    constructor(file) {
       this._file = file;
       this.size = file.size;
     }
-    _createClass$3(FileSource, [{
-      key: "slice",
-      value: function slice(start, end) {
-        // In Apache Cordova applications, a File must be resolved using
-        // FileReader instances, see
-        // https://cordova.apache.org/docs/en/8.x/reference/cordova-plugin-file/index.html#read-a-file
-        if (isCordova()) {
-          return readAsByteArray(this._file.slice(start, end));
-        }
-        var value = this._file.slice(start, end);
-        var done = end >= this.size;
-        return Promise.resolve({
-          value: value,
-          done: done
-        });
+    slice(start, end) {
+      // In Apache Cordova applications, a File must be resolved using
+      // FileReader instances, see
+      // https://cordova.apache.org/docs/en/8.x/reference/cordova-plugin-file/index.html#read-a-file
+      if (isCordova()) {
+        return readAsByteArray(this._file.slice(start, end));
       }
-    }, {
-      key: "close",
-      value: function close() {
-        // Nothing to do here since we don't need to release any resources.
-      }
-    }]);
-    return FileSource;
-  }();
+      const value = this._file.slice(start, end);
+      const done = end >= this.size;
+      return Promise.resolve({
+        value,
+        done
+      });
+    }
+    close() {
+      // Nothing to do here since we don't need to release any resources.
+    }
+  }
 
-  function _typeof$2(o) {
-    "@babel/helpers - typeof";
-
-    return _typeof$2 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
-      return typeof o;
-    } : function (o) {
-      return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$2(o);
-  }
-  function _classCallCheck$2(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties$2(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor) descriptor.writable = true;
-      Object.defineProperty(target, _toPropertyKey$2(descriptor.key), descriptor);
-    }
-  }
-  function _createClass$2(Constructor, protoProps, staticProps) {
-    if (protoProps) _defineProperties$2(Constructor.prototype, protoProps);
-    if (staticProps) _defineProperties$2(Constructor, staticProps);
-    Object.defineProperty(Constructor, "prototype", {
-      writable: false
-    });
-    return Constructor;
-  }
-  function _toPropertyKey$2(arg) {
-    var key = _toPrimitive$2(arg, "string");
-    return _typeof$2(key) === "symbol" ? key : String(key);
-  }
-  function _toPrimitive$2(input, hint) {
-    if (_typeof$2(input) !== "object" || input === null) return input;
-    var prim = input[Symbol.toPrimitive];
-    if (prim !== undefined) {
-      var res = prim.call(input, hint || "default");
-      if (_typeof$2(res) !== "object") return res;
-      throw new TypeError("@@toPrimitive must return a primitive value.");
-    }
-    return (hint === "string" ? String : Number)(input);
-  }
   function len(blobOrArray) {
     if (blobOrArray === undefined) return 0;
     if (blobOrArray.size !== undefined) return blobOrArray.size;
@@ -7553,524 +5578,107 @@
     }
     if (a.set) {
       // Is `a` a typed array?
-      var c = new a.constructor(a.length + b.length);
+      const c = new a.constructor(a.length + b.length);
       c.set(a);
       c.set(b, a.length);
       return c;
     }
     throw new Error('Unknown data type');
   }
-  var StreamSource = /*#__PURE__*/function () {
-    function StreamSource(reader) {
-      _classCallCheck$2(this, StreamSource);
+  class StreamSource {
+    constructor(reader) {
       this._buffer = undefined;
       this._bufferOffset = 0;
       this._reader = reader;
       this._done = false;
     }
-    _createClass$2(StreamSource, [{
-      key: "slice",
-      value: function slice(start, end) {
-        if (start < this._bufferOffset) {
-          return Promise.reject(new Error("Requested data is before the reader's current offset"));
+    slice(start, end) {
+      if (start < this._bufferOffset) {
+        return Promise.reject(new Error("Requested data is before the reader's current offset"));
+      }
+      return this._readUntilEnoughDataOrDone(start, end);
+    }
+    _readUntilEnoughDataOrDone(start, end) {
+      const hasEnoughData = end <= this._bufferOffset + len(this._buffer);
+      if (this._done || hasEnoughData) {
+        const value = this._getDataFromBuffer(start, end);
+        const done = value == null ? this._done : false;
+        return Promise.resolve({
+          value,
+          done
+        });
+      }
+      return this._reader.read().then(_ref => {
+        let {
+          value,
+          done
+        } = _ref;
+        if (done) {
+          this._done = true;
+        } else if (this._buffer === undefined) {
+          this._buffer = value;
+        } else {
+          this._buffer = concat(this._buffer, value);
         }
         return this._readUntilEnoughDataOrDone(start, end);
+      });
+    }
+    _getDataFromBuffer(start, end) {
+      // Remove data from buffer before `start`.
+      // Data might be reread from the buffer if an upload fails, so we can only
+      // safely delete data when it comes *before* what is currently being read.
+      if (start > this._bufferOffset) {
+        this._buffer = this._buffer.slice(start - this._bufferOffset);
+        this._bufferOffset = start;
       }
-    }, {
-      key: "_readUntilEnoughDataOrDone",
-      value: function _readUntilEnoughDataOrDone(start, end) {
-        var _this = this;
-        var hasEnoughData = end <= this._bufferOffset + len(this._buffer);
-        if (this._done || hasEnoughData) {
-          var value = this._getDataFromBuffer(start, end);
-          var done = value == null ? this._done : false;
-          return Promise.resolve({
-            value: value,
-            done: done
-          });
-        }
-        return this._reader.read().then(function (_ref) {
-          var value = _ref.value,
-            done = _ref.done;
-          if (done) {
-            _this._done = true;
-          } else if (_this._buffer === undefined) {
-            _this._buffer = value;
-          } else {
-            _this._buffer = concat(_this._buffer, value);
-          }
-          return _this._readUntilEnoughDataOrDone(start, end);
-        });
+      // If the buffer is empty after removing old data, all data has been read.
+      const hasAllDataBeenRead = len(this._buffer) === 0;
+      if (this._done && hasAllDataBeenRead) {
+        return null;
       }
-    }, {
-      key: "_getDataFromBuffer",
-      value: function _getDataFromBuffer(start, end) {
-        // Remove data from buffer before `start`.
-        // Data might be reread from the buffer if an upload fails, so we can only
-        // safely delete data when it comes *before* what is currently being read.
-        if (start > this._bufferOffset) {
-          this._buffer = this._buffer.slice(start - this._bufferOffset);
-          this._bufferOffset = start;
-        }
-        // If the buffer is empty after removing old data, all data has been read.
-        var hasAllDataBeenRead = len(this._buffer) === 0;
-        if (this._done && hasAllDataBeenRead) {
-          return null;
-        }
-        // We already removed data before `start`, so we just return the first
-        // chunk from the buffer.
-        return this._buffer.slice(0, end - start);
+      // We already removed data before `start`, so we just return the first
+      // chunk from the buffer.
+      return this._buffer.slice(0, end - start);
+    }
+    close() {
+      if (this._reader.cancel) {
+        this._reader.cancel();
       }
-    }, {
-      key: "close",
-      value: function close() {
-        if (this._reader.cancel) {
-          this._reader.cancel();
-        }
-      }
-    }]);
-    return StreamSource;
-  }();
+    }
+  }
 
-  function _typeof$1(o) {
-    "@babel/helpers - typeof";
+  let FileReader$1 = class FileReader {
+    async openFile(input, chunkSize) {
+      // In React Native, when user selects a file, instead of a File or Blob,
+      // you usually get a file object {} with a uri property that contains
+      // a local path to the file. We use XMLHttpRequest to fetch
+      // the file blob, before uploading with tus.
+      if (isReactNative() && input && typeof input.uri !== 'undefined') {
+        try {
+          const blob = await uriToBlob(input.uri);
+          return new FileSource(blob);
+        } catch (err) {
+          throw new Error(`tus: cannot fetch \`file.uri\` as Blob, make sure the uri is correct and accessible. ${err}`);
+        }
+      }
 
-    return _typeof$1 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
-      return typeof o;
-    } : function (o) {
-      return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof$1(o);
-  }
-  function _regeneratorRuntime() {
-
-    /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */
-    _regeneratorRuntime = function _regeneratorRuntime() {
-      return e;
-    };
-    var t,
-      e = {},
-      r = Object.prototype,
-      n = r.hasOwnProperty,
-      o = Object.defineProperty || function (t, e, r) {
-        t[e] = r.value;
-      },
-      i = "function" == typeof Symbol ? Symbol : {},
-      a = i.iterator || "@@iterator",
-      c = i.asyncIterator || "@@asyncIterator",
-      u = i.toStringTag || "@@toStringTag";
-    function define(t, e, r) {
-      return Object.defineProperty(t, e, {
-        value: r,
-        enumerable: !0,
-        configurable: !0,
-        writable: !0
-      }), t[e];
-    }
-    try {
-      define({}, "");
-    } catch (t) {
-      define = function define(t, e, r) {
-        return t[e] = r;
-      };
-    }
-    function wrap(t, e, r, n) {
-      var i = e && e.prototype instanceof Generator ? e : Generator,
-        a = Object.create(i.prototype),
-        c = new Context(n || []);
-      return o(a, "_invoke", {
-        value: makeInvokeMethod(t, r, c)
-      }), a;
-    }
-    function tryCatch(t, e, r) {
-      try {
-        return {
-          type: "normal",
-          arg: t.call(e, r)
-        };
-      } catch (t) {
-        return {
-          type: "throw",
-          arg: t
-        };
+      // Since we emulate the Blob type in our tests (not all target browsers
+      // support it), we cannot use `instanceof` for testing whether the input value
+      // can be handled. Instead, we simply check is the slice() function and the
+      // size property are available.
+      if (typeof input.slice === 'function' && typeof input.size !== 'undefined') {
+        return Promise.resolve(new FileSource(input));
       }
-    }
-    e.wrap = wrap;
-    var h = "suspendedStart",
-      l = "suspendedYield",
-      f = "executing",
-      s = "completed",
-      y = {};
-    function Generator() {}
-    function GeneratorFunction() {}
-    function GeneratorFunctionPrototype() {}
-    var p = {};
-    define(p, a, function () {
-      return this;
-    });
-    var d = Object.getPrototypeOf,
-      v = d && d(d(values([])));
-    v && v !== r && n.call(v, a) && (p = v);
-    var g = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(p);
-    function defineIteratorMethods(t) {
-      ["next", "throw", "return"].forEach(function (e) {
-        define(t, e, function (t) {
-          return this._invoke(e, t);
-        });
-      });
-    }
-    function AsyncIterator(t, e) {
-      function invoke(r, o, i, a) {
-        var c = tryCatch(t[r], t, o);
-        if ("throw" !== c.type) {
-          var u = c.arg,
-            h = u.value;
-          return h && "object" == _typeof$1(h) && n.call(h, "__await") ? e.resolve(h.__await).then(function (t) {
-            invoke("next", t, i, a);
-          }, function (t) {
-            invoke("throw", t, i, a);
-          }) : e.resolve(h).then(function (t) {
-            u.value = t, i(u);
-          }, function (t) {
-            return invoke("throw", t, i, a);
-          });
+      if (typeof input.read === 'function') {
+        chunkSize = Number(chunkSize);
+        if (!Number.isFinite(chunkSize)) {
+          return Promise.reject(new Error('cannot create source for stream without a finite value for the `chunkSize` option'));
         }
-        a(c.arg);
+        return Promise.resolve(new StreamSource(input, chunkSize));
       }
-      var r;
-      o(this, "_invoke", {
-        value: function value(t, n) {
-          function callInvokeWithMethodAndArg() {
-            return new e(function (e, r) {
-              invoke(t, n, e, r);
-            });
-          }
-          return r = r ? r.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg();
-        }
-      });
+      return Promise.reject(new Error('source object may only be an instance of File, Blob, or Reader in this environment'));
     }
-    function makeInvokeMethod(e, r, n) {
-      var o = h;
-      return function (i, a) {
-        if (o === f) throw new Error("Generator is already running");
-        if (o === s) {
-          if ("throw" === i) throw a;
-          return {
-            value: t,
-            done: !0
-          };
-        }
-        for (n.method = i, n.arg = a;;) {
-          var c = n.delegate;
-          if (c) {
-            var u = maybeInvokeDelegate(c, n);
-            if (u) {
-              if (u === y) continue;
-              return u;
-            }
-          }
-          if ("next" === n.method) n.sent = n._sent = n.arg;else if ("throw" === n.method) {
-            if (o === h) throw o = s, n.arg;
-            n.dispatchException(n.arg);
-          } else "return" === n.method && n.abrupt("return", n.arg);
-          o = f;
-          var p = tryCatch(e, r, n);
-          if ("normal" === p.type) {
-            if (o = n.done ? s : l, p.arg === y) continue;
-            return {
-              value: p.arg,
-              done: n.done
-            };
-          }
-          "throw" === p.type && (o = s, n.method = "throw", n.arg = p.arg);
-        }
-      };
-    }
-    function maybeInvokeDelegate(e, r) {
-      var n = r.method,
-        o = e.iterator[n];
-      if (o === t) return r.delegate = null, "throw" === n && e.iterator["return"] && (r.method = "return", r.arg = t, maybeInvokeDelegate(e, r), "throw" === r.method) || "return" !== n && (r.method = "throw", r.arg = new TypeError("The iterator does not provide a '" + n + "' method")), y;
-      var i = tryCatch(o, e.iterator, r.arg);
-      if ("throw" === i.type) return r.method = "throw", r.arg = i.arg, r.delegate = null, y;
-      var a = i.arg;
-      return a ? a.done ? (r[e.resultName] = a.value, r.next = e.nextLoc, "return" !== r.method && (r.method = "next", r.arg = t), r.delegate = null, y) : a : (r.method = "throw", r.arg = new TypeError("iterator result is not an object"), r.delegate = null, y);
-    }
-    function pushTryEntry(t) {
-      var e = {
-        tryLoc: t[0]
-      };
-      1 in t && (e.catchLoc = t[1]), 2 in t && (e.finallyLoc = t[2], e.afterLoc = t[3]), this.tryEntries.push(e);
-    }
-    function resetTryEntry(t) {
-      var e = t.completion || {};
-      e.type = "normal", delete e.arg, t.completion = e;
-    }
-    function Context(t) {
-      this.tryEntries = [{
-        tryLoc: "root"
-      }], t.forEach(pushTryEntry, this), this.reset(!0);
-    }
-    function values(e) {
-      if (e || "" === e) {
-        var r = e[a];
-        if (r) return r.call(e);
-        if ("function" == typeof e.next) return e;
-        if (!isNaN(e.length)) {
-          var o = -1,
-            i = function next() {
-              for (; ++o < e.length;) if (n.call(e, o)) return next.value = e[o], next.done = !1, next;
-              return next.value = t, next.done = !0, next;
-            };
-          return i.next = i;
-        }
-      }
-      throw new TypeError(_typeof$1(e) + " is not iterable");
-    }
-    return GeneratorFunction.prototype = GeneratorFunctionPrototype, o(g, "constructor", {
-      value: GeneratorFunctionPrototype,
-      configurable: !0
-    }), o(GeneratorFunctionPrototype, "constructor", {
-      value: GeneratorFunction,
-      configurable: !0
-    }), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, u, "GeneratorFunction"), e.isGeneratorFunction = function (t) {
-      var e = "function" == typeof t && t.constructor;
-      return !!e && (e === GeneratorFunction || "GeneratorFunction" === (e.displayName || e.name));
-    }, e.mark = function (t) {
-      return Object.setPrototypeOf ? Object.setPrototypeOf(t, GeneratorFunctionPrototype) : (t.__proto__ = GeneratorFunctionPrototype, define(t, u, "GeneratorFunction")), t.prototype = Object.create(g), t;
-    }, e.awrap = function (t) {
-      return {
-        __await: t
-      };
-    }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, c, function () {
-      return this;
-    }), e.AsyncIterator = AsyncIterator, e.async = function (t, r, n, o, i) {
-      void 0 === i && (i = Promise);
-      var a = new AsyncIterator(wrap(t, r, n, o), i);
-      return e.isGeneratorFunction(r) ? a : a.next().then(function (t) {
-        return t.done ? t.value : a.next();
-      });
-    }, defineIteratorMethods(g), define(g, u, "Generator"), define(g, a, function () {
-      return this;
-    }), define(g, "toString", function () {
-      return "[object Generator]";
-    }), e.keys = function (t) {
-      var e = Object(t),
-        r = [];
-      for (var n in e) r.push(n);
-      return r.reverse(), function next() {
-        for (; r.length;) {
-          var t = r.pop();
-          if (t in e) return next.value = t, next.done = !1, next;
-        }
-        return next.done = !0, next;
-      };
-    }, e.values = values, Context.prototype = {
-      constructor: Context,
-      reset: function reset(e) {
-        if (this.prev = 0, this.next = 0, this.sent = this._sent = t, this.done = !1, this.delegate = null, this.method = "next", this.arg = t, this.tryEntries.forEach(resetTryEntry), !e) for (var r in this) "t" === r.charAt(0) && n.call(this, r) && !isNaN(+r.slice(1)) && (this[r] = t);
-      },
-      stop: function stop() {
-        this.done = !0;
-        var t = this.tryEntries[0].completion;
-        if ("throw" === t.type) throw t.arg;
-        return this.rval;
-      },
-      dispatchException: function dispatchException(e) {
-        if (this.done) throw e;
-        var r = this;
-        function handle(n, o) {
-          return a.type = "throw", a.arg = e, r.next = n, o && (r.method = "next", r.arg = t), !!o;
-        }
-        for (var o = this.tryEntries.length - 1; o >= 0; --o) {
-          var i = this.tryEntries[o],
-            a = i.completion;
-          if ("root" === i.tryLoc) return handle("end");
-          if (i.tryLoc <= this.prev) {
-            var c = n.call(i, "catchLoc"),
-              u = n.call(i, "finallyLoc");
-            if (c && u) {
-              if (this.prev < i.catchLoc) return handle(i.catchLoc, !0);
-              if (this.prev < i.finallyLoc) return handle(i.finallyLoc);
-            } else if (c) {
-              if (this.prev < i.catchLoc) return handle(i.catchLoc, !0);
-            } else {
-              if (!u) throw new Error("try statement without catch or finally");
-              if (this.prev < i.finallyLoc) return handle(i.finallyLoc);
-            }
-          }
-        }
-      },
-      abrupt: function abrupt(t, e) {
-        for (var r = this.tryEntries.length - 1; r >= 0; --r) {
-          var o = this.tryEntries[r];
-          if (o.tryLoc <= this.prev && n.call(o, "finallyLoc") && this.prev < o.finallyLoc) {
-            var i = o;
-            break;
-          }
-        }
-        i && ("break" === t || "continue" === t) && i.tryLoc <= e && e <= i.finallyLoc && (i = null);
-        var a = i ? i.completion : {};
-        return a.type = t, a.arg = e, i ? (this.method = "next", this.next = i.finallyLoc, y) : this.complete(a);
-      },
-      complete: function complete(t, e) {
-        if ("throw" === t.type) throw t.arg;
-        return "break" === t.type || "continue" === t.type ? this.next = t.arg : "return" === t.type ? (this.rval = this.arg = t.arg, this.method = "return", this.next = "end") : "normal" === t.type && e && (this.next = e), y;
-      },
-      finish: function finish(t) {
-        for (var e = this.tryEntries.length - 1; e >= 0; --e) {
-          var r = this.tryEntries[e];
-          if (r.finallyLoc === t) return this.complete(r.completion, r.afterLoc), resetTryEntry(r), y;
-        }
-      },
-      "catch": function _catch(t) {
-        for (var e = this.tryEntries.length - 1; e >= 0; --e) {
-          var r = this.tryEntries[e];
-          if (r.tryLoc === t) {
-            var n = r.completion;
-            if ("throw" === n.type) {
-              var o = n.arg;
-              resetTryEntry(r);
-            }
-            return o;
-          }
-        }
-        throw new Error("illegal catch attempt");
-      },
-      delegateYield: function delegateYield(e, r, n) {
-        return this.delegate = {
-          iterator: values(e),
-          resultName: r,
-          nextLoc: n
-        }, "next" === this.method && (this.arg = t), y;
-      }
-    }, e;
-  }
-  function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
-    try {
-      var info = gen[key](arg);
-      var value = info.value;
-    } catch (error) {
-      reject(error);
-      return;
-    }
-    if (info.done) {
-      resolve(value);
-    } else {
-      Promise.resolve(value).then(_next, _throw);
-    }
-  }
-  function _asyncToGenerator(fn) {
-    return function () {
-      var self = this,
-        args = arguments;
-      return new Promise(function (resolve, reject) {
-        var gen = fn.apply(self, args);
-        function _next(value) {
-          asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);
-        }
-        function _throw(err) {
-          asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);
-        }
-        _next(undefined);
-      });
-    };
-  }
-  function _classCallCheck$1(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties$1(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor) descriptor.writable = true;
-      Object.defineProperty(target, _toPropertyKey$1(descriptor.key), descriptor);
-    }
-  }
-  function _createClass$1(Constructor, protoProps, staticProps) {
-    if (protoProps) _defineProperties$1(Constructor.prototype, protoProps);
-    if (staticProps) _defineProperties$1(Constructor, staticProps);
-    Object.defineProperty(Constructor, "prototype", {
-      writable: false
-    });
-    return Constructor;
-  }
-  function _toPropertyKey$1(arg) {
-    var key = _toPrimitive$1(arg, "string");
-    return _typeof$1(key) === "symbol" ? key : String(key);
-  }
-  function _toPrimitive$1(input, hint) {
-    if (_typeof$1(input) !== "object" || input === null) return input;
-    var prim = input[Symbol.toPrimitive];
-    if (prim !== undefined) {
-      var res = prim.call(input, hint || "default");
-      if (_typeof$1(res) !== "object") return res;
-      throw new TypeError("@@toPrimitive must return a primitive value.");
-    }
-    return (hint === "string" ? String : Number)(input);
-  }
-  var FileReader$1 = /*#__PURE__*/function () {
-    function FileReader() {
-      _classCallCheck$1(this, FileReader);
-    }
-    _createClass$1(FileReader, [{
-      key: "openFile",
-      value: function () {
-        var _openFile = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee(input, chunkSize) {
-          var blob;
-          return _regeneratorRuntime().wrap(function _callee$(_context) {
-            while (1) switch (_context.prev = _context.next) {
-              case 0:
-                if (!(isReactNative() && input && typeof input.uri !== 'undefined')) {
-                  _context.next = 11;
-                  break;
-                }
-                _context.prev = 1;
-                _context.next = 4;
-                return uriToBlob(input.uri);
-              case 4:
-                blob = _context.sent;
-                return _context.abrupt("return", new FileSource(blob));
-              case 8:
-                _context.prev = 8;
-                _context.t0 = _context["catch"](1);
-                throw new Error("tus: cannot fetch `file.uri` as Blob, make sure the uri is correct and accessible. ".concat(_context.t0));
-              case 11:
-                if (!(typeof input.slice === 'function' && typeof input.size !== 'undefined')) {
-                  _context.next = 13;
-                  break;
-                }
-                return _context.abrupt("return", Promise.resolve(new FileSource(input)));
-              case 13:
-                if (!(typeof input.read === 'function')) {
-                  _context.next = 18;
-                  break;
-                }
-                chunkSize = Number(chunkSize);
-                if (Number.isFinite(chunkSize)) {
-                  _context.next = 17;
-                  break;
-                }
-                return _context.abrupt("return", Promise.reject(new Error('cannot create source for stream without a finite value for the `chunkSize` option')));
-              case 17:
-                return _context.abrupt("return", Promise.resolve(new StreamSource(input, chunkSize)));
-              case 18:
-                return _context.abrupt("return", Promise.reject(new Error('source object may only be an instance of File, Blob, or Reader in this environment')));
-              case 19:
-              case "end":
-                return _context.stop();
-            }
-          }, _callee, null, [[1, 8]]);
-        }));
-        function openFile(_x, _x2) {
-          return _openFile.apply(this, arguments);
-        }
-        return openFile;
-      }()
-    }]);
-    return FileReader;
-  }();
+  };
 
   // TODO: Differenciate between input types
 
@@ -8088,198 +5696,55 @@
     return Promise.resolve(['tus-br', file.name, file.type, file.size, file.lastModified, options.endpoint].join('-'));
   }
   function reactNativeFingerprint(file, options) {
-    var exifHash = file.exif ? hashCode(JSON.stringify(file.exif)) : 'noexif';
+    const exifHash = file.exif ? hashCode(JSON.stringify(file.exif)) : 'noexif';
     return ['tus-rn', file.name || 'noname', file.size || 'nosize', exifHash, options.endpoint].join('/');
   }
   function hashCode(str) {
     /* eslint-disable no-bitwise */
     // from https://stackoverflow.com/a/8831937/151666
-    var hash = 0;
+    let hash = 0;
     if (str.length === 0) {
       return hash;
     }
-    for (var i = 0; i < str.length; i++) {
-      var _char = str.charCodeAt(i);
-      hash = (hash << 5) - hash + _char;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = (hash << 5) - hash + char;
       hash &= hash; // Convert to 32bit integer
     }
     return hash;
   }
 
-  function _typeof(o) {
-    "@babel/helpers - typeof";
-
-    return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
-      return typeof o;
-    } : function (o) {
-      return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof(o);
-  }
-  function _classCallCheck(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-  function _defineProperties(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor) descriptor.writable = true;
-      Object.defineProperty(target, _toPropertyKey(descriptor.key), descriptor);
-    }
-  }
-  function _createClass(Constructor, protoProps, staticProps) {
-    if (protoProps) _defineProperties(Constructor.prototype, protoProps);
-    if (staticProps) _defineProperties(Constructor, staticProps);
-    Object.defineProperty(Constructor, "prototype", {
-      writable: false
-    });
-    return Constructor;
-  }
-  function _inherits(subClass, superClass) {
-    if (typeof superClass !== "function" && superClass !== null) {
-      throw new TypeError("Super expression must either be null or a function");
-    }
-    subClass.prototype = Object.create(superClass && superClass.prototype, {
-      constructor: {
-        value: subClass,
-        writable: true,
-        configurable: true
-      }
-    });
-    Object.defineProperty(subClass, "prototype", {
-      writable: false
-    });
-    if (superClass) _setPrototypeOf(subClass, superClass);
-  }
-  function _setPrototypeOf(o, p) {
-    _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf(o, p) {
-      o.__proto__ = p;
-      return o;
-    };
-    return _setPrototypeOf(o, p);
-  }
-  function _createSuper(Derived) {
-    var hasNativeReflectConstruct = _isNativeReflectConstruct();
-    return function _createSuperInternal() {
-      var Super = _getPrototypeOf(Derived),
-        result;
-      if (hasNativeReflectConstruct) {
-        var NewTarget = _getPrototypeOf(this).constructor;
-        result = Reflect.construct(Super, arguments, NewTarget);
-      } else {
-        result = Super.apply(this, arguments);
-      }
-      return _possibleConstructorReturn(this, result);
-    };
-  }
-  function _possibleConstructorReturn(self, call) {
-    if (call && (_typeof(call) === "object" || typeof call === "function")) {
-      return call;
-    } else if (call !== void 0) {
-      throw new TypeError("Derived constructors may only return object or undefined");
-    }
-    return _assertThisInitialized(self);
-  }
-  function _assertThisInitialized(self) {
-    if (self === void 0) {
-      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-    }
-    return self;
-  }
-  function _isNativeReflectConstruct() {
-    if (typeof Reflect === "undefined" || !Reflect.construct) return false;
-    if (Reflect.construct.sham) return false;
-    if (typeof Proxy === "function") return true;
-    try {
-      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {}));
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-  function _getPrototypeOf(o) {
-    _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf(o) {
-      return o.__proto__ || Object.getPrototypeOf(o);
-    };
-    return _getPrototypeOf(o);
-  }
-  function ownKeys(e, r) {
-    var t = Object.keys(e);
-    if (Object.getOwnPropertySymbols) {
-      var o = Object.getOwnPropertySymbols(e);
-      r && (o = o.filter(function (r) {
-        return Object.getOwnPropertyDescriptor(e, r).enumerable;
-      })), t.push.apply(t, o);
-    }
-    return t;
-  }
-  function _objectSpread(e) {
-    for (var r = 1; r < arguments.length; r++) {
-      var t = null != arguments[r] ? arguments[r] : {};
-      r % 2 ? ownKeys(Object(t), !0).forEach(function (r) {
-        _defineProperty(e, r, t[r]);
-      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) {
-        Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r));
-      });
-    }
-    return e;
-  }
-  function _defineProperty(obj, key, value) {
-    key = _toPropertyKey(key);
-    if (key in obj) {
-      Object.defineProperty(obj, key, {
-        value: value,
-        enumerable: true,
-        configurable: true,
-        writable: true
-      });
-    } else {
-      obj[key] = value;
-    }
-    return obj;
-  }
-  function _toPropertyKey(arg) {
-    var key = _toPrimitive(arg, "string");
-    return _typeof(key) === "symbol" ? key : String(key);
-  }
-  function _toPrimitive(input, hint) {
-    if (_typeof(input) !== "object" || input === null) return input;
-    var prim = input[Symbol.toPrimitive];
-    if (prim !== undefined) {
-      var res = prim.call(input, hint || "default");
-      if (_typeof(res) !== "object") return res;
-      throw new TypeError("@@toPrimitive must return a primitive value.");
-    }
-    return (hint === "string" ? String : Number)(input);
-  }
-  var defaultOptions = _objectSpread(_objectSpread({}, BaseUpload.defaultOptions), {}, {
+  const defaultOptions = {
+    ...BaseUpload.defaultOptions,
     httpStack: new XHRHttpStack(),
     fileReader: new FileReader$1(),
     urlStorage: canStoreURLs ? new WebStorageUrlStorage() : new NoopUrlStorage(),
-    fingerprint: fingerprint
-  });
-  var Upload = /*#__PURE__*/function (_BaseUpload) {
-    _inherits(Upload, _BaseUpload);
-    var _super = _createSuper(Upload);
-    function Upload() {
-      var file = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
-      var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-      _classCallCheck(this, Upload);
-      options = _objectSpread(_objectSpread({}, defaultOptions), options);
-      return _super.call(this, file, options);
+    fingerprint
+  };
+  class Upload extends BaseUpload {
+    constructor() {
+      let file = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+      let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+      options = {
+        ...defaultOptions,
+        ...options
+      };
+      super(file, options);
     }
-    _createClass(Upload, null, [{
-      key: "terminate",
-      value: function terminate(url) {
-        var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-        options = _objectSpread(_objectSpread({}, defaultOptions), options);
-        return BaseUpload.terminate(url, options);
-      }
-    }]);
-    return Upload;
-  }(BaseUpload);
+    static terminate(url) {
+      let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+      options = {
+        ...defaultOptions,
+        ...options
+      };
+      return BaseUpload.terminate(url, options);
+    }
+  }
+  const {
+    XMLHttpRequest: XMLHttpRequest$1,
+    Blob: Blob$1
+  } = window;
+  XMLHttpRequest$1 && Blob$1 && typeof Blob$1.prototype.slice === 'function';
 
   class TusUpload extends BaseUpload$1 {
     constructor(_ref) {
@@ -8299,33 +5764,33 @@
         type: "tus",
         uploadIndex
       });
-      _defineProperty$2(this, "onError", void 0);
-      _defineProperty$2(this, "onProgress", void 0);
-      _defineProperty$2(this, "onSuccess", void 0);
-      _defineProperty$2(this, "id", void 0);
-      _defineProperty$2(this, "upload", void 0);
-      _defineProperty$2(this, "csrfToken", void 0);
-      _defineProperty$2(this, "handleError", error => {
+      _defineProperty(this, "onError", void 0);
+      _defineProperty(this, "onProgress", void 0);
+      _defineProperty(this, "onSuccess", void 0);
+      _defineProperty(this, "id", void 0);
+      _defineProperty(this, "upload", void 0);
+      _defineProperty(this, "csrfToken", void 0);
+      _defineProperty(this, "handleError", error => {
         if (this.onError) {
           this.onError(error);
         } else {
           throw error;
         }
       });
-      _defineProperty$2(this, "handleProgress", (bytesUploaded, bytesTotal) => {
+      _defineProperty(this, "handleProgress", (bytesUploaded, bytesTotal) => {
         if (this.onProgress) {
           this.onProgress(bytesUploaded, bytesTotal);
         }
       });
-      _defineProperty$2(this, "handleSucces", () => {
+      _defineProperty(this, "handleSucces", () => {
         if (this.onSuccess) {
           this.onSuccess();
         }
       });
-      _defineProperty$2(this, "addCsrTokenToRequest", request => {
+      _defineProperty(this, "addCsrTokenToRequest", request => {
         request.setHeader("X-CSRFToken", this.csrfToken);
       });
-      _defineProperty$2(this, "handleAfterReponse", (_request, response) => {
+      _defineProperty(this, "handleAfterReponse", (_request, response) => {
         const resourceId = response.getHeader("ResourceId");
         if (resourceId) {
           this.id = resourceId;
@@ -8402,24 +5867,24 @@
         translations,
         uploadUrl
       } = _ref;
-      _defineProperty$2(this, "acceptedFileTypes", void 0);
-      _defineProperty$2(this, "callbacks", void 0);
-      _defineProperty$2(this, "chunkSize", void 0);
-      _defineProperty$2(this, "csrfToken", void 0);
-      _defineProperty$2(this, "eventEmitter", void 0);
-      _defineProperty$2(this, "fieldName", void 0);
-      _defineProperty$2(this, "form", void 0);
-      _defineProperty$2(this, "formId", void 0);
-      _defineProperty$2(this, "multiple", void 0);
-      _defineProperty$2(this, "nextUploadIndex", void 0);
-      _defineProperty$2(this, "prefix", void 0);
-      _defineProperty$2(this, "renderer", void 0);
-      _defineProperty$2(this, "retryDelays", void 0);
-      _defineProperty$2(this, "s3UploadDir", void 0);
-      _defineProperty$2(this, "supportDropArea", void 0);
-      _defineProperty$2(this, "uploads", void 0);
-      _defineProperty$2(this, "uploadUrl", void 0);
-      _defineProperty$2(this, "uploadFiles", async files => {
+      _defineProperty(this, "acceptedFileTypes", void 0);
+      _defineProperty(this, "callbacks", void 0);
+      _defineProperty(this, "chunkSize", void 0);
+      _defineProperty(this, "csrfToken", void 0);
+      _defineProperty(this, "eventEmitter", void 0);
+      _defineProperty(this, "fieldName", void 0);
+      _defineProperty(this, "form", void 0);
+      _defineProperty(this, "formId", void 0);
+      _defineProperty(this, "multiple", void 0);
+      _defineProperty(this, "nextUploadIndex", void 0);
+      _defineProperty(this, "prefix", void 0);
+      _defineProperty(this, "renderer", void 0);
+      _defineProperty(this, "retryDelays", void 0);
+      _defineProperty(this, "s3UploadDir", void 0);
+      _defineProperty(this, "supportDropArea", void 0);
+      _defineProperty(this, "uploads", void 0);
+      _defineProperty(this, "uploadUrl", void 0);
+      _defineProperty(this, "uploadFiles", async files => {
         if (files.length === 0) {
           return;
         }
@@ -8439,7 +5904,7 @@
         }
         this.checkDropHint();
       });
-      _defineProperty$2(this, "onChange", e => {
+      _defineProperty(this, "onChange", e => {
         const files = e.target.files || [];
         const acceptedFiles = [];
         const invalidFiles = [];
@@ -8458,10 +5923,10 @@
         }
         this.renderer.clearInput();
       });
-      _defineProperty$2(this, "handleInvalidFiles", files => {
+      _defineProperty(this, "handleInvalidFiles", files => {
         this.renderer.setErrorInvalidFiles(files);
       });
-      _defineProperty$2(this, "handleClick", e => {
+      _defineProperty(this, "handleClick", e => {
         const target = e.target;
         const getUpload = () => {
           const dataIndex = target.getAttribute("data-index");
@@ -8496,7 +5961,7 @@
           }
         }
       });
-      _defineProperty$2(this, "handleProgress", (upload, bytesUploaded, bytesTotal) => {
+      _defineProperty(this, "handleProgress", (upload, bytesUploaded, bytesTotal) => {
         const percentage = (bytesUploaded / bytesTotal * 100).toFixed(2);
         this.renderer.updateProgress(upload.uploadIndex, percentage);
         const {
@@ -8508,7 +5973,7 @@
           }
         }
       });
-      _defineProperty$2(this, "handleError", (upload, error) => {
+      _defineProperty(this, "handleError", (upload, error) => {
         this.renderer.setError(upload.uploadIndex);
         upload.status = "error";
         const {
@@ -8520,7 +5985,7 @@
           }
         }
       });
-      _defineProperty$2(this, "handleSuccess", upload => {
+      _defineProperty(this, "handleSuccess", upload => {
         const {
           renderer
         } = this;
