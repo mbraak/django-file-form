@@ -30,24 +30,24 @@
     }, _typeof(o);
   }
 
-  function _toPrimitive(input, hint) {
-    if (_typeof(input) !== "object" || input === null) return input;
-    var prim = input[Symbol.toPrimitive];
-    if (prim !== undefined) {
-      var res = prim.call(input, hint || "default");
-      if (_typeof(res) !== "object") return res;
+  function toPrimitive(t, r) {
+    if ("object" != _typeof(t) || !t) return t;
+    var e = t[Symbol.toPrimitive];
+    if (void 0 !== e) {
+      var i = e.call(t, r || "default");
+      if ("object" != _typeof(i)) return i;
       throw new TypeError("@@toPrimitive must return a primitive value.");
     }
-    return (hint === "string" ? String : Number)(input);
+    return ("string" === r ? String : Number)(t);
   }
 
-  function _toPropertyKey(arg) {
-    var key = _toPrimitive(arg, "string");
-    return _typeof(key) === "symbol" ? key : String(key);
+  function toPropertyKey(t) {
+    var i = toPrimitive(t, "string");
+    return "symbol" == _typeof(i) ? i : String(i);
   }
 
   function _defineProperty(obj, key, value) {
-    key = _toPropertyKey(key);
+    key = toPropertyKey(key);
     if (key in obj) {
       Object.defineProperty(obj, key, {
         value: value,
@@ -386,139 +386,94 @@
     }
   }
 
-  /**
-   * @param typeMap [Object] Map of MIME type -> Array[extensions]
-   * @param ...
-   */
-  function Mime$1() {
-    this._types = Object.create(null);
-    this._extensions = Object.create(null);
+  const types = { "application/andrew-inset": ["ez"], "application/appinstaller": ["appinstaller"], "application/applixware": ["aw"], "application/appx": ["appx"], "application/appxbundle": ["appxbundle"], "application/atom+xml": ["atom"], "application/atomcat+xml": ["atomcat"], "application/atomdeleted+xml": ["atomdeleted"], "application/atomsvc+xml": ["atomsvc"], "application/atsc-dwd+xml": ["dwd"], "application/atsc-held+xml": ["held"], "application/atsc-rsat+xml": ["rsat"], "application/automationml-aml+xml": ["aml"], "application/automationml-amlx+zip": ["amlx"], "application/bdoc": ["bdoc"], "application/calendar+xml": ["xcs"], "application/ccxml+xml": ["ccxml"], "application/cdfx+xml": ["cdfx"], "application/cdmi-capability": ["cdmia"], "application/cdmi-container": ["cdmic"], "application/cdmi-domain": ["cdmid"], "application/cdmi-object": ["cdmio"], "application/cdmi-queue": ["cdmiq"], "application/cpl+xml": ["cpl"], "application/cu-seeme": ["cu"], "application/cwl": ["cwl"], "application/dash+xml": ["mpd"], "application/dash-patch+xml": ["mpp"], "application/davmount+xml": ["davmount"], "application/docbook+xml": ["dbk"], "application/dssc+der": ["dssc"], "application/dssc+xml": ["xdssc"], "application/ecmascript": ["ecma"], "application/emma+xml": ["emma"], "application/emotionml+xml": ["emotionml"], "application/epub+zip": ["epub"], "application/exi": ["exi"], "application/express": ["exp"], "application/fdf": ["fdf"], "application/fdt+xml": ["fdt"], "application/font-tdpfr": ["pfr"], "application/geo+json": ["geojson"], "application/gml+xml": ["gml"], "application/gpx+xml": ["gpx"], "application/gxf": ["gxf"], "application/gzip": ["gz"], "application/hjson": ["hjson"], "application/hyperstudio": ["stk"], "application/inkml+xml": ["ink", "inkml"], "application/ipfix": ["ipfix"], "application/its+xml": ["its"], "application/java-archive": ["jar", "war", "ear"], "application/java-serialized-object": ["ser"], "application/java-vm": ["class"], "application/javascript": ["*js"], "application/json": ["json", "map"], "application/json5": ["json5"], "application/jsonml+json": ["jsonml"], "application/ld+json": ["jsonld"], "application/lgr+xml": ["lgr"], "application/lost+xml": ["lostxml"], "application/mac-binhex40": ["hqx"], "application/mac-compactpro": ["cpt"], "application/mads+xml": ["mads"], "application/manifest+json": ["webmanifest"], "application/marc": ["mrc"], "application/marcxml+xml": ["mrcx"], "application/mathematica": ["ma", "nb", "mb"], "application/mathml+xml": ["mathml"], "application/mbox": ["mbox"], "application/media-policy-dataset+xml": ["mpf"], "application/mediaservercontrol+xml": ["mscml"], "application/metalink+xml": ["metalink"], "application/metalink4+xml": ["meta4"], "application/mets+xml": ["mets"], "application/mmt-aei+xml": ["maei"], "application/mmt-usd+xml": ["musd"], "application/mods+xml": ["mods"], "application/mp21": ["m21", "mp21"], "application/mp4": ["*mp4", "*mpg4", "mp4s", "m4p"], "application/msix": ["msix"], "application/msixbundle": ["msixbundle"], "application/msword": ["doc", "dot"], "application/mxf": ["mxf"], "application/n-quads": ["nq"], "application/n-triples": ["nt"], "application/node": ["cjs"], "application/octet-stream": ["bin", "dms", "lrf", "mar", "so", "dist", "distz", "pkg", "bpk", "dump", "elc", "deploy", "exe", "dll", "deb", "dmg", "iso", "img", "msi", "msp", "msm", "buffer"], "application/oda": ["oda"], "application/oebps-package+xml": ["opf"], "application/ogg": ["ogx"], "application/omdoc+xml": ["omdoc"], "application/onenote": ["onetoc", "onetoc2", "onetmp", "onepkg"], "application/oxps": ["oxps"], "application/p2p-overlay+xml": ["relo"], "application/patch-ops-error+xml": ["xer"], "application/pdf": ["pdf"], "application/pgp-encrypted": ["pgp"], "application/pgp-keys": ["asc"], "application/pgp-signature": ["sig", "*asc"], "application/pics-rules": ["prf"], "application/pkcs10": ["p10"], "application/pkcs7-mime": ["p7m", "p7c"], "application/pkcs7-signature": ["p7s"], "application/pkcs8": ["p8"], "application/pkix-attr-cert": ["ac"], "application/pkix-cert": ["cer"], "application/pkix-crl": ["crl"], "application/pkix-pkipath": ["pkipath"], "application/pkixcmp": ["pki"], "application/pls+xml": ["pls"], "application/postscript": ["ai", "eps", "ps"], "application/provenance+xml": ["provx"], "application/pskc+xml": ["pskcxml"], "application/raml+yaml": ["raml"], "application/rdf+xml": ["rdf", "owl"], "application/reginfo+xml": ["rif"], "application/relax-ng-compact-syntax": ["rnc"], "application/resource-lists+xml": ["rl"], "application/resource-lists-diff+xml": ["rld"], "application/rls-services+xml": ["rs"], "application/route-apd+xml": ["rapd"], "application/route-s-tsid+xml": ["sls"], "application/route-usd+xml": ["rusd"], "application/rpki-ghostbusters": ["gbr"], "application/rpki-manifest": ["mft"], "application/rpki-roa": ["roa"], "application/rsd+xml": ["rsd"], "application/rss+xml": ["rss"], "application/rtf": ["rtf"], "application/sbml+xml": ["sbml"], "application/scvp-cv-request": ["scq"], "application/scvp-cv-response": ["scs"], "application/scvp-vp-request": ["spq"], "application/scvp-vp-response": ["spp"], "application/sdp": ["sdp"], "application/senml+xml": ["senmlx"], "application/sensml+xml": ["sensmlx"], "application/set-payment-initiation": ["setpay"], "application/set-registration-initiation": ["setreg"], "application/shf+xml": ["shf"], "application/sieve": ["siv", "sieve"], "application/smil+xml": ["smi", "smil"], "application/sparql-query": ["rq"], "application/sparql-results+xml": ["srx"], "application/sql": ["sql"], "application/srgs": ["gram"], "application/srgs+xml": ["grxml"], "application/sru+xml": ["sru"], "application/ssdl+xml": ["ssdl"], "application/ssml+xml": ["ssml"], "application/swid+xml": ["swidtag"], "application/tei+xml": ["tei", "teicorpus"], "application/thraud+xml": ["tfi"], "application/timestamped-data": ["tsd"], "application/toml": ["toml"], "application/trig": ["trig"], "application/ttml+xml": ["ttml"], "application/ubjson": ["ubj"], "application/urc-ressheet+xml": ["rsheet"], "application/urc-targetdesc+xml": ["td"], "application/voicexml+xml": ["vxml"], "application/wasm": ["wasm"], "application/watcherinfo+xml": ["wif"], "application/widget": ["wgt"], "application/winhlp": ["hlp"], "application/wsdl+xml": ["wsdl"], "application/wspolicy+xml": ["wspolicy"], "application/xaml+xml": ["xaml"], "application/xcap-att+xml": ["xav"], "application/xcap-caps+xml": ["xca"], "application/xcap-diff+xml": ["xdf"], "application/xcap-el+xml": ["xel"], "application/xcap-ns+xml": ["xns"], "application/xenc+xml": ["xenc"], "application/xfdf": ["xfdf"], "application/xhtml+xml": ["xhtml", "xht"], "application/xliff+xml": ["xlf"], "application/xml": ["xml", "xsl", "xsd", "rng"], "application/xml-dtd": ["dtd"], "application/xop+xml": ["xop"], "application/xproc+xml": ["xpl"], "application/xslt+xml": ["*xsl", "xslt"], "application/xspf+xml": ["xspf"], "application/xv+xml": ["mxml", "xhvml", "xvml", "xvm"], "application/yang": ["yang"], "application/yin+xml": ["yin"], "application/zip": ["zip"], "audio/3gpp": ["*3gpp"], "audio/aac": ["adts", "aac"], "audio/adpcm": ["adp"], "audio/amr": ["amr"], "audio/basic": ["au", "snd"], "audio/midi": ["mid", "midi", "kar", "rmi"], "audio/mobile-xmf": ["mxmf"], "audio/mp3": ["*mp3"], "audio/mp4": ["m4a", "mp4a"], "audio/mpeg": ["mpga", "mp2", "mp2a", "mp3", "m2a", "m3a"], "audio/ogg": ["oga", "ogg", "spx", "opus"], "audio/s3m": ["s3m"], "audio/silk": ["sil"], "audio/wav": ["wav"], "audio/wave": ["*wav"], "audio/webm": ["weba"], "audio/xm": ["xm"], "font/collection": ["ttc"], "font/otf": ["otf"], "font/ttf": ["ttf"], "font/woff": ["woff"], "font/woff2": ["woff2"], "image/aces": ["exr"], "image/apng": ["apng"], "image/avci": ["avci"], "image/avcs": ["avcs"], "image/avif": ["avif"], "image/bmp": ["bmp", "dib"], "image/cgm": ["cgm"], "image/dicom-rle": ["drle"], "image/dpx": ["dpx"], "image/emf": ["emf"], "image/fits": ["fits"], "image/g3fax": ["g3"], "image/gif": ["gif"], "image/heic": ["heic"], "image/heic-sequence": ["heics"], "image/heif": ["heif"], "image/heif-sequence": ["heifs"], "image/hej2k": ["hej2"], "image/hsj2": ["hsj2"], "image/ief": ["ief"], "image/jls": ["jls"], "image/jp2": ["jp2", "jpg2"], "image/jpeg": ["jpeg", "jpg", "jpe"], "image/jph": ["jph"], "image/jphc": ["jhc"], "image/jpm": ["jpm", "jpgm"], "image/jpx": ["jpx", "jpf"], "image/jxr": ["jxr"], "image/jxra": ["jxra"], "image/jxrs": ["jxrs"], "image/jxs": ["jxs"], "image/jxsc": ["jxsc"], "image/jxsi": ["jxsi"], "image/jxss": ["jxss"], "image/ktx": ["ktx"], "image/ktx2": ["ktx2"], "image/png": ["png"], "image/sgi": ["sgi"], "image/svg+xml": ["svg", "svgz"], "image/t38": ["t38"], "image/tiff": ["tif", "tiff"], "image/tiff-fx": ["tfx"], "image/webp": ["webp"], "image/wmf": ["wmf"], "message/disposition-notification": ["disposition-notification"], "message/global": ["u8msg"], "message/global-delivery-status": ["u8dsn"], "message/global-disposition-notification": ["u8mdn"], "message/global-headers": ["u8hdr"], "message/rfc822": ["eml", "mime"], "model/3mf": ["3mf"], "model/gltf+json": ["gltf"], "model/gltf-binary": ["glb"], "model/iges": ["igs", "iges"], "model/jt": ["jt"], "model/mesh": ["msh", "mesh", "silo"], "model/mtl": ["mtl"], "model/obj": ["obj"], "model/prc": ["prc"], "model/step+xml": ["stpx"], "model/step+zip": ["stpz"], "model/step-xml+zip": ["stpxz"], "model/stl": ["stl"], "model/u3d": ["u3d"], "model/vrml": ["wrl", "vrml"], "model/x3d+binary": ["*x3db", "x3dbz"], "model/x3d+fastinfoset": ["x3db"], "model/x3d+vrml": ["*x3dv", "x3dvz"], "model/x3d+xml": ["x3d", "x3dz"], "model/x3d-vrml": ["x3dv"], "text/cache-manifest": ["appcache", "manifest"], "text/calendar": ["ics", "ifb"], "text/coffeescript": ["coffee", "litcoffee"], "text/css": ["css"], "text/csv": ["csv"], "text/html": ["html", "htm", "shtml"], "text/jade": ["jade"], "text/javascript": ["js", "mjs"], "text/jsx": ["jsx"], "text/less": ["less"], "text/markdown": ["md", "markdown"], "text/mathml": ["mml"], "text/mdx": ["mdx"], "text/n3": ["n3"], "text/plain": ["txt", "text", "conf", "def", "list", "log", "in", "ini"], "text/richtext": ["rtx"], "text/rtf": ["*rtf"], "text/sgml": ["sgml", "sgm"], "text/shex": ["shex"], "text/slim": ["slim", "slm"], "text/spdx": ["spdx"], "text/stylus": ["stylus", "styl"], "text/tab-separated-values": ["tsv"], "text/troff": ["t", "tr", "roff", "man", "me", "ms"], "text/turtle": ["ttl"], "text/uri-list": ["uri", "uris", "urls"], "text/vcard": ["vcard"], "text/vtt": ["vtt"], "text/wgsl": ["wgsl"], "text/xml": ["*xml"], "text/yaml": ["yaml", "yml"], "video/3gpp": ["3gp", "3gpp"], "video/3gpp2": ["3g2"], "video/h261": ["h261"], "video/h263": ["h263"], "video/h264": ["h264"], "video/iso.segment": ["m4s"], "video/jpeg": ["jpgv"], "video/jpm": ["*jpm", "*jpgm"], "video/mj2": ["mj2", "mjp2"], "video/mp2t": ["ts"], "video/mp4": ["mp4", "mp4v", "mpg4"], "video/mpeg": ["mpeg", "mpg", "mpe", "m1v", "m2v"], "video/ogg": ["ogv"], "video/quicktime": ["qt", "mov"], "video/webm": ["webm"] };
+  Object.freeze(types);
 
-    for (let i = 0; i < arguments.length; i++) {
-      this.define(arguments[i]);
-    }
-
-    this.define = this.define.bind(this);
-    this.getType = this.getType.bind(this);
-    this.getExtension = this.getExtension.bind(this);
+  var __classPrivateFieldGet = (window && window.__classPrivateFieldGet) || function (receiver, state, kind, f) {
+      if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+      if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+      return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+  };
+  var _Mime_extensionToType, _Mime_typeToExtension, _Mime_typeToExtensions;
+  class Mime {
+      constructor(...args) {
+          _Mime_extensionToType.set(this, new Map());
+          _Mime_typeToExtension.set(this, new Map());
+          _Mime_typeToExtensions.set(this, new Map());
+          for (const arg of args) {
+              this.define(arg);
+          }
+      }
+      define(typeMap, force = false) {
+          for (let [type, extensions] of Object.entries(typeMap)) {
+              type = type.toLowerCase();
+              extensions = extensions.map((ext) => ext.toLowerCase());
+              if (!__classPrivateFieldGet(this, _Mime_typeToExtensions, "f").has(type)) {
+                  __classPrivateFieldGet(this, _Mime_typeToExtensions, "f").set(type, new Set());
+              }
+              const allExtensions = __classPrivateFieldGet(this, _Mime_typeToExtensions, "f").get(type);
+              let first = true;
+              for (let extension of extensions) {
+                  const starred = extension.startsWith('*');
+                  extension = starred ? extension.slice(1) : extension;
+                  allExtensions?.add(extension);
+                  if (first) {
+                      __classPrivateFieldGet(this, _Mime_typeToExtension, "f").set(type, extension);
+                  }
+                  first = false;
+                  if (starred)
+                      continue;
+                  const currentType = __classPrivateFieldGet(this, _Mime_extensionToType, "f").get(extension);
+                  if (currentType && currentType != type && !force) {
+                      throw new Error(`"${type} -> ${extension}" conflicts with "${currentType} -> ${extension}". Pass \`force=true\` to override this definition.`);
+                  }
+                  __classPrivateFieldGet(this, _Mime_extensionToType, "f").set(extension, type);
+              }
+          }
+          return this;
+      }
+      getType(path) {
+          if (typeof path !== 'string')
+              return null;
+          const last = path.replace(/^.*[/\\]/, '').toLowerCase();
+          const ext = last.replace(/^.*\./, '').toLowerCase();
+          const hasPath = last.length < path.length;
+          const hasDot = ext.length < last.length - 1;
+          if (!hasDot && hasPath)
+              return null;
+          return __classPrivateFieldGet(this, _Mime_extensionToType, "f").get(ext) ?? null;
+      }
+      getExtension(type) {
+          if (typeof type !== 'string')
+              return null;
+          type = type?.split?.(';')[0];
+          return ((type && __classPrivateFieldGet(this, _Mime_typeToExtension, "f").get(type.trim().toLowerCase())) ?? null);
+      }
+      getAllExtensions(type) {
+          if (typeof type !== 'string')
+              return null;
+          return __classPrivateFieldGet(this, _Mime_typeToExtensions, "f").get(type.toLowerCase()) ?? null;
+      }
+      _freeze() {
+          this.define = () => {
+              throw new Error('define() not allowed for built-in Mime objects. See https://github.com/broofa/mime/blob/main/README.md#custom-mime-instances');
+          };
+          Object.freeze(this);
+          for (const extensions of __classPrivateFieldGet(this, _Mime_typeToExtensions, "f").values()) {
+              Object.freeze(extensions);
+          }
+          return this;
+      }
+      _getTestState() {
+          return {
+              types: __classPrivateFieldGet(this, _Mime_extensionToType, "f"),
+              extensions: __classPrivateFieldGet(this, _Mime_typeToExtension, "f"),
+          };
+      }
   }
+  _Mime_extensionToType = new WeakMap(), _Mime_typeToExtension = new WeakMap(), _Mime_typeToExtensions = new WeakMap();
 
-  /**
-   * Define mimetype -> extension mappings.  Each key is a mime-type that maps
-   * to an array of extensions associated with the type.  The first extension is
-   * used as the default extension for the type.
-   *
-   * e.g. mime.define({'audio/ogg', ['oga', 'ogg', 'spx']});
-   *
-   * If a type declares an extension that has already been defined, an error will
-   * be thrown.  To suppress this error and force the extension to be associated
-   * with the new type, pass `force`=true.  Alternatively, you may prefix the
-   * extension with "*" to map the type to extension, without mapping the
-   * extension to the type.
-   *
-   * e.g. mime.define({'audio/wav', ['wav']}, {'audio/x-wav', ['*wav']});
-   *
-   *
-   * @param map (Object) type definitions
-   * @param force (Boolean) if true, force overriding of existing definitions
-   */
-  Mime$1.prototype.define = function(typeMap, force) {
-    for (let type in typeMap) {
-      let extensions = typeMap[type].map(function(t) {
-        return t.toLowerCase();
-      });
-      type = type.toLowerCase();
-
-      for (let i = 0; i < extensions.length; i++) {
-        const ext = extensions[i];
-
-        // '*' prefix = not the preferred type for this extension.  So fixup the
-        // extension, and skip it.
-        if (ext[0] === '*') {
-          continue;
-        }
-
-        if (!force && (ext in this._types)) {
-          throw new Error(
-            'Attempt to change mapping for "' + ext +
-            '" extension from "' + this._types[ext] + '" to "' + type +
-            '". Pass `force=true` to allow this, otherwise remove "' + ext +
-            '" from the list of extensions for "' + type + '".'
-          );
-        }
-
-        this._types[ext] = type;
-      }
-
-      // Use first extension as default
-      if (force || !this._extensions[type]) {
-        const ext = extensions[0];
-        this._extensions[type] = (ext[0] !== '*') ? ext : ext.substr(1);
-      }
-    }
-  };
-
-  /**
-   * Lookup a mime type based on extension
-   */
-  Mime$1.prototype.getType = function(path) {
-    path = String(path);
-    let last = path.replace(/^.*[/\\]/, '').toLowerCase();
-    let ext = last.replace(/^.*\./, '').toLowerCase();
-
-    let hasPath = last.length < path.length;
-    let hasDot = ext.length < last.length - 1;
-
-    return (hasDot || !hasPath) && this._types[ext] || null;
-  };
-
-  /**
-   * Return file extension associated with a mime type
-   */
-  Mime$1.prototype.getExtension = function(type) {
-    type = /^\s*([^;\s]*)/.test(type) && RegExp.$1;
-    return type && this._extensions[type.toLowerCase()] || null;
-  };
-
-  var Mime_1 = Mime$1;
-
-  var standard = {"application/andrew-inset":["ez"],"application/applixware":["aw"],"application/atom+xml":["atom"],"application/atomcat+xml":["atomcat"],"application/atomdeleted+xml":["atomdeleted"],"application/atomsvc+xml":["atomsvc"],"application/atsc-dwd+xml":["dwd"],"application/atsc-held+xml":["held"],"application/atsc-rsat+xml":["rsat"],"application/bdoc":["bdoc"],"application/calendar+xml":["xcs"],"application/ccxml+xml":["ccxml"],"application/cdfx+xml":["cdfx"],"application/cdmi-capability":["cdmia"],"application/cdmi-container":["cdmic"],"application/cdmi-domain":["cdmid"],"application/cdmi-object":["cdmio"],"application/cdmi-queue":["cdmiq"],"application/cu-seeme":["cu"],"application/dash+xml":["mpd"],"application/davmount+xml":["davmount"],"application/docbook+xml":["dbk"],"application/dssc+der":["dssc"],"application/dssc+xml":["xdssc"],"application/ecmascript":["es","ecma"],"application/emma+xml":["emma"],"application/emotionml+xml":["emotionml"],"application/epub+zip":["epub"],"application/exi":["exi"],"application/express":["exp"],"application/fdt+xml":["fdt"],"application/font-tdpfr":["pfr"],"application/geo+json":["geojson"],"application/gml+xml":["gml"],"application/gpx+xml":["gpx"],"application/gxf":["gxf"],"application/gzip":["gz"],"application/hjson":["hjson"],"application/hyperstudio":["stk"],"application/inkml+xml":["ink","inkml"],"application/ipfix":["ipfix"],"application/its+xml":["its"],"application/java-archive":["jar","war","ear"],"application/java-serialized-object":["ser"],"application/java-vm":["class"],"application/javascript":["js","mjs"],"application/json":["json","map"],"application/json5":["json5"],"application/jsonml+json":["jsonml"],"application/ld+json":["jsonld"],"application/lgr+xml":["lgr"],"application/lost+xml":["lostxml"],"application/mac-binhex40":["hqx"],"application/mac-compactpro":["cpt"],"application/mads+xml":["mads"],"application/manifest+json":["webmanifest"],"application/marc":["mrc"],"application/marcxml+xml":["mrcx"],"application/mathematica":["ma","nb","mb"],"application/mathml+xml":["mathml"],"application/mbox":["mbox"],"application/mediaservercontrol+xml":["mscml"],"application/metalink+xml":["metalink"],"application/metalink4+xml":["meta4"],"application/mets+xml":["mets"],"application/mmt-aei+xml":["maei"],"application/mmt-usd+xml":["musd"],"application/mods+xml":["mods"],"application/mp21":["m21","mp21"],"application/mp4":["mp4s","m4p"],"application/msword":["doc","dot"],"application/mxf":["mxf"],"application/n-quads":["nq"],"application/n-triples":["nt"],"application/node":["cjs"],"application/octet-stream":["bin","dms","lrf","mar","so","dist","distz","pkg","bpk","dump","elc","deploy","exe","dll","deb","dmg","iso","img","msi","msp","msm","buffer"],"application/oda":["oda"],"application/oebps-package+xml":["opf"],"application/ogg":["ogx"],"application/omdoc+xml":["omdoc"],"application/onenote":["onetoc","onetoc2","onetmp","onepkg"],"application/oxps":["oxps"],"application/p2p-overlay+xml":["relo"],"application/patch-ops-error+xml":["xer"],"application/pdf":["pdf"],"application/pgp-encrypted":["pgp"],"application/pgp-signature":["asc","sig"],"application/pics-rules":["prf"],"application/pkcs10":["p10"],"application/pkcs7-mime":["p7m","p7c"],"application/pkcs7-signature":["p7s"],"application/pkcs8":["p8"],"application/pkix-attr-cert":["ac"],"application/pkix-cert":["cer"],"application/pkix-crl":["crl"],"application/pkix-pkipath":["pkipath"],"application/pkixcmp":["pki"],"application/pls+xml":["pls"],"application/postscript":["ai","eps","ps"],"application/provenance+xml":["provx"],"application/pskc+xml":["pskcxml"],"application/raml+yaml":["raml"],"application/rdf+xml":["rdf","owl"],"application/reginfo+xml":["rif"],"application/relax-ng-compact-syntax":["rnc"],"application/resource-lists+xml":["rl"],"application/resource-lists-diff+xml":["rld"],"application/rls-services+xml":["rs"],"application/route-apd+xml":["rapd"],"application/route-s-tsid+xml":["sls"],"application/route-usd+xml":["rusd"],"application/rpki-ghostbusters":["gbr"],"application/rpki-manifest":["mft"],"application/rpki-roa":["roa"],"application/rsd+xml":["rsd"],"application/rss+xml":["rss"],"application/rtf":["rtf"],"application/sbml+xml":["sbml"],"application/scvp-cv-request":["scq"],"application/scvp-cv-response":["scs"],"application/scvp-vp-request":["spq"],"application/scvp-vp-response":["spp"],"application/sdp":["sdp"],"application/senml+xml":["senmlx"],"application/sensml+xml":["sensmlx"],"application/set-payment-initiation":["setpay"],"application/set-registration-initiation":["setreg"],"application/shf+xml":["shf"],"application/sieve":["siv","sieve"],"application/smil+xml":["smi","smil"],"application/sparql-query":["rq"],"application/sparql-results+xml":["srx"],"application/srgs":["gram"],"application/srgs+xml":["grxml"],"application/sru+xml":["sru"],"application/ssdl+xml":["ssdl"],"application/ssml+xml":["ssml"],"application/swid+xml":["swidtag"],"application/tei+xml":["tei","teicorpus"],"application/thraud+xml":["tfi"],"application/timestamped-data":["tsd"],"application/toml":["toml"],"application/trig":["trig"],"application/ttml+xml":["ttml"],"application/ubjson":["ubj"],"application/urc-ressheet+xml":["rsheet"],"application/urc-targetdesc+xml":["td"],"application/voicexml+xml":["vxml"],"application/wasm":["wasm"],"application/widget":["wgt"],"application/winhlp":["hlp"],"application/wsdl+xml":["wsdl"],"application/wspolicy+xml":["wspolicy"],"application/xaml+xml":["xaml"],"application/xcap-att+xml":["xav"],"application/xcap-caps+xml":["xca"],"application/xcap-diff+xml":["xdf"],"application/xcap-el+xml":["xel"],"application/xcap-ns+xml":["xns"],"application/xenc+xml":["xenc"],"application/xhtml+xml":["xhtml","xht"],"application/xliff+xml":["xlf"],"application/xml":["xml","xsl","xsd","rng"],"application/xml-dtd":["dtd"],"application/xop+xml":["xop"],"application/xproc+xml":["xpl"],"application/xslt+xml":["*xsl","xslt"],"application/xspf+xml":["xspf"],"application/xv+xml":["mxml","xhvml","xvml","xvm"],"application/yang":["yang"],"application/yin+xml":["yin"],"application/zip":["zip"],"audio/3gpp":["*3gpp"],"audio/adpcm":["adp"],"audio/amr":["amr"],"audio/basic":["au","snd"],"audio/midi":["mid","midi","kar","rmi"],"audio/mobile-xmf":["mxmf"],"audio/mp3":["*mp3"],"audio/mp4":["m4a","mp4a"],"audio/mpeg":["mpga","mp2","mp2a","mp3","m2a","m3a"],"audio/ogg":["oga","ogg","spx","opus"],"audio/s3m":["s3m"],"audio/silk":["sil"],"audio/wav":["wav"],"audio/wave":["*wav"],"audio/webm":["weba"],"audio/xm":["xm"],"font/collection":["ttc"],"font/otf":["otf"],"font/ttf":["ttf"],"font/woff":["woff"],"font/woff2":["woff2"],"image/aces":["exr"],"image/apng":["apng"],"image/avif":["avif"],"image/bmp":["bmp"],"image/cgm":["cgm"],"image/dicom-rle":["drle"],"image/emf":["emf"],"image/fits":["fits"],"image/g3fax":["g3"],"image/gif":["gif"],"image/heic":["heic"],"image/heic-sequence":["heics"],"image/heif":["heif"],"image/heif-sequence":["heifs"],"image/hej2k":["hej2"],"image/hsj2":["hsj2"],"image/ief":["ief"],"image/jls":["jls"],"image/jp2":["jp2","jpg2"],"image/jpeg":["jpeg","jpg","jpe"],"image/jph":["jph"],"image/jphc":["jhc"],"image/jpm":["jpm"],"image/jpx":["jpx","jpf"],"image/jxr":["jxr"],"image/jxra":["jxra"],"image/jxrs":["jxrs"],"image/jxs":["jxs"],"image/jxsc":["jxsc"],"image/jxsi":["jxsi"],"image/jxss":["jxss"],"image/ktx":["ktx"],"image/ktx2":["ktx2"],"image/png":["png"],"image/sgi":["sgi"],"image/svg+xml":["svg","svgz"],"image/t38":["t38"],"image/tiff":["tif","tiff"],"image/tiff-fx":["tfx"],"image/webp":["webp"],"image/wmf":["wmf"],"message/disposition-notification":["disposition-notification"],"message/global":["u8msg"],"message/global-delivery-status":["u8dsn"],"message/global-disposition-notification":["u8mdn"],"message/global-headers":["u8hdr"],"message/rfc822":["eml","mime"],"model/3mf":["3mf"],"model/gltf+json":["gltf"],"model/gltf-binary":["glb"],"model/iges":["igs","iges"],"model/mesh":["msh","mesh","silo"],"model/mtl":["mtl"],"model/obj":["obj"],"model/step+xml":["stpx"],"model/step+zip":["stpz"],"model/step-xml+zip":["stpxz"],"model/stl":["stl"],"model/vrml":["wrl","vrml"],"model/x3d+binary":["*x3db","x3dbz"],"model/x3d+fastinfoset":["x3db"],"model/x3d+vrml":["*x3dv","x3dvz"],"model/x3d+xml":["x3d","x3dz"],"model/x3d-vrml":["x3dv"],"text/cache-manifest":["appcache","manifest"],"text/calendar":["ics","ifb"],"text/coffeescript":["coffee","litcoffee"],"text/css":["css"],"text/csv":["csv"],"text/html":["html","htm","shtml"],"text/jade":["jade"],"text/jsx":["jsx"],"text/less":["less"],"text/markdown":["markdown","md"],"text/mathml":["mml"],"text/mdx":["mdx"],"text/n3":["n3"],"text/plain":["txt","text","conf","def","list","log","in","ini"],"text/richtext":["rtx"],"text/rtf":["*rtf"],"text/sgml":["sgml","sgm"],"text/shex":["shex"],"text/slim":["slim","slm"],"text/spdx":["spdx"],"text/stylus":["stylus","styl"],"text/tab-separated-values":["tsv"],"text/troff":["t","tr","roff","man","me","ms"],"text/turtle":["ttl"],"text/uri-list":["uri","uris","urls"],"text/vcard":["vcard"],"text/vtt":["vtt"],"text/xml":["*xml"],"text/yaml":["yaml","yml"],"video/3gpp":["3gp","3gpp"],"video/3gpp2":["3g2"],"video/h261":["h261"],"video/h263":["h263"],"video/h264":["h264"],"video/iso.segment":["m4s"],"video/jpeg":["jpgv"],"video/jpm":["*jpm","jpgm"],"video/mj2":["mj2","mjp2"],"video/mp2t":["ts"],"video/mp4":["mp4","mp4v","mpg4"],"video/mpeg":["mpeg","mpg","mpe","m1v","m2v"],"video/ogg":["ogv"],"video/quicktime":["qt","mov"],"video/webm":["webm"]};
-
-  let Mime = Mime_1;
-  var lite = new Mime(standard);
-
-  var mime = /*@__PURE__*/getDefaultExportFromCjs(lite);
-
-  const basename = path => {
-    var start = 0;
-    var end = -1;
-    var matchedSlash = true;
-    var i;
-
-    for (i = path.length - 1; i >= 0; --i) {
-      if (path.charCodeAt(i) === 47) {
-        // If we reached a path separator that was not part of a set of path
-        // separators at the end of the string, stop now
-        if (!matchedSlash) {
-          start = i + 1;
-          break;
-        }
-      } else if (end === -1) {
-        // We saw the first non-path separator, mark this as the end of our
-        // path component
-        matchedSlash = false;
-        end = i + 1;
-      }
-    }
-
-    if (end === -1) {
-      return '';
-    }
-
-    return path.slice(start, end);
-  };
-
-  var path$1 = { basename };
+  var mime = new Mime(types)._freeze();
 
   var utils$3 = {};
 
@@ -544,6 +499,7 @@
   const NO_DOTS_SLASH = `(?!${DOTS_SLASH})`;
   const QMARK_NO_DOT = `[^.${SLASH_LITERAL}]`;
   const STAR = `${QMARK}*?`;
+  const SEP = '/';
 
   const POSIX_CHARS = {
     DOT_LITERAL,
@@ -560,7 +516,8 @@
     NO_DOTS_SLASH,
     QMARK_NO_DOT,
     STAR,
-    START_ANCHOR
+    START_ANCHOR,
+    SEP
   };
 
   /**
@@ -580,7 +537,8 @@
     NO_DOTS_SLASH: `(?!${DOT_LITERAL}{1,2}(?:[${WIN_SLASH}]|$))`,
     QMARK_NO_DOT: `[^.${WIN_SLASH}]`,
     START_ANCHOR: `(?:^|[${WIN_SLASH}])`,
-    END_ANCHOR: `(?:[${WIN_SLASH}]|$)`
+    END_ANCHOR: `(?:[${WIN_SLASH}]|$)`,
+    SEP: '\\'
   };
 
   /**
@@ -674,8 +632,6 @@
     CHAR_VERTICAL_LINE: 124, /* | */
     CHAR_ZERO_WIDTH_NOBREAK_SPACE: 65279, /* \uFEFF */
 
-    SEP: '/',
-
     /**
      * Create EXTGLOB_CHARS
      */
@@ -694,7 +650,7 @@
      * Create GLOB_CHARS
      */
 
-    globChars(win32 = false) {
+    globChars(win32) {
       return win32 === true ? WINDOWS_CHARS : POSIX_CHARS;
     }
   };
@@ -720,9 +676,12 @@
   	  });
   	};
 
-  	exports.isWindows = options => {
-  	  if (options && typeof options.windows === 'boolean') {
-  	    return options.windows;
+  	exports.supportsLookbehinds = () => {
+  	  if (typeof process !== 'undefined') {
+  	    const segs = process.version.slice(1).split('.').map(Number);
+  	    if (segs.length === 3 && segs[0] >= 9 || (segs[0] === 8 && segs[1] >= 10)) {
+  	      return true;
+  	    }
   	  }
   	  return false;
   	};
@@ -752,6 +711,17 @@
   	    output = `(?:^(?!${output}).*$)`;
   	  }
   	  return output;
+  	};
+
+  	exports.basename = (path, { windows } = {}) => {
+  	  const segs = path.split(windows ? /[\\/]/ : '/');
+  	  const last = segs[segs.length - 1];
+
+  	  if (last === '') {
+  	    return segs[segs.length - 2];
+  	  }
+
+  	  return last;
   	}; 
   } (utils$3));
 
@@ -1217,7 +1187,8 @@
 
     const capture = opts.capture ? '' : '?:';
 
-    const PLATFORM_CHARS = constants$1.globChars();
+    // create constants based on platform, for windows or posix
+    const PLATFORM_CHARS = constants$1.globChars(opts.windows);
     const EXTGLOB_CHARS = constants$1.extglobChars(PLATFORM_CHARS);
 
     const {
@@ -1842,6 +1813,10 @@
           const next = peek();
           let output = value;
 
+          if (next === '<' && !utils$1.supportsLookbehinds()) {
+            throw new Error('Node.js v10 or higher is required for regex lookbehinds');
+          }
+
           if ((prev.value === '(' && !/[!=<:]/.test(next)) || (next === '<' && !/<([!=]|\w+>)/.test(remaining()))) {
             output = `\\${value}`;
           }
@@ -2161,7 +2136,7 @@
       NO_DOTS_SLASH,
       STAR,
       START_ANCHOR
-    } = constants$1.globChars();
+    } = constants$1.globChars(opts.windows);
 
     const nodot = opts.dot ? NO_DOTS : NO_DOT;
     const slashDot = opts.dot ? NO_DOTS_SLASH : NO_DOT;
@@ -2228,7 +2203,6 @@
 
   var parse_1 = parse$1;
 
-  const path = path$1;
   const scan = scan_1;
   const parse = parse_1;
   const utils = utils$3;
@@ -2257,9 +2231,9 @@
    * @api public
    */
 
-  const picomatch$2 = (glob, options, returnState = false) => {
+  const picomatch$1 = (glob, options, returnState = false) => {
     if (Array.isArray(glob)) {
-      const fns = glob.map(input => picomatch$2(input, options, returnState));
+      const fns = glob.map(input => picomatch$1(input, options, returnState));
       const arrayMatcher = str => {
         for (const isMatch of fns) {
           const state = isMatch(str);
@@ -2277,10 +2251,10 @@
     }
 
     const opts = options || {};
-    const posix = utils.isWindows(options);
+    const posix = opts.windows;
     const regex = isState
-      ? picomatch$2.compileRe(glob, options)
-      : picomatch$2.makeRe(glob, options, false, true);
+      ? picomatch$1.compileRe(glob, options)
+      : picomatch$1.makeRe(glob, options, false, true);
 
     const state = regex.state;
     delete regex.state;
@@ -2288,11 +2262,11 @@
     let isIgnored = () => false;
     if (opts.ignore) {
       const ignoreOpts = { ...options, ignore: null, onMatch: null, onResult: null };
-      isIgnored = picomatch$2(opts.ignore, ignoreOpts, returnState);
+      isIgnored = picomatch$1(opts.ignore, ignoreOpts, returnState);
     }
 
     const matcher = (input, returnObject = false) => {
-      const { isMatch, match, output } = picomatch$2.test(input, regex, options, { glob, posix });
+      const { isMatch, match, output } = picomatch$1.test(input, regex, options, { glob, posix });
       const result = { glob, state, regex, posix, input, output, match, isMatch };
 
       if (typeof opts.onResult === 'function') {
@@ -2342,7 +2316,7 @@
    * @api public
    */
 
-  picomatch$2.test = (input, regex, options, { glob, posix } = {}) => {
+  picomatch$1.test = (input, regex, options, { glob, posix } = {}) => {
     if (typeof input !== 'string') {
       throw new TypeError('Expected input to be a string');
     }
@@ -2363,7 +2337,7 @@
 
     if (match === false || opts.capture === true) {
       if (opts.matchBase === true || opts.basename === true) {
-        match = picomatch$2.matchBase(input, regex, options, posix);
+        match = picomatch$1.matchBase(input, regex, options, posix);
       } else {
         match = regex.exec(output);
       }
@@ -2386,9 +2360,9 @@
    * @api public
    */
 
-  picomatch$2.matchBase = (input, glob, options, posix = utils.isWindows(options)) => {
-    const regex = glob instanceof RegExp ? glob : picomatch$2.makeRe(glob, options);
-    return regex.test(path.basename(input));
+  picomatch$1.matchBase = (input, glob, options) => {
+    const regex = glob instanceof RegExp ? glob : picomatch$1.makeRe(glob, options);
+    return regex.test(utils.basename(input));
   };
 
   /**
@@ -2408,7 +2382,7 @@
    * @api public
    */
 
-  picomatch$2.isMatch = (str, patterns, options) => picomatch$2(patterns, options)(str);
+  picomatch$1.isMatch = (str, patterns, options) => picomatch$1(patterns, options)(str);
 
   /**
    * Parse a glob pattern to create the source string for a regular
@@ -2424,8 +2398,8 @@
    * @api public
    */
 
-  picomatch$2.parse = (pattern, options) => {
-    if (Array.isArray(pattern)) return pattern.map(p => picomatch$2.parse(p, options));
+  picomatch$1.parse = (pattern, options) => {
+    if (Array.isArray(pattern)) return pattern.map(p => picomatch$1.parse(p, options));
     return parse(pattern, { ...options, fastpaths: false });
   };
 
@@ -2456,7 +2430,7 @@
    * @api public
    */
 
-  picomatch$2.scan = (input, options) => scan(input, options);
+  picomatch$1.scan = (input, options) => scan(input, options);
 
   /**
    * Compile a regular expression from the `state` object returned by the
@@ -2470,7 +2444,7 @@
    * @api public
    */
 
-  picomatch$2.compileRe = (state, options, returnOutput = false, returnState = false) => {
+  picomatch$1.compileRe = (state, options, returnOutput = false, returnState = false) => {
     if (returnOutput === true) {
       return state.output;
     }
@@ -2484,7 +2458,7 @@
       source = `^(?!${source}).*$`;
     }
 
-    const regex = picomatch$2.toRegex(source, options);
+    const regex = picomatch$1.toRegex(source, options);
     if (returnState === true) {
       regex.state = state;
     }
@@ -2511,7 +2485,7 @@
    * @api public
    */
 
-  picomatch$2.makeRe = (input, options = {}, returnOutput = false, returnState = false) => {
+  picomatch$1.makeRe = (input, options = {}, returnOutput = false, returnState = false) => {
     if (!input || typeof input !== 'string') {
       throw new TypeError('Expected a non-empty string');
     }
@@ -2526,7 +2500,7 @@
       parsed = parse(input, options);
     }
 
-    return picomatch$2.compileRe(parsed, options, returnOutput, returnState);
+    return picomatch$1.compileRe(parsed, options, returnOutput, returnState);
   };
 
   /**
@@ -2546,7 +2520,7 @@
    * @api public
    */
 
-  picomatch$2.toRegex = (source, options) => {
+  picomatch$1.toRegex = (source, options) => {
     try {
       const opts = options || {};
       return new RegExp(source, opts.flags || (opts.nocase ? 'i' : ''));
@@ -2561,17 +2535,17 @@
    * @return {Object}
    */
 
-  picomatch$2.constants = constants;
+  picomatch$1.constants = constants;
 
   /**
    * Expose "picomatch"
    */
 
-  var picomatch_1 = picomatch$2;
+  var picomatch_1 = picomatch$1;
 
-  var picomatch = picomatch_1;
+  var posix = picomatch_1;
 
-  var picomatch$1 = /*@__PURE__*/getDefaultExportFromCjs(picomatch);
+  var picomatch = /*@__PURE__*/getDefaultExportFromCjs(posix);
 
   const parseInputAccept = inputAccept => {
     const extensions = [];
@@ -2603,13 +2577,13 @@
       if (!mimeType || this.mimeTypes.length === 0) {
         return false;
       }
-      return picomatch$1.isMatch(mimeType, this.mimeTypes);
+      return picomatch.isMatch(mimeType, this.mimeTypes);
     }
     isExtensionAccepted(fileName) {
       if (this.extensions.length === 0) {
         return false;
       }
-      return picomatch$1.isMatch(fileName, this.extensions);
+      return picomatch.isMatch(fileName, this.extensions);
     }
   }
 
@@ -2949,7 +2923,6 @@
       this.initChunks();
       this.createdPromise.catch(() => ({})); // silence uncaught rejection warning
     }
-
     async abort() {
       this.uploading.slice().forEach(xhr => {
         xhr.abort();
@@ -4440,7 +4413,7 @@
     addRequestId: false,
     onBeforeRequest: null,
     onAfterResponse: null,
-    onShouldRetry: null,
+    onShouldRetry: defaultOnShouldRetry,
     chunkSize: Infinity,
     retryDelays: [0, 1000, 3000, 5000],
     parallelUploads: 1,
@@ -4457,7 +4430,8 @@
     constructor(file, options) {
       // Warn about removed options from previous versions
       if ('resume' in options) {
-        console.log('tus: The `resume` option has been removed in tus-js-client v2. Please use the URL storage API instead.'); // eslint-disable-line no-console
+        // eslint-disable-next-line no-console
+        console.log('tus: The `resume` option has been removed in tus-js-client v2. Please use the URL storage API instead.');
       }
 
       // The default options will already be added from the wrapper classes.
@@ -4806,7 +4780,6 @@
         this._req.abort();
         // Note: We do not close the file source here, so the user can resume in the future.
       }
-
       this._aborted = true;
 
       // Stop any timeout used for initiating a retry.
@@ -5276,12 +5249,10 @@
    */
   function isOnline() {
     let online = true;
-    if (typeof window !== 'undefined' &&
+    // Note: We don't reference `window` here because the navigator object also exists
+    // in a Web Worker's context.
     // eslint-disable-next-line no-undef
-    'navigator' in window &&
-    // eslint-disable-next-line no-undef
-    window.navigator.onLine === false) {
-      // eslint-disable-line no-undef
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) {
       online = false;
     }
     return online;
@@ -5289,7 +5260,7 @@
 
   /**
    * Checks whether or not it is ok to retry a request.
-   * @param {Error} err the error returned from the last request
+   * @param {Error|DetailedError} err the error returned from the last request
    * @param {number} retryAttempt the number of times the request has already been retried
    * @param {object} options tus Upload options
    *
@@ -5309,6 +5280,15 @@
     if (options && typeof options.onShouldRetry === 'function') {
       return options.onShouldRetry(err, retryAttempt, options);
     }
+    return defaultOnShouldRetry(err);
+  }
+
+  /**
+   * determines if the request should be retried. Will only retry if not a status 4xx except a 409 or 423
+   * @param {DetailedError} err
+   * @returns {boolean}
+   */
+  function defaultOnShouldRetry(err) {
     const status = err.originalResponse ? err.originalResponse.getStatus() : 0;
     return (!inStatusCategory(status, 400) || status === 409 || status === 423) && isOnline();
   }
@@ -5365,6 +5345,7 @@
 
   let hasStorage = false;
   try {
+    // Note: localStorage does not exist in the Web Worker's context, so we must use window here.
     hasStorage = 'localStorage' in window;
 
     // Attempt to store and read entries from the local storage to detect Private
@@ -5729,7 +5710,6 @@
       hash = (hash << 5) - hash + char;
       hash &= hash; // Convert to 32bit integer
     }
-
     return hash;
   }
 
@@ -5759,11 +5739,6 @@
       return BaseUpload.terminate(url, options);
     }
   }
-  const {
-    XMLHttpRequest: XMLHttpRequest$1,
-    Blob: Blob$1
-  } = window;
-  XMLHttpRequest$1 && Blob$1 && typeof Blob$1.prototype.slice === 'function';
 
   class TusUpload extends BaseUpload$1 {
     constructor(_ref) {
