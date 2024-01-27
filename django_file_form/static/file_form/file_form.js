@@ -3337,7 +3337,7 @@
    *
    * @author Dan Kogai (https://github.com/dankogai)
    */
-  const version = '3.7.5';
+  const version = '3.7.6';
   /**
    * @deprecated use lowercase `version`.
    */
@@ -3597,7 +3597,7 @@
       toUint8Array: toUint8Array,
       extendString: extendString,
       extendUint8Array: extendUint8Array,
-      extendBuiltins: extendBuiltins,
+      extendBuiltins: extendBuiltins
   };
 
   /**
