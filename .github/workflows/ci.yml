@@ -61,10 +61,6 @@ jobs:
         run: python testproject/manage.py makemigrations django_file_form --check --noinput --verbosity=1
         env:
           CHECK_MIGRATIONS: true
-      - name: Setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: "20"
       - name: Build javascript
         working-directory: ./frontend
         run: npm run build
