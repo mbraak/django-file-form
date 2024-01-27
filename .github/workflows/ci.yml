@@ -44,7 +44,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-          cache: 'pip'
+          cache: "pip"
       - name: Install python packages
         run: pip install ${{ matrix.django }} && pip install -r testproject/requirements.txt && pip install -r testproject/requirements_test.txt && pip install -r testproject/requirements_ci.txt && pip install -e .
       - name: Run tests
