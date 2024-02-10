@@ -676,16 +676,6 @@
   	  });
   	};
 
-  	exports.supportsLookbehinds = () => {
-  	  if (typeof process !== 'undefined') {
-  	    const segs = process.version.slice(1).split('.').map(Number);
-  	    if (segs.length === 3 && segs[0] >= 9 || (segs[0] === 8 && segs[1] >= 10)) {
-  	      return true;
-  	    }
-  	  }
-  	  return false;
-  	};
-
   	exports.escapeLast = (input, char, lastIdx) => {
   	  const idx = input.lastIndexOf(char, lastIdx);
   	  if (idx === -1) return input;
@@ -1324,8 +1314,8 @@
 
       if (tok.value || tok.output) append(tok);
       if (prev && prev.type === 'text' && tok.type === 'text') {
+        prev.output = (prev.output || prev.value) + tok.value;
         prev.value += tok.value;
-        prev.output = (prev.output || '') + tok.value;
         return;
       }
 
@@ -1812,10 +1802,6 @@
         if (prev && prev.type === 'paren') {
           const next = peek();
           let output = value;
-
-          if (next === '<' && !utils$1.supportsLookbehinds()) {
-            throw new Error('Node.js v10 or higher is required for regex lookbehinds');
-          }
 
           if ((prev.value === '(' && !/[!=<:]/.test(next)) || (next === '<' && !/<([!=]|\w+>)/.test(remaining()))) {
             output = `\\${value}`;
