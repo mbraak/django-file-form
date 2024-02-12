@@ -87,7 +87,9 @@ class TemporaryUploadedFile(models.Model):
     objects = TemporaryUploadedFileManager()
 
     class Meta(object):
-        index_together = (("form_id", "field_name"),)
+        indexes = [
+            models.Index(fields=["form_id", "field_name"]),
+        ]
         db_table = "django_file_form_uploadedfile"
 
     def __str__(self):
