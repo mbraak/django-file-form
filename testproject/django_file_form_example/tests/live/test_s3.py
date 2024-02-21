@@ -23,9 +23,7 @@ class S3ServerThread(threading.Thread):
     server: BaseWSGIServer
 
     def run(self):
-        application = DomainDispatcherApplication(
-            create_backend_app_with_cors, service="s3"
-        )
+        application = DomainDispatcherApplication(create_backend_app_with_cors)
         self.server = make_server(
             "localhost",
             4566,
