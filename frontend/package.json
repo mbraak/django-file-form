@@ -4,7 +4,7 @@
   "description": "Frontend code for django-file-form",
   "main": "index.js",
   "scripts": {
-    "lint": "eslint src/**/*.ts",
+    "lint": "eslint src",
     "build": "npm run sass; rollup -c rollup.config.mjs; SKIP_COMPRESS_JS=true rollup -c rollup.config.mjs; COVERAGE=true rollup -c rollup.config.mjs",
     "sass": "sass --no-source-map style/file_form.scss ../django_file_form/static/file_form/file_form.css",
     "test": "jest --coverage",
@@ -40,6 +40,7 @@
     "@typescript-eslint/parser": "^6",
     "babel-plugin-istanbul": "^6.1.1",
     "eslint": "^8.21.0",
+    "eslint-import-resolver-typescript": "^3.6.1",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-jsx-a11y": "^6.6.1",
     "eslint-plugin-react": "^7.30.1",
