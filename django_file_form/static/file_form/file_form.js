@@ -3323,13 +3323,11 @@
    *
    * @author Dan Kogai (https://github.com/dankogai)
    */
-  const version = '3.7.6';
+  const version = '3.7.7';
   /**
    * @deprecated use lowercase `version`.
    */
   const VERSION = version;
-  const _hasatob = typeof atob === 'function';
-  const _hasbtoa = typeof btoa === 'function';
   const _hasBuffer = typeof Buffer === 'function';
   const _TD = typeof TextDecoder === 'function' ? new TextDecoder() : undefined;
   const _TE = typeof TextEncoder === 'function' ? new TextEncoder() : undefined;
@@ -3373,7 +3371,7 @@
    * @param {String} bin binary string
    * @returns {string} Base64-encoded string
    */
-  const _btoa = _hasbtoa ? (bin) => btoa(bin)
+  const _btoa = typeof btoa === 'function' ? (bin) => btoa(bin)
       : _hasBuffer ? (bin) => Buffer.from(bin, 'binary').toString('base64')
           : btoaPolyfill;
   const _fromUint8Array = _hasBuffer
@@ -3496,7 +3494,7 @@
    * @param {String} asc Base64-encoded string
    * @returns {string} binary string
    */
-  const _atob = _hasatob ? (asc) => atob(_tidyB64(asc))
+  const _atob = typeof atob === 'function' ? (asc) => atob(_tidyB64(asc))
       : _hasBuffer ? (asc) => Buffer.from(asc, 'base64').toString('binary')
           : atobPolyfill;
   //
