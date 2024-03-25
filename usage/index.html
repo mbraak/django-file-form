@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Usage - django-file-form</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Usage";
+        var mkdocs_page_input_path = "usage.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> django-file-form
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="./">Usage</a>
+    <ul class="current">
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../details/">Details</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../upgrade/">Upgrade</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../python_settings/">Python settings</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../javascript_options/">Javascript options</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../auto_initialize/">Auto initialize javascript</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../form_sets/">Form sets</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../model_forms/">Model forms</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../admin/">Admin</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../translations/">Translations</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../customization/">Customization</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../javascript_events/">Javascript events</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../internals/">Internals</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../changelog/">Changelog</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">django-file-form</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Usage</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h2 id="usage">Usage</h2>
+<p><strong>1 Install django-file-form</strong></p>
+<pre><code>pip install django-file-form
+</code></pre>
+<p><strong>2 Add the apps to your INSTALLED_APPS</strong></p>
+<p>You must include 'django_file_form'</p>
+<pre><code class="language-python">INSTALLED_APPS = [
+    'django_file_form',
+]
+</code></pre>
+<p><strong>3 Add the app to your urls</strong></p>
+<p>In this example we use the url <strong>upload/</strong>. You can use a different url if you like.</p>
+<pre><code class="language-python">urlpatterns = patterns(
+    '',
+    url(r'^upload/', include('django_file_form.urls')),
+)
+</code></pre>
+<p><strong>4 Add FileFormMixin to your form</strong></p>
+<pre><code class="language-python">from django_file_form.forms import FileFormMixin
+
+class ExampleForm(FileFormMixin, forms.Form):
+    pass
+</code></pre>
+<p><strong>5 Add a UploadedFileField</strong></p>
+<pre><code class="language-python">from django_file_form.forms import FileFormMixin, UploadedFileField
+
+class ExampleForm(FileFormMixin, forms.Form):
+    input_file = UploadedFileField()
+</code></pre>
+<p>Import and use <code>MultipleUploadedFileField</code> if you intent to add multiple files.</p>
+<p><strong>6 Include javascript and css in your template</strong></p>
+<pre><code class="language-js">&lt;script src=&quot;{% static &quot;file_form/file_form.min.min.js&quot; %}&quot;&gt;&lt;/script&gt;
+&lt;link rel=&quot;stylesheet&quot; href=&quot;{% static &quot;file_form/file_form.css&quot; %}&quot;&gt;
+</code></pre>
+<p>There is also an uncompressed javascript version: <code>file_form/file_form.js</code>.</p>
+<p><strong>7 Call the initUploadFields javascript function</strong></p>
+<pre><code class="language-html">&lt;form id=&quot;example-form&quot; method=&quot;POST&quot; enctype=&quot;multipart/form-data&quot;&gt;
+  {% csrf_token %} {{ form }}
+&lt;/form&gt;
+
+&lt;script&gt;
+  initUploadFields(document.getElementById(&quot;example-form&quot;));
+&lt;/script&gt;
+</code></pre>
+<p>If your form has a prefix, then call <code>initUploadFields</code> as follows:</p>
+<pre><code class="language-js">// for example, with prefix 'abc'
+initUploadFields(document.getElementById(&quot;example-form&quot;), { prefix: &quot;abc&quot; });
+</code></pre>
+<p>See the <a href="https://docs.djangoproject.com/en/2.1/ref/forms/api/#prefixes-for-forms">Django documentation</a> for more information about form prefixes.</p>
+<p><strong>8 Handle uploaded files</strong></p>
+<pre><code class="language-python">class ExampleFormView(generic.FormView):
+    template_name = 'example_form.html'
+    form_class = forms.ExampleForm
+
+    def form_valid(self, form):
+        input_file = form.cleaned_data['input_file']
+
+        return super(ExampleFormView, self).form_valid(form)
+</code></pre>
+<p><strong>9 Delete temporary files</strong></p>
+<pre><code class="language-python">class ExampleFormView(generic.FormView):
+    template_name = 'example_form.html'
+    form_class = forms.ExampleForm
+
+    def form_valid(self, form):
+        input_file = form.cleaned_data['input_file']
+
+        form.delete_temporary_files()
+
+        return super(ExampleFormView, self).form_valid(form)
+</code></pre>
+<p>It's also possible to delete unused temporary file using a management command:</p>
+<pre><code>python manage.py delete_unused_files
+
+The command deletes temporary files and records that are created at least one day ago.
+</code></pre>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href=".." class="btn btn-neutral float-left" title="Home"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../details/" class="btn btn-neutral float-right" title="Details">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href=".." style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../details/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

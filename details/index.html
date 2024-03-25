@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Details - django-file-form</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Details";
+        var mkdocs_page_input_path = "details.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> django-file-form
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../usage/">Usage</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="./">Details</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#include-hidden-fields">Include hidden fields</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#temp-upload-dir-must-exist">Temp upload dir must exist</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#adding-placeholder-files">Adding placeholder files</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#upload-directly-to-aws-s3">Upload directly to AWS S3</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#accept-attribute">Accept attribute</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#additional-file-metadata">Additional file metadata</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#cache">Cache</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#disabled-property">Disabled property</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#production">Production</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#local-memory-caching">Local-memory caching</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#maximum-size-of-uploaded-chunk">Maximum size of uploaded chunk</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../upgrade/">Upgrade</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../python_settings/">Python settings</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../javascript_options/">Javascript options</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../auto_initialize/">Auto initialize javascript</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../form_sets/">Form sets</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../model_forms/">Model forms</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../admin/">Admin</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../translations/">Translations</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../customization/">Customization</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../javascript_events/">Javascript events</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../internals/">Internals</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../changelog/">Changelog</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">django-file-form</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Details</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="details">Details</h1>
+<h2 id="include-hidden-fields">Include hidden fields</h2>
+<p>Make sure that hidden form fields are included:</p>
+<pre><code class="language-python">{% for hidden in form.hidden_fields %}
+    {{ hidden }}
+{% endfor %}
+</code></pre>
+<p>NB: it's possible that the hidden fields are already included; for example if you use <code>form.as_p</code>. Do not include the hidden fields twice.</p>
+<p>Also see the testproject in the repository.</p>
+<h2 id="temp-upload-dir-must-exist">Temp upload dir must exist</h2>
+<p>Make sure the <code>FILE_FORM_UPLOAD_DIR</code> directory exists.</p>
+<pre><code class="language-python">temp_upload_dir = os.path.join(settings.MEDIA_ROOT,  settings.FILE_FORM_UPLOAD_DIR)
+
+if not os.path.exists(temp_upload_dir):
+  os.mkdir(temp_upload_dir)
+</code></pre>
+<h2 id="adding-placeholder-files">Adding placeholder files</h2>
+<p>If you have used <code>django-file-form</code> to upload files, potentially have saved the files elsewhere, but would like to use <code>django-file-form</code> to edit (remove or replace) the original uploaded files and append new files, you can add information about the original uploaded files as placeholders to the <code>UploadedFileField</code>. More specifically, you can initialize your field with one or more <code>PlaceholderUploadedFile</code> as follows:</p>
+<pre><code class="language-python">from django_file_form.models import PlaceholderUploadedFile
+
+initial['my_field'] = [
+  PlaceholderUploadedFile('testfile1.png')
+]
+</code></pre>
+<p>You can also add options <code>size</code> and <code>file_id</code> to specify file size if the file does not exist locally, and an unique ID of the file, respectively.</p>
+<pre><code class="language-python">initial['my_field'] = [
+  PlaceholderUploadedFile('testfile1.png', size=12394, file_id=my_file.pk)
+]
+</code></pre>
+<p>The placeholder file will be listed, and will either be kept intact, or be removed. When you save the form, you will have to handle the placeholders as follows:</p>
+<pre><code class="language-python">for f in self.cleaned_data['my_field']:
+    if f.is_placeholder:
+        # do nothing, or something with f.name or f.file_id
+        continue
+    # handle newly uploaded files as usual
+
+# remove existing files if the placeholders are deleted
+# ...
+</code></pre>
+<h2 id="upload-directly-to-aws-s3">Upload directly to AWS S3</h2>
+<p><code>django-file-form</code> supports upload directly to AWS S3 compatible storages. The files will be uploaded
+by clients directly to S3 through AJAX operations and return to the backend as <code>File</code> objects
+with <a href="https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html"><code>S3Boto3Storage</code></a>.</p>
+<p>Required packages: <code>boto3</code> and <code>django_storages</code>.</p>
+<p>To use this method, you will first need to make sure your S3 bucket is configured
+to <a href="https://docs.aws.amazon.com/AmazonS3/latest/dev/cors.html">allow upload to bucket directly</a>,
+<a href="https://uppy.io/docs/aws-s3-multipart/#S3-Bucket-Configuration">allow <code>PUT</code> method, and expose <code>ETag</code> header</a>.
+You then need to define the following variables in <code>settings</code></p>
+<pre><code>AWS_ACCESS_KEY_ID
+AWS_SECRET_ACCESS_KEY
+AWS_STORAGE_BUCKET_NAME
+AWS_S3_REGION_NAME (optional)
+AWS_S3_SIGNATURE_VERSION (optional)
+AWS_S3_ENDPOINT_URL (optional)
+</code></pre>
+<p>or through environment variables with the same names as described
+in <a href="https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html"><code>django-storages</code> documentation</a>.</p>
+<p>If you are using <code>django-csp</code> for setting the Content Security Policy, then the following CORS settings are also needed in <code>settings</code></p>
+<pre><code>CSP_DEFAULT_SRC = (&quot;'none'&quot;,)
+CSP_STYLE_SRC = (&quot;'self'&quot;)
+CSP_SCRIPT_SRC = (&quot;'self'&quot;,)
+CSP_FONT_SRC = (&quot;'self'&quot;)
+CSP_IMG_SRC = (&quot;'self'&quot;,)
+CSP_CONNECT_SRC = (&quot;'self'&quot;, AWS_S3_ENDPOINT_URL)
+</code></pre>
+<p>where <code>AWS_S3_ENDPOINT_URL</code> is the AWS endpoint defined above.</p>
+<p>Finally, you will need to define</p>
+<pre><code>s3_upload_dir = &quot;user_or_form_specific_id&quot;
+</code></pre>
+<p>in the form class or passed parameter <code>s3_upload_dir</code> to the constructor of the
+form to inform the frontend to use the AJAX uploader for S3. The files will be
+uploaded to</p>
+<pre><code>${FILE_FORM_UPLOAD_DIR}/${s3_upload_dir}/
+</code></pre>
+<p>in the specified S3 bucket, where <code>s3_upload_dir</code> can be empty or a directory
+specific to user or form to avoid conflicts on the AWS side. If the object
+already exists in the S3 bucket, a random string will be added to filename.</p>
+<p>After form submission, the files will be returned as customized <code>S3Boto3StorageFile</code>
+objects with <code>S3Boto3Storage</code> as its underlying storage. The objects will have attributes
+<code>is_s3direct=True</code>, <code>is_placeholder=False</code>, and <code>original_name</code> which is the
+name of the file that was uploaded that can be different from the basename
+of the object on S3 (<code>f.name</code>). Reading from these objects will download the files
+from S3.</p>
+<h2 id="accept-attribute">Accept attribute</h2>
+<p>You can add an accept attribute to the file input using the <code>accept</code> parameter on <code>UploadedFileField</code>:</p>
+<pre><code>file = UploadedFileField(accept='image/*,.pdf')
+</code></pre>
+<h2 id="additional-file-metadata">Additional file metadata</h2>
+<p>If you want to add and maintain additional metadata such as short descriptions and
+categories of uploaded files, you can use the <code>.metadata</code> field of uploaded files.
+More specifically, the AJAX uploader has a hidden field called <code>metadata</code> (with form
+specific prefix) with its <code>data</code> being the <code>JSON.dump</code>ed meta data of all files. The
+data should be in the format of</p>
+<pre><code>{
+  'filename1': value1,
+  'filename2': value2
+}
+</code></pre>
+<p>To add metadata to uploaded files, you will need to listen to events triggered after the
+additional and removal of file list (see "Javascript events" for details) to add your own
+widgets and event handlers to update the <code>data</code> of this hidden field.</p>
+<p>Upon form submission, <code>django-file-form</code> retrieves the data and assign them to returned file
+objects with matching filename (could be of placeholder and other types) as <code>f.metadata</code>.</p>
+<h2 id="cache">Cache</h2>
+<p>Django-file-form uses the Django cache for storing data while uploading files.</p>
+<ul>
+<li>Only meta data of the file is stored (including the upload progress), not contents of the file.</li>
+<li>The default cache timeout is 24 hours. An upload will fail if it takes longer than that.</li>
+<li>The timeout is configurable using the <code>FILE_FORM_CACHE_TIMEOUT</code> setting. See the 'Python settings' section.</li>
+<li>The cache backed is configurable using <code>FILE_FORM_CACHE</code>.</li>
+</ul>
+<h2 id="disabled-property">Disabled property</h2>
+<p>Make the input disabled by setting the <code>disabled</code> attribute.</p>
+<pre><code class="language-python">class ExampleForm(FileFormMixin, Form):
+    input_file = UploadedFileField(disabled=True)
+</code></pre>
+<p>Also possibe: make the field disabled in the constructor.</p>
+<pre><code class="language-python">def __init__(self, *args, **kwargs):
+    super().__init__(*args, **kwargs)
+
+    self.fields[&quot;input_file&quot;].disabled = True
+</code></pre>
+<h2 id="production">Production</h2>
+<h3 id="local-memory-caching">Local-memory caching</h3>
+<p>Don't use local-memory caching in your Django configuration if you use a multi process WSGI server. It will break file uploads, because file uploads use the Django cache and might hit different WSGI processes.</p>
+<ul>
+<li>The default cache option in Django is local-memory caching.</li>
+<li>Most WSGI servers are multi process.</li>
+</ul>
+<h3 id="maximum-size-of-uploaded-chunk">Maximum size of uploaded chunk</h3>
+<p>Files are uploaded in chunks; the default size of a chunk is 2.5 MB. Your production setup must allow for uploads of this size.</p>
+<ul>
+<li>It's possible that you use a reverse proxy server that has a maximum file upload size. E.g. Nginx has the <code>client_max_body_size</code> option.</li>
+<li>Django has the <code>DATA_UPLOAD_MAX_MEMORY_SIZE</code> option, which also limits the upload size.</li>
+<li>You can change the maximum chunk size with the <code>chunkSize</code> option in Javascript. See the 'javascript options' section in this documentation.</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../usage/" class="btn btn-neutral float-left" title="Usage"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../upgrade/" class="btn btn-neutral float-right" title="Upgrade">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../usage/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../upgrade/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Changelog - django-file-form</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Changelog";
+        var mkdocs_page_input_path = "changelog.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> django-file-form
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../usage/">Usage</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../details/">Details</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../upgrade/">Upgrade</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../python_settings/">Python settings</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../javascript_options/">Javascript options</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../auto_initialize/">Auto initialize javascript</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../form_sets/">Form sets</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../model_forms/">Model forms</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../admin/">Admin</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../translations/">Translations</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../customization/">Customization</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../javascript_events/">Javascript events</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../internals/">Internals</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="./">Changelog</a>
+    <ul class="current">
+    </ul>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">django-file-form</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Changelog</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h2 id="changelog">Changelog</h2>
+<p><strong>development</strong></p>
+<ul>
+<li>Issue #784: compile to es6. This reduces the size of the minified js file to 80k (from 119k)</li>
+</ul>
+<p><strong>3.6.0 (december 8 2023)</strong></p>
+<ul>
+<li>Issue #748: support Django 5.0</li>
+</ul>
+<p><strong>3.5.4 (28 october 2023)</strong></p>
+<ul>
+<li>Issue #760: support django storages 1.14</li>
+</ul>
+<p><strong>3.5.3 (3 september 2023)</strong></p>
+<ul>
+<li>Issue #680: support the disabled property</li>
+<li>Issue #685: use a path for the location header to prevent mixed content issues (thanks to Walter Lorenzetti)</li>
+</ul>
+<p><strong>3.5.2 (31 may 2023)</strong></p>
+<ul>
+<li>Issue #667: uploadComplete sends wrong element with multiple file forms on a page</li>
+<li>Issue #669: rename the minified version to file_form.min.js</li>
+</ul>
+<p><strong>3.5.1 (4 may 2023)</strong></p>
+<ul>
+<li>Issue #638: handle modelform field without associated file (thanks to Walter Lorenzetti)</li>
+</ul>
+<p><strong>3.5.0 (4 april 2023)</strong></p>
+<ul>
+<li>Isssue #614: prevent uploading multiple files for a single file upload (thanks to Krzysztof Kosiorek)</li>
+<li>Support Django 4.2</li>
+</ul>
+<p><strong>3.4.4 (30 january 2023)</strong></p>
+<ul>
+<li>Issue #588: remove temporary uploaded file when deleting a submitted upload</li>
+<li>Issue #590: add the file id to the onClick handler</li>
+</ul>
+<p><strong>3.4.3 (14 january 2023)</strong></p>
+<ul>
+<li>Issue #579: onClick handler (thanks to mi01)</li>
+</ul>
+<p><strong>3.4.2 (7 december 2022)</strong></p>
+<ul>
+<li>Issue #531: add Finnish translations (thanks to Tuomas Vihinen)</li>
+<li>Issue #555: code scanning alert</li>
+</ul>
+<p><strong>3.4.1 (31 august 2022)</strong></p>
+<ul>
+<li>Issue #523: add package lock file (thanks to Saurabh Kumar)</li>
+<li>Issue #524: add js validation for acceptable file types (thanks to Saurabh Kumar)</li>
+<li>Issue #528: fix single upload input</li>
+</ul>
+<p><strong>3.4.0 (5 august 2022)</strong></p>
+<ul>
+<li>Issue #521: support Django 4.1</li>
+</ul>
+<p><strong>3.3.2 (1 june 2022)</strong></p>
+<ul>
+<li>Issue #514: prevent migrations when the DEFAULT_AUTO_FIELD is set.</li>
+<li>The TemporaryUploadedFile model now uses AutoField.</li>
+</ul>
+<p><strong>3.3.1 (2 april 2022)</strong></p>
+<ul>
+<li>Issue #498: added spanish translations (thanks to Juan Helios García Guzmán)</li>
+<li>Issue #504: handle multiple 'upload failed' error messages (thanks to Krzysztof Kosiorek)</li>
+</ul>
+<p><strong>3.3.0 (8 december 2021)</strong></p>
+<ul>
+<li>Support Django 4.0</li>
+</ul>
+<p><strong>3.2.3 (3 october 2021)</strong></p>
+<ul>
+<li>Issue #471: fix security advice: uncontrolled data used in path expression</li>
+<li>Issue #481: make cache timeout configurable (thanks to Seb Haase)</li>
+</ul>
+<p><strong>3.2.2 (17 june 2021)</strong></p>
+<ul>
+<li>Issue #456: handle data parameter with the None value</li>
+<li>Issue #465: remove unused FILE_FORM_MAX_FILE_SIZE setting</li>
+<li>Issue #468: fix modelformset with S3 upload</li>
+</ul>
+<p><strong>3.2.1 (20 april 2021)</strong></p>
+<ul>
+<li>Issue #445: fix ModelForm update with multiple files (thanks to Arcuri Davide)</li>
+</ul>
+<p><strong>3.2.0 (6 april 2021)</strong></p>
+<ul>
+<li>Issue #443: support Django 3.2</li>
+<li>Issue #446: add AWS_S3_REGION_NAME and AWS_S3_SIGNATURE_VERSION settings (thanks to Niklas Wahl)</li>
+<li>Issue #449: add German translations (thanks to Niklas Wahl)</li>
+</ul>
+<p><strong>3.1.5 (29 march 2021)</strong></p>
+<ul>
+<li>Issue #211: auto initialize javascript</li>
+<li>Issue #339: Django admin support</li>
+</ul>
+<p><strong>3.1.4 (8 march 2021)</strong></p>
+<ul>
+<li>Issue #436: allow customization of the widget (thanks to Bo Peng)</li>
+<li>Issue #439: support ModelForm</li>
+</ul>
+<p><strong>3.1.3 (19 january 2021)</strong></p>
+<ul>
+<li>Issue #422: add model rename to migrations (thanks to Shrikrishna Singh)</li>
+</ul>
+<p><strong>3.1.2 (27 december 2020)</strong></p>
+<ul>
+<li>Issue #418: correctly remove upload</li>
+</ul>
+<p><strong>3.1.1 (26 november 2020)</strong></p>
+<ul>
+<li>Issue #388: add cross-site request forgery protection to tus uploads using the standard Django csrf token</li>
+<li>Issue #393: fix delete-unused-files command (thanks to Seb Haase)</li>
+<li>issue #401: optimization: use move instead of copy when possible</li>
+</ul>
+<p><strong>3.1.0 (15 september 2020)</strong></p>
+<ul>
+<li>Issue #324: get placeholder file for UploadWidget (thanks to Shrikrishna Singh)</li>
+<li>Issue #330: allow upload directly to S3 compatible storages (thanks to Bo Peng)</li>
+<li>Issue #331: fix error in deleting files (thanks to Bo Peng)</li>
+<li>Issue #333: replace existing uploaded file with the same name (thanks to Bo Peng)</li>
+<li>Issue #341: add javascript events (experimental)</li>
+<li>Issue #346: allow definition of s3_upload_dir in form class (thanks to Bo Peng)</li>
+</ul>
+<p><strong>3.0.1 (4 september 2020)</strong></p>
+<ul>
+<li>Issue #347: add chunkSize parameter to avoid request error in Django</li>
+</ul>
+<p><strong>3.0.0 (6 august 2020)</strong></p>
+<ul>
+<li>Issue #320: fix UploadMultipleWidget to return correct placeholder files (thanks to Shrikrishna Singh)</li>
+<li>Issue #325: support Django 3.1</li>
+</ul>
+<p><strong>2.2.0 (22 july 2020)</strong></p>
+<ul>
+<li>Issue #315: file is not removed after form error</li>
+<li>Issue #313: allow using custom storage and custom cache (thanks to Balazs Endresz)</li>
+</ul>
+<p><strong>2.1.3 (20 june 2020)</strong></p>
+<ul>
+<li>Issue #304: rewrite frontend in typescript</li>
+<li>Issue #305: don't change migration when setting changes (thanks to Lionqueen94)</li>
+<li>Issue #307: add French translations; also make translations discoverable by makemessages (thanks to Simon Maillard)</li>
+</ul>
+<p><strong>2.1.2 (20 april 2020)</strong></p>
+<ul>
+<li>Issue #298: directory support for drop area</li>
+<li>Issue #300: add migration so makemigrations will not create one (thanks to Lionqueen94)</li>
+</ul>
+<p><strong>2.1.1 (7 april 2020)</strong></p>
+<ul>
+<li>Issue #290: add javascript callbacks (thanks to Peter Dekkers)</li>
+<li>Issue #296: fix progress bar</li>
+<li>Issue #297: add retry delays</li>
+</ul>
+<p><strong>2.1.0 (28 march 2020)</strong></p>
+<ul>
+<li>Issue #266: allow relative <code>FILE_FORM_UPLOAD_DIR</code> setting (thanks to Bo Peng)</li>
+<li>Issue #267: add drop area (thanks to Bo Peng)</li>
+<li>Issue #275: show size of uploaded files (thanks to Bo Peng)</li>
+<li>Issue #278: allow the addition of placeholder files (thanks to Bo Peng)</li>
+<li>Issue #280: remove option <code>FILE_FORM_FILE_STORAGE</code></li>
+</ul>
+<p><strong>2.0.3 (15 february 2020)</strong></p>
+<ul>
+<li>Issue #237: using with form set (thanks to Juan Carlos Carvajal)</li>
+<li>Issue #259: include uncompressed js</li>
+<li>Issue #260: correctly use formset prefix (thanks to Gzuba)</li>
+<li>Issue #261: fix default for <code>FILE_FORM_UPLOAD_DIR</code> (thanks to Gzuba)</li>
+</ul>
+<p><strong>2.0.2 (14 january 2020)</strong></p>
+<ul>
+<li>Issue #247: support form wizard (thanks to Lionqueen94)</li>
+<li>Issue #251: delete after submit</li>
+</ul>
+<p><strong>2.0.1 (6 january 2020)</strong></p>
+<ul>
+<li>Issue #240: add empty dff files div (thanks to Lionqueen94)</li>
+<li>Issue #241: Csp compliance (thanks to Lionqueen94)</li>
+</ul>
+<p><strong>2.0 (30 december 2019)</strong></p>
+<ul>
+<li>Use tus instead of fine uploader</li>
+</ul>
+<p><strong>1.0 (5 december 2019)</strong></p>
+<ul>
+<li>Drop support for Python 2 and Django &lt; 2</li>
+<li>Issue #217: update fine uploader</li>
+<li>Issue #219: use <code>Selenium</code> for all tests</li>
+<li>Issue #222: use <code>pathlib2</code> (instead of pathlib)</li>
+<li>Issue #235: support Django 3.0</li>
+</ul>
+<p><strong>0.4.2 (3 March 2019)</strong></p>
+<ul>
+<li>Issue #207: support form prefixes (thanks to Iw108)</li>
+<li>Issue #201: fix multiple file upload without ajax (thanks to Lionqueen94)</li>
+</ul>
+<p><strong>0.4.1 (5 January 2019)</strong></p>
+<ul>
+<li>Issue #194: correctly call <code>is_authenticated</code> (thanks to Dureba)</li>
+</ul>
+<p><strong>0.4.0 (3 August 2018)</strong></p>
+<ul>
+<li>Support Django 2.1 and Python 3.7</li>
+<li>Issue #173: add i18n to upload widget (thanks to Arman Roomana)</li>
+</ul>
+<p><strong>0.3.0 (6 December 2017)</strong></p>
+<ul>
+<li>Support Django 2.0</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../internals/" class="btn btn-neutral float-left" title="Internals"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../internals/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
