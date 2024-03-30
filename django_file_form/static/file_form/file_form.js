@@ -655,6 +655,8 @@
     }
   };
 
+  /*global navigator*/
+
   (function (exports) {
 
   	const {
@@ -669,6 +671,19 @@
   	exports.isRegexChar = str => str.length === 1 && exports.hasRegexChars(str);
   	exports.escapeRegex = str => str.replace(REGEX_SPECIAL_CHARS_GLOBAL, '\\$1');
   	exports.toPosixSlashes = str => str.replace(REGEX_BACKSLASH, '/');
+
+  	exports.isWindows = () => {
+  	  if (typeof navigator !== 'undefined' && navigator.platform) {
+  	    const platform = navigator.platform.toLowerCase();
+  	    return platform === 'win32' || platform === 'windows';
+  	  }
+
+  	  if (typeof process !== 'undefined' && process.platform) {
+  	    return process.platform === 'win32';
+  	  }
+
+  	  return false;
+  	};
 
   	exports.removeBackslashes = str => {
   	  return str.replace(REGEX_REMOVE_BACKSLASH, match => {
