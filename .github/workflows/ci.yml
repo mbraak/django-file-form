@@ -71,6 +71,6 @@ jobs:
         working-directory: ./coverage
         run: npm clean-install --audit=false --fund=false --loglevel=http && npm run merge_coverage
       - name: Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           verbose: true
