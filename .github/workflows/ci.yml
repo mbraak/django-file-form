@@ -8,7 +8,7 @@ jobs:
 
     strategy:
       matrix:
-        django: ["django==3.2.24", "django==4.2.10", "django==5.0.2"]
+        django: ["django==4.2.11", "django==5.0.4"]
 
     services:
       postgres:
@@ -71,6 +71,7 @@ jobs:
         working-directory: ./coverage
         run: npm clean-install --audit=false --fund=false --loglevel=http && npm run merge_coverage
       - name: Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           verbose: true
