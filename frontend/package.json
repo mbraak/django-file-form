@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Frontend code for django-file-form",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "lint": "eslint src",
     "build": "npm run sass; rollup -c rollup.config.mjs; SKIP_COMPRESS_JS=true rollup -c rollup.config.mjs; COVERAGE=true rollup -c rollup.config.mjs",
@@ -35,7 +36,6 @@
     "@rollup/plugin-terser": "^0.4.0",
     "@types/escape-html": "^1.0.2",
     "@types/jest": "^29.5.0",
-    "@types/mime": "^3.0.1",
     "@typescript-eslint/eslint-plugin": "^7",
     "@typescript-eslint/parser": "^7",
     "babel-plugin-istanbul": "^6.1.1",
@@ -52,6 +52,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.18.9",
+    "@rollup/plugin-alias": "^5.1.0",
     "core-js": "^3.24.1",
     "escape-html": "^1.0.3",
     "eventemitter3": "^5",

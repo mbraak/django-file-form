@@ -1,5 +1,5 @@
 import escape from "escape-html";
-import { formatBytes } from "./util";
+import { formatBytes } from "./util.ts";
 
 class RenderUploadFile {
   container: Element;

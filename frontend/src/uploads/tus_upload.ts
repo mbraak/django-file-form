@@ -1,10 +1,6 @@
-import {
-  HttpRequest,
-  HttpResponse,
-  Upload
-} from "tus-js-client/lib/browser/index.js";
-import BaseUpload, { InitialFile } from "./base_upload";
-import { deleteUpload } from "./tus_utils";
+import { HttpRequest, HttpResponse, Upload } from "tus-js-client";
+import BaseUpload, { InitialFile } from "./base_upload.ts";
+import { deleteUpload } from "./tus_utils.ts";
 
 interface Parameters {
   chunkSize: number;

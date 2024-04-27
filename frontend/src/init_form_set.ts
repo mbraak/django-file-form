@@ -1,5 +1,8 @@
-import initUploadFields, { Options } from "./init_upload_fields";
-import { getInputNameWithPrefix, getInputValueForFormAndPrefix } from "./util";
+import initUploadFields, { Options } from "./init_upload_fields.ts";
+import {
+  getInputNameWithPrefix,
+  getInputValueForFormAndPrefix
+} from "./util.ts";
 
 const initFormSet = (form: Element, optionsParam: Options | string): void => {
   let options: Options;

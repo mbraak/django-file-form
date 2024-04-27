@@ -1,6 +1,6 @@
-import autoInitFileForms from "./auto_init_file_forms";
-import initFormSet from "./init_form_set";
-import initUploadFields from "./init_upload_fields";
+import autoInitFileForms from "./auto_init_file_forms.ts";
+import initFormSet from "./init_form_set.ts";
+import initUploadFields from "./init_upload_fields.ts";
 
 declare const window: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 

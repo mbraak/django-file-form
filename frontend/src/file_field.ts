@@ -1,13 +1,17 @@
-import { findInput, getMetadataFieldName, getUploadsFieldName } from "./util";
-import RenderUploadFile from "./render_upload_file";
-import DropArea from "./drop_area";
+import {
+  findInput,
+  getMetadataFieldName,
+  getUploadsFieldName
+} from "./util.ts";
+import RenderUploadFile from "./render_upload_file.ts";
+import DropArea from "./drop_area.ts";
 
-import S3Upload from "./uploads/s3_upload";
-import EventEmitter from "eventemitter3";
-import { createUploadedFile } from "./uploads/uploaded_file";
-import TusUpload from "./uploads/tus_upload";
-import BaseUpload, { InitialFile, UploadType } from "./uploads/base_upload";
-import AcceptedFileTypes from "./accepted_file_types";
+import S3Upload from "./uploads/s3_upload.ts";
+import { EventEmitter } from "eventemitter3";
+import { createUploadedFile } from "./uploads/uploaded_file.ts";
+import TusUpload from "./uploads/tus_upload.ts";
+import BaseUpload, { InitialFile, UploadType } from "./uploads/base_upload.ts";
+import AcceptedFileTypes from "./accepted_file_types.ts";
 
 export type Translations = { [key: string]: string };
 

@@ -1,7 +1,7 @@
 // The following code is adapted from https://github.com/transloadit/uppy/blob/master/packages/%40uppy/aws-s3-multipart/src/MultipartUploader.js
 // which is released under a MIT License (https://github.com/transloadit/uppy/blob/master/LICENSE)
 
-import BaseUpload, { InitialFile } from "./base_upload";
+import BaseUpload, { InitialFile } from "./base_upload.ts";
 import {
   abortMultipartUpload,
   completeMultipartUpload,
@@ -13,7 +13,7 @@ import {
   prepareUploadPart,
   remove,
   UrlInfo
-} from "./s3_utils";
+} from "./s3_utils.js";
 
 interface ChunkState {
   busy: boolean;
