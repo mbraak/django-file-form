@@ -43,7 +43,7 @@
 
   function toPropertyKey(t) {
     var i = toPrimitive(t, "string");
-    return "symbol" == _typeof(i) ? i : String(i);
+    return "symbol" == _typeof(i) ? i : i + "";
   }
 
   function _defineProperty(obj, key, value) {
@@ -655,6 +655,8 @@
     }
   };
 
+  /*global navigator*/
+
   (function (exports) {
 
   	const {
@@ -670,20 +672,23 @@
   	exports.escapeRegex = str => str.replace(REGEX_SPECIAL_CHARS_GLOBAL, '\\$1');
   	exports.toPosixSlashes = str => str.replace(REGEX_BACKSLASH, '/');
 
+  	exports.isWindows = () => {
+  	  if (typeof navigator !== 'undefined' && navigator.platform) {
+  	    const platform = navigator.platform.toLowerCase();
+  	    return platform === 'win32' || platform === 'windows';
+  	  }
+
+  	  if (typeof process !== 'undefined' && process.platform) {
+  	    return process.platform === 'win32';
+  	  }
+
+  	  return false;
+  	};
+
   	exports.removeBackslashes = str => {
   	  return str.replace(REGEX_REMOVE_BACKSLASH, match => {
   	    return match === '\\' ? '' : match;
   	  });
-  	};
-
-  	exports.supportsLookbehinds = () => {
-  	  if (typeof process !== 'undefined') {
-  	    const segs = process.version.slice(1).split('.').map(Number);
-  	    if (segs.length === 3 && segs[0] >= 9 || (segs[0] === 8 && segs[1] >= 10)) {
-  	      return true;
-  	    }
-  	  }
-  	  return false;
   	};
 
   	exports.escapeLast = (input, char, lastIdx) => {
@@ -1324,8 +1329,8 @@
 
       if (tok.value || tok.output) append(tok);
       if (prev && prev.type === 'text' && tok.type === 'text') {
+        prev.output = (prev.output || prev.value) + tok.value;
         prev.value += tok.value;
-        prev.output = (prev.output || '') + tok.value;
         return;
       }
 
@@ -1812,10 +1817,6 @@
         if (prev && prev.type === 'paren') {
           const next = peek();
           let output = value;
-
-          if (next === '<' && !utils$1.supportsLookbehinds()) {
-            throw new Error('Node.js v10 or higher is required for regex lookbehinds');
-          }
 
           if ((prev.value === '(' && !/[!=<:]/.test(next)) || (next === '<' && !/<([!=]|\w+>)/.test(remaining()))) {
             output = `\\${value}`;
@@ -3337,13 +3338,11 @@
    *
    * @author Dan Kogai (https://github.com/dankogai)
    */
-  const version = '3.7.5';
+  const version = '3.7.7';
   /**
    * @deprecated use lowercase `version`.
    */
   const VERSION = version;
-  const _hasatob = typeof atob === 'function';
-  const _hasbtoa = typeof btoa === 'function';
   const _hasBuffer = typeof Buffer === 'function';
   const _TD = typeof TextDecoder === 'function' ? new TextDecoder() : undefined;
   const _TE = typeof TextEncoder === 'function' ? new TextEncoder() : undefined;
@@ -3387,7 +3386,7 @@
    * @param {String} bin binary string
    * @returns {string} Base64-encoded string
    */
-  const _btoa = _hasbtoa ? (bin) => btoa(bin)
+  const _btoa = typeof btoa === 'function' ? (bin) => btoa(bin)
       : _hasBuffer ? (bin) => Buffer.from(bin, 'binary').toString('base64')
           : btoaPolyfill;
   const _fromUint8Array = _hasBuffer
@@ -3510,7 +3509,7 @@
    * @param {String} asc Base64-encoded string
    * @returns {string} binary string
    */
-  const _atob = _hasatob ? (asc) => atob(_tidyB64(asc))
+  const _atob = typeof atob === 'function' ? (asc) => atob(_tidyB64(asc))
       : _hasBuffer ? (asc) => Buffer.from(asc, 'base64').toString('binary')
           : atobPolyfill;
   //
@@ -3597,7 +3596,7 @@
       toUint8Array: toUint8Array,
       extendString: extendString,
       extendUint8Array: extendUint8Array,
-      extendBuiltins: extendBuiltins,
+      extendBuiltins: extendBuiltins
   };
 
   /**
@@ -4397,6 +4396,8 @@
     });
   }
 
+  const PROTOCOL_TUS_V1 = 'tus-v1';
+  const PROTOCOL_IETF_DRAFT_03 = 'ietf-draft-03';
   const defaultOptions$1 = {
     endpoint: null,
     uploadUrl: null,
@@ -4424,7 +4425,8 @@
     uploadDataDuringCreation: false,
     urlStorage: null,
     fileReader: null,
-    httpStack: null
+    httpStack: null,
+    protocol: PROTOCOL_TUS_V1
   };
   class BaseUpload {
     constructor(file, options) {
@@ -4543,6 +4545,10 @@
       } = this;
       if (!file) {
         this._emitError(new Error('tus: no file or stream to upload provided'));
+        return;
+      }
+      if (![PROTOCOL_TUS_V1, PROTOCOL_IETF_DRAFT_03].includes(this.options.protocol)) {
+        this._emitError(new Error(`tus: unsupported protocol ${this.options.protocol}`));
         return;
       }
       if (!this.options.endpoint && !this.options.uploadUrl && !this.url) {
@@ -4900,6 +4906,9 @@
         this._offset = 0;
         promise = this._addChunkToRequest(req);
       } else {
+        if (this.options.protocol === PROTOCOL_IETF_DRAFT_03) {
+          req.setHeader('Upload-Complete', '?0');
+        }
         promise = this._sendRequest(req, null);
       }
       promise.then(res => {
@@ -4980,7 +4989,7 @@
           return;
         }
         const length = parseInt(res.getHeader('Upload-Length'), 10);
-        if (Number.isNaN(length) && !this.options.uploadLengthDeferred) {
+        if (Number.isNaN(length) && !this.options.uploadLengthDeferred && this.options.protocol === PROTOCOL_TUS_V1) {
           this._emitHttpError(req, res, 'tus: invalid or missing length value');
           return;
         }
@@ -5091,6 +5100,9 @@
         }
         if (value === null) {
           return this._sendRequest(req);
+        }
+        if (this.options.protocol === PROTOCOL_IETF_DRAFT_03) {
+          req.setHeader('Upload-Complete', done ? '?1' : '?0');
         }
         this._emitProgress(this._offset, this._size);
         return this._sendRequest(req, value);
@@ -5211,7 +5223,11 @@
    */
   function openRequest(method, url, options) {
     const req = options.httpStack.createRequest(method, url);
-    req.setHeader('Tus-Resumable', '1.0.0');
+    if (options.protocol === PROTOCOL_IETF_DRAFT_03) {
+      req.setHeader('Upload-Draft-Interop-Version', '5');
+    } else {
+      req.setHeader('Tus-Resumable', '1.0.0');
+    }
     const headers = options.headers || {};
     Object.entries(headers).forEach(_ref4 => {
       let [name, value] = _ref4;

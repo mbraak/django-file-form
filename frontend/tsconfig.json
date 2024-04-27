@@ -2,10 +2,13 @@
   "compileOnSave": false,
   "exclude": ["node_modules"],
   "compilerOptions": {
+    "allowImportingTsExtensions": true,
     "downlevelIteration": true,
     "esModuleInterop": true,
     "lib": ["DOM", "DOM.Iterable", "ES2018"],
-    "moduleResolution": "node",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "noEmit": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitReturns": true,
     "noImplicitThis": true,
@@ -14,9 +17,6 @@
     "noUnusedParameters": true,
     "strictNullChecks": true,
     "strictPropertyInitialization": false,
-    "strict": true,
-    "paths": {
-      "tus-js-client/lib/browser/index.js": ["./node_modules/tus-js-client"]
-    }
+    "strict": true
   }
 }

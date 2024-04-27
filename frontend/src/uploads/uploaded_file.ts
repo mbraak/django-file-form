@@ -5,8 +5,8 @@ import BaseUpload, {
   InitialS3File,
   InitialTusFile,
   UploadType
-} from "./base_upload";
-import { deleteUpload } from "./tus_utils";
+} from "./base_upload.ts";
+import { deleteUpload } from "./tus_utils.ts";
 
 interface BaseUploadedFileParameters {
   name: string;

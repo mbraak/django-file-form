@@ -1,4 +1,4 @@
-import AcceptedFileTypes from "./accepted_file_types";
+import AcceptedFileTypes from "./accepted_file_types.ts";
 
 describe(".isAccepted", () => {
   it("returns true if the extension is accepted", () => {

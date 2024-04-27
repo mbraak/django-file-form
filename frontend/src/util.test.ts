@@ -3,7 +3,7 @@ import {
   getInputNameWithPrefix,
   getMetadataFieldName,
   getUploadsFieldName
-} from "./util";
+} from "./util.ts";
 
 describe("formatBytes", () => {
   it("formats 0 bytes", () => {
