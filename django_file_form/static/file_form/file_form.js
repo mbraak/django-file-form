@@ -66,7 +66,7 @@
       return "0 Bytes";
     }
     const k = 1024;
-    const dm = decimals <= 0 ? 0 : decimals || 2;
+    const dm = decimals ;
     const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     const n = parseFloat((bytes / k ** i).toFixed(dm));
