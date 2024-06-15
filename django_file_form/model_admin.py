@@ -32,7 +32,7 @@ class FileFormAdminMixin(with_typehint(admin.ModelAdmin)):
         return super().media + file_form_media
 
     def get_file_form_js(self):
-        return "file_form/file_form.min.js"
+        return "file_form/file_form.min.js"  # pragma: no cover
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
