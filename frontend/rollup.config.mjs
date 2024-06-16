@@ -19,7 +19,7 @@ const getOutputFilename = () => {
 
 const minimize = !skipCompressJs && !includeCoverage;
 const babelConfigFile = includeCoverage
-  ? "./babel.coverage.config.json"
+  ? "./babel.cov.config.json"
   : "./babel.config.json";
 
 const plugins = [
