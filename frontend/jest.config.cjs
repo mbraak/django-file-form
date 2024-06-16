@@ -1,5 +1,5 @@
 module.exports = {
-  setupFiles: ["./setup-drag-events.js"],
+  setupFiles: ["./jestSetup/setupDragEvents.js"],
   testEnvironment: "jsdom",
   transformIgnorePatterns: ["node_modules/(?!(mime)/)"]
 };
