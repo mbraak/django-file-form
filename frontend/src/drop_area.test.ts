@@ -2,17 +2,17 @@ import { fireEvent, waitFor } from "@testing-library/dom";
 import DropArea, { getFilesFromDataTransfer } from "./drop_area.ts";
 import RenderUploadFile from "./render_upload_file.ts";
 
-const mockFileSystemEntry = (filename: string) => {
-  const file = new File(["test"], filename, { type: "text/plain" });
+const mockFile = (filename: string) =>
+  new File(["test"], filename, { type: "text/plain" });
 
-  return {
+const mockFileSystemEntry = (file: File) =>
+  ({
     isDirectory: false,
     isFile: true,
     file: (successCallback: FileCallback) => {
       successCallback(file);
     }
-  } as FileSystemFileEntry;
-};
+  } as FileSystemFileEntry);
 
 const mockFileSystemDirectoryEntry = (fileEntries: FileSystemFileEntry[]) => {
   const directoryReader = {
@@ -50,22 +50,22 @@ const mockDataTransfer = (fileEntries: FileSystemEntry[]) => {
 
 describe("getFilesFromDataTransfer", () => {
   it("returns a file", async () => {
-    const fileEntry = mockFileSystemEntry("test.txt");
+    const file = mockFile("test.txt");
+    const fileEntry = mockFileSystemEntry(file);
     const dataTransfer = mockDataTransfer([fileEntry]);
 
     const files = await getFilesFromDataTransfer(dataTransfer);
-    expect(files).toHaveLength(1);
-    expect(files[0]).toMatchObject({ name: "test.txt" });
+    expect(files).toEqual([file]);
   });
 
   it("returns a file from a directory entry", async () => {
-    const fileEntry = mockFileSystemEntry("test.txt");
+    const file = mockFile("test.txt");
+    const fileEntry = mockFileSystemEntry(file);
     const directoryEntry = mockFileSystemDirectoryEntry([fileEntry]);
     const dataTransfer = mockDataTransfer([directoryEntry]);
 
     const files = await getFilesFromDataTransfer(dataTransfer);
-    expect(files).toHaveLength(1);
-    expect(files[0]).toMatchObject({ name: "test.txt" });
+    expect(files).toEqual([file]);
   });
 });
 
@@ -80,19 +80,20 @@ describe("DropArea", () => {
 
     new DropArea({
       container,
-      inputAccept: "*.txt",
+      inputAccept: ".txt",
       onUploadFiles,
       renderer
     });
 
-    const fileEntry = mockFileSystemEntry("test.txt");
+    const file = mockFile("test.txt");
+    const fileEntry = mockFileSystemEntry(file);
     const dataTransfer = mockDataTransfer([fileEntry]);
 
     const dragEvent = new DragEvent("drop", { dataTransfer });
     fireEvent(container, dragEvent);
 
     await waitFor(() => {
-      expect(onUploadFiles).toHaveBeenCalled();
+      expect(onUploadFiles).toHaveBeenCalledWith([file]);
     });
   });
 });
