@@ -1,4 +1,6 @@
-import { getFilesFromDataTransfer } from "./drop_area.ts";
+import { fireEvent, waitFor } from "@testing-library/dom";
+import DropArea, { getFilesFromDataTransfer } from "./drop_area.ts";
+import RenderUploadFile from "./render_upload_file.ts";
 
 const mockFileSystemEntry = (filename: string) => {
   const file = new File(["test"], filename, { type: "text/plain" });
@@ -64,5 +66,33 @@ describe("getFilesFromDataTransfer", () => {
     const files = await getFilesFromDataTransfer(dataTransfer);
     expect(files).toHaveLength(1);
     expect(files[0]).toMatchObject({ name: "test.txt" });
+  });
+});
+
+describe("DropArea", () => {
+  it("uploads a file", async () => {
+    const onUploadFiles = jest.fn();
+    const renderer = {
+      setErrorInvalidFiles: jest.fn() as unknown
+    } as RenderUploadFile;
+
+    const container = document.createElement("div");
+
+    new DropArea({
+      container,
+      inputAccept: "*.txt",
+      onUploadFiles,
+      renderer
+    });
+
+    const fileEntry = mockFileSystemEntry("test.txt");
+    const dataTransfer = mockDataTransfer([fileEntry]);
+
+    const dragEvent = new DragEvent("drop", { dataTransfer });
+    fireEvent(container, dragEvent);
+
+    await waitFor(() => {
+      expect(onUploadFiles).toHaveBeenCalled();
+    });
   });
 });
