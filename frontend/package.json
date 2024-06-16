@@ -36,7 +36,7 @@
     "@types/escape-html": "^1.0.2",
     "@typescript-eslint/eslint-plugin": "^7",
     "@typescript-eslint/parser": "^7",
-    "@vitest/coverage-v8": "^1.6.0",
+    "@vitest/coverage-istanbul": "^1.6.0",
     "babel-plugin-istanbul": "^6.1.1",
     "eslint": "^8.21.0",
     "eslint-import-resolver-typescript": "^3.6.1",
