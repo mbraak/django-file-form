@@ -20,47 +20,6 @@
     forms.forEach(initUploadFields);
   };
 
-  function _typeof(o) {
-    "@babel/helpers - typeof";
-
-    return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
-      return typeof o;
-    } : function (o) {
-      return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-    }, _typeof(o);
-  }
-
-  function toPrimitive(t, r) {
-    if ("object" != _typeof(t) || !t) return t;
-    var e = t[Symbol.toPrimitive];
-    if (void 0 !== e) {
-      var i = e.call(t, r || "default");
-      if ("object" != _typeof(i)) return i;
-      throw new TypeError("@@toPrimitive must return a primitive value.");
-    }
-    return ("string" === r ? String : Number)(t);
-  }
-
-  function toPropertyKey(t) {
-    var i = toPrimitive(t, "string");
-    return "symbol" == _typeof(i) ? i : i + "";
-  }
-
-  function _defineProperty(obj, key, value) {
-    key = toPropertyKey(key);
-    if (key in obj) {
-      Object.defineProperty(obj, key, {
-        value: value,
-        enumerable: true,
-        configurable: true,
-        writable: true
-      });
-    } else {
-      obj[key] = value;
-    }
-    return obj;
-  }
-
   const formatBytes = (bytes, decimals) => {
     if (bytes === 0) {
       return "0 Bytes";
@@ -175,29 +134,13 @@
   class RenderUploadFile {
     constructor(_ref) {
       let {
-        parent: _parent,
+        parent,
         input,
         skipRequired,
         translations
       } = _ref;
-      _defineProperty(this, "container", void 0);
-      _defineProperty(this, "input", void 0);
-      _defineProperty(this, "translations", void 0);
-      _defineProperty(this, "errors", void 0);
-      _defineProperty(this, "createErrorContainer", parent => {
-        const div = document.createElement("div");
-        div.className = "dff-invalid-files";
-        parent.appendChild(div);
-        return div;
-      });
-      _defineProperty(this, "createFilesContainer", parent => {
-        const div = document.createElement("div");
-        div.className = "dff-files";
-        parent.appendChild(div);
-        return div;
-      });
-      this.container = this.createFilesContainer(_parent);
-      this.errors = this.createErrorContainer(_parent);
+      this.container = this.createFilesContainer(parent);
+      this.errors = this.createErrorContainer(parent);
       this.input = input;
       this.translations = translations;
       if (skipRequired) {
@@ -323,6 +266,18 @@
         }
       }
     }
+    createErrorContainer = parent => {
+      const div = document.createElement("div");
+      div.className = "dff-invalid-files";
+      parent.appendChild(div);
+      return div;
+    };
+    createFilesContainer = parent => {
+      const div = document.createElement("div");
+      div.className = "dff-files";
+      parent.appendChild(div);
+      return div;
+    };
     addFile(filename, uploadIndex) {
       const div = document.createElement("div");
       div.className = `dff-file dff-file-id-${uploadIndex}`;
@@ -2562,8 +2517,6 @@
   };
   class AcceptedFileTypes {
     constructor(inputAccept) {
-      _defineProperty(this, "extensions", void 0);
-      _defineProperty(this, "mimeTypes", void 0);
       const [extensions, mimeTypes] = parseInputAccept(inputAccept);
       this.extensions = extensions;
       this.mimeTypes = mimeTypes;
@@ -2622,37 +2575,6 @@
         onUploadFiles,
         renderer
       } = _ref;
-      _defineProperty(this, "acceptedFileTypes", void 0);
-      _defineProperty(this, "container", void 0);
-      _defineProperty(this, "onUploadFiles", void 0);
-      _defineProperty(this, "renderer", void 0);
-      _defineProperty(this, "onDrop", e => {
-        const dragEvent = e;
-        this.container.classList.remove("dff-dropping");
-        dragEvent.preventDefault();
-        dragEvent.stopPropagation();
-        const uploadFiles = async () => {
-          try {
-            if (dragEvent.dataTransfer) {
-              const files = await getFilesFromDataTransfer(dragEvent.dataTransfer);
-              const acceptedFiles = [];
-              const invalidFiles = [];
-              for (const file of files) {
-                if (this.acceptedFileTypes.isAccepted(file.name)) {
-                  acceptedFiles.push(file);
-                } else {
-                  invalidFiles.push(file);
-                }
-              }
-              this.renderer.setErrorInvalidFiles(invalidFiles);
-              void this.onUploadFiles(acceptedFiles);
-            }
-          } catch (error) {
-            console.error(error);
-          }
-        };
-        void uploadFiles();
-      });
       this.container = container;
       this.onUploadFiles = onUploadFiles;
       this.acceptedFileTypes = new AcceptedFileTypes(inputAccept);
@@ -2669,6 +2591,33 @@
       });
       container.addEventListener("drop", this.onDrop);
     }
+    onDrop = e => {
+      const dragEvent = e;
+      this.container.classList.remove("dff-dropping");
+      dragEvent.preventDefault();
+      dragEvent.stopPropagation();
+      const uploadFiles = async () => {
+        try {
+          if (dragEvent.dataTransfer) {
+            const files = await getFilesFromDataTransfer(dragEvent.dataTransfer);
+            const acceptedFiles = [];
+            const invalidFiles = [];
+            for (const file of files) {
+              if (this.acceptedFileTypes.isAccepted(file.name)) {
+                acceptedFiles.push(file);
+              } else {
+                invalidFiles.push(file);
+              }
+            }
+            this.renderer.setErrorInvalidFiles(invalidFiles);
+            void this.onUploadFiles(acceptedFiles);
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      };
+      void uploadFiles();
+    };
   }
 
   let BaseUpload$1 = class BaseUpload {
@@ -2679,10 +2628,6 @@
         type,
         uploadIndex
       } = _ref;
-      _defineProperty(this, "name", void 0);
-      _defineProperty(this, "status", void 0);
-      _defineProperty(this, "type", void 0);
-      _defineProperty(this, "uploadIndex", void 0);
       this.name = name;
       this.status = status;
       this.type = type;
@@ -2870,6 +2815,9 @@
     }
   };
 
+  // The following code is adapted from https://github.com/transloadit/uppy/blob/master/packages/%40uppy/aws-s3-multipart/src/MultipartUploader.js
+  // which is released under a MIT License (https://github.com/transloadit/uppy/blob/master/LICENSE)
+
   class S3Upload extends BaseUpload$1 {
     constructor(_ref) {
       let {
@@ -2885,20 +2833,6 @@
         type: "s3",
         uploadIndex
       });
-      _defineProperty(this, "onError", void 0);
-      _defineProperty(this, "onProgress", void 0);
-      _defineProperty(this, "onSuccess", void 0);
-      _defineProperty(this, "chunkState", void 0);
-      _defineProperty(this, "chunks", void 0);
-      _defineProperty(this, "createdPromise", void 0);
-      _defineProperty(this, "csrfToken", void 0);
-      _defineProperty(this, "endpoint", void 0);
-      _defineProperty(this, "file", void 0);
-      _defineProperty(this, "key", void 0);
-      _defineProperty(this, "parts", void 0);
-      _defineProperty(this, "s3UploadDir", void 0);
-      _defineProperty(this, "uploadId", void 0);
-      _defineProperty(this, "uploading", void 0);
       this.csrfToken = csrfToken;
       this.endpoint = endpoint;
       this.file = file;
@@ -3184,7 +3118,6 @@
         type,
         uploadIndex
       });
-      _defineProperty(this, "size", void 0);
       this.size = size;
     }
     async abort() {
@@ -3205,7 +3138,6 @@
         type: "placeholder",
         uploadIndex
       });
-      _defineProperty(this, "id", void 0);
       this.id = initialFile.id;
     }
     getId() {
@@ -3228,8 +3160,6 @@
         type: "uploadedS3",
         uploadIndex
       });
-      _defineProperty(this, "id", void 0);
-      _defineProperty(this, "key", void 0);
       this.id = initialFile.id;
       this.key = initialFile.name;
     }
@@ -3280,9 +3210,6 @@
         type: "uploadedTus",
         uploadIndex
       });
-      _defineProperty(this, "csrfToken", void 0);
-      _defineProperty(this, "id", void 0);
-      _defineProperty(this, "url", void 0);
       this.csrfToken = csrfToken;
       this.id = initialFile.id;
       this.url = `${uploadUrl}${initialFile.id}`;
@@ -5774,38 +5701,6 @@
         type: "tus",
         uploadIndex
       });
-      _defineProperty(this, "onError", void 0);
-      _defineProperty(this, "onProgress", void 0);
-      _defineProperty(this, "onSuccess", void 0);
-      _defineProperty(this, "id", void 0);
-      _defineProperty(this, "upload", void 0);
-      _defineProperty(this, "csrfToken", void 0);
-      _defineProperty(this, "handleError", error => {
-        if (this.onError) {
-          this.onError(error);
-        } else {
-          throw error;
-        }
-      });
-      _defineProperty(this, "handleProgress", (bytesUploaded, bytesTotal) => {
-        if (this.onProgress) {
-          this.onProgress(bytesUploaded, bytesTotal);
-        }
-      });
-      _defineProperty(this, "handleSucces", () => {
-        if (this.onSuccess) {
-          this.onSuccess();
-        }
-      });
-      _defineProperty(this, "addCsrTokenToRequest", request => {
-        request.setHeader("X-CSRFToken", this.csrfToken);
-      });
-      _defineProperty(this, "handleAfterReponse", (_request, response) => {
-        const resourceId = response.getHeader("ResourceId");
-        if (resourceId) {
-          this.id = resourceId;
-        }
-      });
       this.csrfToken = csrfToken;
       this.upload = new Upload(file, {
         chunkSize,
@@ -5844,6 +5739,32 @@
     start() {
       this.upload.start();
     }
+    handleError = error => {
+      if (this.onError) {
+        this.onError(error);
+      } else {
+        throw error;
+      }
+    };
+    handleProgress = (bytesUploaded, bytesTotal) => {
+      if (this.onProgress) {
+        this.onProgress(bytesUploaded, bytesTotal);
+      }
+    };
+    handleSucces = () => {
+      if (this.onSuccess) {
+        this.onSuccess();
+      }
+    };
+    addCsrTokenToRequest = request => {
+      request.setHeader("X-CSRFToken", this.csrfToken);
+    };
+    handleAfterReponse = (_request, response) => {
+      const resourceId = response.getHeader("ResourceId");
+      if (resourceId) {
+        this.id = resourceId;
+      }
+    };
     getInitialFile() {
       return {
         id: this.id,
@@ -5877,141 +5798,6 @@
         translations,
         uploadUrl
       } = _ref;
-      _defineProperty(this, "acceptedFileTypes", void 0);
-      _defineProperty(this, "callbacks", void 0);
-      _defineProperty(this, "chunkSize", void 0);
-      _defineProperty(this, "csrfToken", void 0);
-      _defineProperty(this, "eventEmitter", void 0);
-      _defineProperty(this, "fieldName", void 0);
-      _defineProperty(this, "form", void 0);
-      _defineProperty(this, "formId", void 0);
-      _defineProperty(this, "multiple", void 0);
-      _defineProperty(this, "nextUploadIndex", void 0);
-      _defineProperty(this, "prefix", void 0);
-      _defineProperty(this, "renderer", void 0);
-      _defineProperty(this, "retryDelays", void 0);
-      _defineProperty(this, "s3UploadDir", void 0);
-      _defineProperty(this, "supportDropArea", void 0);
-      _defineProperty(this, "uploads", void 0);
-      _defineProperty(this, "uploadUrl", void 0);
-      _defineProperty(this, "uploadFiles", async files => {
-        if (files.length === 0) {
-          return;
-        }
-        if (!this.multiple) {
-          for (const upload of this.uploads) {
-            this.renderer.deleteFile(upload.uploadIndex);
-          }
-          this.uploads = [];
-          const file = files[0];
-          if (file) {
-            await this.uploadFile(file);
-          }
-        } else {
-          for await (const file of files) {
-            await this.uploadFile(file);
-          }
-        }
-        this.checkDropHint();
-      });
-      _defineProperty(this, "onChange", e => {
-        const files = e.target.files || [];
-        const acceptedFiles = [];
-        const invalidFiles = [];
-        for (const file of files) {
-          if (this.acceptedFileTypes.isAccepted(file.name)) {
-            acceptedFiles.push(file);
-          } else {
-            invalidFiles.push(file);
-          }
-        }
-        if (invalidFiles) {
-          this.handleInvalidFiles([...invalidFiles]);
-        }
-        if (acceptedFiles) {
-          void this.uploadFiles([...acceptedFiles]);
-        }
-        this.renderer.clearInput();
-      });
-      _defineProperty(this, "handleInvalidFiles", files => {
-        this.renderer.setErrorInvalidFiles(files);
-      });
-      _defineProperty(this, "handleClick", e => {
-        const target = e.target;
-        const getUpload = () => {
-          const dataIndex = target.getAttribute("data-index");
-          if (!dataIndex) {
-            return undefined;
-          }
-          const uploadIndex = parseInt(dataIndex, 10);
-          return this.getUploadByIndex(uploadIndex);
-        };
-        if (target.classList.contains("dff-delete") && !target.classList.contains("dff-disabled")) {
-          e.preventDefault();
-          const upload = getUpload();
-          if (upload) {
-            void this.removeExistingUpload(upload);
-          }
-        } else if (target.classList.contains("dff-cancel")) {
-          e.preventDefault();
-          const upload = getUpload();
-          if (upload) {
-            void this.handleCancel(upload);
-          }
-        } else if (target.classList.contains("dff-filename")) {
-          e.preventDefault();
-          const upload = getUpload();
-          if (upload?.status === "done" && this.callbacks.onClick) {
-            this.callbacks.onClick({
-              fileName: upload.name,
-              fieldName: this.fieldName,
-              id: upload.getId(),
-              type: upload.type
-            });
-          }
-        }
-      });
-      _defineProperty(this, "handleProgress", (upload, bytesUploaded, bytesTotal) => {
-        const percentage = (bytesUploaded / bytesTotal * 100).toFixed(2);
-        this.renderer.updateProgress(upload.uploadIndex, percentage);
-        const {
-          onProgress
-        } = this.callbacks;
-        if (onProgress) {
-          if (upload instanceof TusUpload) {
-            onProgress(bytesUploaded, bytesTotal, upload);
-          }
-        }
-      });
-      _defineProperty(this, "handleError", (upload, error) => {
-        this.renderer.setError(upload.uploadIndex);
-        upload.status = "error";
-        const {
-          onError
-        } = this.callbacks;
-        if (onError) {
-          if (upload instanceof TusUpload) {
-            onError(error, upload);
-          }
-        }
-      });
-      _defineProperty(this, "handleSuccess", upload => {
-        const {
-          renderer
-        } = this;
-        this.updatePlaceholderInput();
-        renderer.clearInput();
-        renderer.setSuccess(upload.uploadIndex, upload.getSize());
-        upload.status = "done";
-        const {
-          onSuccess
-        } = this.callbacks;
-        const element = this.renderer.findFileDiv(upload.uploadIndex);
-        this.emitEvent("uploadComplete", element, upload);
-        if (onSuccess && upload.type === "tus") {
-          onSuccess(upload);
-        }
-      });
       this.callbacks = callbacks;
       this.chunkSize = chunkSize;
       this.csrfToken = csrfToken;
@@ -6080,6 +5866,26 @@
         }
       }
     }
+    uploadFiles = async files => {
+      if (files.length === 0) {
+        return;
+      }
+      if (!this.multiple) {
+        for (const upload of this.uploads) {
+          this.renderer.deleteFile(upload.uploadIndex);
+        }
+        this.uploads = [];
+        const file = files[0];
+        if (file) {
+          await this.uploadFile(file);
+        }
+      } else {
+        for await (const file of files) {
+          await this.uploadFile(file);
+        }
+      }
+      this.checkDropHint();
+    };
     async uploadFile(file) {
       const createUpload = () => {
         const {
@@ -6157,6 +5963,104 @@
       this.removeUploadFromList(upload);
       this.updatePlaceholderInput();
     }
+    onChange = e => {
+      const files = e.target.files || [];
+      const acceptedFiles = [];
+      const invalidFiles = [];
+      for (const file of files) {
+        if (this.acceptedFileTypes.isAccepted(file.name)) {
+          acceptedFiles.push(file);
+        } else {
+          invalidFiles.push(file);
+        }
+      }
+      if (invalidFiles) {
+        this.handleInvalidFiles([...invalidFiles]);
+      }
+      if (acceptedFiles) {
+        void this.uploadFiles([...acceptedFiles]);
+      }
+      this.renderer.clearInput();
+    };
+    handleInvalidFiles = files => {
+      this.renderer.setErrorInvalidFiles(files);
+    };
+    handleClick = e => {
+      const target = e.target;
+      const getUpload = () => {
+        const dataIndex = target.getAttribute("data-index");
+        if (!dataIndex) {
+          return undefined;
+        }
+        const uploadIndex = parseInt(dataIndex, 10);
+        return this.getUploadByIndex(uploadIndex);
+      };
+      if (target.classList.contains("dff-delete") && !target.classList.contains("dff-disabled")) {
+        e.preventDefault();
+        const upload = getUpload();
+        if (upload) {
+          void this.removeExistingUpload(upload);
+        }
+      } else if (target.classList.contains("dff-cancel")) {
+        e.preventDefault();
+        const upload = getUpload();
+        if (upload) {
+          void this.handleCancel(upload);
+        }
+      } else if (target.classList.contains("dff-filename")) {
+        e.preventDefault();
+        const upload = getUpload();
+        if (upload?.status === "done" && this.callbacks.onClick) {
+          this.callbacks.onClick({
+            fileName: upload.name,
+            fieldName: this.fieldName,
+            id: upload.getId(),
+            type: upload.type
+          });
+        }
+      }
+    };
+    handleProgress = (upload, bytesUploaded, bytesTotal) => {
+      const percentage = (bytesUploaded / bytesTotal * 100).toFixed(2);
+      this.renderer.updateProgress(upload.uploadIndex, percentage);
+      const {
+        onProgress
+      } = this.callbacks;
+      if (onProgress) {
+        if (upload instanceof TusUpload) {
+          onProgress(bytesUploaded, bytesTotal, upload);
+        }
+      }
+    };
+    handleError = (upload, error) => {
+      this.renderer.setError(upload.uploadIndex);
+      upload.status = "error";
+      const {
+        onError
+      } = this.callbacks;
+      if (onError) {
+        if (upload instanceof TusUpload) {
+          onError(error, upload);
+        }
+      }
+    };
+    handleSuccess = upload => {
+      const {
+        renderer
+      } = this;
+      this.updatePlaceholderInput();
+      renderer.clearInput();
+      renderer.setSuccess(upload.uploadIndex, upload.getSize());
+      upload.status = "done";
+      const {
+        onSuccess
+      } = this.callbacks;
+      const element = this.renderer.findFileDiv(upload.uploadIndex);
+      this.emitEvent("uploadComplete", element, upload);
+      if (onSuccess && upload.type === "tus") {
+        onSuccess(upload);
+      }
+    };
     removeUploadFromList(upload) {
       this.renderer.deleteFile(upload.uploadIndex);
       const index = this.uploads.indexOf(upload);
