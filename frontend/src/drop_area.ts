@@ -34,7 +34,7 @@ const getFilesFromFileSystemEntries = async (
   return result;
 };
 
-const getFilesFromDataTransfer = async (
+export const getFilesFromDataTransfer = async (
   dataTransfer: DataTransfer
 ): Promise<File[]> => {
   if (dataTransfer.items) {
