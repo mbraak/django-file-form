@@ -48,6 +48,13 @@ const mockDataTransfer = (fileEntries: FileSystemEntry[]) => {
   } as DataTransfer;
 };
 
+// Mock DataTransfer without items attribute
+const mockClassicDataTransfer = (file: File) => {
+  const files = [file] as unknown as FileList;
+
+  return { files } as DataTransfer;
+};
+
 describe("DropArea", () => {
   it("uploads a file", async () => {
     const onUploadFiles = jest.fn();
@@ -67,6 +74,32 @@ describe("DropArea", () => {
     const file = mockFile("test.txt");
     const fileEntry = mockFileSystemEntry(file);
     const dataTransfer = mockDataTransfer([fileEntry]);
+
+    const dragEvent = new DragEvent("drop", { dataTransfer });
+    fireEvent(container, dragEvent);
+
+    await waitFor(() => {
+      expect(onUploadFiles).toHaveBeenCalledWith([file]);
+    });
+  });
+
+  it("upload a file when the data transfer doesn't have an items property", async () => {
+    const onUploadFiles = jest.fn();
+    const renderer = {
+      setErrorInvalidFiles: jest.fn() as unknown
+    } as RenderUploadFile;
+
+    const container = document.createElement("div");
+
+    new DropArea({
+      container,
+      inputAccept: ".txt",
+      onUploadFiles,
+      renderer
+    });
+
+    const file = mockFile("test.txt");
+    const dataTransfer = mockClassicDataTransfer(file);
 
     const dragEvent = new DragEvent("drop", { dataTransfer });
     fireEvent(container, dragEvent);
