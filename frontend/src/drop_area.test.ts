@@ -1,5 +1,5 @@
 import { fireEvent, waitFor } from "@testing-library/dom";
-import DropArea, { getFilesFromDataTransfer } from "./drop_area.ts";
+import DropArea from "./drop_area.ts";
 import RenderUploadFile from "./render_upload_file.ts";
 
 const mockFile = (filename: string) =>
@@ -48,27 +48,6 @@ const mockDataTransfer = (fileEntries: FileSystemEntry[]) => {
   } as DataTransfer;
 };
 
-describe("getFilesFromDataTransfer", () => {
-  it("returns a file", async () => {
-    const file = mockFile("test.txt");
-    const fileEntry = mockFileSystemEntry(file);
-    const dataTransfer = mockDataTransfer([fileEntry]);
-
-    const files = await getFilesFromDataTransfer(dataTransfer);
-    expect(files).toEqual([file]);
-  });
-
-  it("returns a file from a directory entry", async () => {
-    const file = mockFile("test.txt");
-    const fileEntry = mockFileSystemEntry(file);
-    const directoryEntry = mockFileSystemDirectoryEntry([fileEntry]);
-    const dataTransfer = mockDataTransfer([directoryEntry]);
-
-    const files = await getFilesFromDataTransfer(dataTransfer);
-    expect(files).toEqual([file]);
-  });
-});
-
 describe("DropArea", () => {
   it("uploads a file", async () => {
     const onUploadFiles = jest.fn();
@@ -88,6 +67,34 @@ describe("DropArea", () => {
     const file = mockFile("test.txt");
     const fileEntry = mockFileSystemEntry(file);
     const dataTransfer = mockDataTransfer([fileEntry]);
+
+    const dragEvent = new DragEvent("drop", { dataTransfer });
+    fireEvent(container, dragEvent);
+
+    await waitFor(() => {
+      expect(onUploadFiles).toHaveBeenCalledWith([file]);
+    });
+  });
+
+  it("uploads a file when uploading a directory", async () => {
+    const onUploadFiles = jest.fn();
+    const renderer = {
+      setErrorInvalidFiles: jest.fn() as unknown
+    } as RenderUploadFile;
+
+    const container = document.createElement("div");
+
+    new DropArea({
+      container,
+      inputAccept: ".txt",
+      onUploadFiles,
+      renderer
+    });
+
+    const file = mockFile("test.txt");
+    const fileEntry = mockFileSystemEntry(file);
+    const directoryEntry = mockFileSystemDirectoryEntry([fileEntry]);
+    const dataTransfer = mockDataTransfer([directoryEntry]);
 
     const dragEvent = new DragEvent("drop", { dataTransfer });
     fireEvent(container, dragEvent);

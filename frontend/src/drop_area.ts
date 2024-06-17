@@ -34,7 +34,7 @@ const getFilesFromFileSystemEntries = async (
   return result;
 };
 
-export const getFilesFromDataTransfer = async (
+const getFilesFromDataTransfer = async (
   dataTransfer: DataTransfer
 ): Promise<File[]> => {
   if (dataTransfer.items) {
@@ -99,10 +99,6 @@ class DropArea {
           const invalidFiles: File[] = [];
 
           for (const file of files) {
-            console.log(
-              file.name,
-              this.acceptedFileTypes.isAccepted(file.name)
-            );
             if (this.acceptedFileTypes.isAccepted(file.name)) {
               acceptedFiles.push(file);
             } else {
