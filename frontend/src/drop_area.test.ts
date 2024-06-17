@@ -136,4 +136,31 @@ describe("DropArea", () => {
       expect(onUploadFiles).toHaveBeenCalledWith([file]);
     });
   });
+
+  it("handles an upload with an extension that is not supported", async () => {
+    const onUploadFiles = jest.fn();
+    const setErrorInvalidFiles = jest.fn();
+    const renderer = { setErrorInvalidFiles } as unknown as RenderUploadFile;
+
+    const container = document.createElement("div");
+
+    new DropArea({
+      container,
+      inputAccept: ".txt",
+      onUploadFiles,
+      renderer
+    });
+
+    const file = mockFile("test.png");
+    const fileEntry = mockFileSystemEntry(file);
+    const dataTransfer = mockDataTransfer([fileEntry]);
+
+    const dragEvent = new DragEvent("drop", { dataTransfer });
+    fireEvent(container, dragEvent);
+
+    await waitFor(() => {
+      expect(onUploadFiles).toHaveBeenCalledWith([]);
+      expect(setErrorInvalidFiles).toHaveBeenCalledWith([file]);
+    });
+  });
 });
