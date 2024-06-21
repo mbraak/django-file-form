@@ -5,6 +5,7 @@ from django.test import TestCase
 from django.core.management import call_command
 from django.conf import settings
 from django.core.files.base import ContentFile
+from django.core.files.storage import FileSystemStorage
 from django.test.utils import captured_stdout, override_settings
 from django.utils import timezone
 
@@ -14,12 +15,16 @@ from django_file_form_example.tests.utils.test_utils import (
     remove_p,
     remove_test_files,
 )
-from django_file_form.models import TemporaryUploadedFile
+from django_file_form.models import TemporaryUploadedFile, get_temp_storage_class
 from django_file_form.util import get_list
 from django_file_form.django_util import get_upload_path
 
 
 media_root = Path(settings.MEDIA_ROOT)
+
+
+class CustomStorage(FileSystemStorage):
+    pass
 
 
 class ModelTests(TestCase):
@@ -94,6 +99,10 @@ class ConfTest(TestCase):
             str(get_upload_path()),
             str(Path(settings.MEDIA_ROOT).joinpath("relative/path")),
         )
+
+    @override_settings(FILE_FORM_TEMP_STORAGE="django_file_form_example.tests.test_model.CustomStorage")
+    def test_get_temp_storage_class_with_custom_storage(self):
+        self.assertEqual(get_temp_storage_class(), CustomStorage)
 
 
 class DeleteUnusedFileTest(TestCase):
