@@ -59,10 +59,11 @@ def get_upload_to(_instance, filename):
     return get_upload_to_for_filename(filename)
 
 
-if hasattr(settings, "FILE_FORM_TEMP_STORAGE"):
-    TempStorage = import_string(settings.FILE_FORM_TEMP_STORAGE)
-else:
-    TempStorage = FileSystemStorage
+def get_temp_storage_class():
+    if hasattr(settings, "FILE_FORM_TEMP_STORAGE"):
+        return import_string(settings.FILE_FORM_TEMP_STORAGE)
+    else:
+        return FileSystemStorage
 
 
 class TemporaryUploadedFile(models.Model):
@@ -77,7 +78,7 @@ class TemporaryUploadedFile(models.Model):
     id = models.AutoField(primary_key=True)
     created = models.DateTimeField(default=timezone.now)
     uploaded_file = models.FileField(
-        max_length=255, storage=TempStorage(), upload_to=get_upload_to
+        max_length=255, storage=get_temp_storage_class()(), upload_to=get_upload_to
     )
     original_filename = models.CharField(max_length=255)
     field_name = models.CharField(max_length=255, null=True, blank=True)
