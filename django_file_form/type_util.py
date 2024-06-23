@@ -14,6 +14,6 @@ def with_typehint(baseclass: Type[T]) -> Type[T]:
     ```
     """
     if TYPE_CHECKING:
-        return baseclass
+        return baseclass  # pragma: no cover
 
     return object
