@@ -39,7 +39,9 @@ const initUploadFields = (form: Element, options: Options = {}): void => {
       return [];
     }
 
-    return JSON.parse(data) as InitialFile[];
+    return (JSON.parse(data) as Record<string, unknown>[]).filter(
+      file => file.type
+    ) as unknown as InitialFile[];
   };
 
   const uploadUrl = getInputValue("upload_url");
