@@ -1,6 +1,6 @@
 ## Changelog
 
-**development**
+**3.7.0 (june 27 2024)**
 
 - Issue #784: compile to es6. This reduces the size of the minified js file to 80k (from 119k)
 - Issue #891: handle error with empty initial file in model form (thanks to Yanhui Xie)
