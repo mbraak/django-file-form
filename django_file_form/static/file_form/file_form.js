@@ -6138,7 +6138,7 @@
       if (!data) {
         return [];
       }
-      return JSON.parse(data);
+      return JSON.parse(data).filter(file => file.type);
     };
     const uploadUrl = getInputValue("upload_url");
     const formId = getInputValue("form_id");
