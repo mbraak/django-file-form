@@ -10,7 +10,8 @@
     "plugin:@typescript-eslint/recommended",
     "plugin:@typescript-eslint/recommended-requiring-type-checking",
     "plugin:import/recommended",
-    "plugin:import/typescript"
+    "plugin:import/typescript",
+    "plugin:deprecation/recommended"
   ],
   "rules": {
     "import/no-named-as-default": "off"
