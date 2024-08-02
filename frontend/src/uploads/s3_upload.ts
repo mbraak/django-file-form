@@ -72,7 +72,7 @@ class S3Upload extends BaseUpload {
     // This mostly exists to make `abortUpload` work well: only sending the abort request if
     // the upload was already created, and if the createMultipartUpload request is still in flight,
     // aborting it immediately after it finishes.
-    this.createdPromise = Promise.reject(); // eslint-disable-line prefer-promise-reject-errors
+    this.createdPromise = Promise.reject(); // eslint-disable-line @typescript-eslint/prefer-promise-reject-errors
     this.chunks = [];
     this.chunkState = [];
     this.uploading = [];
