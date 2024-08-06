@@ -42,6 +42,7 @@
     "babel-plugin-istanbul": "^6.1.1",
     "eslint": "^8.21.0",
     "eslint-import-resolver-typescript": "^3.6.1",
+    "eslint-plugin-deprecation": "^3.0.0",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-jsx-a11y": "^6.6.1",
     "eslint-plugin-react": "^7.30.1",
