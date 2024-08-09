@@ -10,7 +10,7 @@ export const deleteUpload = async (
       if (xhr.status === 204) {
         resolve();
       } else {
-        reject();
+        reject(); // eslint-disable-line @typescript-eslint/prefer-promise-reject-errors
       }
     };
     xhr.setRequestHeader("Tus-Resumable", "1.0.0");
