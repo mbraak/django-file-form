@@ -25,7 +25,7 @@
       return "0 Bytes";
     }
     const k = 1024;
-    const dm = decimals ;
+    const dm = decimals;
     const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     const n = parseFloat((bytes / k ** i).toFixed(dm));
@@ -2848,7 +2848,7 @@
       // This mostly exists to make `abortUpload` work well: only sending the abort request if
       // the upload was already created, and if the createMultipartUpload request is still in flight,
       // aborting it immediately after it finishes.
-      this.createdPromise = Promise.reject(); // eslint-disable-line prefer-promise-reject-errors
+      this.createdPromise = Promise.reject(); // eslint-disable-line @typescript-eslint/prefer-promise-reject-errors
       this.chunks = [];
       this.chunkState = [];
       this.uploading = [];
@@ -3096,7 +3096,7 @@
       if (xhr.status === 204) {
         resolve();
       } else {
-        reject();
+        reject(); // eslint-disable-line @typescript-eslint/prefer-promise-reject-errors
       }
     };
     xhr.setRequestHeader("Tus-Resumable", "1.0.0");
