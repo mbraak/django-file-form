@@ -1,6 +1,6 @@
 ## Changelog
 
-**development**
+**3.8.0 (august 14 2024)**
 
 - Issue #880. Support Django 5.1
 
