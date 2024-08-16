@@ -1,10 +1,14 @@
 ## Changelog
 
+**3.8.0 (august 14 2024)**
+
+- Issue #880. Support Django 5.1
+
 **3.7.0 (june 27 2024)**
 
 - Issue #784: compile to es6. This reduces the size of the minified js file to 80k (from 119k)
+- Issue #841. Drop support for Django 3.2
 - Issue #891: handle error with empty initial file in model form (thanks to Yanhui Xie)
-- Drop support for Django 3.2
 
 **3.6.0 (december 8 2023)**
 
