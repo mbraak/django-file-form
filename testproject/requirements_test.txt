@@ -1,4 +1,4 @@
-cryptography==43.0.0
+cryptography==43.0.1
 moto==5.0.13
 Flask==3.0.3
 flask-cors==5
