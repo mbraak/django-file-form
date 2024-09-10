@@ -28,7 +28,7 @@ const initFormSet = (form: Element, optionsParam: Options | string): void => {
   const formCount = parseInt(totalFormsValue, 10);
 
   for (let i = 0; i < formCount; i += 1) {
-    const subFormPrefix = getInputNameWithPrefix(`${i}`, null);
+    const subFormPrefix = getInputNameWithPrefix(i.toString(), null);
     initUploadFields(form, {
       ...options,
       prefix: `${prefix}-${subFormPrefix}`
