@@ -38,6 +38,7 @@
     "@testing-library/dom": "^10.1.0",
     "@types/escape-html": "^1.0.2",
     "@types/jest": "^29.5.0",
+    "@typescript-eslint/parser": "^8.5.0",
     "babel-plugin-istanbul": "^6.1.1",
     "eslint": "^8.21.0",
     "eslint-import-resolver-typescript": "^3.6.1",
