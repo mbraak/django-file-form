@@ -13,7 +13,7 @@ const initFormSet = (form: Element, optionsParam: Options | string): void => {
     options = optionsParam;
   }
 
-  const prefix = options.prefix || "form";
+  const prefix = options.prefix ?? "form";
 
   const totalFormsValue = getInputValueForFormAndPrefix(
     form,

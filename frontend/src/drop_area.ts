@@ -4,14 +4,16 @@ import RenderUploadFile from "./render_upload_file.ts";
 const getEntriesFromDirectory = async (
   directoryEntry: FileSystemDirectoryEntry
 ): Promise<FileSystemEntry[]> =>
-  new Promise((resolve, reject) =>
-    directoryEntry.createReader().readEntries(resolve, reject)
-  );
+  new Promise((resolve, reject) => {
+    directoryEntry.createReader().readEntries(resolve, reject);
+  });
 
 const getFileFromFileEntry = async (
   fileEntry: FileSystemFileEntry
 ): Promise<File> =>
-  new Promise((resolve, reject) => fileEntry.file(resolve, reject));
+  new Promise((resolve, reject) => {
+    fileEntry.file(resolve, reject);
+  });
 
 const getFilesFromFileSystemEntries = async (
   entries: FileSystemEntry[]
@@ -37,10 +39,11 @@ const getFilesFromFileSystemEntries = async (
 const getFilesFromDataTransfer = async (
   dataTransfer: DataTransfer
 ): Promise<File[]> => {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (dataTransfer.items) {
-    const entries = [...dataTransfer.items].map(
-      item => item.webkitGetAsEntry() as FileSystemEntry
-    );
+    const entries = [...dataTransfer.items]
+      .map(item => item.webkitGetAsEntry())
+      .filter(entry => entry != null) as FileSystemEntry[];
 
     const files = await getFilesFromFileSystemEntries(entries);
     return files;

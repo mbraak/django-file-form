@@ -25,7 +25,7 @@ interface ClickEvent {
 export interface Callbacks {
   onClick?: ({ fileName, fieldName, type }: ClickEvent) => void;
   onDelete?: (upload: BaseUpload) => void;
-  onError?: (error: Error, upload: BaseUpload) => void;
+  onError?: (error: unknown, upload: BaseUpload) => void;
   onProgress?: (
     bytesUploaded: number,
     bytesTotal: number,
@@ -245,7 +245,7 @@ class FileField {
 
     const upload = createUpload();
 
-    upload.onError = error => {
+    upload.onError = (error: unknown) => {
       this.handleError(upload, error);
     };
     upload.onProgress = (bytesUploaded, bytesTotal) => {
@@ -385,7 +385,7 @@ class FileField {
     }
   };
 
-  handleError = (upload: BaseUpload, error: Error): void => {
+  handleError = (upload: BaseUpload, error: unknown): void => {
     this.renderer.setError(upload.uploadIndex);
     upload.status = "error";
 
