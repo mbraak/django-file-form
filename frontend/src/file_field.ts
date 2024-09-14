@@ -13,7 +13,7 @@ import TusUpload from "./uploads/tus_upload.ts";
 import BaseUpload, { InitialFile, UploadType } from "./uploads/base_upload.ts";
 import AcceptedFileTypes from "./accepted_file_types.ts";
 
-export type Translations = { [key: string]: string };
+export type Translations = Record<string, string>;
 
 interface ClickEvent {
   fileName: string;
@@ -25,7 +25,7 @@ interface ClickEvent {
 export interface Callbacks {
   onClick?: ({ fileName, fieldName, type }: ClickEvent) => void;
   onDelete?: (upload: BaseUpload) => void;
-  onError?: (error: Error, upload: BaseUpload) => void;
+  onError?: (error: unknown, upload: BaseUpload) => void;
   onProgress?: (
     bytesUploaded: number,
     bytesTotal: number,
@@ -124,9 +124,7 @@ class FileField {
       this.initDropArea(filesContainer, input.accept);
     }
 
-    if (initial) {
-      this.addInitialFiles(initial);
-    }
+    this.addInitialFiles(initial);
 
     this.checkDropHint();
 
@@ -247,10 +245,15 @@ class FileField {
 
     const upload = createUpload();
 
-    upload.onError = error => this.handleError(upload, error);
-    upload.onProgress = (bytesUploaded, bytesTotal) =>
+    upload.onError = (error: unknown) => {
+      this.handleError(upload, error);
+    };
+    upload.onProgress = (bytesUploaded, bytesTotal) => {
       this.handleProgress(upload, bytesUploaded, bytesTotal);
-    upload.onSuccess = () => this.handleSuccess(upload);
+    };
+    upload.onSuccess = () => {
+      this.handleSuccess(upload);
+    };
     upload.start();
 
     this.uploads.push(upload);
@@ -293,7 +296,7 @@ class FileField {
   }
 
   onChange = (e: Event): void => {
-    const files = (e.target as HTMLInputElement).files || ([] as File[]);
+    const files = (e.target as HTMLInputElement).files ?? ([] as File[]);
     const acceptedFiles: File[] = [];
     const invalidFiles: File[] = [];
 
@@ -305,13 +308,8 @@ class FileField {
       }
     }
 
-    if (invalidFiles) {
-      this.handleInvalidFiles([...invalidFiles]);
-    }
-
-    if (acceptedFiles) {
-      void this.uploadFiles([...acceptedFiles]);
-    }
+    this.handleInvalidFiles([...invalidFiles]);
+    void this.uploadFiles([...acceptedFiles]);
 
     this.renderer.clearInput();
   };
@@ -387,7 +385,7 @@ class FileField {
     }
   };
 
-  handleError = (upload: BaseUpload, error: Error): void => {
+  handleError = (upload: BaseUpload, error: unknown): void => {
     this.renderer.setError(upload.uploadIndex);
     upload.status = "error";
 
@@ -411,10 +409,11 @@ class FileField {
 
     const { onSuccess } = this.callbacks;
 
-    const element = this.renderer.findFileDiv(
-      upload.uploadIndex
-    ) as HTMLElement;
-    this.emitEvent("uploadComplete", element, upload);
+    const element = this.renderer.findFileDiv(upload.uploadIndex);
+
+    if (element) {
+      this.emitEvent("uploadComplete", element, upload);
+    }
 
     if (onSuccess && upload.type === "tus") {
       onSuccess(upload);
@@ -459,7 +458,7 @@ class FileField {
       return;
     }
 
-    const nonEmptyUploads = this.uploads.filter(e => e);
+    const nonEmptyUploads = this.uploads.filter(e => Boolean(e));
 
     if (nonEmptyUploads.length === 0) {
       this.renderer.renderDropHint();

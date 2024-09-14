@@ -139,7 +139,12 @@ export const prepareUploadPart = ({
 }: PrepareUploadPartParameters): Promise<UrlInfo> => {
   const filename = encodeURIComponent(key);
   const headers = new Headers({ "X-CSRFToken": csrfToken });
-  const url = urljoin(endpoint, uploadId, `${number}`, `?key=${filename}`);
+  const url = urljoin(
+    endpoint,
+    uploadId,
+    number.toString(),
+    `?key=${filename}`
+  );
   return fetch(url, {
     method: "get",
     headers: headers

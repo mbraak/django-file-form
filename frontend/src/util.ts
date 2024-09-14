@@ -10,7 +10,11 @@ export const formatBytes = (bytes: number, decimals: number): string => {
   const n = parseFloat((bytes / k ** i).toFixed(dm));
   const size = sizes[i];
 
-  return `${n} ${size}`;
+  if (size == null) {
+    return "";
+  } else {
+    return `${n.toString()} ${size}`;
+  }
 };
 
 export const getInputNameWithPrefix = (

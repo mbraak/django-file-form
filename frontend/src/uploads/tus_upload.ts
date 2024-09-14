@@ -48,7 +48,7 @@ export default class TusUpload extends BaseUpload {
       onError: this.handleError,
       onProgress: this.handleProgress,
       onSuccess: this.handleSucces,
-      retryDelays: retryDelays || [0, 1000, 3000, 5000]
+      retryDelays: retryDelays ?? [0, 1000, 3000, 5000]
     });
 
     this.onError = undefined;

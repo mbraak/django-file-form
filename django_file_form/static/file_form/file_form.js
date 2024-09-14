@@ -30,7 +30,11 @@
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     const n = parseFloat((bytes / k ** i).toFixed(dm));
     const size = sizes[i];
-    return `${n} ${size}`;
+    if (size == null) {
+      return "";
+    } else {
+      return `${n.toString()} ${size}`;
+    }
   };
   const getInputNameWithPrefix = (fieldName, prefix) => prefix ? `${prefix}-${fieldName}` : fieldName;
   const getInputNameWithoutPrefix = (fieldName, prefix) => prefix ? fieldName.slice(prefix.length + 1) : fieldName;
@@ -157,8 +161,8 @@
       div.appendChild(progressSpan);
       const cancelLink = document.createElement("a");
       cancelLink.className = "dff-cancel";
-      cancelLink.innerHTML = this.translations.Cancel || "";
-      cancelLink.setAttribute("data-index", `${uploadIndex}`);
+      cancelLink.innerHTML = this.translations.Cancel ?? "";
+      cancelLink.setAttribute("data-index", uploadIndex.toString());
       cancelLink.href = "#";
       div.appendChild(cancelLink);
       return div;
@@ -193,7 +197,7 @@
       }
     }
     findFileDiv(index) {
-      return this.container.querySelector(`.dff-file-id-${index}`);
+      return this.container.querySelector(`.dff-file-id-${index.toString()}`);
     }
     removeDropHint() {
       const dropHint = this.container.querySelector(".dff-drop-hint");
@@ -207,15 +211,15 @@
       }
       const dropHint = document.createElement("div");
       dropHint.className = "dff-drop-hint";
-      dropHint.innerHTML = this.translations["Drop your files here"] || "";
+      dropHint.innerHTML = this.translations["Drop your files here"] ?? "";
       this.container.appendChild(dropHint);
     }
     setDeleteFailed(index) {
-      this.setErrorMessage(index, this.translations["Delete failed"] || "");
+      this.setErrorMessage(index, this.translations["Delete failed"] ?? "");
       this.enableDelete(index);
     }
     setError(index) {
-      this.setErrorMessage(index, this.translations["Upload failed"] || "");
+      this.setErrorMessage(index, this.translations["Upload failed"] ?? "");
       const el = this.findFileDiv(index);
       if (el) {
         el.classList.add("dff-upload-fail");
@@ -227,7 +231,8 @@
       const errorsMessages = document.createElement("ul");
       for (const file of files) {
         const msg = document.createElement("li");
-        msg.innerText = `${file.name}: ${this.translations["Invalid file type"]}`;
+        const invalidFileTypeMessage = this.translations["Invalid file type"] ?? "";
+        msg.innerText = `${file.name}: ${invalidFileTypeMessage}`;
         msg.className = "dff-error";
         errorsMessages.appendChild(msg);
       }
@@ -248,9 +253,9 @@
           el.appendChild(fileSizeInfo);
         }
         const deleteLink = document.createElement("a");
-        deleteLink.innerHTML = translations.Delete || "";
+        deleteLink.innerHTML = translations.Delete ?? "";
         deleteLink.className = "dff-delete";
-        deleteLink.setAttribute("data-index", `${index}`);
+        deleteLink.setAttribute("data-index", index.toString());
         deleteLink.href = "#";
         el.appendChild(deleteLink);
       }
@@ -258,7 +263,7 @@
       this.removeCancel(index);
     }
     updateProgress(index, percentage) {
-      const el = this.container.querySelector(`.dff-file-id-${index}`);
+      const el = this.container.querySelector(`.dff-file-id-${index.toString()}`);
       if (el) {
         const innerProgressSpan = el.querySelector(".dff-progress-inner");
         if (innerProgressSpan) {
@@ -280,11 +285,11 @@
     };
     addFile(filename, uploadIndex) {
       const div = document.createElement("div");
-      div.className = `dff-file dff-file-id-${uploadIndex}`;
+      div.className = `dff-file dff-file-id-${uploadIndex.toString()}`;
       const nameSpan = document.createElement("span");
       nameSpan.innerHTML = escape(filename);
       nameSpan.className = "dff-filename";
-      nameSpan.setAttribute("data-index", `${uploadIndex}`);
+      nameSpan.setAttribute("data-index", uploadIndex.toString());
       div.appendChild(nameSpan);
       this.container.appendChild(div);
       this.input.required = false;
@@ -2541,8 +2546,12 @@
     }
   }
 
-  const getEntriesFromDirectory = async directoryEntry => new Promise((resolve, reject) => directoryEntry.createReader().readEntries(resolve, reject));
-  const getFileFromFileEntry = async fileEntry => new Promise((resolve, reject) => fileEntry.file(resolve, reject));
+  const getEntriesFromDirectory = async directoryEntry => new Promise((resolve, reject) => {
+    directoryEntry.createReader().readEntries(resolve, reject);
+  });
+  const getFileFromFileEntry = async fileEntry => new Promise((resolve, reject) => {
+    fileEntry.file(resolve, reject);
+  });
   const getFilesFromFileSystemEntries = async entries => {
     const result = [];
     for await (const entry of entries) {
@@ -2558,8 +2567,9 @@
     return result;
   };
   const getFilesFromDataTransfer = async dataTransfer => {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (dataTransfer.items) {
-      const entries = [...dataTransfer.items].map(item => item.webkitGetAsEntry());
+      const entries = [...dataTransfer.items].map(item => item.webkitGetAsEntry()).filter(entry => entry != null);
       const files = await getFilesFromFileSystemEntries(entries);
       return files;
     } else {
@@ -2798,7 +2808,7 @@
     const headers = new Headers({
       "X-CSRFToken": csrfToken
     });
-    const url = urlJoin(endpoint, uploadId, `${number}`, `?key=${filename}`);
+    const url = urlJoin(endpoint, uploadId, number.toString(), `?key=${filename}`);
     return fetch(url, {
       method: "get",
       headers: headers
@@ -2848,7 +2858,7 @@
       // This mostly exists to make `abortUpload` work well: only sending the abort request if
       // the upload was already created, and if the createMultipartUpload request is still in flight,
       // aborting it immediately after it finishes.
-      this.createdPromise = Promise.reject(); // eslint-disable-line @typescript-eslint/prefer-promise-reject-errors
+      this.createdPromise = Promise.reject(new Error());
       this.chunks = [];
       this.chunkState = [];
       this.uploading = [];
@@ -2877,12 +2887,12 @@
       return Promise.resolve();
     }
     getId() {
-      return this.uploadId || undefined;
+      return this.uploadId ?? undefined;
     }
     getInitialFile() {
       return {
-        id: this.uploadId || "",
-        name: this.key || "",
+        id: this.uploadId ?? "",
+        name: this.key ?? "",
         size: this.file.size,
         original_name: this.file.name,
         type: "s3"
@@ -2971,7 +2981,7 @@
         number: index + 1,
         uploadId: this.uploadId
       }).then(result => {
-        const valid = typeof result === "object" && result && typeof result.url === "string";
+        const valid = typeof result === "object" && typeof result.url === "string";
         if (!valid) {
           throw new TypeError("AwsS3/Multipart: Got incorrect result from `prepareUploadPart()`, expected an object `{ url }`.");
         }
@@ -3038,7 +3048,7 @@
           this.handleError(new Error("Non 2xx"));
           return;
         }
-        this.onPartProgress(index, body?.size || 0);
+        this.onPartProgress(index, body?.size ?? 0);
 
         // NOTE This must be allowed by CORS.
         const etag = target.getResponseHeader("ETag");
@@ -3096,7 +3106,7 @@
       if (xhr.status === 204) {
         resolve();
       } else {
-        reject(); // eslint-disable-line @typescript-eslint/prefer-promise-reject-errors
+        reject(new Error());
       }
     };
     xhr.setRequestHeader("Tus-Resumable", "1.0.0");
@@ -5709,7 +5719,7 @@
         onError: this.handleError,
         onProgress: this.handleProgress,
         onSuccess: this.handleSucces,
-        retryDelays: retryDelays || [0, 1000, 3000, 5000]
+        retryDelays: retryDelays ?? [0, 1000, 3000, 5000]
       });
       this.onError = undefined;
       this.onProgress = undefined;
@@ -5818,9 +5828,7 @@
       if (supportDropArea) {
         this.initDropArea(filesContainer, input.accept);
       }
-      if (initial) {
-        this.addInitialFiles(initial);
-      }
+      this.addInitialFiles(initial);
       this.checkDropHint();
       input.addEventListener("change", this.onChange);
       filesContainer.addEventListener("click", this.handleClick);
@@ -5923,9 +5931,15 @@
         await this.removeExistingUpload(existingUpload);
       }
       const upload = createUpload();
-      upload.onError = error => this.handleError(upload, error);
-      upload.onProgress = (bytesUploaded, bytesTotal) => this.handleProgress(upload, bytesUploaded, bytesTotal);
-      upload.onSuccess = () => this.handleSuccess(upload);
+      upload.onError = error => {
+        this.handleError(upload, error);
+      };
+      upload.onProgress = (bytesUploaded, bytesTotal) => {
+        this.handleProgress(upload, bytesUploaded, bytesTotal);
+      };
+      upload.onSuccess = () => {
+        this.handleSuccess(upload);
+      };
       upload.start();
       this.uploads.push(upload);
       const element = renderer.addNewUpload(fileName, newUploadIndex);
@@ -5958,7 +5972,7 @@
       this.updatePlaceholderInput();
     }
     onChange = e => {
-      const files = e.target.files || [];
+      const files = e.target.files ?? [];
       const acceptedFiles = [];
       const invalidFiles = [];
       for (const file of files) {
@@ -5968,12 +5982,8 @@
           invalidFiles.push(file);
         }
       }
-      if (invalidFiles) {
-        this.handleInvalidFiles([...invalidFiles]);
-      }
-      if (acceptedFiles) {
-        void this.uploadFiles([...acceptedFiles]);
-      }
+      this.handleInvalidFiles([...invalidFiles]);
+      void this.uploadFiles([...acceptedFiles]);
       this.renderer.clearInput();
     };
     handleInvalidFiles = files => {
@@ -6050,7 +6060,9 @@
         onSuccess
       } = this.callbacks;
       const element = this.renderer.findFileDiv(upload.uploadIndex);
-      this.emitEvent("uploadComplete", element, upload);
+      if (element) {
+        this.emitEvent("uploadComplete", element, upload);
+      }
       if (onSuccess && upload.type === "tus") {
         onSuccess(upload);
       }
@@ -6086,7 +6098,7 @@
       if (!this.supportDropArea) {
         return;
       }
-      const nonEmptyUploads = this.uploads.filter(e => e);
+      const nonEmptyUploads = this.uploads.filter(e => Boolean(e));
       if (nonEmptyUploads.length === 0) {
         this.renderer.renderDropHint();
       } else {
@@ -6120,12 +6132,12 @@
   const initUploadFields = function (form) {
     let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
     const matchesPrefix = fieldName => {
-      if (!(options && options.prefix)) {
+      if (!options.prefix) {
         return true;
       }
       return fieldName.startsWith(`${options.prefix}-`);
     };
-    const getPrefix = () => options && options.prefix ? options.prefix : null;
+    const getPrefix = () => options.prefix ? options.prefix : null;
     const getInputValue = fieldName => getInputValueForFormAndPrefix(form, fieldName, getPrefix());
     const getInitialFiles = fieldName => {
       const data = getInputValue(getUploadsFieldName(fieldName, getPrefix()));
@@ -6137,7 +6149,7 @@
     const uploadUrl = getInputValue("upload_url");
     const formId = getInputValue("form_id");
     const s3UploadDir = getInputValue("s3_upload_dir");
-    const skipRequired = options.skipRequired || false;
+    const skipRequired = options.skipRequired ?? false;
     const prefix = getPrefix();
     const csrfToken = findInput(form, "csrfmiddlewaretoken", null)?.value;
     if (!csrfToken) {
@@ -6164,20 +6176,20 @@
       const translations = dataTranslations ? JSON.parse(dataTranslations) : {};
       const supportDropArea = !(options.supportDropArea === false);
       new FileField({
-        callbacks: options.callbacks || {},
-        chunkSize: options.chunkSize || 2621440,
+        callbacks: options.callbacks ?? {},
+        chunkSize: options.chunkSize ?? 2621440,
         csrfToken,
         eventEmitter: options.eventEmitter,
         fieldName,
         form,
         formId,
-        s3UploadDir: s3UploadDir || null,
+        s3UploadDir: s3UploadDir ?? null,
         initial,
         input,
         multiple,
         parent: container,
         prefix,
-        retryDelays: options.retryDelays || null,
+        retryDelays: options.retryDelays ?? null,
         skipRequired,
         supportDropArea,
         translations,
@@ -6195,14 +6207,14 @@
     } else {
       options = optionsParam;
     }
-    const prefix = options.prefix || "form";
+    const prefix = options.prefix ?? "form";
     const totalFormsValue = getInputValueForFormAndPrefix(form, "TOTAL_FORMS", prefix);
     if (!totalFormsValue) {
       return;
     }
     const formCount = parseInt(totalFormsValue, 10);
     for (let i = 0; i < formCount; i += 1) {
-      const subFormPrefix = getInputNameWithPrefix(`${i}`, null);
+      const subFormPrefix = getInputNameWithPrefix(i.toString(), null);
       initUploadFields(form, {
         ...options,
         prefix: `${prefix}-${subFormPrefix}`
