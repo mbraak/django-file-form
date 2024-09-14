@@ -19,7 +19,7 @@ export interface Options {
 
 const initUploadFields = (form: Element, options: Options = {}): void => {
   const matchesPrefix = (fieldName: string): boolean => {
-    if (!(options && options.prefix)) {
+    if (!options.prefix) {
       return true;
     }
 
@@ -27,7 +27,7 @@ const initUploadFields = (form: Element, options: Options = {}): void => {
   };
 
   const getPrefix = (): string | null =>
-    options && options.prefix ? options.prefix : null;
+    options.prefix ? options.prefix : null;
 
   const getInputValue = (fieldName: string): string | undefined =>
     getInputValueForFormAndPrefix(form, fieldName, getPrefix());
@@ -47,7 +47,7 @@ const initUploadFields = (form: Element, options: Options = {}): void => {
   const uploadUrl = getInputValue("upload_url");
   const formId = getInputValue("form_id");
   const s3UploadDir = getInputValue("s3_upload_dir");
-  const skipRequired = options.skipRequired || false;
+  const skipRequired = options.skipRequired ?? false;
   const prefix = getPrefix();
   const csrfToken = findInput(form, "csrfmiddlewaretoken", null)?.value;
 
@@ -60,17 +60,13 @@ const initUploadFields = (form: Element, options: Options = {}): void => {
   }
 
   form.querySelectorAll(".dff-uploader").forEach(uploaderDiv => {
-    const container = uploaderDiv.querySelector(
-      ".dff-container"
-    ) as HTMLElement;
+    const container = uploaderDiv.querySelector(".dff-container");
 
     if (!container) {
       return;
     }
 
-    const input = container.querySelector(
-      "input[type=file]"
-    ) as HTMLInputElement;
+    const input = container.querySelector<HTMLInputElement>("input[type=file]");
 
     if (!(input && matchesPrefix(input.name))) {
       return;
@@ -86,20 +82,20 @@ const initUploadFields = (form: Element, options: Options = {}): void => {
     const supportDropArea = !(options.supportDropArea === false);
 
     new FileField({
-      callbacks: options.callbacks || {},
-      chunkSize: options.chunkSize || 2621440,
+      callbacks: options.callbacks ?? {},
+      chunkSize: options.chunkSize ?? 2621440,
       csrfToken,
       eventEmitter: options.eventEmitter,
       fieldName,
       form,
       formId,
-      s3UploadDir: s3UploadDir || null,
+      s3UploadDir: s3UploadDir ?? null,
       initial,
       input,
       multiple,
       parent: container,
       prefix,
-      retryDelays: options.retryDelays || null,
+      retryDelays: options.retryDelays ?? null,
       skipRequired,
       supportDropArea,
       translations,

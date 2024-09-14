@@ -4,7 +4,7 @@ import { formatBytes } from "./util.ts";
 class RenderUploadFile {
   container: Element;
   input: HTMLInputElement;
-  translations: { [key: string]: string };
+  translations: Record<string, string>;
   errors: Element;
 
   constructor({
@@ -16,7 +16,7 @@ class RenderUploadFile {
     parent: Element;
     input: HTMLInputElement;
     skipRequired: boolean;
-    translations: { [key: string]: string };
+    translations: Record<string, string>;
   }) {
     this.container = this.createFilesContainer(parent);
     this.errors = this.createErrorContainer(parent);
@@ -42,8 +42,8 @@ class RenderUploadFile {
 
     const cancelLink = document.createElement("a");
     cancelLink.className = "dff-cancel";
-    cancelLink.innerHTML = this.translations.Cancel || "";
-    cancelLink.setAttribute("data-index", `${uploadIndex}`);
+    cancelLink.innerHTML = this.translations.Cancel ?? "";
+    cancelLink.setAttribute("data-index", uploadIndex.toString());
     cancelLink.href = "#";
     div.appendChild(cancelLink);
 
@@ -91,7 +91,7 @@ class RenderUploadFile {
   }
 
   public findFileDiv(index: number): HTMLElement | null {
-    return this.container.querySelector(`.dff-file-id-${index}`);
+    return this.container.querySelector(`.dff-file-id-${index.toString()}`);
   }
 
   public removeDropHint(): void {
@@ -109,19 +109,19 @@ class RenderUploadFile {
 
     const dropHint = document.createElement("div");
     dropHint.className = "dff-drop-hint";
-    dropHint.innerHTML = this.translations["Drop your files here"] || "";
+    dropHint.innerHTML = this.translations["Drop your files here"] ?? "";
 
     this.container.appendChild(dropHint);
   }
 
   public setDeleteFailed(index: number): void {
-    this.setErrorMessage(index, this.translations["Delete failed"] || "");
+    this.setErrorMessage(index, this.translations["Delete failed"] ?? "");
 
     this.enableDelete(index);
   }
 
   public setError(index: number): void {
-    this.setErrorMessage(index, this.translations["Upload failed"] || "");
+    this.setErrorMessage(index, this.translations["Upload failed"] ?? "");
 
     const el = this.findFileDiv(index);
     if (el) {
@@ -137,7 +137,9 @@ class RenderUploadFile {
 
     for (const file of files) {
       const msg = document.createElement("li");
-      msg.innerText = `${file.name}: ${this.translations["Invalid file type"]}`;
+      const invalidFileTypeMessage =
+        this.translations["Invalid file type"] ?? "";
+      msg.innerText = `${file.name}: ${invalidFileTypeMessage}`;
       msg.className = "dff-error";
       errorsMessages.appendChild(msg);
     }
@@ -162,9 +164,9 @@ class RenderUploadFile {
       }
 
       const deleteLink = document.createElement("a");
-      deleteLink.innerHTML = translations.Delete || "";
+      deleteLink.innerHTML = translations.Delete ?? "";
       deleteLink.className = "dff-delete";
-      deleteLink.setAttribute("data-index", `${index}`);
+      deleteLink.setAttribute("data-index", index.toString());
       deleteLink.href = "#";
 
       el.appendChild(deleteLink);
@@ -175,7 +177,7 @@ class RenderUploadFile {
   }
 
   public updateProgress(index: number, percentage: string): void {
-    const el = this.container.querySelector(`.dff-file-id-${index}`);
+    const el = this.container.querySelector(`.dff-file-id-${index.toString()}`);
     if (el) {
       const innerProgressSpan = el.querySelector(".dff-progress-inner");
 
@@ -202,12 +204,12 @@ class RenderUploadFile {
 
   private addFile(filename: string, uploadIndex: number): HTMLElement {
     const div = document.createElement("div");
-    div.className = `dff-file dff-file-id-${uploadIndex}`;
+    div.className = `dff-file dff-file-id-${uploadIndex.toString()}`;
 
     const nameSpan = document.createElement("span");
     nameSpan.innerHTML = escape(filename);
     nameSpan.className = "dff-filename";
-    nameSpan.setAttribute("data-index", `${uploadIndex}`);
+    nameSpan.setAttribute("data-index", uploadIndex.toString());
 
     div.appendChild(nameSpan);
     this.container.appendChild(div);

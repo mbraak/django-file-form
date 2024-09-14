@@ -10,7 +10,7 @@ export const deleteUpload = async (
       if (xhr.status === 204) {
         resolve();
       } else {
-        reject();
+        reject(new Error());
       }
     };
     xhr.setRequestHeader("Tus-Resumable", "1.0.0");

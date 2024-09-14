@@ -13,7 +13,7 @@ import {
   prepareUploadPart,
   remove,
   UrlInfo
-} from "./s3_utils.js";
+} from "./s3_utils.ts";
 
 interface ChunkState {
   busy: boolean;
@@ -31,7 +31,7 @@ interface S3UploadParameters {
 }
 
 class S3Upload extends BaseUpload {
-  public onError?: (error: Error) => void;
+  public onError?: (error: unknown) => void;
   public onProgress?: (bytesUploaded: number, bytesTotal: number) => void;
   public onSuccess?: () => void;
 
@@ -72,7 +72,7 @@ class S3Upload extends BaseUpload {
     // This mostly exists to make `abortUpload` work well: only sending the abort request if
     // the upload was already created, and if the createMultipartUpload request is still in flight,
     // aborting it immediately after it finishes.
-    this.createdPromise = Promise.reject(); // eslint-disable-line prefer-promise-reject-errors
+    this.createdPromise = Promise.reject(new Error());
     this.chunks = [];
     this.chunkState = [];
     this.uploading = [];
@@ -108,13 +108,13 @@ class S3Upload extends BaseUpload {
   }
 
   public getId(): string | undefined {
-    return this.uploadId || undefined;
+    return this.uploadId ?? undefined;
   }
 
   public getInitialFile(): InitialFile {
     return {
-      id: this.uploadId || "",
-      name: this.key || "",
+      id: this.uploadId ?? "",
+      name: this.key ?? "",
       size: this.file.size,
       original_name: this.file.name,
       type: "s3"
@@ -157,7 +157,7 @@ class S3Upload extends BaseUpload {
       s3UploadDir: this.s3UploadDir
     });
     return this.createdPromise
-      .then((result: MultipartUpload) => {
+      .then((result: MultipartUpload | null) => {
         const valid =
           typeof result === "object" &&
           result &&
@@ -174,7 +174,7 @@ class S3Upload extends BaseUpload {
 
         this.uploadParts();
       })
-      .catch((err: Error) => {
+      .catch((err: unknown) => {
         this.handleError(err);
       });
   }
@@ -230,9 +230,7 @@ class S3Upload extends BaseUpload {
     })
       .then(result => {
         const valid =
-          typeof result === "object" &&
-          result &&
-          typeof result.url === "string";
+          typeof result === "object" && typeof result.url === "string";
         if (!valid) {
           throw new TypeError(
             "AwsS3/Multipart: Got incorrect result from `prepareUploadPart()`, expected an object `{ url }`."
@@ -244,8 +242,8 @@ class S3Upload extends BaseUpload {
         ({ url }: UrlInfo) => {
           this.uploadPartBytes(index, url);
         },
-        err => {
-          this.handleError(err as Error);
+        (err: unknown) => {
+          this.handleError(err);
         }
       );
   }
@@ -321,7 +319,7 @@ class S3Upload extends BaseUpload {
         return;
       }
 
-      this.onPartProgress(index, body?.size || 0);
+      this.onPartProgress(index, body?.size ?? 0);
 
       // NOTE This must be allowed by CORS.
       const etag = target.getResponseHeader("ETag");
@@ -373,13 +371,13 @@ class S3Upload extends BaseUpload {
           this.onSuccess();
         }
       },
-      err => {
+      (err: unknown) => {
         this.handleError(err as Error);
       }
     );
   }
 
-  private handleError(error: Error): void {
+  private handleError(error: unknown): void {
     if (this.onError) {
       this.onError(error);
     } else {
