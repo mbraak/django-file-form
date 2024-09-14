@@ -3254,6 +3254,49 @@
     }
   };
 
+  class DetailedError extends Error {
+    constructor(message) {
+      let causingErr = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+      let req = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+      let res = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
+      super(message);
+      this.originalRequest = req;
+      this.originalResponse = res;
+      this.causingError = causingErr;
+      if (causingErr != null) {
+        message += `, caused by ${causingErr.toString()}`;
+      }
+      if (req != null) {
+        const requestId = req.getHeader('X-Request-ID') || 'n/a';
+        const method = req.getMethod();
+        const url = req.getURL();
+        const status = res ? res.getStatus() : 'n/a';
+        const body = res ? res.getBody() || '' : 'n/a';
+        message += `, originated from request (method: ${method}, url: ${url}, response code: ${status}, response text: ${body}, request id: ${requestId})`;
+      }
+      this.message = message;
+    }
+  }
+
+  function log(msg) {
+    return;
+  }
+
+  class NoopUrlStorage {
+    listAllUploads() {
+      return Promise.resolve([]);
+    }
+    findUploadsByFingerprint(_fingerprint) {
+      return Promise.resolve([]);
+    }
+    removeUpload(_urlStorageKey) {
+      return Promise.resolve();
+    }
+    addUpload(_fingerprint, _upload) {
+      return Promise.resolve(null);
+    }
+  }
+
   /**
    *  base64.ts
    *
@@ -4272,36 +4315,6 @@
 
   var URL = /*@__PURE__*/getDefaultExportFromCjs(urlParse);
 
-  class DetailedError extends Error {
-    constructor(message) {
-      let causingErr = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-      let req = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
-      let res = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
-      super(message);
-      this.originalRequest = req;
-      this.originalResponse = res;
-      this.causingError = causingErr;
-      if (causingErr != null) {
-        message += `, caused by ${causingErr.toString()}`;
-      }
-      if (req != null) {
-        const requestId = req.getHeader('X-Request-ID') || 'n/a';
-        const method = req.getMethod();
-        const url = req.getURL();
-        const status = res ? res.getStatus() : 'n/a';
-        const body = res ? res.getBody() || '' : 'n/a';
-        message += `, originated from request (method: ${method}, url: ${url}, response code: ${status}, response text: ${body}, request id: ${requestId})`;
-      }
-      this.message = message;
-    }
-  }
-
-  /* eslint no-console: "off" */
-
-  function log(msg) {
-    return;
-  }
-
   /**
    * Generate a UUID v4 based on random numbers. We intentioanlly use the less
    * secure Math.random function here since the more secure crypto.getRandomNumbers
@@ -4315,7 +4328,6 @@
    * @return {string} The generate UUID
    */
   function uuid() {
-    /* eslint-disable no-bitwise */
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
       const r = Math.random() * 16 | 0;
       const v = c === 'x' ? r : r & 0x3 | 0x8;
@@ -4329,6 +4341,7 @@
     endpoint: null,
     uploadUrl: null,
     metadata: {},
+    metadataForPartialUploads: {},
     fingerprint: null,
     uploadSize: null,
     onProgress: null,
@@ -4342,7 +4355,7 @@
     onBeforeRequest: null,
     onAfterResponse: null,
     onShouldRetry: defaultOnShouldRetry,
-    chunkSize: Infinity,
+    chunkSize: Number.POSITIVE_INFINITY,
     retryDelays: [0, 1000, 3000, 5000],
     parallelUploads: 1,
     parallelUploadBoundaries: null,
@@ -4359,7 +4372,6 @@
     constructor(file, options) {
       // Warn about removed options from previous versions
       if ('resume' in options) {
-        // eslint-disable-next-line no-console
         console.log('tus: The `resume` option has been removed in tus-js-client v2. Please use the URL storage API instead.');
       }
 
@@ -4596,7 +4608,7 @@
               parallelUploads: 1,
               // Reset this option as we are not doing a parallel upload.
               parallelUploadBoundaries: null,
-              metadata: {},
+              metadata: this.options.metadataForPartialUploads,
               // Add the header to indicate the this is a partial upload.
               headers: {
                 ...this.options.headers,
@@ -4655,7 +4667,7 @@
         }
         this.url = resolveUrl(this.options.endpoint, location);
         log(`Created upload at ${this.url}`);
-        this._emitSuccess();
+        this._emitSuccess(res);
       }).catch(err => {
         this._emitError(err);
       });
@@ -4703,9 +4715,9 @@
     abort(shouldTerminate) {
       // Stop any parallel partial uploads, that have been started in _startParallelUploads.
       if (this._parallelUploads != null) {
-        this._parallelUploads.forEach(upload => {
+        for (const upload of this._parallelUploads) {
           upload.abort(shouldTerminate);
-        });
+        }
       }
 
       // Stop any current running request.
@@ -4762,16 +4774,19 @@
     /**
      * Publishes notification if the upload has been successfully completed.
      *
+     * @param {object} lastResponse Last HTTP response.
      * @api private
      */
-    _emitSuccess() {
+    _emitSuccess(lastResponse) {
       if (this.options.removeFingerprintOnSuccess) {
         // Remove stored fingerprint and corresponding endpoint. This causes
         // new uploads of the same file to be treated as a different file.
         this._removeFromUrlStorage();
       }
       if (typeof this.options.onSuccess === 'function') {
-        this.options.onSuccess();
+        this.options.onSuccess({
+          lastResponse
+        });
       }
     }
 
@@ -4818,9 +4833,9 @@
       }
       const req = this._openRequest('POST', this.options.endpoint);
       if (this.options.uploadLengthDeferred) {
-        req.setHeader('Upload-Defer-Length', 1);
+        req.setHeader('Upload-Defer-Length', '1');
       } else {
-        req.setHeader('Upload-Length', this._size);
+        req.setHeader('Upload-Length', `${this._size}`);
       }
 
       // Add metadata if values have been added
@@ -4855,7 +4870,7 @@
         }
         if (this._size === 0) {
           // Nothing to upload and file was successfully created
-          this._emitSuccess();
+          this._emitSuccess(res);
           this._source.close();
           return;
         }
@@ -4910,12 +4925,12 @@
           this._createUpload();
           return;
         }
-        const offset = parseInt(res.getHeader('Upload-Offset'), 10);
+        const offset = Number.parseInt(res.getHeader('Upload-Offset'), 10);
         if (Number.isNaN(offset)) {
           this._emitHttpError(req, res, 'tus: invalid or missing offset value');
           return;
         }
-        const length = parseInt(res.getHeader('Upload-Length'), 10);
+        const length = Number.parseInt(res.getHeader('Upload-Length'), 10);
         if (Number.isNaN(length) && !this.options.uploadLengthDeferred && this.options.protocol === PROTOCOL_TUS_V1) {
           this._emitHttpError(req, res, 'tus: invalid or missing length value');
           return;
@@ -4928,7 +4943,7 @@
           // data to the server
           if (offset === length) {
             this._emitProgress(length, length);
-            this._emitSuccess();
+            this._emitSuccess(res);
             return;
           }
           this._offset = offset;
@@ -4964,7 +4979,7 @@
       } else {
         req = this._openRequest('PATCH', this.url);
       }
-      req.setHeader('Upload-Offset', this._offset);
+      req.setHeader('Upload-Offset', `${this._offset}`);
       const promise = this._addChunkToRequest(req);
       promise.then(res => {
         if (!inStatusCategory(res.getStatus(), 200)) {
@@ -4998,7 +5013,7 @@
       // The specified chunkSize may be Infinity or the calcluated end position
       // may exceed the file's size. In both cases, we limit the end position to
       // the input's total size for simpler calculations and correctness.
-      if ((end === Infinity || end > this._size) && !this.options.uploadLengthDeferred) {
+      if ((end === Number.POSITIVE_INFINITY || end > this._size) && !this.options.uploadLengthDeferred) {
         end = this._size;
       }
       return this._source.slice(start, end).then(_ref2 => {
@@ -5006,14 +5021,14 @@
           value,
           done
         } = _ref2;
-        const valueSize = value && value.size ? value.size : 0;
+        const valueSize = value?.size ? value.size : 0;
 
         // If the upload length is deferred, the upload size was not specified during
         // upload creation. So, if the file reader is done reading, we know the total
         // upload size and can tell the tus server.
         if (this.options.uploadLengthDeferred && done) {
           this._size = this._offset + valueSize;
-          req.setHeader('Upload-Length', this._size);
+          req.setHeader('Upload-Length', `${this._size}`);
         }
 
         // The specified uploadSize might not match the actual amount of data that a source
@@ -5043,7 +5058,7 @@
      * @api private
      */
     _handleUploadResponse(req, res) {
-      const offset = parseInt(res.getHeader('Upload-Offset'), 10);
+      const offset = Number.parseInt(res.getHeader('Upload-Offset'), 10);
       if (Number.isNaN(offset)) {
         this._emitHttpError(req, res, 'tus: invalid or missing offset value');
         return;
@@ -5053,7 +5068,7 @@
       this._offset = offset;
       if (offset === this._size) {
         // Yay, finally done :)
-        this._emitSuccess();
+        this._emitSuccess(res);
         this._source.close();
         return;
       }
@@ -5156,10 +5171,9 @@
       req.setHeader('Tus-Resumable', '1.0.0');
     }
     const headers = options.headers || {};
-    Object.entries(headers).forEach(_ref4 => {
-      let [name, value] = _ref4;
+    for (const [name, value] of Object.entries(headers)) {
       req.setHeader(name, value);
-    });
+    }
     if (options.addRequestId) {
       const requestId = uuid();
       req.setHeader('X-Request-ID', requestId);
@@ -5194,7 +5208,6 @@
     let online = true;
     // Note: We don't reference `window` here because the navigator object also exists
     // in a Web Worker's context.
-    // eslint-disable-next-line no-undef
     if (typeof navigator !== 'undefined' && navigator.onLine === false) {
       online = false;
     }
@@ -5268,164 +5281,6 @@
     return parts;
   }
   BaseUpload.defaultOptions = defaultOptions$1;
-
-  /* eslint no-unused-vars: "off" */
-
-  class NoopUrlStorage {
-    listAllUploads() {
-      return Promise.resolve([]);
-    }
-    findUploadsByFingerprint(fingerprint) {
-      return Promise.resolve([]);
-    }
-    removeUpload(urlStorageKey) {
-      return Promise.resolve();
-    }
-    addUpload(fingerprint, upload) {
-      return Promise.resolve(null);
-    }
-  }
-
-  let hasStorage = false;
-  try {
-    // Note: localStorage does not exist in the Web Worker's context, so we must use window here.
-    hasStorage = 'localStorage' in window;
-
-    // Attempt to store and read entries from the local storage to detect Private
-    // Mode on Safari on iOS (see #49)
-    // If the key was not used before, we remove it from local storage again to
-    // not cause confusion where the entry came from.
-    const key = 'tusSupport';
-    const originalValue = localStorage.getItem(key);
-    localStorage.setItem(key, originalValue);
-    if (originalValue === null) localStorage.removeItem(key);
-  } catch (e) {
-    // If we try to access localStorage inside a sandboxed iframe, a SecurityError
-    // is thrown. When in private mode on iOS Safari, a QuotaExceededError is
-    // thrown (see #49)
-    if (e.code === e.SECURITY_ERR || e.code === e.QUOTA_EXCEEDED_ERR) {
-      hasStorage = false;
-    } else {
-      throw e;
-    }
-  }
-  const canStoreURLs = hasStorage;
-  class WebStorageUrlStorage {
-    findAllUploads() {
-      const results = this._findEntries('tus::');
-      return Promise.resolve(results);
-    }
-    findUploadsByFingerprint(fingerprint) {
-      const results = this._findEntries(`tus::${fingerprint}::`);
-      return Promise.resolve(results);
-    }
-    removeUpload(urlStorageKey) {
-      localStorage.removeItem(urlStorageKey);
-      return Promise.resolve();
-    }
-    addUpload(fingerprint, upload) {
-      const id = Math.round(Math.random() * 1e12);
-      const key = `tus::${fingerprint}::${id}`;
-      localStorage.setItem(key, JSON.stringify(upload));
-      return Promise.resolve(key);
-    }
-    _findEntries(prefix) {
-      const results = [];
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key.indexOf(prefix) !== 0) continue;
-        try {
-          const upload = JSON.parse(localStorage.getItem(key));
-          upload.urlStorageKey = key;
-          results.push(upload);
-        } catch (e) {
-          // The JSON parse error is intentionally ignored here, so a malformed
-          // entry in the storage cannot prevent an upload.
-        }
-      }
-      return results;
-    }
-  }
-
-  /* eslint-disable max-classes-per-file */
-  class XHRHttpStack {
-    createRequest(method, url) {
-      return new Request(method, url);
-    }
-    getName() {
-      return 'XHRHttpStack';
-    }
-  }
-  class Request {
-    constructor(method, url) {
-      this._xhr = new XMLHttpRequest();
-      this._xhr.open(method, url, true);
-      this._method = method;
-      this._url = url;
-      this._headers = {};
-    }
-    getMethod() {
-      return this._method;
-    }
-    getURL() {
-      return this._url;
-    }
-    setHeader(header, value) {
-      this._xhr.setRequestHeader(header, value);
-      this._headers[header] = value;
-    }
-    getHeader(header) {
-      return this._headers[header];
-    }
-    setProgressHandler(progressHandler) {
-      // Test support for progress events before attaching an event listener
-      if (!('upload' in this._xhr)) {
-        return;
-      }
-      this._xhr.upload.onprogress = e => {
-        if (!e.lengthComputable) {
-          return;
-        }
-        progressHandler(e.loaded);
-      };
-    }
-    send() {
-      let body = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
-      return new Promise((resolve, reject) => {
-        this._xhr.onload = () => {
-          resolve(new Response(this._xhr));
-        };
-        this._xhr.onerror = err => {
-          reject(err);
-        };
-        this._xhr.send(body);
-      });
-    }
-    abort() {
-      this._xhr.abort();
-      return Promise.resolve();
-    }
-    getUnderlyingObject() {
-      return this._xhr;
-    }
-  }
-  class Response {
-    constructor(xhr) {
-      this._xhr = xhr;
-    }
-    getStatus() {
-      return this._xhr.status;
-    }
-    getHeader(header) {
-      return this._xhr.getResponseHeader(header);
-    }
-    getBody() {
-      return this._xhr.responseText;
-    }
-    getUnderlyingObject() {
-      return this._xhr;
-    }
-  }
 
   const isReactNative = () => typeof navigator !== 'undefined' && typeof navigator.product === 'string' && navigator.product.toLowerCase() === 'reactnative';
 
@@ -5642,7 +5497,6 @@
     return ['tus-rn', file.name || 'noname', file.size || 'nosize', exifHash, options.endpoint].join('/');
   }
   function hashCode(str) {
-    /* eslint-disable no-bitwise */
     // from https://stackoverflow.com/a/8831937/151666
     let hash = 0;
     if (str.length === 0) {
@@ -5654,6 +5508,146 @@
       hash &= hash; // Convert to 32bit integer
     }
     return hash;
+  }
+
+  class XHRHttpStack {
+    createRequest(method, url) {
+      return new Request(method, url);
+    }
+    getName() {
+      return 'XHRHttpStack';
+    }
+  }
+  class Request {
+    constructor(method, url) {
+      this._xhr = new XMLHttpRequest();
+      this._xhr.open(method, url, true);
+      this._method = method;
+      this._url = url;
+      this._headers = {};
+    }
+    getMethod() {
+      return this._method;
+    }
+    getURL() {
+      return this._url;
+    }
+    setHeader(header, value) {
+      this._xhr.setRequestHeader(header, value);
+      this._headers[header] = value;
+    }
+    getHeader(header) {
+      return this._headers[header];
+    }
+    setProgressHandler(progressHandler) {
+      // Test support for progress events before attaching an event listener
+      if (!('upload' in this._xhr)) {
+        return;
+      }
+      this._xhr.upload.onprogress = e => {
+        if (!e.lengthComputable) {
+          return;
+        }
+        progressHandler(e.loaded);
+      };
+    }
+    send() {
+      let body = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+      return new Promise((resolve, reject) => {
+        this._xhr.onload = () => {
+          resolve(new Response(this._xhr));
+        };
+        this._xhr.onerror = err => {
+          reject(err);
+        };
+        this._xhr.send(body);
+      });
+    }
+    abort() {
+      this._xhr.abort();
+      return Promise.resolve();
+    }
+    getUnderlyingObject() {
+      return this._xhr;
+    }
+  }
+  class Response {
+    constructor(xhr) {
+      this._xhr = xhr;
+    }
+    getStatus() {
+      return this._xhr.status;
+    }
+    getHeader(header) {
+      return this._xhr.getResponseHeader(header);
+    }
+    getBody() {
+      return this._xhr.responseText;
+    }
+    getUnderlyingObject() {
+      return this._xhr;
+    }
+  }
+
+  let hasStorage = false;
+  try {
+    // Note: localStorage does not exist in the Web Worker's context, so we must use window here.
+    hasStorage = 'localStorage' in window;
+
+    // Attempt to store and read entries from the local storage to detect Private
+    // Mode on Safari on iOS (see #49)
+    // If the key was not used before, we remove it from local storage again to
+    // not cause confusion where the entry came from.
+    const key = 'tusSupport';
+    const originalValue = localStorage.getItem(key);
+    localStorage.setItem(key, originalValue);
+    if (originalValue === null) localStorage.removeItem(key);
+  } catch (e) {
+    // If we try to access localStorage inside a sandboxed iframe, a SecurityError
+    // is thrown. When in private mode on iOS Safari, a QuotaExceededError is
+    // thrown (see #49)
+    if (e.code === e.SECURITY_ERR || e.code === e.QUOTA_EXCEEDED_ERR) {
+      hasStorage = false;
+    } else {
+      throw e;
+    }
+  }
+  const canStoreURLs = hasStorage;
+  class WebStorageUrlStorage {
+    findAllUploads() {
+      const results = this._findEntries('tus::');
+      return Promise.resolve(results);
+    }
+    findUploadsByFingerprint(fingerprint) {
+      const results = this._findEntries(`tus::${fingerprint}::`);
+      return Promise.resolve(results);
+    }
+    removeUpload(urlStorageKey) {
+      localStorage.removeItem(urlStorageKey);
+      return Promise.resolve();
+    }
+    addUpload(fingerprint, upload) {
+      const id = Math.round(Math.random() * 1e12);
+      const key = `tus::${fingerprint}::${id}`;
+      localStorage.setItem(key, JSON.stringify(upload));
+      return Promise.resolve(key);
+    }
+    _findEntries(prefix) {
+      const results = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.indexOf(prefix) !== 0) continue;
+        try {
+          const upload = JSON.parse(localStorage.getItem(key));
+          upload.urlStorageKey = key;
+          results.push(upload);
+        } catch (_e) {
+          // The JSON parse error is intentionally ignored here, so a malformed
+          // entry in the storage cannot prevent an upload.
+        }
+      }
+      return results;
+    }
   }
 
   const defaultOptions = {
