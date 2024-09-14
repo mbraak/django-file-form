@@ -43,7 +43,7 @@ const getFilesFromDataTransfer = async (
   if (dataTransfer.items) {
     const entries = [...dataTransfer.items]
       .map(item => item.webkitGetAsEntry())
-      .filter(entry => entry != null) as FileSystemEntry[];
+      .filter(entry => entry != null);
 
     const files = await getFilesFromFileSystemEntries(entries);
     return files;

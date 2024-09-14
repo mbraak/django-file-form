@@ -13,7 +13,7 @@ import {
   prepareUploadPart,
   remove,
   UrlInfo
-} from "./s3_utils.js";
+} from "./s3_utils.ts";
 
 interface ChunkState {
   busy: boolean;
