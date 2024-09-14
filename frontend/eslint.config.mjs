@@ -23,5 +23,18 @@ export default [
       "@typescript-eslint/restrict-template-expressions": "error",
       "deprecation/deprecation": "error"
     }
+  },
+  {
+    settings: {
+      "import/parsers": {
+        "@typescript-eslint/parser": [".ts", ".js"]
+      },
+      "import/resolver": {
+        typescript: {
+          alwaysTryTypes: true,
+          project: "./tsconfig.json"
+        }
+      }
+    }
   }
 ];
