@@ -1,5 +1,5 @@
 pytz==2024.2
 django-csp==3.8
-boto3==1.35.10
+boto3==1.35.29
 django-formtools==2.5.1
 django-storages==1.14.4
