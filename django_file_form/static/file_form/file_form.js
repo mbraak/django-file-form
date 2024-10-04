@@ -2554,7 +2554,7 @@
   });
   const getFilesFromFileSystemEntries = async entries => {
     const result = [];
-    for await (const entry of entries) {
+    for (const entry of entries) {
       if (entry.isFile) {
         const file = await getFileFromFileEntry(entry);
         result.push(file);
@@ -5882,7 +5882,7 @@
           await this.uploadFile(file);
         }
       } else {
-        for await (const file of files) {
+        for (const file of files) {
           await this.uploadFile(file);
         }
       }

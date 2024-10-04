@@ -20,7 +20,7 @@ const getFilesFromFileSystemEntries = async (
 ): Promise<File[]> => {
   const result = [];
 
-  for await (const entry of entries) {
+  for (const entry of entries) {
     if (entry.isFile) {
       const file = await getFileFromFileEntry(entry as FileSystemFileEntry);
       result.push(file);
