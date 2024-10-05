@@ -19,18 +19,18 @@ export const formatBytes = (bytes: number, decimals: number): string => {
 
 export const getInputNameWithPrefix = (
   fieldName: string,
-  prefix: string | null
+  prefix: null | string
 ): string => (prefix ? `${prefix}-${fieldName}` : fieldName);
 
 const getInputNameWithoutPrefix = (
   fieldName: string,
-  prefix: string | null
+  prefix: null | string
 ): string => (prefix ? fieldName.slice(prefix.length + 1) : fieldName);
 
 export const findInput = (
   form: Element,
   fieldName: string,
-  prefix: string | null
+  prefix: null | string
 ): HTMLInputElement | null => {
   const inputNameWithPrefix = getInputNameWithPrefix(fieldName, prefix);
   const input = form.querySelector(`[name="${inputNameWithPrefix}"]`);
@@ -44,16 +44,16 @@ export const findInput = (
 
 export const getUploadsFieldName = (
   fieldName: string,
-  prefix: string | null
+  prefix: null | string
 ): string => `${getInputNameWithoutPrefix(fieldName, prefix)}-uploads`;
 
 export const getInputValueForFormAndPrefix = (
   form: Element,
   fieldName: string,
-  prefix: string | null
+  prefix: null | string
 ): string | undefined => findInput(form, fieldName, prefix)?.value;
 
 export const getMetadataFieldName = (
   fieldName: string,
-  prefix: string | null
+  prefix: null | string
 ): string => `${getInputNameWithoutPrefix(fieldName, prefix)}-metadata`;

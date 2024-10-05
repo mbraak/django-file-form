@@ -5,9 +5,9 @@ export interface LocationInfo {
 }
 
 export interface MultipartUpload {
+  endpoint: string;
   key: string;
   uploadId: string;
-  endpoint: string;
 }
 
 export interface Part {
@@ -30,9 +30,9 @@ interface AbortMultipartUploadParameters {
 
 export const abortMultipartUpload = ({
   csrfToken,
+  endpoint,
   key,
-  uploadId,
-  endpoint
+  uploadId
 }: AbortMultipartUploadParameters): Promise<unknown> => {
   const filename = encodeURIComponent(key);
   const uploadIdEnc = encodeURIComponent(uploadId);
@@ -41,8 +41,8 @@ export const abortMultipartUpload = ({
   });
   const url = urljoin(endpoint, uploadIdEnc, `?key=${filename}`);
   return fetch(url, {
-    method: "delete",
-    headers: headers
+    headers: headers,
+    method: "delete"
   }).then(response => {
     return response.json();
   });
@@ -58,10 +58,10 @@ interface CompleteMultipartUploadParameters {
 
 export const completeMultipartUpload = ({
   csrfToken,
+  endpoint,
   key,
-  uploadId,
   parts,
-  endpoint
+  uploadId
 }: CompleteMultipartUploadParameters): Promise<LocationInfo> => {
   const filename = encodeURIComponent(key);
   const uploadIdEnc = encodeURIComponent(uploadId);
@@ -70,11 +70,11 @@ export const completeMultipartUpload = ({
   });
   const url = urljoin(endpoint, uploadIdEnc, "complete", `?key=${filename}`);
   return fetch(url, {
-    method: "post",
-    headers: headers,
     body: JSON.stringify({
       parts: parts
-    })
+    }),
+    headers: headers,
+    method: "post"
   })
     .then(response => {
       return response.json();
@@ -103,13 +103,13 @@ export const createMultipartUpload = ({
     "X-CSRFToken": csrfToken
   });
   return fetch(endpoint, {
-    method: "post",
-    headers: headers,
     body: JSON.stringify({
-      filename: file.name,
       contentType: file.type,
+      filename: file.name,
       s3UploadDir: s3UploadDir
-    })
+    }),
+    headers: headers,
+    method: "post"
   })
     .then(response => {
       return response.json();
@@ -146,8 +146,8 @@ export const prepareUploadPart = ({
     `?key=${filename}`
   );
   return fetch(url, {
-    method: "get",
-    headers: headers
+    headers: headers,
+    method: "get"
   })
     .then(response => {
       return response.json();

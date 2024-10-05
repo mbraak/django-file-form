@@ -1,20 +1,36 @@
 import escape from "escape-html";
+
 import { formatBytes } from "./util.ts";
 
 class RenderUploadFile {
+  private createErrorContainer = (parent: Element): Element => {
+    const div = document.createElement("div");
+    div.className = "dff-invalid-files";
+    parent.appendChild(div);
+    return div;
+  };
+  private createFilesContainer = (parent: Element): Element => {
+    const div = document.createElement("div");
+    div.className = "dff-files";
+    parent.appendChild(div);
+
+    return div;
+  };
   container: Element;
-  input: HTMLInputElement;
-  translations: Record<string, string>;
   errors: Element;
 
+  input: HTMLInputElement;
+
+  translations: Record<string, string>;
+
   constructor({
-    parent,
     input,
+    parent,
     skipRequired,
     translations
   }: {
-    parent: Element;
     input: HTMLInputElement;
+    parent: Element;
     skipRequired: boolean;
     translations: Record<string, string>;
   }) {
@@ -26,6 +42,87 @@ class RenderUploadFile {
     if (skipRequired) {
       this.input.required = false;
     }
+  }
+
+  private addFile(filename: string, uploadIndex: number): HTMLElement {
+    const div = document.createElement("div");
+    div.className = `dff-file dff-file-id-${uploadIndex.toString()}`;
+
+    const nameSpan = document.createElement("span");
+    nameSpan.innerHTML = escape(filename);
+    nameSpan.className = "dff-filename";
+    nameSpan.setAttribute("data-index", uploadIndex.toString());
+
+    div.appendChild(nameSpan);
+    this.container.appendChild(div);
+
+    this.input.required = false;
+    return div;
+  }
+
+  private enableDelete(index: number): void {
+    const deleteLink = this.findDeleteLink(index);
+
+    if (deleteLink) {
+      deleteLink.classList.remove("dff-disabled");
+    }
+  }
+
+  private findCancelSpan(index: number): HTMLElement | null {
+    const el = this.findFileDiv(index);
+
+    if (!el) {
+      return null;
+    }
+
+    return el.querySelector<HTMLElement>(".dff-cancel");
+  }
+
+  private findDeleteLink(index: number): HTMLElement | null {
+    const div = this.findFileDiv(index);
+    if (!div) {
+      return div;
+    }
+
+    return div.querySelector(".dff-delete");
+  }
+
+  private removeCancel(index: number): void {
+    const cancelSpan = this.findCancelSpan(index);
+
+    if (cancelSpan) {
+      cancelSpan.remove();
+    }
+  }
+
+  private removeProgress(index: number): void {
+    const el = this.findFileDiv(index);
+
+    if (el) {
+      const progressSpan = el.querySelector(".dff-progress");
+
+      if (progressSpan) {
+        progressSpan.remove();
+      }
+    }
+  }
+
+  private setErrorMessage(index: number, message: string): void {
+    const el = this.findFileDiv(index);
+    if (!el) {
+      return;
+    }
+
+    const originalMessageSpan = el.querySelector(".dff-error");
+    if (originalMessageSpan) {
+      originalMessageSpan.remove();
+    }
+
+    const span = document.createElement("span");
+    span.classList.add("dff-error");
+    span.innerHTML = message;
+
+    el.appendChild(span);
   }
 
   public addNewUpload(filename: string, uploadIndex: number): HTMLElement {
@@ -185,102 +282,6 @@ class RenderUploadFile {
         (innerProgressSpan as HTMLElement).style.width = `${percentage}%`;
       }
     }
-  }
-
-  private createErrorContainer = (parent: Element): Element => {
-    const div = document.createElement("div");
-    div.className = "dff-invalid-files";
-    parent.appendChild(div);
-    return div;
-  };
-
-  private createFilesContainer = (parent: Element): Element => {
-    const div = document.createElement("div");
-    div.className = "dff-files";
-    parent.appendChild(div);
-
-    return div;
-  };
-
-  private addFile(filename: string, uploadIndex: number): HTMLElement {
-    const div = document.createElement("div");
-    div.className = `dff-file dff-file-id-${uploadIndex.toString()}`;
-
-    const nameSpan = document.createElement("span");
-    nameSpan.innerHTML = escape(filename);
-    nameSpan.className = "dff-filename";
-    nameSpan.setAttribute("data-index", uploadIndex.toString());
-
-    div.appendChild(nameSpan);
-    this.container.appendChild(div);
-
-    this.input.required = false;
-    return div;
-  }
-
-  private removeProgress(index: number): void {
-    const el = this.findFileDiv(index);
-
-    if (el) {
-      const progressSpan = el.querySelector(".dff-progress");
-
-      if (progressSpan) {
-        progressSpan.remove();
-      }
-    }
-  }
-
-  private removeCancel(index: number): void {
-    const cancelSpan = this.findCancelSpan(index);
-
-    if (cancelSpan) {
-      cancelSpan.remove();
-    }
-  }
-
-  private findCancelSpan(index: number): HTMLElement | null {
-    const el = this.findFileDiv(index);
-
-    if (!el) {
-      return null;
-    }
-
-    return el.querySelector<HTMLElement>(".dff-cancel");
-  }
-
-  private enableDelete(index: number): void {
-    const deleteLink = this.findDeleteLink(index);
-
-    if (deleteLink) {
-      deleteLink.classList.remove("dff-disabled");
-    }
-  }
-
-  private findDeleteLink(index: number): HTMLElement | null {
-    const div = this.findFileDiv(index);
-    if (!div) {
-      return div;
-    }
-
-    return div.querySelector(".dff-delete");
-  }
-
-  private setErrorMessage(index: number, message: string): void {
-    const el = this.findFileDiv(index);
-    if (!el) {
-      return;
-    }
-
-    const originalMessageSpan = el.querySelector(".dff-error");
-    if (originalMessageSpan) {
-      originalMessageSpan.remove();
-    }
-
-    const span = document.createElement("span");
-    span.classList.add("dff-error");
-    span.innerHTML = message;
-
-    el.appendChild(span);
   }
 }
 

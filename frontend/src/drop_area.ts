@@ -56,38 +56,6 @@ const getFilesFromDataTransfer = async (
 class DropArea {
   acceptedFileTypes: AcceptedFileTypes;
   container: Element;
-  onUploadFiles: (files: File[]) => Promise<void>;
-  renderer: RenderUploadFile;
-
-  constructor({
-    container,
-    inputAccept,
-    onUploadFiles,
-    renderer
-  }: {
-    container: Element;
-    inputAccept: string;
-    onUploadFiles: (files: File[]) => Promise<void>;
-    renderer: RenderUploadFile;
-  }) {
-    this.container = container;
-    this.onUploadFiles = onUploadFiles;
-    this.acceptedFileTypes = new AcceptedFileTypes(inputAccept);
-    this.renderer = renderer;
-
-    container.addEventListener("dragenter", () => {
-      container.classList.add("dff-dropping");
-    });
-    container.addEventListener("dragleave", () => {
-      container.classList.remove("dff-dropping");
-    });
-    container.addEventListener("dragover", e => {
-      container.classList.add("dff-dropping");
-      e.preventDefault();
-    });
-    container.addEventListener("drop", this.onDrop);
-  }
-
   onDrop = (e: Event): void => {
     const dragEvent = e as DragEvent;
     this.container.classList.remove("dff-dropping");
@@ -119,6 +87,38 @@ class DropArea {
 
     void uploadFiles();
   };
+  onUploadFiles: (files: File[]) => Promise<void>;
+
+  renderer: RenderUploadFile;
+
+  constructor({
+    container,
+    inputAccept,
+    onUploadFiles,
+    renderer
+  }: {
+    container: Element;
+    inputAccept: string;
+    onUploadFiles: (files: File[]) => Promise<void>;
+    renderer: RenderUploadFile;
+  }) {
+    this.container = container;
+    this.onUploadFiles = onUploadFiles;
+    this.acceptedFileTypes = new AcceptedFileTypes(inputAccept);
+    this.renderer = renderer;
+
+    container.addEventListener("dragenter", () => {
+      container.classList.add("dff-dropping");
+    });
+    container.addEventListener("dragleave", () => {
+      container.classList.remove("dff-dropping");
+    });
+    container.addEventListener("dragover", e => {
+      container.classList.add("dff-dropping");
+      e.preventDefault();
+    });
+    container.addEventListener("drop", this.onDrop);
+  }
 }
 
 export default DropArea;

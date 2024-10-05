@@ -1,4 +1,5 @@
 import { HttpRequest, HttpResponse, Upload } from "tus-js-client";
+
 import BaseUpload, { InitialFile } from "./base_upload.ts";
 import { deleteUpload } from "./tus_utils.ts";
 
@@ -8,18 +9,53 @@ interface Parameters {
   fieldName: string;
   file: File;
   formId: string;
-  retryDelays: number[] | null;
+  retryDelays: null | number[];
   uploadIndex: number;
   uploadUrl: string;
 }
 
 export default class TusUpload extends BaseUpload {
-  public onError?: (error: Error) => void;
-  public onProgress?: (bytesUploaded: number, bytesTotal: number) => void;
-  public onSuccess?: () => void;
-  private id: string;
-  private upload: Upload;
+  private addCsrTokenToRequest = (request: HttpRequest) => {
+    request.setHeader("X-CSRFToken", this.csrfToken);
+  };
   private csrfToken: string;
+  private handleAfterReponse = (
+    _request: HttpRequest,
+    response: HttpResponse
+  ) => {
+    const resourceId = response.getHeader("ResourceId");
+
+    if (resourceId) {
+      this.id = resourceId;
+    }
+  };
+  private handleError = (error: Error) => {
+    if (this.onError) {
+      this.onError(error);
+    } else {
+      throw error;
+    }
+  };
+  private handleProgress = (bytesUploaded: number, bytesTotal: number) => {
+    if (this.onProgress) {
+      this.onProgress(bytesUploaded, bytesTotal);
+    }
+  };
+  private handleSucces = () => {
+    if (this.onSuccess) {
+      this.onSuccess();
+    }
+  };
+
+  private id: string;
+
+  private upload: Upload;
+
+  public onError?: (error: Error) => void;
+
+  public onProgress?: (bytesUploaded: number, bytesTotal: number) => void;
+
+  public onSuccess?: () => void;
 
   constructor({
     chunkSize,
@@ -72,49 +108,6 @@ export default class TusUpload extends BaseUpload {
     return this.id;
   }
 
-  public getSize(): number {
-    return (this.upload.file as File).size;
-  }
-
-  public start(): void {
-    this.upload.start();
-  }
-
-  private handleError = (error: Error) => {
-    if (this.onError) {
-      this.onError(error);
-    } else {
-      throw error;
-    }
-  };
-
-  private handleProgress = (bytesUploaded: number, bytesTotal: number) => {
-    if (this.onProgress) {
-      this.onProgress(bytesUploaded, bytesTotal);
-    }
-  };
-
-  private handleSucces = () => {
-    if (this.onSuccess) {
-      this.onSuccess();
-    }
-  };
-
-  private addCsrTokenToRequest = (request: HttpRequest) => {
-    request.setHeader("X-CSRFToken", this.csrfToken);
-  };
-
-  private handleAfterReponse = (
-    _request: HttpRequest,
-    response: HttpResponse
-  ) => {
-    const resourceId = response.getHeader("ResourceId");
-
-    if (resourceId) {
-      this.id = resourceId;
-    }
-  };
-
   getInitialFile(): InitialFile {
     return {
       id: this.id,
@@ -123,5 +116,13 @@ export default class TusUpload extends BaseUpload {
       type: "tus",
       url: ""
     };
+  }
+
+  public getSize(): number {
+    return (this.upload.file as File).size;
+  }
+
+  public start(): void {
+    this.upload.start();
   }
 }

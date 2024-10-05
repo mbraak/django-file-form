@@ -1,4 +1,5 @@
 import { fireEvent, waitFor } from "@testing-library/dom";
+
 import DropArea from "./drop_area.ts";
 import RenderUploadFile from "./render_upload_file.ts";
 
@@ -7,11 +8,11 @@ const mockFile = (filename: string) =>
 
 const mockFileSystemEntry = (file: File) =>
   ({
-    isDirectory: false,
-    isFile: true,
     file: (successCallback: FileCallback) => {
       successCallback(file);
-    }
+    },
+    isDirectory: false,
+    isFile: true
   } as FileSystemFileEntry);
 
 const mockFileSystemDirectoryEntry = (fileEntries: FileSystemFileEntry[]) => {
@@ -22,18 +23,18 @@ const mockFileSystemDirectoryEntry = (fileEntries: FileSystemFileEntry[]) => {
   } as FileSystemDirectoryReader;
 
   return {
+    createReader: () => directoryReader,
     isDirectory: true,
-    isFile: false,
-    createReader: () => directoryReader
+    isFile: false
   } as FileSystemDirectoryEntry;
 };
 
 const mockDataTransferItem = (fileEntry: FileSystemEntry) =>
   ({
-    kind: "file",
-    type: "text/plain",
     getAsFile: () => null,
     getAsString: () => "test",
+    kind: "file",
+    type: "text/plain",
     webkitGetAsEntry: () => fileEntry
   } as DataTransferItem);
 

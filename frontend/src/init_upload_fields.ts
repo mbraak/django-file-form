@@ -1,4 +1,5 @@
 import { EventEmitter } from "eventemitter3";
+
 import FileField, { Callbacks, Translations } from "./file_field.ts";
 import { InitialFile } from "./uploads/base_upload.ts";
 import {
@@ -26,7 +27,7 @@ const initUploadFields = (form: Element, options: Options = {}): void => {
     return fieldName.startsWith(`${options.prefix}-`);
   };
 
-  const getPrefix = (): string | null =>
+  const getPrefix = (): null | string =>
     options.prefix ? options.prefix : null;
 
   const getInputValue = (fieldName: string): string | undefined =>
@@ -89,13 +90,13 @@ const initUploadFields = (form: Element, options: Options = {}): void => {
       fieldName,
       form,
       formId,
-      s3UploadDir: s3UploadDir ?? null,
       initial,
       input,
       multiple,
       parent: container,
       prefix,
       retryDelays: options.retryDelays ?? null,
+      s3UploadDir: s3UploadDir ?? null,
       skipRequired,
       supportDropArea,
       translations,

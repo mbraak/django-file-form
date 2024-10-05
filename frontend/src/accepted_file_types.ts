@@ -31,6 +31,22 @@ class AcceptedFileTypes {
     this.mimeTypes = mimeTypes;
   }
 
+  private isExtensionAccepted(fileName: string): boolean {
+    if (this.extensions.length === 0) {
+      return false;
+    }
+
+    return picomatch.isMatch(fileName, this.extensions);
+  }
+
+  private isMimeTypeAccepted(mimeType: null | string): boolean {
+    if (!mimeType || this.mimeTypes.length === 0) {
+      return false;
+    }
+
+    return picomatch.isMatch(mimeType, this.mimeTypes);
+  }
+
   public isAccepted(fileName: string): boolean {
     if (this.extensions.length === 0 && this.mimeTypes.length === 0) {
       return true;
@@ -39,22 +55,6 @@ class AcceptedFileTypes {
       this.isMimeTypeAccepted(mime.getType(fileName)) ||
       this.isExtensionAccepted(fileName)
     );
-  }
-
-  private isMimeTypeAccepted(mimeType: string | null): boolean {
-    if (!mimeType || this.mimeTypes.length === 0) {
-      return false;
-    }
-
-    return picomatch.isMatch(mimeType, this.mimeTypes);
-  }
-
-  private isExtensionAccepted(fileName: string): boolean {
-    if (this.extensions.length === 0) {
-      return false;
-    }
-
-    return picomatch.isMatch(fileName, this.extensions);
   }
 }
 
