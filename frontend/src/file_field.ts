@@ -194,7 +194,7 @@ class FileField {
         await this.uploadFile(file);
       }
     } else {
-      for await (const file of files) {
+      for (const file of files) {
         await this.uploadFile(file);
       }
     }
