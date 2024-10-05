@@ -195,8 +195,8 @@ export const createUploadedFile = ({
       return new UploadedTusFile({
         csrfToken,
         initialFile,
-        uploadUrl,
-        uploadIndex
+        uploadIndex,
+        uploadUrl
       });
   }
 };
