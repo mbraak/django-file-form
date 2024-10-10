@@ -8,7 +8,7 @@ const getEntriesFromDirectory = async (
     directoryEntry.createReader().readEntries(resolve, reject);
   });
 
-const getFileFromFileEntry = async (
+const getFileFromFileSystemFileEntry = async (
   fileEntry: FileSystemFileEntry
 ): Promise<File> =>
   new Promise((resolve, reject) => {
@@ -18,19 +18,32 @@ const getFileFromFileEntry = async (
 const getFilesFromFileSystemEntries = async (
   entries: FileSystemEntry[]
 ): Promise<File[]> => {
-  const result = [];
+  const result: File[] = [];
 
   for (const entry of entries) {
-    if (entry.isFile) {
-      const file = await getFileFromFileEntry(entry as FileSystemFileEntry);
-      result.push(file);
-    } else if (entry.isDirectory) {
-      const entriesFromDirectory = await getEntriesFromDirectory(
-        entry as FileSystemDirectoryEntry
-      );
-      const files = await getFilesFromFileSystemEntries(entriesFromDirectory);
-      files.forEach(file => result.push(file));
-    }
+    const filesFromEntry = await getFilesFromFileSystemEntry(entry);
+    filesFromEntry.forEach(file => result.push(file));
+  }
+
+  return result;
+};
+
+const getFilesFromFileSystemEntry = async (
+  entry: FileSystemEntry
+): Promise<File[]> => {
+  const result: File[] = [];
+
+  if (entry.isFile) {
+    const file = await getFileFromFileSystemFileEntry(
+      entry as FileSystemFileEntry
+    );
+    result.push(file);
+  } else if (entry.isDirectory) {
+    const entriesFromDirectory = await getEntriesFromDirectory(
+      entry as FileSystemDirectoryEntry
+    );
+    const files = await getFilesFromFileSystemEntries(entriesFromDirectory);
+    files.forEach(file => result.push(file));
   }
 
   return result;
@@ -41,11 +54,24 @@ const getFilesFromDataTransfer = async (
 ): Promise<File[]> => {
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (dataTransfer.items) {
-    const entries = [...dataTransfer.items]
-      .map(item => item.webkitGetAsEntry())
-      .filter(entry => entry != null);
+    const files: File[] = [];
 
-    const files = await getFilesFromFileSystemEntries(entries);
+    for (const item of dataTransfer.items) {
+      const fileSystemEntry = item.webkitGetAsEntry();
+      if (fileSystemEntry) {
+        const filesFromEntry = await getFilesFromFileSystemEntry(
+          fileSystemEntry
+        );
+        filesFromEntry.forEach(file => files.push(file));
+      } else {
+        const file = item.getAsFile();
+
+        if (file) {
+          files.push(file);
+        }
+      }
+    }
+
     return files;
   } else {
     // backwards compatibility
