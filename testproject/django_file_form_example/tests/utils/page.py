@@ -144,3 +144,38 @@ class Page(BasePage):
         WebDriverWait(self.selenium, timeout=10, poll_frequency=0.1).until(
             lambda selenium: get_percentage(selenium) > 5
         )
+
+    def drop_file(self, drop_area, temp_file):
+        ATTACH_FILE = """
+            var input = document.createElement('INPUT');
+            input.type = "file";
+            input.id = "_capybara_drop_file";
+            input.multiple = true;
+            document.body.appendChild(input);
+            return input;
+        """
+
+        DROP_FILE = """
+            var el = arguments[0],
+                input = arguments[1],
+                files = input.files,
+                dt = new DataTransfer(),
+                opts = { cancelable: true, bubbles: true, dataTransfer: dt };
+            input.parentElement.removeChild(input);
+            if (dt.items){
+                for (var i=0; i<files.length; i++){
+                dt.items.add(files[i]);
+                }
+            } else {
+                Object.defineProperty(dt, "files", {
+                value: files,
+                writable: false
+                });
+            }
+            var dropEvent = new DragEvent('drop', opts);
+            el.dispatchEvent(dropEvent);
+        """
+
+        input_element = self.selenium.execute_script(ATTACH_FILE)
+        input_element.send_keys(temp_file.path())
+        self.selenium.execute_script(DROP_FILE, drop_area, input_element)
