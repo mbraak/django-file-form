@@ -947,3 +947,15 @@ class LiveTestCase(BaseLiveTestCase):
         self.assertTrue(file_input.get_attribute("disabled"))
 
         self.assertEqual(len(page.find_elements_by_text("Drop your files here")), 0)
+
+    def test_drop_file(self):
+        page = self.page
+        temp_file = page.create_temp_file("content1")
+
+        page.open("/")
+        drop_area = page.selenium.find_element(By.CSS_SELECTOR, ".dff-files")
+        page.drop_file(drop_area, temp_file)
+
+        page.find_upload_success(temp_file)
+        page.assert_page_contains_text("8 Bytes")
+        self.assertEqual(TemporaryUploadedFile.objects.count(), 1)
