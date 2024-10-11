@@ -20,332 +20,6 @@
     forms.forEach(initUploadFields);
   };
 
-  const formatBytes = (bytes, decimals) => {
-    if (bytes === 0) {
-      return "0 Bytes";
-    }
-    const k = 1024;
-    const dm = decimals;
-    const sizes = ["Bytes", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    const n = parseFloat((bytes / k ** i).toFixed(dm));
-    const size = sizes[i];
-    if (size == null) {
-      return "";
-    } else {
-      return `${n.toString()} ${size}`;
-    }
-  };
-  const getInputNameWithPrefix = (fieldName, prefix) => prefix ? `${prefix}-${fieldName}` : fieldName;
-  const getInputNameWithoutPrefix = (fieldName, prefix) => prefix ? fieldName.slice(prefix.length + 1) : fieldName;
-  const findInput = (form, fieldName, prefix) => {
-    const inputNameWithPrefix = getInputNameWithPrefix(fieldName, prefix);
-    const input = form.querySelector(`[name="${inputNameWithPrefix}"]`);
-    if (!input) {
-      return null;
-    }
-    return input;
-  };
-  const getUploadsFieldName = (fieldName, prefix) => `${getInputNameWithoutPrefix(fieldName, prefix)}-uploads`;
-  const getInputValueForFormAndPrefix = (form, fieldName, prefix) => findInput(form, fieldName, prefix)?.value;
-  const getMetadataFieldName = (fieldName, prefix) => `${getInputNameWithoutPrefix(fieldName, prefix)}-metadata`;
-
-  var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
-
-  function getDefaultExportFromCjs (x) {
-  	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
-  }
-
-  /*!
-   * escape-html
-   * Copyright(c) 2012-2013 TJ Holowaychuk
-   * Copyright(c) 2015 Andreas Lubbe
-   * Copyright(c) 2015 Tiancheng "Timothy" Gu
-   * MIT Licensed
-   */
-
-  /**
-   * Module variables.
-   * @private
-   */
-
-  var matchHtmlRegExp = /["'&<>]/;
-
-  /**
-   * Module exports.
-   * @public
-   */
-
-  var escapeHtml_1 = escapeHtml;
-
-  /**
-   * Escape special characters in the given string of html.
-   *
-   * @param  {string} string The string to escape for inserting into HTML
-   * @return {string}
-   * @public
-   */
-
-  function escapeHtml(string) {
-    var str = '' + string;
-    var match = matchHtmlRegExp.exec(str);
-
-    if (!match) {
-      return str;
-    }
-
-    var escape;
-    var html = '';
-    var index = 0;
-    var lastIndex = 0;
-
-    for (index = match.index; index < str.length; index++) {
-      switch (str.charCodeAt(index)) {
-        case 34: // "
-          escape = '&quot;';
-          break;
-        case 38: // &
-          escape = '&amp;';
-          break;
-        case 39: // '
-          escape = '&#39;';
-          break;
-        case 60: // <
-          escape = '&lt;';
-          break;
-        case 62: // >
-          escape = '&gt;';
-          break;
-        default:
-          continue;
-      }
-
-      if (lastIndex !== index) {
-        html += str.substring(lastIndex, index);
-      }
-
-      lastIndex = index + 1;
-      html += escape;
-    }
-
-    return lastIndex !== index
-      ? html + str.substring(lastIndex, index)
-      : html;
-  }
-
-  var escape = /*@__PURE__*/getDefaultExportFromCjs(escapeHtml_1);
-
-  class RenderUploadFile {
-    constructor(_ref) {
-      let {
-        parent,
-        input,
-        skipRequired,
-        translations
-      } = _ref;
-      this.container = this.createFilesContainer(parent);
-      this.errors = this.createErrorContainer(parent);
-      this.input = input;
-      this.translations = translations;
-      if (skipRequired) {
-        this.input.required = false;
-      }
-    }
-    addNewUpload(filename, uploadIndex) {
-      const div = this.addFile(filename, uploadIndex);
-      const progressSpan = document.createElement("span");
-      progressSpan.className = "dff-progress";
-      const innerSpan = document.createElement("span");
-      innerSpan.className = "dff-progress-inner";
-      progressSpan.appendChild(innerSpan);
-      div.appendChild(progressSpan);
-      const cancelLink = document.createElement("a");
-      cancelLink.className = "dff-cancel";
-      cancelLink.innerHTML = this.translations.Cancel ?? "";
-      cancelLink.setAttribute("data-index", uploadIndex.toString());
-      cancelLink.href = "#";
-      div.appendChild(cancelLink);
-      return div;
-    }
-    addUploadedFile(filename, uploadIndex, filesize) {
-      const element = this.addFile(filename, uploadIndex);
-      this.setSuccess(uploadIndex, filesize);
-      return element;
-    }
-    clearInput() {
-      const {
-        input
-      } = this;
-      input.value = "";
-    }
-    deleteFile(index) {
-      const div = this.findFileDiv(index);
-      if (div) {
-        div.remove();
-      }
-    }
-    disableCancel(index) {
-      const cancelSpan = this.findCancelSpan(index);
-      if (cancelSpan) {
-        cancelSpan.classList.add("dff-disabled");
-      }
-    }
-    disableDelete(index) {
-      const deleteLink = this.findDeleteLink(index);
-      if (deleteLink) {
-        deleteLink.classList.add("dff-disabled");
-      }
-    }
-    findFileDiv(index) {
-      return this.container.querySelector(`.dff-file-id-${index.toString()}`);
-    }
-    removeDropHint() {
-      const dropHint = this.container.querySelector(".dff-drop-hint");
-      if (dropHint) {
-        dropHint.remove();
-      }
-    }
-    renderDropHint() {
-      if (this.container.querySelector(".dff-drop-hint")) {
-        return;
-      }
-      const dropHint = document.createElement("div");
-      dropHint.className = "dff-drop-hint";
-      dropHint.innerHTML = this.translations["Drop your files here"] ?? "";
-      this.container.appendChild(dropHint);
-    }
-    setDeleteFailed(index) {
-      this.setErrorMessage(index, this.translations["Delete failed"] ?? "");
-      this.enableDelete(index);
-    }
-    setError(index) {
-      this.setErrorMessage(index, this.translations["Upload failed"] ?? "");
-      const el = this.findFileDiv(index);
-      if (el) {
-        el.classList.add("dff-upload-fail");
-      }
-      this.removeProgress(index);
-      this.removeCancel(index);
-    }
-    setErrorInvalidFiles(files) {
-      const errorsMessages = document.createElement("ul");
-      for (const file of files) {
-        const msg = document.createElement("li");
-        const invalidFileTypeMessage = this.translations["Invalid file type"] ?? "";
-        msg.innerText = `${file.name}: ${invalidFileTypeMessage}`;
-        msg.className = "dff-error";
-        errorsMessages.appendChild(msg);
-      }
-      this.errors.replaceChildren(errorsMessages);
-      this.clearInput();
-    }
-    setSuccess(index, size) {
-      const {
-        translations
-      } = this;
-      const el = this.findFileDiv(index);
-      if (el) {
-        el.classList.add("dff-upload-success");
-        if (size != null) {
-          const fileSizeInfo = document.createElement("span");
-          fileSizeInfo.innerHTML = formatBytes(size, 2);
-          fileSizeInfo.className = "dff-filesize";
-          el.appendChild(fileSizeInfo);
-        }
-        const deleteLink = document.createElement("a");
-        deleteLink.innerHTML = translations.Delete ?? "";
-        deleteLink.className = "dff-delete";
-        deleteLink.setAttribute("data-index", index.toString());
-        deleteLink.href = "#";
-        el.appendChild(deleteLink);
-      }
-      this.removeProgress(index);
-      this.removeCancel(index);
-    }
-    updateProgress(index, percentage) {
-      const el = this.container.querySelector(`.dff-file-id-${index.toString()}`);
-      if (el) {
-        const innerProgressSpan = el.querySelector(".dff-progress-inner");
-        if (innerProgressSpan) {
-          innerProgressSpan.style.width = `${percentage}%`;
-        }
-      }
-    }
-    createErrorContainer = parent => {
-      const div = document.createElement("div");
-      div.className = "dff-invalid-files";
-      parent.appendChild(div);
-      return div;
-    };
-    createFilesContainer = parent => {
-      const div = document.createElement("div");
-      div.className = "dff-files";
-      parent.appendChild(div);
-      return div;
-    };
-    addFile(filename, uploadIndex) {
-      const div = document.createElement("div");
-      div.className = `dff-file dff-file-id-${uploadIndex.toString()}`;
-      const nameSpan = document.createElement("span");
-      nameSpan.innerHTML = escape(filename);
-      nameSpan.className = "dff-filename";
-      nameSpan.setAttribute("data-index", uploadIndex.toString());
-      div.appendChild(nameSpan);
-      this.container.appendChild(div);
-      this.input.required = false;
-      return div;
-    }
-    removeProgress(index) {
-      const el = this.findFileDiv(index);
-      if (el) {
-        const progressSpan = el.querySelector(".dff-progress");
-        if (progressSpan) {
-          progressSpan.remove();
-        }
-      }
-    }
-    removeCancel(index) {
-      const cancelSpan = this.findCancelSpan(index);
-      if (cancelSpan) {
-        cancelSpan.remove();
-      }
-    }
-    findCancelSpan(index) {
-      const el = this.findFileDiv(index);
-      if (!el) {
-        return null;
-      }
-      return el.querySelector(".dff-cancel");
-    }
-    enableDelete(index) {
-      const deleteLink = this.findDeleteLink(index);
-      if (deleteLink) {
-        deleteLink.classList.remove("dff-disabled");
-      }
-    }
-    findDeleteLink(index) {
-      const div = this.findFileDiv(index);
-      if (!div) {
-        return div;
-      }
-      return div.querySelector(".dff-delete");
-    }
-    setErrorMessage(index, message) {
-      const el = this.findFileDiv(index);
-      if (!el) {
-        return;
-      }
-      const originalMessageSpan = el.querySelector(".dff-error");
-      if (originalMessageSpan) {
-        originalMessageSpan.remove();
-      }
-      const span = document.createElement("span");
-      span.classList.add("dff-error");
-      span.innerHTML = message;
-      el.appendChild(span);
-    }
-  }
-
   const types = { "application/andrew-inset": ["ez"], "application/appinstaller": ["appinstaller"], "application/applixware": ["aw"], "application/appx": ["appx"], "application/appxbundle": ["appxbundle"], "application/atom+xml": ["atom"], "application/atomcat+xml": ["atomcat"], "application/atomdeleted+xml": ["atomdeleted"], "application/atomsvc+xml": ["atomsvc"], "application/atsc-dwd+xml": ["dwd"], "application/atsc-held+xml": ["held"], "application/atsc-rsat+xml": ["rsat"], "application/automationml-aml+xml": ["aml"], "application/automationml-amlx+zip": ["amlx"], "application/bdoc": ["bdoc"], "application/calendar+xml": ["xcs"], "application/ccxml+xml": ["ccxml"], "application/cdfx+xml": ["cdfx"], "application/cdmi-capability": ["cdmia"], "application/cdmi-container": ["cdmic"], "application/cdmi-domain": ["cdmid"], "application/cdmi-object": ["cdmio"], "application/cdmi-queue": ["cdmiq"], "application/cpl+xml": ["cpl"], "application/cu-seeme": ["cu"], "application/cwl": ["cwl"], "application/dash+xml": ["mpd"], "application/dash-patch+xml": ["mpp"], "application/davmount+xml": ["davmount"], "application/docbook+xml": ["dbk"], "application/dssc+der": ["dssc"], "application/dssc+xml": ["xdssc"], "application/ecmascript": ["ecma"], "application/emma+xml": ["emma"], "application/emotionml+xml": ["emotionml"], "application/epub+zip": ["epub"], "application/exi": ["exi"], "application/express": ["exp"], "application/fdf": ["fdf"], "application/fdt+xml": ["fdt"], "application/font-tdpfr": ["pfr"], "application/geo+json": ["geojson"], "application/gml+xml": ["gml"], "application/gpx+xml": ["gpx"], "application/gxf": ["gxf"], "application/gzip": ["gz"], "application/hjson": ["hjson"], "application/hyperstudio": ["stk"], "application/inkml+xml": ["ink", "inkml"], "application/ipfix": ["ipfix"], "application/its+xml": ["its"], "application/java-archive": ["jar", "war", "ear"], "application/java-serialized-object": ["ser"], "application/java-vm": ["class"], "application/javascript": ["*js"], "application/json": ["json", "map"], "application/json5": ["json5"], "application/jsonml+json": ["jsonml"], "application/ld+json": ["jsonld"], "application/lgr+xml": ["lgr"], "application/lost+xml": ["lostxml"], "application/mac-binhex40": ["hqx"], "application/mac-compactpro": ["cpt"], "application/mads+xml": ["mads"], "application/manifest+json": ["webmanifest"], "application/marc": ["mrc"], "application/marcxml+xml": ["mrcx"], "application/mathematica": ["ma", "nb", "mb"], "application/mathml+xml": ["mathml"], "application/mbox": ["mbox"], "application/media-policy-dataset+xml": ["mpf"], "application/mediaservercontrol+xml": ["mscml"], "application/metalink+xml": ["metalink"], "application/metalink4+xml": ["meta4"], "application/mets+xml": ["mets"], "application/mmt-aei+xml": ["maei"], "application/mmt-usd+xml": ["musd"], "application/mods+xml": ["mods"], "application/mp21": ["m21", "mp21"], "application/mp4": ["*mp4", "*mpg4", "mp4s", "m4p"], "application/msix": ["msix"], "application/msixbundle": ["msixbundle"], "application/msword": ["doc", "dot"], "application/mxf": ["mxf"], "application/n-quads": ["nq"], "application/n-triples": ["nt"], "application/node": ["cjs"], "application/octet-stream": ["bin", "dms", "lrf", "mar", "so", "dist", "distz", "pkg", "bpk", "dump", "elc", "deploy", "exe", "dll", "deb", "dmg", "iso", "img", "msi", "msp", "msm", "buffer"], "application/oda": ["oda"], "application/oebps-package+xml": ["opf"], "application/ogg": ["ogx"], "application/omdoc+xml": ["omdoc"], "application/onenote": ["onetoc", "onetoc2", "onetmp", "onepkg"], "application/oxps": ["oxps"], "application/p2p-overlay+xml": ["relo"], "application/patch-ops-error+xml": ["xer"], "application/pdf": ["pdf"], "application/pgp-encrypted": ["pgp"], "application/pgp-keys": ["asc"], "application/pgp-signature": ["sig", "*asc"], "application/pics-rules": ["prf"], "application/pkcs10": ["p10"], "application/pkcs7-mime": ["p7m", "p7c"], "application/pkcs7-signature": ["p7s"], "application/pkcs8": ["p8"], "application/pkix-attr-cert": ["ac"], "application/pkix-cert": ["cer"], "application/pkix-crl": ["crl"], "application/pkix-pkipath": ["pkipath"], "application/pkixcmp": ["pki"], "application/pls+xml": ["pls"], "application/postscript": ["ai", "eps", "ps"], "application/provenance+xml": ["provx"], "application/pskc+xml": ["pskcxml"], "application/raml+yaml": ["raml"], "application/rdf+xml": ["rdf", "owl"], "application/reginfo+xml": ["rif"], "application/relax-ng-compact-syntax": ["rnc"], "application/resource-lists+xml": ["rl"], "application/resource-lists-diff+xml": ["rld"], "application/rls-services+xml": ["rs"], "application/route-apd+xml": ["rapd"], "application/route-s-tsid+xml": ["sls"], "application/route-usd+xml": ["rusd"], "application/rpki-ghostbusters": ["gbr"], "application/rpki-manifest": ["mft"], "application/rpki-roa": ["roa"], "application/rsd+xml": ["rsd"], "application/rss+xml": ["rss"], "application/rtf": ["rtf"], "application/sbml+xml": ["sbml"], "application/scvp-cv-request": ["scq"], "application/scvp-cv-response": ["scs"], "application/scvp-vp-request": ["spq"], "application/scvp-vp-response": ["spp"], "application/sdp": ["sdp"], "application/senml+xml": ["senmlx"], "application/sensml+xml": ["sensmlx"], "application/set-payment-initiation": ["setpay"], "application/set-registration-initiation": ["setreg"], "application/shf+xml": ["shf"], "application/sieve": ["siv", "sieve"], "application/smil+xml": ["smi", "smil"], "application/sparql-query": ["rq"], "application/sparql-results+xml": ["srx"], "application/sql": ["sql"], "application/srgs": ["gram"], "application/srgs+xml": ["grxml"], "application/sru+xml": ["sru"], "application/ssdl+xml": ["ssdl"], "application/ssml+xml": ["ssml"], "application/swid+xml": ["swidtag"], "application/tei+xml": ["tei", "teicorpus"], "application/thraud+xml": ["tfi"], "application/timestamped-data": ["tsd"], "application/toml": ["toml"], "application/trig": ["trig"], "application/ttml+xml": ["ttml"], "application/ubjson": ["ubj"], "application/urc-ressheet+xml": ["rsheet"], "application/urc-targetdesc+xml": ["td"], "application/voicexml+xml": ["vxml"], "application/wasm": ["wasm"], "application/watcherinfo+xml": ["wif"], "application/widget": ["wgt"], "application/winhlp": ["hlp"], "application/wsdl+xml": ["wsdl"], "application/wspolicy+xml": ["wspolicy"], "application/xaml+xml": ["xaml"], "application/xcap-att+xml": ["xav"], "application/xcap-caps+xml": ["xca"], "application/xcap-diff+xml": ["xdf"], "application/xcap-el+xml": ["xel"], "application/xcap-ns+xml": ["xns"], "application/xenc+xml": ["xenc"], "application/xfdf": ["xfdf"], "application/xhtml+xml": ["xhtml", "xht"], "application/xliff+xml": ["xlf"], "application/xml": ["xml", "xsl", "xsd", "rng"], "application/xml-dtd": ["dtd"], "application/xop+xml": ["xop"], "application/xproc+xml": ["xpl"], "application/xslt+xml": ["*xsl", "xslt"], "application/xspf+xml": ["xspf"], "application/xv+xml": ["mxml", "xhvml", "xvml", "xvm"], "application/yang": ["yang"], "application/yin+xml": ["yin"], "application/zip": ["zip"], "audio/3gpp": ["*3gpp"], "audio/aac": ["adts", "aac"], "audio/adpcm": ["adp"], "audio/amr": ["amr"], "audio/basic": ["au", "snd"], "audio/midi": ["mid", "midi", "kar", "rmi"], "audio/mobile-xmf": ["mxmf"], "audio/mp3": ["*mp3"], "audio/mp4": ["m4a", "mp4a"], "audio/mpeg": ["mpga", "mp2", "mp2a", "mp3", "m2a", "m3a"], "audio/ogg": ["oga", "ogg", "spx", "opus"], "audio/s3m": ["s3m"], "audio/silk": ["sil"], "audio/wav": ["wav"], "audio/wave": ["*wav"], "audio/webm": ["weba"], "audio/xm": ["xm"], "font/collection": ["ttc"], "font/otf": ["otf"], "font/ttf": ["ttf"], "font/woff": ["woff"], "font/woff2": ["woff2"], "image/aces": ["exr"], "image/apng": ["apng"], "image/avci": ["avci"], "image/avcs": ["avcs"], "image/avif": ["avif"], "image/bmp": ["bmp", "dib"], "image/cgm": ["cgm"], "image/dicom-rle": ["drle"], "image/dpx": ["dpx"], "image/emf": ["emf"], "image/fits": ["fits"], "image/g3fax": ["g3"], "image/gif": ["gif"], "image/heic": ["heic"], "image/heic-sequence": ["heics"], "image/heif": ["heif"], "image/heif-sequence": ["heifs"], "image/hej2k": ["hej2"], "image/hsj2": ["hsj2"], "image/ief": ["ief"], "image/jls": ["jls"], "image/jp2": ["jp2", "jpg2"], "image/jpeg": ["jpeg", "jpg", "jpe"], "image/jph": ["jph"], "image/jphc": ["jhc"], "image/jpm": ["jpm", "jpgm"], "image/jpx": ["jpx", "jpf"], "image/jxr": ["jxr"], "image/jxra": ["jxra"], "image/jxrs": ["jxrs"], "image/jxs": ["jxs"], "image/jxsc": ["jxsc"], "image/jxsi": ["jxsi"], "image/jxss": ["jxss"], "image/ktx": ["ktx"], "image/ktx2": ["ktx2"], "image/png": ["png"], "image/sgi": ["sgi"], "image/svg+xml": ["svg", "svgz"], "image/t38": ["t38"], "image/tiff": ["tif", "tiff"], "image/tiff-fx": ["tfx"], "image/webp": ["webp"], "image/wmf": ["wmf"], "message/disposition-notification": ["disposition-notification"], "message/global": ["u8msg"], "message/global-delivery-status": ["u8dsn"], "message/global-disposition-notification": ["u8mdn"], "message/global-headers": ["u8hdr"], "message/rfc822": ["eml", "mime"], "model/3mf": ["3mf"], "model/gltf+json": ["gltf"], "model/gltf-binary": ["glb"], "model/iges": ["igs", "iges"], "model/jt": ["jt"], "model/mesh": ["msh", "mesh", "silo"], "model/mtl": ["mtl"], "model/obj": ["obj"], "model/prc": ["prc"], "model/step+xml": ["stpx"], "model/step+zip": ["stpz"], "model/step-xml+zip": ["stpxz"], "model/stl": ["stl"], "model/u3d": ["u3d"], "model/vrml": ["wrl", "vrml"], "model/x3d+binary": ["*x3db", "x3dbz"], "model/x3d+fastinfoset": ["x3db"], "model/x3d+vrml": ["*x3dv", "x3dvz"], "model/x3d+xml": ["x3d", "x3dz"], "model/x3d-vrml": ["x3dv"], "text/cache-manifest": ["appcache", "manifest"], "text/calendar": ["ics", "ifb"], "text/coffeescript": ["coffee", "litcoffee"], "text/css": ["css"], "text/csv": ["csv"], "text/html": ["html", "htm", "shtml"], "text/jade": ["jade"], "text/javascript": ["js", "mjs"], "text/jsx": ["jsx"], "text/less": ["less"], "text/markdown": ["md", "markdown"], "text/mathml": ["mml"], "text/mdx": ["mdx"], "text/n3": ["n3"], "text/plain": ["txt", "text", "conf", "def", "list", "log", "in", "ini"], "text/richtext": ["rtx"], "text/rtf": ["*rtf"], "text/sgml": ["sgml", "sgm"], "text/shex": ["shex"], "text/slim": ["slim", "slm"], "text/spdx": ["spdx"], "text/stylus": ["stylus", "styl"], "text/tab-separated-values": ["tsv"], "text/troff": ["t", "tr", "roff", "man", "me", "ms"], "text/turtle": ["ttl"], "text/uri-list": ["uri", "uris", "urls"], "text/vcard": ["vcard"], "text/vtt": ["vtt"], "text/wgsl": ["wgsl"], "text/xml": ["*xml"], "text/yaml": ["yaml", "yml"], "video/3gpp": ["3gp", "3gpp"], "video/3gpp2": ["3g2"], "video/h261": ["h261"], "video/h263": ["h263"], "video/h264": ["h264"], "video/iso.segment": ["m4s"], "video/jpeg": ["jpgv"], "video/jpm": ["*jpm", "*jpgm"], "video/mj2": ["mj2", "mjp2"], "video/mp2t": ["ts"], "video/mp4": ["mp4", "mp4v", "mpg4"], "video/mpeg": ["mpeg", "mpg", "mpe", "m1v", "m2v"], "video/ogg": ["ogv"], "video/quicktime": ["qt", "mov"], "video/webm": ["webm"] };
   Object.freeze(types);
 
@@ -434,6 +108,12 @@
   _Mime_extensionToType = new WeakMap(), _Mime_typeToExtension = new WeakMap(), _Mime_typeToExtensions = new WeakMap();
 
   var mime = new Mime(types)._freeze();
+
+  var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
+
+  function getDefaultExportFromCjs (x) {
+  	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
+  }
 
   var utils$3 = {};
 
@@ -2526,11 +2206,11 @@
       this.extensions = extensions;
       this.mimeTypes = mimeTypes;
     }
-    isAccepted(fileName) {
-      if (this.extensions.length === 0 && this.mimeTypes.length === 0) {
-        return true;
+    isExtensionAccepted(fileName) {
+      if (this.extensions.length === 0) {
+        return false;
       }
-      return this.isMimeTypeAccepted(mime.getType(fileName)) || this.isExtensionAccepted(fileName);
+      return picomatch.isMatch(fileName, this.extensions);
     }
     isMimeTypeAccepted(mimeType) {
       if (!mimeType || this.mimeTypes.length === 0) {
@@ -2538,11 +2218,11 @@
       }
       return picomatch.isMatch(mimeType, this.mimeTypes);
     }
-    isExtensionAccepted(fileName) {
-      if (this.extensions.length === 0) {
-        return false;
+    isAccepted(fileName) {
+      if (this.extensions.length === 0 && this.mimeTypes.length === 0) {
+        return true;
       }
-      return picomatch.isMatch(fileName, this.extensions);
+      return this.isMimeTypeAccepted(mime.getType(fileName)) || this.isExtensionAccepted(fileName);
     }
   }
 
@@ -2578,29 +2258,6 @@
     }
   };
   class DropArea {
-    constructor(_ref) {
-      let {
-        container,
-        inputAccept,
-        onUploadFiles,
-        renderer
-      } = _ref;
-      this.container = container;
-      this.onUploadFiles = onUploadFiles;
-      this.acceptedFileTypes = new AcceptedFileTypes(inputAccept);
-      this.renderer = renderer;
-      container.addEventListener("dragenter", () => {
-        container.classList.add("dff-dropping");
-      });
-      container.addEventListener("dragleave", () => {
-        container.classList.remove("dff-dropping");
-      });
-      container.addEventListener("dragover", e => {
-        container.classList.add("dff-dropping");
-        e.preventDefault();
-      });
-      container.addEventListener("drop", this.onDrop);
-    }
     onDrop = e => {
       const dragEvent = e;
       this.container.classList.remove("dff-dropping");
@@ -2628,6 +2285,349 @@
       };
       void uploadFiles();
     };
+    constructor(_ref) {
+      let {
+        container,
+        inputAccept,
+        onUploadFiles,
+        renderer
+      } = _ref;
+      this.container = container;
+      this.onUploadFiles = onUploadFiles;
+      this.acceptedFileTypes = new AcceptedFileTypes(inputAccept);
+      this.renderer = renderer;
+      container.addEventListener("dragenter", () => {
+        container.classList.add("dff-dropping");
+      });
+      container.addEventListener("dragleave", () => {
+        container.classList.remove("dff-dropping");
+      });
+      container.addEventListener("dragover", e => {
+        container.classList.add("dff-dropping");
+        e.preventDefault();
+      });
+      container.addEventListener("drop", this.onDrop);
+    }
+  }
+
+  /*!
+   * escape-html
+   * Copyright(c) 2012-2013 TJ Holowaychuk
+   * Copyright(c) 2015 Andreas Lubbe
+   * Copyright(c) 2015 Tiancheng "Timothy" Gu
+   * MIT Licensed
+   */
+
+  /**
+   * Module variables.
+   * @private
+   */
+
+  var matchHtmlRegExp = /["'&<>]/;
+
+  /**
+   * Module exports.
+   * @public
+   */
+
+  var escapeHtml_1 = escapeHtml;
+
+  /**
+   * Escape special characters in the given string of html.
+   *
+   * @param  {string} string The string to escape for inserting into HTML
+   * @return {string}
+   * @public
+   */
+
+  function escapeHtml(string) {
+    var str = '' + string;
+    var match = matchHtmlRegExp.exec(str);
+
+    if (!match) {
+      return str;
+    }
+
+    var escape;
+    var html = '';
+    var index = 0;
+    var lastIndex = 0;
+
+    for (index = match.index; index < str.length; index++) {
+      switch (str.charCodeAt(index)) {
+        case 34: // "
+          escape = '&quot;';
+          break;
+        case 38: // &
+          escape = '&amp;';
+          break;
+        case 39: // '
+          escape = '&#39;';
+          break;
+        case 60: // <
+          escape = '&lt;';
+          break;
+        case 62: // >
+          escape = '&gt;';
+          break;
+        default:
+          continue;
+      }
+
+      if (lastIndex !== index) {
+        html += str.substring(lastIndex, index);
+      }
+
+      lastIndex = index + 1;
+      html += escape;
+    }
+
+    return lastIndex !== index
+      ? html + str.substring(lastIndex, index)
+      : html;
+  }
+
+  var escape = /*@__PURE__*/getDefaultExportFromCjs(escapeHtml_1);
+
+  const formatBytes = (bytes, decimals) => {
+    if (bytes === 0) {
+      return "0 Bytes";
+    }
+    const k = 1024;
+    const dm = decimals;
+    const sizes = ["Bytes", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    const n = parseFloat((bytes / k ** i).toFixed(dm));
+    const size = sizes[i];
+    if (size == null) {
+      return "";
+    } else {
+      return `${n.toString()} ${size}`;
+    }
+  };
+  const getInputNameWithPrefix = (fieldName, prefix) => prefix ? `${prefix}-${fieldName}` : fieldName;
+  const getInputNameWithoutPrefix = (fieldName, prefix) => prefix ? fieldName.slice(prefix.length + 1) : fieldName;
+  const findInput = (form, fieldName, prefix) => {
+    const inputNameWithPrefix = getInputNameWithPrefix(fieldName, prefix);
+    const input = form.querySelector(`[name="${inputNameWithPrefix}"]`);
+    if (!input) {
+      return null;
+    }
+    return input;
+  };
+  const getUploadsFieldName = (fieldName, prefix) => `${getInputNameWithoutPrefix(fieldName, prefix)}-uploads`;
+  const getInputValueForFormAndPrefix = (form, fieldName, prefix) => findInput(form, fieldName, prefix)?.value;
+  const getMetadataFieldName = (fieldName, prefix) => `${getInputNameWithoutPrefix(fieldName, prefix)}-metadata`;
+
+  class RenderUploadFile {
+    createErrorContainer = parent => {
+      const div = document.createElement("div");
+      div.className = "dff-invalid-files";
+      parent.appendChild(div);
+      return div;
+    };
+    createFilesContainer = parent => {
+      const div = document.createElement("div");
+      div.className = "dff-files";
+      parent.appendChild(div);
+      return div;
+    };
+    constructor(_ref) {
+      let {
+        input,
+        parent,
+        skipRequired,
+        translations
+      } = _ref;
+      this.container = this.createFilesContainer(parent);
+      this.errors = this.createErrorContainer(parent);
+      this.input = input;
+      this.translations = translations;
+      if (skipRequired) {
+        this.input.required = false;
+      }
+    }
+    addFile(filename, uploadIndex) {
+      const div = document.createElement("div");
+      div.className = `dff-file dff-file-id-${uploadIndex.toString()}`;
+      const nameSpan = document.createElement("span");
+      nameSpan.innerHTML = escape(filename);
+      nameSpan.className = "dff-filename";
+      nameSpan.setAttribute("data-index", uploadIndex.toString());
+      div.appendChild(nameSpan);
+      this.container.appendChild(div);
+      this.input.required = false;
+      return div;
+    }
+    enableDelete(index) {
+      const deleteLink = this.findDeleteLink(index);
+      if (deleteLink) {
+        deleteLink.classList.remove("dff-disabled");
+      }
+    }
+    findCancelSpan(index) {
+      const el = this.findFileDiv(index);
+      if (!el) {
+        return null;
+      }
+      return el.querySelector(".dff-cancel");
+    }
+    findDeleteLink(index) {
+      const div = this.findFileDiv(index);
+      if (!div) {
+        return div;
+      }
+      return div.querySelector(".dff-delete");
+    }
+    removeCancel(index) {
+      const cancelSpan = this.findCancelSpan(index);
+      if (cancelSpan) {
+        cancelSpan.remove();
+      }
+    }
+    removeProgress(index) {
+      const el = this.findFileDiv(index);
+      if (el) {
+        const progressSpan = el.querySelector(".dff-progress");
+        if (progressSpan) {
+          progressSpan.remove();
+        }
+      }
+    }
+    setErrorMessage(index, message) {
+      const el = this.findFileDiv(index);
+      if (!el) {
+        return;
+      }
+      const originalMessageSpan = el.querySelector(".dff-error");
+      if (originalMessageSpan) {
+        originalMessageSpan.remove();
+      }
+      const span = document.createElement("span");
+      span.classList.add("dff-error");
+      span.innerHTML = message;
+      el.appendChild(span);
+    }
+    addNewUpload(filename, uploadIndex) {
+      const div = this.addFile(filename, uploadIndex);
+      const progressSpan = document.createElement("span");
+      progressSpan.className = "dff-progress";
+      const innerSpan = document.createElement("span");
+      innerSpan.className = "dff-progress-inner";
+      progressSpan.appendChild(innerSpan);
+      div.appendChild(progressSpan);
+      const cancelLink = document.createElement("a");
+      cancelLink.className = "dff-cancel";
+      cancelLink.innerHTML = this.translations.Cancel ?? "";
+      cancelLink.setAttribute("data-index", uploadIndex.toString());
+      cancelLink.href = "#";
+      div.appendChild(cancelLink);
+      return div;
+    }
+    addUploadedFile(filename, uploadIndex, filesize) {
+      const element = this.addFile(filename, uploadIndex);
+      this.setSuccess(uploadIndex, filesize);
+      return element;
+    }
+    clearInput() {
+      const {
+        input
+      } = this;
+      input.value = "";
+    }
+    deleteFile(index) {
+      const div = this.findFileDiv(index);
+      if (div) {
+        div.remove();
+      }
+    }
+    disableCancel(index) {
+      const cancelSpan = this.findCancelSpan(index);
+      if (cancelSpan) {
+        cancelSpan.classList.add("dff-disabled");
+      }
+    }
+    disableDelete(index) {
+      const deleteLink = this.findDeleteLink(index);
+      if (deleteLink) {
+        deleteLink.classList.add("dff-disabled");
+      }
+    }
+    findFileDiv(index) {
+      return this.container.querySelector(`.dff-file-id-${index.toString()}`);
+    }
+    removeDropHint() {
+      const dropHint = this.container.querySelector(".dff-drop-hint");
+      if (dropHint) {
+        dropHint.remove();
+      }
+    }
+    renderDropHint() {
+      if (this.container.querySelector(".dff-drop-hint")) {
+        return;
+      }
+      const dropHint = document.createElement("div");
+      dropHint.className = "dff-drop-hint";
+      dropHint.innerHTML = this.translations["Drop your files here"] ?? "";
+      this.container.appendChild(dropHint);
+    }
+    setDeleteFailed(index) {
+      this.setErrorMessage(index, this.translations["Delete failed"] ?? "");
+      this.enableDelete(index);
+    }
+    setError(index) {
+      this.setErrorMessage(index, this.translations["Upload failed"] ?? "");
+      const el = this.findFileDiv(index);
+      if (el) {
+        el.classList.add("dff-upload-fail");
+      }
+      this.removeProgress(index);
+      this.removeCancel(index);
+    }
+    setErrorInvalidFiles(files) {
+      const errorsMessages = document.createElement("ul");
+      for (const file of files) {
+        const msg = document.createElement("li");
+        const invalidFileTypeMessage = this.translations["Invalid file type"] ?? "";
+        msg.innerText = `${file.name}: ${invalidFileTypeMessage}`;
+        msg.className = "dff-error";
+        errorsMessages.appendChild(msg);
+      }
+      this.errors.replaceChildren(errorsMessages);
+      this.clearInput();
+    }
+    setSuccess(index, size) {
+      const {
+        translations
+      } = this;
+      const el = this.findFileDiv(index);
+      if (el) {
+        el.classList.add("dff-upload-success");
+        if (size != null) {
+          const fileSizeInfo = document.createElement("span");
+          fileSizeInfo.innerHTML = formatBytes(size, 2);
+          fileSizeInfo.className = "dff-filesize";
+          el.appendChild(fileSizeInfo);
+        }
+        const deleteLink = document.createElement("a");
+        deleteLink.innerHTML = translations.Delete ?? "";
+        deleteLink.className = "dff-delete";
+        deleteLink.setAttribute("data-index", index.toString());
+        deleteLink.href = "#";
+        el.appendChild(deleteLink);
+      }
+      this.removeProgress(index);
+      this.removeCancel(index);
+    }
+    updateProgress(index, percentage) {
+      const el = this.container.querySelector(`.dff-file-id-${index.toString()}`);
+      if (el) {
+        const innerProgressSpan = el.querySelector(".dff-progress-inner");
+        if (innerProgressSpan) {
+          innerProgressSpan.style.width = `${percentage}%`;
+        }
+      }
+    }
   }
 
   let BaseUpload$1 = class BaseUpload {
@@ -2726,9 +2726,9 @@
   const abortMultipartUpload = _ref => {
     let {
       csrfToken,
+      endpoint,
       key,
-      uploadId,
-      endpoint
+      uploadId
     } = _ref;
     const filename = encodeURIComponent(key);
     const uploadIdEnc = encodeURIComponent(uploadId);
@@ -2737,8 +2737,8 @@
     });
     const url = urlJoin(endpoint, uploadIdEnc, `?key=${filename}`);
     return fetch(url, {
-      method: "delete",
-      headers: headers
+      headers: headers,
+      method: "delete"
     }).then(response => {
       return response.json();
     });
@@ -2746,10 +2746,10 @@
   const completeMultipartUpload = _ref2 => {
     let {
       csrfToken,
+      endpoint,
       key,
-      uploadId,
       parts,
-      endpoint
+      uploadId
     } = _ref2;
     const filename = encodeURIComponent(key);
     const uploadIdEnc = encodeURIComponent(uploadId);
@@ -2758,11 +2758,11 @@
     });
     const url = urlJoin(endpoint, uploadIdEnc, "complete", `?key=${filename}`);
     return fetch(url, {
-      method: "post",
-      headers: headers,
       body: JSON.stringify({
         parts: parts
-      })
+      }),
+      headers: headers,
+      method: "post"
     }).then(response => {
       return response.json();
     }).then(data => {
@@ -2782,13 +2782,13 @@
       "X-CSRFToken": csrfToken
     });
     return fetch(endpoint, {
-      method: "post",
-      headers: headers,
       body: JSON.stringify({
-        filename: file.name,
         contentType: file.type,
+        filename: file.name,
         s3UploadDir: s3UploadDir
-      })
+      }),
+      headers: headers,
+      method: "post"
     }).then(response => {
       return response.json();
     }).then(data => {
@@ -2810,8 +2810,8 @@
     });
     const url = urlJoin(endpoint, uploadId, number.toString(), `?key=${filename}`);
     return fetch(url, {
-      method: "get",
-      headers: headers
+      headers: headers,
+      method: "get"
     }).then(response => {
       return response.json();
     }).then(data => {
@@ -2868,58 +2868,25 @@
       this.initChunks();
       this.createdPromise.catch(() => ({})); // silence uncaught rejection warning
     }
-    async abort() {
-      this.uploading.slice().forEach(xhr => {
-        xhr.abort();
+    completeUpload() {
+      // Parts may not have completed uploading in sorted order, if limit > 1.
+      this.parts.sort((a, b) => a.PartNumber - b.PartNumber);
+      if (!this.uploadId || !this.key) {
+        return Promise.resolve();
+      }
+      return completeMultipartUpload({
+        csrfToken: this.csrfToken,
+        endpoint: this.endpoint,
+        key: this.key,
+        parts: this.parts,
+        uploadId: this.uploadId
+      }).then(() => {
+        if (this.onSuccess) {
+          this.onSuccess();
+        }
+      }, err => {
+        this.handleError(err);
       });
-      this.uploading = [];
-      await this.createdPromise;
-      if (this.key && this.uploadId) {
-        await abortMultipartUpload({
-          csrfToken: this.csrfToken,
-          endpoint: this.endpoint,
-          key: this.key,
-          uploadId: this.uploadId
-        });
-      }
-    }
-    async delete() {
-      return Promise.resolve();
-    }
-    getId() {
-      return this.uploadId ?? undefined;
-    }
-    getInitialFile() {
-      return {
-        id: this.uploadId ?? "",
-        name: this.key ?? "",
-        size: this.file.size,
-        original_name: this.file.name,
-        type: "s3"
-      };
-    }
-    getSize() {
-      return this.file.size;
-    }
-    start() {
-      void this.createUpload();
-    }
-    initChunks() {
-      const chunks = [];
-      const desiredChunkSize = getChunkSize(this.file);
-      // at least 5MB per request, at most 10k requests
-      const minChunkSize = Math.max(5 * MB, Math.ceil(this.file.size / 10000));
-      const chunkSize = Math.max(desiredChunkSize, minChunkSize);
-      for (let i = 0; i < this.file.size; i += chunkSize) {
-        const end = Math.min(this.file.size, i + chunkSize);
-        chunks.push(this.file.slice(i, end));
-      }
-      this.chunks = chunks;
-      this.chunkState = chunks.map(() => ({
-        uploaded: 0,
-        busy: false,
-        done: false
-      }));
     }
     createUpload() {
       this.createdPromise = createMultipartUpload({
@@ -2940,31 +2907,52 @@
         this.handleError(err);
       });
     }
-    uploadParts() {
-      const need = 1 - this.uploading.length;
-      if (need === 0) {
-        return;
+    handleError(error) {
+      if (this.onError) {
+        this.onError(error);
+      } else {
+        throw error;
       }
-
-      // All parts are uploaded.
-      if (this.chunkState.every(state => state.done)) {
-        void this.completeUpload();
-        return;
+    }
+    initChunks() {
+      const chunks = [];
+      const desiredChunkSize = getChunkSize(this.file);
+      // at least 5MB per request, at most 10k requests
+      const minChunkSize = Math.max(5 * MB, Math.ceil(this.file.size / 10000));
+      const chunkSize = Math.max(desiredChunkSize, minChunkSize);
+      for (let i = 0; i < this.file.size; i += chunkSize) {
+        const end = Math.min(this.file.size, i + chunkSize);
+        chunks.push(this.file.slice(i, end));
       }
-      const candidates = [];
-      for (let i = 0; i < this.chunkState.length; i++) {
-        const state = this.chunkState[i];
-        if (!state || state.done || state.busy) {
-          continue;
-        }
-        candidates.push(i);
-        if (candidates.length >= need) {
-          break;
-        }
+      this.chunks = chunks;
+      this.chunkState = chunks.map(() => ({
+        busy: false,
+        done: false,
+        uploaded: 0
+      }));
+    }
+    onPartComplete(index, etag) {
+      const state = this.chunkState[index];
+      if (state) {
+        state.etag = etag;
+        state.done = true;
       }
-      candidates.forEach(index => {
-        void this.uploadPart(index);
-      });
+      const part = {
+        ETag: etag,
+        PartNumber: index + 1
+      };
+      this.parts.push(part);
+      this.uploadParts();
+    }
+    onPartProgress(index, sent) {
+      const state = this.chunkState[index];
+      if (state) {
+        state.uploaded = sent;
+      }
+      if (this.onProgress) {
+        const totalUploaded = this.chunkState.reduce((n, c) => n + c.uploaded, 0);
+        this.onProgress(totalUploaded, this.file.size);
+      }
     }
     uploadPart(index) {
       const state = this.chunkState[index];
@@ -2994,29 +2982,6 @@
       }, err => {
         this.handleError(err);
       });
-    }
-    onPartProgress(index, sent) {
-      const state = this.chunkState[index];
-      if (state) {
-        state.uploaded = sent;
-      }
-      if (this.onProgress) {
-        const totalUploaded = this.chunkState.reduce((n, c) => n + c.uploaded, 0);
-        this.onProgress(totalUploaded, this.file.size);
-      }
-    }
-    onPartComplete(index, etag) {
-      const state = this.chunkState[index];
-      if (state) {
-        state.etag = etag;
-        state.done = true;
-      }
-      const part = {
-        PartNumber: index + 1,
-        ETag: etag
-      };
-      this.parts.push(part);
-      this.uploadParts();
     }
     uploadPartBytes(index, url) {
       const body = this.chunks[index];
@@ -3070,199 +3035,69 @@
       });
       xhr.send(body);
     }
-    completeUpload() {
-      // Parts may not have completed uploading in sorted order, if limit > 1.
-      this.parts.sort((a, b) => a.PartNumber - b.PartNumber);
-      if (!this.uploadId || !this.key) {
-        return Promise.resolve();
+    uploadParts() {
+      const need = 1 - this.uploading.length;
+      if (need === 0) {
+        return;
       }
-      return completeMultipartUpload({
-        csrfToken: this.csrfToken,
-        endpoint: this.endpoint,
-        key: this.key,
-        uploadId: this.uploadId,
-        parts: this.parts
-      }).then(() => {
-        if (this.onSuccess) {
-          this.onSuccess();
+
+      // All parts are uploaded.
+      if (this.chunkState.every(state => state.done)) {
+        void this.completeUpload();
+        return;
+      }
+      const candidates = [];
+      for (let i = 0; i < this.chunkState.length; i++) {
+        const state = this.chunkState[i];
+        if (!state || state.done || state.busy) {
+          continue;
         }
-      }, err => {
-        this.handleError(err);
-      });
-    }
-    handleError(error) {
-      if (this.onError) {
-        this.onError(error);
-      } else {
-        throw error;
+        candidates.push(i);
+        if (candidates.length >= need) {
+          break;
+        }
       }
-    }
-  }
-
-  const deleteUpload = async (url, csrfToken) => new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.open("DELETE", url);
-    xhr.onload = () => {
-      if (xhr.status === 204) {
-        resolve();
-      } else {
-        reject(new Error());
-      }
-    };
-    xhr.setRequestHeader("Tus-Resumable", "1.0.0");
-    xhr.setRequestHeader("X-CSRFToken", csrfToken);
-    xhr.send(null);
-  });
-
-  class BaseUploadedFile extends BaseUpload$1 {
-    constructor(_ref) {
-      let {
-        name,
-        size,
-        type,
-        uploadIndex
-      } = _ref;
-      super({
-        name,
-        status: "done",
-        type,
-        uploadIndex
+      candidates.forEach(index => {
+        void this.uploadPart(index);
       });
-      this.size = size;
     }
     async abort() {
-      return Promise.resolve();
+      this.uploading.slice().forEach(xhr => {
+        xhr.abort();
+      });
+      this.uploading = [];
+      await this.createdPromise;
+      if (this.key && this.uploadId) {
+        await abortMultipartUpload({
+          csrfToken: this.csrfToken,
+          endpoint: this.endpoint,
+          key: this.key,
+          uploadId: this.uploadId
+        });
+      }
     }
     async delete() {
       return Promise.resolve();
     }
-    getSize() {
-      return this.size;
-    }
-  }
-  class PlaceholderFile extends BaseUploadedFile {
-    constructor(initialFile, uploadIndex) {
-      super({
-        name: initialFile.name,
-        size: initialFile.size,
-        type: "placeholder",
-        uploadIndex
-      });
-      this.id = initialFile.id;
-    }
     getId() {
-      return undefined;
+      return this.uploadId ?? undefined;
     }
     getInitialFile() {
       return {
-        id: this.id,
-        name: this.name,
-        size: this.size,
-        type: "placeholder"
-      };
-    }
-  }
-  class UploadedS3File extends BaseUploadedFile {
-    constructor(initialFile, uploadIndex) {
-      super({
-        name: initialFile.original_name || initialFile.name,
-        size: initialFile.size,
-        type: "uploadedS3",
-        uploadIndex
-      });
-      this.id = initialFile.id;
-      this.key = initialFile.name;
-    }
-    getId() {
-      return this.id;
-    }
-    getInitialFile() {
-      return {
-        id: this.id,
-        name: this.key,
-        original_name: this.name,
-        size: this.size,
+        id: this.uploadId ?? "",
+        name: this.key ?? "",
+        original_name: this.file.name,
+        size: this.file.size,
         type: "s3"
       };
     }
-  }
-  class ExistingFile extends BaseUploadedFile {
-    constructor(initialFile, uploadIndex) {
-      super({
-        name: initialFile.name,
-        size: initialFile.size,
-        type: "existing",
-        uploadIndex
-      });
+    getSize() {
+      return this.file.size;
     }
-    getId() {
-      return undefined;
-    }
-    getInitialFile() {
-      return {
-        name: this.name,
-        size: this.size,
-        type: "existing"
-      };
+    start() {
+      void this.createUpload();
     }
   }
-  class UploadedTusFile extends BaseUploadedFile {
-    constructor(_ref2) {
-      let {
-        csrfToken,
-        initialFile,
-        uploadIndex,
-        uploadUrl
-      } = _ref2;
-      super({
-        name: initialFile.name,
-        size: initialFile.size,
-        type: "uploadedTus",
-        uploadIndex
-      });
-      this.csrfToken = csrfToken;
-      this.id = initialFile.id;
-      this.url = `${uploadUrl}${initialFile.id}`;
-    }
-    async delete() {
-      await deleteUpload(this.url, this.csrfToken);
-    }
-    getId() {
-      return this.id;
-    }
-    getInitialFile() {
-      return {
-        id: this.id,
-        name: this.name,
-        size: this.size,
-        type: "tus",
-        url: ""
-      };
-    }
-  }
-  const createUploadedFile = _ref3 => {
-    let {
-      csrfToken,
-      initialFile,
-      uploadIndex,
-      uploadUrl
-    } = _ref3;
-    switch (initialFile.type) {
-      case "existing":
-        return new ExistingFile(initialFile, uploadIndex);
-      case "placeholder":
-        return new PlaceholderFile(initialFile, uploadIndex);
-      case "s3":
-        return new UploadedS3File(initialFile, uploadIndex);
-      case "tus":
-        return new UploadedTusFile({
-          csrfToken,
-          initialFile,
-          uploadUrl,
-          uploadIndex
-        });
-    }
-  };
 
   class DetailedError extends Error {
     constructor(message) {
@@ -5687,7 +5522,48 @@
     }
   }
 
+  const deleteUpload = async (url, csrfToken) => new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("DELETE", url);
+    xhr.onload = () => {
+      if (xhr.status === 204) {
+        resolve();
+      } else {
+        reject(new Error());
+      }
+    };
+    xhr.setRequestHeader("Tus-Resumable", "1.0.0");
+    xhr.setRequestHeader("X-CSRFToken", csrfToken);
+    xhr.send(null);
+  });
+
   class TusUpload extends BaseUpload$1 {
+    addCsrTokenToRequest = request => {
+      request.setHeader("X-CSRFToken", this.csrfToken);
+    };
+    handleAfterReponse = (_request, response) => {
+      const resourceId = response.getHeader("ResourceId");
+      if (resourceId) {
+        this.id = resourceId;
+      }
+    };
+    handleError = error => {
+      if (this.onError) {
+        this.onError(error);
+      } else {
+        throw error;
+      }
+    };
+    handleProgress = (bytesUploaded, bytesTotal) => {
+      if (this.onProgress) {
+        this.onProgress(bytesUploaded, bytesTotal);
+      }
+    };
+    handleSucces = () => {
+      if (this.onSuccess) {
+        this.onSuccess();
+      }
+    };
     constructor(_ref) {
       let {
         chunkSize,
@@ -5737,38 +5613,6 @@
     getId() {
       return this.id;
     }
-    getSize() {
-      return this.upload.file.size;
-    }
-    start() {
-      this.upload.start();
-    }
-    handleError = error => {
-      if (this.onError) {
-        this.onError(error);
-      } else {
-        throw error;
-      }
-    };
-    handleProgress = (bytesUploaded, bytesTotal) => {
-      if (this.onProgress) {
-        this.onProgress(bytesUploaded, bytesTotal);
-      }
-    };
-    handleSucces = () => {
-      if (this.onSuccess) {
-        this.onSuccess();
-      }
-    };
-    addCsrTokenToRequest = request => {
-      request.setHeader("X-CSRFToken", this.csrfToken);
-    };
-    handleAfterReponse = (_request, response) => {
-      const resourceId = response.getHeader("ResourceId");
-      if (resourceId) {
-        this.id = resourceId;
-      }
-    };
     getInitialFile() {
       return {
         id: this.id,
@@ -5778,9 +5622,281 @@
         url: ""
       };
     }
+    getSize() {
+      return this.upload.file.size;
+    }
+    start() {
+      this.upload.start();
+    }
   }
 
+  class BaseUploadedFile extends BaseUpload$1 {
+    constructor(_ref) {
+      let {
+        name,
+        size,
+        type,
+        uploadIndex
+      } = _ref;
+      super({
+        name,
+        status: "done",
+        type,
+        uploadIndex
+      });
+      this.size = size;
+    }
+    async abort() {
+      return Promise.resolve();
+    }
+    async delete() {
+      return Promise.resolve();
+    }
+    getSize() {
+      return this.size;
+    }
+  }
+  class PlaceholderFile extends BaseUploadedFile {
+    constructor(initialFile, uploadIndex) {
+      super({
+        name: initialFile.name,
+        size: initialFile.size,
+        type: "placeholder",
+        uploadIndex
+      });
+      this.id = initialFile.id;
+    }
+    getId() {
+      return undefined;
+    }
+    getInitialFile() {
+      return {
+        id: this.id,
+        name: this.name,
+        size: this.size,
+        type: "placeholder"
+      };
+    }
+  }
+  class UploadedS3File extends BaseUploadedFile {
+    constructor(initialFile, uploadIndex) {
+      super({
+        name: initialFile.original_name || initialFile.name,
+        size: initialFile.size,
+        type: "uploadedS3",
+        uploadIndex
+      });
+      this.id = initialFile.id;
+      this.key = initialFile.name;
+    }
+    getId() {
+      return this.id;
+    }
+    getInitialFile() {
+      return {
+        id: this.id,
+        name: this.key,
+        original_name: this.name,
+        size: this.size,
+        type: "s3"
+      };
+    }
+  }
+  class ExistingFile extends BaseUploadedFile {
+    constructor(initialFile, uploadIndex) {
+      super({
+        name: initialFile.name,
+        size: initialFile.size,
+        type: "existing",
+        uploadIndex
+      });
+    }
+    getId() {
+      return undefined;
+    }
+    getInitialFile() {
+      return {
+        name: this.name,
+        size: this.size,
+        type: "existing"
+      };
+    }
+  }
+  class UploadedTusFile extends BaseUploadedFile {
+    constructor(_ref2) {
+      let {
+        csrfToken,
+        initialFile,
+        uploadIndex,
+        uploadUrl
+      } = _ref2;
+      super({
+        name: initialFile.name,
+        size: initialFile.size,
+        type: "uploadedTus",
+        uploadIndex
+      });
+      this.csrfToken = csrfToken;
+      this.id = initialFile.id;
+      this.url = `${uploadUrl}${initialFile.id}`;
+    }
+    async delete() {
+      await deleteUpload(this.url, this.csrfToken);
+    }
+    getId() {
+      return this.id;
+    }
+    getInitialFile() {
+      return {
+        id: this.id,
+        name: this.name,
+        size: this.size,
+        type: "tus",
+        url: ""
+      };
+    }
+  }
+  const createUploadedFile = _ref3 => {
+    let {
+      csrfToken,
+      initialFile,
+      uploadIndex,
+      uploadUrl
+    } = _ref3;
+    switch (initialFile.type) {
+      case "existing":
+        return new ExistingFile(initialFile, uploadIndex);
+      case "placeholder":
+        return new PlaceholderFile(initialFile, uploadIndex);
+      case "s3":
+        return new UploadedS3File(initialFile, uploadIndex);
+      case "tus":
+        return new UploadedTusFile({
+          csrfToken,
+          initialFile,
+          uploadIndex,
+          uploadUrl
+        });
+    }
+  };
+
   class FileField {
+    handleClick = e => {
+      const target = e.target;
+      const getUpload = () => {
+        const dataIndex = target.getAttribute("data-index");
+        if (!dataIndex) {
+          return undefined;
+        }
+        const uploadIndex = parseInt(dataIndex, 10);
+        return this.getUploadByIndex(uploadIndex);
+      };
+      if (target.classList.contains("dff-delete") && !target.classList.contains("dff-disabled")) {
+        e.preventDefault();
+        const upload = getUpload();
+        if (upload) {
+          void this.removeExistingUpload(upload);
+        }
+      } else if (target.classList.contains("dff-cancel")) {
+        e.preventDefault();
+        const upload = getUpload();
+        if (upload) {
+          void this.handleCancel(upload);
+        }
+      } else if (target.classList.contains("dff-filename")) {
+        e.preventDefault();
+        const upload = getUpload();
+        if (upload?.status === "done" && this.callbacks.onClick) {
+          this.callbacks.onClick({
+            fieldName: this.fieldName,
+            fileName: upload.name,
+            id: upload.getId(),
+            type: upload.type
+          });
+        }
+      }
+    };
+    handleError = (upload, error) => {
+      this.renderer.setError(upload.uploadIndex);
+      upload.status = "error";
+      const {
+        onError
+      } = this.callbacks;
+      if (onError) {
+        if (upload instanceof TusUpload) {
+          onError(error, upload);
+        }
+      }
+    };
+    handleInvalidFiles = files => {
+      this.renderer.setErrorInvalidFiles(files);
+    };
+    handleProgress = (upload, bytesUploaded, bytesTotal) => {
+      const percentage = (bytesUploaded / bytesTotal * 100).toFixed(2);
+      this.renderer.updateProgress(upload.uploadIndex, percentage);
+      const {
+        onProgress
+      } = this.callbacks;
+      if (onProgress) {
+        if (upload instanceof TusUpload) {
+          onProgress(bytesUploaded, bytesTotal, upload);
+        }
+      }
+    };
+    handleSuccess = upload => {
+      const {
+        renderer
+      } = this;
+      this.updatePlaceholderInput();
+      renderer.clearInput();
+      renderer.setSuccess(upload.uploadIndex, upload.getSize());
+      upload.status = "done";
+      const {
+        onSuccess
+      } = this.callbacks;
+      const element = this.renderer.findFileDiv(upload.uploadIndex);
+      if (element) {
+        this.emitEvent("uploadComplete", element, upload);
+      }
+      if (onSuccess && upload.type === "tus") {
+        onSuccess(upload);
+      }
+    };
+    onChange = e => {
+      const files = e.target.files ?? [];
+      const acceptedFiles = [];
+      const invalidFiles = [];
+      for (const file of files) {
+        if (this.acceptedFileTypes.isAccepted(file.name)) {
+          acceptedFiles.push(file);
+        } else {
+          invalidFiles.push(file);
+        }
+      }
+      this.handleInvalidFiles([...invalidFiles]);
+      void this.uploadFiles([...acceptedFiles]);
+      this.renderer.clearInput();
+    };
+    uploadFiles = async files => {
+      if (files.length === 0) {
+        return;
+      }
+      if (!this.multiple) {
+        for (const upload of this.uploads) {
+          this.renderer.deleteFile(upload.uploadIndex);
+        }
+        this.uploads = [];
+        const file = files[0];
+        if (file) {
+          await this.uploadFile(file);
+        }
+      } else {
+        for (const file of files) {
+          await this.uploadFile(file);
+        }
+      }
+      this.checkDropHint();
+    };
     constructor(_ref) {
       let {
         callbacks,
@@ -5819,8 +5935,8 @@
       this.uploads = [];
       this.nextUploadIndex = 0;
       this.renderer = new RenderUploadFile({
-        parent,
         input,
+        parent,
         skipRequired,
         translations
       });
@@ -5868,26 +5984,92 @@
         }
       }
     }
-    uploadFiles = async files => {
-      if (files.length === 0) {
+    checkDropHint() {
+      if (!this.supportDropArea) {
         return;
       }
-      if (!this.multiple) {
-        for (const upload of this.uploads) {
-          this.renderer.deleteFile(upload.uploadIndex);
-        }
-        this.uploads = [];
-        const file = files[0];
-        if (file) {
-          await this.uploadFile(file);
-        }
+      const nonEmptyUploads = this.uploads.filter(e => Boolean(e));
+      if (nonEmptyUploads.length === 0) {
+        this.renderer.renderDropHint();
       } else {
-        for (const file of files) {
-          await this.uploadFile(file);
+        this.renderer.removeDropHint();
+      }
+    }
+    emitEvent(eventName, element, upload) {
+      if (this.eventEmitter) {
+        this.eventEmitter.emit(eventName, {
+          element,
+          fieldName: this.fieldName,
+          fileName: upload.name,
+          metaDataField: this.getMetaDataField(),
+          upload
+        });
+      }
+    }
+    findUploadByName(fileName) {
+      return this.uploads.find(upload => upload.name === fileName);
+    }
+    getMetaDataField() {
+      return findInput(this.form, getMetadataFieldName(this.fieldName, this.prefix), this.prefix);
+    }
+    getUploadByIndex(uploadIndex) {
+      return this.uploads.find(upload => upload.uploadIndex === uploadIndex);
+    }
+    async handleCancel(upload) {
+      this.renderer.disableCancel(upload.uploadIndex);
+      await upload.abort();
+      this.removeUploadFromList(upload);
+    }
+    initDropArea(container, inputAccept) {
+      new DropArea({
+        container,
+        inputAccept,
+        onUploadFiles: this.uploadFiles,
+        renderer: this.renderer
+      });
+    }
+    async removeExistingUpload(upload) {
+      const element = this.renderer.findFileDiv(upload.uploadIndex);
+      if (element) {
+        this.emitEvent("removeUpload", element, upload);
+      }
+      if (upload.status === "uploading") {
+        this.renderer.disableCancel(upload.uploadIndex);
+        await upload.abort();
+      } else if (upload.status === "done") {
+        this.renderer.disableDelete(upload.uploadIndex);
+        try {
+          await upload.delete();
+        } catch {
+          this.renderer.setDeleteFailed(upload.uploadIndex);
+          return;
         }
       }
+      this.removeUploadFromList(upload);
+      this.updatePlaceholderInput();
+    }
+    removeUploadFromList(upload) {
+      this.renderer.deleteFile(upload.uploadIndex);
+      const index = this.uploads.indexOf(upload);
+      if (index >= 0) {
+        this.uploads.splice(index, 1);
+      }
       this.checkDropHint();
-    };
+      const {
+        onDelete
+      } = this.callbacks;
+      if (onDelete) {
+        onDelete(upload);
+      }
+    }
+    updatePlaceholderInput() {
+      const input = findInput(this.form, getUploadsFieldName(this.fieldName, this.prefix), this.prefix);
+      if (!input) {
+        return;
+      }
+      const placeholdersInfo = this.uploads.map(upload => upload.getInitialFile());
+      input.value = JSON.stringify(placeholdersInfo);
+    }
     async uploadFile(file) {
       const createUpload = () => {
         const {
@@ -5945,188 +6127,6 @@
       const element = renderer.addNewUpload(fileName, newUploadIndex);
       this.emitEvent("addUpload", element, upload);
     }
-    getUploadByIndex(uploadIndex) {
-      return this.uploads.find(upload => upload.uploadIndex === uploadIndex);
-    }
-    findUploadByName(fileName) {
-      return this.uploads.find(upload => upload.name === fileName);
-    }
-    async removeExistingUpload(upload) {
-      const element = this.renderer.findFileDiv(upload.uploadIndex);
-      if (element) {
-        this.emitEvent("removeUpload", element, upload);
-      }
-      if (upload.status === "uploading") {
-        this.renderer.disableCancel(upload.uploadIndex);
-        await upload.abort();
-      } else if (upload.status === "done") {
-        this.renderer.disableDelete(upload.uploadIndex);
-        try {
-          await upload.delete();
-        } catch {
-          this.renderer.setDeleteFailed(upload.uploadIndex);
-          return;
-        }
-      }
-      this.removeUploadFromList(upload);
-      this.updatePlaceholderInput();
-    }
-    onChange = e => {
-      const files = e.target.files ?? [];
-      const acceptedFiles = [];
-      const invalidFiles = [];
-      for (const file of files) {
-        if (this.acceptedFileTypes.isAccepted(file.name)) {
-          acceptedFiles.push(file);
-        } else {
-          invalidFiles.push(file);
-        }
-      }
-      this.handleInvalidFiles([...invalidFiles]);
-      void this.uploadFiles([...acceptedFiles]);
-      this.renderer.clearInput();
-    };
-    handleInvalidFiles = files => {
-      this.renderer.setErrorInvalidFiles(files);
-    };
-    handleClick = e => {
-      const target = e.target;
-      const getUpload = () => {
-        const dataIndex = target.getAttribute("data-index");
-        if (!dataIndex) {
-          return undefined;
-        }
-        const uploadIndex = parseInt(dataIndex, 10);
-        return this.getUploadByIndex(uploadIndex);
-      };
-      if (target.classList.contains("dff-delete") && !target.classList.contains("dff-disabled")) {
-        e.preventDefault();
-        const upload = getUpload();
-        if (upload) {
-          void this.removeExistingUpload(upload);
-        }
-      } else if (target.classList.contains("dff-cancel")) {
-        e.preventDefault();
-        const upload = getUpload();
-        if (upload) {
-          void this.handleCancel(upload);
-        }
-      } else if (target.classList.contains("dff-filename")) {
-        e.preventDefault();
-        const upload = getUpload();
-        if (upload?.status === "done" && this.callbacks.onClick) {
-          this.callbacks.onClick({
-            fileName: upload.name,
-            fieldName: this.fieldName,
-            id: upload.getId(),
-            type: upload.type
-          });
-        }
-      }
-    };
-    handleProgress = (upload, bytesUploaded, bytesTotal) => {
-      const percentage = (bytesUploaded / bytesTotal * 100).toFixed(2);
-      this.renderer.updateProgress(upload.uploadIndex, percentage);
-      const {
-        onProgress
-      } = this.callbacks;
-      if (onProgress) {
-        if (upload instanceof TusUpload) {
-          onProgress(bytesUploaded, bytesTotal, upload);
-        }
-      }
-    };
-    handleError = (upload, error) => {
-      this.renderer.setError(upload.uploadIndex);
-      upload.status = "error";
-      const {
-        onError
-      } = this.callbacks;
-      if (onError) {
-        if (upload instanceof TusUpload) {
-          onError(error, upload);
-        }
-      }
-    };
-    handleSuccess = upload => {
-      const {
-        renderer
-      } = this;
-      this.updatePlaceholderInput();
-      renderer.clearInput();
-      renderer.setSuccess(upload.uploadIndex, upload.getSize());
-      upload.status = "done";
-      const {
-        onSuccess
-      } = this.callbacks;
-      const element = this.renderer.findFileDiv(upload.uploadIndex);
-      if (element) {
-        this.emitEvent("uploadComplete", element, upload);
-      }
-      if (onSuccess && upload.type === "tus") {
-        onSuccess(upload);
-      }
-    };
-    removeUploadFromList(upload) {
-      this.renderer.deleteFile(upload.uploadIndex);
-      const index = this.uploads.indexOf(upload);
-      if (index >= 0) {
-        this.uploads.splice(index, 1);
-      }
-      this.checkDropHint();
-      const {
-        onDelete
-      } = this.callbacks;
-      if (onDelete) {
-        onDelete(upload);
-      }
-    }
-    async handleCancel(upload) {
-      this.renderer.disableCancel(upload.uploadIndex);
-      await upload.abort();
-      this.removeUploadFromList(upload);
-    }
-    initDropArea(container, inputAccept) {
-      new DropArea({
-        container,
-        inputAccept,
-        onUploadFiles: this.uploadFiles,
-        renderer: this.renderer
-      });
-    }
-    checkDropHint() {
-      if (!this.supportDropArea) {
-        return;
-      }
-      const nonEmptyUploads = this.uploads.filter(e => Boolean(e));
-      if (nonEmptyUploads.length === 0) {
-        this.renderer.renderDropHint();
-      } else {
-        this.renderer.removeDropHint();
-      }
-    }
-    updatePlaceholderInput() {
-      const input = findInput(this.form, getUploadsFieldName(this.fieldName, this.prefix), this.prefix);
-      if (!input) {
-        return;
-      }
-      const placeholdersInfo = this.uploads.map(upload => upload.getInitialFile());
-      input.value = JSON.stringify(placeholdersInfo);
-    }
-    getMetaDataField() {
-      return findInput(this.form, getMetadataFieldName(this.fieldName, this.prefix), this.prefix);
-    }
-    emitEvent(eventName, element, upload) {
-      if (this.eventEmitter) {
-        this.eventEmitter.emit(eventName, {
-          element,
-          fieldName: this.fieldName,
-          fileName: upload.name,
-          metaDataField: this.getMetaDataField(),
-          upload
-        });
-      }
-    }
   }
 
   const initUploadFields = function (form) {
@@ -6183,13 +6183,13 @@
         fieldName,
         form,
         formId,
-        s3UploadDir: s3UploadDir ?? null,
         initial,
         input,
         multiple,
         parent: container,
         prefix,
         retryDelays: options.retryDelays ?? null,
+        s3UploadDir: s3UploadDir ?? null,
         skipRequired,
         supportDropArea,
         translations,
