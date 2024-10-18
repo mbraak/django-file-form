@@ -2229,28 +2229,45 @@
   const getEntriesFromDirectory = async directoryEntry => new Promise((resolve, reject) => {
     directoryEntry.createReader().readEntries(resolve, reject);
   });
-  const getFileFromFileEntry = async fileEntry => new Promise((resolve, reject) => {
+  const getFileFromFileSystemFileEntry = async fileEntry => new Promise((resolve, reject) => {
     fileEntry.file(resolve, reject);
   });
   const getFilesFromFileSystemEntries = async entries => {
     const result = [];
     for (const entry of entries) {
-      if (entry.isFile) {
-        const file = await getFileFromFileEntry(entry);
-        result.push(file);
-      } else if (entry.isDirectory) {
-        const entriesFromDirectory = await getEntriesFromDirectory(entry);
-        const files = await getFilesFromFileSystemEntries(entriesFromDirectory);
-        files.forEach(file => result.push(file));
-      }
+      const filesFromEntry = await getFilesFromFileSystemEntry(entry);
+      filesFromEntry.forEach(file => result.push(file));
+    }
+    return result;
+  };
+  const getFilesFromFileSystemEntry = async entry => {
+    const result = [];
+    if (entry.isFile) {
+      const file = await getFileFromFileSystemFileEntry(entry);
+      result.push(file);
+    } else if (entry.isDirectory) {
+      const entriesFromDirectory = await getEntriesFromDirectory(entry);
+      const files = await getFilesFromFileSystemEntries(entriesFromDirectory);
+      files.forEach(file => result.push(file));
     }
     return result;
   };
   const getFilesFromDataTransfer = async dataTransfer => {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (dataTransfer.items) {
-      const entries = [...dataTransfer.items].map(item => item.webkitGetAsEntry()).filter(entry => entry != null);
-      const files = await getFilesFromFileSystemEntries(entries);
+      const files = [];
+      for (const item of dataTransfer.items) {
+        const fileSystemEntry = item.webkitGetAsEntry();
+        if (fileSystemEntry) {
+          const filesFromEntry = await getFilesFromFileSystemEntry(fileSystemEntry);
+          filesFromEntry.forEach(file => files.push(file));
+        } else {
+          const file = item.getAsFile();
+          if (file) {
+            files.push(file);
+          }
+        }
+      }
       return files;
     } else {
       // backwards compatibility
