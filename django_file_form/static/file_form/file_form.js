@@ -115,2078 +115,2131 @@
   	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
   }
 
-  var utils$3 = {};
+  var utils = {};
 
-  const WIN_SLASH = '\\\\/';
-  const WIN_NO_SLASH = `[^${WIN_SLASH}]`;
+  var constants;
+  var hasRequiredConstants;
 
-  /**
-   * Posix glob regex
-   */
+  function requireConstants () {
+  	if (hasRequiredConstants) return constants;
+  	hasRequiredConstants = 1;
 
-  const DOT_LITERAL = '\\.';
-  const PLUS_LITERAL = '\\+';
-  const QMARK_LITERAL = '\\?';
-  const SLASH_LITERAL = '\\/';
-  const ONE_CHAR = '(?=.)';
-  const QMARK = '[^/]';
-  const END_ANCHOR = `(?:${SLASH_LITERAL}|$)`;
-  const START_ANCHOR = `(?:^|${SLASH_LITERAL})`;
-  const DOTS_SLASH = `${DOT_LITERAL}{1,2}${END_ANCHOR}`;
-  const NO_DOT = `(?!${DOT_LITERAL})`;
-  const NO_DOTS = `(?!${START_ANCHOR}${DOTS_SLASH})`;
-  const NO_DOT_SLASH = `(?!${DOT_LITERAL}{0,1}${END_ANCHOR})`;
-  const NO_DOTS_SLASH = `(?!${DOTS_SLASH})`;
-  const QMARK_NO_DOT = `[^.${SLASH_LITERAL}]`;
-  const STAR = `${QMARK}*?`;
-  const SEP = '/';
+  	const WIN_SLASH = '\\\\/';
+  	const WIN_NO_SLASH = `[^${WIN_SLASH}]`;
 
-  const POSIX_CHARS = {
-    DOT_LITERAL,
-    PLUS_LITERAL,
-    QMARK_LITERAL,
-    SLASH_LITERAL,
-    ONE_CHAR,
-    QMARK,
-    END_ANCHOR,
-    DOTS_SLASH,
-    NO_DOT,
-    NO_DOTS,
-    NO_DOT_SLASH,
-    NO_DOTS_SLASH,
-    QMARK_NO_DOT,
-    STAR,
-    START_ANCHOR,
-    SEP
-  };
+  	/**
+  	 * Posix glob regex
+  	 */
 
-  /**
-   * Windows glob regex
-   */
+  	const DOT_LITERAL = '\\.';
+  	const PLUS_LITERAL = '\\+';
+  	const QMARK_LITERAL = '\\?';
+  	const SLASH_LITERAL = '\\/';
+  	const ONE_CHAR = '(?=.)';
+  	const QMARK = '[^/]';
+  	const END_ANCHOR = `(?:${SLASH_LITERAL}|$)`;
+  	const START_ANCHOR = `(?:^|${SLASH_LITERAL})`;
+  	const DOTS_SLASH = `${DOT_LITERAL}{1,2}${END_ANCHOR}`;
+  	const NO_DOT = `(?!${DOT_LITERAL})`;
+  	const NO_DOTS = `(?!${START_ANCHOR}${DOTS_SLASH})`;
+  	const NO_DOT_SLASH = `(?!${DOT_LITERAL}{0,1}${END_ANCHOR})`;
+  	const NO_DOTS_SLASH = `(?!${DOTS_SLASH})`;
+  	const QMARK_NO_DOT = `[^.${SLASH_LITERAL}]`;
+  	const STAR = `${QMARK}*?`;
+  	const SEP = '/';
 
-  const WINDOWS_CHARS = {
-    ...POSIX_CHARS,
+  	const POSIX_CHARS = {
+  	  DOT_LITERAL,
+  	  PLUS_LITERAL,
+  	  QMARK_LITERAL,
+  	  SLASH_LITERAL,
+  	  ONE_CHAR,
+  	  QMARK,
+  	  END_ANCHOR,
+  	  DOTS_SLASH,
+  	  NO_DOT,
+  	  NO_DOTS,
+  	  NO_DOT_SLASH,
+  	  NO_DOTS_SLASH,
+  	  QMARK_NO_DOT,
+  	  STAR,
+  	  START_ANCHOR,
+  	  SEP
+  	};
 
-    SLASH_LITERAL: `[${WIN_SLASH}]`,
-    QMARK: WIN_NO_SLASH,
-    STAR: `${WIN_NO_SLASH}*?`,
-    DOTS_SLASH: `${DOT_LITERAL}{1,2}(?:[${WIN_SLASH}]|$)`,
-    NO_DOT: `(?!${DOT_LITERAL})`,
-    NO_DOTS: `(?!(?:^|[${WIN_SLASH}])${DOT_LITERAL}{1,2}(?:[${WIN_SLASH}]|$))`,
-    NO_DOT_SLASH: `(?!${DOT_LITERAL}{0,1}(?:[${WIN_SLASH}]|$))`,
-    NO_DOTS_SLASH: `(?!${DOT_LITERAL}{1,2}(?:[${WIN_SLASH}]|$))`,
-    QMARK_NO_DOT: `[^.${WIN_SLASH}]`,
-    START_ANCHOR: `(?:^|[${WIN_SLASH}])`,
-    END_ANCHOR: `(?:[${WIN_SLASH}]|$)`,
-    SEP: '\\'
-  };
+  	/**
+  	 * Windows glob regex
+  	 */
 
-  /**
-   * POSIX Bracket Regex
-   */
+  	const WINDOWS_CHARS = {
+  	  ...POSIX_CHARS,
 
-  const POSIX_REGEX_SOURCE$1 = {
-    alnum: 'a-zA-Z0-9',
-    alpha: 'a-zA-Z',
-    ascii: '\\x00-\\x7F',
-    blank: ' \\t',
-    cntrl: '\\x00-\\x1F\\x7F',
-    digit: '0-9',
-    graph: '\\x21-\\x7E',
-    lower: 'a-z',
-    print: '\\x20-\\x7E ',
-    punct: '\\-!"#$%&\'()\\*+,./:;<=>?@[\\]^_`{|}~',
-    space: ' \\t\\r\\n\\v\\f',
-    upper: 'A-Z',
-    word: 'A-Za-z0-9_',
-    xdigit: 'A-Fa-f0-9'
-  };
+  	  SLASH_LITERAL: `[${WIN_SLASH}]`,
+  	  QMARK: WIN_NO_SLASH,
+  	  STAR: `${WIN_NO_SLASH}*?`,
+  	  DOTS_SLASH: `${DOT_LITERAL}{1,2}(?:[${WIN_SLASH}]|$)`,
+  	  NO_DOT: `(?!${DOT_LITERAL})`,
+  	  NO_DOTS: `(?!(?:^|[${WIN_SLASH}])${DOT_LITERAL}{1,2}(?:[${WIN_SLASH}]|$))`,
+  	  NO_DOT_SLASH: `(?!${DOT_LITERAL}{0,1}(?:[${WIN_SLASH}]|$))`,
+  	  NO_DOTS_SLASH: `(?!${DOT_LITERAL}{1,2}(?:[${WIN_SLASH}]|$))`,
+  	  QMARK_NO_DOT: `[^.${WIN_SLASH}]`,
+  	  START_ANCHOR: `(?:^|[${WIN_SLASH}])`,
+  	  END_ANCHOR: `(?:[${WIN_SLASH}]|$)`,
+  	  SEP: '\\'
+  	};
 
-  var constants$2 = {
-    MAX_LENGTH: 1024 * 64,
-    POSIX_REGEX_SOURCE: POSIX_REGEX_SOURCE$1,
+  	/**
+  	 * POSIX Bracket Regex
+  	 */
 
-    // regular expressions
-    REGEX_BACKSLASH: /\\(?![*+?^${}(|)[\]])/g,
-    REGEX_NON_SPECIAL_CHARS: /^[^@![\].,$*+?^{}()|\\/]+/,
-    REGEX_SPECIAL_CHARS: /[-*+?.^${}(|)[\]]/,
-    REGEX_SPECIAL_CHARS_BACKREF: /(\\?)((\W)(\3*))/g,
-    REGEX_SPECIAL_CHARS_GLOBAL: /([-*+?.^${}(|)[\]])/g,
-    REGEX_REMOVE_BACKSLASH: /(?:\[.*?[^\\]\]|\\(?=.))/g,
+  	const POSIX_REGEX_SOURCE = {
+  	  alnum: 'a-zA-Z0-9',
+  	  alpha: 'a-zA-Z',
+  	  ascii: '\\x00-\\x7F',
+  	  blank: ' \\t',
+  	  cntrl: '\\x00-\\x1F\\x7F',
+  	  digit: '0-9',
+  	  graph: '\\x21-\\x7E',
+  	  lower: 'a-z',
+  	  print: '\\x20-\\x7E ',
+  	  punct: '\\-!"#$%&\'()\\*+,./:;<=>?@[\\]^_`{|}~',
+  	  space: ' \\t\\r\\n\\v\\f',
+  	  upper: 'A-Z',
+  	  word: 'A-Za-z0-9_',
+  	  xdigit: 'A-Fa-f0-9'
+  	};
 
-    // Replace globs with equivalent patterns to reduce parsing time.
-    REPLACEMENTS: {
-      '***': '*',
-      '**/**': '**',
-      '**/**/**': '**'
-    },
+  	constants = {
+  	  MAX_LENGTH: 1024 * 64,
+  	  POSIX_REGEX_SOURCE,
 
-    // Digits
-    CHAR_0: 48, /* 0 */
-    CHAR_9: 57, /* 9 */
+  	  // regular expressions
+  	  REGEX_BACKSLASH: /\\(?![*+?^${}(|)[\]])/g,
+  	  REGEX_NON_SPECIAL_CHARS: /^[^@![\].,$*+?^{}()|\\/]+/,
+  	  REGEX_SPECIAL_CHARS: /[-*+?.^${}(|)[\]]/,
+  	  REGEX_SPECIAL_CHARS_BACKREF: /(\\?)((\W)(\3*))/g,
+  	  REGEX_SPECIAL_CHARS_GLOBAL: /([-*+?.^${}(|)[\]])/g,
+  	  REGEX_REMOVE_BACKSLASH: /(?:\[.*?[^\\]\]|\\(?=.))/g,
 
-    // Alphabet chars.
-    CHAR_UPPERCASE_A: 65, /* A */
-    CHAR_LOWERCASE_A: 97, /* a */
-    CHAR_UPPERCASE_Z: 90, /* Z */
-    CHAR_LOWERCASE_Z: 122, /* z */
+  	  // Replace globs with equivalent patterns to reduce parsing time.
+  	  REPLACEMENTS: {
+  	    '***': '*',
+  	    '**/**': '**',
+  	    '**/**/**': '**'
+  	  },
 
-    CHAR_LEFT_PARENTHESES: 40, /* ( */
-    CHAR_RIGHT_PARENTHESES: 41, /* ) */
+  	  // Digits
+  	  CHAR_0: 48, /* 0 */
+  	  CHAR_9: 57, /* 9 */
 
-    CHAR_ASTERISK: 42, /* * */
+  	  // Alphabet chars.
+  	  CHAR_UPPERCASE_A: 65, /* A */
+  	  CHAR_LOWERCASE_A: 97, /* a */
+  	  CHAR_UPPERCASE_Z: 90, /* Z */
+  	  CHAR_LOWERCASE_Z: 122, /* z */
 
-    // Non-alphabetic chars.
-    CHAR_AMPERSAND: 38, /* & */
-    CHAR_AT: 64, /* @ */
-    CHAR_BACKWARD_SLASH: 92, /* \ */
-    CHAR_CARRIAGE_RETURN: 13, /* \r */
-    CHAR_CIRCUMFLEX_ACCENT: 94, /* ^ */
-    CHAR_COLON: 58, /* : */
-    CHAR_COMMA: 44, /* , */
-    CHAR_DOT: 46, /* . */
-    CHAR_DOUBLE_QUOTE: 34, /* " */
-    CHAR_EQUAL: 61, /* = */
-    CHAR_EXCLAMATION_MARK: 33, /* ! */
-    CHAR_FORM_FEED: 12, /* \f */
-    CHAR_FORWARD_SLASH: 47, /* / */
-    CHAR_GRAVE_ACCENT: 96, /* ` */
-    CHAR_HASH: 35, /* # */
-    CHAR_HYPHEN_MINUS: 45, /* - */
-    CHAR_LEFT_ANGLE_BRACKET: 60, /* < */
-    CHAR_LEFT_CURLY_BRACE: 123, /* { */
-    CHAR_LEFT_SQUARE_BRACKET: 91, /* [ */
-    CHAR_LINE_FEED: 10, /* \n */
-    CHAR_NO_BREAK_SPACE: 160, /* \u00A0 */
-    CHAR_PERCENT: 37, /* % */
-    CHAR_PLUS: 43, /* + */
-    CHAR_QUESTION_MARK: 63, /* ? */
-    CHAR_RIGHT_ANGLE_BRACKET: 62, /* > */
-    CHAR_RIGHT_CURLY_BRACE: 125, /* } */
-    CHAR_RIGHT_SQUARE_BRACKET: 93, /* ] */
-    CHAR_SEMICOLON: 59, /* ; */
-    CHAR_SINGLE_QUOTE: 39, /* ' */
-    CHAR_SPACE: 32, /*   */
-    CHAR_TAB: 9, /* \t */
-    CHAR_UNDERSCORE: 95, /* _ */
-    CHAR_VERTICAL_LINE: 124, /* | */
-    CHAR_ZERO_WIDTH_NOBREAK_SPACE: 65279, /* \uFEFF */
+  	  CHAR_LEFT_PARENTHESES: 40, /* ( */
+  	  CHAR_RIGHT_PARENTHESES: 41, /* ) */
 
-    /**
-     * Create EXTGLOB_CHARS
-     */
+  	  CHAR_ASTERISK: 42, /* * */
 
-    extglobChars(chars) {
-      return {
-        '!': { type: 'negate', open: '(?:(?!(?:', close: `))${chars.STAR})` },
-        '?': { type: 'qmark', open: '(?:', close: ')?' },
-        '+': { type: 'plus', open: '(?:', close: ')+' },
-        '*': { type: 'star', open: '(?:', close: ')*' },
-        '@': { type: 'at', open: '(?:', close: ')' }
-      };
-    },
+  	  // Non-alphabetic chars.
+  	  CHAR_AMPERSAND: 38, /* & */
+  	  CHAR_AT: 64, /* @ */
+  	  CHAR_BACKWARD_SLASH: 92, /* \ */
+  	  CHAR_CARRIAGE_RETURN: 13, /* \r */
+  	  CHAR_CIRCUMFLEX_ACCENT: 94, /* ^ */
+  	  CHAR_COLON: 58, /* : */
+  	  CHAR_COMMA: 44, /* , */
+  	  CHAR_DOT: 46, /* . */
+  	  CHAR_DOUBLE_QUOTE: 34, /* " */
+  	  CHAR_EQUAL: 61, /* = */
+  	  CHAR_EXCLAMATION_MARK: 33, /* ! */
+  	  CHAR_FORM_FEED: 12, /* \f */
+  	  CHAR_FORWARD_SLASH: 47, /* / */
+  	  CHAR_GRAVE_ACCENT: 96, /* ` */
+  	  CHAR_HASH: 35, /* # */
+  	  CHAR_HYPHEN_MINUS: 45, /* - */
+  	  CHAR_LEFT_ANGLE_BRACKET: 60, /* < */
+  	  CHAR_LEFT_CURLY_BRACE: 123, /* { */
+  	  CHAR_LEFT_SQUARE_BRACKET: 91, /* [ */
+  	  CHAR_LINE_FEED: 10, /* \n */
+  	  CHAR_NO_BREAK_SPACE: 160, /* \u00A0 */
+  	  CHAR_PERCENT: 37, /* % */
+  	  CHAR_PLUS: 43, /* + */
+  	  CHAR_QUESTION_MARK: 63, /* ? */
+  	  CHAR_RIGHT_ANGLE_BRACKET: 62, /* > */
+  	  CHAR_RIGHT_CURLY_BRACE: 125, /* } */
+  	  CHAR_RIGHT_SQUARE_BRACKET: 93, /* ] */
+  	  CHAR_SEMICOLON: 59, /* ; */
+  	  CHAR_SINGLE_QUOTE: 39, /* ' */
+  	  CHAR_SPACE: 32, /*   */
+  	  CHAR_TAB: 9, /* \t */
+  	  CHAR_UNDERSCORE: 95, /* _ */
+  	  CHAR_VERTICAL_LINE: 124, /* | */
+  	  CHAR_ZERO_WIDTH_NOBREAK_SPACE: 65279, /* \uFEFF */
 
-    /**
-     * Create GLOB_CHARS
-     */
+  	  /**
+  	   * Create EXTGLOB_CHARS
+  	   */
 
-    globChars(win32) {
-      return win32 === true ? WINDOWS_CHARS : POSIX_CHARS;
-    }
-  };
+  	  extglobChars(chars) {
+  	    return {
+  	      '!': { type: 'negate', open: '(?:(?!(?:', close: `))${chars.STAR})` },
+  	      '?': { type: 'qmark', open: '(?:', close: ')?' },
+  	      '+': { type: 'plus', open: '(?:', close: ')+' },
+  	      '*': { type: 'star', open: '(?:', close: ')*' },
+  	      '@': { type: 'at', open: '(?:', close: ')' }
+  	    };
+  	  },
+
+  	  /**
+  	   * Create GLOB_CHARS
+  	   */
+
+  	  globChars(win32) {
+  	    return win32 === true ? WINDOWS_CHARS : POSIX_CHARS;
+  	  }
+  	};
+  	return constants;
+  }
 
   /*global navigator*/
 
-  (function (exports) {
+  var hasRequiredUtils;
+
+  function requireUtils () {
+  	if (hasRequiredUtils) return utils;
+  	hasRequiredUtils = 1;
+  	(function (exports) {
+
+  		const {
+  		  REGEX_BACKSLASH,
+  		  REGEX_REMOVE_BACKSLASH,
+  		  REGEX_SPECIAL_CHARS,
+  		  REGEX_SPECIAL_CHARS_GLOBAL
+  		} = /*@__PURE__*/ requireConstants();
+
+  		exports.isObject = val => val !== null && typeof val === 'object' && !Array.isArray(val);
+  		exports.hasRegexChars = str => REGEX_SPECIAL_CHARS.test(str);
+  		exports.isRegexChar = str => str.length === 1 && exports.hasRegexChars(str);
+  		exports.escapeRegex = str => str.replace(REGEX_SPECIAL_CHARS_GLOBAL, '\\$1');
+  		exports.toPosixSlashes = str => str.replace(REGEX_BACKSLASH, '/');
+
+  		exports.isWindows = () => {
+  		  if (typeof navigator !== 'undefined' && navigator.platform) {
+  		    const platform = navigator.platform.toLowerCase();
+  		    return platform === 'win32' || platform === 'windows';
+  		  }
+
+  		  if (typeof process !== 'undefined' && process.platform) {
+  		    return process.platform === 'win32';
+  		  }
+
+  		  return false;
+  		};
+
+  		exports.removeBackslashes = str => {
+  		  return str.replace(REGEX_REMOVE_BACKSLASH, match => {
+  		    return match === '\\' ? '' : match;
+  		  });
+  		};
+
+  		exports.escapeLast = (input, char, lastIdx) => {
+  		  const idx = input.lastIndexOf(char, lastIdx);
+  		  if (idx === -1) return input;
+  		  if (input[idx - 1] === '\\') return exports.escapeLast(input, char, idx - 1);
+  		  return `${input.slice(0, idx)}\\${input.slice(idx)}`;
+  		};
+
+  		exports.removePrefix = (input, state = {}) => {
+  		  let output = input;
+  		  if (output.startsWith('./')) {
+  		    output = output.slice(2);
+  		    state.prefix = './';
+  		  }
+  		  return output;
+  		};
+
+  		exports.wrapOutput = (input, state = {}, options = {}) => {
+  		  const prepend = options.contains ? '' : '^';
+  		  const append = options.contains ? '' : '$';
+
+  		  let output = `${prepend}(?:${input})${append}`;
+  		  if (state.negated === true) {
+  		    output = `(?:^(?!${output}).*$)`;
+  		  }
+  		  return output;
+  		};
+
+  		exports.basename = (path, { windows } = {}) => {
+  		  const segs = path.split(windows ? /[\\/]/ : '/');
+  		  const last = segs[segs.length - 1];
+
+  		  if (last === '') {
+  		    return segs[segs.length - 2];
+  		  }
+
+  		  return last;
+  		}; 
+  	} (utils));
+  	return utils;
+  }
+
+  var scan_1;
+  var hasRequiredScan;
+
+  function requireScan () {
+  	if (hasRequiredScan) return scan_1;
+  	hasRequiredScan = 1;
+
+  	const utils = /*@__PURE__*/ requireUtils();
+  	const {
+  	  CHAR_ASTERISK,             /* * */
+  	  CHAR_AT,                   /* @ */
+  	  CHAR_BACKWARD_SLASH,       /* \ */
+  	  CHAR_COMMA,                /* , */
+  	  CHAR_DOT,                  /* . */
+  	  CHAR_EXCLAMATION_MARK,     /* ! */
+  	  CHAR_FORWARD_SLASH,        /* / */
+  	  CHAR_LEFT_CURLY_BRACE,     /* { */
+  	  CHAR_LEFT_PARENTHESES,     /* ( */
+  	  CHAR_LEFT_SQUARE_BRACKET,  /* [ */
+  	  CHAR_PLUS,                 /* + */
+  	  CHAR_QUESTION_MARK,        /* ? */
+  	  CHAR_RIGHT_CURLY_BRACE,    /* } */
+  	  CHAR_RIGHT_PARENTHESES,    /* ) */
+  	  CHAR_RIGHT_SQUARE_BRACKET  /* ] */
+  	} = /*@__PURE__*/ requireConstants();
+
+  	const isPathSeparator = code => {
+  	  return code === CHAR_FORWARD_SLASH || code === CHAR_BACKWARD_SLASH;
+  	};
+
+  	const depth = token => {
+  	  if (token.isPrefix !== true) {
+  	    token.depth = token.isGlobstar ? Infinity : 1;
+  	  }
+  	};
+
+  	/**
+  	 * Quickly scans a glob pattern and returns an object with a handful of
+  	 * useful properties, like `isGlob`, `path` (the leading non-glob, if it exists),
+  	 * `glob` (the actual pattern), `negated` (true if the path starts with `!` but not
+  	 * with `!(`) and `negatedExtglob` (true if the path starts with `!(`).
+  	 *
+  	 * ```js
+  	 * const pm = require('picomatch');
+  	 * console.log(pm.scan('foo/bar/*.js'));
+  	 * { isGlob: true, input: 'foo/bar/*.js', base: 'foo/bar', glob: '*.js' }
+  	 * ```
+  	 * @param {String} `str`
+  	 * @param {Object} `options`
+  	 * @return {Object} Returns an object with tokens and regex source string.
+  	 * @api public
+  	 */
+
+  	const scan = (input, options) => {
+  	  const opts = options || {};
+
+  	  const length = input.length - 1;
+  	  const scanToEnd = opts.parts === true || opts.scanToEnd === true;
+  	  const slashes = [];
+  	  const tokens = [];
+  	  const parts = [];
+
+  	  let str = input;
+  	  let index = -1;
+  	  let start = 0;
+  	  let lastIndex = 0;
+  	  let isBrace = false;
+  	  let isBracket = false;
+  	  let isGlob = false;
+  	  let isExtglob = false;
+  	  let isGlobstar = false;
+  	  let braceEscaped = false;
+  	  let backslashes = false;
+  	  let negated = false;
+  	  let negatedExtglob = false;
+  	  let finished = false;
+  	  let braces = 0;
+  	  let prev;
+  	  let code;
+  	  let token = { value: '', depth: 0, isGlob: false };
+
+  	  const eos = () => index >= length;
+  	  const peek = () => str.charCodeAt(index + 1);
+  	  const advance = () => {
+  	    prev = code;
+  	    return str.charCodeAt(++index);
+  	  };
+
+  	  while (index < length) {
+  	    code = advance();
+  	    let next;
+
+  	    if (code === CHAR_BACKWARD_SLASH) {
+  	      backslashes = token.backslashes = true;
+  	      code = advance();
+
+  	      if (code === CHAR_LEFT_CURLY_BRACE) {
+  	        braceEscaped = true;
+  	      }
+  	      continue;
+  	    }
+
+  	    if (braceEscaped === true || code === CHAR_LEFT_CURLY_BRACE) {
+  	      braces++;
+
+  	      while (eos() !== true && (code = advance())) {
+  	        if (code === CHAR_BACKWARD_SLASH) {
+  	          backslashes = token.backslashes = true;
+  	          advance();
+  	          continue;
+  	        }
+
+  	        if (code === CHAR_LEFT_CURLY_BRACE) {
+  	          braces++;
+  	          continue;
+  	        }
+
+  	        if (braceEscaped !== true && code === CHAR_DOT && (code = advance()) === CHAR_DOT) {
+  	          isBrace = token.isBrace = true;
+  	          isGlob = token.isGlob = true;
+  	          finished = true;
+
+  	          if (scanToEnd === true) {
+  	            continue;
+  	          }
+
+  	          break;
+  	        }
+
+  	        if (braceEscaped !== true && code === CHAR_COMMA) {
+  	          isBrace = token.isBrace = true;
+  	          isGlob = token.isGlob = true;
+  	          finished = true;
+
+  	          if (scanToEnd === true) {
+  	            continue;
+  	          }
+
+  	          break;
+  	        }
+
+  	        if (code === CHAR_RIGHT_CURLY_BRACE) {
+  	          braces--;
+
+  	          if (braces === 0) {
+  	            braceEscaped = false;
+  	            isBrace = token.isBrace = true;
+  	            finished = true;
+  	            break;
+  	          }
+  	        }
+  	      }
+
+  	      if (scanToEnd === true) {
+  	        continue;
+  	      }
+
+  	      break;
+  	    }
+
+  	    if (code === CHAR_FORWARD_SLASH) {
+  	      slashes.push(index);
+  	      tokens.push(token);
+  	      token = { value: '', depth: 0, isGlob: false };
+
+  	      if (finished === true) continue;
+  	      if (prev === CHAR_DOT && index === (start + 1)) {
+  	        start += 2;
+  	        continue;
+  	      }
+
+  	      lastIndex = index + 1;
+  	      continue;
+  	    }
+
+  	    if (opts.noext !== true) {
+  	      const isExtglobChar = code === CHAR_PLUS
+  	        || code === CHAR_AT
+  	        || code === CHAR_ASTERISK
+  	        || code === CHAR_QUESTION_MARK
+  	        || code === CHAR_EXCLAMATION_MARK;
+
+  	      if (isExtglobChar === true && peek() === CHAR_LEFT_PARENTHESES) {
+  	        isGlob = token.isGlob = true;
+  	        isExtglob = token.isExtglob = true;
+  	        finished = true;
+  	        if (code === CHAR_EXCLAMATION_MARK && index === start) {
+  	          negatedExtglob = true;
+  	        }
+
+  	        if (scanToEnd === true) {
+  	          while (eos() !== true && (code = advance())) {
+  	            if (code === CHAR_BACKWARD_SLASH) {
+  	              backslashes = token.backslashes = true;
+  	              code = advance();
+  	              continue;
+  	            }
+
+  	            if (code === CHAR_RIGHT_PARENTHESES) {
+  	              isGlob = token.isGlob = true;
+  	              finished = true;
+  	              break;
+  	            }
+  	          }
+  	          continue;
+  	        }
+  	        break;
+  	      }
+  	    }
+
+  	    if (code === CHAR_ASTERISK) {
+  	      if (prev === CHAR_ASTERISK) isGlobstar = token.isGlobstar = true;
+  	      isGlob = token.isGlob = true;
+  	      finished = true;
+
+  	      if (scanToEnd === true) {
+  	        continue;
+  	      }
+  	      break;
+  	    }
+
+  	    if (code === CHAR_QUESTION_MARK) {
+  	      isGlob = token.isGlob = true;
+  	      finished = true;
+
+  	      if (scanToEnd === true) {
+  	        continue;
+  	      }
+  	      break;
+  	    }
+
+  	    if (code === CHAR_LEFT_SQUARE_BRACKET) {
+  	      while (eos() !== true && (next = advance())) {
+  	        if (next === CHAR_BACKWARD_SLASH) {
+  	          backslashes = token.backslashes = true;
+  	          advance();
+  	          continue;
+  	        }
+
+  	        if (next === CHAR_RIGHT_SQUARE_BRACKET) {
+  	          isBracket = token.isBracket = true;
+  	          isGlob = token.isGlob = true;
+  	          finished = true;
+  	          break;
+  	        }
+  	      }
+
+  	      if (scanToEnd === true) {
+  	        continue;
+  	      }
+
+  	      break;
+  	    }
+
+  	    if (opts.nonegate !== true && code === CHAR_EXCLAMATION_MARK && index === start) {
+  	      negated = token.negated = true;
+  	      start++;
+  	      continue;
+  	    }
+
+  	    if (opts.noparen !== true && code === CHAR_LEFT_PARENTHESES) {
+  	      isGlob = token.isGlob = true;
+
+  	      if (scanToEnd === true) {
+  	        while (eos() !== true && (code = advance())) {
+  	          if (code === CHAR_LEFT_PARENTHESES) {
+  	            backslashes = token.backslashes = true;
+  	            code = advance();
+  	            continue;
+  	          }
+
+  	          if (code === CHAR_RIGHT_PARENTHESES) {
+  	            finished = true;
+  	            break;
+  	          }
+  	        }
+  	        continue;
+  	      }
+  	      break;
+  	    }
+
+  	    if (isGlob === true) {
+  	      finished = true;
+
+  	      if (scanToEnd === true) {
+  	        continue;
+  	      }
+
+  	      break;
+  	    }
+  	  }
+
+  	  if (opts.noext === true) {
+  	    isExtglob = false;
+  	    isGlob = false;
+  	  }
+
+  	  let base = str;
+  	  let prefix = '';
+  	  let glob = '';
+
+  	  if (start > 0) {
+  	    prefix = str.slice(0, start);
+  	    str = str.slice(start);
+  	    lastIndex -= start;
+  	  }
+
+  	  if (base && isGlob === true && lastIndex > 0) {
+  	    base = str.slice(0, lastIndex);
+  	    glob = str.slice(lastIndex);
+  	  } else if (isGlob === true) {
+  	    base = '';
+  	    glob = str;
+  	  } else {
+  	    base = str;
+  	  }
+
+  	  if (base && base !== '' && base !== '/' && base !== str) {
+  	    if (isPathSeparator(base.charCodeAt(base.length - 1))) {
+  	      base = base.slice(0, -1);
+  	    }
+  	  }
+
+  	  if (opts.unescape === true) {
+  	    if (glob) glob = utils.removeBackslashes(glob);
+
+  	    if (base && backslashes === true) {
+  	      base = utils.removeBackslashes(base);
+  	    }
+  	  }
+
+  	  const state = {
+  	    prefix,
+  	    input,
+  	    start,
+  	    base,
+  	    glob,
+  	    isBrace,
+  	    isBracket,
+  	    isGlob,
+  	    isExtglob,
+  	    isGlobstar,
+  	    negated,
+  	    negatedExtglob
+  	  };
+
+  	  if (opts.tokens === true) {
+  	    state.maxDepth = 0;
+  	    if (!isPathSeparator(code)) {
+  	      tokens.push(token);
+  	    }
+  	    state.tokens = tokens;
+  	  }
+
+  	  if (opts.parts === true || opts.tokens === true) {
+  	    let prevIndex;
+
+  	    for (let idx = 0; idx < slashes.length; idx++) {
+  	      const n = prevIndex ? prevIndex + 1 : start;
+  	      const i = slashes[idx];
+  	      const value = input.slice(n, i);
+  	      if (opts.tokens) {
+  	        if (idx === 0 && start !== 0) {
+  	          tokens[idx].isPrefix = true;
+  	          tokens[idx].value = prefix;
+  	        } else {
+  	          tokens[idx].value = value;
+  	        }
+  	        depth(tokens[idx]);
+  	        state.maxDepth += tokens[idx].depth;
+  	      }
+  	      if (idx !== 0 || value !== '') {
+  	        parts.push(value);
+  	      }
+  	      prevIndex = i;
+  	    }
+
+  	    if (prevIndex && prevIndex + 1 < input.length) {
+  	      const value = input.slice(prevIndex + 1);
+  	      parts.push(value);
+
+  	      if (opts.tokens) {
+  	        tokens[tokens.length - 1].value = value;
+  	        depth(tokens[tokens.length - 1]);
+  	        state.maxDepth += tokens[tokens.length - 1].depth;
+  	      }
+  	    }
+
+  	    state.slashes = slashes;
+  	    state.parts = parts;
+  	  }
+
+  	  return state;
+  	};
+
+  	scan_1 = scan;
+  	return scan_1;
+  }
+
+  var parse_1;
+  var hasRequiredParse;
+
+  function requireParse () {
+  	if (hasRequiredParse) return parse_1;
+  	hasRequiredParse = 1;
+
+  	const constants = /*@__PURE__*/ requireConstants();
+  	const utils = /*@__PURE__*/ requireUtils();
+
+  	/**
+  	 * Constants
+  	 */
 
   	const {
-  	  REGEX_BACKSLASH,
-  	  REGEX_REMOVE_BACKSLASH,
-  	  REGEX_SPECIAL_CHARS,
-  	  REGEX_SPECIAL_CHARS_GLOBAL
-  	} = constants$2;
+  	  MAX_LENGTH,
+  	  POSIX_REGEX_SOURCE,
+  	  REGEX_NON_SPECIAL_CHARS,
+  	  REGEX_SPECIAL_CHARS_BACKREF,
+  	  REPLACEMENTS
+  	} = constants;
 
-  	exports.isObject = val => val !== null && typeof val === 'object' && !Array.isArray(val);
-  	exports.hasRegexChars = str => REGEX_SPECIAL_CHARS.test(str);
-  	exports.isRegexChar = str => str.length === 1 && exports.hasRegexChars(str);
-  	exports.escapeRegex = str => str.replace(REGEX_SPECIAL_CHARS_GLOBAL, '\\$1');
-  	exports.toPosixSlashes = str => str.replace(REGEX_BACKSLASH, '/');
+  	/**
+  	 * Helpers
+  	 */
 
-  	exports.isWindows = () => {
-  	  if (typeof navigator !== 'undefined' && navigator.platform) {
-  	    const platform = navigator.platform.toLowerCase();
-  	    return platform === 'win32' || platform === 'windows';
+  	const expandRange = (args, options) => {
+  	  if (typeof options.expandRange === 'function') {
+  	    return options.expandRange(...args, options);
   	  }
 
-  	  if (typeof process !== 'undefined' && process.platform) {
-  	    return process.platform === 'win32';
+  	  args.sort();
+  	  const value = `[${args.join('-')}]`;
+
+  	  try {
+  	    /* eslint-disable-next-line no-new */
+  	    new RegExp(value);
+  	  } catch (ex) {
+  	    return args.map(v => utils.escapeRegex(v)).join('..');
   	  }
 
-  	  return false;
+  	  return value;
   	};
 
-  	exports.removeBackslashes = str => {
-  	  return str.replace(REGEX_REMOVE_BACKSLASH, match => {
-  	    return match === '\\' ? '' : match;
-  	  });
+  	/**
+  	 * Create the message for a syntax error
+  	 */
+
+  	const syntaxError = (type, char) => {
+  	  return `Missing ${type}: "${char}" - use "\\\\${char}" to match literal characters`;
   	};
 
-  	exports.escapeLast = (input, char, lastIdx) => {
-  	  const idx = input.lastIndexOf(char, lastIdx);
-  	  if (idx === -1) return input;
-  	  if (input[idx - 1] === '\\') return exports.escapeLast(input, char, idx - 1);
-  	  return `${input.slice(0, idx)}\\${input.slice(idx)}`;
-  	};
+  	/**
+  	 * Parse the given input string.
+  	 * @param {String} input
+  	 * @param {Object} options
+  	 * @return {Object}
+  	 */
 
-  	exports.removePrefix = (input, state = {}) => {
-  	  let output = input;
-  	  if (output.startsWith('./')) {
-  	    output = output.slice(2);
-  	    state.prefix = './';
-  	  }
-  	  return output;
-  	};
-
-  	exports.wrapOutput = (input, state = {}, options = {}) => {
-  	  const prepend = options.contains ? '' : '^';
-  	  const append = options.contains ? '' : '$';
-
-  	  let output = `${prepend}(?:${input})${append}`;
-  	  if (state.negated === true) {
-  	    output = `(?:^(?!${output}).*$)`;
-  	  }
-  	  return output;
-  	};
-
-  	exports.basename = (path, { windows } = {}) => {
-  	  const segs = path.split(windows ? /[\\/]/ : '/');
-  	  const last = segs[segs.length - 1];
-
-  	  if (last === '') {
-  	    return segs[segs.length - 2];
+  	const parse = (input, options) => {
+  	  if (typeof input !== 'string') {
+  	    throw new TypeError('Expected a string');
   	  }
 
-  	  return last;
-  	}; 
-  } (utils$3));
-
-  const utils$2 = utils$3;
-  const {
-    CHAR_ASTERISK,             /* * */
-    CHAR_AT,                   /* @ */
-    CHAR_BACKWARD_SLASH,       /* \ */
-    CHAR_COMMA,                /* , */
-    CHAR_DOT,                  /* . */
-    CHAR_EXCLAMATION_MARK,     /* ! */
-    CHAR_FORWARD_SLASH,        /* / */
-    CHAR_LEFT_CURLY_BRACE,     /* { */
-    CHAR_LEFT_PARENTHESES,     /* ( */
-    CHAR_LEFT_SQUARE_BRACKET,  /* [ */
-    CHAR_PLUS,                 /* + */
-    CHAR_QUESTION_MARK,        /* ? */
-    CHAR_RIGHT_CURLY_BRACE,    /* } */
-    CHAR_RIGHT_PARENTHESES,    /* ) */
-    CHAR_RIGHT_SQUARE_BRACKET  /* ] */
-  } = constants$2;
-
-  const isPathSeparator = code => {
-    return code === CHAR_FORWARD_SLASH || code === CHAR_BACKWARD_SLASH;
-  };
-
-  const depth = token => {
-    if (token.isPrefix !== true) {
-      token.depth = token.isGlobstar ? Infinity : 1;
-    }
-  };
-
-  /**
-   * Quickly scans a glob pattern and returns an object with a handful of
-   * useful properties, like `isGlob`, `path` (the leading non-glob, if it exists),
-   * `glob` (the actual pattern), `negated` (true if the path starts with `!` but not
-   * with `!(`) and `negatedExtglob` (true if the path starts with `!(`).
-   *
-   * ```js
-   * const pm = require('picomatch');
-   * console.log(pm.scan('foo/bar/*.js'));
-   * { isGlob: true, input: 'foo/bar/*.js', base: 'foo/bar', glob: '*.js' }
-   * ```
-   * @param {String} `str`
-   * @param {Object} `options`
-   * @return {Object} Returns an object with tokens and regex source string.
-   * @api public
-   */
-
-  const scan$1 = (input, options) => {
-    const opts = options || {};
-
-    const length = input.length - 1;
-    const scanToEnd = opts.parts === true || opts.scanToEnd === true;
-    const slashes = [];
-    const tokens = [];
-    const parts = [];
-
-    let str = input;
-    let index = -1;
-    let start = 0;
-    let lastIndex = 0;
-    let isBrace = false;
-    let isBracket = false;
-    let isGlob = false;
-    let isExtglob = false;
-    let isGlobstar = false;
-    let braceEscaped = false;
-    let backslashes = false;
-    let negated = false;
-    let negatedExtglob = false;
-    let finished = false;
-    let braces = 0;
-    let prev;
-    let code;
-    let token = { value: '', depth: 0, isGlob: false };
-
-    const eos = () => index >= length;
-    const peek = () => str.charCodeAt(index + 1);
-    const advance = () => {
-      prev = code;
-      return str.charCodeAt(++index);
-    };
-
-    while (index < length) {
-      code = advance();
-      let next;
-
-      if (code === CHAR_BACKWARD_SLASH) {
-        backslashes = token.backslashes = true;
-        code = advance();
-
-        if (code === CHAR_LEFT_CURLY_BRACE) {
-          braceEscaped = true;
-        }
-        continue;
-      }
-
-      if (braceEscaped === true || code === CHAR_LEFT_CURLY_BRACE) {
-        braces++;
-
-        while (eos() !== true && (code = advance())) {
-          if (code === CHAR_BACKWARD_SLASH) {
-            backslashes = token.backslashes = true;
-            advance();
-            continue;
-          }
-
-          if (code === CHAR_LEFT_CURLY_BRACE) {
-            braces++;
-            continue;
-          }
-
-          if (braceEscaped !== true && code === CHAR_DOT && (code = advance()) === CHAR_DOT) {
-            isBrace = token.isBrace = true;
-            isGlob = token.isGlob = true;
-            finished = true;
-
-            if (scanToEnd === true) {
-              continue;
-            }
-
-            break;
-          }
-
-          if (braceEscaped !== true && code === CHAR_COMMA) {
-            isBrace = token.isBrace = true;
-            isGlob = token.isGlob = true;
-            finished = true;
-
-            if (scanToEnd === true) {
-              continue;
-            }
-
-            break;
-          }
-
-          if (code === CHAR_RIGHT_CURLY_BRACE) {
-            braces--;
-
-            if (braces === 0) {
-              braceEscaped = false;
-              isBrace = token.isBrace = true;
-              finished = true;
-              break;
-            }
-          }
-        }
-
-        if (scanToEnd === true) {
-          continue;
-        }
-
-        break;
-      }
-
-      if (code === CHAR_FORWARD_SLASH) {
-        slashes.push(index);
-        tokens.push(token);
-        token = { value: '', depth: 0, isGlob: false };
-
-        if (finished === true) continue;
-        if (prev === CHAR_DOT && index === (start + 1)) {
-          start += 2;
-          continue;
-        }
-
-        lastIndex = index + 1;
-        continue;
-      }
-
-      if (opts.noext !== true) {
-        const isExtglobChar = code === CHAR_PLUS
-          || code === CHAR_AT
-          || code === CHAR_ASTERISK
-          || code === CHAR_QUESTION_MARK
-          || code === CHAR_EXCLAMATION_MARK;
-
-        if (isExtglobChar === true && peek() === CHAR_LEFT_PARENTHESES) {
-          isGlob = token.isGlob = true;
-          isExtglob = token.isExtglob = true;
-          finished = true;
-          if (code === CHAR_EXCLAMATION_MARK && index === start) {
-            negatedExtglob = true;
-          }
-
-          if (scanToEnd === true) {
-            while (eos() !== true && (code = advance())) {
-              if (code === CHAR_BACKWARD_SLASH) {
-                backslashes = token.backslashes = true;
-                code = advance();
-                continue;
-              }
-
-              if (code === CHAR_RIGHT_PARENTHESES) {
-                isGlob = token.isGlob = true;
-                finished = true;
-                break;
-              }
-            }
-            continue;
-          }
-          break;
-        }
-      }
-
-      if (code === CHAR_ASTERISK) {
-        if (prev === CHAR_ASTERISK) isGlobstar = token.isGlobstar = true;
-        isGlob = token.isGlob = true;
-        finished = true;
-
-        if (scanToEnd === true) {
-          continue;
-        }
-        break;
-      }
-
-      if (code === CHAR_QUESTION_MARK) {
-        isGlob = token.isGlob = true;
-        finished = true;
-
-        if (scanToEnd === true) {
-          continue;
-        }
-        break;
-      }
-
-      if (code === CHAR_LEFT_SQUARE_BRACKET) {
-        while (eos() !== true && (next = advance())) {
-          if (next === CHAR_BACKWARD_SLASH) {
-            backslashes = token.backslashes = true;
-            advance();
-            continue;
-          }
-
-          if (next === CHAR_RIGHT_SQUARE_BRACKET) {
-            isBracket = token.isBracket = true;
-            isGlob = token.isGlob = true;
-            finished = true;
-            break;
-          }
-        }
-
-        if (scanToEnd === true) {
-          continue;
-        }
-
-        break;
-      }
-
-      if (opts.nonegate !== true && code === CHAR_EXCLAMATION_MARK && index === start) {
-        negated = token.negated = true;
-        start++;
-        continue;
-      }
-
-      if (opts.noparen !== true && code === CHAR_LEFT_PARENTHESES) {
-        isGlob = token.isGlob = true;
-
-        if (scanToEnd === true) {
-          while (eos() !== true && (code = advance())) {
-            if (code === CHAR_LEFT_PARENTHESES) {
-              backslashes = token.backslashes = true;
-              code = advance();
-              continue;
-            }
-
-            if (code === CHAR_RIGHT_PARENTHESES) {
-              finished = true;
-              break;
-            }
-          }
-          continue;
-        }
-        break;
-      }
-
-      if (isGlob === true) {
-        finished = true;
-
-        if (scanToEnd === true) {
-          continue;
-        }
-
-        break;
-      }
-    }
-
-    if (opts.noext === true) {
-      isExtglob = false;
-      isGlob = false;
-    }
-
-    let base = str;
-    let prefix = '';
-    let glob = '';
-
-    if (start > 0) {
-      prefix = str.slice(0, start);
-      str = str.slice(start);
-      lastIndex -= start;
-    }
-
-    if (base && isGlob === true && lastIndex > 0) {
-      base = str.slice(0, lastIndex);
-      glob = str.slice(lastIndex);
-    } else if (isGlob === true) {
-      base = '';
-      glob = str;
-    } else {
-      base = str;
-    }
-
-    if (base && base !== '' && base !== '/' && base !== str) {
-      if (isPathSeparator(base.charCodeAt(base.length - 1))) {
-        base = base.slice(0, -1);
-      }
-    }
-
-    if (opts.unescape === true) {
-      if (glob) glob = utils$2.removeBackslashes(glob);
-
-      if (base && backslashes === true) {
-        base = utils$2.removeBackslashes(base);
-      }
-    }
-
-    const state = {
-      prefix,
-      input,
-      start,
-      base,
-      glob,
-      isBrace,
-      isBracket,
-      isGlob,
-      isExtglob,
-      isGlobstar,
-      negated,
-      negatedExtglob
-    };
-
-    if (opts.tokens === true) {
-      state.maxDepth = 0;
-      if (!isPathSeparator(code)) {
-        tokens.push(token);
-      }
-      state.tokens = tokens;
-    }
-
-    if (opts.parts === true || opts.tokens === true) {
-      let prevIndex;
-
-      for (let idx = 0; idx < slashes.length; idx++) {
-        const n = prevIndex ? prevIndex + 1 : start;
-        const i = slashes[idx];
-        const value = input.slice(n, i);
-        if (opts.tokens) {
-          if (idx === 0 && start !== 0) {
-            tokens[idx].isPrefix = true;
-            tokens[idx].value = prefix;
-          } else {
-            tokens[idx].value = value;
-          }
-          depth(tokens[idx]);
-          state.maxDepth += tokens[idx].depth;
-        }
-        if (idx !== 0 || value !== '') {
-          parts.push(value);
-        }
-        prevIndex = i;
-      }
-
-      if (prevIndex && prevIndex + 1 < input.length) {
-        const value = input.slice(prevIndex + 1);
-        parts.push(value);
-
-        if (opts.tokens) {
-          tokens[tokens.length - 1].value = value;
-          depth(tokens[tokens.length - 1]);
-          state.maxDepth += tokens[tokens.length - 1].depth;
-        }
-      }
-
-      state.slashes = slashes;
-      state.parts = parts;
-    }
-
-    return state;
-  };
-
-  var scan_1 = scan$1;
-
-  const constants$1 = constants$2;
-  const utils$1 = utils$3;
-
-  /**
-   * Constants
-   */
-
-  const {
-    MAX_LENGTH,
-    POSIX_REGEX_SOURCE,
-    REGEX_NON_SPECIAL_CHARS,
-    REGEX_SPECIAL_CHARS_BACKREF,
-    REPLACEMENTS
-  } = constants$1;
-
-  /**
-   * Helpers
-   */
-
-  const expandRange = (args, options) => {
-    if (typeof options.expandRange === 'function') {
-      return options.expandRange(...args, options);
-    }
-
-    args.sort();
-    const value = `[${args.join('-')}]`;
-
-    try {
-      /* eslint-disable-next-line no-new */
-      new RegExp(value);
-    } catch (ex) {
-      return args.map(v => utils$1.escapeRegex(v)).join('..');
-    }
-
-    return value;
-  };
-
-  /**
-   * Create the message for a syntax error
-   */
-
-  const syntaxError = (type, char) => {
-    return `Missing ${type}: "${char}" - use "\\\\${char}" to match literal characters`;
-  };
-
-  /**
-   * Parse the given input string.
-   * @param {String} input
-   * @param {Object} options
-   * @return {Object}
-   */
-
-  const parse$1 = (input, options) => {
-    if (typeof input !== 'string') {
-      throw new TypeError('Expected a string');
-    }
-
-    input = REPLACEMENTS[input] || input;
-
-    const opts = { ...options };
-    const max = typeof opts.maxLength === 'number' ? Math.min(MAX_LENGTH, opts.maxLength) : MAX_LENGTH;
-
-    let len = input.length;
-    if (len > max) {
-      throw new SyntaxError(`Input length: ${len}, exceeds maximum allowed length: ${max}`);
-    }
-
-    const bos = { type: 'bos', value: '', output: opts.prepend || '' };
-    const tokens = [bos];
-
-    const capture = opts.capture ? '' : '?:';
-
-    // create constants based on platform, for windows or posix
-    const PLATFORM_CHARS = constants$1.globChars(opts.windows);
-    const EXTGLOB_CHARS = constants$1.extglobChars(PLATFORM_CHARS);
-
-    const {
-      DOT_LITERAL,
-      PLUS_LITERAL,
-      SLASH_LITERAL,
-      ONE_CHAR,
-      DOTS_SLASH,
-      NO_DOT,
-      NO_DOT_SLASH,
-      NO_DOTS_SLASH,
-      QMARK,
-      QMARK_NO_DOT,
-      STAR,
-      START_ANCHOR
-    } = PLATFORM_CHARS;
-
-    const globstar = opts => {
-      return `(${capture}(?:(?!${START_ANCHOR}${opts.dot ? DOTS_SLASH : DOT_LITERAL}).)*?)`;
-    };
-
-    const nodot = opts.dot ? '' : NO_DOT;
-    const qmarkNoDot = opts.dot ? QMARK : QMARK_NO_DOT;
-    let star = opts.bash === true ? globstar(opts) : STAR;
-
-    if (opts.capture) {
-      star = `(${star})`;
-    }
-
-    // minimatch options support
-    if (typeof opts.noext === 'boolean') {
-      opts.noextglob = opts.noext;
-    }
-
-    const state = {
-      input,
-      index: -1,
-      start: 0,
-      dot: opts.dot === true,
-      consumed: '',
-      output: '',
-      prefix: '',
-      backtrack: false,
-      negated: false,
-      brackets: 0,
-      braces: 0,
-      parens: 0,
-      quotes: 0,
-      globstar: false,
-      tokens
-    };
-
-    input = utils$1.removePrefix(input, state);
-    len = input.length;
-
-    const extglobs = [];
-    const braces = [];
-    const stack = [];
-    let prev = bos;
-    let value;
-
-    /**
-     * Tokenizing helpers
-     */
-
-    const eos = () => state.index === len - 1;
-    const peek = state.peek = (n = 1) => input[state.index + n];
-    const advance = state.advance = () => input[++state.index] || '';
-    const remaining = () => input.slice(state.index + 1);
-    const consume = (value = '', num = 0) => {
-      state.consumed += value;
-      state.index += num;
-    };
-
-    const append = token => {
-      state.output += token.output != null ? token.output : token.value;
-      consume(token.value);
-    };
-
-    const negate = () => {
-      let count = 1;
-
-      while (peek() === '!' && (peek(2) !== '(' || peek(3) === '?')) {
-        advance();
-        state.start++;
-        count++;
-      }
-
-      if (count % 2 === 0) {
-        return false;
-      }
-
-      state.negated = true;
-      state.start++;
-      return true;
-    };
-
-    const increment = type => {
-      state[type]++;
-      stack.push(type);
-    };
-
-    const decrement = type => {
-      state[type]--;
-      stack.pop();
-    };
-
-    /**
-     * Push tokens onto the tokens array. This helper speeds up
-     * tokenizing by 1) helping us avoid backtracking as much as possible,
-     * and 2) helping us avoid creating extra tokens when consecutive
-     * characters are plain text. This improves performance and simplifies
-     * lookbehinds.
-     */
-
-    const push = tok => {
-      if (prev.type === 'globstar') {
-        const isBrace = state.braces > 0 && (tok.type === 'comma' || tok.type === 'brace');
-        const isExtglob = tok.extglob === true || (extglobs.length && (tok.type === 'pipe' || tok.type === 'paren'));
-
-        if (tok.type !== 'slash' && tok.type !== 'paren' && !isBrace && !isExtglob) {
-          state.output = state.output.slice(0, -prev.output.length);
-          prev.type = 'star';
-          prev.value = '*';
-          prev.output = star;
-          state.output += prev.output;
-        }
-      }
-
-      if (extglobs.length && tok.type !== 'paren') {
-        extglobs[extglobs.length - 1].inner += tok.value;
-      }
-
-      if (tok.value || tok.output) append(tok);
-      if (prev && prev.type === 'text' && tok.type === 'text') {
-        prev.output = (prev.output || prev.value) + tok.value;
-        prev.value += tok.value;
-        return;
-      }
-
-      tok.prev = prev;
-      tokens.push(tok);
-      prev = tok;
-    };
-
-    const extglobOpen = (type, value) => {
-      const token = { ...EXTGLOB_CHARS[value], conditions: 1, inner: '' };
-
-      token.prev = prev;
-      token.parens = state.parens;
-      token.output = state.output;
-      const output = (opts.capture ? '(' : '') + token.open;
-
-      increment('parens');
-      push({ type, value, output: state.output ? '' : ONE_CHAR });
-      push({ type: 'paren', extglob: true, value: advance(), output });
-      extglobs.push(token);
-    };
-
-    const extglobClose = token => {
-      let output = token.close + (opts.capture ? ')' : '');
-      let rest;
-
-      if (token.type === 'negate') {
-        let extglobStar = star;
-
-        if (token.inner && token.inner.length > 1 && token.inner.includes('/')) {
-          extglobStar = globstar(opts);
-        }
-
-        if (extglobStar !== star || eos() || /^\)+$/.test(remaining())) {
-          output = token.close = `)$))${extglobStar}`;
-        }
-
-        if (token.inner.includes('*') && (rest = remaining()) && /^\.[^\\/.]+$/.test(rest)) {
-          // Any non-magical string (`.ts`) or even nested expression (`.{ts,tsx}`) can follow after the closing parenthesis.
-          // In this case, we need to parse the string and use it in the output of the original pattern.
-          // Suitable patterns: `/!(*.d).ts`, `/!(*.d).{ts,tsx}`, `**/!(*-dbg).@(js)`.
-          //
-          // Disabling the `fastpaths` option due to a problem with parsing strings as `.ts` in the pattern like `**/!(*.d).ts`.
-          const expression = parse$1(rest, { ...options, fastpaths: false }).output;
-
-          output = token.close = `)${expression})${extglobStar})`;
-        }
-
-        if (token.prev.type === 'bos') {
-          state.negatedExtglob = true;
-        }
-      }
-
-      push({ type: 'paren', extglob: true, value, output });
-      decrement('parens');
-    };
-
-    /**
-     * Fast paths
-     */
-
-    if (opts.fastpaths !== false && !/(^[*!]|[/()[\]{}"])/.test(input)) {
-      let backslashes = false;
-
-      let output = input.replace(REGEX_SPECIAL_CHARS_BACKREF, (m, esc, chars, first, rest, index) => {
-        if (first === '\\') {
-          backslashes = true;
-          return m;
-        }
-
-        if (first === '?') {
-          if (esc) {
-            return esc + first + (rest ? QMARK.repeat(rest.length) : '');
-          }
-          if (index === 0) {
-            return qmarkNoDot + (rest ? QMARK.repeat(rest.length) : '');
-          }
-          return QMARK.repeat(chars.length);
-        }
-
-        if (first === '.') {
-          return DOT_LITERAL.repeat(chars.length);
-        }
-
-        if (first === '*') {
-          if (esc) {
-            return esc + first + (rest ? star : '');
-          }
-          return star;
-        }
-        return esc ? m : `\\${m}`;
-      });
-
-      if (backslashes === true) {
-        if (opts.unescape === true) {
-          output = output.replace(/\\/g, '');
-        } else {
-          output = output.replace(/\\+/g, m => {
-            return m.length % 2 === 0 ? '\\\\' : (m ? '\\' : '');
-          });
-        }
-      }
-
-      if (output === input && opts.contains === true) {
-        state.output = input;
-        return state;
-      }
-
-      state.output = utils$1.wrapOutput(output, state, options);
-      return state;
-    }
-
-    /**
-     * Tokenize input until we reach end-of-string
-     */
-
-    while (!eos()) {
-      value = advance();
-
-      if (value === '\u0000') {
-        continue;
-      }
-
-      /**
-       * Escaped characters
-       */
-
-      if (value === '\\') {
-        const next = peek();
-
-        if (next === '/' && opts.bash !== true) {
-          continue;
-        }
-
-        if (next === '.' || next === ';') {
-          continue;
-        }
-
-        if (!next) {
-          value += '\\';
-          push({ type: 'text', value });
-          continue;
-        }
-
-        // collapse slashes to reduce potential for exploits
-        const match = /^\\+/.exec(remaining());
-        let slashes = 0;
-
-        if (match && match[0].length > 2) {
-          slashes = match[0].length;
-          state.index += slashes;
-          if (slashes % 2 !== 0) {
-            value += '\\';
-          }
-        }
-
-        if (opts.unescape === true) {
-          value = advance();
-        } else {
-          value += advance();
-        }
-
-        if (state.brackets === 0) {
-          push({ type: 'text', value });
-          continue;
-        }
-      }
-
-      /**
-       * If we're inside a regex character class, continue
-       * until we reach the closing bracket.
-       */
-
-      if (state.brackets > 0 && (value !== ']' || prev.value === '[' || prev.value === '[^')) {
-        if (opts.posix !== false && value === ':') {
-          const inner = prev.value.slice(1);
-          if (inner.includes('[')) {
-            prev.posix = true;
-
-            if (inner.includes(':')) {
-              const idx = prev.value.lastIndexOf('[');
-              const pre = prev.value.slice(0, idx);
-              const rest = prev.value.slice(idx + 2);
-              const posix = POSIX_REGEX_SOURCE[rest];
-              if (posix) {
-                prev.value = pre + posix;
-                state.backtrack = true;
-                advance();
-
-                if (!bos.output && tokens.indexOf(prev) === 1) {
-                  bos.output = ONE_CHAR;
-                }
-                continue;
-              }
-            }
-          }
-        }
-
-        if ((value === '[' && peek() !== ':') || (value === '-' && peek() === ']')) {
-          value = `\\${value}`;
-        }
-
-        if (value === ']' && (prev.value === '[' || prev.value === '[^')) {
-          value = `\\${value}`;
-        }
-
-        if (opts.posix === true && value === '!' && prev.value === '[') {
-          value = '^';
-        }
-
-        prev.value += value;
-        append({ value });
-        continue;
-      }
-
-      /**
-       * If we're inside a quoted string, continue
-       * until we reach the closing double quote.
-       */
-
-      if (state.quotes === 1 && value !== '"') {
-        value = utils$1.escapeRegex(value);
-        prev.value += value;
-        append({ value });
-        continue;
-      }
-
-      /**
-       * Double quotes
-       */
-
-      if (value === '"') {
-        state.quotes = state.quotes === 1 ? 0 : 1;
-        if (opts.keepQuotes === true) {
-          push({ type: 'text', value });
-        }
-        continue;
-      }
-
-      /**
-       * Parentheses
-       */
-
-      if (value === '(') {
-        increment('parens');
-        push({ type: 'paren', value });
-        continue;
-      }
-
-      if (value === ')') {
-        if (state.parens === 0 && opts.strictBrackets === true) {
-          throw new SyntaxError(syntaxError('opening', '('));
-        }
-
-        const extglob = extglobs[extglobs.length - 1];
-        if (extglob && state.parens === extglob.parens + 1) {
-          extglobClose(extglobs.pop());
-          continue;
-        }
-
-        push({ type: 'paren', value, output: state.parens ? ')' : '\\)' });
-        decrement('parens');
-        continue;
-      }
-
-      /**
-       * Square brackets
-       */
-
-      if (value === '[') {
-        if (opts.nobracket === true || !remaining().includes(']')) {
-          if (opts.nobracket !== true && opts.strictBrackets === true) {
-            throw new SyntaxError(syntaxError('closing', ']'));
-          }
-
-          value = `\\${value}`;
-        } else {
-          increment('brackets');
-        }
-
-        push({ type: 'bracket', value });
-        continue;
-      }
-
-      if (value === ']') {
-        if (opts.nobracket === true || (prev && prev.type === 'bracket' && prev.value.length === 1)) {
-          push({ type: 'text', value, output: `\\${value}` });
-          continue;
-        }
-
-        if (state.brackets === 0) {
-          if (opts.strictBrackets === true) {
-            throw new SyntaxError(syntaxError('opening', '['));
-          }
-
-          push({ type: 'text', value, output: `\\${value}` });
-          continue;
-        }
-
-        decrement('brackets');
-
-        const prevValue = prev.value.slice(1);
-        if (prev.posix !== true && prevValue[0] === '^' && !prevValue.includes('/')) {
-          value = `/${value}`;
-        }
-
-        prev.value += value;
-        append({ value });
-
-        // when literal brackets are explicitly disabled
-        // assume we should match with a regex character class
-        if (opts.literalBrackets === false || utils$1.hasRegexChars(prevValue)) {
-          continue;
-        }
-
-        const escaped = utils$1.escapeRegex(prev.value);
-        state.output = state.output.slice(0, -prev.value.length);
-
-        // when literal brackets are explicitly enabled
-        // assume we should escape the brackets to match literal characters
-        if (opts.literalBrackets === true) {
-          state.output += escaped;
-          prev.value = escaped;
-          continue;
-        }
-
-        // when the user specifies nothing, try to match both
-        prev.value = `(${capture}${escaped}|${prev.value})`;
-        state.output += prev.value;
-        continue;
-      }
-
-      /**
-       * Braces
-       */
-
-      if (value === '{' && opts.nobrace !== true) {
-        increment('braces');
-
-        const open = {
-          type: 'brace',
-          value,
-          output: '(',
-          outputIndex: state.output.length,
-          tokensIndex: state.tokens.length
-        };
-
-        braces.push(open);
-        push(open);
-        continue;
-      }
-
-      if (value === '}') {
-        const brace = braces[braces.length - 1];
-
-        if (opts.nobrace === true || !brace) {
-          push({ type: 'text', value, output: value });
-          continue;
-        }
-
-        let output = ')';
-
-        if (brace.dots === true) {
-          const arr = tokens.slice();
-          const range = [];
-
-          for (let i = arr.length - 1; i >= 0; i--) {
-            tokens.pop();
-            if (arr[i].type === 'brace') {
-              break;
-            }
-            if (arr[i].type !== 'dots') {
-              range.unshift(arr[i].value);
-            }
-          }
-
-          output = expandRange(range, opts);
-          state.backtrack = true;
-        }
-
-        if (brace.comma !== true && brace.dots !== true) {
-          const out = state.output.slice(0, brace.outputIndex);
-          const toks = state.tokens.slice(brace.tokensIndex);
-          brace.value = brace.output = '\\{';
-          value = output = '\\}';
-          state.output = out;
-          for (const t of toks) {
-            state.output += (t.output || t.value);
-          }
-        }
-
-        push({ type: 'brace', value, output });
-        decrement('braces');
-        braces.pop();
-        continue;
-      }
-
-      /**
-       * Pipes
-       */
-
-      if (value === '|') {
-        if (extglobs.length > 0) {
-          extglobs[extglobs.length - 1].conditions++;
-        }
-        push({ type: 'text', value });
-        continue;
-      }
-
-      /**
-       * Commas
-       */
-
-      if (value === ',') {
-        let output = value;
-
-        const brace = braces[braces.length - 1];
-        if (brace && stack[stack.length - 1] === 'braces') {
-          brace.comma = true;
-          output = '|';
-        }
-
-        push({ type: 'comma', value, output });
-        continue;
-      }
-
-      /**
-       * Slashes
-       */
-
-      if (value === '/') {
-        // if the beginning of the glob is "./", advance the start
-        // to the current index, and don't add the "./" characters
-        // to the state. This greatly simplifies lookbehinds when
-        // checking for BOS characters like "!" and "." (not "./")
-        if (prev.type === 'dot' && state.index === state.start + 1) {
-          state.start = state.index + 1;
-          state.consumed = '';
-          state.output = '';
-          tokens.pop();
-          prev = bos; // reset "prev" to the first token
-          continue;
-        }
-
-        push({ type: 'slash', value, output: SLASH_LITERAL });
-        continue;
-      }
-
-      /**
-       * Dots
-       */
-
-      if (value === '.') {
-        if (state.braces > 0 && prev.type === 'dot') {
-          if (prev.value === '.') prev.output = DOT_LITERAL;
-          const brace = braces[braces.length - 1];
-          prev.type = 'dots';
-          prev.output += value;
-          prev.value += value;
-          brace.dots = true;
-          continue;
-        }
-
-        if ((state.braces + state.parens) === 0 && prev.type !== 'bos' && prev.type !== 'slash') {
-          push({ type: 'text', value, output: DOT_LITERAL });
-          continue;
-        }
-
-        push({ type: 'dot', value, output: DOT_LITERAL });
-        continue;
-      }
-
-      /**
-       * Question marks
-       */
-
-      if (value === '?') {
-        const isGroup = prev && prev.value === '(';
-        if (!isGroup && opts.noextglob !== true && peek() === '(' && peek(2) !== '?') {
-          extglobOpen('qmark', value);
-          continue;
-        }
-
-        if (prev && prev.type === 'paren') {
-          const next = peek();
-          let output = value;
-
-          if ((prev.value === '(' && !/[!=<:]/.test(next)) || (next === '<' && !/<([!=]|\w+>)/.test(remaining()))) {
-            output = `\\${value}`;
-          }
-
-          push({ type: 'text', value, output });
-          continue;
-        }
-
-        if (opts.dot !== true && (prev.type === 'slash' || prev.type === 'bos')) {
-          push({ type: 'qmark', value, output: QMARK_NO_DOT });
-          continue;
-        }
-
-        push({ type: 'qmark', value, output: QMARK });
-        continue;
-      }
-
-      /**
-       * Exclamation
-       */
-
-      if (value === '!') {
-        if (opts.noextglob !== true && peek() === '(') {
-          if (peek(2) !== '?' || !/[!=<:]/.test(peek(3))) {
-            extglobOpen('negate', value);
-            continue;
-          }
-        }
-
-        if (opts.nonegate !== true && state.index === 0) {
-          negate();
-          continue;
-        }
-      }
-
-      /**
-       * Plus
-       */
-
-      if (value === '+') {
-        if (opts.noextglob !== true && peek() === '(' && peek(2) !== '?') {
-          extglobOpen('plus', value);
-          continue;
-        }
-
-        if ((prev && prev.value === '(') || opts.regex === false) {
-          push({ type: 'plus', value, output: PLUS_LITERAL });
-          continue;
-        }
-
-        if ((prev && (prev.type === 'bracket' || prev.type === 'paren' || prev.type === 'brace')) || state.parens > 0) {
-          push({ type: 'plus', value });
-          continue;
-        }
-
-        push({ type: 'plus', value: PLUS_LITERAL });
-        continue;
-      }
-
-      /**
-       * Plain text
-       */
-
-      if (value === '@') {
-        if (opts.noextglob !== true && peek() === '(' && peek(2) !== '?') {
-          push({ type: 'at', extglob: true, value, output: '' });
-          continue;
-        }
-
-        push({ type: 'text', value });
-        continue;
-      }
-
-      /**
-       * Plain text
-       */
-
-      if (value !== '*') {
-        if (value === '$' || value === '^') {
-          value = `\\${value}`;
-        }
-
-        const match = REGEX_NON_SPECIAL_CHARS.exec(remaining());
-        if (match) {
-          value += match[0];
-          state.index += match[0].length;
-        }
-
-        push({ type: 'text', value });
-        continue;
-      }
-
-      /**
-       * Stars
-       */
-
-      if (prev && (prev.type === 'globstar' || prev.star === true)) {
-        prev.type = 'star';
-        prev.star = true;
-        prev.value += value;
-        prev.output = star;
-        state.backtrack = true;
-        state.globstar = true;
-        consume(value);
-        continue;
-      }
-
-      let rest = remaining();
-      if (opts.noextglob !== true && /^\([^?]/.test(rest)) {
-        extglobOpen('star', value);
-        continue;
-      }
-
-      if (prev.type === 'star') {
-        if (opts.noglobstar === true) {
-          consume(value);
-          continue;
-        }
-
-        const prior = prev.prev;
-        const before = prior.prev;
-        const isStart = prior.type === 'slash' || prior.type === 'bos';
-        const afterStar = before && (before.type === 'star' || before.type === 'globstar');
-
-        if (opts.bash === true && (!isStart || (rest[0] && rest[0] !== '/'))) {
-          push({ type: 'star', value, output: '' });
-          continue;
-        }
-
-        const isBrace = state.braces > 0 && (prior.type === 'comma' || prior.type === 'brace');
-        const isExtglob = extglobs.length && (prior.type === 'pipe' || prior.type === 'paren');
-        if (!isStart && prior.type !== 'paren' && !isBrace && !isExtglob) {
-          push({ type: 'star', value, output: '' });
-          continue;
-        }
-
-        // strip consecutive `/**/`
-        while (rest.slice(0, 3) === '/**') {
-          const after = input[state.index + 4];
-          if (after && after !== '/') {
-            break;
-          }
-          rest = rest.slice(3);
-          consume('/**', 3);
-        }
-
-        if (prior.type === 'bos' && eos()) {
-          prev.type = 'globstar';
-          prev.value += value;
-          prev.output = globstar(opts);
-          state.output = prev.output;
-          state.globstar = true;
-          consume(value);
-          continue;
-        }
-
-        if (prior.type === 'slash' && prior.prev.type !== 'bos' && !afterStar && eos()) {
-          state.output = state.output.slice(0, -(prior.output + prev.output).length);
-          prior.output = `(?:${prior.output}`;
-
-          prev.type = 'globstar';
-          prev.output = globstar(opts) + (opts.strictSlashes ? ')' : '|$)');
-          prev.value += value;
-          state.globstar = true;
-          state.output += prior.output + prev.output;
-          consume(value);
-          continue;
-        }
-
-        if (prior.type === 'slash' && prior.prev.type !== 'bos' && rest[0] === '/') {
-          const end = rest[1] !== void 0 ? '|$' : '';
-
-          state.output = state.output.slice(0, -(prior.output + prev.output).length);
-          prior.output = `(?:${prior.output}`;
-
-          prev.type = 'globstar';
-          prev.output = `${globstar(opts)}${SLASH_LITERAL}|${SLASH_LITERAL}${end})`;
-          prev.value += value;
-
-          state.output += prior.output + prev.output;
-          state.globstar = true;
-
-          consume(value + advance());
-
-          push({ type: 'slash', value: '/', output: '' });
-          continue;
-        }
-
-        if (prior.type === 'bos' && rest[0] === '/') {
-          prev.type = 'globstar';
-          prev.value += value;
-          prev.output = `(?:^|${SLASH_LITERAL}|${globstar(opts)}${SLASH_LITERAL})`;
-          state.output = prev.output;
-          state.globstar = true;
-          consume(value + advance());
-          push({ type: 'slash', value: '/', output: '' });
-          continue;
-        }
-
-        // remove single star from output
-        state.output = state.output.slice(0, -prev.output.length);
-
-        // reset previous token to globstar
-        prev.type = 'globstar';
-        prev.output = globstar(opts);
-        prev.value += value;
-
-        // reset output with globstar
-        state.output += prev.output;
-        state.globstar = true;
-        consume(value);
-        continue;
-      }
-
-      const token = { type: 'star', value, output: star };
-
-      if (opts.bash === true) {
-        token.output = '.*?';
-        if (prev.type === 'bos' || prev.type === 'slash') {
-          token.output = nodot + token.output;
-        }
-        push(token);
-        continue;
-      }
-
-      if (prev && (prev.type === 'bracket' || prev.type === 'paren') && opts.regex === true) {
-        token.output = value;
-        push(token);
-        continue;
-      }
-
-      if (state.index === state.start || prev.type === 'slash' || prev.type === 'dot') {
-        if (prev.type === 'dot') {
-          state.output += NO_DOT_SLASH;
-          prev.output += NO_DOT_SLASH;
-
-        } else if (opts.dot === true) {
-          state.output += NO_DOTS_SLASH;
-          prev.output += NO_DOTS_SLASH;
-
-        } else {
-          state.output += nodot;
-          prev.output += nodot;
-        }
-
-        if (peek() !== '*') {
-          state.output += ONE_CHAR;
-          prev.output += ONE_CHAR;
-        }
-      }
-
-      push(token);
-    }
-
-    while (state.brackets > 0) {
-      if (opts.strictBrackets === true) throw new SyntaxError(syntaxError('closing', ']'));
-      state.output = utils$1.escapeLast(state.output, '[');
-      decrement('brackets');
-    }
-
-    while (state.parens > 0) {
-      if (opts.strictBrackets === true) throw new SyntaxError(syntaxError('closing', ')'));
-      state.output = utils$1.escapeLast(state.output, '(');
-      decrement('parens');
-    }
-
-    while (state.braces > 0) {
-      if (opts.strictBrackets === true) throw new SyntaxError(syntaxError('closing', '}'));
-      state.output = utils$1.escapeLast(state.output, '{');
-      decrement('braces');
-    }
-
-    if (opts.strictSlashes !== true && (prev.type === 'star' || prev.type === 'bracket')) {
-      push({ type: 'maybe_slash', value: '', output: `${SLASH_LITERAL}?` });
-    }
-
-    // rebuild the output if we had to backtrack at any point
-    if (state.backtrack === true) {
-      state.output = '';
-
-      for (const token of state.tokens) {
-        state.output += token.output != null ? token.output : token.value;
-
-        if (token.suffix) {
-          state.output += token.suffix;
-        }
-      }
-    }
-
-    return state;
-  };
-
-  /**
-   * Fast paths for creating regular expressions for common glob patterns.
-   * This can significantly speed up processing and has very little downside
-   * impact when none of the fast paths match.
-   */
-
-  parse$1.fastpaths = (input, options) => {
-    const opts = { ...options };
-    const max = typeof opts.maxLength === 'number' ? Math.min(MAX_LENGTH, opts.maxLength) : MAX_LENGTH;
-    const len = input.length;
-    if (len > max) {
-      throw new SyntaxError(`Input length: ${len}, exceeds maximum allowed length: ${max}`);
-    }
-
-    input = REPLACEMENTS[input] || input;
-
-    // create constants based on platform, for windows or posix
-    const {
-      DOT_LITERAL,
-      SLASH_LITERAL,
-      ONE_CHAR,
-      DOTS_SLASH,
-      NO_DOT,
-      NO_DOTS,
-      NO_DOTS_SLASH,
-      STAR,
-      START_ANCHOR
-    } = constants$1.globChars(opts.windows);
-
-    const nodot = opts.dot ? NO_DOTS : NO_DOT;
-    const slashDot = opts.dot ? NO_DOTS_SLASH : NO_DOT;
-    const capture = opts.capture ? '' : '?:';
-    const state = { negated: false, prefix: '' };
-    let star = opts.bash === true ? '.*?' : STAR;
-
-    if (opts.capture) {
-      star = `(${star})`;
-    }
-
-    const globstar = opts => {
-      if (opts.noglobstar === true) return star;
-      return `(${capture}(?:(?!${START_ANCHOR}${opts.dot ? DOTS_SLASH : DOT_LITERAL}).)*?)`;
-    };
-
-    const create = str => {
-      switch (str) {
-        case '*':
-          return `${nodot}${ONE_CHAR}${star}`;
-
-        case '.*':
-          return `${DOT_LITERAL}${ONE_CHAR}${star}`;
-
-        case '*.*':
-          return `${nodot}${star}${DOT_LITERAL}${ONE_CHAR}${star}`;
-
-        case '*/*':
-          return `${nodot}${star}${SLASH_LITERAL}${ONE_CHAR}${slashDot}${star}`;
-
-        case '**':
-          return nodot + globstar(opts);
-
-        case '**/*':
-          return `(?:${nodot}${globstar(opts)}${SLASH_LITERAL})?${slashDot}${ONE_CHAR}${star}`;
-
-        case '**/*.*':
-          return `(?:${nodot}${globstar(opts)}${SLASH_LITERAL})?${slashDot}${star}${DOT_LITERAL}${ONE_CHAR}${star}`;
-
-        case '**/.*':
-          return `(?:${nodot}${globstar(opts)}${SLASH_LITERAL})?${DOT_LITERAL}${ONE_CHAR}${star}`;
-
-        default: {
-          const match = /^(.*?)\.(\w+)$/.exec(str);
-          if (!match) return;
-
-          const source = create(match[1]);
-          if (!source) return;
-
-          return source + DOT_LITERAL + match[2];
-        }
-      }
-    };
-
-    const output = utils$1.removePrefix(input, state);
-    let source = create(output);
-
-    if (source && opts.strictSlashes !== true) {
-      source += `${SLASH_LITERAL}?`;
-    }
-
-    return source;
-  };
-
-  var parse_1 = parse$1;
-
-  const scan = scan_1;
-  const parse = parse_1;
-  const utils = utils$3;
-  const constants = constants$2;
-  const isObject = val => val && typeof val === 'object' && !Array.isArray(val);
-
-  /**
-   * Creates a matcher function from one or more glob patterns. The
-   * returned function takes a string to match as its first argument,
-   * and returns true if the string is a match. The returned matcher
-   * function also takes a boolean as the second argument that, when true,
-   * returns an object with additional information.
-   *
-   * ```js
-   * const picomatch = require('picomatch');
-   * // picomatch(glob[, options]);
-   *
-   * const isMatch = picomatch('*.!(*a)');
-   * console.log(isMatch('a.a')); //=> false
-   * console.log(isMatch('a.b')); //=> true
-   * ```
-   * @name picomatch
-   * @param {String|Array} `globs` One or more glob patterns.
-   * @param {Object=} `options`
-   * @return {Function=} Returns a matcher function.
-   * @api public
-   */
-
-  const picomatch$1 = (glob, options, returnState = false) => {
-    if (Array.isArray(glob)) {
-      const fns = glob.map(input => picomatch$1(input, options, returnState));
-      const arrayMatcher = str => {
-        for (const isMatch of fns) {
-          const state = isMatch(str);
-          if (state) return state;
-        }
-        return false;
-      };
-      return arrayMatcher;
-    }
-
-    const isState = isObject(glob) && glob.tokens && glob.input;
-
-    if (glob === '' || (typeof glob !== 'string' && !isState)) {
-      throw new TypeError('Expected pattern to be a non-empty string');
-    }
-
-    const opts = options || {};
-    const posix = opts.windows;
-    const regex = isState
-      ? picomatch$1.compileRe(glob, options)
-      : picomatch$1.makeRe(glob, options, false, true);
-
-    const state = regex.state;
-    delete regex.state;
-
-    let isIgnored = () => false;
-    if (opts.ignore) {
-      const ignoreOpts = { ...options, ignore: null, onMatch: null, onResult: null };
-      isIgnored = picomatch$1(opts.ignore, ignoreOpts, returnState);
-    }
-
-    const matcher = (input, returnObject = false) => {
-      const { isMatch, match, output } = picomatch$1.test(input, regex, options, { glob, posix });
-      const result = { glob, state, regex, posix, input, output, match, isMatch };
-
-      if (typeof opts.onResult === 'function') {
-        opts.onResult(result);
-      }
-
-      if (isMatch === false) {
-        result.isMatch = false;
-        return returnObject ? result : false;
-      }
-
-      if (isIgnored(input)) {
-        if (typeof opts.onIgnore === 'function') {
-          opts.onIgnore(result);
-        }
-        result.isMatch = false;
-        return returnObject ? result : false;
-      }
-
-      if (typeof opts.onMatch === 'function') {
-        opts.onMatch(result);
-      }
-      return returnObject ? result : true;
-    };
-
-    if (returnState) {
-      matcher.state = state;
-    }
-
-    return matcher;
-  };
-
-  /**
-   * Test `input` with the given `regex`. This is used by the main
-   * `picomatch()` function to test the input string.
-   *
-   * ```js
-   * const picomatch = require('picomatch');
-   * // picomatch.test(input, regex[, options]);
-   *
-   * console.log(picomatch.test('foo/bar', /^(?:([^/]*?)\/([^/]*?))$/));
-   * // { isMatch: true, match: [ 'foo/', 'foo', 'bar' ], output: 'foo/bar' }
-   * ```
-   * @param {String} `input` String to test.
-   * @param {RegExp} `regex`
-   * @return {Object} Returns an object with matching info.
-   * @api public
-   */
-
-  picomatch$1.test = (input, regex, options, { glob, posix } = {}) => {
-    if (typeof input !== 'string') {
-      throw new TypeError('Expected input to be a string');
-    }
-
-    if (input === '') {
-      return { isMatch: false, output: '' };
-    }
-
-    const opts = options || {};
-    const format = opts.format || (posix ? utils.toPosixSlashes : null);
-    let match = input === glob;
-    let output = (match && format) ? format(input) : input;
-
-    if (match === false) {
-      output = format ? format(input) : input;
-      match = output === glob;
-    }
-
-    if (match === false || opts.capture === true) {
-      if (opts.matchBase === true || opts.basename === true) {
-        match = picomatch$1.matchBase(input, regex, options, posix);
-      } else {
-        match = regex.exec(output);
-      }
-    }
-
-    return { isMatch: Boolean(match), match, output };
-  };
-
-  /**
-   * Match the basename of a filepath.
-   *
-   * ```js
-   * const picomatch = require('picomatch');
-   * // picomatch.matchBase(input, glob[, options]);
-   * console.log(picomatch.matchBase('foo/bar.js', '*.js'); // true
-   * ```
-   * @param {String} `input` String to test.
-   * @param {RegExp|String} `glob` Glob pattern or regex created by [.makeRe](#makeRe).
-   * @return {Boolean}
-   * @api public
-   */
-
-  picomatch$1.matchBase = (input, glob, options) => {
-    const regex = glob instanceof RegExp ? glob : picomatch$1.makeRe(glob, options);
-    return regex.test(utils.basename(input));
-  };
-
-  /**
-   * Returns true if **any** of the given glob `patterns` match the specified `string`.
-   *
-   * ```js
-   * const picomatch = require('picomatch');
-   * // picomatch.isMatch(string, patterns[, options]);
-   *
-   * console.log(picomatch.isMatch('a.a', ['b.*', '*.a'])); //=> true
-   * console.log(picomatch.isMatch('a.a', 'b.*')); //=> false
-   * ```
-   * @param {String|Array} str The string to test.
-   * @param {String|Array} patterns One or more glob patterns to use for matching.
-   * @param {Object} [options] See available [options](#options).
-   * @return {Boolean} Returns true if any patterns match `str`
-   * @api public
-   */
-
-  picomatch$1.isMatch = (str, patterns, options) => picomatch$1(patterns, options)(str);
-
-  /**
-   * Parse a glob pattern to create the source string for a regular
-   * expression.
-   *
-   * ```js
-   * const picomatch = require('picomatch');
-   * const result = picomatch.parse(pattern[, options]);
-   * ```
-   * @param {String} `pattern`
-   * @param {Object} `options`
-   * @return {Object} Returns an object with useful properties and output to be used as a regex source string.
-   * @api public
-   */
-
-  picomatch$1.parse = (pattern, options) => {
-    if (Array.isArray(pattern)) return pattern.map(p => picomatch$1.parse(p, options));
-    return parse(pattern, { ...options, fastpaths: false });
-  };
-
-  /**
-   * Scan a glob pattern to separate the pattern into segments.
-   *
-   * ```js
-   * const picomatch = require('picomatch');
-   * // picomatch.scan(input[, options]);
-   *
-   * const result = picomatch.scan('!./foo/*.js');
-   * console.log(result);
-   * { prefix: '!./',
-   *   input: '!./foo/*.js',
-   *   start: 3,
-   *   base: 'foo',
-   *   glob: '*.js',
-   *   isBrace: false,
-   *   isBracket: false,
-   *   isGlob: true,
-   *   isExtglob: false,
-   *   isGlobstar: false,
-   *   negated: true }
-   * ```
-   * @param {String} `input` Glob pattern to scan.
-   * @param {Object} `options`
-   * @return {Object} Returns an object with
-   * @api public
-   */
-
-  picomatch$1.scan = (input, options) => scan(input, options);
-
-  /**
-   * Compile a regular expression from the `state` object returned by the
-   * [parse()](#parse) method.
-   *
-   * @param {Object} `state`
-   * @param {Object} `options`
-   * @param {Boolean} `returnOutput` Intended for implementors, this argument allows you to return the raw output from the parser.
-   * @param {Boolean} `returnState` Adds the state to a `state` property on the returned regex. Useful for implementors and debugging.
-   * @return {RegExp}
-   * @api public
-   */
-
-  picomatch$1.compileRe = (state, options, returnOutput = false, returnState = false) => {
-    if (returnOutput === true) {
-      return state.output;
-    }
-
-    const opts = options || {};
-    const prepend = opts.contains ? '' : '^';
-    const append = opts.contains ? '' : '$';
-
-    let source = `${prepend}(?:${state.output})${append}`;
-    if (state && state.negated === true) {
-      source = `^(?!${source}).*$`;
-    }
-
-    const regex = picomatch$1.toRegex(source, options);
-    if (returnState === true) {
-      regex.state = state;
-    }
-
-    return regex;
-  };
-
-  /**
-   * Create a regular expression from a parsed glob pattern.
-   *
-   * ```js
-   * const picomatch = require('picomatch');
-   * const state = picomatch.parse('*.js');
-   * // picomatch.compileRe(state[, options]);
-   *
-   * console.log(picomatch.compileRe(state));
-   * //=> /^(?:(?!\.)(?=.)[^/]*?\.js)$/
-   * ```
-   * @param {String} `state` The object returned from the `.parse` method.
-   * @param {Object} `options`
-   * @param {Boolean} `returnOutput` Implementors may use this argument to return the compiled output, instead of a regular expression. This is not exposed on the options to prevent end-users from mutating the result.
-   * @param {Boolean} `returnState` Implementors may use this argument to return the state from the parsed glob with the returned regular expression.
-   * @return {RegExp} Returns a regex created from the given pattern.
-   * @api public
-   */
-
-  picomatch$1.makeRe = (input, options = {}, returnOutput = false, returnState = false) => {
-    if (!input || typeof input !== 'string') {
-      throw new TypeError('Expected a non-empty string');
-    }
-
-    let parsed = { negated: false, fastpaths: true };
-
-    if (options.fastpaths !== false && (input[0] === '.' || input[0] === '*')) {
-      parsed.output = parse.fastpaths(input, options);
-    }
-
-    if (!parsed.output) {
-      parsed = parse(input, options);
-    }
-
-    return picomatch$1.compileRe(parsed, options, returnOutput, returnState);
-  };
-
-  /**
-   * Create a regular expression from the given regex source string.
-   *
-   * ```js
-   * const picomatch = require('picomatch');
-   * // picomatch.toRegex(source[, options]);
-   *
-   * const { output } = picomatch.parse('*.js');
-   * console.log(picomatch.toRegex(output));
-   * //=> /^(?:(?!\.)(?=.)[^/]*?\.js)$/
-   * ```
-   * @param {String} `source` Regular expression source string.
-   * @param {Object} `options`
-   * @return {RegExp}
-   * @api public
-   */
-
-  picomatch$1.toRegex = (source, options) => {
-    try {
-      const opts = options || {};
-      return new RegExp(source, opts.flags || (opts.nocase ? 'i' : ''));
-    } catch (err) {
-      if (options && options.debug === true) throw err;
-      return /$^/;
-    }
-  };
-
-  /**
-   * Picomatch constants.
-   * @return {Object}
-   */
-
-  picomatch$1.constants = constants;
-
-  /**
-   * Expose "picomatch"
-   */
-
-  var picomatch_1 = picomatch$1;
-
-  var posix = picomatch_1;
-
-  var picomatch = /*@__PURE__*/getDefaultExportFromCjs(posix);
+  	  input = REPLACEMENTS[input] || input;
+
+  	  const opts = { ...options };
+  	  const max = typeof opts.maxLength === 'number' ? Math.min(MAX_LENGTH, opts.maxLength) : MAX_LENGTH;
+
+  	  let len = input.length;
+  	  if (len > max) {
+  	    throw new SyntaxError(`Input length: ${len}, exceeds maximum allowed length: ${max}`);
+  	  }
+
+  	  const bos = { type: 'bos', value: '', output: opts.prepend || '' };
+  	  const tokens = [bos];
+
+  	  const capture = opts.capture ? '' : '?:';
+
+  	  // create constants based on platform, for windows or posix
+  	  const PLATFORM_CHARS = constants.globChars(opts.windows);
+  	  const EXTGLOB_CHARS = constants.extglobChars(PLATFORM_CHARS);
+
+  	  const {
+  	    DOT_LITERAL,
+  	    PLUS_LITERAL,
+  	    SLASH_LITERAL,
+  	    ONE_CHAR,
+  	    DOTS_SLASH,
+  	    NO_DOT,
+  	    NO_DOT_SLASH,
+  	    NO_DOTS_SLASH,
+  	    QMARK,
+  	    QMARK_NO_DOT,
+  	    STAR,
+  	    START_ANCHOR
+  	  } = PLATFORM_CHARS;
+
+  	  const globstar = opts => {
+  	    return `(${capture}(?:(?!${START_ANCHOR}${opts.dot ? DOTS_SLASH : DOT_LITERAL}).)*?)`;
+  	  };
+
+  	  const nodot = opts.dot ? '' : NO_DOT;
+  	  const qmarkNoDot = opts.dot ? QMARK : QMARK_NO_DOT;
+  	  let star = opts.bash === true ? globstar(opts) : STAR;
+
+  	  if (opts.capture) {
+  	    star = `(${star})`;
+  	  }
+
+  	  // minimatch options support
+  	  if (typeof opts.noext === 'boolean') {
+  	    opts.noextglob = opts.noext;
+  	  }
+
+  	  const state = {
+  	    input,
+  	    index: -1,
+  	    start: 0,
+  	    dot: opts.dot === true,
+  	    consumed: '',
+  	    output: '',
+  	    prefix: '',
+  	    backtrack: false,
+  	    negated: false,
+  	    brackets: 0,
+  	    braces: 0,
+  	    parens: 0,
+  	    quotes: 0,
+  	    globstar: false,
+  	    tokens
+  	  };
+
+  	  input = utils.removePrefix(input, state);
+  	  len = input.length;
+
+  	  const extglobs = [];
+  	  const braces = [];
+  	  const stack = [];
+  	  let prev = bos;
+  	  let value;
+
+  	  /**
+  	   * Tokenizing helpers
+  	   */
+
+  	  const eos = () => state.index === len - 1;
+  	  const peek = state.peek = (n = 1) => input[state.index + n];
+  	  const advance = state.advance = () => input[++state.index] || '';
+  	  const remaining = () => input.slice(state.index + 1);
+  	  const consume = (value = '', num = 0) => {
+  	    state.consumed += value;
+  	    state.index += num;
+  	  };
+
+  	  const append = token => {
+  	    state.output += token.output != null ? token.output : token.value;
+  	    consume(token.value);
+  	  };
+
+  	  const negate = () => {
+  	    let count = 1;
+
+  	    while (peek() === '!' && (peek(2) !== '(' || peek(3) === '?')) {
+  	      advance();
+  	      state.start++;
+  	      count++;
+  	    }
+
+  	    if (count % 2 === 0) {
+  	      return false;
+  	    }
+
+  	    state.negated = true;
+  	    state.start++;
+  	    return true;
+  	  };
+
+  	  const increment = type => {
+  	    state[type]++;
+  	    stack.push(type);
+  	  };
+
+  	  const decrement = type => {
+  	    state[type]--;
+  	    stack.pop();
+  	  };
+
+  	  /**
+  	   * Push tokens onto the tokens array. This helper speeds up
+  	   * tokenizing by 1) helping us avoid backtracking as much as possible,
+  	   * and 2) helping us avoid creating extra tokens when consecutive
+  	   * characters are plain text. This improves performance and simplifies
+  	   * lookbehinds.
+  	   */
+
+  	  const push = tok => {
+  	    if (prev.type === 'globstar') {
+  	      const isBrace = state.braces > 0 && (tok.type === 'comma' || tok.type === 'brace');
+  	      const isExtglob = tok.extglob === true || (extglobs.length && (tok.type === 'pipe' || tok.type === 'paren'));
+
+  	      if (tok.type !== 'slash' && tok.type !== 'paren' && !isBrace && !isExtglob) {
+  	        state.output = state.output.slice(0, -prev.output.length);
+  	        prev.type = 'star';
+  	        prev.value = '*';
+  	        prev.output = star;
+  	        state.output += prev.output;
+  	      }
+  	    }
+
+  	    if (extglobs.length && tok.type !== 'paren') {
+  	      extglobs[extglobs.length - 1].inner += tok.value;
+  	    }
+
+  	    if (tok.value || tok.output) append(tok);
+  	    if (prev && prev.type === 'text' && tok.type === 'text') {
+  	      prev.output = (prev.output || prev.value) + tok.value;
+  	      prev.value += tok.value;
+  	      return;
+  	    }
+
+  	    tok.prev = prev;
+  	    tokens.push(tok);
+  	    prev = tok;
+  	  };
+
+  	  const extglobOpen = (type, value) => {
+  	    const token = { ...EXTGLOB_CHARS[value], conditions: 1, inner: '' };
+
+  	    token.prev = prev;
+  	    token.parens = state.parens;
+  	    token.output = state.output;
+  	    const output = (opts.capture ? '(' : '') + token.open;
+
+  	    increment('parens');
+  	    push({ type, value, output: state.output ? '' : ONE_CHAR });
+  	    push({ type: 'paren', extglob: true, value: advance(), output });
+  	    extglobs.push(token);
+  	  };
+
+  	  const extglobClose = token => {
+  	    let output = token.close + (opts.capture ? ')' : '');
+  	    let rest;
+
+  	    if (token.type === 'negate') {
+  	      let extglobStar = star;
+
+  	      if (token.inner && token.inner.length > 1 && token.inner.includes('/')) {
+  	        extglobStar = globstar(opts);
+  	      }
+
+  	      if (extglobStar !== star || eos() || /^\)+$/.test(remaining())) {
+  	        output = token.close = `)$))${extglobStar}`;
+  	      }
+
+  	      if (token.inner.includes('*') && (rest = remaining()) && /^\.[^\\/.]+$/.test(rest)) {
+  	        // Any non-magical string (`.ts`) or even nested expression (`.{ts,tsx}`) can follow after the closing parenthesis.
+  	        // In this case, we need to parse the string and use it in the output of the original pattern.
+  	        // Suitable patterns: `/!(*.d).ts`, `/!(*.d).{ts,tsx}`, `**/!(*-dbg).@(js)`.
+  	        //
+  	        // Disabling the `fastpaths` option due to a problem with parsing strings as `.ts` in the pattern like `**/!(*.d).ts`.
+  	        const expression = parse(rest, { ...options, fastpaths: false }).output;
+
+  	        output = token.close = `)${expression})${extglobStar})`;
+  	      }
+
+  	      if (token.prev.type === 'bos') {
+  	        state.negatedExtglob = true;
+  	      }
+  	    }
+
+  	    push({ type: 'paren', extglob: true, value, output });
+  	    decrement('parens');
+  	  };
+
+  	  /**
+  	   * Fast paths
+  	   */
+
+  	  if (opts.fastpaths !== false && !/(^[*!]|[/()[\]{}"])/.test(input)) {
+  	    let backslashes = false;
+
+  	    let output = input.replace(REGEX_SPECIAL_CHARS_BACKREF, (m, esc, chars, first, rest, index) => {
+  	      if (first === '\\') {
+  	        backslashes = true;
+  	        return m;
+  	      }
+
+  	      if (first === '?') {
+  	        if (esc) {
+  	          return esc + first + (rest ? QMARK.repeat(rest.length) : '');
+  	        }
+  	        if (index === 0) {
+  	          return qmarkNoDot + (rest ? QMARK.repeat(rest.length) : '');
+  	        }
+  	        return QMARK.repeat(chars.length);
+  	      }
+
+  	      if (first === '.') {
+  	        return DOT_LITERAL.repeat(chars.length);
+  	      }
+
+  	      if (first === '*') {
+  	        if (esc) {
+  	          return esc + first + (rest ? star : '');
+  	        }
+  	        return star;
+  	      }
+  	      return esc ? m : `\\${m}`;
+  	    });
+
+  	    if (backslashes === true) {
+  	      if (opts.unescape === true) {
+  	        output = output.replace(/\\/g, '');
+  	      } else {
+  	        output = output.replace(/\\+/g, m => {
+  	          return m.length % 2 === 0 ? '\\\\' : (m ? '\\' : '');
+  	        });
+  	      }
+  	    }
+
+  	    if (output === input && opts.contains === true) {
+  	      state.output = input;
+  	      return state;
+  	    }
+
+  	    state.output = utils.wrapOutput(output, state, options);
+  	    return state;
+  	  }
+
+  	  /**
+  	   * Tokenize input until we reach end-of-string
+  	   */
+
+  	  while (!eos()) {
+  	    value = advance();
+
+  	    if (value === '\u0000') {
+  	      continue;
+  	    }
+
+  	    /**
+  	     * Escaped characters
+  	     */
+
+  	    if (value === '\\') {
+  	      const next = peek();
+
+  	      if (next === '/' && opts.bash !== true) {
+  	        continue;
+  	      }
+
+  	      if (next === '.' || next === ';') {
+  	        continue;
+  	      }
+
+  	      if (!next) {
+  	        value += '\\';
+  	        push({ type: 'text', value });
+  	        continue;
+  	      }
+
+  	      // collapse slashes to reduce potential for exploits
+  	      const match = /^\\+/.exec(remaining());
+  	      let slashes = 0;
+
+  	      if (match && match[0].length > 2) {
+  	        slashes = match[0].length;
+  	        state.index += slashes;
+  	        if (slashes % 2 !== 0) {
+  	          value += '\\';
+  	        }
+  	      }
+
+  	      if (opts.unescape === true) {
+  	        value = advance();
+  	      } else {
+  	        value += advance();
+  	      }
+
+  	      if (state.brackets === 0) {
+  	        push({ type: 'text', value });
+  	        continue;
+  	      }
+  	    }
+
+  	    /**
+  	     * If we're inside a regex character class, continue
+  	     * until we reach the closing bracket.
+  	     */
+
+  	    if (state.brackets > 0 && (value !== ']' || prev.value === '[' || prev.value === '[^')) {
+  	      if (opts.posix !== false && value === ':') {
+  	        const inner = prev.value.slice(1);
+  	        if (inner.includes('[')) {
+  	          prev.posix = true;
+
+  	          if (inner.includes(':')) {
+  	            const idx = prev.value.lastIndexOf('[');
+  	            const pre = prev.value.slice(0, idx);
+  	            const rest = prev.value.slice(idx + 2);
+  	            const posix = POSIX_REGEX_SOURCE[rest];
+  	            if (posix) {
+  	              prev.value = pre + posix;
+  	              state.backtrack = true;
+  	              advance();
+
+  	              if (!bos.output && tokens.indexOf(prev) === 1) {
+  	                bos.output = ONE_CHAR;
+  	              }
+  	              continue;
+  	            }
+  	          }
+  	        }
+  	      }
+
+  	      if ((value === '[' && peek() !== ':') || (value === '-' && peek() === ']')) {
+  	        value = `\\${value}`;
+  	      }
+
+  	      if (value === ']' && (prev.value === '[' || prev.value === '[^')) {
+  	        value = `\\${value}`;
+  	      }
+
+  	      if (opts.posix === true && value === '!' && prev.value === '[') {
+  	        value = '^';
+  	      }
+
+  	      prev.value += value;
+  	      append({ value });
+  	      continue;
+  	    }
+
+  	    /**
+  	     * If we're inside a quoted string, continue
+  	     * until we reach the closing double quote.
+  	     */
+
+  	    if (state.quotes === 1 && value !== '"') {
+  	      value = utils.escapeRegex(value);
+  	      prev.value += value;
+  	      append({ value });
+  	      continue;
+  	    }
+
+  	    /**
+  	     * Double quotes
+  	     */
+
+  	    if (value === '"') {
+  	      state.quotes = state.quotes === 1 ? 0 : 1;
+  	      if (opts.keepQuotes === true) {
+  	        push({ type: 'text', value });
+  	      }
+  	      continue;
+  	    }
+
+  	    /**
+  	     * Parentheses
+  	     */
+
+  	    if (value === '(') {
+  	      increment('parens');
+  	      push({ type: 'paren', value });
+  	      continue;
+  	    }
+
+  	    if (value === ')') {
+  	      if (state.parens === 0 && opts.strictBrackets === true) {
+  	        throw new SyntaxError(syntaxError('opening', '('));
+  	      }
+
+  	      const extglob = extglobs[extglobs.length - 1];
+  	      if (extglob && state.parens === extglob.parens + 1) {
+  	        extglobClose(extglobs.pop());
+  	        continue;
+  	      }
+
+  	      push({ type: 'paren', value, output: state.parens ? ')' : '\\)' });
+  	      decrement('parens');
+  	      continue;
+  	    }
+
+  	    /**
+  	     * Square brackets
+  	     */
+
+  	    if (value === '[') {
+  	      if (opts.nobracket === true || !remaining().includes(']')) {
+  	        if (opts.nobracket !== true && opts.strictBrackets === true) {
+  	          throw new SyntaxError(syntaxError('closing', ']'));
+  	        }
+
+  	        value = `\\${value}`;
+  	      } else {
+  	        increment('brackets');
+  	      }
+
+  	      push({ type: 'bracket', value });
+  	      continue;
+  	    }
+
+  	    if (value === ']') {
+  	      if (opts.nobracket === true || (prev && prev.type === 'bracket' && prev.value.length === 1)) {
+  	        push({ type: 'text', value, output: `\\${value}` });
+  	        continue;
+  	      }
+
+  	      if (state.brackets === 0) {
+  	        if (opts.strictBrackets === true) {
+  	          throw new SyntaxError(syntaxError('opening', '['));
+  	        }
+
+  	        push({ type: 'text', value, output: `\\${value}` });
+  	        continue;
+  	      }
+
+  	      decrement('brackets');
+
+  	      const prevValue = prev.value.slice(1);
+  	      if (prev.posix !== true && prevValue[0] === '^' && !prevValue.includes('/')) {
+  	        value = `/${value}`;
+  	      }
+
+  	      prev.value += value;
+  	      append({ value });
+
+  	      // when literal brackets are explicitly disabled
+  	      // assume we should match with a regex character class
+  	      if (opts.literalBrackets === false || utils.hasRegexChars(prevValue)) {
+  	        continue;
+  	      }
+
+  	      const escaped = utils.escapeRegex(prev.value);
+  	      state.output = state.output.slice(0, -prev.value.length);
+
+  	      // when literal brackets are explicitly enabled
+  	      // assume we should escape the brackets to match literal characters
+  	      if (opts.literalBrackets === true) {
+  	        state.output += escaped;
+  	        prev.value = escaped;
+  	        continue;
+  	      }
+
+  	      // when the user specifies nothing, try to match both
+  	      prev.value = `(${capture}${escaped}|${prev.value})`;
+  	      state.output += prev.value;
+  	      continue;
+  	    }
+
+  	    /**
+  	     * Braces
+  	     */
+
+  	    if (value === '{' && opts.nobrace !== true) {
+  	      increment('braces');
+
+  	      const open = {
+  	        type: 'brace',
+  	        value,
+  	        output: '(',
+  	        outputIndex: state.output.length,
+  	        tokensIndex: state.tokens.length
+  	      };
+
+  	      braces.push(open);
+  	      push(open);
+  	      continue;
+  	    }
+
+  	    if (value === '}') {
+  	      const brace = braces[braces.length - 1];
+
+  	      if (opts.nobrace === true || !brace) {
+  	        push({ type: 'text', value, output: value });
+  	        continue;
+  	      }
+
+  	      let output = ')';
+
+  	      if (brace.dots === true) {
+  	        const arr = tokens.slice();
+  	        const range = [];
+
+  	        for (let i = arr.length - 1; i >= 0; i--) {
+  	          tokens.pop();
+  	          if (arr[i].type === 'brace') {
+  	            break;
+  	          }
+  	          if (arr[i].type !== 'dots') {
+  	            range.unshift(arr[i].value);
+  	          }
+  	        }
+
+  	        output = expandRange(range, opts);
+  	        state.backtrack = true;
+  	      }
+
+  	      if (brace.comma !== true && brace.dots !== true) {
+  	        const out = state.output.slice(0, brace.outputIndex);
+  	        const toks = state.tokens.slice(brace.tokensIndex);
+  	        brace.value = brace.output = '\\{';
+  	        value = output = '\\}';
+  	        state.output = out;
+  	        for (const t of toks) {
+  	          state.output += (t.output || t.value);
+  	        }
+  	      }
+
+  	      push({ type: 'brace', value, output });
+  	      decrement('braces');
+  	      braces.pop();
+  	      continue;
+  	    }
+
+  	    /**
+  	     * Pipes
+  	     */
+
+  	    if (value === '|') {
+  	      if (extglobs.length > 0) {
+  	        extglobs[extglobs.length - 1].conditions++;
+  	      }
+  	      push({ type: 'text', value });
+  	      continue;
+  	    }
+
+  	    /**
+  	     * Commas
+  	     */
+
+  	    if (value === ',') {
+  	      let output = value;
+
+  	      const brace = braces[braces.length - 1];
+  	      if (brace && stack[stack.length - 1] === 'braces') {
+  	        brace.comma = true;
+  	        output = '|';
+  	      }
+
+  	      push({ type: 'comma', value, output });
+  	      continue;
+  	    }
+
+  	    /**
+  	     * Slashes
+  	     */
+
+  	    if (value === '/') {
+  	      // if the beginning of the glob is "./", advance the start
+  	      // to the current index, and don't add the "./" characters
+  	      // to the state. This greatly simplifies lookbehinds when
+  	      // checking for BOS characters like "!" and "." (not "./")
+  	      if (prev.type === 'dot' && state.index === state.start + 1) {
+  	        state.start = state.index + 1;
+  	        state.consumed = '';
+  	        state.output = '';
+  	        tokens.pop();
+  	        prev = bos; // reset "prev" to the first token
+  	        continue;
+  	      }
+
+  	      push({ type: 'slash', value, output: SLASH_LITERAL });
+  	      continue;
+  	    }
+
+  	    /**
+  	     * Dots
+  	     */
+
+  	    if (value === '.') {
+  	      if (state.braces > 0 && prev.type === 'dot') {
+  	        if (prev.value === '.') prev.output = DOT_LITERAL;
+  	        const brace = braces[braces.length - 1];
+  	        prev.type = 'dots';
+  	        prev.output += value;
+  	        prev.value += value;
+  	        brace.dots = true;
+  	        continue;
+  	      }
+
+  	      if ((state.braces + state.parens) === 0 && prev.type !== 'bos' && prev.type !== 'slash') {
+  	        push({ type: 'text', value, output: DOT_LITERAL });
+  	        continue;
+  	      }
+
+  	      push({ type: 'dot', value, output: DOT_LITERAL });
+  	      continue;
+  	    }
+
+  	    /**
+  	     * Question marks
+  	     */
+
+  	    if (value === '?') {
+  	      const isGroup = prev && prev.value === '(';
+  	      if (!isGroup && opts.noextglob !== true && peek() === '(' && peek(2) !== '?') {
+  	        extglobOpen('qmark', value);
+  	        continue;
+  	      }
+
+  	      if (prev && prev.type === 'paren') {
+  	        const next = peek();
+  	        let output = value;
+
+  	        if ((prev.value === '(' && !/[!=<:]/.test(next)) || (next === '<' && !/<([!=]|\w+>)/.test(remaining()))) {
+  	          output = `\\${value}`;
+  	        }
+
+  	        push({ type: 'text', value, output });
+  	        continue;
+  	      }
+
+  	      if (opts.dot !== true && (prev.type === 'slash' || prev.type === 'bos')) {
+  	        push({ type: 'qmark', value, output: QMARK_NO_DOT });
+  	        continue;
+  	      }
+
+  	      push({ type: 'qmark', value, output: QMARK });
+  	      continue;
+  	    }
+
+  	    /**
+  	     * Exclamation
+  	     */
+
+  	    if (value === '!') {
+  	      if (opts.noextglob !== true && peek() === '(') {
+  	        if (peek(2) !== '?' || !/[!=<:]/.test(peek(3))) {
+  	          extglobOpen('negate', value);
+  	          continue;
+  	        }
+  	      }
+
+  	      if (opts.nonegate !== true && state.index === 0) {
+  	        negate();
+  	        continue;
+  	      }
+  	    }
+
+  	    /**
+  	     * Plus
+  	     */
+
+  	    if (value === '+') {
+  	      if (opts.noextglob !== true && peek() === '(' && peek(2) !== '?') {
+  	        extglobOpen('plus', value);
+  	        continue;
+  	      }
+
+  	      if ((prev && prev.value === '(') || opts.regex === false) {
+  	        push({ type: 'plus', value, output: PLUS_LITERAL });
+  	        continue;
+  	      }
+
+  	      if ((prev && (prev.type === 'bracket' || prev.type === 'paren' || prev.type === 'brace')) || state.parens > 0) {
+  	        push({ type: 'plus', value });
+  	        continue;
+  	      }
+
+  	      push({ type: 'plus', value: PLUS_LITERAL });
+  	      continue;
+  	    }
+
+  	    /**
+  	     * Plain text
+  	     */
+
+  	    if (value === '@') {
+  	      if (opts.noextglob !== true && peek() === '(' && peek(2) !== '?') {
+  	        push({ type: 'at', extglob: true, value, output: '' });
+  	        continue;
+  	      }
+
+  	      push({ type: 'text', value });
+  	      continue;
+  	    }
+
+  	    /**
+  	     * Plain text
+  	     */
+
+  	    if (value !== '*') {
+  	      if (value === '$' || value === '^') {
+  	        value = `\\${value}`;
+  	      }
+
+  	      const match = REGEX_NON_SPECIAL_CHARS.exec(remaining());
+  	      if (match) {
+  	        value += match[0];
+  	        state.index += match[0].length;
+  	      }
+
+  	      push({ type: 'text', value });
+  	      continue;
+  	    }
+
+  	    /**
+  	     * Stars
+  	     */
+
+  	    if (prev && (prev.type === 'globstar' || prev.star === true)) {
+  	      prev.type = 'star';
+  	      prev.star = true;
+  	      prev.value += value;
+  	      prev.output = star;
+  	      state.backtrack = true;
+  	      state.globstar = true;
+  	      consume(value);
+  	      continue;
+  	    }
+
+  	    let rest = remaining();
+  	    if (opts.noextglob !== true && /^\([^?]/.test(rest)) {
+  	      extglobOpen('star', value);
+  	      continue;
+  	    }
+
+  	    if (prev.type === 'star') {
+  	      if (opts.noglobstar === true) {
+  	        consume(value);
+  	        continue;
+  	      }
+
+  	      const prior = prev.prev;
+  	      const before = prior.prev;
+  	      const isStart = prior.type === 'slash' || prior.type === 'bos';
+  	      const afterStar = before && (before.type === 'star' || before.type === 'globstar');
+
+  	      if (opts.bash === true && (!isStart || (rest[0] && rest[0] !== '/'))) {
+  	        push({ type: 'star', value, output: '' });
+  	        continue;
+  	      }
+
+  	      const isBrace = state.braces > 0 && (prior.type === 'comma' || prior.type === 'brace');
+  	      const isExtglob = extglobs.length && (prior.type === 'pipe' || prior.type === 'paren');
+  	      if (!isStart && prior.type !== 'paren' && !isBrace && !isExtglob) {
+  	        push({ type: 'star', value, output: '' });
+  	        continue;
+  	      }
+
+  	      // strip consecutive `/**/`
+  	      while (rest.slice(0, 3) === '/**') {
+  	        const after = input[state.index + 4];
+  	        if (after && after !== '/') {
+  	          break;
+  	        }
+  	        rest = rest.slice(3);
+  	        consume('/**', 3);
+  	      }
+
+  	      if (prior.type === 'bos' && eos()) {
+  	        prev.type = 'globstar';
+  	        prev.value += value;
+  	        prev.output = globstar(opts);
+  	        state.output = prev.output;
+  	        state.globstar = true;
+  	        consume(value);
+  	        continue;
+  	      }
+
+  	      if (prior.type === 'slash' && prior.prev.type !== 'bos' && !afterStar && eos()) {
+  	        state.output = state.output.slice(0, -(prior.output + prev.output).length);
+  	        prior.output = `(?:${prior.output}`;
+
+  	        prev.type = 'globstar';
+  	        prev.output = globstar(opts) + (opts.strictSlashes ? ')' : '|$)');
+  	        prev.value += value;
+  	        state.globstar = true;
+  	        state.output += prior.output + prev.output;
+  	        consume(value);
+  	        continue;
+  	      }
+
+  	      if (prior.type === 'slash' && prior.prev.type !== 'bos' && rest[0] === '/') {
+  	        const end = rest[1] !== void 0 ? '|$' : '';
+
+  	        state.output = state.output.slice(0, -(prior.output + prev.output).length);
+  	        prior.output = `(?:${prior.output}`;
+
+  	        prev.type = 'globstar';
+  	        prev.output = `${globstar(opts)}${SLASH_LITERAL}|${SLASH_LITERAL}${end})`;
+  	        prev.value += value;
+
+  	        state.output += prior.output + prev.output;
+  	        state.globstar = true;
+
+  	        consume(value + advance());
+
+  	        push({ type: 'slash', value: '/', output: '' });
+  	        continue;
+  	      }
+
+  	      if (prior.type === 'bos' && rest[0] === '/') {
+  	        prev.type = 'globstar';
+  	        prev.value += value;
+  	        prev.output = `(?:^|${SLASH_LITERAL}|${globstar(opts)}${SLASH_LITERAL})`;
+  	        state.output = prev.output;
+  	        state.globstar = true;
+  	        consume(value + advance());
+  	        push({ type: 'slash', value: '/', output: '' });
+  	        continue;
+  	      }
+
+  	      // remove single star from output
+  	      state.output = state.output.slice(0, -prev.output.length);
+
+  	      // reset previous token to globstar
+  	      prev.type = 'globstar';
+  	      prev.output = globstar(opts);
+  	      prev.value += value;
+
+  	      // reset output with globstar
+  	      state.output += prev.output;
+  	      state.globstar = true;
+  	      consume(value);
+  	      continue;
+  	    }
+
+  	    const token = { type: 'star', value, output: star };
+
+  	    if (opts.bash === true) {
+  	      token.output = '.*?';
+  	      if (prev.type === 'bos' || prev.type === 'slash') {
+  	        token.output = nodot + token.output;
+  	      }
+  	      push(token);
+  	      continue;
+  	    }
+
+  	    if (prev && (prev.type === 'bracket' || prev.type === 'paren') && opts.regex === true) {
+  	      token.output = value;
+  	      push(token);
+  	      continue;
+  	    }
+
+  	    if (state.index === state.start || prev.type === 'slash' || prev.type === 'dot') {
+  	      if (prev.type === 'dot') {
+  	        state.output += NO_DOT_SLASH;
+  	        prev.output += NO_DOT_SLASH;
+
+  	      } else if (opts.dot === true) {
+  	        state.output += NO_DOTS_SLASH;
+  	        prev.output += NO_DOTS_SLASH;
+
+  	      } else {
+  	        state.output += nodot;
+  	        prev.output += nodot;
+  	      }
+
+  	      if (peek() !== '*') {
+  	        state.output += ONE_CHAR;
+  	        prev.output += ONE_CHAR;
+  	      }
+  	    }
+
+  	    push(token);
+  	  }
+
+  	  while (state.brackets > 0) {
+  	    if (opts.strictBrackets === true) throw new SyntaxError(syntaxError('closing', ']'));
+  	    state.output = utils.escapeLast(state.output, '[');
+  	    decrement('brackets');
+  	  }
+
+  	  while (state.parens > 0) {
+  	    if (opts.strictBrackets === true) throw new SyntaxError(syntaxError('closing', ')'));
+  	    state.output = utils.escapeLast(state.output, '(');
+  	    decrement('parens');
+  	  }
+
+  	  while (state.braces > 0) {
+  	    if (opts.strictBrackets === true) throw new SyntaxError(syntaxError('closing', '}'));
+  	    state.output = utils.escapeLast(state.output, '{');
+  	    decrement('braces');
+  	  }
+
+  	  if (opts.strictSlashes !== true && (prev.type === 'star' || prev.type === 'bracket')) {
+  	    push({ type: 'maybe_slash', value: '', output: `${SLASH_LITERAL}?` });
+  	  }
+
+  	  // rebuild the output if we had to backtrack at any point
+  	  if (state.backtrack === true) {
+  	    state.output = '';
+
+  	    for (const token of state.tokens) {
+  	      state.output += token.output != null ? token.output : token.value;
+
+  	      if (token.suffix) {
+  	        state.output += token.suffix;
+  	      }
+  	    }
+  	  }
+
+  	  return state;
+  	};
+
+  	/**
+  	 * Fast paths for creating regular expressions for common glob patterns.
+  	 * This can significantly speed up processing and has very little downside
+  	 * impact when none of the fast paths match.
+  	 */
+
+  	parse.fastpaths = (input, options) => {
+  	  const opts = { ...options };
+  	  const max = typeof opts.maxLength === 'number' ? Math.min(MAX_LENGTH, opts.maxLength) : MAX_LENGTH;
+  	  const len = input.length;
+  	  if (len > max) {
+  	    throw new SyntaxError(`Input length: ${len}, exceeds maximum allowed length: ${max}`);
+  	  }
+
+  	  input = REPLACEMENTS[input] || input;
+
+  	  // create constants based on platform, for windows or posix
+  	  const {
+  	    DOT_LITERAL,
+  	    SLASH_LITERAL,
+  	    ONE_CHAR,
+  	    DOTS_SLASH,
+  	    NO_DOT,
+  	    NO_DOTS,
+  	    NO_DOTS_SLASH,
+  	    STAR,
+  	    START_ANCHOR
+  	  } = constants.globChars(opts.windows);
+
+  	  const nodot = opts.dot ? NO_DOTS : NO_DOT;
+  	  const slashDot = opts.dot ? NO_DOTS_SLASH : NO_DOT;
+  	  const capture = opts.capture ? '' : '?:';
+  	  const state = { negated: false, prefix: '' };
+  	  let star = opts.bash === true ? '.*?' : STAR;
+
+  	  if (opts.capture) {
+  	    star = `(${star})`;
+  	  }
+
+  	  const globstar = opts => {
+  	    if (opts.noglobstar === true) return star;
+  	    return `(${capture}(?:(?!${START_ANCHOR}${opts.dot ? DOTS_SLASH : DOT_LITERAL}).)*?)`;
+  	  };
+
+  	  const create = str => {
+  	    switch (str) {
+  	      case '*':
+  	        return `${nodot}${ONE_CHAR}${star}`;
+
+  	      case '.*':
+  	        return `${DOT_LITERAL}${ONE_CHAR}${star}`;
+
+  	      case '*.*':
+  	        return `${nodot}${star}${DOT_LITERAL}${ONE_CHAR}${star}`;
+
+  	      case '*/*':
+  	        return `${nodot}${star}${SLASH_LITERAL}${ONE_CHAR}${slashDot}${star}`;
+
+  	      case '**':
+  	        return nodot + globstar(opts);
+
+  	      case '**/*':
+  	        return `(?:${nodot}${globstar(opts)}${SLASH_LITERAL})?${slashDot}${ONE_CHAR}${star}`;
+
+  	      case '**/*.*':
+  	        return `(?:${nodot}${globstar(opts)}${SLASH_LITERAL})?${slashDot}${star}${DOT_LITERAL}${ONE_CHAR}${star}`;
+
+  	      case '**/.*':
+  	        return `(?:${nodot}${globstar(opts)}${SLASH_LITERAL})?${DOT_LITERAL}${ONE_CHAR}${star}`;
+
+  	      default: {
+  	        const match = /^(.*?)\.(\w+)$/.exec(str);
+  	        if (!match) return;
+
+  	        const source = create(match[1]);
+  	        if (!source) return;
+
+  	        return source + DOT_LITERAL + match[2];
+  	      }
+  	    }
+  	  };
+
+  	  const output = utils.removePrefix(input, state);
+  	  let source = create(output);
+
+  	  if (source && opts.strictSlashes !== true) {
+  	    source += `${SLASH_LITERAL}?`;
+  	  }
+
+  	  return source;
+  	};
+
+  	parse_1 = parse;
+  	return parse_1;
+  }
+
+  var picomatch_1;
+  var hasRequiredPicomatch;
+
+  function requirePicomatch () {
+  	if (hasRequiredPicomatch) return picomatch_1;
+  	hasRequiredPicomatch = 1;
+
+  	const scan = /*@__PURE__*/ requireScan();
+  	const parse = /*@__PURE__*/ requireParse();
+  	const utils = /*@__PURE__*/ requireUtils();
+  	const constants = /*@__PURE__*/ requireConstants();
+  	const isObject = val => val && typeof val === 'object' && !Array.isArray(val);
+
+  	/**
+  	 * Creates a matcher function from one or more glob patterns. The
+  	 * returned function takes a string to match as its first argument,
+  	 * and returns true if the string is a match. The returned matcher
+  	 * function also takes a boolean as the second argument that, when true,
+  	 * returns an object with additional information.
+  	 *
+  	 * ```js
+  	 * const picomatch = require('picomatch');
+  	 * // picomatch(glob[, options]);
+  	 *
+  	 * const isMatch = picomatch('*.!(*a)');
+  	 * console.log(isMatch('a.a')); //=> false
+  	 * console.log(isMatch('a.b')); //=> true
+  	 * ```
+  	 * @name picomatch
+  	 * @param {String|Array} `globs` One or more glob patterns.
+  	 * @param {Object=} `options`
+  	 * @return {Function=} Returns a matcher function.
+  	 * @api public
+  	 */
+
+  	const picomatch = (glob, options, returnState = false) => {
+  	  if (Array.isArray(glob)) {
+  	    const fns = glob.map(input => picomatch(input, options, returnState));
+  	    const arrayMatcher = str => {
+  	      for (const isMatch of fns) {
+  	        const state = isMatch(str);
+  	        if (state) return state;
+  	      }
+  	      return false;
+  	    };
+  	    return arrayMatcher;
+  	  }
+
+  	  const isState = isObject(glob) && glob.tokens && glob.input;
+
+  	  if (glob === '' || (typeof glob !== 'string' && !isState)) {
+  	    throw new TypeError('Expected pattern to be a non-empty string');
+  	  }
+
+  	  const opts = options || {};
+  	  const posix = opts.windows;
+  	  const regex = isState
+  	    ? picomatch.compileRe(glob, options)
+  	    : picomatch.makeRe(glob, options, false, true);
+
+  	  const state = regex.state;
+  	  delete regex.state;
+
+  	  let isIgnored = () => false;
+  	  if (opts.ignore) {
+  	    const ignoreOpts = { ...options, ignore: null, onMatch: null, onResult: null };
+  	    isIgnored = picomatch(opts.ignore, ignoreOpts, returnState);
+  	  }
+
+  	  const matcher = (input, returnObject = false) => {
+  	    const { isMatch, match, output } = picomatch.test(input, regex, options, { glob, posix });
+  	    const result = { glob, state, regex, posix, input, output, match, isMatch };
+
+  	    if (typeof opts.onResult === 'function') {
+  	      opts.onResult(result);
+  	    }
+
+  	    if (isMatch === false) {
+  	      result.isMatch = false;
+  	      return returnObject ? result : false;
+  	    }
+
+  	    if (isIgnored(input)) {
+  	      if (typeof opts.onIgnore === 'function') {
+  	        opts.onIgnore(result);
+  	      }
+  	      result.isMatch = false;
+  	      return returnObject ? result : false;
+  	    }
+
+  	    if (typeof opts.onMatch === 'function') {
+  	      opts.onMatch(result);
+  	    }
+  	    return returnObject ? result : true;
+  	  };
+
+  	  if (returnState) {
+  	    matcher.state = state;
+  	  }
+
+  	  return matcher;
+  	};
+
+  	/**
+  	 * Test `input` with the given `regex`. This is used by the main
+  	 * `picomatch()` function to test the input string.
+  	 *
+  	 * ```js
+  	 * const picomatch = require('picomatch');
+  	 * // picomatch.test(input, regex[, options]);
+  	 *
+  	 * console.log(picomatch.test('foo/bar', /^(?:([^/]*?)\/([^/]*?))$/));
+  	 * // { isMatch: true, match: [ 'foo/', 'foo', 'bar' ], output: 'foo/bar' }
+  	 * ```
+  	 * @param {String} `input` String to test.
+  	 * @param {RegExp} `regex`
+  	 * @return {Object} Returns an object with matching info.
+  	 * @api public
+  	 */
+
+  	picomatch.test = (input, regex, options, { glob, posix } = {}) => {
+  	  if (typeof input !== 'string') {
+  	    throw new TypeError('Expected input to be a string');
+  	  }
+
+  	  if (input === '') {
+  	    return { isMatch: false, output: '' };
+  	  }
+
+  	  const opts = options || {};
+  	  const format = opts.format || (posix ? utils.toPosixSlashes : null);
+  	  let match = input === glob;
+  	  let output = (match && format) ? format(input) : input;
+
+  	  if (match === false) {
+  	    output = format ? format(input) : input;
+  	    match = output === glob;
+  	  }
+
+  	  if (match === false || opts.capture === true) {
+  	    if (opts.matchBase === true || opts.basename === true) {
+  	      match = picomatch.matchBase(input, regex, options, posix);
+  	    } else {
+  	      match = regex.exec(output);
+  	    }
+  	  }
+
+  	  return { isMatch: Boolean(match), match, output };
+  	};
+
+  	/**
+  	 * Match the basename of a filepath.
+  	 *
+  	 * ```js
+  	 * const picomatch = require('picomatch');
+  	 * // picomatch.matchBase(input, glob[, options]);
+  	 * console.log(picomatch.matchBase('foo/bar.js', '*.js'); // true
+  	 * ```
+  	 * @param {String} `input` String to test.
+  	 * @param {RegExp|String} `glob` Glob pattern or regex created by [.makeRe](#makeRe).
+  	 * @return {Boolean}
+  	 * @api public
+  	 */
+
+  	picomatch.matchBase = (input, glob, options) => {
+  	  const regex = glob instanceof RegExp ? glob : picomatch.makeRe(glob, options);
+  	  return regex.test(utils.basename(input));
+  	};
+
+  	/**
+  	 * Returns true if **any** of the given glob `patterns` match the specified `string`.
+  	 *
+  	 * ```js
+  	 * const picomatch = require('picomatch');
+  	 * // picomatch.isMatch(string, patterns[, options]);
+  	 *
+  	 * console.log(picomatch.isMatch('a.a', ['b.*', '*.a'])); //=> true
+  	 * console.log(picomatch.isMatch('a.a', 'b.*')); //=> false
+  	 * ```
+  	 * @param {String|Array} str The string to test.
+  	 * @param {String|Array} patterns One or more glob patterns to use for matching.
+  	 * @param {Object} [options] See available [options](#options).
+  	 * @return {Boolean} Returns true if any patterns match `str`
+  	 * @api public
+  	 */
+
+  	picomatch.isMatch = (str, patterns, options) => picomatch(patterns, options)(str);
+
+  	/**
+  	 * Parse a glob pattern to create the source string for a regular
+  	 * expression.
+  	 *
+  	 * ```js
+  	 * const picomatch = require('picomatch');
+  	 * const result = picomatch.parse(pattern[, options]);
+  	 * ```
+  	 * @param {String} `pattern`
+  	 * @param {Object} `options`
+  	 * @return {Object} Returns an object with useful properties and output to be used as a regex source string.
+  	 * @api public
+  	 */
+
+  	picomatch.parse = (pattern, options) => {
+  	  if (Array.isArray(pattern)) return pattern.map(p => picomatch.parse(p, options));
+  	  return parse(pattern, { ...options, fastpaths: false });
+  	};
+
+  	/**
+  	 * Scan a glob pattern to separate the pattern into segments.
+  	 *
+  	 * ```js
+  	 * const picomatch = require('picomatch');
+  	 * // picomatch.scan(input[, options]);
+  	 *
+  	 * const result = picomatch.scan('!./foo/*.js');
+  	 * console.log(result);
+  	 * { prefix: '!./',
+  	 *   input: '!./foo/*.js',
+  	 *   start: 3,
+  	 *   base: 'foo',
+  	 *   glob: '*.js',
+  	 *   isBrace: false,
+  	 *   isBracket: false,
+  	 *   isGlob: true,
+  	 *   isExtglob: false,
+  	 *   isGlobstar: false,
+  	 *   negated: true }
+  	 * ```
+  	 * @param {String} `input` Glob pattern to scan.
+  	 * @param {Object} `options`
+  	 * @return {Object} Returns an object with
+  	 * @api public
+  	 */
+
+  	picomatch.scan = (input, options) => scan(input, options);
+
+  	/**
+  	 * Compile a regular expression from the `state` object returned by the
+  	 * [parse()](#parse) method.
+  	 *
+  	 * @param {Object} `state`
+  	 * @param {Object} `options`
+  	 * @param {Boolean} `returnOutput` Intended for implementors, this argument allows you to return the raw output from the parser.
+  	 * @param {Boolean} `returnState` Adds the state to a `state` property on the returned regex. Useful for implementors and debugging.
+  	 * @return {RegExp}
+  	 * @api public
+  	 */
+
+  	picomatch.compileRe = (state, options, returnOutput = false, returnState = false) => {
+  	  if (returnOutput === true) {
+  	    return state.output;
+  	  }
+
+  	  const opts = options || {};
+  	  const prepend = opts.contains ? '' : '^';
+  	  const append = opts.contains ? '' : '$';
+
+  	  let source = `${prepend}(?:${state.output})${append}`;
+  	  if (state && state.negated === true) {
+  	    source = `^(?!${source}).*$`;
+  	  }
+
+  	  const regex = picomatch.toRegex(source, options);
+  	  if (returnState === true) {
+  	    regex.state = state;
+  	  }
+
+  	  return regex;
+  	};
+
+  	/**
+  	 * Create a regular expression from a parsed glob pattern.
+  	 *
+  	 * ```js
+  	 * const picomatch = require('picomatch');
+  	 * const state = picomatch.parse('*.js');
+  	 * // picomatch.compileRe(state[, options]);
+  	 *
+  	 * console.log(picomatch.compileRe(state));
+  	 * //=> /^(?:(?!\.)(?=.)[^/]*?\.js)$/
+  	 * ```
+  	 * @param {String} `state` The object returned from the `.parse` method.
+  	 * @param {Object} `options`
+  	 * @param {Boolean} `returnOutput` Implementors may use this argument to return the compiled output, instead of a regular expression. This is not exposed on the options to prevent end-users from mutating the result.
+  	 * @param {Boolean} `returnState` Implementors may use this argument to return the state from the parsed glob with the returned regular expression.
+  	 * @return {RegExp} Returns a regex created from the given pattern.
+  	 * @api public
+  	 */
+
+  	picomatch.makeRe = (input, options = {}, returnOutput = false, returnState = false) => {
+  	  if (!input || typeof input !== 'string') {
+  	    throw new TypeError('Expected a non-empty string');
+  	  }
+
+  	  let parsed = { negated: false, fastpaths: true };
+
+  	  if (options.fastpaths !== false && (input[0] === '.' || input[0] === '*')) {
+  	    parsed.output = parse.fastpaths(input, options);
+  	  }
+
+  	  if (!parsed.output) {
+  	    parsed = parse(input, options);
+  	  }
+
+  	  return picomatch.compileRe(parsed, options, returnOutput, returnState);
+  	};
+
+  	/**
+  	 * Create a regular expression from the given regex source string.
+  	 *
+  	 * ```js
+  	 * const picomatch = require('picomatch');
+  	 * // picomatch.toRegex(source[, options]);
+  	 *
+  	 * const { output } = picomatch.parse('*.js');
+  	 * console.log(picomatch.toRegex(output));
+  	 * //=> /^(?:(?!\.)(?=.)[^/]*?\.js)$/
+  	 * ```
+  	 * @param {String} `source` Regular expression source string.
+  	 * @param {Object} `options`
+  	 * @return {RegExp}
+  	 * @api public
+  	 */
+
+  	picomatch.toRegex = (source, options) => {
+  	  try {
+  	    const opts = options || {};
+  	    return new RegExp(source, opts.flags || (opts.nocase ? 'i' : ''));
+  	  } catch (err) {
+  	    if (options && options.debug === true) throw err;
+  	    return /$^/;
+  	  }
+  	};
+
+  	/**
+  	 * Picomatch constants.
+  	 * @return {Object}
+  	 */
+
+  	picomatch.constants = constants;
+
+  	/**
+  	 * Expose "picomatch"
+  	 */
+
+  	picomatch_1 = picomatch;
+  	return picomatch_1;
+  }
+
+  var posix;
+  var hasRequiredPosix;
+
+  function requirePosix () {
+  	if (hasRequiredPosix) return posix;
+  	hasRequiredPosix = 1;
+
+  	posix = /*@__PURE__*/ requirePicomatch();
+  	return posix;
+  }
+
+  var posixExports = /*@__PURE__*/ requirePosix();
+  var picomatch = /*@__PURE__*/getDefaultExportFromCjs(posixExports);
 
   const parseInputAccept = inputAccept => {
     const extensions = [];
@@ -2335,76 +2388,86 @@
    * MIT Licensed
    */
 
-  /**
-   * Module variables.
-   * @private
-   */
+  var escapeHtml_1;
+  var hasRequiredEscapeHtml;
 
-  var matchHtmlRegExp = /["'&<>]/;
+  function requireEscapeHtml () {
+  	if (hasRequiredEscapeHtml) return escapeHtml_1;
+  	hasRequiredEscapeHtml = 1;
 
-  /**
-   * Module exports.
-   * @public
-   */
+  	/**
+  	 * Module variables.
+  	 * @private
+  	 */
 
-  var escapeHtml_1 = escapeHtml;
+  	var matchHtmlRegExp = /["'&<>]/;
 
-  /**
-   * Escape special characters in the given string of html.
-   *
-   * @param  {string} string The string to escape for inserting into HTML
-   * @return {string}
-   * @public
-   */
+  	/**
+  	 * Module exports.
+  	 * @public
+  	 */
 
-  function escapeHtml(string) {
-    var str = '' + string;
-    var match = matchHtmlRegExp.exec(str);
+  	escapeHtml_1 = escapeHtml;
 
-    if (!match) {
-      return str;
-    }
+  	/**
+  	 * Escape special characters in the given string of html.
+  	 *
+  	 * @param  {string} string The string to escape for inserting into HTML
+  	 * @return {string}
+  	 * @public
+  	 */
 
-    var escape;
-    var html = '';
-    var index = 0;
-    var lastIndex = 0;
+  	function escapeHtml(string) {
+  	  var str = '' + string;
+  	  var match = matchHtmlRegExp.exec(str);
 
-    for (index = match.index; index < str.length; index++) {
-      switch (str.charCodeAt(index)) {
-        case 34: // "
-          escape = '&quot;';
-          break;
-        case 38: // &
-          escape = '&amp;';
-          break;
-        case 39: // '
-          escape = '&#39;';
-          break;
-        case 60: // <
-          escape = '&lt;';
-          break;
-        case 62: // >
-          escape = '&gt;';
-          break;
-        default:
-          continue;
-      }
+  	  if (!match) {
+  	    return str;
+  	  }
 
-      if (lastIndex !== index) {
-        html += str.substring(lastIndex, index);
-      }
+  	  var escape;
+  	  var html = '';
+  	  var index = 0;
+  	  var lastIndex = 0;
 
-      lastIndex = index + 1;
-      html += escape;
-    }
+  	  for (index = match.index; index < str.length; index++) {
+  	    switch (str.charCodeAt(index)) {
+  	      case 34: // "
+  	        escape = '&quot;';
+  	        break;
+  	      case 38: // &
+  	        escape = '&amp;';
+  	        break;
+  	      case 39: // '
+  	        escape = '&#39;';
+  	        break;
+  	      case 60: // <
+  	        escape = '&lt;';
+  	        break;
+  	      case 62: // >
+  	        escape = '&gt;';
+  	        break;
+  	      default:
+  	        continue;
+  	    }
 
-    return lastIndex !== index
-      ? html + str.substring(lastIndex, index)
-      : html;
+  	    if (lastIndex !== index) {
+  	      html += str.substring(lastIndex, index);
+  	    }
+
+  	    lastIndex = index + 1;
+  	    html += escape;
+  	  }
+
+  	  return lastIndex !== index
+  	    ? html + str.substring(lastIndex, index)
+  	    : html;
+  	}
+  	return escapeHtml_1;
   }
 
-  var escape = /*@__PURE__*/getDefaultExportFromCjs(escapeHtml_1);
+  var escapeHtmlExports = requireEscapeHtml();
+  var escape = /*@__PURE__*/getDefaultExportFromCjs(escapeHtmlExports);
 
   const formatBytes = (bytes, decimals) => {
     if (bytes === 0) {
@@ -3279,14 +3342,14 @@
    * @param {boolean} [urlsafe] if `true` make the result URL-safe
    * @returns {string} Base64 string
    */
-  const encode$1 = (src, urlsafe = false) => urlsafe
+  const encode = (src, urlsafe = false) => urlsafe
       ? _mkUriSafe(_encode(src))
       : _encode(src);
   /**
    * converts a UTF-8-encoded string to URL-safe Base64 RFC4648 §5.
    * @returns {string} Base64 string
    */
-  const encodeURI = (src) => encode$1(src, true);
+  const encodeURI = (src) => encode(src, true);
   // This trick is found broken https://github.com/dankogai/js-base64/issues/130
   // const btou = (src: string) => decodeURIComponent(escape(src));
   // reverting good old fationed regexp
@@ -3364,7 +3427,7 @@
    * @param {String} src Base64 string.  Both normal and URL-safe are supported
    * @returns {string} UTF-8 string
    */
-  const decode$1 = (src) => _decode(_unURI(src));
+  const decode = (src) => _decode(_unURI(src));
   /**
    * check if a value is a valid Base64 string
    * @param {String} src a value to check
@@ -3386,10 +3449,10 @@
    */
   const extendString = function () {
       const _add = (name, body) => Object.defineProperty(String.prototype, name, _noEnum(body));
-      _add('fromBase64', function () { return decode$1(this); });
-      _add('toBase64', function (urlsafe) { return encode$1(this, urlsafe); });
-      _add('toBase64URI', function () { return encode$1(this, true); });
-      _add('toBase64URL', function () { return encode$1(this, true); });
+      _add('fromBase64', function () { return decode(this); });
+      _add('toBase64', function (urlsafe) { return encode(this, urlsafe); });
+      _add('toBase64URI', function () { return encode(this, true); });
+      _add('toBase64URL', function () { return encode(this, true); });
       _add('toUint8Array', function () { return toUint8Array(this); });
   };
   /**
@@ -3415,14 +3478,14 @@
       atobPolyfill: atobPolyfill,
       btoa: _btoa,
       btoaPolyfill: btoaPolyfill,
-      fromBase64: decode$1,
-      toBase64: encode$1,
-      encode: encode$1,
+      fromBase64: decode,
+      toBase64: encode,
+      encode: encode,
       encodeURI: encodeURI,
       encodeURL: encodeURI,
       utob: utob,
       btou: btou,
-      decode: decode$1,
+      decode: decode,
       isValid: isValid,
       fromUint8Array: fromUint8Array,
       toUint8Array: toUint8Array,
@@ -3431,751 +3494,778 @@
       extendBuiltins: extendBuiltins
   };
 
-  /**
-   * Check if we're required to add a port number.
-   *
-   * @see https://url.spec.whatwg.org/#default-port
-   * @param {Number|String} port Port number we need to check
-   * @param {String} protocol Protocol we need to check against.
-   * @returns {Boolean} Is it a default port for the given protocol
-   * @api private
-   */
-  var requiresPort = function required(port, protocol) {
-    protocol = protocol.split(':')[0];
-    port = +port;
+  var requiresPort;
+  var hasRequiredRequiresPort;
 
-    if (!port) return false;
+  function requireRequiresPort () {
+  	if (hasRequiredRequiresPort) return requiresPort;
+  	hasRequiredRequiresPort = 1;
 
-    switch (protocol) {
-      case 'http':
-      case 'ws':
-      return port !== 80;
+  	/**
+  	 * Check if we're required to add a port number.
+  	 *
+  	 * @see https://url.spec.whatwg.org/#default-port
+  	 * @param {Number|String} port Port number we need to check
+  	 * @param {String} protocol Protocol we need to check against.
+  	 * @returns {Boolean} Is it a default port for the given protocol
+  	 * @api private
+  	 */
+  	requiresPort = function required(port, protocol) {
+  	  protocol = protocol.split(':')[0];
+  	  port = +port;
 
-      case 'https':
-      case 'wss':
-      return port !== 443;
+  	  if (!port) return false;
 
-      case 'ftp':
-      return port !== 21;
+  	  switch (protocol) {
+  	    case 'http':
+  	    case 'ws':
+  	    return port !== 80;
 
-      case 'gopher':
-      return port !== 70;
+  	    case 'https':
+  	    case 'wss':
+  	    return port !== 443;
 
-      case 'file':
-      return false;
-    }
+  	    case 'ftp':
+  	    return port !== 21;
 
-    return port !== 0;
-  };
+  	    case 'gopher':
+  	    return port !== 70;
 
-  var querystringify$1 = {};
+  	    case 'file':
+  	    return false;
+  	  }
 
-  var has = Object.prototype.hasOwnProperty
-    , undef;
-
-  /**
-   * Decode a URI encoded string.
-   *
-   * @param {String} input The URI encoded string.
-   * @returns {String|Null} The decoded string.
-   * @api private
-   */
-  function decode(input) {
-    try {
-      return decodeURIComponent(input.replace(/\+/g, ' '));
-    } catch (e) {
-      return null;
-    }
+  	  return port !== 0;
+  	};
+  	return requiresPort;
   }
 
-  /**
-   * Attempts to encode a given input.
-   *
-   * @param {String} input The string that needs to be encoded.
-   * @returns {String|Null} The encoded string.
-   * @api private
-   */
-  function encode(input) {
-    try {
-      return encodeURIComponent(input);
-    } catch (e) {
-      return null;
-    }
+  var querystringify = {};
+
+  var hasRequiredQuerystringify;
+
+  function requireQuerystringify () {
+  	if (hasRequiredQuerystringify) return querystringify;
+  	hasRequiredQuerystringify = 1;
+
+  	var has = Object.prototype.hasOwnProperty
+  	  , undef;
+
+  	/**
+  	 * Decode a URI encoded string.
+  	 *
+  	 * @param {String} input The URI encoded string.
+  	 * @returns {String|Null} The decoded string.
+  	 * @api private
+  	 */
+  	function decode(input) {
+  	  try {
+  	    return decodeURIComponent(input.replace(/\+/g, ' '));
+  	  } catch (e) {
+  	    return null;
+  	  }
+  	}
+
+  	/**
+  	 * Attempts to encode a given input.
+  	 *
+  	 * @param {String} input The string that needs to be encoded.
+  	 * @returns {String|Null} The encoded string.
+  	 * @api private
+  	 */
+  	function encode(input) {
+  	  try {
+  	    return encodeURIComponent(input);
+  	  } catch (e) {
+  	    return null;
+  	  }
+  	}
+
+  	/**
+  	 * Simple query string parser.
+  	 *
+  	 * @param {String} query The query string that needs to be parsed.
+  	 * @returns {Object}
+  	 * @api public
+  	 */
+  	function querystring(query) {
+  	  var parser = /([^=?#&]+)=?([^&]*)/g
+  	    , result = {}
+  	    , part;
+
+  	  while (part = parser.exec(query)) {
+  	    var key = decode(part[1])
+  	      , value = decode(part[2]);
+
+  	    //
+  	    // Prevent overriding of existing properties. This ensures that build-in
+  	    // methods like `toString` or __proto__ are not overriden by malicious
+  	    // querystrings.
+  	    //
+  	    // In the case if failed decoding, we want to omit the key/value pairs
+  	    // from the result.
+  	    //
+  	    if (key === null || value === null || key in result) continue;
+  	    result[key] = value;
+  	  }
+
+  	  return result;
+  	}
+
+  	/**
+  	 * Transform a query string to an object.
+  	 *
+  	 * @param {Object} obj Object that should be transformed.
+  	 * @param {String} prefix Optional prefix.
+  	 * @returns {String}
+  	 * @api public
+  	 */
+  	function querystringify$1(obj, prefix) {
+  	  prefix = prefix || '';
+
+  	  var pairs = []
+  	    , value
+  	    , key;
+
+  	  //
+  	  // Optionally prefix with a '?' if needed
+  	  //
+  	  if ('string' !== typeof prefix) prefix = '?';
+
+  	  for (key in obj) {
+  	    if (has.call(obj, key)) {
+  	      value = obj[key];
+
+  	      //
+  	      // Edge cases where we actually want to encode the value to an empty
+  	      // string instead of the stringified value.
+  	      //
+  	      if (!value && (value === null || value === undef || isNaN(value))) {
+  	        value = '';
+  	      }
+
+  	      key = encode(key);
+  	      value = encode(value);
+
+  	      //
+  	      // If we failed to encode the strings, we should bail out as we don't
+  	      // want to add invalid strings to the query.
+  	      //
+  	      if (key === null || value === null) continue;
+  	      pairs.push(key +'='+ value);
+  	    }
+  	  }
+
+  	  return pairs.length ? prefix + pairs.join('&') : '';
+  	}
+
+  	//
+  	// Expose the module.
+  	//
+  	querystringify.stringify = querystringify$1;
+  	querystringify.parse = querystring;
+  	return querystringify;
   }
 
-  /**
-   * Simple query string parser.
-   *
-   * @param {String} query The query string that needs to be parsed.
-   * @returns {Object}
-   * @api public
-   */
-  function querystring(query) {
-    var parser = /([^=?#&]+)=?([^&]*)/g
-      , result = {}
-      , part;
+  var urlParse;
+  var hasRequiredUrlParse;
 
-    while (part = parser.exec(query)) {
-      var key = decode(part[1])
-        , value = decode(part[2]);
+  function requireUrlParse () {
+  	if (hasRequiredUrlParse) return urlParse;
+  	hasRequiredUrlParse = 1;
 
-      //
-      // Prevent overriding of existing properties. This ensures that build-in
-      // methods like `toString` or __proto__ are not overriden by malicious
-      // querystrings.
-      //
-      // In the case if failed decoding, we want to omit the key/value pairs
-      // from the result.
-      //
-      if (key === null || value === null || key in result) continue;
-      result[key] = value;
-    }
+  	var required = requireRequiresPort()
+  	  , qs = requireQuerystringify()
+  	  , controlOrWhitespace = /^[\x00-\x20\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff]+/
+  	  , CRHTLF = /[\n\r\t]/g
+  	  , slashes = /^[A-Za-z][A-Za-z0-9+-.]*:\/\//
+  	  , port = /:\d+$/
+  	  , protocolre = /^([a-z][a-z0-9.+-]*:)?(\/\/)?([\\/]+)?([\S\s]*)/i
+  	  , windowsDriveLetter = /^[a-zA-Z]:/;
 
-    return result;
+  	/**
+  	 * Remove control characters and whitespace from the beginning of a string.
+  	 *
+  	 * @param {Object|String} str String to trim.
+  	 * @returns {String} A new string representing `str` stripped of control
+  	 *     characters and whitespace from its beginning.
+  	 * @public
+  	 */
+  	function trimLeft(str) {
+  	  return (str ? str : '').toString().replace(controlOrWhitespace, '');
+  	}
+
+  	/**
+  	 * These are the parse rules for the URL parser, it informs the parser
+  	 * about:
+  	 *
+  	 * 0. The char it Needs to parse, if it's a string it should be done using
+  	 *    indexOf, RegExp using exec and NaN means set as current value.
+  	 * 1. The property we should set when parsing this value.
+  	 * 2. Indication if it's backwards or forward parsing, when set as number it's
+  	 *    the value of extra chars that should be split off.
+  	 * 3. Inherit from location if non existing in the parser.
+  	 * 4. `toLowerCase` the resulting value.
+  	 */
+  	var rules = [
+  	  ['#', 'hash'],                        // Extract from the back.
+  	  ['?', 'query'],                       // Extract from the back.
+  	  function sanitize(address, url) {     // Sanitize what is left of the address
+  	    return isSpecial(url.protocol) ? address.replace(/\\/g, '/') : address;
+  	  },
+  	  ['/', 'pathname'],                    // Extract from the back.
+  	  ['@', 'auth', 1],                     // Extract from the front.
+  	  [NaN, 'host', undefined, 1, 1],       // Set left over value.
+  	  [/:(\d*)$/, 'port', undefined, 1],    // RegExp the back.
+  	  [NaN, 'hostname', undefined, 1, 1]    // Set left over.
+  	];
+
+  	/**
+  	 * These properties should not be copied or inherited from. This is only needed
+  	 * for all non blob URL's as a blob URL does not include a hash, only the
+  	 * origin.
+  	 *
+  	 * @type {Object}
+  	 * @private
+  	 */
+  	var ignore = { hash: 1, query: 1 };
+
+  	/**
+  	 * The location object differs when your code is loaded through a normal page,
+  	 * Worker or through a worker using a blob. And with the blobble begins the
+  	 * trouble as the location object will contain the URL of the blob, not the
+  	 * location of the page where our code is loaded in. The actual origin is
+  	 * encoded in the `pathname` so we can thankfully generate a good "default"
+  	 * location from it so we can generate proper relative URL's again.
+  	 *
+  	 * @param {Object|String} loc Optional default location object.
+  	 * @returns {Object} lolcation object.
+  	 * @public
+  	 */
+  	function lolcation(loc) {
+  	  var globalVar;
+
+  	  if (typeof window !== 'undefined') globalVar = window;
+  	  else if (typeof commonjsGlobal !== 'undefined') globalVar = commonjsGlobal;
+  	  else if (typeof self !== 'undefined') globalVar = self;
+  	  else globalVar = {};
+
+  	  var location = globalVar.location || {};
+  	  loc = loc || location;
+
+  	  var finaldestination = {}
+  	    , type = typeof loc
+  	    , key;
+
+  	  if ('blob:' === loc.protocol) {
+  	    finaldestination = new Url(unescape(loc.pathname), {});
+  	  } else if ('string' === type) {
+  	    finaldestination = new Url(loc, {});
+  	    for (key in ignore) delete finaldestination[key];
+  	  } else if ('object' === type) {
+  	    for (key in loc) {
+  	      if (key in ignore) continue;
+  	      finaldestination[key] = loc[key];
+  	    }
+
+  	    if (finaldestination.slashes === undefined) {
+  	      finaldestination.slashes = slashes.test(loc.href);
+  	    }
+  	  }
+
+  	  return finaldestination;
+  	}
+
+  	/**
+  	 * Check whether a protocol scheme is special.
+  	 *
+  	 * @param {String} The protocol scheme of the URL
+  	 * @return {Boolean} `true` if the protocol scheme is special, else `false`
+  	 * @private
+  	 */
+  	function isSpecial(scheme) {
+  	  return (
+  	    scheme === 'file:' ||
+  	    scheme === 'ftp:' ||
+  	    scheme === 'http:' ||
+  	    scheme === 'https:' ||
+  	    scheme === 'ws:' ||
+  	    scheme === 'wss:'
+  	  );
+  	}
+
+  	/**
+  	 * @typedef ProtocolExtract
+  	 * @type Object
+  	 * @property {String} protocol Protocol matched in the URL, in lowercase.
+  	 * @property {Boolean} slashes `true` if protocol is followed by "//", else `false`.
+  	 * @property {String} rest Rest of the URL that is not part of the protocol.
+  	 */
+
+  	/**
+  	 * Extract protocol information from a URL with/without double slash ("//").
+  	 *
+  	 * @param {String} address URL we want to extract from.
+  	 * @param {Object} location
+  	 * @return {ProtocolExtract} Extracted information.
+  	 * @private
+  	 */
+  	function extractProtocol(address, location) {
+  	  address = trimLeft(address);
+  	  address = address.replace(CRHTLF, '');
+  	  location = location || {};
+
+  	  var match = protocolre.exec(address);
+  	  var protocol = match[1] ? match[1].toLowerCase() : '';
+  	  var forwardSlashes = !!match[2];
+  	  var otherSlashes = !!match[3];
+  	  var slashesCount = 0;
+  	  var rest;
+
+  	  if (forwardSlashes) {
+  	    if (otherSlashes) {
+  	      rest = match[2] + match[3] + match[4];
+  	      slashesCount = match[2].length + match[3].length;
+  	    } else {
+  	      rest = match[2] + match[4];
+  	      slashesCount = match[2].length;
+  	    }
+  	  } else {
+  	    if (otherSlashes) {
+  	      rest = match[3] + match[4];
+  	      slashesCount = match[3].length;
+  	    } else {
+  	      rest = match[4];
+  	    }
+  	  }
+
+  	  if (protocol === 'file:') {
+  	    if (slashesCount >= 2) {
+  	      rest = rest.slice(2);
+  	    }
+  	  } else if (isSpecial(protocol)) {
+  	    rest = match[4];
+  	  } else if (protocol) {
+  	    if (forwardSlashes) {
+  	      rest = rest.slice(2);
+  	    }
+  	  } else if (slashesCount >= 2 && isSpecial(location.protocol)) {
+  	    rest = match[4];
+  	  }
+
+  	  return {
+  	    protocol: protocol,
+  	    slashes: forwardSlashes || isSpecial(protocol),
+  	    slashesCount: slashesCount,
+  	    rest: rest
+  	  };
+  	}
+
+  	/**
+  	 * Resolve a relative URL pathname against a base URL pathname.
+  	 *
+  	 * @param {String} relative Pathname of the relative URL.
+  	 * @param {String} base Pathname of the base URL.
+  	 * @return {String} Resolved pathname.
+  	 * @private
+  	 */
+  	function resolve(relative, base) {
+  	  if (relative === '') return base;
+
+  	  var path = (base || '/').split('/').slice(0, -1).concat(relative.split('/'))
+  	    , i = path.length
+  	    , last = path[i - 1]
+  	    , unshift = false
+  	    , up = 0;
+
+  	  while (i--) {
+  	    if (path[i] === '.') {
+  	      path.splice(i, 1);
+  	    } else if (path[i] === '..') {
+  	      path.splice(i, 1);
+  	      up++;
+  	    } else if (up) {
+  	      if (i === 0) unshift = true;
+  	      path.splice(i, 1);
+  	      up--;
+  	    }
+  	  }
+
+  	  if (unshift) path.unshift('');
+  	  if (last === '.' || last === '..') path.push('');
+
+  	  return path.join('/');
+  	}
+
+  	/**
+  	 * The actual URL instance. Instead of returning an object we've opted-in to
+  	 * create an actual constructor as it's much more memory efficient and
+  	 * faster and it pleases my OCD.
+  	 *
+  	 * It is worth noting that we should not use `URL` as class name to prevent
+  	 * clashes with the global URL instance that got introduced in browsers.
+  	 *
+  	 * @constructor
+  	 * @param {String} address URL we want to parse.
+  	 * @param {Object|String} [location] Location defaults for relative paths.
+  	 * @param {Boolean|Function} [parser] Parser for the query string.
+  	 * @private
+  	 */
+  	function Url(address, location, parser) {
+  	  address = trimLeft(address);
+  	  address = address.replace(CRHTLF, '');
+
+  	  if (!(this instanceof Url)) {
+  	    return new Url(address, location, parser);
+  	  }
+
+  	  var relative, extracted, parse, instruction, index, key
+  	    , instructions = rules.slice()
+  	    , type = typeof location
+  	    , url = this
+  	    , i = 0;
+
+  	  //
+  	  // The following if statements allows this module two have compatibility with
+  	  // 2 different API:
+  	  //
+  	  // 1. Node.js's `url.parse` api which accepts a URL, boolean as arguments
+  	  //    where the boolean indicates that the query string should also be parsed.
+  	  //
+  	  // 2. The `URL` interface of the browser which accepts a URL, object as
+  	  //    arguments. The supplied object will be used as default values / fall-back
+  	  //    for relative paths.
+  	  //
+  	  if ('object' !== type && 'string' !== type) {
+  	    parser = location;
+  	    location = null;
+  	  }
+
+  	  if (parser && 'function' !== typeof parser) parser = qs.parse;
+
+  	  location = lolcation(location);
+
+  	  //
+  	  // Extract protocol information before running the instructions.
+  	  //
+  	  extracted = extractProtocol(address || '', location);
+  	  relative = !extracted.protocol && !extracted.slashes;
+  	  url.slashes = extracted.slashes || relative && location.slashes;
+  	  url.protocol = extracted.protocol || location.protocol || '';
+  	  address = extracted.rest;
+
+  	  //
+  	  // When the authority component is absent the URL starts with a path
+  	  // component.
+  	  //
+  	  if (
+  	    extracted.protocol === 'file:' && (
+  	      extracted.slashesCount !== 2 || windowsDriveLetter.test(address)) ||
+  	    (!extracted.slashes &&
+  	      (extracted.protocol ||
+  	        extracted.slashesCount < 2 ||
+  	        !isSpecial(url.protocol)))
+  	  ) {
+  	    instructions[3] = [/(.*)/, 'pathname'];
+  	  }
+
+  	  for (; i < instructions.length; i++) {
+  	    instruction = instructions[i];
+
+  	    if (typeof instruction === 'function') {
+  	      address = instruction(address, url);
+  	      continue;
+  	    }
+
+  	    parse = instruction[0];
+  	    key = instruction[1];
+
+  	    if (parse !== parse) {
+  	      url[key] = address;
+  	    } else if ('string' === typeof parse) {
+  	      index = parse === '@'
+  	        ? address.lastIndexOf(parse)
+  	        : address.indexOf(parse);
+
+  	      if (~index) {
+  	        if ('number' === typeof instruction[2]) {
+  	          url[key] = address.slice(0, index);
+  	          address = address.slice(index + instruction[2]);
+  	        } else {
+  	          url[key] = address.slice(index);
+  	          address = address.slice(0, index);
+  	        }
+  	      }
+  	    } else if ((index = parse.exec(address))) {
+  	      url[key] = index[1];
+  	      address = address.slice(0, index.index);
+  	    }
+
+  	    url[key] = url[key] || (
+  	      relative && instruction[3] ? location[key] || '' : ''
+  	    );
+
+  	    //
+  	    // Hostname, host and protocol should be lowercased so they can be used to
+  	    // create a proper `origin`.
+  	    //
+  	    if (instruction[4]) url[key] = url[key].toLowerCase();
+  	  }
+
+  	  //
+  	  // Also parse the supplied query string in to an object. If we're supplied
+  	  // with a custom parser as function use that instead of the default build-in
+  	  // parser.
+  	  //
+  	  if (parser) url.query = parser(url.query);
+
+  	  //
+  	  // If the URL is relative, resolve the pathname against the base URL.
+  	  //
+  	  if (
+  	      relative
+  	    && location.slashes
+  	    && url.pathname.charAt(0) !== '/'
+  	    && (url.pathname !== '' || location.pathname !== '')
+  	  ) {
+  	    url.pathname = resolve(url.pathname, location.pathname);
+  	  }
+
+  	  //
+  	  // Default to a / for pathname if none exists. This normalizes the URL
+  	  // to always have a /
+  	  //
+  	  if (url.pathname.charAt(0) !== '/' && isSpecial(url.protocol)) {
+  	    url.pathname = '/' + url.pathname;
+  	  }
+
+  	  //
+  	  // We should not add port numbers if they are already the default port number
+  	  // for a given protocol. As the host also contains the port number we're going
+  	  // override it with the hostname which contains no port number.
+  	  //
+  	  if (!required(url.port, url.protocol)) {
+  	    url.host = url.hostname;
+  	    url.port = '';
+  	  }
+
+  	  //
+  	  // Parse down the `auth` for the username and password.
+  	  //
+  	  url.username = url.password = '';
+
+  	  if (url.auth) {
+  	    index = url.auth.indexOf(':');
+
+  	    if (~index) {
+  	      url.username = url.auth.slice(0, index);
+  	      url.username = encodeURIComponent(decodeURIComponent(url.username));
+
+  	      url.password = url.auth.slice(index + 1);
+  	      url.password = encodeURIComponent(decodeURIComponent(url.password));
+  	    } else {
+  	      url.username = encodeURIComponent(decodeURIComponent(url.auth));
+  	    }
+
+  	    url.auth = url.password ? url.username +':'+ url.password : url.username;
+  	  }
+
+  	  url.origin = url.protocol !== 'file:' && isSpecial(url.protocol) && url.host
+  	    ? url.protocol +'//'+ url.host
+  	    : 'null';
+
+  	  //
+  	  // The href is just the compiled result.
+  	  //
+  	  url.href = url.toString();
+  	}
+
+  	/**
+  	 * This is convenience method for changing properties in the URL instance to
+  	 * insure that they all propagate correctly.
+  	 *
+  	 * @param {String} part          Property we need to adjust.
+  	 * @param {Mixed} value          The newly assigned value.
+  	 * @param {Boolean|Function} fn  When setting the query, it will be the function
+  	 *                               used to parse the query.
+  	 *                               When setting the protocol, double slash will be
+  	 *                               removed from the final url if it is true.
+  	 * @returns {URL} URL instance for chaining.
+  	 * @public
+  	 */
+  	function set(part, value, fn) {
+  	  var url = this;
+
+  	  switch (part) {
+  	    case 'query':
+  	      if ('string' === typeof value && value.length) {
+  	        value = (fn || qs.parse)(value);
+  	      }
+
+  	      url[part] = value;
+  	      break;
+
+  	    case 'port':
+  	      url[part] = value;
+
+  	      if (!required(value, url.protocol)) {
+  	        url.host = url.hostname;
+  	        url[part] = '';
+  	      } else if (value) {
+  	        url.host = url.hostname +':'+ value;
+  	      }
+
+  	      break;
+
+  	    case 'hostname':
+  	      url[part] = value;
+
+  	      if (url.port) value += ':'+ url.port;
+  	      url.host = value;
+  	      break;
+
+  	    case 'host':
+  	      url[part] = value;
+
+  	      if (port.test(value)) {
+  	        value = value.split(':');
+  	        url.port = value.pop();
+  	        url.hostname = value.join(':');
+  	      } else {
+  	        url.hostname = value;
+  	        url.port = '';
+  	      }
+
+  	      break;
+
+  	    case 'protocol':
+  	      url.protocol = value.toLowerCase();
+  	      url.slashes = !fn;
+  	      break;
+
+  	    case 'pathname':
+  	    case 'hash':
+  	      if (value) {
+  	        var char = part === 'pathname' ? '/' : '#';
+  	        url[part] = value.charAt(0) !== char ? char + value : value;
+  	      } else {
+  	        url[part] = value;
+  	      }
+  	      break;
+
+  	    case 'username':
+  	    case 'password':
+  	      url[part] = encodeURIComponent(value);
+  	      break;
+
+  	    case 'auth':
+  	      var index = value.indexOf(':');
+
+  	      if (~index) {
+  	        url.username = value.slice(0, index);
+  	        url.username = encodeURIComponent(decodeURIComponent(url.username));
+
+  	        url.password = value.slice(index + 1);
+  	        url.password = encodeURIComponent(decodeURIComponent(url.password));
+  	      } else {
+  	        url.username = encodeURIComponent(decodeURIComponent(value));
+  	      }
+  	  }
+
+  	  for (var i = 0; i < rules.length; i++) {
+  	    var ins = rules[i];
+
+  	    if (ins[4]) url[ins[1]] = url[ins[1]].toLowerCase();
+  	  }
+
+  	  url.auth = url.password ? url.username +':'+ url.password : url.username;
+
+  	  url.origin = url.protocol !== 'file:' && isSpecial(url.protocol) && url.host
+  	    ? url.protocol +'//'+ url.host
+  	    : 'null';
+
+  	  url.href = url.toString();
+
+  	  return url;
+  	}
+
+  	/**
+  	 * Transform the properties back in to a valid and full URL string.
+  	 *
+  	 * @param {Function} stringify Optional query stringify function.
+  	 * @returns {String} Compiled version of the URL.
+  	 * @public
+  	 */
+  	function toString(stringify) {
+  	  if (!stringify || 'function' !== typeof stringify) stringify = qs.stringify;
+
+  	  var query
+  	    , url = this
+  	    , host = url.host
+  	    , protocol = url.protocol;
+
+  	  if (protocol && protocol.charAt(protocol.length - 1) !== ':') protocol += ':';
+
+  	  var result =
+  	    protocol +
+  	    ((url.protocol && url.slashes) || isSpecial(url.protocol) ? '//' : '');
+
+  	  if (url.username) {
+  	    result += url.username;
+  	    if (url.password) result += ':'+ url.password;
+  	    result += '@';
+  	  } else if (url.password) {
+  	    result += ':'+ url.password;
+  	    result += '@';
+  	  } else if (
+  	    url.protocol !== 'file:' &&
+  	    isSpecial(url.protocol) &&
+  	    !host &&
+  	    url.pathname !== '/'
+  	  ) {
+  	    //
+  	    // Add back the empty userinfo, otherwise the original invalid URL
+  	    // might be transformed into a valid one with `url.pathname` as host.
+  	    //
+  	    result += '@';
+  	  }
+
+  	  //
+  	  // Trailing colon is removed from `url.host` when it is parsed. If it still
+  	  // ends with a colon, then add back the trailing colon that was removed. This
+  	  // prevents an invalid URL from being transformed into a valid one.
+  	  //
+  	  if (host[host.length - 1] === ':' || (port.test(url.hostname) && !url.port)) {
+  	    host += ':';
+  	  }
+
+  	  result += host + url.pathname;
+
+  	  query = 'object' === typeof url.query ? stringify(url.query) : url.query;
+  	  if (query) result += '?' !== query.charAt(0) ? '?'+ query : query;
+
+  	  if (url.hash) result += url.hash;
+
+  	  return result;
+  	}
+
+  	Url.prototype = { set: set, toString: toString };
+
+  	//
+  	// Expose the URL parser and some additional properties that might be useful for
+  	// others or testing.
+  	//
+  	Url.extractProtocol = extractProtocol;
+  	Url.location = lolcation;
+  	Url.trimLeft = trimLeft;
+  	Url.qs = qs;
+
+  	urlParse = Url;
+  	return urlParse;
   }
 
-  /**
-   * Transform a query string to an object.
-   *
-   * @param {Object} obj Object that should be transformed.
-   * @param {String} prefix Optional prefix.
-   * @returns {String}
-   * @api public
-   */
-  function querystringify(obj, prefix) {
-    prefix = prefix || '';
-
-    var pairs = []
-      , value
-      , key;
-
-    //
-    // Optionally prefix with a '?' if needed
-    //
-    if ('string' !== typeof prefix) prefix = '?';
-
-    for (key in obj) {
-      if (has.call(obj, key)) {
-        value = obj[key];
-
-        //
-        // Edge cases where we actually want to encode the value to an empty
-        // string instead of the stringified value.
-        //
-        if (!value && (value === null || value === undef || isNaN(value))) {
-          value = '';
-        }
-
-        key = encode(key);
-        value = encode(value);
-
-        //
-        // If we failed to encode the strings, we should bail out as we don't
-        // want to add invalid strings to the query.
-        //
-        if (key === null || value === null) continue;
-        pairs.push(key +'='+ value);
-      }
-    }
-
-    return pairs.length ? prefix + pairs.join('&') : '';
-  }
-
-  //
-  // Expose the module.
-  //
-  querystringify$1.stringify = querystringify;
-  querystringify$1.parse = querystring;
-
-  var required = requiresPort
-    , qs = querystringify$1
-    , controlOrWhitespace = /^[\x00-\x20\u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff]+/
-    , CRHTLF = /[\n\r\t]/g
-    , slashes = /^[A-Za-z][A-Za-z0-9+-.]*:\/\//
-    , port = /:\d+$/
-    , protocolre = /^([a-z][a-z0-9.+-]*:)?(\/\/)?([\\/]+)?([\S\s]*)/i
-    , windowsDriveLetter = /^[a-zA-Z]:/;
-
-  /**
-   * Remove control characters and whitespace from the beginning of a string.
-   *
-   * @param {Object|String} str String to trim.
-   * @returns {String} A new string representing `str` stripped of control
-   *     characters and whitespace from its beginning.
-   * @public
-   */
-  function trimLeft(str) {
-    return (str ? str : '').toString().replace(controlOrWhitespace, '');
-  }
-
-  /**
-   * These are the parse rules for the URL parser, it informs the parser
-   * about:
-   *
-   * 0. The char it Needs to parse, if it's a string it should be done using
-   *    indexOf, RegExp using exec and NaN means set as current value.
-   * 1. The property we should set when parsing this value.
-   * 2. Indication if it's backwards or forward parsing, when set as number it's
-   *    the value of extra chars that should be split off.
-   * 3. Inherit from location if non existing in the parser.
-   * 4. `toLowerCase` the resulting value.
-   */
-  var rules = [
-    ['#', 'hash'],                        // Extract from the back.
-    ['?', 'query'],                       // Extract from the back.
-    function sanitize(address, url) {     // Sanitize what is left of the address
-      return isSpecial(url.protocol) ? address.replace(/\\/g, '/') : address;
-    },
-    ['/', 'pathname'],                    // Extract from the back.
-    ['@', 'auth', 1],                     // Extract from the front.
-    [NaN, 'host', undefined, 1, 1],       // Set left over value.
-    [/:(\d*)$/, 'port', undefined, 1],    // RegExp the back.
-    [NaN, 'hostname', undefined, 1, 1]    // Set left over.
-  ];
-
-  /**
-   * These properties should not be copied or inherited from. This is only needed
-   * for all non blob URL's as a blob URL does not include a hash, only the
-   * origin.
-   *
-   * @type {Object}
-   * @private
-   */
-  var ignore = { hash: 1, query: 1 };
-
-  /**
-   * The location object differs when your code is loaded through a normal page,
-   * Worker or through a worker using a blob. And with the blobble begins the
-   * trouble as the location object will contain the URL of the blob, not the
-   * location of the page where our code is loaded in. The actual origin is
-   * encoded in the `pathname` so we can thankfully generate a good "default"
-   * location from it so we can generate proper relative URL's again.
-   *
-   * @param {Object|String} loc Optional default location object.
-   * @returns {Object} lolcation object.
-   * @public
-   */
-  function lolcation(loc) {
-    var globalVar;
-
-    if (typeof window !== 'undefined') globalVar = window;
-    else if (typeof commonjsGlobal !== 'undefined') globalVar = commonjsGlobal;
-    else if (typeof self !== 'undefined') globalVar = self;
-    else globalVar = {};
-
-    var location = globalVar.location || {};
-    loc = loc || location;
-
-    var finaldestination = {}
-      , type = typeof loc
-      , key;
-
-    if ('blob:' === loc.protocol) {
-      finaldestination = new Url(unescape(loc.pathname), {});
-    } else if ('string' === type) {
-      finaldestination = new Url(loc, {});
-      for (key in ignore) delete finaldestination[key];
-    } else if ('object' === type) {
-      for (key in loc) {
-        if (key in ignore) continue;
-        finaldestination[key] = loc[key];
-      }
-
-      if (finaldestination.slashes === undefined) {
-        finaldestination.slashes = slashes.test(loc.href);
-      }
-    }
-
-    return finaldestination;
-  }
-
-  /**
-   * Check whether a protocol scheme is special.
-   *
-   * @param {String} The protocol scheme of the URL
-   * @return {Boolean} `true` if the protocol scheme is special, else `false`
-   * @private
-   */
-  function isSpecial(scheme) {
-    return (
-      scheme === 'file:' ||
-      scheme === 'ftp:' ||
-      scheme === 'http:' ||
-      scheme === 'https:' ||
-      scheme === 'ws:' ||
-      scheme === 'wss:'
-    );
-  }
-
-  /**
-   * @typedef ProtocolExtract
-   * @type Object
-   * @property {String} protocol Protocol matched in the URL, in lowercase.
-   * @property {Boolean} slashes `true` if protocol is followed by "//", else `false`.
-   * @property {String} rest Rest of the URL that is not part of the protocol.
-   */
-
-  /**
-   * Extract protocol information from a URL with/without double slash ("//").
-   *
-   * @param {String} address URL we want to extract from.
-   * @param {Object} location
-   * @return {ProtocolExtract} Extracted information.
-   * @private
-   */
-  function extractProtocol(address, location) {
-    address = trimLeft(address);
-    address = address.replace(CRHTLF, '');
-    location = location || {};
-
-    var match = protocolre.exec(address);
-    var protocol = match[1] ? match[1].toLowerCase() : '';
-    var forwardSlashes = !!match[2];
-    var otherSlashes = !!match[3];
-    var slashesCount = 0;
-    var rest;
-
-    if (forwardSlashes) {
-      if (otherSlashes) {
-        rest = match[2] + match[3] + match[4];
-        slashesCount = match[2].length + match[3].length;
-      } else {
-        rest = match[2] + match[4];
-        slashesCount = match[2].length;
-      }
-    } else {
-      if (otherSlashes) {
-        rest = match[3] + match[4];
-        slashesCount = match[3].length;
-      } else {
-        rest = match[4];
-      }
-    }
-
-    if (protocol === 'file:') {
-      if (slashesCount >= 2) {
-        rest = rest.slice(2);
-      }
-    } else if (isSpecial(protocol)) {
-      rest = match[4];
-    } else if (protocol) {
-      if (forwardSlashes) {
-        rest = rest.slice(2);
-      }
-    } else if (slashesCount >= 2 && isSpecial(location.protocol)) {
-      rest = match[4];
-    }
-
-    return {
-      protocol: protocol,
-      slashes: forwardSlashes || isSpecial(protocol),
-      slashesCount: slashesCount,
-      rest: rest
-    };
-  }
-
-  /**
-   * Resolve a relative URL pathname against a base URL pathname.
-   *
-   * @param {String} relative Pathname of the relative URL.
-   * @param {String} base Pathname of the base URL.
-   * @return {String} Resolved pathname.
-   * @private
-   */
-  function resolve(relative, base) {
-    if (relative === '') return base;
-
-    var path = (base || '/').split('/').slice(0, -1).concat(relative.split('/'))
-      , i = path.length
-      , last = path[i - 1]
-      , unshift = false
-      , up = 0;
-
-    while (i--) {
-      if (path[i] === '.') {
-        path.splice(i, 1);
-      } else if (path[i] === '..') {
-        path.splice(i, 1);
-        up++;
-      } else if (up) {
-        if (i === 0) unshift = true;
-        path.splice(i, 1);
-        up--;
-      }
-    }
-
-    if (unshift) path.unshift('');
-    if (last === '.' || last === '..') path.push('');
-
-    return path.join('/');
-  }
-
-  /**
-   * The actual URL instance. Instead of returning an object we've opted-in to
-   * create an actual constructor as it's much more memory efficient and
-   * faster and it pleases my OCD.
-   *
-   * It is worth noting that we should not use `URL` as class name to prevent
-   * clashes with the global URL instance that got introduced in browsers.
-   *
-   * @constructor
-   * @param {String} address URL we want to parse.
-   * @param {Object|String} [location] Location defaults for relative paths.
-   * @param {Boolean|Function} [parser] Parser for the query string.
-   * @private
-   */
-  function Url(address, location, parser) {
-    address = trimLeft(address);
-    address = address.replace(CRHTLF, '');
-
-    if (!(this instanceof Url)) {
-      return new Url(address, location, parser);
-    }
-
-    var relative, extracted, parse, instruction, index, key
-      , instructions = rules.slice()
-      , type = typeof location
-      , url = this
-      , i = 0;
-
-    //
-    // The following if statements allows this module two have compatibility with
-    // 2 different API:
-    //
-    // 1. Node.js's `url.parse` api which accepts a URL, boolean as arguments
-    //    where the boolean indicates that the query string should also be parsed.
-    //
-    // 2. The `URL` interface of the browser which accepts a URL, object as
-    //    arguments. The supplied object will be used as default values / fall-back
-    //    for relative paths.
-    //
-    if ('object' !== type && 'string' !== type) {
-      parser = location;
-      location = null;
-    }
-
-    if (parser && 'function' !== typeof parser) parser = qs.parse;
-
-    location = lolcation(location);
-
-    //
-    // Extract protocol information before running the instructions.
-    //
-    extracted = extractProtocol(address || '', location);
-    relative = !extracted.protocol && !extracted.slashes;
-    url.slashes = extracted.slashes || relative && location.slashes;
-    url.protocol = extracted.protocol || location.protocol || '';
-    address = extracted.rest;
-
-    //
-    // When the authority component is absent the URL starts with a path
-    // component.
-    //
-    if (
-      extracted.protocol === 'file:' && (
-        extracted.slashesCount !== 2 || windowsDriveLetter.test(address)) ||
-      (!extracted.slashes &&
-        (extracted.protocol ||
-          extracted.slashesCount < 2 ||
-          !isSpecial(url.protocol)))
-    ) {
-      instructions[3] = [/(.*)/, 'pathname'];
-    }
-
-    for (; i < instructions.length; i++) {
-      instruction = instructions[i];
-
-      if (typeof instruction === 'function') {
-        address = instruction(address, url);
-        continue;
-      }
-
-      parse = instruction[0];
-      key = instruction[1];
-
-      if (parse !== parse) {
-        url[key] = address;
-      } else if ('string' === typeof parse) {
-        index = parse === '@'
-          ? address.lastIndexOf(parse)
-          : address.indexOf(parse);
-
-        if (~index) {
-          if ('number' === typeof instruction[2]) {
-            url[key] = address.slice(0, index);
-            address = address.slice(index + instruction[2]);
-          } else {
-            url[key] = address.slice(index);
-            address = address.slice(0, index);
-          }
-        }
-      } else if ((index = parse.exec(address))) {
-        url[key] = index[1];
-        address = address.slice(0, index.index);
-      }
-
-      url[key] = url[key] || (
-        relative && instruction[3] ? location[key] || '' : ''
-      );
-
-      //
-      // Hostname, host and protocol should be lowercased so they can be used to
-      // create a proper `origin`.
-      //
-      if (instruction[4]) url[key] = url[key].toLowerCase();
-    }
-
-    //
-    // Also parse the supplied query string in to an object. If we're supplied
-    // with a custom parser as function use that instead of the default build-in
-    // parser.
-    //
-    if (parser) url.query = parser(url.query);
-
-    //
-    // If the URL is relative, resolve the pathname against the base URL.
-    //
-    if (
-        relative
-      && location.slashes
-      && url.pathname.charAt(0) !== '/'
-      && (url.pathname !== '' || location.pathname !== '')
-    ) {
-      url.pathname = resolve(url.pathname, location.pathname);
-    }
-
-    //
-    // Default to a / for pathname if none exists. This normalizes the URL
-    // to always have a /
-    //
-    if (url.pathname.charAt(0) !== '/' && isSpecial(url.protocol)) {
-      url.pathname = '/' + url.pathname;
-    }
-
-    //
-    // We should not add port numbers if they are already the default port number
-    // for a given protocol. As the host also contains the port number we're going
-    // override it with the hostname which contains no port number.
-    //
-    if (!required(url.port, url.protocol)) {
-      url.host = url.hostname;
-      url.port = '';
-    }
-
-    //
-    // Parse down the `auth` for the username and password.
-    //
-    url.username = url.password = '';
-
-    if (url.auth) {
-      index = url.auth.indexOf(':');
-
-      if (~index) {
-        url.username = url.auth.slice(0, index);
-        url.username = encodeURIComponent(decodeURIComponent(url.username));
-
-        url.password = url.auth.slice(index + 1);
-        url.password = encodeURIComponent(decodeURIComponent(url.password));
-      } else {
-        url.username = encodeURIComponent(decodeURIComponent(url.auth));
-      }
-
-      url.auth = url.password ? url.username +':'+ url.password : url.username;
-    }
-
-    url.origin = url.protocol !== 'file:' && isSpecial(url.protocol) && url.host
-      ? url.protocol +'//'+ url.host
-      : 'null';
-
-    //
-    // The href is just the compiled result.
-    //
-    url.href = url.toString();
-  }
-
-  /**
-   * This is convenience method for changing properties in the URL instance to
-   * insure that they all propagate correctly.
-   *
-   * @param {String} part          Property we need to adjust.
-   * @param {Mixed} value          The newly assigned value.
-   * @param {Boolean|Function} fn  When setting the query, it will be the function
-   *                               used to parse the query.
-   *                               When setting the protocol, double slash will be
-   *                               removed from the final url if it is true.
-   * @returns {URL} URL instance for chaining.
-   * @public
-   */
-  function set(part, value, fn) {
-    var url = this;
-
-    switch (part) {
-      case 'query':
-        if ('string' === typeof value && value.length) {
-          value = (fn || qs.parse)(value);
-        }
-
-        url[part] = value;
-        break;
-
-      case 'port':
-        url[part] = value;
-
-        if (!required(value, url.protocol)) {
-          url.host = url.hostname;
-          url[part] = '';
-        } else if (value) {
-          url.host = url.hostname +':'+ value;
-        }
-
-        break;
-
-      case 'hostname':
-        url[part] = value;
-
-        if (url.port) value += ':'+ url.port;
-        url.host = value;
-        break;
-
-      case 'host':
-        url[part] = value;
-
-        if (port.test(value)) {
-          value = value.split(':');
-          url.port = value.pop();
-          url.hostname = value.join(':');
-        } else {
-          url.hostname = value;
-          url.port = '';
-        }
-
-        break;
-
-      case 'protocol':
-        url.protocol = value.toLowerCase();
-        url.slashes = !fn;
-        break;
-
-      case 'pathname':
-      case 'hash':
-        if (value) {
-          var char = part === 'pathname' ? '/' : '#';
-          url[part] = value.charAt(0) !== char ? char + value : value;
-        } else {
-          url[part] = value;
-        }
-        break;
-
-      case 'username':
-      case 'password':
-        url[part] = encodeURIComponent(value);
-        break;
-
-      case 'auth':
-        var index = value.indexOf(':');
-
-        if (~index) {
-          url.username = value.slice(0, index);
-          url.username = encodeURIComponent(decodeURIComponent(url.username));
-
-          url.password = value.slice(index + 1);
-          url.password = encodeURIComponent(decodeURIComponent(url.password));
-        } else {
-          url.username = encodeURIComponent(decodeURIComponent(value));
-        }
-    }
-
-    for (var i = 0; i < rules.length; i++) {
-      var ins = rules[i];
-
-      if (ins[4]) url[ins[1]] = url[ins[1]].toLowerCase();
-    }
-
-    url.auth = url.password ? url.username +':'+ url.password : url.username;
-
-    url.origin = url.protocol !== 'file:' && isSpecial(url.protocol) && url.host
-      ? url.protocol +'//'+ url.host
-      : 'null';
-
-    url.href = url.toString();
-
-    return url;
-  }
-
-  /**
-   * Transform the properties back in to a valid and full URL string.
-   *
-   * @param {Function} stringify Optional query stringify function.
-   * @returns {String} Compiled version of the URL.
-   * @public
-   */
-  function toString(stringify) {
-    if (!stringify || 'function' !== typeof stringify) stringify = qs.stringify;
-
-    var query
-      , url = this
-      , host = url.host
-      , protocol = url.protocol;
-
-    if (protocol && protocol.charAt(protocol.length - 1) !== ':') protocol += ':';
-
-    var result =
-      protocol +
-      ((url.protocol && url.slashes) || isSpecial(url.protocol) ? '//' : '');
-
-    if (url.username) {
-      result += url.username;
-      if (url.password) result += ':'+ url.password;
-      result += '@';
-    } else if (url.password) {
-      result += ':'+ url.password;
-      result += '@';
-    } else if (
-      url.protocol !== 'file:' &&
-      isSpecial(url.protocol) &&
-      !host &&
-      url.pathname !== '/'
-    ) {
-      //
-      // Add back the empty userinfo, otherwise the original invalid URL
-      // might be transformed into a valid one with `url.pathname` as host.
-      //
-      result += '@';
-    }
-
-    //
-    // Trailing colon is removed from `url.host` when it is parsed. If it still
-    // ends with a colon, then add back the trailing colon that was removed. This
-    // prevents an invalid URL from being transformed into a valid one.
-    //
-    if (host[host.length - 1] === ':' || (port.test(url.hostname) && !url.port)) {
-      host += ':';
-    }
-
-    result += host + url.pathname;
-
-    query = 'object' === typeof url.query ? stringify(url.query) : url.query;
-    if (query) result += '?' !== query.charAt(0) ? '?'+ query : query;
-
-    if (url.hash) result += url.hash;
-
-    return result;
-  }
-
-  Url.prototype = { set: set, toString: toString };
-
-  //
-  // Expose the URL parser and some additional properties that might be useful for
-  // others or testing.
-  //
-  Url.extractProtocol = extractProtocol;
-  Url.location = lolcation;
-  Url.trimLeft = trimLeft;
-  Url.qs = qs;
-
-  var urlParse = Url;
-
-  var URL = /*@__PURE__*/getDefaultExportFromCjs(urlParse);
+  var urlParseExports = requireUrlParse();
+  var URL = /*@__PURE__*/getDefaultExportFromCjs(urlParseExports);
 
   /**
    * Generate a UUID v4 based on random numbers. We intentioanlly use the less
