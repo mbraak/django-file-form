@@ -50,7 +50,7 @@ Import and use `MultipleUploadedFileField` if you intent to add multiple files.
 **6 Include javascript and css in your template**
 
 ```js
-<script src="{% static "file_form/file_form.min.min.js" %}"></script>
+<script src="{% static "file_form/file_form.min.js" %}"></script>
 <link rel="stylesheet" href="{% static "file_form/file_form.css" %}">
 ```
 
