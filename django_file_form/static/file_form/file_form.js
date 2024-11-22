@@ -2259,6 +2259,12 @@
       this.extensions = extensions;
       this.mimeTypes = mimeTypes;
     }
+    isAccepted(fileName) {
+      if (this.extensions.length === 0 && this.mimeTypes.length === 0) {
+        return true;
+      }
+      return this.isMimeTypeAccepted(mime.getType(fileName)) || this.isExtensionAccepted(fileName);
+    }
     isExtensionAccepted(fileName) {
       if (this.extensions.length === 0) {
         return false;
@@ -2270,12 +2276,6 @@
         return false;
       }
       return picomatch.isMatch(mimeType, this.mimeTypes);
-    }
-    isAccepted(fileName) {
-      if (this.extensions.length === 0 && this.mimeTypes.length === 0) {
-        return true;
-      }
-      return this.isMimeTypeAccepted(mime.getType(fileName)) || this.isExtensionAccepted(fileName);
     }
   }
 
@@ -2328,6 +2328,29 @@
     }
   };
   class DropArea {
+    constructor(_ref) {
+      let {
+        container,
+        inputAccept,
+        onUploadFiles,
+        renderer
+      } = _ref;
+      this.container = container;
+      this.onUploadFiles = onUploadFiles;
+      this.acceptedFileTypes = new AcceptedFileTypes(inputAccept);
+      this.renderer = renderer;
+      container.addEventListener("dragenter", () => {
+        container.classList.add("dff-dropping");
+      });
+      container.addEventListener("dragleave", () => {
+        container.classList.remove("dff-dropping");
+      });
+      container.addEventListener("dragover", e => {
+        container.classList.add("dff-dropping");
+        e.preventDefault();
+      });
+      container.addEventListener("drop", this.onDrop);
+    }
     onDrop = e => {
       const dragEvent = e;
       this.container.classList.remove("dff-dropping");
@@ -2355,29 +2378,6 @@
       };
       void uploadFiles();
     };
-    constructor(_ref) {
-      let {
-        container,
-        inputAccept,
-        onUploadFiles,
-        renderer
-      } = _ref;
-      this.container = container;
-      this.onUploadFiles = onUploadFiles;
-      this.acceptedFileTypes = new AcceptedFileTypes(inputAccept);
-      this.renderer = renderer;
-      container.addEventListener("dragenter", () => {
-        container.classList.add("dff-dropping");
-      });
-      container.addEventListener("dragleave", () => {
-        container.classList.remove("dff-dropping");
-      });
-      container.addEventListener("dragover", e => {
-        container.classList.add("dff-dropping");
-        e.preventDefault();
-      });
-      container.addEventListener("drop", this.onDrop);
-    }
   }
 
   /*!
@@ -2500,18 +2500,6 @@
   const getMetadataFieldName = (fieldName, prefix) => `${getInputNameWithoutPrefix(fieldName, prefix)}-metadata`;
 
   class RenderUploadFile {
-    createErrorContainer = parent => {
-      const div = document.createElement("div");
-      div.className = "dff-invalid-files";
-      parent.appendChild(div);
-      return div;
-    };
-    createFilesContainer = parent => {
-      const div = document.createElement("div");
-      div.className = "dff-files";
-      parent.appendChild(div);
-      return div;
-    };
     constructor(_ref) {
       let {
         input,
@@ -2526,67 +2514,6 @@
       if (skipRequired) {
         this.input.required = false;
       }
-    }
-    addFile(filename, uploadIndex) {
-      const div = document.createElement("div");
-      div.className = `dff-file dff-file-id-${uploadIndex.toString()}`;
-      const nameSpan = document.createElement("span");
-      nameSpan.innerHTML = escape(filename);
-      nameSpan.className = "dff-filename";
-      nameSpan.setAttribute("data-index", uploadIndex.toString());
-      div.appendChild(nameSpan);
-      this.container.appendChild(div);
-      this.input.required = false;
-      return div;
-    }
-    enableDelete(index) {
-      const deleteLink = this.findDeleteLink(index);
-      if (deleteLink) {
-        deleteLink.classList.remove("dff-disabled");
-      }
-    }
-    findCancelSpan(index) {
-      const el = this.findFileDiv(index);
-      if (!el) {
-        return null;
-      }
-      return el.querySelector(".dff-cancel");
-    }
-    findDeleteLink(index) {
-      const div = this.findFileDiv(index);
-      if (!div) {
-        return div;
-      }
-      return div.querySelector(".dff-delete");
-    }
-    removeCancel(index) {
-      const cancelSpan = this.findCancelSpan(index);
-      if (cancelSpan) {
-        cancelSpan.remove();
-      }
-    }
-    removeProgress(index) {
-      const el = this.findFileDiv(index);
-      if (el) {
-        const progressSpan = el.querySelector(".dff-progress");
-        if (progressSpan) {
-          progressSpan.remove();
-        }
-      }
-    }
-    setErrorMessage(index, message) {
-      const el = this.findFileDiv(index);
-      if (!el) {
-        return;
-      }
-      const originalMessageSpan = el.querySelector(".dff-error");
-      if (originalMessageSpan) {
-        originalMessageSpan.remove();
-      }
-      const span = document.createElement("span");
-      span.classList.add("dff-error");
-      span.innerHTML = message;
-      el.appendChild(span);
     }
     addNewUpload(filename, uploadIndex) {
       const div = this.addFile(filename, uploadIndex);
@@ -2707,6 +2634,79 @@
           innerProgressSpan.style.width = `${percentage}%`;
         }
       }
+    }
+    addFile(filename, uploadIndex) {
+      const div = document.createElement("div");
+      div.className = `dff-file dff-file-id-${uploadIndex.toString()}`;
+      const nameSpan = document.createElement("span");
+      nameSpan.innerHTML = escape(filename);
+      nameSpan.className = "dff-filename";
+      nameSpan.setAttribute("data-index", uploadIndex.toString());
+      div.appendChild(nameSpan);
+      this.container.appendChild(div);
+      this.input.required = false;
+      return div;
+    }
+    createErrorContainer = parent => {
+      const div = document.createElement("div");
+      div.className = "dff-invalid-files";
+      parent.appendChild(div);
+      return div;
+    };
+    createFilesContainer = parent => {
+      const div = document.createElement("div");
+      div.className = "dff-files";
+      parent.appendChild(div);
+      return div;
+    };
+    enableDelete(index) {
+      const deleteLink = this.findDeleteLink(index);
+      if (deleteLink) {
+        deleteLink.classList.remove("dff-disabled");
+      }
+    }
+    findCancelSpan(index) {
+      const el = this.findFileDiv(index);
+      if (!el) {
+        return null;
+      }
+      return el.querySelector(".dff-cancel");
+    }
+    findDeleteLink(index) {
+      const div = this.findFileDiv(index);
+      if (!div) {
+        return div;
+      }
+      return div.querySelector(".dff-delete");
+    }
+    removeCancel(index) {
+      const cancelSpan = this.findCancelSpan(index);
+      if (cancelSpan) {
+        cancelSpan.remove();
+      }
+    }
+    removeProgress(index) {
+      const el = this.findFileDiv(index);
+      if (el) {
+        const progressSpan = el.querySelector(".dff-progress");
+        if (progressSpan) {
+          progressSpan.remove();
+        }
+      }
+    }
+    setErrorMessage(index, message) {
+      const el = this.findFileDiv(index);
+      if (!el) {
+        return;
+      }
+      const originalMessageSpan = el.querySelector(".dff-error");
+      if (originalMessageSpan) {
+        originalMessageSpan.remove();
+      }
+      const span = document.createElement("span");
+      span.classList.add("dff-error");
+      span.innerHTML = message;
+      el.appendChild(span);
     }
   }
 
@@ -2948,6 +2948,42 @@
       this.initChunks();
       this.createdPromise.catch(() => ({})); // silence uncaught rejection warning
     }
+    async abort() {
+      this.uploading.slice().forEach(xhr => {
+        xhr.abort();
+      });
+      this.uploading = [];
+      await this.createdPromise;
+      if (this.key && this.uploadId) {
+        await abortMultipartUpload({
+          csrfToken: this.csrfToken,
+          endpoint: this.endpoint,
+          key: this.key,
+          uploadId: this.uploadId
+        });
+      }
+    }
+    async delete() {
+      return Promise.resolve();
+    }
+    getId() {
+      return this.uploadId ?? undefined;
+    }
+    getInitialFile() {
+      return {
+        id: this.uploadId ?? "",
+        name: this.key ?? "",
+        original_name: this.file.name,
+        size: this.file.size,
+        type: "s3"
+      };
+    }
+    getSize() {
+      return this.file.size;
+    }
+    start() {
+      void this.createUpload();
+    }
     completeUpload() {
       // Parts may not have completed uploading in sorted order, if limit > 1.
       this.parts.sort((a, b) => a.PartNumber - b.PartNumber);
@@ -3140,42 +3176,6 @@
       candidates.forEach(index => {
         void this.uploadPart(index);
       });
-    }
-    async abort() {
-      this.uploading.slice().forEach(xhr => {
-        xhr.abort();
-      });
-      this.uploading = [];
-      await this.createdPromise;
-      if (this.key && this.uploadId) {
-        await abortMultipartUpload({
-          csrfToken: this.csrfToken,
-          endpoint: this.endpoint,
-          key: this.key,
-          uploadId: this.uploadId
-        });
-      }
-    }
-    async delete() {
-      return Promise.resolve();
-    }
-    getId() {
-      return this.uploadId ?? undefined;
-    }
-    getInitialFile() {
-      return {
-        id: this.uploadId ?? "",
-        name: this.key ?? "",
-        original_name: this.file.name,
-        size: this.file.size,
-        type: "s3"
-      };
-    }
-    getSize() {
-      return this.file.size;
-    }
-    start() {
-      void this.createUpload();
     }
   }
 
@@ -5645,32 +5645,6 @@
   });
 
   class TusUpload extends BaseUpload$1 {
-    addCsrTokenToRequest = request => {
-      request.setHeader("X-CSRFToken", this.csrfToken);
-    };
-    handleAfterReponse = (_request, response) => {
-      const resourceId = response.getHeader("ResourceId");
-      if (resourceId) {
-        this.id = resourceId;
-      }
-    };
-    handleError = error => {
-      if (this.onError) {
-        this.onError(error);
-      } else {
-        throw error;
-      }
-    };
-    handleProgress = (bytesUploaded, bytesTotal) => {
-      if (this.onProgress) {
-        this.onProgress(bytesUploaded, bytesTotal);
-      }
-    };
-    handleSucces = () => {
-      if (this.onSuccess) {
-        this.onSuccess();
-      }
-    };
     constructor(_ref) {
       let {
         chunkSize,
@@ -5735,6 +5709,32 @@
     start() {
       this.upload.start();
     }
+    addCsrTokenToRequest = request => {
+      request.setHeader("X-CSRFToken", this.csrfToken);
+    };
+    handleAfterReponse = (_request, response) => {
+      const resourceId = response.getHeader("ResourceId");
+      if (resourceId) {
+        this.id = resourceId;
+      }
+    };
+    handleError = error => {
+      if (this.onError) {
+        this.onError(error);
+      } else {
+        throw error;
+      }
+    };
+    handleProgress = (bytesUploaded, bytesTotal) => {
+      if (this.onProgress) {
+        this.onProgress(bytesUploaded, bytesTotal);
+      }
+    };
+    handleSucces = () => {
+      if (this.onSuccess) {
+        this.onSuccess();
+      }
+    };
   }
 
   class BaseUploadedFile extends BaseUpload$1 {
@@ -5785,6 +5785,26 @@
       };
     }
   }
+  class ExistingFile extends BaseUploadedFile {
+    constructor(initialFile, uploadIndex) {
+      super({
+        name: initialFile.name,
+        size: initialFile.size,
+        type: "existing",
+        uploadIndex
+      });
+    }
+    getId() {
+      return undefined;
+    }
+    getInitialFile() {
+      return {
+        name: this.name,
+        size: this.size,
+        type: "existing"
+      };
+    }
+  }
   class UploadedS3File extends BaseUploadedFile {
     constructor(initialFile, uploadIndex) {
       super({
@@ -5806,26 +5826,6 @@
         original_name: this.name,
         size: this.size,
         type: "s3"
-      };
-    }
-  }
-  class ExistingFile extends BaseUploadedFile {
-    constructor(initialFile, uploadIndex) {
-      super({
-        name: initialFile.name,
-        size: initialFile.size,
-        type: "existing",
-        uploadIndex
-      });
-    }
-    getId() {
-      return undefined;
-    }
-    getInitialFile() {
-      return {
-        name: this.name,
-        size: this.size,
-        type: "existing"
       };
     }
   }
@@ -5888,122 +5888,6 @@
   };
 
   class FileField {
-    handleClick = e => {
-      const target = e.target;
-      const getUpload = () => {
-        const dataIndex = target.getAttribute("data-index");
-        if (!dataIndex) {
-          return undefined;
-        }
-        const uploadIndex = parseInt(dataIndex, 10);
-        return this.getUploadByIndex(uploadIndex);
-      };
-      if (target.classList.contains("dff-delete") && !target.classList.contains("dff-disabled")) {
-        e.preventDefault();
-        const upload = getUpload();
-        if (upload) {
-          void this.removeExistingUpload(upload);
-        }
-      } else if (target.classList.contains("dff-cancel")) {
-        e.preventDefault();
-        const upload = getUpload();
-        if (upload) {
-          void this.handleCancel(upload);
-        }
-      } else if (target.classList.contains("dff-filename")) {
-        e.preventDefault();
-        const upload = getUpload();
-        if (upload?.status === "done" && this.callbacks.onClick) {
-          this.callbacks.onClick({
-            fieldName: this.fieldName,
-            fileName: upload.name,
-            id: upload.getId(),
-            type: upload.type
-          });
-        }
-      }
-    };
-    handleError = (upload, error) => {
-      this.renderer.setError(upload.uploadIndex);
-      upload.status = "error";
-      const {
-        onError
-      } = this.callbacks;
-      if (onError) {
-        if (upload instanceof TusUpload) {
-          onError(error, upload);
-        }
-      }
-    };
-    handleInvalidFiles = files => {
-      this.renderer.setErrorInvalidFiles(files);
-    };
-    handleProgress = (upload, bytesUploaded, bytesTotal) => {
-      const percentage = (bytesUploaded / bytesTotal * 100).toFixed(2);
-      this.renderer.updateProgress(upload.uploadIndex, percentage);
-      const {
-        onProgress
-      } = this.callbacks;
-      if (onProgress) {
-        if (upload instanceof TusUpload) {
-          onProgress(bytesUploaded, bytesTotal, upload);
-        }
-      }
-    };
-    handleSuccess = upload => {
-      const {
-        renderer
-      } = this;
-      this.updatePlaceholderInput();
-      renderer.clearInput();
-      renderer.setSuccess(upload.uploadIndex, upload.getSize());
-      upload.status = "done";
-      const {
-        onSuccess
-      } = this.callbacks;
-      const element = this.renderer.findFileDiv(upload.uploadIndex);
-      if (element) {
-        this.emitEvent("uploadComplete", element, upload);
-      }
-      if (onSuccess && upload.type === "tus") {
-        onSuccess(upload);
-      }
-    };
-    onChange = e => {
-      const files = e.target.files ?? [];
-      const acceptedFiles = [];
-      const invalidFiles = [];
-      for (const file of files) {
-        if (this.acceptedFileTypes.isAccepted(file.name)) {
-          acceptedFiles.push(file);
-        } else {
-          invalidFiles.push(file);
-        }
-      }
-      this.handleInvalidFiles([...invalidFiles]);
-      void this.uploadFiles([...acceptedFiles]);
-      this.renderer.clearInput();
-    };
-    uploadFiles = async files => {
-      if (files.length === 0) {
-        return;
-      }
-      if (!this.multiple) {
-        for (const upload of this.uploads) {
-          this.renderer.deleteFile(upload.uploadIndex);
-        }
-        this.uploads = [];
-        const file = files[0];
-        if (file) {
-          await this.uploadFile(file);
-        }
-      } else {
-        for (const file of files) {
-          await this.uploadFile(file);
-        }
-      }
-      this.checkDropHint();
-    };
     constructor(_ref) {
       let {
         callbacks,
@@ -6127,6 +6011,87 @@
       await upload.abort();
       this.removeUploadFromList(upload);
     }
+    handleClick = e => {
+      const target = e.target;
+      const getUpload = () => {
+        const dataIndex = target.getAttribute("data-index");
+        if (!dataIndex) {
+          return undefined;
+        }
+        const uploadIndex = parseInt(dataIndex, 10);
+        return this.getUploadByIndex(uploadIndex);
+      };
+      if (target.classList.contains("dff-delete") && !target.classList.contains("dff-disabled")) {
+        e.preventDefault();
+        const upload = getUpload();
+        if (upload) {
+          void this.removeExistingUpload(upload);
+        }
+      } else if (target.classList.contains("dff-cancel")) {
+        e.preventDefault();
+        const upload = getUpload();
+        if (upload) {
+          void this.handleCancel(upload);
+        }
+      } else if (target.classList.contains("dff-filename")) {
+        e.preventDefault();
+        const upload = getUpload();
+        if (upload?.status === "done" && this.callbacks.onClick) {
+          this.callbacks.onClick({
+            fieldName: this.fieldName,
+            fileName: upload.name,
+            id: upload.getId(),
+            type: upload.type
+          });
+        }
+      }
+    };
+    handleError = (upload, error) => {
+      this.renderer.setError(upload.uploadIndex);
+      upload.status = "error";
+      const {
+        onError
+      } = this.callbacks;
+      if (onError) {
+        if (upload instanceof TusUpload) {
+          onError(error, upload);
+        }
+      }
+    };
+    handleInvalidFiles = files => {
+      this.renderer.setErrorInvalidFiles(files);
+    };
+    handleProgress = (upload, bytesUploaded, bytesTotal) => {
+      const percentage = (bytesUploaded / bytesTotal * 100).toFixed(2);
+      this.renderer.updateProgress(upload.uploadIndex, percentage);
+      const {
+        onProgress
+      } = this.callbacks;
+      if (onProgress) {
+        if (upload instanceof TusUpload) {
+          onProgress(bytesUploaded, bytesTotal, upload);
+        }
+      }
+    };
+    handleSuccess = upload => {
+      const {
+        renderer
+      } = this;
+      this.updatePlaceholderInput();
+      renderer.clearInput();
+      renderer.setSuccess(upload.uploadIndex, upload.getSize());
+      upload.status = "done";
+      const {
+        onSuccess
+      } = this.callbacks;
+      const element = this.renderer.findFileDiv(upload.uploadIndex);
+      if (element) {
+        this.emitEvent("uploadComplete", element, upload);
+      }
+      if (onSuccess && upload.type === "tus") {
+        onSuccess(upload);
+      }
+    };
     initDropArea(container, inputAccept) {
       new DropArea({
         container,
@@ -6135,6 +6100,21 @@
         renderer: this.renderer
       });
     }
+    onChange = e => {
+      const files = e.target.files ?? [];
+      const acceptedFiles = [];
+      const invalidFiles = [];
+      for (const file of files) {
+        if (this.acceptedFileTypes.isAccepted(file.name)) {
+          acceptedFiles.push(file);
+        } else {
+          invalidFiles.push(file);
+        }
+      }
+      this.handleInvalidFiles([...invalidFiles]);
+      void this.uploadFiles([...acceptedFiles]);
+      this.renderer.clearInput();
+    };
     async removeExistingUpload(upload) {
       const element = this.renderer.findFileDiv(upload.uploadIndex);
       if (element) {
@@ -6234,6 +6214,26 @@
       const element = renderer.addNewUpload(fileName, newUploadIndex);
       this.emitEvent("addUpload", element, upload);
     }
+    uploadFiles = async files => {
+      if (files.length === 0) {
+        return;
+      }
+      if (!this.multiple) {
+        for (const upload of this.uploads) {
+          this.renderer.deleteFile(upload.uploadIndex);
+        }
+        this.uploads = [];
+        const file = files[0];
+        if (file) {
+          await this.uploadFile(file);
+        }
+      } else {
+        for (const file of files) {
+          await this.uploadFile(file);
+        }
+      }
+      this.checkDropHint();
+    };
   }
 
   const initUploadFields = function (form) {
