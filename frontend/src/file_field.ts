@@ -13,15 +13,6 @@ import {
   getUploadsFieldName
 } from "./util.ts";
 
-export type Translations = Record<string, string>;
-
-interface ClickEvent {
-  fieldName: string;
-  fileName: string;
-  id?: string;
-  type: UploadType;
-}
-
 export interface Callbacks {
   onClick?: ({ fieldName, fileName, type }: ClickEvent) => void;
   onDelete?: (upload: BaseUpload) => void;
@@ -32,6 +23,15 @@ export interface Callbacks {
     upload: BaseUpload
   ) => void;
   onSuccess?: (upload: BaseUpload) => void;
+}
+
+export type Translations = Record<string, string>;
+
+interface ClickEvent {
+  fieldName: string;
+  fileName: string;
+  id?: string;
+  type: UploadType;
 }
 
 interface ConstructorParams {
@@ -64,164 +64,14 @@ class FileField {
   fieldName: string;
   form: Element;
   formId: string;
-  handleClick = (e: Event): void => {
-    const target = e.target as HTMLElement;
-
-    const getUpload = (): BaseUpload | undefined => {
-      const dataIndex = target.getAttribute("data-index");
-
-      if (!dataIndex) {
-        return undefined;
-      }
-
-      const uploadIndex = parseInt(dataIndex, 10);
-      return this.getUploadByIndex(uploadIndex);
-    };
-
-    if (
-      target.classList.contains("dff-delete") &&
-      !target.classList.contains("dff-disabled")
-    ) {
-      e.preventDefault();
-
-      const upload = getUpload();
-
-      if (upload) {
-        void this.removeExistingUpload(upload);
-      }
-    } else if (target.classList.contains("dff-cancel")) {
-      e.preventDefault();
-
-      const upload = getUpload();
-
-      if (upload) {
-        void this.handleCancel(upload);
-      }
-    } else if (target.classList.contains("dff-filename")) {
-      e.preventDefault();
-
-      const upload = getUpload();
-
-      if (upload?.status === "done" && this.callbacks.onClick) {
-        this.callbacks.onClick({
-          fieldName: this.fieldName,
-          fileName: upload.name,
-          id: upload.getId(),
-          type: upload.type
-        });
-      }
-    }
-  };
-  handleError = (upload: BaseUpload, error: unknown): void => {
-    this.renderer.setError(upload.uploadIndex);
-    upload.status = "error";
-
-    const { onError } = this.callbacks;
-
-    if (onError) {
-      if (upload instanceof TusUpload) {
-        onError(error, upload);
-      }
-    }
-  };
-  handleInvalidFiles = (files: File[]): void => {
-    this.renderer.setErrorInvalidFiles(files);
-  };
-  handleProgress = (
-    upload: BaseUpload,
-    bytesUploaded: number,
-    bytesTotal: number
-  ): void => {
-    const percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2);
-
-    this.renderer.updateProgress(upload.uploadIndex, percentage);
-
-    const { onProgress } = this.callbacks;
-
-    if (onProgress) {
-      if (upload instanceof TusUpload) {
-        onProgress(bytesUploaded, bytesTotal, upload);
-      }
-    }
-  };
-  handleSuccess = (upload: BaseUpload): void => {
-    const { renderer } = this;
-
-    this.updatePlaceholderInput();
-
-    renderer.clearInput();
-    renderer.setSuccess(upload.uploadIndex, upload.getSize());
-    upload.status = "done";
-
-    const { onSuccess } = this.callbacks;
-
-    const element = this.renderer.findFileDiv(upload.uploadIndex);
-
-    if (element) {
-      this.emitEvent("uploadComplete", element, upload);
-    }
-
-    if (onSuccess && upload.type === "tus") {
-      onSuccess(upload);
-    }
-  };
   multiple: boolean;
   nextUploadIndex: number;
-  onChange = (e: Event): void => {
-    const files = (e.target as HTMLInputElement).files ?? ([] as File[]);
-    const acceptedFiles: File[] = [];
-    const invalidFiles: File[] = [];
-
-    for (const file of files) {
-      if (this.acceptedFileTypes.isAccepted(file.name)) {
-        acceptedFiles.push(file);
-      } else {
-        invalidFiles.push(file);
-      }
-    }
-
-    this.handleInvalidFiles([...invalidFiles]);
-    void this.uploadFiles([...acceptedFiles]);
-
-    this.renderer.clearInput();
-  };
   prefix: null | string;
-
   renderer: RenderUploadFile;
-
   retryDelays: null | number[];
-
   s3UploadDir: null | string;
-
   supportDropArea: boolean;
-
-  uploadFiles = async (files: File[]): Promise<void> => {
-    if (files.length === 0) {
-      return;
-    }
-
-    if (!this.multiple) {
-      for (const upload of this.uploads) {
-        this.renderer.deleteFile(upload.uploadIndex);
-      }
-
-      this.uploads = [];
-      const file = files[0];
-
-      if (file) {
-        await this.uploadFile(file);
-      }
-    } else {
-      for (const file of files) {
-        await this.uploadFile(file);
-      }
-    }
-
-    this.checkDropHint();
-  };
-
   uploads: BaseUpload[];
-
   uploadUrl: string;
 
   constructor({
@@ -375,6 +225,112 @@ class FileField {
     this.removeUploadFromList(upload);
   }
 
+  handleClick = (e: Event): void => {
+    const target = e.target as HTMLElement;
+
+    const getUpload = (): BaseUpload | undefined => {
+      const dataIndex = target.getAttribute("data-index");
+
+      if (!dataIndex) {
+        return undefined;
+      }
+
+      const uploadIndex = parseInt(dataIndex, 10);
+      return this.getUploadByIndex(uploadIndex);
+    };
+
+    if (
+      target.classList.contains("dff-delete") &&
+      !target.classList.contains("dff-disabled")
+    ) {
+      e.preventDefault();
+
+      const upload = getUpload();
+
+      if (upload) {
+        void this.removeExistingUpload(upload);
+      }
+    } else if (target.classList.contains("dff-cancel")) {
+      e.preventDefault();
+
+      const upload = getUpload();
+
+      if (upload) {
+        void this.handleCancel(upload);
+      }
+    } else if (target.classList.contains("dff-filename")) {
+      e.preventDefault();
+
+      const upload = getUpload();
+
+      if (upload?.status === "done" && this.callbacks.onClick) {
+        this.callbacks.onClick({
+          fieldName: this.fieldName,
+          fileName: upload.name,
+          id: upload.getId(),
+          type: upload.type
+        });
+      }
+    }
+  };
+
+  handleError = (upload: BaseUpload, error: unknown): void => {
+    this.renderer.setError(upload.uploadIndex);
+    upload.status = "error";
+
+    const { onError } = this.callbacks;
+
+    if (onError) {
+      if (upload instanceof TusUpload) {
+        onError(error, upload);
+      }
+    }
+  };
+
+  handleInvalidFiles = (files: File[]): void => {
+    this.renderer.setErrorInvalidFiles(files);
+  };
+
+  handleProgress = (
+    upload: BaseUpload,
+    bytesUploaded: number,
+    bytesTotal: number
+  ): void => {
+    const percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2);
+
+    this.renderer.updateProgress(upload.uploadIndex, percentage);
+
+    const { onProgress } = this.callbacks;
+
+    if (onProgress) {
+      if (upload instanceof TusUpload) {
+        onProgress(bytesUploaded, bytesTotal, upload);
+      }
+    }
+  };
+
+  handleSuccess = (upload: BaseUpload): void => {
+    const { renderer } = this;
+
+    this.updatePlaceholderInput();
+
+    renderer.clearInput();
+    renderer.setSuccess(upload.uploadIndex, upload.getSize());
+    upload.status = "done";
+
+    const { onSuccess } = this.callbacks;
+
+    const element = this.renderer.findFileDiv(upload.uploadIndex);
+
+    if (element) {
+      this.emitEvent("uploadComplete", element, upload);
+    }
+
+    if (onSuccess && upload.type === "tus") {
+      onSuccess(upload);
+    }
+  };
+
   initDropArea(container: Element, inputAccept: string): void {
     new DropArea({
       container,
@@ -383,6 +339,25 @@ class FileField {
       renderer: this.renderer
     });
   }
+
+  onChange = (e: Event): void => {
+    const files = (e.target as HTMLInputElement).files ?? ([] as File[]);
+    const acceptedFiles: File[] = [];
+    const invalidFiles: File[] = [];
+
+    for (const file of files) {
+      if (this.acceptedFileTypes.isAccepted(file.name)) {
+        acceptedFiles.push(file);
+      } else {
+        invalidFiles.push(file);
+      }
+    }
+
+    this.handleInvalidFiles([...invalidFiles]);
+    void this.uploadFiles([...acceptedFiles]);
+
+    this.renderer.clearInput();
+  };
 
   async removeExistingUpload(upload: BaseUpload): Promise<void> {
     const element = this.renderer.findFileDiv(upload.uploadIndex);
@@ -503,6 +478,31 @@ class FileField {
     const element = renderer.addNewUpload(fileName, newUploadIndex);
     this.emitEvent("addUpload", element, upload);
   }
+
+  uploadFiles = async (files: File[]): Promise<void> => {
+    if (files.length === 0) {
+      return;
+    }
+
+    if (!this.multiple) {
+      for (const upload of this.uploads) {
+        this.renderer.deleteFile(upload.uploadIndex);
+      }
+
+      this.uploads = [];
+      const file = files[0];
+
+      if (file) {
+        await this.uploadFile(file);
+      }
+    } else {
+      for (const file of files) {
+        await this.uploadFile(file);
+      }
+    }
+
+    this.checkDropHint();
+  };
 }
 
 export default FileField;

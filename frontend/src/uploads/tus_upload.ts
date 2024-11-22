@@ -15,47 +15,12 @@ interface Parameters {
 }
 
 export default class TusUpload extends BaseUpload {
-  private addCsrTokenToRequest = (request: HttpRequest) => {
-    request.setHeader("X-CSRFToken", this.csrfToken);
-  };
-  private csrfToken: string;
-  private handleAfterReponse = (
-    _request: HttpRequest,
-    response: HttpResponse
-  ) => {
-    const resourceId = response.getHeader("ResourceId");
-
-    if (resourceId) {
-      this.id = resourceId;
-    }
-  };
-  private handleError = (error: Error) => {
-    if (this.onError) {
-      this.onError(error);
-    } else {
-      throw error;
-    }
-  };
-  private handleProgress = (bytesUploaded: number, bytesTotal: number) => {
-    if (this.onProgress) {
-      this.onProgress(bytesUploaded, bytesTotal);
-    }
-  };
-  private handleSucces = () => {
-    if (this.onSuccess) {
-      this.onSuccess();
-    }
-  };
-
-  private id: string;
-
-  private upload: Upload;
-
   public onError?: (error: Error) => void;
-
   public onProgress?: (bytesUploaded: number, bytesTotal: number) => void;
-
   public onSuccess?: () => void;
+  private csrfToken: string;
+  private id: string;
+  private upload: Upload;
 
   constructor({
     chunkSize,
@@ -125,4 +90,39 @@ export default class TusUpload extends BaseUpload {
   public start(): void {
     this.upload.start();
   }
+
+  private addCsrTokenToRequest = (request: HttpRequest) => {
+    request.setHeader("X-CSRFToken", this.csrfToken);
+  };
+
+  private handleAfterReponse = (
+    _request: HttpRequest,
+    response: HttpResponse
+  ) => {
+    const resourceId = response.getHeader("ResourceId");
+
+    if (resourceId) {
+      this.id = resourceId;
+    }
+  };
+
+  private handleError = (error: Error) => {
+    if (this.onError) {
+      this.onError(error);
+    } else {
+      throw error;
+    }
+  };
+
+  private handleProgress = (bytesUploaded: number, bytesTotal: number) => {
+    if (this.onProgress) {
+      this.onProgress(bytesUploaded, bytesTotal);
+    }
+  };
+
+  private handleSucces = () => {
+    if (this.onSuccess) {
+      this.onSuccess();
+    }
+  };
 }
