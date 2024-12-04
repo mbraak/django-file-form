@@ -110,5 +110,3 @@ CSP_CONNECT_SRC = ("'self'", AWS_S3_ENDPOINT_URL)
 
 if "COVERAGE" in os.environ:
     CSP_SCRIPT_SRC += ["'unsafe-eval'"]
-
-logging.basicConfig(level="INFO")
