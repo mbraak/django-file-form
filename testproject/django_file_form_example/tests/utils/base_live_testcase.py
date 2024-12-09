@@ -11,8 +11,9 @@ class SeleniumTestMetaClass(SeleniumTestCaseBase):
     def create_options(self):
         options = self.import_options(self.browser)()
 
+        # Fix for Django 4.2
         if self.headless:
-            options.add_argument("--headless=new")
+            options.add_argument("--headless")
 
         options.add_argument("--disable-dev-shm-usage")
         options.set_capability("goog:loggingPrefs", {"browser": "ALL"})
