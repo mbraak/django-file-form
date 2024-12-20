@@ -31,10 +31,13 @@ interface S3UploadParameters {
 }
 
 class S3Upload extends BaseUpload {
+  public onError?: (error: unknown) => void;
+  public onProgress?: (bytesUploaded: number, bytesTotal: number) => void;
+  public onSuccess?: () => void;
+
   private chunks: Blob[];
   private chunkState: ChunkState[];
   private createdPromise: Promise<MultipartUpload>;
-
   private csrfToken: string;
   private endpoint: string;
   private file: File;
@@ -43,9 +46,6 @@ class S3Upload extends BaseUpload {
   private s3UploadDir: string;
   private uploadId: null | string;
   private uploading: XMLHttpRequest[];
-  public onError?: (error: unknown) => void;
-  public onProgress?: (bytesUploaded: number, bytesTotal: number) => void;
-  public onSuccess?: () => void;
 
   constructor({
     csrfToken,
@@ -83,6 +83,50 @@ class S3Upload extends BaseUpload {
     this.initChunks();
 
     this.createdPromise.catch(() => ({})); // silence uncaught rejection warning
+  }
+
+  public async abort(): Promise<void> {
+    this.uploading.slice().forEach(xhr => {
+      xhr.abort();
+    });
+    this.uploading = [];
+
+    await this.createdPromise;
+
+    if (this.key && this.uploadId) {
+      await abortMultipartUpload({
+        csrfToken: this.csrfToken,
+        endpoint: this.endpoint,
+        key: this.key,
+        uploadId: this.uploadId
+      });
+    }
+  }
+
+  public async delete(): Promise<void> {
+    return Promise.resolve();
+  }
+
+  public getId(): string | undefined {
+    return this.uploadId ?? undefined;
+  }
+
+  public getInitialFile(): InitialFile {
+    return {
+      id: this.uploadId ?? "",
+      name: this.key ?? "",
+      original_name: this.file.name,
+      size: this.file.size,
+      type: "s3"
+    };
+  }
+
+  public getSize(): number {
+    return this.file.size;
+  }
+
+  public start(): void {
+    void this.createUpload();
   }
 
   private completeUpload(): Promise<void> {
@@ -339,50 +383,6 @@ class S3Upload extends BaseUpload {
     candidates.forEach(index => {
       void this.uploadPart(index);
     });
-  }
-
-  public async abort(): Promise<void> {
-    this.uploading.slice().forEach(xhr => {
-      xhr.abort();
-    });
-    this.uploading = [];
-
-    await this.createdPromise;
-
-    if (this.key && this.uploadId) {
-      await abortMultipartUpload({
-        csrfToken: this.csrfToken,
-        endpoint: this.endpoint,
-        key: this.key,
-        uploadId: this.uploadId
-      });
-    }
-  }
-
-  public async delete(): Promise<void> {
-    return Promise.resolve();
-  }
-
-  public getId(): string | undefined {
-    return this.uploadId ?? undefined;
-  }
-
-  public getInitialFile(): InitialFile {
-    return {
-      id: this.uploadId ?? "",
-      name: this.key ?? "",
-      original_name: this.file.name,
-      size: this.file.size,
-      type: "s3"
-    };
-  }
-
-  public getSize(): number {
-    return this.file.size;
-  }
-
-  public start(): void {
-    void this.createUpload();
   }
 }
 
