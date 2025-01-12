@@ -61,6 +61,9 @@ jobs:
         run: npm run test
       - name: Create javascript coverage directory
         run: mkdir js_coverage
+      - name: Collect static files
+        run: python manage.py collectstatic --no-input
+        working-directory: testproject
       - name: Test with coverage
         run: COVERAGE=true coverage run --source=django_file_form,testproject/django_file_form_example testproject/manage.py test django_file_form_example -v 2
       - name: Merge Python coverage
