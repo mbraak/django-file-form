@@ -60,11 +60,12 @@ class S3TestCase(BaseLiveTestCase):
             endpoint_url="http://localhost:4566",
             aws_access_key_id="access1",
             aws_secret_access_key="test1",
+            region_name="eu-west-1"
         )
         bucket = s3.Bucket("mybucket")
 
         bucket.create(
-            CreateBucketConfiguration={"LocationConstraint": "us_east1"},
+            CreateBucketConfiguration={"LocationConstraint": "eu-west-1"},
         )
 
         cls.bucket = bucket
