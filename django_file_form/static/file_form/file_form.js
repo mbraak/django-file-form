@@ -2011,7 +2011,7 @@
   	      }
 
   	      if (prior.type === 'slash' && prior.prev.type !== 'bos' && rest[0] === '/') {
-  	        const end = rest[1] !== void 0 ? '|$' : '';
+  	        const end = rest[1] !== undefined ? '|$' : '';
 
   	        state.output = state.output.slice(0, -(prior.output + prev.output).length);
   	        prior.output = `(?:${prior.output}`;
@@ -4640,6 +4640,7 @@
 
   const PROTOCOL_TUS_V1 = 'tus-v1';
   const PROTOCOL_IETF_DRAFT_03 = 'ietf-draft-03';
+  const PROTOCOL_IETF_DRAFT_05 = 'ietf-draft-05';
   const defaultOptions$1 = {
     endpoint: null,
     uploadUrl: null,
@@ -4789,7 +4790,7 @@
         this._emitError(new Error('tus: no file or stream to upload provided'));
         return;
       }
-      if (![PROTOCOL_TUS_V1, PROTOCOL_IETF_DRAFT_03].includes(this.options.protocol)) {
+      if (![PROTOCOL_TUS_V1, PROTOCOL_IETF_DRAFT_03, PROTOCOL_IETF_DRAFT_05].includes(this.options.protocol)) {
         this._emitError(new Error(`tus: unsupported protocol ${this.options.protocol}`));
         return;
       }
@@ -5151,7 +5152,7 @@
         this._offset = 0;
         promise = this._addChunkToRequest(req);
       } else {
-        if (this.options.protocol === PROTOCOL_IETF_DRAFT_03) {
+        if (this.options.protocol === PROTOCOL_IETF_DRAFT_03 || this.options.protocol === PROTOCOL_IETF_DRAFT_05) {
           req.setHeader('Upload-Complete', '?0');
         }
         promise = this._sendRequest(req, null);
@@ -5311,7 +5312,11 @@
       req.setProgressHandler(bytesSent => {
         this._emitProgress(start + bytesSent, this._size);
       });
-      req.setHeader('Content-Type', 'application/offset+octet-stream');
+      if (this.options.protocol === PROTOCOL_TUS_V1) {
+        req.setHeader('Content-Type', 'application/offset+octet-stream');
+      } else if (this.options.protocol === PROTOCOL_IETF_DRAFT_05) {
+        req.setHeader('Content-Type', 'application/partial-upload');
+      }
 
       // The specified chunkSize may be Infinity or the calcluated end position
       // may exceed the file's size. In both cases, we limit the end position to
@@ -5346,7 +5351,7 @@
         if (value === null) {
           return this._sendRequest(req);
         }
-        if (this.options.protocol === PROTOCOL_IETF_DRAFT_03) {
+        if (this.options.protocol === PROTOCOL_IETF_DRAFT_03 || this.options.protocol === PROTOCOL_IETF_DRAFT_05) {
           req.setHeader('Upload-Complete', done ? '?1' : '?0');
         }
         this._emitProgress(this._offset, this._size);
@@ -5470,6 +5475,8 @@
     const req = options.httpStack.createRequest(method, url);
     if (options.protocol === PROTOCOL_IETF_DRAFT_03) {
       req.setHeader('Upload-Draft-Interop-Version', '5');
+    } else if (options.protocol === PROTOCOL_IETF_DRAFT_05) {
+      req.setHeader('Upload-Draft-Interop-Version', '6');
     } else {
       req.setHeader('Tus-Resumable', '1.0.0');
     }
