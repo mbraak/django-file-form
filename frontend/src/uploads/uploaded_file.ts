@@ -15,6 +15,20 @@ interface BaseUploadedFileParameters {
   uploadIndex: number;
 }
 
+interface UploadedFileParameters {
+  csrfToken: string;
+  initialFile: InitialFile;
+  uploadIndex: number;
+  uploadUrl: string;
+}
+
+interface UploadedTusFileParameters {
+  csrfToken: string;
+  initialFile: InitialTusFile;
+  uploadIndex: number;
+  uploadUrl: string;
+}
+
 export abstract class BaseUploadedFile extends BaseUpload {
   size: number;
 
@@ -65,6 +79,29 @@ class PlaceholderFile extends BaseUploadedFile {
   }
 }
 
+export class ExistingFile extends BaseUploadedFile {
+  constructor(initialFile: InitialExistingFile, uploadIndex: number) {
+    super({
+      name: initialFile.name,
+      size: initialFile.size,
+      type: "existing",
+      uploadIndex
+    });
+  }
+
+  public getId(): string | undefined {
+    return undefined;
+  }
+
+  public getInitialFile(): InitialExistingFile {
+    return {
+      name: this.name,
+      size: this.size,
+      type: "existing"
+    };
+  }
+}
+
 export class UploadedS3File extends BaseUploadedFile {
   id: string;
   key: string;
@@ -94,36 +131,6 @@ export class UploadedS3File extends BaseUploadedFile {
       type: "s3"
     };
   }
-}
-
-export class ExistingFile extends BaseUploadedFile {
-  constructor(initialFile: InitialExistingFile, uploadIndex: number) {
-    super({
-      name: initialFile.name,
-      size: initialFile.size,
-      type: "existing",
-      uploadIndex
-    });
-  }
-
-  public getId(): string | undefined {
-    return undefined;
-  }
-
-  public getInitialFile(): InitialExistingFile {
-    return {
-      name: this.name,
-      size: this.size,
-      type: "existing"
-    };
-  }
-}
-
-interface UploadedTusFileParameters {
-  csrfToken: string;
-  initialFile: InitialTusFile;
-  uploadIndex: number;
-  uploadUrl: string;
 }
 
 export class UploadedTusFile extends BaseUploadedFile {
@@ -166,13 +173,6 @@ export class UploadedTusFile extends BaseUploadedFile {
       url: ""
     };
   }
-}
-
-interface UploadedFileParameters {
-  csrfToken: string;
-  initialFile: InitialFile;
-  uploadIndex: number;
-  uploadUrl: string;
 }
 
 export const createUploadedFile = ({

@@ -1,17 +1,13 @@
-type UploadStatus = "done" | "error" | "uploading";
-export type UploadType =
-  | "existing"
-  | "placeholder"
-  | "s3"
-  | "tus"
-  | "uploadedS3"
-  | "uploadedTus";
-
 export interface InitialExistingFile {
   name: string;
   size: number;
   type: "existing";
 }
+export type InitialFile =
+  | InitialExistingFile
+  | InitialPlaceholderFile
+  | InitialS3File
+  | InitialTusFile;
 
 export interface InitialPlaceholderFile {
   id: string;
@@ -36,11 +32,13 @@ export interface InitialTusFile {
   url: string;
 }
 
-export type InitialFile =
-  | InitialExistingFile
-  | InitialPlaceholderFile
-  | InitialS3File
-  | InitialTusFile;
+export type UploadType =
+  | "existing"
+  | "placeholder"
+  | "s3"
+  | "tus"
+  | "uploadedS3"
+  | "uploadedTus";
 
 interface UploadParameters {
   name: string;
@@ -48,6 +46,8 @@ interface UploadParameters {
   type: UploadType;
   uploadIndex: number;
 }
+
+type UploadStatus = "done" | "error" | "uploading";
 
 abstract class BaseUpload {
   name: string;
