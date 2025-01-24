@@ -340,6 +340,31 @@ class FileField {
     });
   }
 
+  uploadFiles = async (files: File[]): Promise<void> => {
+    if (files.length === 0) {
+      return;
+    }
+
+    if (!this.multiple) {
+      for (const upload of this.uploads) {
+        this.renderer.deleteFile(upload.uploadIndex);
+      }
+
+      this.uploads = [];
+      const file = files[0];
+
+      if (file) {
+        await this.uploadFile(file);
+      }
+    } else {
+      for (const file of files) {
+        await this.uploadFile(file);
+      }
+    }
+
+    this.checkDropHint();
+  };
+
   onChange = (e: Event): void => {
     const files = (e.target as HTMLInputElement).files ?? ([] as File[]);
     const acceptedFiles: File[] = [];
@@ -478,31 +503,6 @@ class FileField {
     const element = renderer.addNewUpload(fileName, newUploadIndex);
     this.emitEvent("addUpload", element, upload);
   }
-
-  uploadFiles = async (files: File[]): Promise<void> => {
-    if (files.length === 0) {
-      return;
-    }
-
-    if (!this.multiple) {
-      for (const upload of this.uploads) {
-        this.renderer.deleteFile(upload.uploadIndex);
-      }
-
-      this.uploads = [];
-      const file = files[0];
-
-      if (file) {
-        await this.uploadFile(file);
-      }
-    } else {
-      for (const file of files) {
-        await this.uploadFile(file);
-      }
-    }
-
-    this.checkDropHint();
-  };
 }
 
 export default FileField;
