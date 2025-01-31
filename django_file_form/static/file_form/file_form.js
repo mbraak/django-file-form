@@ -6458,6 +6458,26 @@
         renderer: this.renderer
       });
     }
+    uploadFiles = async files => {
+      if (files.length === 0) {
+        return;
+      }
+      if (!this.multiple) {
+        for (const upload of this.uploads) {
+          this.renderer.deleteFile(upload.uploadIndex);
+        }
+        this.uploads = [];
+        const file = files[0];
+        if (file) {
+          await this.uploadFile(file);
+        }
+      } else {
+        for (const file of files) {
+          await this.uploadFile(file);
+        }
+      }
+      this.checkDropHint();
+    };
     onChange = e => {
       const files = e.target.files ?? [];
       const acceptedFiles = [];
@@ -6572,26 +6592,6 @@
       const element = renderer.addNewUpload(fileName, newUploadIndex);
       this.emitEvent("addUpload", element, upload);
     }
-    uploadFiles = async files => {
-      if (files.length === 0) {
-        return;
-      }
-      if (!this.multiple) {
-        for (const upload of this.uploads) {
-          this.renderer.deleteFile(upload.uploadIndex);
-        }
-        this.uploads = [];
-        const file = files[0];
-        if (file) {
-          await this.uploadFile(file);
-        }
-      } else {
-        for (const file of files) {
-          await this.uploadFile(file);
-        }
-      }
-      this.checkDropHint();
-    };
   }
 
   const initUploadFields = function (form) {
@@ -6602,7 +6602,7 @@
       }
       return fieldName.startsWith(`${options.prefix}-`);
     };
-    const getPrefix = () => options.prefix ? options.prefix : null;
+    const getPrefix = () => options.prefix ?? null;
     const getInputValue = fieldName => getInputValueForFormAndPrefix(form, fieldName, getPrefix());
     const getInitialFiles = fieldName => {
       const data = getInputValue(getUploadsFieldName(fieldName, getPrefix()));
