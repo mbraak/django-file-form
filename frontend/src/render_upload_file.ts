@@ -43,7 +43,7 @@ class RenderUploadFile {
 
     const cancelLink = document.createElement("a");
     cancelLink.className = "dff-cancel";
-    cancelLink.innerHTML = this.translations.Cancel ?? "";
+    cancelLink.innerText = this.translations.Cancel ?? "";
     cancelLink.setAttribute("data-index", uploadIndex.toString());
     cancelLink.href = "#";
     div.appendChild(cancelLink);
@@ -110,7 +110,7 @@ class RenderUploadFile {
 
     const dropHint = document.createElement("div");
     dropHint.className = "dff-drop-hint";
-    dropHint.innerHTML = this.translations["Drop your files here"] ?? "";
+    dropHint.innerText = this.translations["Drop your files here"] ?? "";
 
     this.container.appendChild(dropHint);
   }
@@ -158,14 +158,14 @@ class RenderUploadFile {
 
       if (size != null) {
         const fileSizeInfo = document.createElement("span");
-        fileSizeInfo.innerHTML = formatBytes(size, 2);
+        fileSizeInfo.innerText = formatBytes(size, 2);
         fileSizeInfo.className = "dff-filesize";
 
         el.appendChild(fileSizeInfo);
       }
 
       const deleteLink = document.createElement("a");
-      deleteLink.innerHTML = translations.Delete ?? "";
+      deleteLink.innerText = translations.Delete ?? "";
       deleteLink.className = "dff-delete";
       deleteLink.setAttribute("data-index", index.toString());
       deleteLink.href = "#";
@@ -279,7 +279,7 @@ class RenderUploadFile {
 
     const span = document.createElement("span");
     span.classList.add("dff-error");
-    span.innerHTML = message;
+    span.innerText = message;
 
     el.appendChild(span);
   }
