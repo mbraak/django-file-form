@@ -193,7 +193,7 @@ class RenderUploadFile {
     div.className = `dff-file dff-file-id-${uploadIndex.toString()}`;
 
     const nameSpan = document.createElement("span");
-    nameSpan.innerText = escape(filename);
+    nameSpan.innerHTML = escape(filename);
     nameSpan.className = "dff-filename";
     nameSpan.setAttribute("data-index", uploadIndex.toString());
 
