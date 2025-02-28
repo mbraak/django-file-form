@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='example',
             name='input_file',
-            field=models.FileField(max_length=255, null=True, storage=django.core.files.storage.FileSystemStorage(location='/Users/henkjansen/django-file-form/testproject/media'), upload_to='example'),
+            field=models.FileField(blank=True, max_length=255, null=True, storage=django.core.files.storage.FileSystemStorage(location='/Users/henkjansen/django-file-form/testproject/media'), upload_to='example'),
         ),
     ]
