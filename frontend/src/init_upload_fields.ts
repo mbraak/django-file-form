@@ -27,8 +27,7 @@ const initUploadFields = (form: Element, options: Options = {}): void => {
     return fieldName.startsWith(`${options.prefix}-`);
   };
 
-  const getPrefix = (): null | string =>
-    options.prefix ? options.prefix : null;
+  const getPrefix = (): null | string => options.prefix ?? null;
 
   const getInputValue = (fieldName: string): string | undefined =>
     getInputValueForFormAndPrefix(form, fieldName, getPrefix());
