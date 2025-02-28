@@ -793,8 +793,26 @@ class LiveTestCase(BaseLiveTestCase):
         page.wait_until_upload_is_removed()
 
         page.submit()
+        page.assert_page_contains_text("Upload success")
 
-        page.assert_page_contains_text("This field is required")
+        example.refresh_from_db()
+        self.assertFalse(bool(example.input_file))
+
+    def test_model_form_edit_unchanged(self):
+        example = Example.objects.create(
+            title="title1",
+            input_file=ContentFile("original", get_random_id()),
+        )
+
+        page = self.page
+        page.open(f"/model_form/{example.id}")
+        page.assert_page_contains_text("8 Bytes")
+
+        page.submit()
+        page.assert_page_contains_text("Upload success")
+
+        example.refresh_from_db()
+        self.assertTrue(bool(example.input_file))
 
     def test_model_form_multipe_add(self):
         page = self.page
