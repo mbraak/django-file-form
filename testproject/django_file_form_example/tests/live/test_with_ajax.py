@@ -725,6 +725,17 @@ class LiveTestCase(BaseLiveTestCase):
         example = Example.objects.get(title="abc")
         self.assertEqual(example.input_file.name, f"example/{temp_file.base_name()}")
         self.assertEqual(read_file(example.input_file), b"content1")
+        self.assertTrue(bool(example.input_file))
+
+    def test_model_form_add_with_empty_value(self):
+        page = self.page
+        page.open("/model_form")
+        page.fill_title_field("abc")
+        page.submit()
+        page.assert_page_contains_text("Upload success")
+
+        example = Example.objects.get(title="abc")
+        self.assertFalse(bool(example.input_file))
 
     def test_model_form_edit(self):
         example = Example.objects.create(
@@ -752,6 +763,21 @@ class LiveTestCase(BaseLiveTestCase):
         example.refresh_from_db()
         self.assertEqual(example.title, "changed title")
         self.assertEqual(read_file(example.input_file), b"new_content")
+
+    def test_model_form_edit_with_empty_value(self):
+        example = Example.objects.create(title="title1")
+
+        page = self.page
+        page.open(f"/model_form/{example.id}")
+        page.find_title_field().clear()
+        page.fill_title_field("changed title")
+
+        page.submit()
+
+        page.assert_page_contains_text("Upload success")
+
+        example.refresh_from_db()
+        self.assertEqual(example.title, "changed title")
 
     def test_model_form_edit_remove_file(self):
         example = Example.objects.create(
