@@ -2,6 +2,7 @@ from django.http import QueryDict
 from django.utils.datastructures import MultiValueDict
 
 from .base_upload_widget import BaseUploadWidget
+from .form_data import FormData
 
 
 class UploadWidget(BaseUploadWidget):
@@ -11,13 +12,16 @@ class UploadWidget(BaseUploadWidget):
         upload = super().value_from_datadict(data, files, prefixed_field_name)
 
         if upload:
+            # Uploaded Tus file
             return upload
         else:
-            uploads = get_uploads(data, prefixed_field_name)
+            form_data = FormData(data, prefixed_field_name)
 
-            upload = uploads[0] if uploads else None
-            metadata = get_file_meta(data, prefixed_field_name)
-
-            if upload and upload.name in metadata:
-                upload.metadata = metadata[upload.name]
-            return upload
+            if form_data.s3_and_placeholder_uploads:
+                return form_data.s3_and_placeholder_uploads[0]
+            elif form_data.has_existing_uploads:
+                # No changes
+                return None
+            else:
+                # Remove file
+                return False
