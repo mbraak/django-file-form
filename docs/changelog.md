@@ -1,5 +1,9 @@
 ## Changelog
 
+**development**
+
+- Issue #1011: handle a model form with an empty value (thanks to Darien Reese)
+
 **3.8.0 (august 14 2024)**
 
 - Issue #880. Support Django 5.1
