@@ -181,7 +181,7 @@ class EditModelFormView(FileModelFormMixin, generic.UpdateView):
         initial_input_file = form.initial["input_file"]
         initial_input_file_path = (
             initial_input_file.path
-            if isinstance(initial_input_file, FieldFile)
+            if bool(initial_input_file)
             else None
         )
 
@@ -189,7 +189,7 @@ class EditModelFormView(FileModelFormMixin, generic.UpdateView):
 
         input_file = form.cleaned_data["input_file"]
 
-        if initial_input_file_path and not isinstance(input_file, FieldFile):
+        if initial_input_file_path and not bool(input_file):
             os.unlink(initial_input_file_path)
 
         return HttpResponseRedirect(self.get_success_url())
