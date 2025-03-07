@@ -121,6 +121,7 @@ class FileFormMixin(with_typehint(Form)):
         return [
             get_initial_data_from_uploaded_file(uploaded_file)
             for uploaded_file in uploaded_files
+            if bool(uploaded_file)
         ]
 
     def _update_files_data(self):

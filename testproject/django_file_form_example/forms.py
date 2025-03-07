@@ -171,10 +171,8 @@ class ExampleModelForm(FileFormMixin, ModelForm):
     class Meta:
         model = Example
         fields = ("title", "input_file")
-        field_classes = dict(
-            input_file=UploadedFileField,
-        )
 
+    input_file=UploadedFileField(required=False)
     prefix = "example"
 
 
