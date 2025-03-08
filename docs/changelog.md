@@ -1,6 +1,6 @@
 ## Changelog
 
-**development**
+**3.8.1 (march 8 2025)**
 
 - Issue #1011: handle a model form with an empty value (thanks to Darien Reese)
 - Issue #1018: make the extension match case insensitive
