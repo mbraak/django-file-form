@@ -1,3 +1,14 @@
 declare module "picomatch/posix" {
-  function isMatch(str: string, patterns: string[]): boolean;
+  interface PicomatchOptions {
+    /**
+     * Make matching case-insensitive.
+     */
+    nocase?: boolean;
+  }
+
+  function isMatch(
+    str: string,
+    patterns: string | string[],
+    options?: PicomatchOptions
+  ): boolean;
 }

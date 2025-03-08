@@ -46,7 +46,7 @@ class AcceptedFileTypes {
       return false;
     }
 
-    return picomatch.isMatch(fileName, this.extensions);
+    return picomatch.isMatch(fileName, this.extensions, { nocase: true });
   }
 
   private isMimeTypeAccepted(mimeType: null | string): boolean {

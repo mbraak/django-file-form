@@ -7,6 +7,12 @@ describe(".isAccepted", () => {
     expect(acceptedFileTypes.isAccepted("def.xyz")).toBe(true);
   });
 
+  it("returns true if the extension is accepted and the filename is uppercase", () => {
+    const acceptedFileTypes = new AcceptedFileTypes(".txt,.xyz");
+    expect(acceptedFileTypes.isAccepted("ABC.TXT")).toBe(true);
+    expect(acceptedFileTypes.isAccepted("DEF.XYZ")).toBe(true);
+  });
+
   it("returns false if the extension is not accepted", () => {
     const acceptedFileTypes = new AcceptedFileTypes(".txt,.xyz");
     expect(acceptedFileTypes.isAccepted("abc.xls")).toBe(false);
@@ -28,6 +34,14 @@ describe(".isAccepted", () => {
     );
     expect(acceptedFileTypes.isAccepted("abc.txt")).toBe(true);
     expect(acceptedFileTypes.isAccepted("abc.json")).toBe(true);
+  });
+
+  it("returns true if the mimetype is accepted and the filename is uppercase", () => {
+    const acceptedFileTypes = new AcceptedFileTypes(
+      "text/plain,application/json"
+    );
+    expect(acceptedFileTypes.isAccepted("ABC.TXT")).toBe(true);
+    expect(acceptedFileTypes.isAccepted("ABC.JSON")).toBe(true);
   });
 
   it("returns false if the mimetype is not accepted", () => {
