@@ -2011,7 +2011,7 @@
   	      }
 
   	      if (prior.type === 'slash' && prior.prev.type !== 'bos' && rest[0] === '/') {
-  	        const end = rest[1] !== undefined ? '|$' : '';
+  	        const end = rest[1] !== void 0 ? '|$' : '';
 
   	        state.output = state.output.slice(0, -(prior.output + prev.output).length);
   	        prior.output = `(?:${prior.output}`;
@@ -2876,7 +2876,7 @@
       div.appendChild(progressSpan);
       const cancelLink = document.createElement("a");
       cancelLink.className = "dff-cancel";
-      cancelLink.innerHTML = this.translations.Cancel ?? "";
+      cancelLink.innerText = this.translations.Cancel ?? "";
       cancelLink.setAttribute("data-index", uploadIndex.toString());
       cancelLink.href = "#";
       div.appendChild(cancelLink);
@@ -2926,7 +2926,7 @@
       }
       const dropHint = document.createElement("div");
       dropHint.className = "dff-drop-hint";
-      dropHint.innerHTML = this.translations["Drop your files here"] ?? "";
+      dropHint.innerText = this.translations["Drop your files here"] ?? "";
       this.container.appendChild(dropHint);
     }
     setDeleteFailed(index) {
@@ -2963,12 +2963,12 @@
         el.classList.add("dff-upload-success");
         if (size != null) {
           const fileSizeInfo = document.createElement("span");
-          fileSizeInfo.innerHTML = formatBytes(size, 2);
+          fileSizeInfo.innerText = formatBytes(size, 2);
           fileSizeInfo.className = "dff-filesize";
           el.appendChild(fileSizeInfo);
         }
         const deleteLink = document.createElement("a");
-        deleteLink.innerHTML = translations.Delete ?? "";
+        deleteLink.innerText = translations.Delete ?? "";
         deleteLink.className = "dff-delete";
         deleteLink.setAttribute("data-index", index.toString());
         deleteLink.href = "#";
@@ -3056,7 +3056,7 @@
       }
       const span = document.createElement("span");
       span.classList.add("dff-error");
-      span.innerHTML = message;
+      span.innerText = message;
       el.appendChild(span);
     }
   }
@@ -6602,7 +6602,7 @@
       }
       return fieldName.startsWith(`${options.prefix}-`);
     };
-    const getPrefix = () => options.prefix ? options.prefix : null;
+    const getPrefix = () => options.prefix ?? null;
     const getInputValue = fieldName => getInputValueForFormAndPrefix(form, fieldName, getPrefix());
     const getInitialFiles = fieldName => {
       const data = getInputValue(getUploadsFieldName(fieldName, getPrefix()));
