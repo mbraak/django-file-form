@@ -3,6 +3,7 @@
 **development**
 
 - Issue #1011: handle a model form with an empty value (thanks to Darien Reese)
+- Issue #1018: make the extension match case insensitive
 
 **3.8.0 (august 14 2024)**
 
