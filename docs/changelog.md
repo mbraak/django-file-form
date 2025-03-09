@@ -1,5 +1,9 @@
 ## Changelog
 
+**3.8.2 (march 9 2025)**
+
+- Issue #1018: correctly compile javascript bundle
+
 **3.8.1 (march 8 2025)**
 
 - Issue #1011: handle a model form with an empty value (thanks to Darien Reese)
