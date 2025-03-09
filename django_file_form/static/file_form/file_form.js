@@ -2620,7 +2620,9 @@
       if (this.extensions.length === 0) {
         return false;
       }
-      return picomatch.isMatch(fileName, this.extensions);
+      return picomatch.isMatch(fileName, this.extensions, {
+        nocase: true
+      });
     }
     isMimeTypeAccepted(mimeType) {
       if (!mimeType || this.mimeTypes.length === 0) {
