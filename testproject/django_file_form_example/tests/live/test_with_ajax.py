@@ -701,6 +701,8 @@ class LiveTestCase(BaseLiveTestCase):
         page.fill_title_field("abc")
         page.submit()
 
+        page.assert_page_contains_text("Upload success")
+
         self.assertEqual(Example2.objects.count(), 1)
 
     def test_model_form_add(self):
@@ -873,6 +875,7 @@ class LiveTestCase(BaseLiveTestCase):
         page.wait_until_upload_is_removed(upload_index=1)
 
         page.submit()
+        page.assert_page_contains_text("Upload success")
 
         example = Example2.objects.get(pk=example.id)
 
@@ -905,6 +908,7 @@ class LiveTestCase(BaseLiveTestCase):
         page.upload_using_js(temp_file)
         page.find_upload_success(temp_file, upload_index=1)
         page.submit()
+        page.assert_page_contains_text("Upload success")
 
         example = Example2.objects.get(pk=example.id)
 
