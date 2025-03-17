@@ -331,14 +331,10 @@ class LiveTestCase(BaseLiveTestCase):
     def test_permission_success(self):
         page = self.page
 
-        page.create_user("test1", "password")
-        page.login("test1", "password")
-
-        page.assert_page_contains_text("Title")
-
         temp_file = page.create_temp_file("content1")
 
-        page.open("/")
+        page.create_user("test1", "password")
+        page.login("test1", "password")
 
         page.upload_using_js(temp_file)
         page.find_upload_success(temp_file)
@@ -347,12 +343,10 @@ class LiveTestCase(BaseLiveTestCase):
     def test_permission_for_delete_fail(self):
         page = self.page
 
-        page.create_user("test1", "password")
-        page.login("test1", "password")
-
         temp_file = page.create_temp_file("content1")
 
-        page.open("/")
+        page.create_user("test1", "password")
+        page.login("test1", "password")
 
         page.upload_using_js(temp_file)
         page.find_upload_success(temp_file)
@@ -366,12 +360,10 @@ class LiveTestCase(BaseLiveTestCase):
     def test_permission_for_delete_success(self):
         page = self.page
 
-        page.create_user("test1", "password")
-        page.login("test1", "password")
-
         temp_file = page.create_temp_file("content1")
 
-        page.open("/")
+        page.create_user("test1", "password")
+        page.login("test1", "password")
 
         page.upload_using_js(temp_file)
         page.find_upload_success(temp_file)
@@ -701,6 +693,8 @@ class LiveTestCase(BaseLiveTestCase):
         page.fill_title_field("abc")
         page.submit()
 
+        page.assert_page_contains_text("Upload success")
+
         self.assertEqual(Example2.objects.count(), 1)
 
     def test_model_form_add(self):
@@ -873,6 +867,7 @@ class LiveTestCase(BaseLiveTestCase):
         page.wait_until_upload_is_removed(upload_index=1)
 
         page.submit()
+        page.assert_page_contains_text("Upload success")
 
         example = Example2.objects.get(pk=example.id)
 
@@ -905,6 +900,7 @@ class LiveTestCase(BaseLiveTestCase):
         page.upload_using_js(temp_file)
         page.find_upload_success(temp_file, upload_index=1)
         page.submit()
+        page.assert_page_contains_text("Upload success")
 
         example = Example2.objects.get(pk=example.id)
 
