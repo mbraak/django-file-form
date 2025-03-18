@@ -684,6 +684,7 @@ class LiveTestCase(BaseLiveTestCase):
         placeholder1_input.clear()
         placeholder1_input.send_keys("new value")
         page.submit()
+        page.assert_page_contains_text("Title field is required")
 
         placeholder1_input = page.selenium.find_element(
             By.CSS_SELECTOR, placeholder1_input_selector
