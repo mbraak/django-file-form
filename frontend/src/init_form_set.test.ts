@@ -28,25 +28,52 @@ const createInput = (type: string, name: string, value?: string) => {
 const createHiddenInput = (name: string, value: string) =>
   createInput("hidden", name, value);
 
+const createFormSet = (prefix: string) => {
+  const form = document.createElement("form");
+  document.body.append(form);
+
+  form.append(createHiddenInput(`${prefix}-TOTAL_FORMS`, "1"));
+  form.append(createHiddenInput("csrfmiddlewaretoken", "token1"));
+
+  form.append(createHiddenInput(`${prefix}-0-form_id`, "id1"));
+  form.append(createHiddenInput(`${prefix}-0-upload_url`, "/upload"));
+
+  const uploaderDiv = createDiv("dff-uploader");
+  form.append(uploaderDiv);
+
+  const containerDiv = createDiv("dff-container");
+  uploaderDiv.append(containerDiv);
+
+  containerDiv.append(createInput("file", `${prefix}-0-input_file`));
+
+  return form;
+};
+
+beforeEach(() => {
+  document.body.innerHTML = "";
+});
+
 describe(".initFormSet", () => {
   it("initializes a form", () => {
-    const form = document.createElement("form");
-    document.body.append(form);
-
-    form.append(createHiddenInput("form-TOTAL_FORMS", "1"));
-    form.append(createHiddenInput("csrfmiddlewaretoken", "token1"));
-    form.append(createHiddenInput("form-0-form_id", "id1"));
-    form.append(createHiddenInput("form-0-upload_url", "/upload"));
-
-    const uploaderDiv = createDiv("dff-uploader");
-    form.append(uploaderDiv);
-
-    const containerDiv = createDiv("dff-container");
-    uploaderDiv.append(containerDiv);
-
-    containerDiv.append(createInput("file", "form-0-input_file"));
+    const form = createFormSet("form");
 
     initFormSet(form, {});
+
+    screen.getByText("Drop your files here");
+  });
+
+  it("initializes a form with a string prefix parameter", () => {
+    const form = createFormSet("test");
+
+    initFormSet(form, "test");
+
+    screen.getByText("Drop your files here");
+  });
+
+  it("initializes a form with a prefix in an object parameter", () => {
+    const form = createFormSet("test");
+
+    initFormSet(form, { prefix: "test" });
 
     screen.getByText("Drop your files here");
   });
