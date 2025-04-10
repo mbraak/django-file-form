@@ -43,7 +43,7 @@ class RenderUploadFile {
 
     const cancelLink = document.createElement("a");
     cancelLink.className = "dff-cancel";
-    cancelLink.innerText = this.translations.Cancel ?? "";
+    cancelLink.textContent = this.getTranslation("Cancel");
     cancelLink.setAttribute("data-index", uploadIndex.toString());
     cancelLink.href = "#";
     div.appendChild(cancelLink);
@@ -110,19 +110,19 @@ class RenderUploadFile {
 
     const dropHint = document.createElement("div");
     dropHint.className = "dff-drop-hint";
-    dropHint.innerText = this.translations["Drop your files here"] ?? "";
+    dropHint.textContent = this.getTranslation("Drop your files here");
 
     this.container.appendChild(dropHint);
   }
 
   public setDeleteFailed(index: number): void {
-    this.setErrorMessage(index, this.translations["Delete failed"] ?? "");
+    this.setErrorMessage(index, this.getTranslation("Delete failed"));
 
     this.enableDelete(index);
   }
 
   public setError(index: number): void {
-    this.setErrorMessage(index, this.translations["Upload failed"] ?? "");
+    this.setErrorMessage(index, this.getTranslation("Upload failed"));
 
     const el = this.findFileDiv(index);
     if (el) {
@@ -138,9 +138,8 @@ class RenderUploadFile {
 
     for (const file of files) {
       const msg = document.createElement("li");
-      const invalidFileTypeMessage =
-        this.translations["Invalid file type"] ?? "";
-      msg.innerText = `${file.name}: ${invalidFileTypeMessage}`;
+      const invalidFileTypeMessage = this.getTranslation("Invalid file type");
+      msg.textContent = `${file.name}: ${invalidFileTypeMessage}`;
       msg.className = "dff-error";
       errorsMessages.appendChild(msg);
     }
@@ -150,22 +149,20 @@ class RenderUploadFile {
   }
 
   public setSuccess(index: number, size?: number): void {
-    const { translations } = this;
-
     const el = this.findFileDiv(index);
     if (el) {
       el.classList.add("dff-upload-success");
 
       if (size != null) {
         const fileSizeInfo = document.createElement("span");
-        fileSizeInfo.innerText = formatBytes(size, 2);
+        fileSizeInfo.textContent = formatBytes(size, 2);
         fileSizeInfo.className = "dff-filesize";
 
         el.appendChild(fileSizeInfo);
       }
 
       const deleteLink = document.createElement("a");
-      deleteLink.innerText = translations.Delete ?? "";
+      deleteLink.textContent = this.getTranslation("Delete");
       deleteLink.className = "dff-delete";
       deleteLink.setAttribute("data-index", index.toString());
       deleteLink.href = "#";
@@ -246,6 +243,10 @@ class RenderUploadFile {
     return div.querySelector(".dff-delete");
   }
 
+  private getTranslation(key: string) {
+    return this.translations[key] ?? key;
+  }
+
   private removeCancel(index: number): void {
     const cancelSpan = this.findCancelSpan(index);
 
@@ -279,7 +280,7 @@ class RenderUploadFile {
 
     const span = document.createElement("span");
     span.classList.add("dff-error");
-    span.innerText = message;
+    span.textContent = message;
 
     el.appendChild(span);
   }
