@@ -1,5 +1,9 @@
 ## Changelog
 
+**3.9.0 (april 8 2025)**
+
+- Support Django 5.2; drop support for Django 5.0
+
 **3.8.2 (march 9 2025)**
 
 - Issue #1018: correctly compile javascript bundle
