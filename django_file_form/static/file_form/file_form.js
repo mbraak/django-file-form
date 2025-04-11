@@ -50,6 +50,7 @@
       'application/dash+xml': ['mpd'],
       'application/dash-patch+xml': ['mpp'],
       'application/davmount+xml': ['davmount'],
+      'application/dicom': ['dcm'],
       'application/docbook+xml': ['dbk'],
       'application/dssc+der': ['dssc'],
       'application/dssc+xml': ['xdssc'],
@@ -136,7 +137,14 @@
       'application/oebps-package+xml': ['opf'],
       'application/ogg': ['ogx'],
       'application/omdoc+xml': ['omdoc'],
-      'application/onenote': ['onetoc', 'onetoc2', 'onetmp', 'onepkg'],
+      'application/onenote': [
+          'onetoc',
+          'onetoc2',
+          'onetmp',
+          'onepkg',
+          'one',
+          'onea',
+      ],
       'application/oxps': ['oxps'],
       'application/p2p-overlay+xml': ['relo'],
       'application/patch-ops-error+xml': ['xer'],
@@ -232,6 +240,7 @@
       'application/yang': ['yang'],
       'application/yin+xml': ['yin'],
       'application/zip': ['zip'],
+      'application/zip+dotlottie': ['lottie'],
       'audio/3gpp': ['*3gpp'],
       'audio/aac': ['adts', 'aac'],
       'audio/adpcm': ['adp'],
@@ -240,7 +249,7 @@
       'audio/midi': ['mid', 'midi', 'kar', 'rmi'],
       'audio/mobile-xmf': ['mxmf'],
       'audio/mp3': ['*mp3'],
-      'audio/mp4': ['m4a', 'mp4a'],
+      'audio/mp4': ['m4a', 'mp4a', 'm4b'],
       'audio/mpeg': ['mpga', 'mp2', 'mp2a', 'mp3', 'm2a', 'm3a'],
       'audio/ogg': ['oga', 'ogg', 'spx', 'opus'],
       'audio/s3m': ['s3m'],
@@ -272,11 +281,12 @@
       'image/heif': ['heif'],
       'image/heif-sequence': ['heifs'],
       'image/hej2k': ['hej2'],
-      'image/hsj2': ['hsj2'],
       'image/ief': ['ief'],
+      'image/jaii': ['jaii'],
+      'image/jais': ['jais'],
       'image/jls': ['jls'],
       'image/jp2': ['jp2', 'jpg2'],
-      'image/jpeg': ['jpeg', 'jpg', 'jpe'],
+      'image/jpeg': ['jpg', 'jpeg', 'jpe'],
       'image/jph': ['jph'],
       'image/jphc': ['jhc'],
       'image/jpm': ['jpm', 'jpgm'],
@@ -291,6 +301,7 @@
       'image/jxss': ['jxss'],
       'image/ktx': ['ktx'],
       'image/ktx2': ['ktx2'],
+      'image/pjpeg': ['jfif'],
       'image/png': ['png'],
       'image/sgi': ['sgi'],
       'image/svg+xml': ['svg', 'svgz'],
@@ -304,7 +315,7 @@
       'message/global-delivery-status': ['u8dsn'],
       'message/global-disposition-notification': ['u8mdn'],
       'message/global-headers': ['u8hdr'],
-      'message/rfc822': ['eml', 'mime'],
+      'message/rfc822': ['eml', 'mime', 'mht', 'mhtml'],
       'model/3mf': ['3mf'],
       'model/gltf+json': ['gltf'],
       'model/gltf-binary': ['glb'],
@@ -314,6 +325,7 @@
       'model/mtl': ['mtl'],
       'model/obj': ['obj'],
       'model/prc': ['prc'],
+      'model/step': ['step', 'stp', 'stpnc', 'p21', '210'],
       'model/step+xml': ['stpx'],
       'model/step+zip': ['stpz'],
       'model/step-xml+zip': ['stpxz'],
@@ -420,8 +432,8 @@
       getType(path) {
           if (typeof path !== 'string')
               return null;
-          const last = path.replace(/^.*[/\\]/, '').toLowerCase();
-          const ext = last.replace(/^.*\./, '').toLowerCase();
+          const last = path.replace(/^.*[/\\]/s, '').toLowerCase();
+          const ext = last.replace(/^.*\./s, '').toLowerCase();
           const hasPath = last.length < path.length;
           const hasDot = ext.length < last.length - 1;
           if (!hasDot && hasPath)
