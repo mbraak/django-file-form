@@ -4,7 +4,10 @@ import {
   getInputValueForFormAndPrefix
 } from "./util.ts";
 
-const initFormSet = (form: Element, optionsParam: Options | string): void => {
+const initFormSet = (
+  form: HTMLFormElement,
+  optionsParam: Options | string
+): void => {
   let options: Options;
 
   if (typeof optionsParam === "string") {

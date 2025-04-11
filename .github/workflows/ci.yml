@@ -66,6 +66,13 @@ jobs:
         working-directory: testproject
       - name: Test with coverage
         run: COVERAGE=true coverage run --source=django_file_form,testproject/django_file_form_example testproject/manage.py test django_file_form_example -v 2
+      - name: Screenshots artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          if-no-files-found: ignore
+          name: screenshots
+          path: testproject/screenshots/
       - name: Merge Python coverage
         run: coverage report && coverage lcov
       - name: Merge javascript coverage
