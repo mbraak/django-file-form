@@ -45,7 +45,7 @@ class BaseLiveTestCase(SeleniumTestCase, LiveServerTestCase, metaclass=SeleniumT
         write_json(f"js_coverage/{filename}.json", coverage)
 
     def did_test_have_errors(self):
-        return not self._outcome.result.wasSuccessful()
+        return not self._outcome.success
 
     def tearDown(self):
         try:
