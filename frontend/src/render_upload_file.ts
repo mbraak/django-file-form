@@ -43,7 +43,8 @@ class RenderUploadFile {
 
     const cancelLink = document.createElement("a");
     cancelLink.className = "dff-cancel";
-    cancelLink.textContent = this.getTranslation("Cancel");
+
+    this.setTextContent(cancelLink, this.getTranslation("Cancel"));
     cancelLink.setAttribute("data-index", uploadIndex.toString());
     cancelLink.href = "#";
     div.appendChild(cancelLink);
@@ -110,7 +111,7 @@ class RenderUploadFile {
 
     const dropHint = document.createElement("div");
     dropHint.className = "dff-drop-hint";
-    dropHint.textContent = this.getTranslation("Drop your files here");
+    this.setTextContent(dropHint, this.getTranslation("Drop your files here"));
 
     this.container.appendChild(dropHint);
   }
@@ -139,7 +140,7 @@ class RenderUploadFile {
     for (const file of files) {
       const msg = document.createElement("li");
       const invalidFileTypeMessage = this.getTranslation("Invalid file type");
-      msg.textContent = `${file.name}: ${invalidFileTypeMessage}`;
+      this.setTextContent(msg, `${file.name}: ${invalidFileTypeMessage}`);
       msg.className = "dff-error";
       errorsMessages.appendChild(msg);
     }
@@ -155,14 +156,14 @@ class RenderUploadFile {
 
       if (size != null) {
         const fileSizeInfo = document.createElement("span");
-        fileSizeInfo.textContent = formatBytes(size, 2);
+        this.setTextContent(fileSizeInfo, formatBytes(size, 2));
         fileSizeInfo.className = "dff-filesize";
 
         el.appendChild(fileSizeInfo);
       }
 
       const deleteLink = document.createElement("a");
-      deleteLink.textContent = this.getTranslation("Delete");
+      this.setTextContent(deleteLink, this.getTranslation("Delete"));
       deleteLink.className = "dff-delete";
       deleteLink.setAttribute("data-index", index.toString());
       deleteLink.href = "#";
@@ -280,9 +281,13 @@ class RenderUploadFile {
 
     const span = document.createElement("span");
     span.classList.add("dff-error");
-    span.textContent = message;
+    this.setTextContent(span, message);
 
     el.appendChild(span);
+  }
+
+  private setTextContent(element: HTMLElement, text: string) {
+    element.append(document.createTextNode(text));
   }
 }
 
