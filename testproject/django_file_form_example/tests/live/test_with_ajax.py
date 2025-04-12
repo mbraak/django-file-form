@@ -1,5 +1,6 @@
 from pathlib import Path
 import json
+import uuid
 
 from django.conf import settings
 from django.core.files.base import ContentFile
