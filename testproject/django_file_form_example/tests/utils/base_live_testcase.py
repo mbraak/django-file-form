@@ -13,7 +13,7 @@ class SeleniumTestMetaClass(SeleniumTestCaseBase):
 
         # Fix for Django 4.2
         if self.headless:
-            options.add_argument("--headless=new")
+            options.add_argument("--headless")
 
         options.add_argument("--disable-dev-shm-usage")
         options.set_capability("goog:loggingPrefs", {"browser": "ALL"})
@@ -50,26 +50,6 @@ class BaseLiveTestCase(SeleniumTestCase, LiveServerTestCase, metaclass=SeleniumT
     def tearDown(self):
         try:
             self.handle_coverage()
-            self.handleErrors()
             self.page.cleanup()
         finally:
             super().tearDown()
-
-    def handleErrors(self):
-        if self.did_test_have_errors():  # pragma: no cover
-            self.save_screenshot(self.id())
-            self.print_browser_log()
-
-    @classmethod
-    def save_screenshot(cls, method_name):  # pragma: no cover
-        screenshots_path = Path("screenshots")
-        if not screenshots_path.exists():
-            screenshots_path.mkdir()
-
-        filename = str(screenshots_path.joinpath(method_name + ".png"))
-        cls.selenium.get_screenshot_as_file(filename)
-
-    @classmethod
-    def print_browser_log(cls):  # pragma: no cover
-        for entry in cls.selenium.get_log("browser"):
-            print(entry)
