@@ -16,7 +16,6 @@ class SeleniumTestMetaClass(SeleniumTestCaseBase):
             options.add_argument("--headless")
 
         options.add_argument("--disable-dev-shm-usage")
-        options.set_capability("goog:loggingPrefs", {"browser": "ALL"})
 
         return options
 
