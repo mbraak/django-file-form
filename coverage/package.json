@@ -4,7 +4,6 @@
     "nyc": "^17"
   },
   "scripts": {
-    "merge_coverage": "nyc --reporter lcov -t ./js_coverage --cwd .. report",
-    "print_coverage": "nyc --reporter text -t ./js_coverage --cwd .. report"
+    "merge_coverage": "nyc --reporter lcov -t ./js_coverage --cwd .. report"
   }
 }
