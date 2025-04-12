@@ -1,5 +1,6 @@
 from pathlib import Path
 import json
+import uuid
 
 from django.conf import settings
 from django.core.files.base import ContentFile
@@ -191,6 +192,7 @@ class LiveTestCase(BaseLiveTestCase):
         page.find_upload_success(temp_file)
 
         page.submit()
+        page.assert_page_contains_text("Title field is required")
 
         page.find_upload_success(temp_file)
         page.assert_page_contains_text("8 Bytes")
@@ -333,8 +335,9 @@ class LiveTestCase(BaseLiveTestCase):
 
         temp_file = page.create_temp_file("content1")
 
-        page.create_user("test1", "password")
-        page.login("test1", "password")
+        password = uuid.uuid4().hex
+        page.create_user("test1", password)
+        page.login("test1", password)
 
         page.upload_using_js(temp_file)
         page.find_upload_success(temp_file)
@@ -345,8 +348,9 @@ class LiveTestCase(BaseLiveTestCase):
 
         temp_file = page.create_temp_file("content1")
 
-        page.create_user("test1", "password")
-        page.login("test1", "password")
+        password = uuid.uuid4().hex
+        page.create_user("test1", password)
+        page.login("test1", password)
 
         page.upload_using_js(temp_file)
         page.find_upload_success(temp_file)
@@ -362,8 +366,9 @@ class LiveTestCase(BaseLiveTestCase):
 
         temp_file = page.create_temp_file("content1")
 
-        page.create_user("test1", "password")
-        page.login("test1", "password")
+        password = uuid.uuid4().hex
+        page.create_user("test1", password)
+        page.login("test1", password)
 
         page.upload_using_js(temp_file)
         page.find_upload_success(temp_file)
