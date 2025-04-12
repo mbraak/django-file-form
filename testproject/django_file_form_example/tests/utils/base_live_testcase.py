@@ -43,9 +43,6 @@ class BaseLiveTestCase(SeleniumTestCase, LiveServerTestCase, metaclass=SeleniumT
         filename = uuid4().hex
         write_json(f"js_coverage/{filename}.json", coverage)
 
-    def did_test_have_errors(self):
-        return not self._outcome.success
-
     def tearDown(self):
         try:
             self.handle_coverage()
