@@ -34,6 +34,8 @@ class BaseLiveTestCase(SeleniumTestCase, LiveServerTestCase, metaclass=SeleniumT
         )
         self.selenium.set_network_conditions(latency=0, throughput=-1)
 
+        self.setup_detect_test_error()
+
     def handle_coverage(self):
         if getattr(settings, "DJANGO_FILE_FORM_COVERAGE_JS", False):
             self.save_coverage()
@@ -44,9 +46,6 @@ class BaseLiveTestCase(SeleniumTestCase, LiveServerTestCase, metaclass=SeleniumT
         filename = uuid4().hex
         write_json(f"js_coverage/{filename}.json", coverage)
 
-    def did_test_have_errors(self):
-        return not self._outcome.success
-
     def tearDown(self):
         try:
             self.handle_coverage()
@@ -54,6 +53,13 @@ class BaseLiveTestCase(SeleniumTestCase, LiveServerTestCase, metaclass=SeleniumT
             self.page.cleanup()
         finally:
             super().tearDown()
+
+    def setup_detect_test_error(self):
+        self.error_count = len(self._outcome.result.errors)
+        self.failure_count = len(self._outcome.result.failures)
+
+    def did_test_have_errors(self):
+        return self.error_count != len(self._outcome.result.errors) or self.failure_count != len(self._outcome.result.failures)
 
     def handleErrors(self):
         if self.did_test_have_errors():  # pragma: no cover
