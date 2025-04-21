@@ -39,7 +39,7 @@
     "@types/jest": "^29.5.0",
     "babel-plugin-istanbul": "^7",
     "eslint": "^9",
-    "eslint-import-resolver-typescript": "^3.6.3",
+    "eslint-import-resolver-typescript": "^4",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-perfectionist": "^4",
     "eslint-plugin-react": "^7.30.1",
