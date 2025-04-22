@@ -28,10 +28,8 @@ def start_upload(request):
         check_permission(request)
     except PermissionDenied:
         return HttpResponseForbidden(
-            json.dumps(
-                dict(status="permission denied")
-            ),
-            content_type="application/json"
+            json.dumps(dict(status="permission denied")),
+            content_type="application/json",
         )
 
     response = get_tus_response()

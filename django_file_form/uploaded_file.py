@@ -70,7 +70,6 @@ try:
         def get_initial_data(self):
             return dict(id=self.file_id, name=self.name, size=self.size, type="s3")
 
-
 except (ImportError, ImproperlyConfigured):
     # S3 is an optional feature but we keep the symbol
     class S3UploadedFileWithId:

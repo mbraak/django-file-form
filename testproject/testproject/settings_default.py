@@ -26,9 +26,11 @@ DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
 DATABASES = dict(
     default=dict(
-        ENGINE="django.db.backends.dummy"
-        if os.environ.get("CHECK_MIGRATIONS", "") == "true"
-        else "django.db.backends.postgresql",
+        ENGINE=(
+            "django.db.backends.dummy"
+            if os.environ.get("CHECK_MIGRATIONS", "") == "true"
+            else "django.db.backends.postgresql"
+        ),
         NAME="django-file-form-example",
         USER="postgres",
         PASSWORD=os.environ.get("POSTGRES_PASSWORD", ""),

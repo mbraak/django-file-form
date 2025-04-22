@@ -25,5 +25,5 @@ class UploadMultipleWidget(BaseUploadWidget):
                 )
                 or []
             )
-        
+
         return uploads_from_files + form_data.s3_and_placeholder_uploads

@@ -21,8 +21,10 @@ class SeleniumTestMetaClass(SeleniumTestCaseBase):
         return options
 
 
-class BaseLiveTestCase(SeleniumTestCase, LiveServerTestCase, metaclass=SeleniumTestMetaClass):
-    browsers = ['chrome']
+class BaseLiveTestCase(
+    SeleniumTestCase, LiveServerTestCase, metaclass=SeleniumTestMetaClass
+):
+    browsers = ["chrome"]
     headless = True
     page_class = None
 
@@ -59,7 +61,9 @@ class BaseLiveTestCase(SeleniumTestCase, LiveServerTestCase, metaclass=SeleniumT
         self.failure_count = len(self._outcome.result.failures)
 
     def did_test_have_errors(self):
-        return self.error_count != len(self._outcome.result.errors) or self.failure_count != len(self._outcome.result.failures)
+        return self.error_count != len(
+            self._outcome.result.errors
+        ) or self.failure_count != len(self._outcome.result.failures)
 
     def handleErrors(self):
         if self.did_test_have_errors():  # pragma: no cover

@@ -60,7 +60,7 @@ class S3TestCase(BaseLiveTestCase):
             endpoint_url="http://localhost:4566",
             aws_access_key_id="access1",
             aws_secret_access_key="test1",
-            region_name="eu-west-1"
+            region_name="eu-west-1",
         )
         bucket = s3.Bucket("mybucket")
 
@@ -161,7 +161,7 @@ class S3TestCase(BaseLiveTestCase):
 
         page.set_slow_network_conditions()
 
-        temp_file = page.create_temp_file(b"a" * (2 ** 21), binary=True)
+        temp_file = page.create_temp_file(b"a" * (2**21), binary=True)
         page.upload_using_js(temp_file)
         page.wait_until_upload_starts()
         page.cancel_upload()

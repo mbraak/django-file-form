@@ -7,7 +7,9 @@ class Example(models.Model):
     fs = FileSystemStorage(location=settings.MEDIA_ROOT)
 
     title = models.CharField(max_length=255)
-    input_file = models.FileField(max_length=255, upload_to="example", storage=fs, null=True, blank=True)
+    input_file = models.FileField(
+        max_length=255, upload_to="example", storage=fs, null=True, blank=True
+    )
 
     def __str__(self):
         return self.title

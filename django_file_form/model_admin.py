@@ -26,7 +26,7 @@ class FileFormAdminMixin(with_typehint(admin.ModelAdmin)):
     def media(self):
         file_form_media = Media(
             css={"all": ("file_form/file_form.css",)},
-            js=(self.get_file_form_js(), "file_form/auto_init.js")
+            js=(self.get_file_form_js(), "file_form/auto_init.js"),
         )
 
         return super().media + file_form_media

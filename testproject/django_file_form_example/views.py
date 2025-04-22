@@ -109,9 +109,9 @@ class PlaceholderView(BaseFormView):
             self.get_context_data(
                 finished=True,
                 input_files=[f.name for f in form["input_file"].value()],
-                other_input_file=other_input_file_value.name
-                if other_input_file_value
-                else "",
+                other_input_file=(
+                    other_input_file_value.name if other_input_file_value else ""
+                ),
             )
         )
 
@@ -180,9 +180,7 @@ class EditModelFormView(FileModelFormMixin, generic.UpdateView):
     def form_valid(self, form):
         initial_input_file = form.initial["input_file"]
         initial_input_file_path = (
-            initial_input_file.path
-            if bool(initial_input_file)
-            else None
+            initial_input_file.path if bool(initial_input_file) else None
         )
 
         form.save()
