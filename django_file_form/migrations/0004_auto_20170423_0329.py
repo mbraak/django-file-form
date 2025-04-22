@@ -10,6 +10,6 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddIndex(
             "uploadedfile",
-            Index(fields=["form_id", "field_name"], name="form_id_field_name_idx")
+            Index(fields=["form_id", "field_name"], name="form_id_field_name_idx"),
         ),
     ]

@@ -6,13 +6,13 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('django_file_form', '0008_auto_20220519_0204'),
+        ("django_file_form", "0008_auto_20220519_0204"),
     ]
 
     operations = [
         migrations.RenameIndex(
-            model_name='temporaryuploadedfile',
-            new_name='form_id_field_name_idx',
-            old_fields=('form_id', 'field_name'),
+            model_name="temporaryuploadedfile",
+            new_name="form_id_field_name_idx",
+            old_fields=("form_id", "field_name"),
         ),
     ]

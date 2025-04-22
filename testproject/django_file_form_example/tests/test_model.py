@@ -100,7 +100,9 @@ class ConfTest(TestCase):
             str(Path(settings.MEDIA_ROOT).joinpath("relative/path")),
         )
 
-    @override_settings(FILE_FORM_TEMP_STORAGE="django_file_form_example.tests.test_model.CustomStorage")
+    @override_settings(
+        FILE_FORM_TEMP_STORAGE="django_file_form_example.tests.test_model.CustomStorage"
+    )
     def test_get_temp_storage_class_with_custom_storage(self):
         self.assertEqual(get_temp_storage_class(), CustomStorage)
 

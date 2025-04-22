@@ -10,34 +10,82 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Example',
+            name="Example",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=255)),
-                ('input_file', models.FileField(max_length=255, storage=django.core.files.storage.FileSystemStorage(location=settings.MEDIA_ROOT), upload_to='example')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("title", models.CharField(max_length=255)),
+                (
+                    "input_file",
+                    models.FileField(
+                        max_length=255,
+                        storage=django.core.files.storage.FileSystemStorage(
+                            location=settings.MEDIA_ROOT
+                        ),
+                        upload_to="example",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Example2',
+            name="Example2",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=255)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("title", models.CharField(max_length=255)),
             ],
         ),
         migrations.CreateModel(
-            name='ExampleFile',
+            name="ExampleFile",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('input_file', models.FileField(max_length=255, storage=django.core.files.storage.FileSystemStorage(location=settings.MEDIA_ROOT), upload_to='example')),
-                ('example', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='files', to='django_file_form_example.example2')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "input_file",
+                    models.FileField(
+                        max_length=255,
+                        storage=django.core.files.storage.FileSystemStorage(
+                            location=settings.MEDIA_ROOT
+                        ),
+                        upload_to="example",
+                    ),
+                ),
+                (
+                    "example",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="files",
+                        to="django_file_form_example.example2",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['input_file'],
+                "ordering": ["input_file"],
             },
         ),
     ]

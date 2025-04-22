@@ -72,12 +72,12 @@ def get_tus_response():
     response["Tus-Extension"] = ",".join(tus_api_extensions)
     response["Access-Control-Allow-Origin"] = "*"
     response["Access-Control-Allow-Methods"] = "PATCH,HEAD,GET,POST,OPTIONS"
-    response[
-        "Access-Control-Expose-Headers"
-    ] = "Tus-Resumable,upload-length,upload-metadata,Location,Upload-Offset"
-    response[
-        "Access-Control-Allow-Headers"
-    ] = "Tus-Resumable,upload-length,upload-metadata,Location,Upload-Offset,content-type"
+    response["Access-Control-Expose-Headers"] = (
+        "Tus-Resumable,upload-length,upload-metadata,Location,Upload-Offset"
+    )
+    response["Access-Control-Allow-Headers"] = (
+        "Tus-Resumable,upload-length,upload-metadata,Location,Upload-Offset,content-type"
+    )
     response["Cache-Control"] = "no-store"
 
     return response
