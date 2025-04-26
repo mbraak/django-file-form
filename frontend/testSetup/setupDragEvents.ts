@@ -4,6 +4,6 @@ window.DragEvent = class DragEvent extends MouseEvent {
   constructor(type: string, eventInitDict?: DragEventInit) {
     super(type, eventInitDict);
 
-    this.dataTransfer = eventInitDict?.dataTransfer || null;
+    this.dataTransfer = eventInitDict?.dataTransfer ?? null;
   }
 };
