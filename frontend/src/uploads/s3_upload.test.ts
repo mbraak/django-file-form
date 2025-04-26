@@ -1,3 +1,5 @@
+import { describe, expect, test } from "vitest";
+
 import S3Upload from "./s3_upload.ts";
 
 const createS3Upload = () => {
@@ -13,13 +15,13 @@ const createS3Upload = () => {
 };
 
 describe("getId", () => {
-  it("returns undefined when the upload is not started", () => {
+  test("returns undefined when the upload is not started", () => {
     expect(createS3Upload().getId()).toBeUndefined();
   });
 });
 
 describe("getInitialFile", () => {
-  it("return the initial file when the upload has not started", () => {
+  test("return the initial file when the upload has not started", () => {
     expect(createS3Upload().getInitialFile()).toEqual({
       id: "",
       name: "",
@@ -31,7 +33,7 @@ describe("getInitialFile", () => {
 });
 
 describe("getSize", () => {
-  it("returns the size", () => {
+  test("returns the size", () => {
     expect(createS3Upload().getSize()).toEqual(8);
   });
 });
