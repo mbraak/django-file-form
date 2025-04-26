@@ -18,6 +18,18 @@ describe("getId", () => {
   });
 });
 
+describe("getInitialFile", () => {
+  it("return the initial file when the upload has not started", () => {
+    expect(createS3Upload().getInitialFile()).toEqual({
+      id: "",
+      name: "",
+      original_name: "file.txt",
+      size: 8,
+      type: "s3"
+    });
+  });
+});
+
 describe("getSize", () => {
   it("returns the size", () => {
     expect(createS3Upload().getSize()).toEqual(8);
