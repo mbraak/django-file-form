@@ -348,7 +348,6 @@ class S3Upload extends BaseUpload {
       }
 
       const error = new Error("Unknown error");
-      // error.source = ev.target
       this.handleError(error);
     });
     xhr.send(body);
