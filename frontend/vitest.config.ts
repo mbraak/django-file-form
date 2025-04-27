@@ -7,6 +7,6 @@ export default defineConfig({
       reporter: ["lcov", "text"]
     },
     environment: "jsdom",
-    setupFiles: ["./testSetup/setupDragEvents.ts"]
+    setupFiles: ["./testSetup/vitestSetup.ts"]
   }
 });
