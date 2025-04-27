@@ -37,6 +37,7 @@
     "@testing-library/dom": "^10.1.0",
     "@types/escape-html": "^1.0.2",
     "@vitest/coverage-istanbul": "^3.1.2",
+    "@vitest/eslint-plugin": "^1.1.43",
     "babel-plugin-istanbul": "^7",
     "eslint": "^9",
     "eslint-import-resolver-typescript": "^4",
