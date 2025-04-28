@@ -3479,42 +3479,40 @@
         }
         this.onPartProgress(index, ev.loaded);
       });
-      xhr.addEventListener("abort", ev => {
-        remove(this.uploading, ev.target);
+      xhr.addEventListener("abort", () => {
+        remove(this.uploading, xhr);
         const state = this.chunkState[index];
         if (state) {
           state.busy = false;
         }
       });
-      xhr.addEventListener("load", ev => {
-        const target = ev.target;
-        remove(this.uploading, target);
+      xhr.addEventListener("load", () => {
+        remove(this.uploading, xhr);
         const state = this.chunkState[index];
         if (state) {
           state.busy = false;
         }
-        if (target.status < 200 || target.status >= 300) {
+        if (xhr.status < 200 || xhr.status >= 300) {
           this.handleError(new Error("Non 2xx"));
           return;
         }
         this.onPartProgress(index, body?.size ?? 0);
 
         // NOTE This must be allowed by CORS.
-        const etag = target.getResponseHeader("ETag");
+        const etag = xhr.getResponseHeader("ETag");
         if (etag === null) {
           this.handleError(new Error("AwsS3/Multipart: Could not read the ETag header. This likely means CORS is not configured correctly on the S3 Bucket. See https://uppy.io/docs/aws-s3-multipart#S3-Bucket-Configuration for instructions."));
           return;
         }
         this.onPartComplete(index, etag);
       });
-      xhr.addEventListener("error", ev => {
-        remove(this.uploading, ev.target);
+      xhr.addEventListener("error", () => {
+        remove(this.uploading, xhr);
         const state = this.chunkState[index];
         if (state) {
           state.busy = false;
         }
         const error = new Error("Unknown error");
-        // error.source = ev.target
         this.handleError(error);
       });
       xhr.send(body);
