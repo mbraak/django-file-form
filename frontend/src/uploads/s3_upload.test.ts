@@ -1,14 +1,45 @@
-import { describe, expect, test } from "vitest";
+import { waitFor } from "@testing-library/dom";
+import { http, HttpResponse } from "msw";
+import { setupServer } from "msw/node";
+import { afterAll, afterEach, beforeAll, describe, expect, test } from "vitest";
 
 import S3Upload from "./s3_upload.ts";
+
+const server = setupServer(
+  http.post("http://s3_endpoint.net/", () =>
+    HttpResponse.json({ key: "test-key-1", uploadId: "upload-id-1" })
+  ),
+  http.get("http://s3_endpoint.net/upload-id-1/1", () =>
+    HttpResponse.json({ url: "http://s3_endpoint.net/upload/1" })
+  ),
+  http.put("http://s3_endpoint.net/upload/1", () =>
+    HttpResponse.json({}, { headers: { ETag: "etag1" } })
+  ),
+  http.post("http://s3_endpoint.net/upload-id-1/complete", () =>
+    HttpResponse.json({})
+  )
+);
+
+beforeAll(() => {
+  server.listen();
+});
+
+afterEach(() => {
+  server.resetHandlers();
+});
+
+afterAll(() => {
+  server.close();
+});
 
 const createS3Upload = () => {
   const file = new File(["content1"], "file.txt");
 
   return new S3Upload({
     csrfToken: "csrf1",
-    endpoint: "http://endpoint.com/",
+    endpoint: "http://s3_endpoint.net/",
     file,
+
     s3UploadDir: "upload_dir",
     uploadIndex: 1
   });
@@ -35,5 +66,22 @@ describe("getInitialFile", () => {
 describe("getSize", () => {
   test("returns the size", () => {
     expect(createS3Upload().getSize()).toEqual(8);
+  });
+});
+
+describe("start", () => {
+  test("calls onSuccess when the file is uploaded", async () => {
+    let success = false;
+
+    const s3Upload = createS3Upload();
+    s3Upload.onSuccess = () => {
+      success = true;
+    };
+
+    s3Upload.start();
+
+    await waitFor(() => {
+      expect(success).toBe(true);
+    });
   });
 });
