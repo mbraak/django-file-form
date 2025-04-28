@@ -12,7 +12,12 @@ const server = setupServer(
   http.get("http://s3_endpoint.net/upload-id-1/1", () =>
     HttpResponse.json({ url: "http://s3_endpoint.net/upload/1" })
   ),
-  http.put("http://s3_endpoint.net/upload/1", () => HttpResponse.json({}))
+  http.put("http://s3_endpoint.net/upload/1", () =>
+    HttpResponse.json({}, { headers: { ETag: "etag1" } })
+  ),
+  http.post("http://s3_endpoint.net/upload-id-1/complete", () =>
+    HttpResponse.json({})
+  )
 );
 
 beforeAll(() => {
@@ -34,6 +39,7 @@ const createS3Upload = () => {
     csrfToken: "csrf1",
     endpoint: "http://s3_endpoint.net/",
     file,
+
     s3UploadDir: "upload_dir",
     uploadIndex: 1
   });
@@ -65,11 +71,17 @@ describe("getSize", () => {
 
 describe("start", () => {
   test("...", async () => {
+    let success = false;
+
     const s3Upload = createS3Upload();
+    s3Upload.onSuccess = () => {
+      success = true;
+    };
+
     s3Upload.start();
 
     await waitFor(() => {
-      expect(s3Upload.status).toEqual("done");
+      expect(success).toBe(true);
     });
   });
 });
