@@ -70,7 +70,7 @@ describe("getSize", () => {
 });
 
 describe("start", () => {
-  test("...", async () => {
+  test("calls onSuccess when the file is uploaded", async () => {
     let success = false;
 
     const s3Upload = createS3Upload();
