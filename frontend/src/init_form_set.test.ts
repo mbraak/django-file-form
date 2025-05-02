@@ -1,4 +1,5 @@
 import { screen } from "@testing-library/dom";
+import { beforeEach, describe, expect, test } from "vitest";
 
 import initFormSet from "./init_form_set.ts";
 
@@ -54,27 +55,27 @@ beforeEach(() => {
 });
 
 describe(".initFormSet", () => {
-  it("initializes a form", () => {
+  test("initializes a form", () => {
     const form = createFormSet("form");
 
     initFormSet(form, {});
 
-    screen.getByText("Drop your files here");
+    expect(screen.getByText("Drop your files here")).toBeInTheDocument();
   });
 
-  it("initializes a form with a string prefix parameter", () => {
+  test("initializes a form with a string prefix parameter", () => {
     const form = createFormSet("test");
 
     initFormSet(form, "test");
 
-    screen.getByText("Drop your files here");
+    expect(screen.getByText("Drop your files here")).toBeInTheDocument();
   });
 
-  it("initializes a form with a prefix in an object parameter", () => {
+  test("initializes a form with a prefix in an object parameter", () => {
     const form = createFormSet("test");
 
     initFormSet(form, { prefix: "test" });
 
-    screen.getByText("Drop your files here");
+    expect(screen.getByText("Drop your files here")).toBeInTheDocument();
   });
 });

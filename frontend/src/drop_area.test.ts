@@ -1,4 +1,5 @@
 import { fireEvent, waitFor } from "@testing-library/dom";
+import { describe, expect, test, vi } from "vitest";
 
 import DropArea from "./drop_area.ts";
 import RenderUploadFile from "./render_upload_file.ts";
@@ -57,10 +58,10 @@ const mockClassicDataTransfer = (file: File) => {
 };
 
 describe("DropArea", () => {
-  it("uploads a file", async () => {
-    const onUploadFiles = jest.fn();
+  test("uploads a file", async () => {
+    const onUploadFiles = vi.fn();
     const renderer = {
-      setErrorInvalidFiles: jest.fn() as unknown
+      setErrorInvalidFiles: vi.fn() as unknown
     } as RenderUploadFile;
 
     const container = document.createElement("div");
@@ -84,10 +85,10 @@ describe("DropArea", () => {
     });
   });
 
-  it("upload a file when the data transfer doesn't have an items property", async () => {
-    const onUploadFiles = jest.fn();
+  test("upload a file when the data transfer doesn't have an items property", async () => {
+    const onUploadFiles = vi.fn();
     const renderer = {
-      setErrorInvalidFiles: jest.fn() as unknown
+      setErrorInvalidFiles: vi.fn() as unknown
     } as RenderUploadFile;
 
     const container = document.createElement("div");
@@ -110,10 +111,10 @@ describe("DropArea", () => {
     });
   });
 
-  it("uploads a file when uploading a directory", async () => {
-    const onUploadFiles = jest.fn();
+  test("uploads a file when uploading a directory", async () => {
+    const onUploadFiles = vi.fn();
     const renderer = {
-      setErrorInvalidFiles: jest.fn() as unknown
+      setErrorInvalidFiles: vi.fn() as unknown
     } as RenderUploadFile;
 
     const container = document.createElement("div");
@@ -138,9 +139,9 @@ describe("DropArea", () => {
     });
   });
 
-  it("handles an upload with an extension that is not supported", async () => {
-    const onUploadFiles = jest.fn();
-    const setErrorInvalidFiles = jest.fn();
+  test("handles an upload with an extension that is not supported", async () => {
+    const onUploadFiles = vi.fn();
+    const setErrorInvalidFiles = vi.fn();
     const renderer = { setErrorInvalidFiles } as unknown as RenderUploadFile;
 
     const container = document.createElement("div");
