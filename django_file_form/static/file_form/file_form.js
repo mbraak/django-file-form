@@ -2693,13 +2693,12 @@
     }
   };
   class DropArea {
-    constructor(_ref) {
-      let {
-        container,
-        inputAccept,
-        onUploadFiles,
-        renderer
-      } = _ref;
+    constructor({
+      container,
+      inputAccept,
+      onUploadFiles,
+      renderer
+    }) {
       this.container = container;
       this.onUploadFiles = onUploadFiles;
       this.acceptedFileTypes = new AcceptedFileTypes(inputAccept);
@@ -2865,13 +2864,12 @@
   const getMetadataFieldName = (fieldName, prefix) => `${getInputNameWithoutPrefix(fieldName, prefix)}-metadata`;
 
   class RenderUploadFile {
-    constructor(_ref) {
-      let {
-        input,
-        parent,
-        skipRequired,
-        translations
-      } = _ref;
+    constructor({
+      input,
+      parent,
+      skipRequired,
+      translations
+    }) {
       this.container = this.createFilesContainer(parent);
       this.errors = this.createErrorContainer(parent);
       this.input = input;
@@ -3079,13 +3077,12 @@
   }
 
   let BaseUpload$1 = class BaseUpload {
-    constructor(_ref) {
-      let {
-        name,
-        status,
-        type,
-        uploadIndex
-      } = _ref;
+    constructor({
+      name,
+      status,
+      type,
+      uploadIndex
+    }) {
       this.name = name;
       this.status = status;
       this.type = type;
@@ -3171,13 +3168,12 @@
   }
 
   const MB = 1024 * 1024;
-  const abortMultipartUpload = _ref => {
-    let {
-      csrfToken,
-      endpoint,
-      key,
-      uploadId
-    } = _ref;
+  const abortMultipartUpload = ({
+    csrfToken,
+    endpoint,
+    key,
+    uploadId
+  }) => {
     const filename = encodeURIComponent(key);
     const uploadIdEnc = encodeURIComponent(uploadId);
     const headers = new Headers({
@@ -3191,14 +3187,13 @@
       return response.json();
     });
   };
-  const completeMultipartUpload = _ref2 => {
-    let {
-      csrfToken,
-      endpoint,
-      key,
-      parts,
-      uploadId
-    } = _ref2;
+  const completeMultipartUpload = ({
+    csrfToken,
+    endpoint,
+    key,
+    parts,
+    uploadId
+  }) => {
     const filename = encodeURIComponent(key);
     const uploadIdEnc = encodeURIComponent(uploadId);
     const headers = new Headers({
@@ -3217,13 +3212,12 @@
       return data;
     });
   };
-  const createMultipartUpload = _ref3 => {
-    let {
-      csrfToken,
-      endpoint,
-      file,
-      s3UploadDir
-    } = _ref3;
+  const createMultipartUpload = ({
+    csrfToken,
+    endpoint,
+    file,
+    s3UploadDir
+  }) => {
     const headers = new Headers({
       accept: "application/json",
       "content-type": "application/json",
@@ -3244,14 +3238,13 @@
     });
   };
   const getChunkSize = file => Math.ceil(file.size / 10000);
-  const prepareUploadPart = _ref4 => {
-    let {
-      csrfToken,
-      endpoint,
-      key,
-      number,
-      uploadId
-    } = _ref4;
+  const prepareUploadPart = ({
+    csrfToken,
+    endpoint,
+    key,
+    number,
+    uploadId
+  }) => {
     const filename = encodeURIComponent(key);
     const headers = new Headers({
       "X-CSRFToken": csrfToken
@@ -3277,14 +3270,13 @@
   // which is released under a MIT License (https://github.com/transloadit/uppy/blob/master/LICENSE)
 
   class S3Upload extends BaseUpload$1 {
-    constructor(_ref) {
-      let {
-        csrfToken,
-        endpoint,
-        file,
-        s3UploadDir,
-        uploadIndex
-      } = _ref;
+    constructor({
+      csrfToken,
+      endpoint,
+      file,
+      s3UploadDir,
+      uploadIndex
+    }) {
       super({
         name: file.name,
         status: "uploading",
@@ -3458,10 +3450,9 @@
           throw new TypeError("AwsS3/Multipart: Got incorrect result from `prepareUploadPart()`, expected an object `{ url }`.");
         }
         return result;
-      }).then(_ref2 => {
-        let {
-          url
-        } = _ref2;
+      }).then(({
+        url
+      }) => {
         this.uploadPartBytes(index, url);
       }, err => {
         this.handleError(err);
@@ -3546,10 +3537,7 @@
   }
 
   class DetailedError extends Error {
-    constructor(message) {
-      let causingErr = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-      let req = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
-      let res = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
+    constructor(message, causingErr = null, req = null, res = null) {
       super(message);
       this.originalRequest = req;
       this.originalResponse = res;
@@ -4760,8 +4748,7 @@
      * @param {object} options Optional options for influencing HTTP requests.
      * @return {Promise} The Promise will be resolved/rejected when the requests finish.
      */
-    static terminate(url) {
-      let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    static terminate(url, options = {}) {
       const req = openRequest('DELETE', url, options);
       return sendRequest(req, null, options).then(res => {
         // A 204 response indicates a successfull request
@@ -4909,57 +4896,54 @@
       // upload is completed.
       const uploads = parts.map((part, index) => {
         let lastPartProgress = 0;
-        return this._source.slice(part.start, part.end).then(_ref => {
-          let {
-            value
-          } = _ref;
-          return new Promise((resolve, reject) => {
-            // Merge with the user supplied options but overwrite some values.
-            const options = {
-              ...this.options,
-              // If available, the partial upload should be resumed from a previous URL.
-              uploadUrl: part.uploadUrl || null,
-              // We take manually care of resuming for partial uploads, so they should
-              // not be stored in the URL storage.
-              storeFingerprintForResuming: false,
-              removeFingerprintOnSuccess: false,
-              // Reset the parallelUploads option to not cause recursion.
-              parallelUploads: 1,
-              // Reset this option as we are not doing a parallel upload.
-              parallelUploadBoundaries: null,
-              metadata: this.options.metadataForPartialUploads,
-              // Add the header to indicate the this is a partial upload.
-              headers: {
-                ...this.options.headers,
-                'Upload-Concat': 'partial'
-              },
-              // Reject or resolve the promise if the upload errors or completes.
-              onSuccess: resolve,
-              onError: reject,
-              // Based in the progress for this partial upload, calculate the progress
-              // for the entire final upload.
-              onProgress: newPartProgress => {
-                totalProgress = totalProgress - lastPartProgress + newPartProgress;
-                lastPartProgress = newPartProgress;
-                this._emitProgress(totalProgress, totalSize);
-              },
-              // Wait until every partial upload has an upload URL, so we can add
-              // them to the URL storage.
-              onUploadUrlAvailable: () => {
-                this._parallelUploadUrls[index] = upload.url;
-                // Test if all uploads have received an URL
-                if (this._parallelUploadUrls.filter(u => Boolean(u)).length === parts.length) {
-                  this._saveUploadInUrlStorage();
-                }
+        return this._source.slice(part.start, part.end).then(({
+          value
+        }) => new Promise((resolve, reject) => {
+          // Merge with the user supplied options but overwrite some values.
+          const options = {
+            ...this.options,
+            // If available, the partial upload should be resumed from a previous URL.
+            uploadUrl: part.uploadUrl || null,
+            // We take manually care of resuming for partial uploads, so they should
+            // not be stored in the URL storage.
+            storeFingerprintForResuming: false,
+            removeFingerprintOnSuccess: false,
+            // Reset the parallelUploads option to not cause recursion.
+            parallelUploads: 1,
+            // Reset this option as we are not doing a parallel upload.
+            parallelUploadBoundaries: null,
+            metadata: this.options.metadataForPartialUploads,
+            // Add the header to indicate the this is a partial upload.
+            headers: {
+              ...this.options.headers,
+              'Upload-Concat': 'partial'
+            },
+            // Reject or resolve the promise if the upload errors or completes.
+            onSuccess: resolve,
+            onError: reject,
+            // Based in the progress for this partial upload, calculate the progress
+            // for the entire final upload.
+            onProgress: newPartProgress => {
+              totalProgress = totalProgress - lastPartProgress + newPartProgress;
+              lastPartProgress = newPartProgress;
+              this._emitProgress(totalProgress, totalSize);
+            },
+            // Wait until every partial upload has an upload URL, so we can add
+            // them to the URL storage.
+            onUploadUrlAvailable: () => {
+              this._parallelUploadUrls[index] = upload.url;
+              // Test if all uploads have received an URL
+              if (this._parallelUploadUrls.filter(u => Boolean(u)).length === parts.length) {
+                this._saveUploadInUrlStorage();
               }
-            };
-            const upload = new BaseUpload(value, options);
-            upload.start();
+            }
+          };
+          const upload = new BaseUpload(value, options);
+          upload.start();
 
-            // Store the upload in an array, so we can later abort them if necessary.
-            this._parallelUploads.push(upload);
-          });
-        });
+          // Store the upload in an array, so we can later abort them if necessary.
+          this._parallelUploads.push(upload);
+        }));
       });
       let req;
       // Wait until all partial uploads are finished and we can send the POST request for
@@ -5339,11 +5323,10 @@
       if ((end === Number.POSITIVE_INFINITY || end > this._size) && !this.options.uploadLengthDeferred) {
         end = this._size;
       }
-      return this._source.slice(start, end).then(_ref2 => {
-        let {
-          value,
-          done
-        } = _ref2;
+      return this._source.slice(start, end).then(({
+        value,
+        done
+      }) => {
         const valueSize = value?.size ? value.size : 0;
 
         // If the upload length is deferred, the upload size was not specified during
@@ -5457,16 +5440,12 @@
      *
      * @api private
      */
-    _sendRequest(req) {
-      let body = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+    _sendRequest(req, body = null) {
       return sendRequest(req, body, this.options);
     }
   }
   function encodeMetadata(metadata) {
-    return Object.entries(metadata).map(_ref3 => {
-      let [key, value] = _ref3;
-      return `${key} ${gBase64.encode(String(value))}`;
-    }).join(',');
+    return Object.entries(metadata).map(([key, value]) => `${key} ${gBase64.encode(String(value))}`).join(',');
   }
 
   /**
@@ -5730,11 +5709,10 @@
           done
         });
       }
-      return this._reader.read().then(_ref => {
-        let {
-          value,
-          done
-        } = _ref;
+      return this._reader.read().then(({
+        value,
+        done
+      }) => {
         if (done) {
           this._done = true;
         } else if (this._buffer === undefined) {
@@ -5876,8 +5854,7 @@
         progressHandler(e.loaded);
       };
     }
-    send() {
-      let body = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+    send(body = null) {
       return new Promise((resolve, reject) => {
         this._xhr.onload = () => {
           resolve(new Response(this._xhr));
@@ -5983,17 +5960,14 @@
     fingerprint
   };
   class Upload extends BaseUpload {
-    constructor() {
-      let file = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
-      let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    constructor(file = null, options = {}) {
       options = {
         ...defaultOptions,
         ...options
       };
       super(file, options);
     }
-    static terminate(url) {
-      let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    static terminate(url, options = {}) {
       options = {
         ...defaultOptions,
         ...options
@@ -6018,17 +5992,16 @@
   });
 
   class TusUpload extends BaseUpload$1 {
-    constructor(_ref) {
-      let {
-        chunkSize,
-        csrfToken,
-        fieldName,
-        file,
-        formId,
-        retryDelays,
-        uploadIndex,
-        uploadUrl
-      } = _ref;
+    constructor({
+      chunkSize,
+      csrfToken,
+      fieldName,
+      file,
+      formId,
+      retryDelays,
+      uploadIndex,
+      uploadUrl
+    }) {
       super({
         name: file.name,
         status: "uploading",
@@ -6111,13 +6084,12 @@
   }
 
   class BaseUploadedFile extends BaseUpload$1 {
-    constructor(_ref) {
-      let {
-        name,
-        size,
-        type,
-        uploadIndex
-      } = _ref;
+    constructor({
+      name,
+      size,
+      type,
+      uploadIndex
+    }) {
       super({
         name,
         status: "done",
@@ -6203,13 +6175,12 @@
     }
   }
   class UploadedTusFile extends BaseUploadedFile {
-    constructor(_ref2) {
-      let {
-        csrfToken,
-        initialFile,
-        uploadIndex,
-        uploadUrl
-      } = _ref2;
+    constructor({
+      csrfToken,
+      initialFile,
+      uploadIndex,
+      uploadUrl
+    }) {
       super({
         name: initialFile.name,
         size: initialFile.size,
@@ -6236,13 +6207,12 @@
       };
     }
   }
-  const createUploadedFile = _ref3 => {
-    let {
-      csrfToken,
-      initialFile,
-      uploadIndex,
-      uploadUrl
-    } = _ref3;
+  const createUploadedFile = ({
+    csrfToken,
+    initialFile,
+    uploadIndex,
+    uploadUrl
+  }) => {
     switch (initialFile.type) {
       case "existing":
         return new ExistingFile(initialFile, uploadIndex);
@@ -6261,27 +6231,26 @@
   };
 
   class FileField {
-    constructor(_ref) {
-      let {
-        callbacks,
-        chunkSize,
-        csrfToken,
-        eventEmitter,
-        fieldName,
-        form,
-        formId,
-        initial,
-        input,
-        multiple,
-        parent,
-        prefix,
-        retryDelays,
-        s3UploadDir,
-        skipRequired,
-        supportDropArea,
-        translations,
-        uploadUrl
-      } = _ref;
+    constructor({
+      callbacks,
+      chunkSize,
+      csrfToken,
+      eventEmitter,
+      fieldName,
+      form,
+      formId,
+      initial,
+      input,
+      multiple,
+      parent,
+      prefix,
+      retryDelays,
+      s3UploadDir,
+      skipRequired,
+      supportDropArea,
+      translations,
+      uploadUrl
+    }) {
       this.callbacks = callbacks;
       this.chunkSize = chunkSize;
       this.csrfToken = csrfToken;
@@ -6609,8 +6578,7 @@
     };
   }
 
-  const initUploadFields = function (form) {
-    let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+  const initUploadFields = (form, options = {}) => {
     const matchesPrefix = fieldName => {
       if (!options.prefix) {
         return true;
