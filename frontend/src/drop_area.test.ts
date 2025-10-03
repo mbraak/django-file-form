@@ -8,13 +8,13 @@ const mockFile = (filename: string) =>
   new File(["test"], filename, { type: "text/plain" });
 
 const mockFileSystemEntry = (file: File) =>
-  ({
-    file: (successCallback: FileCallback) => {
-      successCallback(file);
-    },
-    isDirectory: false,
-    isFile: true
-  } as FileSystemFileEntry);
+({
+  file: (successCallback: FileCallback) => {
+    successCallback(file);
+  },
+  isDirectory: false,
+  isFile: true
+} as FileSystemFileEntry);
 
 const mockFileSystemDirectoryEntry = (fileEntries: FileSystemFileEntry[]) => {
   const directoryReader = {
@@ -31,13 +31,13 @@ const mockFileSystemDirectoryEntry = (fileEntries: FileSystemFileEntry[]) => {
 };
 
 const mockDataTransferItem = (fileEntry: FileSystemEntry) =>
-  ({
-    getAsFile: () => null,
-    getAsString: () => "test",
-    kind: "file",
-    type: "text/plain",
-    webkitGetAsEntry: () => fileEntry
-  } as DataTransferItem);
+({
+  getAsFile: () => null,
+  getAsString: () => "test",
+  kind: "file",
+  type: "text/plain",
+  webkitGetAsEntry: () => fileEntry
+} as DataTransferItem);
 
 const mockDataTransfer = (fileEntries: FileSystemEntry[]) => {
   const dataTransferItems = fileEntries.map(mockDataTransferItem);
@@ -81,7 +81,7 @@ describe("DropArea", () => {
     fireEvent(container, dragEvent);
 
     await waitFor(() => {
-      expect(onUploadFiles).toHaveBeenCalledWith([file]);
+      expect(onUploadFiles).toHaveBeenCalledExactlyOnceWith([file]);
     });
   });
 
@@ -107,7 +107,7 @@ describe("DropArea", () => {
     fireEvent(container, dragEvent);
 
     await waitFor(() => {
-      expect(onUploadFiles).toHaveBeenCalledWith([file]);
+      expect(onUploadFiles).toHaveBeenCalledExactlyOnceWith([file]);
     });
   });
 
@@ -135,7 +135,7 @@ describe("DropArea", () => {
     fireEvent(container, dragEvent);
 
     await waitFor(() => {
-      expect(onUploadFiles).toHaveBeenCalledWith([file]);
+      expect(onUploadFiles).toHaveBeenCalledExactlyOnceWith([file]);
     });
   });
 
@@ -161,8 +161,8 @@ describe("DropArea", () => {
     fireEvent(container, dragEvent);
 
     await waitFor(() => {
-      expect(onUploadFiles).toHaveBeenCalledWith([]);
-      expect(setErrorInvalidFiles).toHaveBeenCalledWith([file]);
+      expect(onUploadFiles).toHaveBeenCalledExactlyOnceWith([]);
+      expect(setErrorInvalidFiles).toHaveBeenCalledExactlyOnceWith([file]);
     });
   });
 });
