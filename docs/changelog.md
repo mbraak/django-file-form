@@ -1,5 +1,9 @@
 ## Changelog
 
+**3.9.1 (november 11 2025)**
+
+- Issue #1158: return bad request status for missing meta data (thanks to Ivan Cvetkovic)
+
 **3.9.0 (april 8 2025)**
 
 - Support Django 5.2; drop support for Django 5.0
@@ -20,7 +24,7 @@
 **3.7.0 (june 27 2024)**
 
 - Issue #784: compile to es6. This reduces the size of the minified js file to 80k (from 119k)
-- Issue #841. Drop support for Django 3.2
+- Issue #841: drop support for Django 3.2
 - Issue #891: handle error with empty initial file in model form (thanks to Yanhui Xie)
 
 **3.6.0 (december 8 2023)**
