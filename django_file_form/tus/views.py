@@ -35,11 +35,10 @@ def start_upload(request):
     response = get_tus_response()
 
     if request.META.get("HTTP_TUS_RESUMABLE", None) is None:
-        logger.warning("Received File upload for unsupported file transfer protocol")
-        response.status_code = 500
-        response.reason_phrase = (
-            "Received File upload for unsupported file transfer protocol"
-        )
+        error_message = "Received file upload for unsupported file transfer protocol"
+        logger.warning(error_message)
+        response.status_code = 400
+        response.reason_phrase = error_message
         return response
 
     metadata = {}
