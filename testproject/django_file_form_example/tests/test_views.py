@@ -17,10 +17,10 @@ class ViewTests(TestCase):
 
     def test_post_without_metadata(self):
         response = Client().post("/upload/")
-        self.assertEqual(response.status_code, 500)
+        self.assertEqual(response.status_code, 400)
         self.assertEqual(
             response.reason_phrase,
-            "Received File upload for unsupported file transfer protocol",
+            "Received file upload for unsupported file transfer protocol",
         )
 
     def test_head(self):
