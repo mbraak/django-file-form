@@ -675,7 +675,7 @@
   function requireUtils () {
   	if (hasRequiredUtils) return utils;
   	hasRequiredUtils = 1;
-  	(function (exports) {
+  	(function (exports$1) {
 
   		const {
   		  REGEX_BACKSLASH,
@@ -684,13 +684,13 @@
   		  REGEX_SPECIAL_CHARS_GLOBAL
   		} = /*@__PURE__*/ requireConstants();
 
-  		exports.isObject = val => val !== null && typeof val === 'object' && !Array.isArray(val);
-  		exports.hasRegexChars = str => REGEX_SPECIAL_CHARS.test(str);
-  		exports.isRegexChar = str => str.length === 1 && exports.hasRegexChars(str);
-  		exports.escapeRegex = str => str.replace(REGEX_SPECIAL_CHARS_GLOBAL, '\\$1');
-  		exports.toPosixSlashes = str => str.replace(REGEX_BACKSLASH, '/');
+  		exports$1.isObject = val => val !== null && typeof val === 'object' && !Array.isArray(val);
+  		exports$1.hasRegexChars = str => REGEX_SPECIAL_CHARS.test(str);
+  		exports$1.isRegexChar = str => str.length === 1 && exports$1.hasRegexChars(str);
+  		exports$1.escapeRegex = str => str.replace(REGEX_SPECIAL_CHARS_GLOBAL, '\\$1');
+  		exports$1.toPosixSlashes = str => str.replace(REGEX_BACKSLASH, '/');
 
-  		exports.isWindows = () => {
+  		exports$1.isWindows = () => {
   		  if (typeof navigator !== 'undefined' && navigator.platform) {
   		    const platform = navigator.platform.toLowerCase();
   		    return platform === 'win32' || platform === 'windows';
@@ -703,20 +703,20 @@
   		  return false;
   		};
 
-  		exports.removeBackslashes = str => {
+  		exports$1.removeBackslashes = str => {
   		  return str.replace(REGEX_REMOVE_BACKSLASH, match => {
   		    return match === '\\' ? '' : match;
   		  });
   		};
 
-  		exports.escapeLast = (input, char, lastIdx) => {
+  		exports$1.escapeLast = (input, char, lastIdx) => {
   		  const idx = input.lastIndexOf(char, lastIdx);
   		  if (idx === -1) return input;
-  		  if (input[idx - 1] === '\\') return exports.escapeLast(input, char, idx - 1);
+  		  if (input[idx - 1] === '\\') return exports$1.escapeLast(input, char, idx - 1);
   		  return `${input.slice(0, idx)}\\${input.slice(idx)}`;
   		};
 
-  		exports.removePrefix = (input, state = {}) => {
+  		exports$1.removePrefix = (input, state = {}) => {
   		  let output = input;
   		  if (output.startsWith('./')) {
   		    output = output.slice(2);
@@ -725,7 +725,7 @@
   		  return output;
   		};
 
-  		exports.wrapOutput = (input, state = {}, options = {}) => {
+  		exports$1.wrapOutput = (input, state = {}, options = {}) => {
   		  const prepend = options.contains ? '' : '^';
   		  const append = options.contains ? '' : '$';
 
@@ -736,7 +736,7 @@
   		  return output;
   		};
 
-  		exports.basename = (path, { windows } = {}) => {
+  		exports$1.basename = (path, { windows } = {}) => {
   		  const segs = path.split(windows ? /[\\/]/ : '/');
   		  const last = segs[segs.length - 1];
 
