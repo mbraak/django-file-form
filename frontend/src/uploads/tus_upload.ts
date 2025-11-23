@@ -44,11 +44,11 @@ export default class TusUpload extends BaseUpload {
         filename: file.name,
         formId: formId
       },
-      onAfterResponse: this.handleAfterReponse,
+      onAfterResponse: this.handleAfterResponse,
       onBeforeRequest: this.addCsrTokenToRequest,
       onError: this.handleError,
       onProgress: this.handleProgress,
-      onSuccess: this.handleSucces,
+      onSuccess: this.handleSuccess,
       retryDelays: retryDelays ?? [0, 1000, 3000, 5000]
     });
 
@@ -95,7 +95,7 @@ export default class TusUpload extends BaseUpload {
     request.setHeader("X-CSRFToken", this.csrfToken);
   };
 
-  private handleAfterReponse = (
+  private handleAfterResponse = (
     _request: HttpRequest,
     response: HttpResponse
   ) => {
@@ -120,7 +120,7 @@ export default class TusUpload extends BaseUpload {
     }
   };
 
-  private handleSucces = () => {
+  private handleSuccess = () => {
     if (this.onSuccess) {
       this.onSuccess();
     }

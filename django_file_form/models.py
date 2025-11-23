@@ -71,7 +71,7 @@ class TemporaryUploadedFile(models.Model):
     TemporaryUploadedFile is used for temporary storage of an uploaded file.
 
     * Added when a file is uploaded using the tus ajax upload
-    * Removed when the form is submitted sucessfully
+    * Removed when the form is submitted successfully
     * Or removed later by 'python manage.py delete_unused_files'
     """
 
