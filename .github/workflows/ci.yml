@@ -31,6 +31,13 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v6
+      - name: Check spelling
+        uses: streetsidesoftware/cspell-action@v8
+        with:
+          files: |
+            frontend/src/**/*.ts
+            django_file_form/**/*.py
+            testproject/**/*.py
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
