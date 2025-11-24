@@ -1,5 +1,5 @@
 cryptography==46.0.3
-moto==5.1.16
+moto==5.1.17
 Flask==3.1.2
 Flask-Cors==6.0.1
 psycopg==3.2.12
