@@ -6025,11 +6025,11 @@
           filename: file.name,
           formId: formId
         },
-        onAfterResponse: this.handleAfterReponse,
+        onAfterResponse: this.handleAfterResponse,
         onBeforeRequest: this.addCsrTokenToRequest,
         onError: this.handleError,
         onProgress: this.handleProgress,
-        onSuccess: this.handleSucces,
+        onSuccess: this.handleSuccess,
         retryDelays: retryDelays ?? [0, 1000, 3000, 5000]
       });
       this.onError = undefined;
@@ -6066,7 +6066,7 @@
     addCsrTokenToRequest = request => {
       request.setHeader("X-CSRFToken", this.csrfToken);
     };
-    handleAfterReponse = (_request, response) => {
+    handleAfterResponse = (_request, response) => {
       const resourceId = response.getHeader("ResourceId");
       if (resourceId) {
         this.id = resourceId;
@@ -6084,7 +6084,7 @@
         this.onProgress(bytesUploaded, bytesTotal);
       }
     };
-    handleSucces = () => {
+    handleSuccess = () => {
       if (this.onSuccess) {
         this.onSuccess();
       }
