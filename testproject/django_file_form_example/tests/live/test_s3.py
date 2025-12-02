@@ -37,7 +37,7 @@ class S3ServerThread(threading.Thread):
 
 
 @override_settings(
-    AWS_STORAGE_BUCKET_NAME="my_bucket",
+    AWS_STORAGE_BUCKET_NAME="bucket1",
     AWS_S3_ENDPOINT_URL="http://localhost:4566",
     AWS_ACCESS_KEY_ID="access1",
     AWS_SECRET_ACCESS_KEY="test1",
@@ -62,7 +62,7 @@ class S3TestCase(BaseLiveTestCase):
             aws_secret_access_key="test1",
             region_name="eu-west-1",
         )
-        bucket = s3.Bucket("my_bucket")
+        bucket = s3.Bucket("bucket1")
 
         bucket.create(
             CreateBucketConfiguration={"LocationConstraint": "eu-west-1"},
@@ -75,7 +75,7 @@ class S3TestCase(BaseLiveTestCase):
         super().setUp()
 
         for file in self.bucket.objects.all():
-            self.s3.Object("my_bucket", file.key).delete()
+            self.s3.Object("bucket1", file.key).delete()
 
     @classmethod
     def tearDownClass(cls):
