@@ -2,6 +2,7 @@
 
 import django.core.files.storage
 from django.db import migrations, models
+from django.conf import settings
 
 
 class Migration(migrations.Migration):
@@ -19,7 +20,7 @@ class Migration(migrations.Migration):
                 max_length=255,
                 null=True,
                 storage=django.core.files.storage.FileSystemStorage(
-                    location="/Users/henkjansen/django-file-form/testproject/media"
+                    location=settings.MEDIA_ROOT
                 ),
                 upload_to="example",
             ),

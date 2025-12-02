@@ -814,7 +814,7 @@ class LiveTestCase(BaseLiveTestCase):
         example.refresh_from_db()
         self.assertTrue(bool(example.input_file))
 
-    def test_model_form_multipe_add(self):
+    def test_model_form_multiple_add(self):
         page = self.page
 
         temp_file1 = page.create_temp_file("content1")
@@ -851,7 +851,7 @@ class LiveTestCase(BaseLiveTestCase):
             {b"content1", b"content2"},
         )
 
-    def test_model_form_multipe_edit_add_and_remove(self):
+    def test_model_form_multiple_edit_add_and_remove(self):
         page = self.page
 
         filename1 = "test1_" + get_random_id()
@@ -889,7 +889,7 @@ class LiveTestCase(BaseLiveTestCase):
             {b"content1"},
         )
 
-    def test_model_form_multipe_edit_add_file(self):
+    def test_model_form_multiple_edit_add_file(self):
         page = self.page
 
         filename1 = "test1_" + get_random_id()
@@ -922,7 +922,7 @@ class LiveTestCase(BaseLiveTestCase):
             {b"content1", b"content2"},
         )
 
-    def test_model_form_multipe_edit_remove_all_files(self):
+    def test_model_form_multiple_edit_remove_all_files(self):
         page = self.page
 
         filename = "test1_" + get_random_id()
