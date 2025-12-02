@@ -38,6 +38,7 @@ jobs:
             frontend/src/**/*.ts
             django_file_form/**/*.py
             testproject/**/*.py
+          incremental_files_only: false
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:

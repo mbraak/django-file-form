@@ -57,5 +57,5 @@ urlpatterns = (
     ),
     path("success", views.ExampleSuccessView.as_view(), name="example_success"),
     path("without_js", views.WithoutJsExampleView.as_view(), name="without_js_example"),
-    path("wizard", views.WizardExampleview.as_view(), name="wizard_example"),
+    path("wizard", views.WizardExampleView.as_view(), name="wizard_example"),
 )

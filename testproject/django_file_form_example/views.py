@@ -64,7 +64,7 @@ class MultipleWithoutJsExampleView(MultipleExampleView):
     use_ajax = False
 
 
-class WizardExampleview(SessionWizardView):
+class WizardExampleView(SessionWizardView):
     form_list = [forms.MultipleFileExampleForm, forms.WizardStepForm]
     file_storage = FileSystemStorage(location=get_upload_path())
     template_name = "wizard.html"
@@ -133,7 +133,7 @@ class WithAcceptExample(BaseFormView):
 
 
 class WithCustomWidgetExample(PlaceholderView):
-    custom_js_files = ["eventemitter3.js", "example_form_custom_widget.js"]
+    custom_js_files = ["event_emitter3.js", "example_form_custom_widget.js"]
     form_class = forms.PlaceholderWidgetExampleForm
 
     def get_initial(self):
