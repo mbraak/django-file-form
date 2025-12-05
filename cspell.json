@@ -1,0 +1,14 @@
+{
+  "ignorePaths": ["testproject/django_file_form_example/static/"],
+  "language": "en-GB",
+  "words": [
+    "ajaxuploader",
+    "cancelable",
+    "csrfmiddlewaretoken",
+    "formtools",
+    "nocase",
+    "resumable",
+    "typehint",
+    "urljoin"
+  ]
+}

@@ -18,12 +18,12 @@ def encode_datetime(*args, **kwargs):
     Return a valid datetime.
     - depends on timezone settings
     """
-    naive_datime = datetime(*args, **kwargs)
+    naive_datetime = datetime(*args, **kwargs)
 
     if settings.USE_TZ:
-        return timezone.make_aware(naive_datime, timezone.get_current_timezone())
+        return timezone.make_aware(naive_datetime, timezone.get_current_timezone())
     else:
-        return naive_datime  # pragma: no cover
+        return naive_datetime  # pragma: no cover
 
 
 def remove_p(path):

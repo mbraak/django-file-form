@@ -67,7 +67,7 @@ describe("getUploadsFieldName", () => {
 });
 
 describe("getMetadataFieldName", () => {
-  test("returns the name without the predix and with the 'metadata' suffix when there is a prefix", () => {
+  test("returns the name without the prefix and with the 'metadata' suffix when there is a prefix", () => {
     expect(getMetadataFieldName("abc-field1", "abc")).toBe("field1-metadata");
   });
 

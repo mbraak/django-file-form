@@ -10,9 +10,9 @@ jobs:
       matrix:
         django:
           [
-            "django==4.2.26",
-            "django==5.1.14",
-            "django==5.2.8",
+            "django==4.2.27",
+            "django==5.1.15",
+            "django==5.2.9",
             "django==6.0rc1",
           ]
 
@@ -36,9 +36,17 @@ jobs:
 
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
+      - name: Check spelling
+        uses: streetsidesoftware/cspell-action@v8
+        with:
+          files: |
+            frontend/src/**/*.ts
+            django_file_form/**/*.py
+            testproject/**/*.py
+          incremental_files_only: false
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20"
           cache: "npm"
@@ -47,7 +55,7 @@ jobs:
         working-directory: ./frontend
         run: npm clean-install --audit=false --fund=false --loglevel=http
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
           cache: "pip"
