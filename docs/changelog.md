@@ -1,6 +1,6 @@
 ## Changelog
 
-**development**
+**4.0.0 (december 5 2025)**
 
 - Support Django 6.0; drop support for Django 5.1
 
