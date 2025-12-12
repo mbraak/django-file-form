@@ -1,5 +1,9 @@
 ## Changelog
 
+**4.0.0 (december 5 2025)**
+
+- Support Django 6.0; drop support for Django 5.1
+
 **3.9.1 (november 11 2025)**
 
 - Issue #1158: return bad request status for missing meta data (thanks to Ivan Cvetkovic)
