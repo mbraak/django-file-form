@@ -44,7 +44,7 @@
     "eslint": "^9.39.1",
     "eslint-import-resolver-typescript": "^4.4.4",
     "eslint-plugin-import": "^2.32.0",
-    "eslint-plugin-perfectionist": "^4.15.1",
+    "eslint-plugin-perfectionist": "^5",
     "eslint-plugin-react": "^7.37.5",
     "jsdom": "^27.2.0",
     "msw": "^2.12.3",
