@@ -150,7 +150,7 @@ class S3Upload extends BaseUpload {
         }
       },
       (err: unknown) => {
-        this.handleError(err as Error);
+        this.handleError(err);
       }
     );
   }
