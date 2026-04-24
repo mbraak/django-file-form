@@ -21,7 +21,7 @@ const mockFileSystemDirectoryEntry = (fileEntries: FileSystemFileEntry[]) => {
     readEntries: (successCallback: FileSystemEntriesCallback) => {
       successCallback(fileEntries);
     }
-  } as FileSystemDirectoryReader;
+  };
 
   return {
     createReader: () => directoryReader,
