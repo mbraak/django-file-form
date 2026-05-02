@@ -3,7 +3,6 @@
   "exclude": ["node_modules"],
   "compilerOptions": {
     "allowImportingTsExtensions": true,
-    "downlevelIteration": true,
     "esModuleInterop": true,
     "lib": ["DOM", "DOM.Iterable", "ES2018"],
     "module": "NodeNext",
