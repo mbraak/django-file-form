@@ -5636,13 +5636,13 @@
    *
    * @author Dan Kogai (https://github.com/dankogai)
    */
-  const version = '3.7.8';
+  const version = '3.8.0';
   /**
    * @deprecated use lowercase `version`.
    */
   const VERSION = version;
   const _hasBuffer = typeof Buffer === 'function';
-  const _TD = typeof TextDecoder === 'function' ? new TextDecoder() : undefined;
+  const _TD = typeof TextDecoder === 'function' ? new TextDecoder('utf-8', { ignoreBOM: true }) : undefined;
   const _TE = typeof TextEncoder === 'function' ? new TextEncoder() : undefined;
   const b64ch = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
   const b64chs = Array.prototype.slice.call(b64ch);
