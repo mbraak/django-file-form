@@ -1390,7 +1390,15 @@
   	  }
   	};
 
-  	const getStarExtglobSequenceOutput = pattern => {
+  	const buildCharClassStar = chars => {
+  	  const source = chars.length === 1
+  	    ? utils.escapeRegex(chars[0])
+  	    : `[${chars.map(ch => utils.escapeRegex(ch)).join('')}]`;
+
+  	  return `${source}*`;
+  	};
+
+  	const getStarExtglobSequenceChars = pattern => {
   	  let index = 0;
   	  const chars = [];
 
@@ -1419,11 +1427,7 @@
   	    return;
   	  }
 
-  	  const source = chars.length === 1
-  	    ? utils.escapeRegex(chars[0])
-  	    : `[${chars.map(ch => utils.escapeRegex(ch)).join('')}]`;
-
-  	  return `${source}*`;
+  	  return chars;
   	};
 
   	const repeatedExtglobRecursion = pattern => {
@@ -1462,15 +1466,41 @@
   	    }
   	  }
 
+  	  // A repeated extglob is "risky" (prone to catastrophic backtracking) when a
+  	  // branch is itself a `*(...)` sequence, since that nests an unbounded quantifier
+  	  // inside the outer `+(...)`/`*(...)`. When *every* branch reduces to single
+  	  // characters we can emit one flat, ReDoS-safe character class that preserves the
+  	  // meaning of ALL branches (e.g. `+(*(a)|*(b))` -> `[ab]*`), rather than dropping
+  	  // every branch but the first.
+  	  const safeChars = [];
+  	  let sawStarSequence = false;
+  	  let combinable = true;
+
   	  for (const branch of branches) {
-  	    const safeOutput = getStarExtglobSequenceOutput(branch);
-  	    if (safeOutput) {
-  	      return { risky: true, safeOutput };
+  	    const chars = getStarExtglobSequenceChars(branch);
+  	    if (chars) {
+  	      sawStarSequence = true;
+  	      safeChars.push(...chars);
+  	      continue;
   	    }
+
+  	    const literal = normalizeSimpleBranch(branch);
+  	    if (literal && literal.length === 1) {
+  	      safeChars.push(literal);
+  	      continue;
+  	    }
+
+  	    combinable = false;
 
   	    if (repeatedExtglobRecursion(branch) > max) {
   	      return { risky: true };
   	    }
+  	  }
+
+  	  if (sawStarSequence) {
+  	    return combinable
+  	      ? { risky: true, safeOutput: buildCharClassStar([...new Set(safeChars)]) }
+  	      : { risky: true };
   	  }
 
   	  return { risky: false };
@@ -2574,6 +2604,18 @@
   	 * const isMatch = picomatch('*.!(*a)');
   	 * console.log(isMatch('a.a')); //=> false
   	 * console.log(isMatch('a.b')); //=> true
+  	 *
+  	 * // For environments without `node.js`, `picomatch/posix` provides you a dependency-free matcher, without automatic OS detection.
+  	 * const picomatch = require('picomatch/posix');
+  	 * // the same API, defaulting to posix paths
+  	 * const isMatch = picomatch('a/*');
+  	 * console.log(isMatch('a\\b')); //=> false
+  	 * console.log(isMatch('a/b')); //=> true
+  	 *
+  	 * // you can still configure the matcher function to accept windows paths
+  	 * const isMatch = picomatch('a/*', { options: windows });
+  	 * console.log(isMatch('a\\b')); //=> true
+  	 * console.log(isMatch('a/b')); //=> true
   	 * ```
   	 * @name picomatch
   	 * @param {String|Array} `globs` One or more glob patterns.
@@ -2711,9 +2753,9 @@
   	 * @api public
   	 */
 
-  	picomatch.matchBase = (input, glob, options) => {
+  	picomatch.matchBase = (input, glob, options, posix = options && options.windows) => {
   	  const regex = glob instanceof RegExp ? glob : picomatch.makeRe(glob, options);
-  	  return regex.test(utils.basename(input));
+  	  return regex.test(utils.basename(input, { windows: posix }));
   	};
 
   	/**
