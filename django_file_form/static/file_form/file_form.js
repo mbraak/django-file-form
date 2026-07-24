@@ -1390,7 +1390,15 @@
   	  }
   	};
 
-  	const getStarExtglobSequenceOutput = pattern => {
+  	const buildCharClassStar = chars => {
+  	  const source = chars.length === 1
+  	    ? utils.escapeRegex(chars[0])
+  	    : `[${chars.map(ch => utils.escapeRegex(ch)).join('')}]`;
+
+  	  return `${source}*`;
+  	};
+
+  	const getStarExtglobSequenceChars = pattern => {
   	  let index = 0;
   	  const chars = [];
 
@@ -1419,11 +1427,7 @@
   	    return;
   	  }
 
-  	  const source = chars.length === 1
-  	    ? utils.escapeRegex(chars[0])
-  	    : `[${chars.map(ch => utils.escapeRegex(ch)).join('')}]`;
-
-  	  return `${source}*`;
+  	  return chars;
   	};
 
   	const repeatedExtglobRecursion = pattern => {
@@ -1462,15 +1466,41 @@
   	    }
   	  }
 
+  	  // A repeated extglob is "risky" (prone to catastrophic backtracking) when a
+  	  // branch is itself a `*(...)` sequence, since that nests an unbounded quantifier
+  	  // inside the outer `+(...)`/`*(...)`. When *every* branch reduces to single
+  	  // characters we can emit one flat, ReDoS-safe character class that preserves the
+  	  // meaning of ALL branches (e.g. `+(*(a)|*(b))` -> `[ab]*`), rather than dropping
+  	  // every branch but the first.
+  	  const safeChars = [];
+  	  let sawStarSequence = false;
+  	  let combinable = true;
+
   	  for (const branch of branches) {
-  	    const safeOutput = getStarExtglobSequenceOutput(branch);
-  	    if (safeOutput) {
-  	      return { risky: true, safeOutput };
+  	    const chars = getStarExtglobSequenceChars(branch);
+  	    if (chars) {
+  	      sawStarSequence = true;
+  	      safeChars.push(...chars);
+  	      continue;
   	    }
+
+  	    const literal = normalizeSimpleBranch(branch);
+  	    if (literal && literal.length === 1) {
+  	      safeChars.push(literal);
+  	      continue;
+  	    }
+
+  	    combinable = false;
 
   	    if (repeatedExtglobRecursion(branch) > max) {
   	      return { risky: true };
   	    }
+  	  }
+
+  	  if (sawStarSequence) {
+  	    return combinable
+  	      ? { risky: true, safeOutput: buildCharClassStar([...new Set(safeChars)]) }
+  	      : { risky: true };
   	  }
 
   	  return { risky: false };
@@ -2574,6 +2604,18 @@
   	 * const isMatch = picomatch('*.!(*a)');
   	 * console.log(isMatch('a.a')); //=> false
   	 * console.log(isMatch('a.b')); //=> true
+  	 *
+  	 * // For environments without `node.js`, `picomatch/posix` provides you a dependency-free matcher, without automatic OS detection.
+  	 * const picomatch = require('picomatch/posix');
+  	 * // the same API, defaulting to posix paths
+  	 * const isMatch = picomatch('a/*');
+  	 * console.log(isMatch('a\\b')); //=> false
+  	 * console.log(isMatch('a/b')); //=> true
+  	 *
+  	 * // you can still configure the matcher function to accept windows paths
+  	 * const isMatch = picomatch('a/*', { options: windows });
+  	 * console.log(isMatch('a\\b')); //=> true
+  	 * console.log(isMatch('a/b')); //=> true
   	 * ```
   	 * @name picomatch
   	 * @param {String|Array} `globs` One or more glob patterns.
@@ -2711,9 +2753,9 @@
   	 * @api public
   	 */
 
-  	picomatch.matchBase = (input, glob, options) => {
+  	picomatch.matchBase = (input, glob, options, posix = options && options.windows) => {
   	  const regex = glob instanceof RegExp ? glob : picomatch.makeRe(glob, options);
-  	  return regex.test(utils.basename(input));
+  	  return regex.test(utils.basename(input, { windows: posix }));
   	};
 
   	/**
@@ -5636,13 +5678,12 @@
    *
    * @author Dan Kogai (https://github.com/dankogai)
    */
-  const version = '3.7.8';
+  const version = '3.9.1';
   /**
    * @deprecated use lowercase `version`.
    */
   const VERSION = version;
-  const _hasBuffer = typeof Buffer === 'function';
-  const _TD = typeof TextDecoder === 'function' ? new TextDecoder() : undefined;
+  const _TD = typeof TextDecoder === 'function' ? new TextDecoder('utf-8', { ignoreBOM: true }) : undefined;
   const _TE = typeof TextEncoder === 'function' ? new TextEncoder() : undefined;
   const b64ch = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
   const b64chs = Array.prototype.slice.call(b64ch);
@@ -5685,10 +5726,8 @@
    * @returns {string} Base64-encoded string
    */
   const _btoa = typeof btoa === 'function' ? (bin) => btoa(bin)
-      : _hasBuffer ? (bin) => Buffer.from(bin, 'binary').toString('base64')
-          : btoaPolyfill;
-  const _fromUint8Array = _hasBuffer
-      ? (u8a) => Buffer.from(u8a).toString('base64')
+      : btoaPolyfill;
+  const _fromUint8Array = typeof Uint8Array.prototype.toBase64 === 'function' ? (u8a) => u8a.toBase64()
       : (u8a) => {
           // cf. https://stackoverflow.com/questions/12710001/how-to-convert-uint8-array-to-base64-encoded-string/12713326#12713326
           const maxargs = 0x1000;
@@ -5735,11 +5774,9 @@
    */
   const utob = (u) => u.replace(re_utob, cb_utob);
   //
-  const _encode = _hasBuffer
-      ? (s) => Buffer.from(s, 'utf8').toString('base64')
-      : _TE
-          ? (s) => _fromUint8Array(_TE.encode(s))
-          : (s) => _btoa(utob(s));
+  const _encode = _TE
+      ? (s) => _fromUint8Array(_TE.encode(s))
+      : (s) => _btoa(utob(s));
   /**
    * converts a UTF-8-encoded string to a Base64 string.
    * @param {boolean} [urlsafe] if `true` make the result URL-safe
@@ -5815,22 +5852,18 @@
    * @returns {string} binary string
    */
   const _atob = typeof atob === 'function' ? (asc) => atob(_tidyB64(asc))
-      : _hasBuffer ? (asc) => Buffer.from(asc, 'base64').toString('binary')
-          : atobPolyfill;
+      : atobPolyfill;
   //
-  const _toUint8Array = _hasBuffer
-      ? (a) => _U8Afrom(Buffer.from(a, 'base64'))
-      : (a) => _U8Afrom(_atob(a).split('').map(c => c.charCodeAt(0)));
+  const _toUint8Array = typeof Uint8Array.fromBase64 === 'function'
+      ? (a) => Uint8Array.fromBase64(a) : (a) => _U8Afrom(_atob(a).split('').map(c => c.charCodeAt(0)));
   /**
    * converts a Base64 string to a Uint8Array.
    */
   const toUint8Array = (a) => _toUint8Array(_unURI(a));
   //
-  const _decode = _hasBuffer
-      ? (a) => Buffer.from(a, 'base64').toString('utf8')
-      : _TD
-          ? (a) => _TD.decode(_toUint8Array(a))
-          : (a) => btou(_atob(a));
+  const _decode = _TD
+      ? (a) => _TD.decode(_toUint8Array(a))
+      : (a) => btou(_atob(a));
   const _unURI = (a) => _tidyB64(a.replace(/[-_]/g, (m0) => m0 == '-' ? '+' : '/'));
   /**
    * converts a Base64 string to a UTF-8 string.
