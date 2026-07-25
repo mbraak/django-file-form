@@ -15,10 +15,11 @@ Features:
 
 The project is hosted on [github](https://github.com/mbraak/django-file-form).
 
-Works with Django 4.2, 5.2 and 6.0 Also with Python 3.10 - 3.14
+Works with Django 5.2, 6.0 and 6.1 Also with Python 3.10 - 3.14
 
 Older versions:
 
 - Django-file-form 3.5.x supports Django 4.1
 - Django-file-form 3.8.x supports Django 5.0
 - Django-file-form 3.9.x supports Django 5.1
+- Django-file-form 4.0.x supports Django 4.2
