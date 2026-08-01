@@ -42,7 +42,13 @@ const plugins = [
 ];
 
 if (minimize) {
-  const terserPlugin = terser();
+  const terserPlugin = terser({
+    mangle: {
+      properties: {
+        regex: /^_/
+      }
+    }
+  });
   plugins.push(terserPlugin);
 }
 
