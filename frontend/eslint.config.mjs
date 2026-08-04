@@ -19,7 +19,22 @@ export default [
       }
     },
     rules: {
-      "@typescript-eslint/restrict-template-expressions": "error"
+      "@typescript-eslint/restrict-template-expressions": "error",
+      "@typescript-eslint/naming-convention": [
+        "error",
+        {
+          selector: "memberLike",
+          modifiers: ["private"],
+          format: [],
+          leadingUnderscore: "require"
+        },
+        {
+          selector: "memberLike",
+          modifiers: ["protected"],
+          format: [],
+          leadingUnderscore: "require"
+        }
+      ]
     },
     settings: {
       "import/resolver": {
