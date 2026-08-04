@@ -2975,28 +2975,28 @@
   class AcceptedFileTypes {
     constructor(inputAccept) {
       const [extensions, mimeTypes] = parseInputAccept(inputAccept);
-      this.extensions = extensions;
-      this.mimeTypes = mimeTypes;
+      this._extensions = extensions;
+      this._mimeTypes = mimeTypes;
     }
     isAccepted(fileName) {
-      if (this.extensions.length === 0 && this.mimeTypes.length === 0) {
+      if (this._extensions.length === 0 && this._mimeTypes.length === 0) {
         return true;
       }
-      return this.isMimeTypeAccepted(mime.getType(fileName)) || this.isExtensionAccepted(fileName);
+      return this._isMimeTypeAccepted(mime.getType(fileName)) || this._isExtensionAccepted(fileName);
     }
-    isExtensionAccepted(fileName) {
-      if (this.extensions.length === 0) {
+    _isExtensionAccepted(fileName) {
+      if (this._extensions.length === 0) {
         return false;
       }
-      return picomatch.isMatch(fileName, this.extensions, {
+      return picomatch.isMatch(fileName, this._extensions, {
         nocase: true
       });
     }
-    isMimeTypeAccepted(mimeType) {
-      if (!mimeType || this.mimeTypes.length === 0) {
+    _isMimeTypeAccepted(mimeType) {
+      if (!mimeType || this._mimeTypes.length === 0) {
         return false;
       }
-      return picomatch.isMatch(mimeType, this.mimeTypes);
+      return picomatch.isMatch(mimeType, this._mimeTypes);
     }
   }
 
@@ -3226,16 +3226,16 @@
       skipRequired,
       translations
     }) {
-      this.container = this.createFilesContainer(parent);
-      this.errors = this.createErrorContainer(parent);
-      this.input = input;
-      this.translations = translations;
+      this.container = this._createFilesContainer(parent);
+      this._errors = this._createErrorContainer(parent);
+      this._input = input;
+      this._translations = translations;
       if (skipRequired) {
-        this.input.required = false;
+        this._input.required = false;
       }
     }
     addNewUpload(filename, uploadIndex) {
-      const div = this.addFile(filename, uploadIndex);
+      const div = this._addFile(filename, uploadIndex);
       const progressSpan = document.createElement("span");
       progressSpan.className = "dff-progress";
       const innerSpan = document.createElement("span");
@@ -3244,20 +3244,20 @@
       div.appendChild(progressSpan);
       const cancelLink = document.createElement("a");
       cancelLink.className = "dff-cancel";
-      this.setTextContent(cancelLink, this.getTranslation("Cancel"));
+      this._setTextContent(cancelLink, this._getTranslation("Cancel"));
       cancelLink.setAttribute("data-index", uploadIndex.toString());
       cancelLink.href = "#";
       div.appendChild(cancelLink);
       return div;
     }
     addUploadedFile(filename, uploadIndex, filesize) {
-      const element = this.addFile(filename, uploadIndex);
+      const element = this._addFile(filename, uploadIndex);
       this.setSuccess(uploadIndex, filesize);
       return element;
     }
     clearInput() {
       const {
-        input
+        _input: input
       } = this;
       input.value = "";
     }
@@ -3268,13 +3268,13 @@
       }
     }
     disableCancel(index) {
-      const cancelSpan = this.findCancelSpan(index);
+      const cancelSpan = this._findCancelSpan(index);
       if (cancelSpan) {
         cancelSpan.classList.add("dff-disabled");
       }
     }
     disableDelete(index) {
-      const deleteLink = this.findDeleteLink(index);
+      const deleteLink = this._findDeleteLink(index);
       if (deleteLink) {
         deleteLink.classList.add("dff-disabled");
       }
@@ -3294,32 +3294,32 @@
       }
       const dropHint = document.createElement("div");
       dropHint.className = "dff-drop-hint";
-      this.setTextContent(dropHint, this.getTranslation("Drop your files here"));
+      this._setTextContent(dropHint, this._getTranslation("Drop your files here"));
       this.container.appendChild(dropHint);
     }
     setDeleteFailed(index) {
-      this.setErrorMessage(index, this.getTranslation("Delete failed"));
-      this.enableDelete(index);
+      this._setErrorMessage(index, this._getTranslation("Delete failed"));
+      this._enableDelete(index);
     }
     setError(index) {
-      this.setErrorMessage(index, this.getTranslation("Upload failed"));
+      this._setErrorMessage(index, this._getTranslation("Upload failed"));
       const el = this.findFileDiv(index);
       if (el) {
         el.classList.add("dff-upload-fail");
       }
-      this.removeProgress(index);
-      this.removeCancel(index);
+      this._removeProgress(index);
+      this._removeCancel(index);
     }
     setErrorInvalidFiles(files) {
       const errorsMessages = document.createElement("ul");
       for (const file of files) {
         const msg = document.createElement("li");
-        const invalidFileTypeMessage = this.getTranslation("Invalid file type");
-        this.setTextContent(msg, `${file.name}: ${invalidFileTypeMessage}`);
+        const invalidFileTypeMessage = this._getTranslation("Invalid file type");
+        this._setTextContent(msg, `${file.name}: ${invalidFileTypeMessage}`);
         msg.className = "dff-error";
         errorsMessages.appendChild(msg);
       }
-      this.errors.replaceChildren(errorsMessages);
+      this._errors.replaceChildren(errorsMessages);
       this.clearInput();
     }
     setSuccess(index, size) {
@@ -3328,19 +3328,19 @@
         el.classList.add("dff-upload-success");
         if (size != null) {
           const fileSizeInfo = document.createElement("span");
-          this.setTextContent(fileSizeInfo, formatBytes(size, 2));
+          this._setTextContent(fileSizeInfo, formatBytes(size, 2));
           fileSizeInfo.className = "dff-filesize";
           el.appendChild(fileSizeInfo);
         }
         const deleteLink = document.createElement("a");
-        this.setTextContent(deleteLink, this.getTranslation("Delete"));
+        this._setTextContent(deleteLink, this._getTranslation("Delete"));
         deleteLink.className = "dff-delete";
         deleteLink.setAttribute("data-index", index.toString());
         deleteLink.href = "#";
         el.appendChild(deleteLink);
       }
-      this.removeProgress(index);
-      this.removeCancel(index);
+      this._removeProgress(index);
+      this._removeCancel(index);
     }
     updateProgress(index, percentage) {
       const el = this.container.querySelector(`.dff-file-id-${index.toString()}`);
@@ -3351,7 +3351,7 @@
         }
       }
     }
-    addFile(filename, uploadIndex) {
+    _addFile(filename, uploadIndex) {
       const div = document.createElement("div");
       div.className = `dff-file dff-file-id-${uploadIndex.toString()}`;
       const nameSpan = document.createElement("span");
@@ -3360,51 +3360,51 @@
       nameSpan.setAttribute("data-index", uploadIndex.toString());
       div.appendChild(nameSpan);
       this.container.appendChild(div);
-      this.input.required = false;
+      this._input.required = false;
       return div;
     }
-    createErrorContainer = parent => {
+    _createErrorContainer = parent => {
       const div = document.createElement("div");
       div.className = "dff-invalid-files";
       parent.appendChild(div);
       return div;
     };
-    createFilesContainer = parent => {
+    _createFilesContainer = parent => {
       const div = document.createElement("div");
       div.className = "dff-files";
       parent.appendChild(div);
       return div;
     };
-    enableDelete(index) {
-      const deleteLink = this.findDeleteLink(index);
+    _enableDelete(index) {
+      const deleteLink = this._findDeleteLink(index);
       if (deleteLink) {
         deleteLink.classList.remove("dff-disabled");
       }
     }
-    findCancelSpan(index) {
+    _findCancelSpan(index) {
       const el = this.findFileDiv(index);
       if (!el) {
         return null;
       }
       return el.querySelector(".dff-cancel");
     }
-    findDeleteLink(index) {
+    _findDeleteLink(index) {
       const div = this.findFileDiv(index);
       if (!div) {
         return div;
       }
       return div.querySelector(".dff-delete");
     }
-    getTranslation(key) {
-      return this.translations[key] ?? key;
+    _getTranslation(key) {
+      return this._translations[key] ?? key;
     }
-    removeCancel(index) {
-      const cancelSpan = this.findCancelSpan(index);
+    _removeCancel(index) {
+      const cancelSpan = this._findCancelSpan(index);
       if (cancelSpan) {
         cancelSpan.remove();
       }
     }
-    removeProgress(index) {
+    _removeProgress(index) {
       const el = this.findFileDiv(index);
       if (el) {
         const progressSpan = el.querySelector(".dff-progress");
@@ -3413,7 +3413,7 @@
         }
       }
     }
-    setErrorMessage(index, message) {
+    _setErrorMessage(index, message) {
       const el = this.findFileDiv(index);
       if (!el) {
         return;
@@ -3424,10 +3424,10 @@
       }
       const span = document.createElement("span");
       span.classList.add("dff-error");
-      this.setTextContent(span, message);
+      this._setTextContent(span, message);
       el.appendChild(span);
     }
-    setTextContent(element, text) {
+    _setTextContent(element, text) {
       element.append(document.createTextNode(text));
     }
   }
@@ -3639,13 +3639,13 @@
         type: "s3",
         uploadIndex
       });
-      this.csrfToken = csrfToken;
-      this.endpoint = endpoint;
-      this.file = file;
-      this.s3UploadDir = s3UploadDir;
-      this.key = null;
-      this.uploadId = null;
-      this.parts = [];
+      this._csrfToken = csrfToken;
+      this._endpoint = endpoint;
+      this._file = file;
+      this._s3UploadDir = s3UploadDir;
+      this._key = null;
+      this._uploadId = null;
+      this._parts = [];
 
       // Do `this.createdPromise.then(OP)` to execute an operation `OP` _only_ if the
       // upload was created already. That also ensures that the sequencing is right
@@ -3654,28 +3654,28 @@
       // This mostly exists to make `abortUpload` work well: only sending the abort request if
       // the upload was already created, and if the createMultipartUpload request is still in flight,
       // aborting it immediately after it finishes.
-      this.createdPromise = Promise.reject(new Error());
-      this.chunks = [];
-      this.chunkState = [];
-      this.uploading = [];
+      this._createdPromise = Promise.reject(new Error());
+      this._chunks = [];
+      this._chunkState = [];
+      this._uploading = [];
       this.onError = undefined;
       this.onProgress = undefined;
       this.onSuccess = undefined;
-      this.initChunks();
-      this.createdPromise.catch(() => ({})); // silence uncaught rejection warning
+      this._initChunks();
+      this._createdPromise.catch(() => ({})); // silence uncaught rejection warning
     }
     async abort() {
-      this.uploading.slice().forEach(xhr => {
+      this._uploading.slice().forEach(xhr => {
         xhr.abort();
       });
-      this.uploading = [];
-      await this.createdPromise;
-      if (this.key && this.uploadId) {
+      this._uploading = [];
+      await this._createdPromise;
+      if (this._key && this._uploadId) {
         await abortMultipartUpload({
-          csrfToken: this.csrfToken,
-          endpoint: this.endpoint,
-          key: this.key,
-          uploadId: this.uploadId
+          csrfToken: this._csrfToken,
+          endpoint: this._endpoint,
+          key: this._key,
+          uploadId: this._uploadId
         });
       }
     }
@@ -3683,88 +3683,88 @@
       return Promise.resolve();
     }
     getId() {
-      return this.uploadId ?? undefined;
+      return this._uploadId ?? undefined;
     }
     getInitialFile() {
       return {
-        id: this.uploadId ?? "",
-        name: this.key ?? "",
-        original_name: this.file.name,
-        size: this.file.size,
+        id: this._uploadId ?? "",
+        name: this._key ?? "",
+        original_name: this._file.name,
+        size: this._file.size,
         type: "s3"
       };
     }
     getSize() {
-      return this.file.size;
+      return this._file.size;
     }
     start() {
-      void this.createUpload();
+      void this._createUpload();
     }
-    completeUpload() {
+    _completeUpload() {
       // Parts may not have completed uploading in sorted order, if limit > 1.
-      this.parts.sort((a, b) => a.PartNumber - b.PartNumber);
-      if (!this.uploadId || !this.key) {
+      this._parts.sort((a, b) => a.PartNumber - b.PartNumber);
+      if (!this._uploadId || !this._key) {
         return Promise.resolve();
       }
       return completeMultipartUpload({
-        csrfToken: this.csrfToken,
-        endpoint: this.endpoint,
-        key: this.key,
-        parts: this.parts,
-        uploadId: this.uploadId
+        csrfToken: this._csrfToken,
+        endpoint: this._endpoint,
+        key: this._key,
+        parts: this._parts,
+        uploadId: this._uploadId
       }).then(() => {
         if (this.onSuccess) {
           this.onSuccess();
         }
       }, err => {
-        this.handleError(err);
+        this._handleError(err);
       });
     }
-    createUpload() {
-      this.createdPromise = createMultipartUpload({
-        csrfToken: this.csrfToken,
-        endpoint: this.endpoint,
-        file: this.file,
-        s3UploadDir: this.s3UploadDir
+    _createUpload() {
+      this._createdPromise = createMultipartUpload({
+        csrfToken: this._csrfToken,
+        endpoint: this._endpoint,
+        file: this._file,
+        s3UploadDir: this._s3UploadDir
       });
-      return this.createdPromise.then(result => {
+      return this._createdPromise.then(result => {
         const valid = typeof result === "object" && result && typeof result.uploadId === "string" && typeof result.key === "string";
         if (!valid) {
           throw new TypeError("AwsS3/Multipart: Got incorrect result from `createMultipartUpload()`, expected an object `{ uploadId, key }`.");
         }
-        this.key = result.key;
-        this.uploadId = result.uploadId;
-        this.uploadParts();
+        this._key = result.key;
+        this._uploadId = result.uploadId;
+        this._uploadParts();
       }).catch(err => {
-        this.handleError(err);
+        this._handleError(err);
       });
     }
-    handleError(error) {
+    _handleError(error) {
       if (this.onError) {
         this.onError(error);
       } else {
         throw error;
       }
     }
-    initChunks() {
+    _initChunks() {
       const chunks = [];
-      const desiredChunkSize = getChunkSize(this.file);
+      const desiredChunkSize = getChunkSize(this._file);
       // at least 5MB per request, at most 10k requests
-      const minChunkSize = Math.max(5 * MB, Math.ceil(this.file.size / 10000));
+      const minChunkSize = Math.max(5 * MB, Math.ceil(this._file.size / 10000));
       const chunkSize = Math.max(desiredChunkSize, minChunkSize);
-      for (let i = 0; i < this.file.size; i += chunkSize) {
-        const end = Math.min(this.file.size, i + chunkSize);
-        chunks.push(this.file.slice(i, end));
+      for (let i = 0; i < this._file.size; i += chunkSize) {
+        const end = Math.min(this._file.size, i + chunkSize);
+        chunks.push(this._file.slice(i, end));
       }
-      this.chunks = chunks;
-      this.chunkState = chunks.map(() => ({
+      this._chunks = chunks;
+      this._chunkState = chunks.map(() => ({
         busy: false,
         done: false,
         uploaded: 0
       }));
     }
-    onPartComplete(index, etag) {
-      const state = this.chunkState[index];
+    _onPartComplete(index, etag) {
+      const state = this._chunkState[index];
       if (state) {
         state.etag = etag;
         state.done = true;
@@ -3773,33 +3773,33 @@
         ETag: etag,
         PartNumber: index + 1
       };
-      this.parts.push(part);
-      this.uploadParts();
+      this._parts.push(part);
+      this._uploadParts();
     }
-    onPartProgress(index, sent) {
-      const state = this.chunkState[index];
+    _onPartProgress(index, sent) {
+      const state = this._chunkState[index];
       if (state) {
         state.uploaded = sent;
       }
       if (this.onProgress) {
-        const totalUploaded = this.chunkState.reduce((n, c) => n + c.uploaded, 0);
-        this.onProgress(totalUploaded, this.file.size);
+        const totalUploaded = this._chunkState.reduce((n, c) => n + c.uploaded, 0);
+        this.onProgress(totalUploaded, this._file.size);
       }
     }
-    uploadPart(index) {
-      const state = this.chunkState[index];
+    _uploadPart(index) {
+      const state = this._chunkState[index];
       if (state) {
         state.busy = true;
       }
-      if (!this.key || !this.uploadId) {
+      if (!this._key || !this._uploadId) {
         return Promise.resolve();
       }
       return prepareUploadPart({
-        csrfToken: this.csrfToken,
-        endpoint: this.endpoint,
-        key: this.key,
+        csrfToken: this._csrfToken,
+        endpoint: this._endpoint,
+        key: this._key,
         number: index + 1,
-        uploadId: this.uploadId
+        uploadId: this._uploadId
       }).then(result => {
         const valid = typeof result === "object" && typeof result.url === "string";
         if (!valid) {
@@ -3809,75 +3809,75 @@
       }).then(({
         url
       }) => {
-        this.uploadPartBytes(index, url);
+        this._uploadPartBytes(index, url);
       }, err => {
-        this.handleError(err);
+        this._handleError(err);
       });
     }
-    uploadPartBytes(index, url) {
-      const body = this.chunks[index];
+    _uploadPartBytes(index, url) {
+      const body = this._chunks[index];
       const xhr = new XMLHttpRequest();
       xhr.open("PUT", url, true);
       xhr.responseType = "text";
-      this.uploading.push(xhr);
+      this._uploading.push(xhr);
       xhr.upload.addEventListener("progress", ev => {
         if (!ev.lengthComputable) {
           return;
         }
-        this.onPartProgress(index, ev.loaded);
+        this._onPartProgress(index, ev.loaded);
       });
       xhr.addEventListener("abort", () => {
-        remove(this.uploading, xhr);
-        const state = this.chunkState[index];
+        remove(this._uploading, xhr);
+        const state = this._chunkState[index];
         if (state) {
           state.busy = false;
         }
       });
       xhr.addEventListener("load", () => {
-        remove(this.uploading, xhr);
-        const state = this.chunkState[index];
+        remove(this._uploading, xhr);
+        const state = this._chunkState[index];
         if (state) {
           state.busy = false;
         }
         if (xhr.status < 200 || xhr.status >= 300) {
-          this.handleError(new Error("Non 2xx"));
+          this._handleError(new Error("Non 2xx"));
           return;
         }
-        this.onPartProgress(index, body?.size ?? 0);
+        this._onPartProgress(index, body?.size ?? 0);
 
         // NOTE This must be allowed by CORS.
         const etag = xhr.getResponseHeader("ETag");
         if (etag === null) {
-          this.handleError(new Error("AwsS3/Multipart: Could not read the ETag header. This likely means CORS is not configured correctly on the S3 Bucket. See https://uppy.io/docs/aws-s3-multipart#S3-Bucket-Configuration for instructions."));
+          this._handleError(new Error("AwsS3/Multipart: Could not read the ETag header. This likely means CORS is not configured correctly on the S3 Bucket. See https://uppy.io/docs/aws-s3-multipart#S3-Bucket-Configuration for instructions."));
           return;
         }
-        this.onPartComplete(index, etag);
+        this._onPartComplete(index, etag);
       });
       xhr.addEventListener("error", () => {
-        remove(this.uploading, xhr);
-        const state = this.chunkState[index];
+        remove(this._uploading, xhr);
+        const state = this._chunkState[index];
         if (state) {
           state.busy = false;
         }
         const error = new Error("Unknown error");
-        this.handleError(error);
+        this._handleError(error);
       });
       xhr.send(body);
     }
-    uploadParts() {
-      const need = 1 - this.uploading.length;
+    _uploadParts() {
+      const need = 1 - this._uploading.length;
       if (need === 0) {
         return;
       }
 
       // All parts are uploaded.
-      if (this.chunkState.every(state => state.done)) {
-        void this.completeUpload();
+      if (this._chunkState.every(state => state.done)) {
+        void this._completeUpload();
         return;
       }
       const candidates = [];
-      for (let i = 0; i < this.chunkState.length; i++) {
-        const state = this.chunkState[i];
+      for (let i = 0; i < this._chunkState.length; i++) {
+        const state = this._chunkState[i];
         if (!state || state.done || state.busy) {
           continue;
         }
@@ -3887,7 +3887,7 @@
         }
       }
       candidates.forEach(index => {
-        void this.uploadPart(index);
+        void this._uploadPart(index);
       });
     }
   }
@@ -5678,7 +5678,7 @@
    *
    * @author Dan Kogai (https://github.com/dankogai)
    */
-  const version = '3.9.2';
+  const version = '3.9.1';
   /**
    * @deprecated use lowercase `version`.
    */
@@ -8097,8 +8097,8 @@
         type: "tus",
         uploadIndex
       });
-      this.csrfToken = csrfToken;
-      this.upload = new Upload(file, {
+      this._csrfToken = csrfToken;
+      this._upload = new Upload(file, {
         chunkSize,
         endpoint: uploadUrl,
         metadata: {
@@ -8106,11 +8106,11 @@
           filename: file.name,
           formId: formId
         },
-        onAfterResponse: this.handleAfterResponse,
-        onBeforeRequest: this.addCsrTokenToRequest,
-        onError: this.handleError,
-        onProgress: this.handleProgress,
-        onSuccess: this.handleSuccess,
+        onAfterResponse: this._handleAfterResponse,
+        onBeforeRequest: this._addCsrTokenToRequest,
+        onError: this._handleError,
+        onProgress: this._handleProgress,
+        onSuccess: this._handleSuccess,
         retryDelays: retryDelays ?? [0, 1000, 3000, 5000]
       });
       this.onError = undefined;
@@ -8118,20 +8118,20 @@
       this.onSuccess = undefined;
     }
     async abort() {
-      await this.upload.abort(true);
+      await this._upload.abort(true);
     }
     async delete() {
-      if (!this.upload.url) {
+      if (!this._upload.url) {
         return Promise.resolve();
       }
-      await deleteUpload(this.upload.url, this.csrfToken);
+      await deleteUpload(this._upload.url, this._csrfToken);
     }
     getId() {
-      return this.id;
+      return this._id;
     }
     getInitialFile() {
       return {
-        id: this.id,
+        id: this._id,
         name: this.name,
         size: this.getSize(),
         type: "tus",
@@ -8139,33 +8139,33 @@
       };
     }
     getSize() {
-      return this.upload.file.size;
+      return this._upload.file.size;
     }
     start() {
-      this.upload.start();
+      this._upload.start();
     }
-    addCsrTokenToRequest = request => {
-      request.setHeader("X-CSRFToken", this.csrfToken);
+    _addCsrTokenToRequest = request => {
+      request.setHeader("X-CSRFToken", this._csrfToken);
     };
-    handleAfterResponse = (_request, response) => {
+    _handleAfterResponse = (_request, response) => {
       const resourceId = response.getHeader("ResourceId");
       if (resourceId) {
-        this.id = resourceId;
+        this._id = resourceId;
       }
     };
-    handleError = error => {
+    _handleError = error => {
       if (this.onError) {
         this.onError(error);
       } else {
         throw error;
       }
     };
-    handleProgress = (bytesUploaded, bytesTotal) => {
+    _handleProgress = (bytesUploaded, bytesTotal) => {
       if (this.onProgress) {
         this.onProgress(bytesUploaded, bytesTotal);
       }
     };
-    handleSuccess = () => {
+    _handleSuccess = () => {
       if (this.onSuccess) {
         this.onSuccess();
       }

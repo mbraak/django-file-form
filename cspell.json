@@ -1,5 +1,5 @@
 {
-  "ignorePaths": ["testproject/django_file_form_example/static/"],
+  "ignorePaths": ["testproject/django_file_form_example/static/", "*.test.ts"],
   "language": "en-GB",
   "words": [
     "ajaxuploader",
