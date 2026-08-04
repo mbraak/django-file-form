@@ -21,40 +21,40 @@ const parseInputAccept = (inputAccept: string): [string[], string[]] => {
 };
 
 class AcceptedFileTypes {
-  private extensions: string[];
-  private mimeTypes: string[];
+  private _extensions: string[];
+  private _mimeTypes: string[];
 
   constructor(inputAccept: string) {
     const [extensions, mimeTypes] = parseInputAccept(inputAccept);
 
-    this.extensions = extensions;
-    this.mimeTypes = mimeTypes;
+    this._extensions = extensions;
+    this._mimeTypes = mimeTypes;
   }
 
   public isAccepted(fileName: string): boolean {
-    if (this.extensions.length === 0 && this.mimeTypes.length === 0) {
+    if (this._extensions.length === 0 && this._mimeTypes.length === 0) {
       return true;
     }
     return (
-      this.isMimeTypeAccepted(mime.getType(fileName)) ||
-      this.isExtensionAccepted(fileName)
+      this._isMimeTypeAccepted(mime.getType(fileName)) ||
+      this._isExtensionAccepted(fileName)
     );
   }
 
-  private isExtensionAccepted(fileName: string): boolean {
-    if (this.extensions.length === 0) {
+  private _isExtensionAccepted(fileName: string): boolean {
+    if (this._extensions.length === 0) {
       return false;
     }
 
-    return picomatch.isMatch(fileName, this.extensions, { nocase: true });
+    return picomatch.isMatch(fileName, this._extensions, { nocase: true });
   }
 
-  private isMimeTypeAccepted(mimeType: null | string): boolean {
-    if (!mimeType || this.mimeTypes.length === 0) {
+  private _isMimeTypeAccepted(mimeType: null | string): boolean {
+    if (!mimeType || this._mimeTypes.length === 0) {
       return false;
     }
 
-    return picomatch.isMatch(mimeType, this.mimeTypes);
+    return picomatch.isMatch(mimeType, this._mimeTypes);
   }
 }
 
