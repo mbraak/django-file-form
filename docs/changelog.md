@@ -1,6 +1,6 @@
 ## Changelog
 
-**development version**
+**4.1.0 (august 6 2026)**
 
 - Issue #1300: support Django 6.1; drop support for Django 4.2
 
