@@ -1,23 +1,36 @@
-import mime from "mime/lite";
-import picomatch from "picomatch/posix";
-
 const parseInputAccept = (inputAccept: string): [string[], string[]] => {
   const extensions: string[] = [];
   const mimeTypes: string[] = [];
 
   inputAccept
     .split(",")
-    .map(mimeType => mimeType.trim())
+    .map(fileType => fileType.trim().toLowerCase())
     .filter(Boolean)
     .forEach(fileType => {
       if (fileType.startsWith(".")) {
-        extensions.push(`*${fileType}`);
+        extensions.push(fileType);
       } else {
         mimeTypes.push(fileType);
       }
     });
 
   return [extensions, mimeTypes];
+};
+
+// Matches a mime type against a pattern from the accept attribute.
+// The pattern is a full mime type ('text/plain') or uses a wildcard for the
+// type or subtype ('image/*', '*/*').
+const matchesMimeType = (mimeType: string, pattern: string): boolean => {
+  const [type, subtype] = mimeType.split("/");
+  const [patternType, patternSubtype] = pattern.split("/");
+
+  const matchesPart = (
+    part: string | undefined,
+    patternPart: string | undefined
+  ): boolean =>
+    patternPart === "*" || (part !== undefined && part === patternPart);
+
+  return matchesPart(type, patternType) && matchesPart(subtype, patternSubtype);
 };
 
 class AcceptedFileTypes {
@@ -31,30 +44,34 @@ class AcceptedFileTypes {
     this._mimeTypes = mimeTypes;
   }
 
-  public isAccepted(fileName: string): boolean {
+  public isAccepted(file: File): boolean {
     if (this._extensions.length === 0 && this._mimeTypes.length === 0) {
       return true;
     }
     return (
-      this._isMimeTypeAccepted(mime.getType(fileName)) ||
-      this._isExtensionAccepted(fileName)
+      this._isMimeTypeAccepted(file.type) ||
+      this._isExtensionAccepted(file.name)
     );
   }
 
   private _isExtensionAccepted(fileName: string): boolean {
-    if (this._extensions.length === 0) {
-      return false;
-    }
+    const lowerCaseFileName = fileName.toLowerCase();
 
-    return picomatch.isMatch(fileName, this._extensions, { nocase: true });
+    return this._extensions.some(extension =>
+      lowerCaseFileName.endsWith(extension)
+    );
   }
 
-  private _isMimeTypeAccepted(mimeType: null | string): boolean {
-    if (!mimeType || this._mimeTypes.length === 0) {
+  private _isMimeTypeAccepted(mimeType: string): boolean {
+    if (!mimeType) {
       return false;
     }
 
-    return picomatch.isMatch(mimeType, this._mimeTypes);
+    const lowerCaseMimeType = mimeType.toLowerCase();
+
+    return this._mimeTypes.some(pattern =>
+      matchesMimeType(lowerCaseMimeType, pattern)
+    );
   }
 }
 

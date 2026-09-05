@@ -53,9 +53,6 @@ if (minimize) {
 }
 
 export default {
-  moduleContext: {
-    "node_modules/mime/dist/src/Mime.js": "window" // Fix 'this is undefined' error in the mime package
-  },
   input: "src/file_form.ts",
   output: {
     file: `../django_file_form/static/file_form/${getOutputFilename()}`,

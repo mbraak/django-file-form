@@ -346,7 +346,7 @@ class FileField {
     const invalidFiles: File[] = [];
 
     for (const file of files) {
-      if (this.acceptedFileTypes.isAccepted(file.name)) {
+      if (this.acceptedFileTypes.isAccepted(file)) {
         acceptedFiles.push(file);
       } else {
         invalidFiles.push(file);
