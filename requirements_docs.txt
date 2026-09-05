@@ -1,2 +1,2 @@
 properdocs==1.6.7
-properdocs-theme-readthedocs==1.6.5
+mkdocs-materialx==10.2.0
