@@ -78,6 +78,31 @@ describe(".isAccepted", () => {
     ).toBe(false);
   });
 
+  test("accepts any file type for a full wildcard", () => {
+    const acceptedFileTypes = new AcceptedFileTypes("*/*");
+    expect(
+      acceptedFileTypes.isAccepted(
+        createFile("abc.xls", "application/vnd.ms-excel")
+      )
+    ).toBe(true);
+    expect(acceptedFileTypes.isAccepted(createFile("abc"))).toBe(false);
+  });
+
+  test("handles whitespace and mixed case in the accept attribute", () => {
+    const acceptedFileTypes = new AcceptedFileTypes(" .TXT , Image/* ");
+    expect(acceptedFileTypes.isAccepted(createFile("abc.txt"))).toBe(true);
+    expect(
+      acceptedFileTypes.isAccepted(createFile("abc.png", "image/png"))
+    ).toBe(true);
+    expect(acceptedFileTypes.isAccepted(createFile("abc.xls"))).toBe(false);
+  });
+
+  test("does not match a partial extension", () => {
+    const acceptedFileTypes = new AcceptedFileTypes(".txt");
+    expect(acceptedFileTypes.isAccepted(createFile("abc.txt.zip"))).toBe(false);
+    expect(acceptedFileTypes.isAccepted(createFile("abctxt"))).toBe(false);
+  });
+
   test("returns false if the browser doesn't know the mimetype", () => {
     const acceptedFileTypes = new AcceptedFileTypes("text/plain");
     expect(acceptedFileTypes.isAccepted(createFile("abc.txt"))).toBe(false);
