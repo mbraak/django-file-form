@@ -23,5 +23,5 @@ jobs:
       - name: Install python packages
         run: |
           pip install -r requirements_docs.txt
-      - name: Run mkdocs
-        run: mkdocs gh-deploy --force
+      - name: Run properdocs
+        run: properdocs gh-deploy --force
