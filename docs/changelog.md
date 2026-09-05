@@ -1,5 +1,13 @@
 ## Changelog
 
+**development**
+
+- Issue #1336: make the javascript bundle smaller.
+  - It's now 46k (minified, not gzipped), which is 50% small.er
+  - Drop support for very old browsers.
+  - Rely on mime type support from the browser instead of using a library.
+  - Replace glob library with custom code.
+
 **4.1.0 (august 6 2026)**
 
 - Issue #1300: support Django 6.1; drop support for Django 4.2

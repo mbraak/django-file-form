@@ -4,8 +4,7 @@
       "@babel/preset-env",
       {
         "targets": "defaults",
-        "useBuiltIns": "usage",
-        "corejs": 3
+        "useBuiltIns": false
       }
     ],
     "@babel/preset-typescript"
