@@ -1,4 +1,4 @@
-import { EventEmitter } from "eventemitter3";
+import type { EventEmitter } from "eventemitter3";
 
 import type { InitialFile } from "./uploads/base_upload.ts";
 

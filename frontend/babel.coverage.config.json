@@ -1,12 +1,7 @@
 {
+  "targets": "defaults",
   "presets": [
-    [
-      "@babel/preset-env",
-      {
-        "targets": "defaults",
-        "useBuiltIns": false
-      }
-    ],
+    "@babel/preset-env",
     "@babel/preset-typescript"
   ],
   "plugins": [
