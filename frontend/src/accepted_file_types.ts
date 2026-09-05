@@ -1,4 +1,3 @@
-import mime from "mime/lite";
 import picomatch from "picomatch/posix";
 
 const parseInputAccept = (inputAccept: string): [string[], string[]] => {
@@ -31,13 +30,13 @@ class AcceptedFileTypes {
     this._mimeTypes = mimeTypes;
   }
 
-  public isAccepted(fileName: string): boolean {
+  public isAccepted(file: File): boolean {
     if (this._extensions.length === 0 && this._mimeTypes.length === 0) {
       return true;
     }
     return (
-      this._isMimeTypeAccepted(mime.getType(fileName)) ||
-      this._isExtensionAccepted(fileName)
+      this._isMimeTypeAccepted(file.type) ||
+      this._isExtensionAccepted(file.name)
     );
   }
 
@@ -49,12 +48,12 @@ class AcceptedFileTypes {
     return picomatch.isMatch(fileName, this._extensions, { nocase: true });
   }
 
-  private _isMimeTypeAccepted(mimeType: null | string): boolean {
+  private _isMimeTypeAccepted(mimeType: string): boolean {
     if (!mimeType || this._mimeTypes.length === 0) {
       return false;
     }
 
-    return picomatch.isMatch(mimeType, this._mimeTypes);
+    return picomatch.isMatch(mimeType, this._mimeTypes, { nocase: true });
   }
 }
 
