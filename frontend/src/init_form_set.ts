@@ -1,4 +1,4 @@
-import initUploadFields, { Options } from "./init_upload_fields.ts";
+import initUploadFields, { type Options } from "./init_upload_fields.ts";
 import {
   getInputNameWithPrefix,
   getInputValueForFormAndPrefix

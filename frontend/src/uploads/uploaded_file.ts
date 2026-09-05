@@ -1,10 +1,10 @@
 import BaseUpload, {
-  InitialExistingFile,
-  InitialFile,
-  InitialPlaceholderFile,
-  InitialS3File,
-  InitialTusFile,
-  UploadType
+  type InitialExistingFile,
+  type InitialFile,
+  type InitialPlaceholderFile,
+  type InitialS3File,
+  type InitialTusFile,
+  type UploadType
 } from "./base_upload.ts";
 import { deleteUpload } from "./tus_utils.ts";
 
