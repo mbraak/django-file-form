@@ -1,6 +1,6 @@
-import { HttpRequest, HttpResponse, Upload } from "tus-js-client";
+import { type HttpRequest, type HttpResponse, Upload } from "tus-js-client";
 
-import BaseUpload, { InitialFile } from "./base_upload.ts";
+import BaseUpload, { type InitialFile } from "./base_upload.ts";
 import { deleteUpload } from "./tus_utils.ts";
 
 interface Parameters {

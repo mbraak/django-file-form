@@ -1,7 +1,8 @@
 import { EventEmitter } from "eventemitter3";
 
-import FileField, { Callbacks, Translations } from "./file_field.ts";
-import { InitialFile } from "./uploads/base_upload.ts";
+import type { InitialFile } from "./uploads/base_upload.ts";
+
+import FileField, { type Callbacks, type Translations } from "./file_field.ts";
 import {
   findInput,
   getInputValueForFormAndPrefix,
