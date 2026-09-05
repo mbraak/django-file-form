@@ -1,5 +1,3 @@
-import type { EventEmitter } from "eventemitter3";
-
 import type { InitialFile } from "./uploads/base_upload.ts";
 
 import FileField, { type Callbacks, type Translations } from "./file_field.ts";
@@ -12,7 +10,6 @@ import {
 export interface Options {
   callbacks?: Callbacks;
   chunkSize?: number;
-  eventEmitter?: EventEmitter;
   prefix?: string;
   retryDelays?: number[];
   skipRequired?: boolean;
@@ -86,7 +83,6 @@ const initUploadFields = (form: Element, options: Options = {}): void => {
       callbacks: options.callbacks ?? {},
       chunkSize: options.chunkSize ?? 2621440,
       csrfToken,
-      eventEmitter: options.eventEmitter,
       fieldName,
       form,
       formId,

@@ -7,6 +7,9 @@
   - Drop support for very old browsers.
   - Rely on mime type support from the browser instead of using a library.
   - Replace glob library with custom code.
+- Replace `eventemitter3` with custom events.
+  - The `addUpload`, `removeUpload` and `uploadComplete` events are dispatched on the form element.
+  - The `eventEmitter` option of `initUploadFields` is removed. See 'Javascript events'.
 
 **4.1.0 (august 6 2026)**
 

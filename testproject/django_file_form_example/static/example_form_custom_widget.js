@@ -1,6 +1,6 @@
-const eventEmitter = new EventEmitter3();
+const form = document.getElementById("example-form");
 
-eventEmitter.on('addUpload', ({ element, fieldName, fileName, metaDataField, upload }) => {
+form.addEventListener('addUpload', ({ detail: { element, fieldName, fileName, metaDataField, upload } }) => {
   function descriptionChanged(evt) {
     const metaData = JSON.parse(metaDataField.value);
 
@@ -25,14 +25,13 @@ eventEmitter.on('addUpload', ({ element, fieldName, fileName, metaDataField, upl
   element.insertBefore(descElem, element.firstElementChild.nextElementSibling);
 });
 
-eventEmitter.on('removeUpload', ({ element, fieldName, fileName, metaDataField, upload }) => {
+form.addEventListener('removeUpload', ({ detail: { element, fieldName, fileName, metaDataField, upload } }) => {
   // do not need to update hidden data since returned metadata will be ignored
 });
 
 initUploadFields(
-    document.getElementById("example-form"),
+    form,
     {
-      eventEmitter,
       prefix: "example",
       retryDelays: [],
       skipRequired: true,
