@@ -1,9 +1,11 @@
-import { EventEmitter } from "eventemitter3";
+import type { EventEmitter } from "eventemitter3";
+
+import type BaseUpload from "./uploads/base_upload.ts";
+import type { InitialFile, UploadType } from "./uploads/base_upload.ts";
 
 import AcceptedFileTypes from "./accepted_file_types.ts";
 import DropArea from "./drop_area.ts";
 import RenderUploadFile from "./render_upload_file.ts";
-import BaseUpload, { type InitialFile, type UploadType } from "./uploads/base_upload.ts";
 import S3Upload from "./uploads/s3_upload.ts";
 import TusUpload from "./uploads/tus_upload.ts";
 import { createUploadedFile } from "./uploads/uploaded_file.ts";

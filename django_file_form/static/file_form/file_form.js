@@ -43,6 +43,8 @@
     return matchesPart(type, patternType) && matchesPart(subtype, patternSubtype);
   };
   class AcceptedFileTypes {
+    _extensions;
+    _mimeTypes;
     constructor(inputAccept) {
       const [extensions, mimeTypes] = parseInputAccept(inputAccept);
       this._extensions = extensions;
@@ -116,6 +118,10 @@
     }
   };
   class DropArea {
+    acceptedFileTypes;
+    container;
+    onUploadFiles;
+    renderer;
     constructor({
       container,
       inputAccept,
@@ -293,6 +299,10 @@
   const getMetadataFieldName = (fieldName, prefix) => `${getInputNameWithoutPrefix(fieldName, prefix)}-metadata`;
 
   class RenderUploadFile {
+    container;
+    _errors;
+    _input;
+    _translations;
     constructor({
       input,
       parent,
@@ -506,6 +516,10 @@
   }
 
   let BaseUpload$1 = class BaseUpload {
+    name;
+    status;
+    type;
+    uploadIndex;
     constructor({
       name,
       status,
@@ -699,6 +713,20 @@
   // which is released under a MIT License (https://github.com/transloadit/uppy/blob/master/LICENSE)
 
   class S3Upload extends BaseUpload$1 {
+    onError;
+    onProgress;
+    onSuccess;
+    _chunks;
+    _chunkState;
+    _createdPromise;
+    _csrfToken;
+    _endpoint;
+    _file;
+    _key;
+    _parts;
+    _s3UploadDir;
+    _uploadId;
+    _uploading;
     constructor({
       csrfToken,
       endpoint,
@@ -3419,6 +3447,12 @@
   });
 
   class TusUpload extends BaseUpload$1 {
+    onError;
+    onProgress;
+    onSuccess;
+    _csrfToken;
+    _id;
+    _upload;
     constructor({
       chunkSize,
       csrfToken,
@@ -3511,6 +3545,7 @@
   }
 
   class BaseUploadedFile extends BaseUpload$1 {
+    size;
     constructor({
       name,
       size,
@@ -3536,6 +3571,7 @@
     }
   }
   class PlaceholderFile extends BaseUploadedFile {
+    id;
     constructor(initialFile, uploadIndex) {
       super({
         name: initialFile.name,
@@ -3578,6 +3614,8 @@
     }
   }
   class UploadedS3File extends BaseUploadedFile {
+    id;
+    key;
     constructor(initialFile, uploadIndex) {
       super({
         name: initialFile.original_name || initialFile.name,
@@ -3602,6 +3640,9 @@
     }
   }
   class UploadedTusFile extends BaseUploadedFile {
+    csrfToken;
+    id;
+    url;
     constructor({
       csrfToken,
       initialFile,
@@ -3658,6 +3699,23 @@
   };
 
   class FileField {
+    acceptedFileTypes;
+    callbacks;
+    chunkSize;
+    csrfToken;
+    eventEmitter;
+    fieldName;
+    form;
+    formId;
+    multiple;
+    nextUploadIndex;
+    prefix;
+    renderer;
+    retryDelays;
+    s3UploadDir;
+    supportDropArea;
+    uploads;
+    uploadUrl;
     constructor({
       callbacks,
       chunkSize,

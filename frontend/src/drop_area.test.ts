@@ -1,8 +1,9 @@
 import { fireEvent, waitFor } from "@testing-library/dom";
 import { describe, expect, test, vi } from "vitest";
 
+import type RenderUploadFile from "./render_upload_file.ts";
+
 import DropArea from "./drop_area.ts";
-import RenderUploadFile from "./render_upload_file.ts";
 
 const mockFile = (filename: string) =>
   new File(["test"], filename, { type: "text/plain" });

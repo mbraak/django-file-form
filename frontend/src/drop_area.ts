@@ -1,5 +1,6 @@
+import type RenderUploadFile from "./render_upload_file.ts";
+
 import AcceptedFileTypes from "./accepted_file_types.ts";
-import RenderUploadFile from "./render_upload_file.ts";
 
 const getEntriesFromDirectory = async (
   directoryEntry: FileSystemDirectoryEntry

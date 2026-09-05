@@ -25,10 +25,10 @@
   },
   "homepage": "https://github.com/mbraak/django-file-form#readme",
   "devDependencies": {
-    "@babel/core": "^7.28.5",
-    "@babel/plugin-transform-runtime": "^7.28.5",
-    "@babel/preset-env": "^7.28.5",
-    "@babel/preset-typescript": "^7.28.5",
+    "@babel/core": "^8.0.1",
+    "@babel/plugin-transform-runtime": "^8.0.1",
+    "@babel/preset-env": "^8.0.2",
+    "@babel/preset-typescript": "^8.0.1",
     "@eslint/js": "^10",
     "@rollup/plugin-babel": "^7",
     "@rollup/plugin-commonjs": "^29",
@@ -40,11 +40,12 @@
     "@types/node": "^26",
     "@vitest/coverage-istanbul": "^4.0.16",
     "@vitest/eslint-plugin": "^1.6.4",
-    "babel-plugin-istanbul": "^8",
+    "babel-plugin-istanbul": "^8.0.2",
     "eslint": "^10",
     "eslint-import-resolver-typescript": "^4.4.4",
     "eslint-plugin-import-x": "^4",
     "eslint-plugin-perfectionist": "^5.1.0",
+    "eventemitter3": "^5.0.4",
     "jsdom": "^29",
     "msw": "^2.12.6",
     "rollup": "^4.54.0",
@@ -55,11 +56,15 @@
     "vitest": "^4.0.16"
   },
   "dependencies": {
-    "@babel/runtime": "^7.28.4",
+    "@babel/runtime": "^8.0.0",
     "@rollup/plugin-alias": "^6",
     "escape-html": "^1.0.3",
-    "eventemitter3": "^5.0.1",
     "tus-js-client": "^4.3.1",
     "url-join": "^5.0.0"
+  },
+  "overrides": {
+    "@rollup/plugin-babel": {
+      "@babel/core": "$@babel/core"
+    }
   }
 }

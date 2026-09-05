@@ -19,6 +19,11 @@ export default [
       }
     },
     rules: {
+      "@typescript-eslint/consistent-type-imports": [
+        "error",
+        { fixStyle: "inline-type-imports" }
+      ],
+      "@typescript-eslint/no-import-type-side-effects": "error",
       "@typescript-eslint/restrict-template-expressions": "error",
       "@typescript-eslint/naming-convention": [
         "error",
