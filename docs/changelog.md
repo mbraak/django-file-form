@@ -1,9 +1,9 @@
 ## Changelog
 
-**development**
+**5.0.0 (september 6 2026)**
 
 - Issue #1336: make the javascript bundle smaller.
-  - It's now 46k (minified, not gzipped), which is 50% small.er
+  - It's now 46k (minified, not gzipped), which is 50% smaller.
   - Drop support for very old browsers.
   - Rely on mime type support from the browser instead of using a library.
   - Replace glob library with custom code.
