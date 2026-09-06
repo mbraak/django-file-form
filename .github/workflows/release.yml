@@ -1,24 +1,36 @@
 name: Release
 
+# A tag push does a real release. A manual run (workflow_dispatch) is always a
+# dry run: it publishes to TestPyPI and creates a draft GitHub release.
+
 on:
   push:
     tags:
       - "[0-9]+.[0-9]+.[0-9]+"
+  workflow_dispatch:
 
 jobs:
   build:
     name: Build package
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
 
     steps:
       - name: Check out repository code
         uses: actions/checkout@v7
 
-      - name: Check that the tag matches the package version
+      - name: Read the package version
+        id: version
         run: |
           version=$(python3 -c 'import tomllib; print(tomllib.load(open("pyproject.toml", "rb"))["project"]["version"])')
-          if [ "$version" != "$GITHUB_REF_NAME" ]; then
-            echo "Tag $GITHUB_REF_NAME does not match version $version in pyproject.toml"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Check that the tag matches the package version
+        if: github.event_name == 'push'
+        run: |
+          if [ "${{ steps.version.outputs.version }}" != "$GITHUB_REF_NAME" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match version ${{ steps.version.outputs.version }} in pyproject.toml"
             exit 1
           fi
 
@@ -55,12 +67,12 @@ jobs:
           path: dist/
 
   publish:
-    name: Publish to PyPI
+    name: Publish to ${{ github.event_name == 'workflow_dispatch' && 'TestPyPI' || 'PyPI' }}
     needs: build
     runs-on: ubuntu-latest
     environment:
-      name: pypi
-      url: https://pypi.org/project/django-file-form/${{ github.ref_name }}/
+      name: ${{ github.event_name == 'workflow_dispatch' && 'testpypi' || 'pypi' }}
+      url: https://${{ github.event_name == 'workflow_dispatch' && 'test.pypi.org' || 'pypi.org' }}/project/django-file-form/${{ needs.build.outputs.version }}/
     permissions:
       id-token: write
 
@@ -72,11 +84,19 @@ jobs:
           path: dist/
 
       - name: Publish to PyPI
+        if: github.event_name == 'push'
         uses: pypa/gh-action-pypi-publish@release/v1
+
+      - name: Publish to TestPyPI (dry run)
+        if: github.event_name == 'workflow_dispatch'
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          skip-existing: true
 
   github-release:
     name: Create GitHub release
-    needs: publish
+    needs: [build, publish]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -91,5 +111,7 @@ jobs:
       - name: Create release
         uses: softprops/action-gh-release@v3
         with:
+          tag_name: ${{ needs.build.outputs.version }}
+          draft: ${{ github.event_name == 'workflow_dispatch' }}
           files: dist/*
           generate_release_notes: true
