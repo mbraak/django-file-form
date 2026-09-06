@@ -1,5 +1,3 @@
-import type { EventEmitter } from "eventemitter3";
-
 import type BaseUpload from "./uploads/base_upload.ts";
 import type { InitialFile, UploadType } from "./uploads/base_upload.ts";
 
@@ -29,6 +27,18 @@ export interface Callbacks {
 
 export type Translations = Record<string, string>;
 
+export type UploadEvent = CustomEvent<UploadEventDetail>;
+
+export interface UploadEventDetail {
+  element: HTMLElement;
+  fieldName: string;
+  fileName: string;
+  metaDataField: HTMLElement | null;
+  upload: BaseUpload;
+}
+
+export type UploadEventName = "addUpload" | "removeUpload" | "uploadComplete";
+
 interface ClickEvent {
   fieldName: string;
   fileName: string;
@@ -40,7 +50,6 @@ interface ConstructorParams {
   callbacks: Callbacks;
   chunkSize: number;
   csrfToken: string;
-  eventEmitter?: EventEmitter;
   fieldName: string;
   form: Element;
   formId: string;
@@ -62,7 +71,6 @@ class FileField {
   callbacks: Callbacks;
   chunkSize: number;
   csrfToken: string;
-  eventEmitter?: EventEmitter;
   fieldName: string;
   form: Element;
   formId: string;
@@ -80,7 +88,6 @@ class FileField {
     callbacks,
     chunkSize,
     csrfToken,
-    eventEmitter,
     fieldName,
     form,
     formId,
@@ -99,7 +106,6 @@ class FileField {
     this.callbacks = callbacks;
     this.chunkSize = chunkSize;
     this.csrfToken = csrfToken;
-    this.eventEmitter = eventEmitter;
     this.fieldName = fieldName;
     this.form = form;
     this.formId = formId;
@@ -193,16 +199,22 @@ class FileField {
     }
   }
 
-  emitEvent(eventName: string, element: HTMLElement, upload: BaseUpload): void {
-    if (this.eventEmitter) {
-      this.eventEmitter.emit(eventName, {
-        element,
-        fieldName: this.fieldName,
-        fileName: upload.name,
-        metaDataField: this.getMetaDataField(),
-        upload
-      });
-    }
+  emitEvent(
+    eventName: UploadEventName,
+    element: HTMLElement,
+    upload: BaseUpload
+  ): void {
+    const detail: UploadEventDetail = {
+      element,
+      fieldName: this.fieldName,
+      fileName: upload.name,
+      metaDataField: this.getMetaDataField(),
+      upload
+    };
+
+    this.form.dispatchEvent(
+      new CustomEvent<UploadEventDetail>(eventName, { bubbles: true, detail })
+    );
   }
 
   findUploadByName(fileName: string): BaseUpload | undefined {

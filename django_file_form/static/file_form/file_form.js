@@ -3703,7 +3703,6 @@
     callbacks;
     chunkSize;
     csrfToken;
-    eventEmitter;
     fieldName;
     form;
     formId;
@@ -3720,7 +3719,6 @@
       callbacks,
       chunkSize,
       csrfToken,
-      eventEmitter,
       fieldName,
       form,
       formId,
@@ -3739,7 +3737,6 @@
       this.callbacks = callbacks;
       this.chunkSize = chunkSize;
       this.csrfToken = csrfToken;
-      this.eventEmitter = eventEmitter;
       this.fieldName = fieldName;
       this.form = form;
       this.formId = formId;
@@ -3814,15 +3811,17 @@
       }
     }
     emitEvent(eventName, element, upload) {
-      if (this.eventEmitter) {
-        this.eventEmitter.emit(eventName, {
-          element,
-          fieldName: this.fieldName,
-          fileName: upload.name,
-          metaDataField: this.getMetaDataField(),
-          upload
-        });
-      }
+      const detail = {
+        element,
+        fieldName: this.fieldName,
+        fileName: upload.name,
+        metaDataField: this.getMetaDataField(),
+        upload
+      };
+      this.form.dispatchEvent(new CustomEvent(eventName, {
+        bubbles: true,
+        detail
+      }));
     }
     findUploadByName(fileName) {
       return this.uploads.find(upload => upload.name === fileName);
@@ -4112,7 +4111,6 @@
         callbacks: options.callbacks ?? {},
         chunkSize: options.chunkSize ?? 2621440,
         csrfToken,
-        eventEmitter: options.eventEmitter,
         fieldName,
         form,
         formId,
