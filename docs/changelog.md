@@ -1,6 +1,6 @@
 ## Changelog
 
-**development**
+**5.0.1 (september 6 2026)**
 
 - Issue #1341 Include locale files in the package.
 

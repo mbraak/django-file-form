@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "django-file-form"
-version = "5.0.0"
+version = "5.0.1"
 description = "Django-file-form helps you to write forms with a pretty ajax upload"
 readme = "README.md"
 license = "Apache-2.0"
