@@ -1,5 +1,9 @@
 ## Changelog
 
+**development**
+
+- Issue #1341 Include locale files in the package.
+
 **5.0.0 (september 6 2026)**
 
 - Issue #1336: make the javascript bundle smaller.
