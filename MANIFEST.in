@@ -1,2 +1,5 @@
 recursive-include django_file_form/templates *
 recursive-include django_file_form/static *
+recursive-include django_file_form/locale *
+exclude django_file_form/static/file_form/file_form.coverage.js
+exclude django_file_form/static/file_form/file_form.coverage.js.map
