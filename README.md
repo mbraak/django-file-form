@@ -22,3 +22,5 @@ Features:
 - Supports addition of arbitrary file meta data and related widgets.
 
 The project is hosted on [github](https://github.com/mbraak/django-file-form).
+
+![screenshot](https://raw.github.com/mbraak/django-file-form/master/screenshot.png)
