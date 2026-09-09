@@ -18,5 +18,5 @@ jobs:
           install-script: npm install
           build-script: build
           cwd: ./frontend
-          pattern: "django_file_form/static/file_form/file_form.min.js"
+          pattern: "../django_file_form/static/file_form/file_form.min.js"
           compression: "none"
