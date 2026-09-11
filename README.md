@@ -10,6 +10,8 @@
 
 Read the documentation at [http://mbraak.github.io/django-file-form/](http://mbraak.github.io/django-file-form/)
 
+Example project: https://github.com/mbraak/django-file-form-example
+
 Features:
 
 - You can easily add an ajax file-upload to a form.
