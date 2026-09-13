@@ -1,6 +1,6 @@
 import re
 
-from django.test import TestCase, Client
+from django.test import Client, TestCase
 
 from django_file_form_example.tests.utils.test_utils import remove_test_files
 

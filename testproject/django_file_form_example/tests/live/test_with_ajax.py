@@ -1,6 +1,6 @@
-from pathlib import Path
 import json
 import uuid
+from pathlib import Path
 
 from django.conf import settings
 from django.core.files.base import ContentFile
@@ -8,13 +8,13 @@ from django.test import override_settings
 from selenium.webdriver.common.by import By
 
 from django_file_form.models import TemporaryUploadedFile
-from django_file_form_example.tests.utils.base_live_testcase import BaseLiveTestCase
 from django_file_form_example.models import Example, Example2, ExampleFile
+from django_file_form_example.tests.utils.base_live_testcase import BaseLiveTestCase
 from django_file_form_example.tests.utils.page import Page
 from django_file_form_example.tests.utils.test_utils import (
-    read_file,
     count_temp_uploads,
     get_random_id,
+    read_file,
 )
 
 media_root = Path(settings.MEDIA_ROOT)

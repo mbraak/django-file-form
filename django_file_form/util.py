@@ -5,5 +5,5 @@ def get_list(v):
         return [v]
 
 
-def compact(l):
-    return [v for v in l if v]
+def compact(items):
+    return [v for v in items if v]

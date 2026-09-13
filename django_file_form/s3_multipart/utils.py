@@ -2,8 +2,8 @@ import os
 import time
 
 import boto3
-from botocore.exceptions import ClientError
 from botocore.client import Config
+from botocore.exceptions import ClientError
 from django.utils.crypto import get_random_string
 from storages.utils import setting
 
@@ -63,7 +63,7 @@ def get_client():
                     signature_version=signature_version, region_name=region_name
                 ),
             )
-        except:
+        except Exception:
             time.sleep(0.01)
 
 

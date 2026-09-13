@@ -3,8 +3,8 @@ from datetime import datetime
 from json import dumps
 from pathlib import Path
 
-from django.utils import timezone
 from django.conf import settings
+from django.utils import timezone
 
 from django_file_form_example.models import Example, ExampleFile
 
@@ -58,7 +58,7 @@ def remove_example_file(filename):
 
 
 def has_files(path: Path):
-    files = list(entry for entry in path.iterdir() if entry.is_file())
+    files = [entry for entry in path.iterdir() if entry.is_file()]
 
     return len(files) != 0
 

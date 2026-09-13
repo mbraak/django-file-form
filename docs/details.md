@@ -19,10 +19,10 @@ Also see the testproject in the repository.
 Make sure the `FILE_FORM_UPLOAD_DIR` directory exists.
 
 ```python
-temp_upload_dir = os.path.join(settings.MEDIA_ROOT,  settings.FILE_FORM_UPLOAD_DIR)
+temp_upload_dir = os.path.join(settings.MEDIA_ROOT, settings.FILE_FORM_UPLOAD_DIR)
 
 if not os.path.exists(temp_upload_dir):
-  os.mkdir(temp_upload_dir)
+    os.mkdir(temp_upload_dir)
 ```
 
 ## Adding placeholder files
@@ -32,23 +32,21 @@ If you have used `django-file-form` to upload files, potentially have saved the 
 ```python
 from django_file_form.models import PlaceholderUploadedFile
 
-initial['my_field'] = [
-  PlaceholderUploadedFile('testfile1.png')
-]
+initial["my_field"] = [PlaceholderUploadedFile("testfile1.png")]
 ```
 
 You can also add options `size` and `file_id` to specify file size if the file does not exist locally, and an unique ID of the file, respectively.
 
 ```python
-initial['my_field'] = [
-  PlaceholderUploadedFile('testfile1.png', size=12394, file_id=my_file.pk)
+initial["my_field"] = [
+    PlaceholderUploadedFile("testfile1.png", size=12394, file_id=my_file.pk)
 ]
 ```
 
 The placeholder file will be listed, and will either be kept intact, or be removed. When you save the form, you will have to handle the placeholders as follows:
 
 ```python
-for f in self.cleaned_data['my_field']:
+for f in self.cleaned_data["my_field"]:
     if f.is_placeholder:
         # do nothing, or something with f.name or f.file_id
         continue

@@ -1,7 +1,7 @@
 import json
+
 from django.forms import ClearableFileInput
 from django.utils.translation import gettext as _
-
 
 TRANSLATIONS = {
     "Cancel": _("Cancel"),

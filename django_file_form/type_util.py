@@ -1,10 +1,9 @@
-from typing import Type, TYPE_CHECKING, TypeVar
-
+from typing import TYPE_CHECKING, TypeVar
 
 T = TypeVar("T")
 
 
-def with_typehint(baseclass: Type[T]) -> Type[T]:
+def with_typehint(baseclass: type[T]) -> type[T]:
     """
     Useful function to make mixins with baseclass typehint
 

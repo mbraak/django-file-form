@@ -2,10 +2,9 @@ import json
 import logging
 
 from django.http import JsonResponse
-from django.views.decorators.http import require_POST, require_http_methods, require_GET
+from django.views.decorators.http import require_GET, require_http_methods, require_POST
 
-from .utils import get_bucket_name, file_form_upload_dir, get_client, get_available_name
-
+from .utils import file_form_upload_dir, get_available_name, get_bucket_name, get_client
 
 logger = logging.getLogger(__name__)
 
