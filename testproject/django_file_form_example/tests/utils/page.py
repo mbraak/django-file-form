@@ -1,8 +1,9 @@
 import re
+
 from django.contrib.auth.models import User
 from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.wait import WebDriverWait
 
 from .base_page import BasePage
 from .test_utils import to_class_string

@@ -7,14 +7,13 @@ from django.db import models
 from django.utils import timezone
 from django.utils.module_loading import import_string
 
-from .model_manager import ModelManager
 from .django_util import get_upload_path
-
+from .model_manager import ModelManager
 
 # Import uploaded files for backward compatibility
 from .uploaded_file import (
-    PlaceholderUploadedFile,
-    S3UploadedFileWithId,
+    PlaceholderUploadedFile,  # noqa: F401
+    S3UploadedFileWithId,  # noqa: F401
     UploadedTusFile,
 )
 
@@ -87,7 +86,7 @@ class TemporaryUploadedFile(models.Model):
 
     objects = TemporaryUploadedFileManager()
 
-    class Meta(object):
+    class Meta:
         indexes = [
             models.Index(
                 fields=["form_id", "field_name"], name="form_id_field_name_idx"

@@ -1,6 +1,5 @@
-from pathlib import Path
-import logging
 import os
+from pathlib import Path
 
 
 def mkdir_p(path):
@@ -24,20 +23,20 @@ DEBUG = True
 
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
-DATABASES = dict(
-    default=dict(
-        ENGINE=(
+DATABASES = {
+    "default": {
+        "ENGINE": (
             "django.db.backends.dummy"
             if os.environ.get("CHECK_MIGRATIONS", "") == "true"
             else "django.db.backends.postgresql"
         ),
-        NAME="django-file-form-example",
-        USER="postgres",
-        PASSWORD=os.environ.get("POSTGRES_PASSWORD", ""),
-        HOST=os.environ.get("POSTGRES_HOST", ""),
-        PORT=os.environ.get("POSTGRES_PORT", ""),
-    )
-)
+        "NAME": "django-file-form-example",
+        "USER": "postgres",
+        "PASSWORD": os.environ.get("POSTGRES_PASSWORD", ""),
+        "HOST": os.environ.get("POSTGRES_HOST", ""),
+        "PORT": os.environ.get("POSTGRES_PORT", ""),
+    }
+}
 
 INSTALLED_APPS = [
     # Project app
@@ -74,11 +73,11 @@ create_media_paths(Path(MEDIA_ROOT))
 USE_TZ = True
 
 TEMPLATES = [
-    dict(
-        BACKEND="django.template.backends.django.DjangoTemplates",
-        APP_DIRS=True,
-        OPTIONS=dict(
-            context_processors=[
+    {
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
                 "django.contrib.auth.context_processors.auth",
                 "django.template.context_processors.debug",
                 "django.template.context_processors.i18n",
@@ -88,8 +87,8 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "django.template.context_processors.request",
             ]
-        ),
-    ),
+        },
+    },
 ]
 
 if "COVERAGE" in os.environ:

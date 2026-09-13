@@ -1,15 +1,14 @@
 import json
 import uuid
 
-from django.urls import reverse
 from django.forms import CharField, Form, HiddenInput
-
-from .util import get_list
-from .type_util import with_typehint
-from .uploaded_file import get_initial_data_from_uploaded_file
+from django.urls import reverse
 
 # UploadedFileField and MultipleUploadedFileField must be in this module because they are in the api
-from .fields import UploadedFileField, MultipleUploadedFileField
+from .fields import MultipleUploadedFileField, UploadedFileField  # noqa: F401
+from .type_util import with_typehint
+from .uploaded_file import get_initial_data_from_uploaded_file
+from .util import get_list
 
 
 class FileFormMixin(with_typehint(Form)):

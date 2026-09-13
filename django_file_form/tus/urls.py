@@ -1,6 +1,6 @@
 from django.urls import path
-from .views import handle_upload, start_upload
 
+from .views import handle_upload, start_upload
 
 urlpatterns = [
     path("", start_upload, name="tus_upload"),

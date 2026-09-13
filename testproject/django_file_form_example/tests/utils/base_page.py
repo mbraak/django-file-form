@@ -1,9 +1,10 @@
 from selenium.webdriver.common.by import By
+
 from .temp_file import TempFile
 from .test_utils import remove_test_files
 
 
-class BasePage(object):
+class BasePage:
     def __init__(self, selenium, live_server_url, on_submit):
         self.selenium = selenium
         self.live_server_url = live_server_url

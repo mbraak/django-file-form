@@ -12,7 +12,7 @@ You must include 'django_file_form'
 
 ```python
 INSTALLED_APPS = [
-    'django_file_form',
+    "django_file_form",
 ]
 ```
 
@@ -22,8 +22,8 @@ In this example we use the url **upload/**. You can use a different url if you l
 
 ```python
 urlpatterns = patterns(
-    '',
-    url(r'^upload/', include('django_file_form.urls')),
+    "",
+    url(r"^upload/", include("django_file_form.urls")),
 )
 ```
 
@@ -31,6 +31,7 @@ urlpatterns = patterns(
 
 ```python
 from django_file_form.forms import FileFormMixin
+
 
 class ExampleForm(FileFormMixin, forms.Form):
     pass
@@ -40,6 +41,7 @@ class ExampleForm(FileFormMixin, forms.Form):
 
 ```python
 from django_file_form.forms import FileFormMixin, UploadedFileField
+
 
 class ExampleForm(FileFormMixin, forms.Form):
     input_file = UploadedFileField()
@@ -81,11 +83,11 @@ See the [Django documentation](https://docs.djangoproject.com/en/2.1/ref/forms/a
 
 ```python
 class ExampleFormView(generic.FormView):
-    template_name = 'example_form.html'
+    template_name = "example_form.html"
     form_class = forms.ExampleForm
 
     def form_valid(self, form):
-        input_file = form.cleaned_data['input_file']
+        input_file = form.cleaned_data["input_file"]
 
         return super(ExampleFormView, self).form_valid(form)
 ```
@@ -94,11 +96,11 @@ class ExampleFormView(generic.FormView):
 
 ```python
 class ExampleFormView(generic.FormView):
-    template_name = 'example_form.html'
+    template_name = "example_form.html"
     form_class = forms.ExampleForm
 
     def form_valid(self, form):
-        input_file = form.cleaned_data['input_file']
+        input_file = form.cleaned_data["input_file"]
 
         form.delete_temporary_files()
 

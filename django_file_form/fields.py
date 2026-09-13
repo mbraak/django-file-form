@@ -1,10 +1,10 @@
+from django.core import validators
 from django.forms import FileField
 from django.forms.widgets import FILE_INPUT_CONTRADICTION
-from django.core import validators
 
-from .widgets import UploadWidget, UploadMultipleWidget
 from .models import TemporaryUploadedFile
 from .util import get_list
+from .widgets import UploadMultipleWidget, UploadWidget
 
 
 class UploadedFileField(FileField):
@@ -19,9 +19,9 @@ class UploadedFileField(FileField):
 
     def widget_attrs(self, widget):
         if self.accept:
-            return dict(accept=self.accept)
+            return {"accept": self.accept}
         else:
-            return dict()
+            return {}
 
     # new methods
 

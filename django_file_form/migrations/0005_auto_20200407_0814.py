@@ -6,7 +6,6 @@ from . import storage
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("django_file_form", "0004_auto_20170423_0329"),
     ]

@@ -1,13 +1,13 @@
 import os
-from tempfile import NamedTemporaryFile
 from pathlib import Path
+from tempfile import NamedTemporaryFile
 
 from django.conf import settings
 
 from django_file_form.models import TemporaryUploadedFile
 
 
-class TempFile(object):
+class TempFile:
     def __init__(self):
         self.named_temporary_file = None
 
@@ -16,7 +16,8 @@ class TempFile(object):
             raise Exception("Tempfile is already created")
 
         def create_named_temporary_file():
-            f = NamedTemporaryFile(mode="w+b", prefix=prefix or "tmp")
+            # The file is kept open on purpose; it is closed in `destroy`
+            f = NamedTemporaryFile(mode="w+b", prefix=prefix or "tmp")  # noqa: SIM115
             f.write(content if binary else content.encode())
             f.seek(0)
 

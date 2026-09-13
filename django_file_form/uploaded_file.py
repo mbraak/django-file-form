@@ -1,9 +1,8 @@
 import os
 import uuid
-from typing import Union, List, Dict
 
-from django.core.files import uploadedfile
 from django.core.exceptions import ImproperlyConfigured
+from django.core.files import uploadedfile
 from django.db.models.fields.files import FieldFile
 
 
@@ -21,7 +20,12 @@ class PlaceholderUploadedFile:
         self.metadata = metadata
 
     def get_initial_data(self):
-        return dict(id=self.file_id, name=self.name, size=self.size, type="placeholder")
+        return {
+            "id": self.file_id,
+            "name": self.name,
+            "size": self.size,
+            "type": "placeholder",
+        }
 
 
 class UploadedTusFile(uploadedfile.UploadedFile):
@@ -36,7 +40,7 @@ class UploadedTusFile(uploadedfile.UploadedFile):
         self.metadata = metadata
 
     def get_initial_data(self):
-        return dict(id=self.file_id, name=self.name, size=self.size, type="tus")
+        return {"id": self.file_id, "name": self.name, "size": self.size, "type": "tus"}
 
 
 try:
@@ -68,7 +72,12 @@ try:
             self.metadata = metadata
 
         def get_initial_data(self):
-            return dict(id=self.file_id, name=self.name, size=self.size, type="s3")
+            return {
+                "id": self.file_id,
+                "name": self.name,
+                "size": self.size,
+                "type": "s3",
+            }
 
 except (ImportError, ImproperlyConfigured):
     # S3 is an optional feature but we keep the symbol
@@ -76,22 +85,19 @@ except (ImportError, ImproperlyConfigured):
         pass
 
 
-UploadedFileTypes = Union[FieldFile, PlaceholderUploadedFile, UploadedTusFile]
+UploadedFileTypes = FieldFile | PlaceholderUploadedFile | UploadedTusFile
 
-UploadedFileTypesOrList = Union[
-    UploadedFileTypes,
-    List[Union[UploadedFileTypes]],
-]
+UploadedFileTypesOrList = UploadedFileTypes | list[UploadedFileTypes]
 
 
-def get_initial_data_from_field_file(field_file: FieldFile) -> Dict:
+def get_initial_data_from_field_file(field_file: FieldFile) -> dict:
     try:
-        return dict(name=field_file.name, size=field_file.size, type="existing")
-    except:
-        return dict()
+        return {"name": field_file.name, "size": field_file.size, "type": "existing"}
+    except Exception:
+        return {}
 
 
-def get_initial_data_from_uploaded_file(uploaded_file: UploadedFileTypes) -> Dict:
+def get_initial_data_from_uploaded_file(uploaded_file: UploadedFileTypes) -> dict:
     if isinstance(uploaded_file, FieldFile):
         return get_initial_data_from_field_file(uploaded_file)
     else:
