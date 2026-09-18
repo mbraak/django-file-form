@@ -1,23 +1,23 @@
 import base64
+import json
 import logging
 import uuid
-import json
 
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseForbidden
-from django.views.decorators.http import require_POST, require_http_methods
 from django.utils._os import safe_join, to_path
+from django.views.decorators.http import require_http_methods, require_POST
 
 from django_file_form import conf
+from django_file_form.django_util import check_permission, get_upload_path
 from django_file_form.models import TemporaryUploadedFile
-from django_file_form.django_util import get_upload_path, check_permission
+
 from .utils import (
     cache,
     create_uploaded_file_in_db,
     get_tus_response,
     remove_resource_from_cache,
 )
-
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +28,7 @@ def start_upload(request):
         check_permission(request)
     except PermissionDenied:
         return HttpResponseForbidden(
-            json.dumps(dict(status="permission denied")),
+            json.dumps({"status": "permission denied"}),
             content_type="application/json",
         )
 
@@ -55,24 +55,20 @@ def start_upload(request):
     resource_id = str(uuid.uuid4())
 
     cache.add(
-        "tus-uploads/{}/filename".format(resource_id),
+        f"tus-uploads/{resource_id}/filename",
         metadata.get("filename"),
         conf.CACHE_TIMEOUT,
     )
-    cache.add(
-        "tus-uploads/{}/file_size".format(resource_id), file_size, conf.CACHE_TIMEOUT
-    )
-    cache.add("tus-uploads/{}/offset".format(resource_id), 0, conf.CACHE_TIMEOUT)
-    cache.add(
-        "tus-uploads/{}/metadata".format(resource_id), metadata, conf.CACHE_TIMEOUT
-    )
+    cache.add(f"tus-uploads/{resource_id}/file_size", file_size, conf.CACHE_TIMEOUT)
+    cache.add(f"tus-uploads/{resource_id}/offset", 0, conf.CACHE_TIMEOUT)
+    cache.add(f"tus-uploads/{resource_id}/metadata", metadata, conf.CACHE_TIMEOUT)
 
     try:
-        with to_path(safe_join(get_upload_path(), resource_id)).open("wb") as f:
+        with to_path(safe_join(get_upload_path(), resource_id)).open("wb"):
             pass
-    except IOError as e:
+    except OSError as e:
         logger.error(
-            "Unable to create file: {}".format(e),
+            f"Unable to create file: {e}",
             exc_info=True,
             extra={
                 "request": request,
@@ -82,7 +78,7 @@ def start_upload(request):
         return response
 
     response.status_code = 201
-    response["Location"] = "{}{}".format(request.get_full_path(), resource_id)
+    response["Location"] = f"{request.get_full_path()}{resource_id}"
     response["ResourceId"] = resource_id
     return response
 
@@ -104,8 +100,8 @@ def upload_info(resource_id):
 
     response = get_tus_response()
 
-    offset = cache.get("tus-uploads/{}/offset".format(resource_id))
-    file_size = cache.get("tus-uploads/{}/file_size".format(resource_id))
+    offset = cache.get(f"tus-uploads/{resource_id}/offset")
+    file_size = cache.get(f"tus-uploads/{resource_id}/file_size")
     if offset is None:
         logger.info("TUS head resource not found")
         response.status_code = 404
@@ -122,9 +118,9 @@ def upload_info(resource_id):
 def upload_part(request, resource_id):
     response = get_tus_response()
 
-    filename = cache.get("tus-uploads/{}/filename".format(resource_id))
-    metadata = cache.get("tus-uploads/{}/metadata".format(resource_id))
-    offset = cache.get("tus-uploads/{}/offset".format(resource_id))
+    filename = cache.get(f"tus-uploads/{resource_id}/filename")
+    metadata = cache.get(f"tus-uploads/{resource_id}/metadata")
+    offset = cache.get(f"tus-uploads/{resource_id}/offset")
 
     file_offset = int(request.META.get("HTTP_UPLOAD_OFFSET", 0))
     chunk_size = int(request.META.get("CONTENT_LENGTH", 102400))
@@ -144,26 +140,26 @@ def upload_part(request, resource_id):
 
     try:
         file = upload_file_path.open("r+b")
-    except IOError:
+    except OSError:
         file = upload_file_path.open("wb")
 
     if file:
         try:
             file.seek(file_offset)
             file.write(request.body)
-        except IOError:
+        except OSError:
             response.status_code = 500
             return response
         finally:
             file.close()
 
     try:
-        new_offset = cache.incr("tus-uploads/{}/offset".format(resource_id), chunk_size)
+        new_offset = cache.incr(f"tus-uploads/{resource_id}/offset", chunk_size)
     except ValueError:
         response.status_code = 404
         return response
 
-    file_size_string = cache.get("tus-uploads/{}/file_size".format(resource_id))
+    file_size_string = cache.get(f"tus-uploads/{resource_id}/file_size")
 
     if file_size_string is None:
         response.status_code = 404

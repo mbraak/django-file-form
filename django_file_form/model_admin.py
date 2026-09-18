@@ -1,6 +1,6 @@
-from django.db import models
-from django.forms import ModelForm, Media
 from django.contrib import admin
+from django.db import models
+from django.forms import Media, ModelForm
 
 from .fields import UploadedFileField
 from .forms import FileFormMixin

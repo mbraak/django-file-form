@@ -1,7 +1,8 @@
-from django.contrib import admin
 from django.conf import settings
+from django.contrib import admin
 
 from django_file_form.model_admin import FileFormAdmin
+
 from .models import Example, Example2, ExampleFile
 
 

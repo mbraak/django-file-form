@@ -2,9 +2,9 @@ from django.core.files.base import ContentFile
 from django.forms import Form
 from django.test import TestCase
 
-from django_file_form.fields import UploadedFileField, MultipleUploadedFileField
+from django_file_form.fields import MultipleUploadedFileField, UploadedFileField
 from django_file_form.forms import FileFormMixin
-from django_file_form.uploaded_file import UploadedTusFile, PlaceholderUploadedFile
+from django_file_form.uploaded_file import PlaceholderUploadedFile, UploadedTusFile
 
 
 class TestForm(FileFormMixin, Form):
@@ -15,10 +15,10 @@ class TestForm(FileFormMixin, Form):
 class FormTests(TestCase):
     def test_empty_form(self):
         form = TestForm(
-            data=dict(
-                main_notebook=None,
-                attachments=[],
-            )
+            data={
+                "main_notebook": None,
+                "attachments": [],
+            }
         )
 
         self.assertTrue(form.is_valid())
@@ -27,9 +27,9 @@ class FormTests(TestCase):
         uploaded_tus_file = UploadedTusFile(
             file=ContentFile("xyz", "test.txt"), file_id="111"
         )
-        files = dict(main_notebook=uploaded_tus_file)
+        files = {"main_notebook": uploaded_tus_file}
 
-        form = TestForm(data=dict(), files=files)
+        form = TestForm(data={}, files=files)
 
         self.assertTrue(form.is_valid())
         self.assertEqual(form.cleaned_data["main_notebook"].name, "test.txt")
@@ -41,9 +41,9 @@ class FormTests(TestCase):
         uploaded_tus_file2 = UploadedTusFile(
             file=ContentFile("def", "test2.txt"), file_id="113"
         )
-        files = dict(attachments=[uploaded_tus_file1, uploaded_tus_file2])
+        files = {"attachments": [uploaded_tus_file1, uploaded_tus_file2]}
 
-        form = TestForm(data=dict(), files=files)
+        form = TestForm(data={}, files=files)
 
         self.assertTrue(form.is_valid())
 
@@ -56,9 +56,9 @@ class FormTests(TestCase):
         placeholder_uploaded_file = PlaceholderUploadedFile(
             name="placeholder1.txt", size=100
         )
-        initial = dict(attachments=[placeholder_uploaded_file])
+        initial = {"attachments": [placeholder_uploaded_file]}
 
-        form = TestForm(data=dict(), files=dict(), initial=initial)
+        form = TestForm(data={}, files={}, initial=initial)
 
         self.assertTrue(form.is_valid())
         self.assertEqual(

@@ -1,14 +1,14 @@
 import threading
 
+import boto3
 from django.test import override_settings
 from flask_cors import CORS
 from moto.server import DomainDispatcherApplication, create_backend_app
-from werkzeug.serving import make_server, BaseWSGIServer
-import boto3
 from selenium.webdriver.common.by import By
+from werkzeug.serving import BaseWSGIServer, make_server
 
+from django_file_form_example.models import Example, Example2
 from django_file_form_example.tests.utils.base_live_testcase import BaseLiveTestCase
-from django_file_form_example.models import Example2, Example
 from django_file_form_example.tests.utils.page import Page
 from django_file_form_example.tests.utils.test_utils import read_file
 

@@ -1,13 +1,13 @@
 import json
-from typing import Dict
 from functools import cached_property
+
 from django.http import QueryDict
 
-from django_file_form.util import compact
 from django_file_form.uploaded_file import PlaceholderUploadedFile, S3UploadedFileWithId
+from django_file_form.util import compact
 
 
-def parse_placeholder_and_s3_upload(upload_data: Dict):
+def parse_placeholder_and_s3_upload(upload_data: dict):
     upload_type = upload_data["type"]
 
     if upload_type == "placeholder":
