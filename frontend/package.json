@@ -38,7 +38,7 @@
     "@testing-library/jest-dom": "^7",
     "@types/escape-html": "^1.0.4",
     "@types/node": "^26",
-    "@vitest/coverage-istanbul": "^4.0.16",
+    "@vitest/coverage-istanbul": "^5",
     "@vitest/eslint-plugin": "^1.6.4",
     "babel-plugin-istanbul": "^8.0.2",
     "eslint": "^10",
@@ -52,7 +52,7 @@
     "sass": "^1.97.1",
     "typescript": "^6",
     "typescript-eslint": "^8.50.1",
-    "vitest": "^4.0.16"
+    "vitest": "^5"
   },
   "dependencies": {
     "@babel/runtime": "^8.0.0",

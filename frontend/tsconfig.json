@@ -14,6 +14,7 @@
     "noUncheckedIndexedAccess": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
+    "skipLibCheck": true,
     "strictNullChecks": true,
     "strictPropertyInitialization": false,
     "strict": true,
