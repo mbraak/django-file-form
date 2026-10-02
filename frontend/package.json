@@ -46,7 +46,7 @@
     "eslint-plugin-import-x": "^4",
     "eslint-plugin-perfectionist": "^5.1.0",
     "jsdom": "^29",
-    "msw": "^3",
+    "msw": "^2",
     "rollup": "^4.54.0",
     "rollup-plugin-serve": "^3",
     "sass": "^1.97.1",

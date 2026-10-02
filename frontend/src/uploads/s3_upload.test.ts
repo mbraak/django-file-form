@@ -1,6 +1,3 @@
-/**
- * @vitest-environment-options {"url": "http://s3_endpoint.net/"}
- */
 import { waitFor } from "@testing-library/dom";
 import { delay, http, HttpResponse } from "msw";
 import { setupServer } from "msw/node";
