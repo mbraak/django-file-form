@@ -1,20 +1,25 @@
+import css from "@eslint/css";
 import eslint from "@eslint/js";
+import vitest from "@vitest/eslint-plugin";
 import compat from "eslint-plugin-compat";
-import tseslint from "typescript-eslint";
 import importPlugin from "eslint-plugin-import-x";
 import perfectionistPlugin from "eslint-plugin-perfectionist";
-import vitest from "@vitest/eslint-plugin";
+import { defineConfig } from "eslint/config";
+import tseslint from "typescript-eslint";
 
-export default [
+export default defineConfig([
   { ignores: ["*.config.{js,mjs,ts}"] },
-  eslint.configs.recommended,
-  compat.configs["flat/recommended"],
-  ...tseslint.configs.strictTypeChecked,
-  ...tseslint.configs.stylisticTypeChecked,
-  importPlugin.flatConfigs.recommended,
-  importPlugin.flatConfigs.typescript,
-  perfectionistPlugin.configs["recommended-natural"],
   {
+    files: ["**/*.{js,mjs,ts}"],
+    extends: [
+      eslint.configs.recommended,
+      compat.configs["flat/recommended"],
+      tseslint.configs.strictTypeChecked,
+      tseslint.configs.stylisticTypeChecked,
+      importPlugin.flatConfigs.recommended,
+      importPlugin.flatConfigs.typescript,
+      perfectionistPlugin.configs["recommended-natural"]
+    ],
     languageOptions: {
       parserOptions: {
         projectService: true,
@@ -59,5 +64,13 @@ export default [
       ...vitest.configs.recommended.rules,
       "compat/compat": "off"
     }
+  },
+  {
+    files: ["style/**/*.scss"],
+    language: "css/css",
+    plugins: {
+      css
+    },
+    extends: ["css/recommended"]
   }
-];
+]);
