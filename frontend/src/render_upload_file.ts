@@ -1,5 +1,3 @@
-import escape from "escape-html";
-
 import { formatBytes } from "./util.ts";
 
 class RenderUploadFile {
@@ -192,7 +190,7 @@ class RenderUploadFile {
     div.className = `dff-file dff-file-id-${uploadIndex.toString()}`;
 
     const nameSpan = document.createElement("span");
-    nameSpan.innerHTML = escape(filename);
+    nameSpan.textContent = filename;
     nameSpan.className = "dff-filename";
     nameSpan.setAttribute("data-index", uploadIndex.toString());
 

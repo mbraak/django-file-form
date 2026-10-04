@@ -3,6 +3,7 @@ import eslint from "@eslint/js";
 import vitest from "@vitest/eslint-plugin";
 import compat from "eslint-plugin-compat";
 import importPlugin from "eslint-plugin-import-x";
+import noUnsanitized from "eslint-plugin-no-unsanitized";
 import perfectionistPlugin from "eslint-plugin-perfectionist";
 import { defineConfig } from "eslint/config";
 import tseslint from "typescript-eslint";
@@ -18,6 +19,7 @@ export default defineConfig([
       tseslint.configs.stylisticTypeChecked,
       importPlugin.flatConfigs.recommended,
       importPlugin.flatConfigs.typescript,
+      noUnsanitized.configs.recommended,
       perfectionistPlugin.configs["recommended-natural"]
     ],
     languageOptions: {
