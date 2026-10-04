@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "lint": "eslint src",
+    "lint": "eslint src style",
     "build": "npm run sass; rollup -c rollup.config.mjs; SKIP_COMPRESS_JS=true rollup -c rollup.config.mjs; COVERAGE=true rollup -c rollup.config.mjs",
     "sass": "sass --no-source-map style/file_form.scss ../django_file_form/static/file_form/file_form.css",
     "test": "vitest run --coverage",
@@ -33,6 +33,7 @@
     "@babel/plugin-transform-runtime": "^8.0.1",
     "@babel/preset-env": "^8.0.2",
     "@babel/preset-typescript": "^8.0.1",
+    "@eslint/css": "^2.0.0",
     "@eslint/js": "^10",
     "@rollup/plugin-babel": "^7",
     "@rollup/plugin-commonjs": "^29",
