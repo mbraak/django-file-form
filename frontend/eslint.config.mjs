@@ -3,6 +3,7 @@ import eslint from "@eslint/js";
 import vitest from "@vitest/eslint-plugin";
 import compat from "eslint-plugin-compat";
 import importPlugin from "eslint-plugin-import-x";
+import jestDom from "eslint-plugin-jest-dom";
 import noUnsanitized from "eslint-plugin-no-unsanitized";
 import perfectionistPlugin from "eslint-plugin-perfectionist";
 import { defineConfig } from "eslint/config";
@@ -59,6 +60,7 @@ export default defineConfig([
   },
   {
     files: ["src/**/*.test.ts"],
+    extends: [jestDom.configs["flat/recommended"]],
     plugins: {
       vitest
     },
