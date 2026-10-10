@@ -310,7 +310,8 @@ class FileField {
     bytesUploaded: number,
     bytesTotal: number
   ): void => {
-    const percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2);
+    const percentage =
+      bytesTotal === 0 ? "0" : ((bytesUploaded / bytesTotal) * 100).toFixed(2);
 
     this.renderer.updateProgress(upload.uploadIndex, percentage);
 
