@@ -33,6 +33,7 @@
     "@babel/plugin-transform-runtime": "^8.0.1",
     "@babel/preset-env": "^8.0.2",
     "@babel/preset-typescript": "^8.0.1",
+    "@eslint-community/eslint-plugin-eslint-comments": "^4.8.1",
     "@eslint/css": "^2.0.0",
     "@eslint/js": "^10",
     "@rollup/plugin-babel": "^7",

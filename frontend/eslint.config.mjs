@@ -1,3 +1,4 @@
+import comments from "@eslint-community/eslint-plugin-eslint-comments/configs";
 import css from "@eslint/css";
 import eslint from "@eslint/js";
 import vitest from "@vitest/eslint-plugin";
@@ -17,6 +18,7 @@ export default defineConfig([
     files: ["**/*.{js,mjs,ts}"],
     extends: [
       eslint.configs.recommended,
+      comments.recommended,
       compat.configs["flat/recommended"],
       tseslint.configs.strictTypeChecked,
       tseslint.configs.stylisticTypeChecked,
@@ -25,6 +27,9 @@ export default defineConfig([
       noUnsanitized.configs.recommended,
       perfectionistPlugin.configs["recommended-natural"]
     ],
+    linterOptions: {
+      reportUnusedDisableDirectives: "error"
+    },
     languageOptions: {
       parserOptions: {
         projectService: true,
@@ -35,6 +40,7 @@ export default defineConfig([
       unicorn
     },
     rules: {
+      "@eslint-community/eslint-comments/require-description": "error",
       "@typescript-eslint/consistent-type-imports": [
         "error",
         { fixStyle: "inline-type-imports" }
