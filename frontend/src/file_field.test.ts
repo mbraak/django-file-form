@@ -626,6 +626,44 @@ describe("clicking the filename", () => {
     });
   });
 
+  test("renders the filename as a button when there is an onClick callback", () => {
+    const { parent } = createFileField({
+      callbacks: { onClick: vi.fn() },
+      initial: [existingFile]
+    });
+
+    expect(query(parent, ".dff-filename").tagName).toBe("BUTTON");
+  });
+
+  test("renders the filename as text when there is no onClick callback", () => {
+    const { parent } = createFileField({ initial: [existingFile] });
+
+    expect(query(parent, ".dff-filename").tagName).toBe("SPAN");
+  });
+
+  test("calls the onClick callback for a file that has been uploaded", () => {
+    const onClick = vi.fn();
+    const { fileField, input, parent } = createFileField({
+      callbacks: { onClick }
+    });
+
+    selectFiles(input, [mockFile("file.txt")]);
+    getTusUpload(fileField).onSuccess?.();
+
+    const filename = query(parent, ".dff-filename");
+
+    expect(filename.tagName).toBe("BUTTON");
+
+    filename.click();
+
+    expect(onClick).toHaveBeenCalledExactlyOnceWith({
+      fieldName: "input_file",
+      fileName: "file.txt",
+      id: undefined,
+      type: "tus"
+    });
+  });
+
   test("does not call the onClick callback for a file that is uploading", () => {
     const onClick = vi.fn();
     const { input, parent } = createFileField({ callbacks: { onClick } });

@@ -121,6 +121,7 @@ class FileField {
     this.nextUploadIndex = 0;
 
     this.renderer = new RenderUploadFile({
+      clickableFilenames: callbacks.onClick != null,
       input,
       parent,
       skipRequired,

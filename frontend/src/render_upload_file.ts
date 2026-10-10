@@ -5,22 +5,26 @@ let nextLabelId = 0;
 class RenderUploadFile {
   public container: Element;
 
+  private clickableFilenames: boolean;
   private errors: Element;
   private input: HTMLInputElement;
   private status: Element;
   private translations: Record<string, string>;
 
   constructor({
+    clickableFilenames = false,
     input,
     parent,
     skipRequired,
     translations
   }: {
+    clickableFilenames?: boolean;
     input: HTMLInputElement;
     parent: Element;
     skipRequired: boolean;
     translations: Record<string, string>;
   }) {
+    this.clickableFilenames = clickableFilenames;
     this.container = this.createFilesContainer(parent);
     this.labelFilesContainer(input);
     this.errors = this.createErrorContainer(parent);
@@ -175,6 +179,10 @@ class RenderUploadFile {
     if (el) {
       el.classList.add("dff-upload-success");
 
+      if (this.clickableFilenames) {
+        this.makeFilenameClickable(el, index);
+      }
+
       if (size != null) {
         const fileSizeInfo = document.createElement("span");
         this.setTextContent(fileSizeInfo, formatBytes(size, 2));
@@ -320,6 +328,18 @@ class RenderUploadFile {
     }
 
     this.container.setAttribute("aria-labelledby", label.id);
+  }
+
+  // A filename that can be clicked is a button, so that it can be reached and
+  // pressed with the keyboard
+  private makeFilenameClickable(el: Element, index: number): void {
+    const nameSpan = el.querySelector("span.dff-filename");
+
+    if (nameSpan) {
+      nameSpan.replaceWith(
+        this.createButton("dff-filename", nameSpan.textContent, index)
+      );
+    }
   }
 
   private removeCancel(index: number): void {

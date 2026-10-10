@@ -3,12 +3,14 @@ import { describe, expect, test } from "vitest";
 import RenderUploadFile from "./render_upload_file.ts";
 
 interface CreateRendererParameters {
+  clickableFilenames?: boolean;
   inputType?: string;
   skipRequired?: boolean;
   translations?: Record<string, string>;
 }
 
 const createRenderer = ({
+  clickableFilenames = false,
   inputType = "file",
   skipRequired = false,
   translations = {}
@@ -21,6 +23,7 @@ const createRenderer = ({
   input.required = true;
 
   const renderer = new RenderUploadFile({
+    clickableFilenames,
     input,
     parent,
     skipRequired,
@@ -690,5 +693,67 @@ describe("announce", () => {
 
     expect(status?.querySelector("b")).toBeNull();
     expect(status).toHaveTextContent("<b>file</b>.txt uploaded");
+  });
+});
+
+describe("clickable filenames", () => {
+  test("renders the filename as text by default", () => {
+    const { renderer } = createRenderer();
+
+    const div = renderer.addUploadedFile("file.txt", 1);
+
+    expect(div.querySelector(".dff-filename")?.tagName).toBe("SPAN");
+  });
+
+  test("renders the filename of an uploaded file as a button", () => {
+    const { renderer } = createRenderer({ clickableFilenames: true });
+
+    const div = renderer.addUploadedFile("file.txt", 1);
+
+    const filename = div.querySelector(".dff-filename");
+
+    expect(filename?.tagName).toBe("BUTTON");
+    expect(filename).toHaveAttribute("type", "button");
+    expect(filename).toHaveAttribute("data-index", "1");
+    expect(filename).toHaveAccessibleName("file.txt");
+  });
+
+  test("renders the filename as text while the file is uploading", () => {
+    const { renderer } = createRenderer({ clickableFilenames: true });
+
+    const div = renderer.addNewUpload("file.txt", 1);
+
+    expect(div.querySelector(".dff-filename")?.tagName).toBe("SPAN");
+  });
+
+  test("makes the filename a button when the upload is done", () => {
+    const { renderer } = createRenderer({ clickableFilenames: true });
+    const div = renderer.addNewUpload("file.txt", 1);
+
+    renderer.setSuccess(1, 4);
+
+    expect(div.querySelectorAll(".dff-filename")).toHaveLength(1);
+    expect(div.firstElementChild?.tagName).toBe("BUTTON");
+    expect(div.firstElementChild).toHaveClass("dff-filename");
+  });
+
+  test("keeps the filename as text when the upload fails", () => {
+    const { renderer } = createRenderer({ clickableFilenames: true });
+    const div = renderer.addNewUpload("file.txt", 1);
+
+    renderer.setError(1);
+
+    expect(div.querySelector(".dff-filename")?.tagName).toBe("SPAN");
+  });
+
+  test("escapes the filename of the button", () => {
+    const { renderer } = createRenderer({ clickableFilenames: true });
+
+    const div = renderer.addUploadedFile("<b>file</b>.txt", 1);
+
+    const filename = div.querySelector(".dff-filename");
+
+    expect(filename?.querySelector("b")).toBeNull();
+    expect(filename).toHaveTextContent("<b>file</b>.txt");
   });
 });
