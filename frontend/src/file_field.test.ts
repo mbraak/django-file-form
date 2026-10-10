@@ -24,6 +24,7 @@ interface CreateFileFieldParameters {
   multiple?: boolean;
   s3UploadDir?: null | string;
   supportDropArea?: boolean;
+  translations?: Record<string, string>;
 }
 
 const createHiddenInput = (name: string, value: string) => {
@@ -42,7 +43,8 @@ const createFileField = ({
   initial = [],
   multiple = false,
   s3UploadDir = null,
-  supportDropArea = false
+  supportDropArea = false,
+  translations = {}
 }: CreateFileFieldParameters = {}) => {
   const form = document.createElement("form");
   const parent = document.createElement("div");
@@ -75,7 +77,7 @@ const createFileField = ({
     s3UploadDir,
     skipRequired: false,
     supportDropArea,
-    translations: {},
+    translations,
     uploadUrl: "/upload/"
   });
 
@@ -131,6 +133,9 @@ const query = (parent: Element, selector: string) => {
 
   return element;
 };
+
+const getStatus = (parent: Element) =>
+  parent.querySelector(".dff-status")?.textContent;
 
 const existingFile: InitialFile = {
   name: "existing.txt",
@@ -310,6 +315,24 @@ describe("selecting files", () => {
     expect(parent.querySelector(".dff-invalid-files")).toHaveTextContent(
       "image.png: Invalid file type"
     );
+  });
+
+  test("marks the input as invalid when a file has an invalid type", () => {
+    const { input } = createFileField({ accept: ".txt" });
+
+    selectFiles(input, [mockFile("image.png")]);
+
+    expect(input).toHaveAttribute("aria-invalid", "true");
+  });
+
+  test("clears the errors when only valid files are selected", () => {
+    const { input, parent } = createFileField({ accept: ".txt" });
+    selectFiles(input, [mockFile("image.png")]);
+
+    selectFiles(input, [mockFile("file.txt")]);
+
+    expect(parent.querySelector(".dff-invalid-files")).toBeEmptyDOMElement();
+    expect(input).not.toHaveAttribute("aria-invalid");
   });
 
   test("replaces the current file when multiple is false", async () => {
@@ -538,7 +561,7 @@ describe("clicking delete", () => {
     expect(parent.querySelector(".dff-delete")).not.toHaveClass("dff-disabled");
   });
 
-  test("does nothing when the delete link is disabled", () => {
+  test("does nothing when the delete button is disabled", () => {
     const deleteSpy = vi.spyOn(ExistingFile.prototype, "delete");
     const { fileField, parent } = createFileField({ initial: [existingFile] });
     fileField.renderer.disableDelete(0);
@@ -585,6 +608,22 @@ describe("clicking cancel", () => {
     expect(parent.querySelector(".dff-file")).not.toBeInTheDocument();
     expect(onDelete).toHaveBeenCalledExactlyOnceWith(upload);
   });
+
+  test("aborts the upload only once when cancel is clicked twice", async () => {
+    const { fileField, input, parent } = createFileField();
+
+    selectFiles(input, [mockFile("file.txt")]);
+    const cancelButton = query(parent, ".dff-cancel");
+
+    cancelButton.click();
+    cancelButton.click();
+
+    await vi.waitFor(() => {
+      expect(fileField.uploads).toHaveLength(0);
+    });
+
+    expect(tusAbort).toHaveBeenCalledOnce();
+  });
 });
 
 describe("clicking the filename", () => {
@@ -605,6 +644,44 @@ describe("clicking the filename", () => {
     });
   });
 
+  test("renders the filename as a button when there is an onClick callback", () => {
+    const { parent } = createFileField({
+      callbacks: { onClick: vi.fn() },
+      initial: [existingFile]
+    });
+
+    expect(query(parent, ".dff-filename").tagName).toBe("BUTTON");
+  });
+
+  test("renders the filename as text when there is no onClick callback", () => {
+    const { parent } = createFileField({ initial: [existingFile] });
+
+    expect(query(parent, ".dff-filename").tagName).toBe("SPAN");
+  });
+
+  test("calls the onClick callback for a file that has been uploaded", () => {
+    const onClick = vi.fn();
+    const { fileField, input, parent } = createFileField({
+      callbacks: { onClick }
+    });
+
+    selectFiles(input, [mockFile("file.txt")]);
+    getTusUpload(fileField).onSuccess?.();
+
+    const filename = query(parent, ".dff-filename");
+
+    expect(filename.tagName).toBe("BUTTON");
+
+    filename.click();
+
+    expect(onClick).toHaveBeenCalledExactlyOnceWith({
+      fieldName: "input_file",
+      fileName: "file.txt",
+      id: undefined,
+      type: "tus"
+    });
+  });
+
   test("does not call the onClick callback for a file that is uploading", () => {
     const onClick = vi.fn();
     const { input, parent } = createFileField({ callbacks: { onClick } });
@@ -613,5 +690,130 @@ describe("clicking the filename", () => {
     query(parent, ".dff-filename").click();
 
     expect(onClick).not.toHaveBeenCalled();
+  });
+});
+
+describe("announcements", () => {
+  test("does not announce the initial files", () => {
+    const { parent } = createFileField({ initial: [existingFile] });
+
+    expect(getStatus(parent)).toBe("");
+  });
+
+  test("announces a finished upload", () => {
+    const { fileField, input, parent } = createFileField();
+
+    selectFiles(input, [mockFile("file.txt")]);
+    getTusUpload(fileField).onSuccess?.();
+
+    expect(getStatus(parent)).toBe("file.txt uploaded");
+  });
+
+  test("announces a failed upload", () => {
+    const { fileField, input, parent } = createFileField();
+
+    selectFiles(input, [mockFile("file.txt")]);
+    getTusUpload(fileField).onError?.(new Error("failed"));
+
+    expect(getStatus(parent)).toBe("Upload failed: file.txt");
+  });
+
+  test("announces a deleted file", async () => {
+    const { fileField, parent } = createFileField({ initial: [existingFile] });
+
+    query(parent, ".dff-delete").click();
+
+    await vi.waitFor(() => {
+      expect(fileField.uploads).toHaveLength(0);
+    });
+
+    expect(getStatus(parent)).toBe("existing.txt removed");
+  });
+
+  test("announces a failed delete", async () => {
+    vi.spyOn(ExistingFile.prototype, "delete").mockRejectedValue(
+      new Error("Delete failed")
+    );
+    const { parent } = createFileField({ initial: [existingFile] });
+
+    query(parent, ".dff-delete").click();
+
+    await vi.waitFor(() => {
+      expect(getStatus(parent)).toBe("Delete failed: existing.txt");
+    });
+  });
+
+  test("announces a canceled upload", async () => {
+    const { fileField, input, parent } = createFileField();
+
+    selectFiles(input, [mockFile("file.txt")]);
+    query(parent, ".dff-cancel").click();
+
+    await vi.waitFor(() => {
+      expect(fileField.uploads).toHaveLength(0);
+    });
+
+    expect(getStatus(parent)).toBe("file.txt removed");
+  });
+
+  test("uses the translations", () => {
+    const { fileField, input, parent } = createFileField({
+      translations: { "{filename} uploaded": "{filename} geüpload" }
+    });
+
+    selectFiles(input, [mockFile("file.txt")]);
+    getTusUpload(fileField).onSuccess?.();
+
+    expect(getStatus(parent)).toBe("file.txt geüpload");
+  });
+});
+
+describe("focus", () => {
+  test("moves the focus to the next file after clicking delete", async () => {
+    const { fileField, parent } = createFileField({
+      initial: [existingFile, { ...existingFile, name: "second.txt" }],
+      multiple: true
+    });
+    const deleteButton = query(parent, ".dff-file-id-0 .dff-delete");
+    deleteButton.focus();
+
+    deleteButton.click();
+
+    await vi.waitFor(() => {
+      expect(fileField.uploads).toHaveLength(1);
+    });
+
+    expect(query(parent, ".dff-file-id-1 .dff-delete")).toHaveFocus();
+  });
+
+  test("moves the focus to the input after canceling the only upload", async () => {
+    const { fileField, input, parent } = createFileField();
+    selectFiles(input, [mockFile("file.txt")]);
+    const cancelButton = query(parent, ".dff-cancel");
+    cancelButton.focus();
+
+    cancelButton.click();
+
+    await vi.waitFor(() => {
+      expect(fileField.uploads).toHaveLength(0);
+    });
+
+    expect(input).toHaveFocus();
+  });
+
+  test("does not move the focus when a file is replaced", async () => {
+    const { fileField, input, parent } = createFileField({
+      initial: [existingFile],
+      multiple: true
+    });
+    query(parent, ".dff-delete").focus();
+
+    selectFiles(input, [mockFile("existing.txt")]);
+
+    await vi.waitFor(() => {
+      expect(getUpload(fileField)).toBeInstanceOf(TusUpload);
+    });
+
+    expect(document.body).toHaveFocus();
   });
 });

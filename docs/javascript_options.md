@@ -32,6 +32,8 @@ The callbacks are:
       - `placeholder`: placeholder
       - `existing`: existing file
     - The filename is rendered with the `dff-filename` class. You can use this class to change the styling.
+    - When this callback is set, the filename of an uploaded file is rendered as a `<button>`, so that it can also be
+      clicked using the keyboard. While a file is uploading, the filename is plain text.
 
 - `onDelete`
   - Called when file is deleted

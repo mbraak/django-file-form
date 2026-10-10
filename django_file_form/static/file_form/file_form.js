@@ -204,19 +204,33 @@
   const getInputValueForFormAndPrefix = (form, fieldName, prefix) => findInput(form, fieldName, prefix)?.value;
   const getMetadataFieldName = (fieldName, prefix) => `${getInputNameWithoutPrefix(fieldName, prefix)}-metadata`;
 
+  let nextId = 0;
+  const createId = prefix => {
+    nextId += 1;
+    return `${prefix}-${nextId.toString()}`;
+  };
   class RenderUploadFile {
     _container;
+    _clickableFilenames;
     _errors;
     _input;
+    // Whether this code set aria-invalid on the input, and not the server
+    _isInvalidSetHere = false;
+    _status;
     _translations;
     constructor({
+      _clickableFilenames: clickableFilenames = false,
       _input: input,
       _parent: parent,
       _skipRequired: skipRequired,
       _translations: translations
     }) {
+      this._clickableFilenames = clickableFilenames;
       this._container = this._createFilesContainer(parent);
+      this._labelFilesContainer(input);
       this._errors = this._createErrorContainer(parent);
+      this._describeInputWithErrors(input);
+      this._status = this._createStatusContainer(parent);
       this._input = input;
       this._translations = translations;
       if (skipRequired) {
@@ -227,16 +241,16 @@
       const div = this._addFile(filename, uploadIndex);
       const progressSpan = document.createElement("span");
       progressSpan.className = "dff-progress";
+      progressSpan.setAttribute("role", "progressbar");
+      progressSpan.setAttribute("aria-label", this._formatTranslation("Upload progress for {filename}", filename));
+      progressSpan.setAttribute("aria-valuemin", "0");
+      progressSpan.setAttribute("aria-valuemax", "100");
+      progressSpan.setAttribute("aria-valuenow", "0");
       const innerSpan = document.createElement("span");
       innerSpan.className = "dff-progress-inner";
       progressSpan.append(innerSpan);
       div.append(progressSpan);
-      const cancelLink = document.createElement("a");
-      cancelLink.className = "dff-cancel";
-      this._setTextContent(cancelLink, this._getTranslation("Cancel"));
-      cancelLink.dataset.index = uploadIndex.toString();
-      cancelLink.href = "#";
-      div.append(cancelLink);
+      div.append(this._createButton("dff-cancel", this._getTranslation("Cancel"), uploadIndex));
       return div;
     }
     _addUploadedFile(filename, uploadIndex, filesize) {
@@ -244,25 +258,37 @@
       this._setSuccess(uploadIndex, filesize);
       return element;
     }
+
+    // Tells screen reader users what happened to a file: the status element is a
+    // live region, which is read out when its text changes.
+    _announce(key, filename) {
+      this._status.replaceChildren(document.createTextNode(this._formatTranslation(key, filename)));
+    }
     _clearInput() {
       this._input.value = "";
     }
-    _deleteFile(index) {
+
+    // With moveFocus, the focus goes to the next file, the previous file or the
+    // input, instead of being lost when the element that has it is removed.
+    _deleteFile(index, moveFocus = false) {
       const div = this._findFileDiv(index);
-      if (div) {
-        div.remove();
+      if (!div) {
+        return;
       }
+      const focusTarget = moveFocus && this._mayMoveFocus(div) ? this._findFocusTarget(div) : null;
+      div.remove();
+      focusTarget?.focus();
     }
     _disableCancel(index) {
-      const cancelSpan = this._findCancelSpan(index);
-      if (cancelSpan) {
-        cancelSpan.classList.add("dff-disabled");
+      const cancelButton = this._findCancelButton(index);
+      if (cancelButton) {
+        this._setButtonDisabled(cancelButton, true);
       }
     }
     _disableDelete(index) {
-      const deleteLink = this._findDeleteLink(index);
-      if (deleteLink) {
-        deleteLink.classList.add("dff-disabled");
+      const deleteButton = this._findDeleteButton(index);
+      if (deleteButton) {
+        this._setButtonDisabled(deleteButton, true);
       }
     }
     _findFileDiv(index) {
@@ -280,12 +306,21 @@
       }
       const dropHint = document.createElement("div");
       dropHint.className = "dff-drop-hint";
+      // Dropping only works with a mouse, and the files container is a list,
+      // which may only contain list items
+      dropHint.setAttribute("aria-hidden", "true");
       this._setTextContent(dropHint, this._getTranslation("Drop your files here"));
       this._container.append(dropHint);
     }
-    _setDeleteFailed(index) {
+    _setDeleteFailed(index, moveFocus = false) {
       this._setErrorMessage(index, this._getTranslation("Delete failed"));
       this._enableDelete(index);
+      const div = this._findFileDiv(index);
+
+      // Disabling the delete button may have taken the focus away from it
+      if (moveFocus && div && this._mayMoveFocus(div)) {
+        this._findDeleteButton(index)?.focus();
+      }
     }
     _setError(index) {
       this._setErrorMessage(index, this._getTranslation("Upload failed"));
@@ -297,6 +332,12 @@
       this._removeCancel(index);
     }
     _setErrorInvalidFiles(files) {
+      this._clearInput();
+      if (files.length === 0) {
+        this._errors.replaceChildren();
+        this._setInputInvalid(false);
+        return;
+      }
       const errorsMessages = document.createElement("ul");
       for (const file of files) {
         const msg = document.createElement("li");
@@ -306,40 +347,42 @@
         errorsMessages.append(msg);
       }
       this._errors.replaceChildren(errorsMessages);
-      this._clearInput();
+      this._setInputInvalid(true);
     }
     _setSuccess(index, size) {
       const el = this._findFileDiv(index);
       if (el) {
         el.classList.add("dff-upload-success");
+        if (this._clickableFilenames) {
+          this._makeFilenameClickable(el, index);
+        }
         if (size != null) {
           const fileSizeInfo = document.createElement("span");
           this._setTextContent(fileSizeInfo, formatBytes(size, 2));
           fileSizeInfo.className = "dff-filesize";
           el.append(fileSizeInfo);
         }
-        const deleteLink = document.createElement("a");
-        this._setTextContent(deleteLink, this._getTranslation("Delete"));
-        deleteLink.className = "dff-delete";
-        deleteLink.dataset.index = index.toString();
-        deleteLink.href = "#";
-        el.append(deleteLink);
+        el.append(this._createButton("dff-delete", this._getTranslation("Delete"), index));
       }
       this._removeProgress(index);
       this._removeCancel(index);
     }
     _updateProgress(index, percentage) {
       const el = this._container.querySelector(`.dff-file-id-${index.toString()}`);
-      if (el) {
-        const innerProgressSpan = el.querySelector(".dff-progress-inner");
-        if (innerProgressSpan) {
-          innerProgressSpan.style.width = `${percentage}%`;
-        }
+      const progressSpan = el?.querySelector(".dff-progress");
+      if (!progressSpan) {
+        return;
+      }
+      progressSpan.setAttribute("aria-valuenow", percentage);
+      const innerProgressSpan = progressSpan.querySelector(".dff-progress-inner");
+      if (innerProgressSpan) {
+        innerProgressSpan.style.width = `${percentage}%`;
       }
     }
     _addFile(filename, uploadIndex) {
       const div = document.createElement("div");
       div.className = `dff-file dff-file-id-${uploadIndex.toString()}`;
+      div.setAttribute("role", "listitem");
       const nameSpan = document.createElement("span");
       nameSpan.textContent = filename;
       nameSpan.className = "dff-filename";
@@ -349,45 +392,120 @@
       this._input.required = false;
       return div;
     }
+    _createButton(className, text, uploadIndex) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = className;
+      button.dataset.index = uploadIndex.toString();
+      this._setTextContent(button, text);
+      return button;
+    }
     _createErrorContainer = parent => {
       const div = document.createElement("div");
       div.className = "dff-invalid-files";
+      div.setAttribute("role", "alert");
       parent.append(div);
       return div;
     };
     _createFilesContainer = parent => {
       const div = document.createElement("div");
       div.className = "dff-files";
+      div.setAttribute("role", "list");
       parent.append(div);
       return div;
     };
+    _createStatusContainer = parent => {
+      const div = document.createElement("div");
+      div.className = "dff-status";
+      div.setAttribute("role", "status");
+      parent.append(div);
+      return div;
+    };
+
+    // A screen reader reads the errors when the input has the focus. Django may
+    // have set aria-describedby already, for the help text.
+    _describeInputWithErrors(input) {
+      this._errors.id = createId("dff-errors");
+      const describedBy = input.getAttribute("aria-describedby");
+      input.setAttribute("aria-describedby", describedBy ? `${describedBy} ${this._errors.id}` : this._errors.id);
+    }
     _enableDelete(index) {
-      const deleteLink = this._findDeleteLink(index);
-      if (deleteLink) {
-        deleteLink.classList.remove("dff-disabled");
+      const deleteButton = this._findDeleteButton(index);
+      if (deleteButton) {
+        this._setButtonDisabled(deleteButton, false);
       }
     }
-    _findCancelSpan(index) {
+    _findCancelButton(index) {
       const el = this._findFileDiv(index);
       if (!el) {
         return null;
       }
       return el.querySelector(".dff-cancel");
     }
-    _findDeleteLink(index) {
+    _findDeleteButton(index) {
       const div = this._findFileDiv(index);
       if (!div) {
         return div;
       }
       return div.querySelector(".dff-delete");
     }
+
+    // The delete or cancel button of the next file, or else of the previous file,
+    // or else the input. Landing on the same kind of button makes it easy to
+    // remove several files in a row.
+    _findFocusTarget(div) {
+      const siblings = Array.from(this._container.querySelectorAll(".dff-file"));
+      const index = siblings.indexOf(div);
+      const candidates = [...siblings.slice(index + 1), ...siblings.slice(0, index).reverse()];
+      for (const candidate of candidates) {
+        const button = candidate.querySelector(".dff-delete:enabled, .dff-cancel:enabled") ?? candidate.querySelector("button:enabled");
+        if (button) {
+          return button;
+        }
+      }
+      return this._input;
+    }
+    _formatTranslation(key, filename) {
+      // A replacer function, so that "$&" in the filename is not a pattern
+      return this._getTranslation(key).replace("{filename}", () => filename);
+    }
     _getTranslation(key) {
       return this._translations[key] ?? key;
     }
+
+    // Names the list of files after the label of the field, so that the lists
+    // of several fields can be told apart. A label that wraps the input is
+    // skipped: its name would include the text of the input itself.
+    _labelFilesContainer(input) {
+      const label = input.labels?.[0];
+      if (!label || label.contains(input)) {
+        return;
+      }
+      if (!label.id) {
+        label.id = createId("dff-label");
+      }
+      this._container.setAttribute("aria-labelledby", label.id);
+    }
+
+    // A filename that can be clicked is a button, so that it can be reached and
+    // pressed with the keyboard
+    _makeFilenameClickable(el, index) {
+      const nameSpan = el.querySelector("span.dff-filename");
+      if (nameSpan) {
+        nameSpan.replaceWith(this._createButton("dff-filename", nameSpan.textContent, index));
+      }
+    }
+
+    // Only when the focus is still in the file, or was lost because a button in
+    // it was disabled: the focus is not taken away from somewhere else.
+    _mayMoveFocus(div) {
+      const active = document.activeElement;
+      return active == null || active === document.body || div.contains(active);
+    }
     _removeCancel(index) {
-      const cancelSpan = this._findCancelSpan(index);
-      if (cancelSpan) {
-        cancelSpan.remove();
+      const cancelButton = this._findCancelButton(index);
+      if (cancelButton) {
+        cancelButton.remove();
       }
     }
     _removeProgress(index) {
@@ -398,6 +516,11 @@
           progressSpan.remove();
         }
       }
+    }
+    _setButtonDisabled(button, disabled) {
+      button.disabled = disabled;
+      // Keep the class for existing stylesheets
+      button.classList.toggle("dff-disabled", disabled);
     }
     _setErrorMessage(index, message) {
       const el = this._findFileDiv(index);
@@ -412,6 +535,20 @@
       span.classList.add("dff-error");
       this._setTextContent(span, message);
       el.append(span);
+    }
+
+    // Django sets aria-invalid when the server rejected the field; that is left
+    // alone
+    _setInputInvalid(invalid) {
+      if (invalid) {
+        if (this._input.getAttribute("aria-invalid") !== "true") {
+          this._input.setAttribute("aria-invalid", "true");
+          this._isInvalidSetHere = true;
+        }
+      } else if (this._isInvalidSetHere) {
+        this._input.removeAttribute("aria-invalid");
+        this._isInvalidSetHere = false;
+      }
     }
     _setTextContent(element, text) {
       element.append(document.createTextNode(text));
@@ -922,16 +1059,16 @@
   }
 
   class NoopUrlStorage {
-    _listAllUploads() {
+    listAllUploads() {
       return Promise.resolve([]);
     }
-    _findUploadsByFingerprint(_fingerprint) {
+    findUploadsByFingerprint(_fingerprint) {
       return Promise.resolve([]);
     }
-    _removeUpload(_urlStorageKey) {
+    removeUpload(_urlStorageKey) {
       return Promise.resolve();
     }
-    _addUpload(_fingerprint, _upload) {
+    addUpload(_fingerprint, _upload) {
       return Promise.resolve(null);
     }
   }
@@ -3002,7 +3139,7 @@
       this._file = file;
       this.size = file.size;
     }
-    _slice(start, end) {
+    slice(start, end) {
       // In Apache Cordova applications, a File must be resolved using
       // FileReader instances, see
       // https://cordova.apache.org/docs/en/8.x/reference/cordova-plugin-file/index.html#read-a-file
@@ -3016,7 +3153,7 @@
         done
       });
     }
-    _close() {
+    close() {
       // Nothing to do here since we don't need to release any resources.
     }
   }
@@ -3057,7 +3194,7 @@
       this._reader = reader;
       this._done = false;
     }
-    _slice(start, end) {
+    slice(start, end) {
       if (start < this._bufferOffset) {
         return Promise.reject(new Error("Requested data is before the reader's current offset"));
       }
@@ -3104,7 +3241,7 @@
       // chunk from the buffer.
       return this._buffer.slice(0, end - start);
     }
-    _close() {
+    close() {
       if (this._reader.cancel) {
         this._reader.cancel();
       }
@@ -3112,7 +3249,7 @@
   }
 
   let FileReader$1 = class FileReader {
-    async _openFile(input, chunkSize) {
+    async openFile(input, chunkSize) {
       // In React Native, when user selects a file, instead of a File or Blob,
       // you usually get a file object {} with a uri property that contains
       // a local path to the file. We use XMLHttpRequest to fetch
@@ -3178,10 +3315,10 @@
   }
 
   class XHRHttpStack {
-    _createRequest(method, url) {
+    createRequest(method, url) {
       return new Request(method, url);
     }
-    _getName() {
+    getName() {
       return 'XHRHttpStack';
     }
   }
@@ -3193,20 +3330,20 @@
       this._url = url;
       this._headers = {};
     }
-    _getMethod() {
+    getMethod() {
       return this._method;
     }
-    _getURL() {
+    getURL() {
       return this._url;
     }
-    _setHeader(header, value) {
+    setHeader(header, value) {
       this._xhr.setRequestHeader(header, value);
       this._headers[header] = value;
     }
-    _getHeader(header) {
+    getHeader(header) {
       return this._headers[header];
     }
-    _setProgressHandler(progressHandler) {
+    setProgressHandler(progressHandler) {
       // Test support for progress events before attaching an event listener
       if (!('upload' in this._xhr)) {
         return;
@@ -3218,7 +3355,7 @@
         progressHandler(e.loaded);
       };
     }
-    _send(body = null) {
+    send(body = null) {
       return new Promise((resolve, reject) => {
         this._xhr.onload = () => {
           resolve(new Response(this._xhr));
@@ -3229,11 +3366,11 @@
         this._xhr.send(body);
       });
     }
-    _abort() {
+    abort() {
       this._xhr.abort();
       return Promise.resolve();
     }
-    _getUnderlyingObject() {
+    getUnderlyingObject() {
       return this._xhr;
     }
   }
@@ -3241,16 +3378,16 @@
     constructor(xhr) {
       this._xhr = xhr;
     }
-    _getStatus() {
+    getStatus() {
       return this._xhr.status;
     }
-    _getHeader(header) {
+    getHeader(header) {
       return this._xhr.getResponseHeader(header);
     }
-    _getBody() {
+    getBody() {
       return this._xhr.responseText;
     }
-    _getUnderlyingObject() {
+    getUnderlyingObject() {
       return this._xhr;
     }
   }
@@ -3280,19 +3417,19 @@
   }
   const canStoreURLs = hasStorage;
   class WebStorageUrlStorage {
-    _findAllUploads() {
+    findAllUploads() {
       const results = this._findEntries('tus::');
       return Promise.resolve(results);
     }
-    _findUploadsByFingerprint(fingerprint) {
+    findUploadsByFingerprint(fingerprint) {
       const results = this._findEntries(`tus::${fingerprint}::`);
       return Promise.resolve(results);
     }
-    _removeUpload(urlStorageKey) {
+    removeUpload(urlStorageKey) {
       localStorage.removeItem(urlStorageKey);
       return Promise.resolve();
     }
-    _addUpload(fingerprint, upload) {
+    addUpload(fingerprint, upload) {
       const id = Math.round(Math.random() * 1e12);
       const key = `tus::${fingerprint}::${id}`;
       localStorage.setItem(key, JSON.stringify(upload));
@@ -3331,7 +3468,7 @@
       };
       super(file, options);
     }
-    static _terminate(url, options = {}) {
+    static terminate(url, options = {}) {
       options = {
         ...defaultOptions,
         ...options
@@ -3399,13 +3536,13 @@
       this.onSuccess = undefined;
     }
     async abort() {
-      await this._upload._abort(true);
+      await this._upload.abort(true);
     }
     async delete() {
-      if (!this._upload._url) {
+      if (!this._upload.url) {
         return;
       }
-      await deleteUpload(this._upload._url, this._csrfToken);
+      await deleteUpload(this._upload.url, this._csrfToken);
     }
     getId() {
       return this._id;
@@ -3420,10 +3557,10 @@
       };
     }
     getSize() {
-      return this._upload._file.size;
+      return this._upload.file.size;
     }
     start() {
-      this._upload._start();
+      this._upload.start();
     }
     _addCsrTokenToRequest = request => {
       request.setHeader("X-CSRFToken", this._csrfToken);
@@ -3659,6 +3796,7 @@
       this._uploads = [];
       this._nextUploadIndex = 0;
       this._renderer = new RenderUploadFile({
+        _clickableFilenames: callbacks.onClick != null,
         _input: input,
         _parent: parent,
         _skipRequired: skipRequired,
@@ -3678,8 +3816,8 @@
         return;
       }
       const {
-        multiple,
-        renderer
+        _multiple: multiple,
+        _renderer: renderer
       } = this;
       const addInitialFile = initialFile => {
         const {
@@ -3741,10 +3879,11 @@
     _getUploadByIndex(uploadIndex) {
       return this._uploads.find(upload => upload.uploadIndex === uploadIndex);
     }
-    async _handleCancel(upload) {
+    async _handleCancel(upload, moveFocus = false) {
       this._renderer._disableCancel(upload.uploadIndex);
       await upload.abort();
-      this._removeUploadFromList(upload);
+      this._removeUploadFromList(upload, moveFocus);
+      this._renderer._announce("{filename} removed", upload.name);
     }
     _handleClick = e => {
       const target = e.target;
@@ -3756,17 +3895,15 @@
         const uploadIndex = parseInt(dataIndex, 10);
         return this._getUploadByIndex(uploadIndex);
       };
-      if (target.classList.contains("dff-delete") && !target.classList.contains("dff-disabled")) {
-        e.preventDefault();
+      if (target.classList.contains("dff-delete")) {
         const upload = getUpload();
         if (upload) {
-          void this._removeExistingUpload(upload);
+          void this._removeExistingUpload(upload, true);
         }
       } else if (target.classList.contains("dff-cancel")) {
-        e.preventDefault();
         const upload = getUpload();
         if (upload) {
-          void this._handleCancel(upload);
+          void this._handleCancel(upload, true);
         }
       } else if (target.classList.contains("dff-filename")) {
         e.preventDefault();
@@ -3783,6 +3920,7 @@
     };
     _handleError = (upload, error) => {
       this._renderer._setError(upload.uploadIndex);
+      this._renderer._announce("Upload failed: {filename}", upload.name);
       upload.status = "error";
       const {
         onError
@@ -3810,11 +3948,12 @@
     };
     _handleSuccess = upload => {
       const {
-        renderer
+        _renderer: renderer
       } = this;
       this._updatePlaceholderInput();
       renderer._clearInput();
       renderer._setSuccess(upload.uploadIndex, upload.getSize());
+      renderer._announce("{filename} uploaded", upload.name);
       upload.status = "done";
       const {
         onSuccess
@@ -3850,7 +3989,10 @@
       void this._uploadFiles([...acceptedFiles]);
       this._renderer._clearInput();
     };
-    async _removeExistingUpload(upload) {
+
+    // moveFocus: whether the user removed the file, with the delete or cancel
+    // button, and the focus should not be lost
+    async _removeExistingUpload(upload, moveFocus = false) {
       const element = this._renderer._findFileDiv(upload.uploadIndex);
       if (element) {
         this._emitEvent("removeUpload", element, upload);
@@ -3863,15 +4005,17 @@
         try {
           await upload.delete();
         } catch {
-          this._renderer._setDeleteFailed(upload.uploadIndex);
+          this._renderer._setDeleteFailed(upload.uploadIndex, moveFocus);
+          this._renderer._announce("Delete failed: {filename}", upload.name);
           return;
         }
       }
-      this._removeUploadFromList(upload);
+      this._removeUploadFromList(upload, moveFocus);
       this._updatePlaceholderInput();
+      this._renderer._announce("{filename} removed", upload.name);
     }
-    _removeUploadFromList(upload) {
-      this._renderer._deleteFile(upload.uploadIndex);
+    _removeUploadFromList(upload, moveFocus = false) {
+      this._renderer._deleteFile(upload.uploadIndex, moveFocus);
       const index = this._uploads.indexOf(upload);
       if (index >= 0) {
         this._uploads.splice(index, 1);
@@ -3895,8 +4039,8 @@
     async _uploadFile(file) {
       const createUpload = () => {
         const {
-          csrfToken,
-          s3UploadDir
+          _csrfToken: csrfToken,
+          _s3UploadDir: s3UploadDir
         } = this;
         if (s3UploadDir != null) {
           return new S3Upload({
@@ -3920,10 +4064,10 @@
         }
       };
       const {
-        fieldName,
-        formId,
-        renderer,
-        uploadUrl
+        _fieldName: fieldName,
+        _formId: formId,
+        _renderer: renderer,
+        _uploadUrl: uploadUrl
       } = this;
       const fileName = file.name;
       const existingUpload = this._findUploadByName(fileName);

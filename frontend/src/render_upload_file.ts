@@ -1,25 +1,42 @@
 import { formatBytes } from "./util.ts";
 
+let nextId = 0;
+
+const createId = (prefix: string): string => {
+  nextId += 1;
+  return `${prefix}-${nextId.toString()}`;
+};
+
 class RenderUploadFile {
   public container: Element;
 
+  private clickableFilenames: boolean;
   private errors: Element;
   private input: HTMLInputElement;
+  // Whether this code set aria-invalid on the input, and not the server
+  private isInvalidSetHere = false;
+  private status: Element;
   private translations: Record<string, string>;
 
   constructor({
+    clickableFilenames = false,
     input,
     parent,
     skipRequired,
     translations
   }: {
+    clickableFilenames?: boolean;
     input: HTMLInputElement;
     parent: Element;
     skipRequired: boolean;
     translations: Record<string, string>;
   }) {
+    this.clickableFilenames = clickableFilenames;
     this.container = this.createFilesContainer(parent);
+    this.labelFilesContainer(input);
     this.errors = this.createErrorContainer(parent);
+    this.describeInputWithErrors(input);
+    this.status = this.createStatusContainer(parent);
     this.input = input;
     this.translations = translations;
 
@@ -33,6 +50,14 @@ class RenderUploadFile {
 
     const progressSpan = document.createElement("span");
     progressSpan.className = "dff-progress";
+    progressSpan.setAttribute("role", "progressbar");
+    progressSpan.setAttribute(
+      "aria-label",
+      this.formatTranslation("Upload progress for {filename}", filename)
+    );
+    progressSpan.setAttribute("aria-valuemin", "0");
+    progressSpan.setAttribute("aria-valuemax", "100");
+    progressSpan.setAttribute("aria-valuenow", "0");
 
     const innerSpan = document.createElement("span");
     innerSpan.className = "dff-progress-inner";
@@ -40,13 +65,13 @@ class RenderUploadFile {
     progressSpan.append(innerSpan);
     div.append(progressSpan);
 
-    const cancelLink = document.createElement("a");
-    cancelLink.className = "dff-cancel";
-
-    this.setTextContent(cancelLink, this.getTranslation("Cancel"));
-    cancelLink.dataset.index = uploadIndex.toString();
-    cancelLink.href = "#";
-    div.append(cancelLink);
+    div.append(
+      this.createButton(
+        "dff-cancel",
+        this.getTranslation("Cancel"),
+        uploadIndex
+      )
+    );
 
     return div;
   }
@@ -61,31 +86,47 @@ class RenderUploadFile {
     return element;
   }
 
+  // Tells screen reader users what happened to a file: the status element is a
+  // live region, which is read out when its text changes.
+  public announce(key: string, filename: string): void {
+    this.status.replaceChildren(
+      document.createTextNode(this.formatTranslation(key, filename))
+    );
+  }
+
   public clearInput(): void {
     this.input.value = "";
   }
 
-  public deleteFile(index: number): void {
+  // With moveFocus, the focus goes to the next file, the previous file or the
+  // input, instead of being lost when the element that has it is removed.
+  public deleteFile(index: number, moveFocus = false): void {
     const div = this.findFileDiv(index);
 
-    if (div) {
-      div.remove();
+    if (!div) {
+      return;
     }
+
+    const focusTarget =
+      moveFocus && this.mayMoveFocus(div) ? this.findFocusTarget(div) : null;
+
+    div.remove();
+    focusTarget?.focus();
   }
 
   public disableCancel(index: number): void {
-    const cancelSpan = this.findCancelSpan(index);
+    const cancelButton = this.findCancelButton(index);
 
-    if (cancelSpan) {
-      cancelSpan.classList.add("dff-disabled");
+    if (cancelButton) {
+      this.setButtonDisabled(cancelButton, true);
     }
   }
 
   public disableDelete(index: number): void {
-    const deleteLink = this.findDeleteLink(index);
+    const deleteButton = this.findDeleteButton(index);
 
-    if (deleteLink) {
-      deleteLink.classList.add("dff-disabled");
+    if (deleteButton) {
+      this.setButtonDisabled(deleteButton, true);
     }
   }
 
@@ -108,15 +149,25 @@ class RenderUploadFile {
 
     const dropHint = document.createElement("div");
     dropHint.className = "dff-drop-hint";
+    // Dropping only works with a mouse, and the files container is a list,
+    // which may only contain list items
+    dropHint.setAttribute("aria-hidden", "true");
     this.setTextContent(dropHint, this.getTranslation("Drop your files here"));
 
     this.container.append(dropHint);
   }
 
-  public setDeleteFailed(index: number): void {
+  public setDeleteFailed(index: number, moveFocus = false): void {
     this.setErrorMessage(index, this.getTranslation("Delete failed"));
 
     this.enableDelete(index);
+
+    const div = this.findFileDiv(index);
+
+    // Disabling the delete button may have taken the focus away from it
+    if (moveFocus && div && this.mayMoveFocus(div)) {
+      this.findDeleteButton(index)?.focus();
+    }
   }
 
   public setError(index: number): void {
@@ -132,6 +183,14 @@ class RenderUploadFile {
   }
 
   public setErrorInvalidFiles(files: File[]): void {
+    this.clearInput();
+
+    if (files.length === 0) {
+      this.errors.replaceChildren();
+      this.setInputInvalid(false);
+      return;
+    }
+
     const errorsMessages = document.createElement("ul");
 
     for (const file of files) {
@@ -143,13 +202,17 @@ class RenderUploadFile {
     }
 
     this.errors.replaceChildren(errorsMessages);
-    this.clearInput();
+    this.setInputInvalid(true);
   }
 
   public setSuccess(index: number, size?: number): void {
     const el = this.findFileDiv(index);
     if (el) {
       el.classList.add("dff-upload-success");
+
+      if (this.clickableFilenames) {
+        this.makeFilenameClickable(el, index);
+      }
 
       if (size != null) {
         const fileSizeInfo = document.createElement("span");
@@ -159,13 +222,9 @@ class RenderUploadFile {
         el.append(fileSizeInfo);
       }
 
-      const deleteLink = document.createElement("a");
-      this.setTextContent(deleteLink, this.getTranslation("Delete"));
-      deleteLink.className = "dff-delete";
-      deleteLink.dataset.index = index.toString();
-      deleteLink.href = "#";
-
-      el.append(deleteLink);
+      el.append(
+        this.createButton("dff-delete", this.getTranslation("Delete"), index)
+      );
     }
 
     this.removeProgress(index);
@@ -174,18 +233,27 @@ class RenderUploadFile {
 
   public updateProgress(index: number, percentage: string): void {
     const el = this.container.querySelector(`.dff-file-id-${index.toString()}`);
-    if (el) {
-      const innerProgressSpan = el.querySelector(".dff-progress-inner");
+    const progressSpan = el?.querySelector(".dff-progress");
 
-      if (innerProgressSpan) {
-        (innerProgressSpan as HTMLElement).style.width = `${percentage}%`;
-      }
+    if (!progressSpan) {
+      return;
+    }
+
+    progressSpan.setAttribute("aria-valuenow", percentage);
+
+    const innerProgressSpan = progressSpan.querySelector<HTMLElement>(
+      ".dff-progress-inner"
+    );
+
+    if (innerProgressSpan) {
+      innerProgressSpan.style.width = `${percentage}%`;
     }
   }
 
   private addFile(filename: string, uploadIndex: number): HTMLElement {
     const div = document.createElement("div");
     div.className = `dff-file dff-file-id-${uploadIndex.toString()}`;
+    div.setAttribute("role", "listitem");
 
     const nameSpan = document.createElement("span");
     nameSpan.textContent = filename;
@@ -199,9 +267,24 @@ class RenderUploadFile {
     return div;
   }
 
+  private createButton(
+    className: string,
+    text: string,
+    uploadIndex: number
+  ): HTMLButtonElement {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = className;
+    button.dataset.index = uploadIndex.toString();
+    this.setTextContent(button, text);
+
+    return button;
+  }
+
   private createErrorContainer = (parent: Element): Element => {
     const div = document.createElement("div");
     div.className = "dff-invalid-files";
+    div.setAttribute("role", "alert");
     parent.append(div);
     return div;
   };
@@ -209,47 +292,139 @@ class RenderUploadFile {
   private createFilesContainer = (parent: Element): Element => {
     const div = document.createElement("div");
     div.className = "dff-files";
+    div.setAttribute("role", "list");
     parent.append(div);
 
     return div;
   };
 
-  private enableDelete(index: number): void {
-    const deleteLink = this.findDeleteLink(index);
+  private createStatusContainer = (parent: Element): Element => {
+    const div = document.createElement("div");
+    div.className = "dff-status";
+    div.setAttribute("role", "status");
+    parent.append(div);
 
-    if (deleteLink) {
-      deleteLink.classList.remove("dff-disabled");
+    return div;
+  };
+
+  // A screen reader reads the errors when the input has the focus. Django may
+  // have set aria-describedby already, for the help text.
+  private describeInputWithErrors(input: HTMLInputElement): void {
+    this.errors.id = createId("dff-errors");
+
+    const describedBy = input.getAttribute("aria-describedby");
+
+    input.setAttribute(
+      "aria-describedby",
+      describedBy ? `${describedBy} ${this.errors.id}` : this.errors.id
+    );
+  }
+
+  private enableDelete(index: number): void {
+    const deleteButton = this.findDeleteButton(index);
+
+    if (deleteButton) {
+      this.setButtonDisabled(deleteButton, false);
     }
   }
 
-  private findCancelSpan(index: number): HTMLElement | null {
+  private findCancelButton(index: number): HTMLButtonElement | null {
     const el = this.findFileDiv(index);
 
     if (!el) {
       return null;
     }
 
-    return el.querySelector<HTMLElement>(".dff-cancel");
+    return el.querySelector<HTMLButtonElement>(".dff-cancel");
   }
 
-  private findDeleteLink(index: number): HTMLElement | null {
+  private findDeleteButton(index: number): HTMLButtonElement | null {
     const div = this.findFileDiv(index);
     if (!div) {
       return div;
     }
 
-    return div.querySelector(".dff-delete");
+    return div.querySelector<HTMLButtonElement>(".dff-delete");
+  }
+
+  // The delete or cancel button of the next file, or else of the previous file,
+  // or else the input. Landing on the same kind of button makes it easy to
+  // remove several files in a row.
+  private findFocusTarget(div: Element): HTMLElement {
+    const siblings = Array.from(
+      this.container.querySelectorAll<HTMLElement>(".dff-file")
+    );
+    const index = siblings.indexOf(div as HTMLElement);
+    const candidates = [
+      ...siblings.slice(index + 1),
+      ...siblings.slice(0, index).reverse()
+    ];
+
+    for (const candidate of candidates) {
+      const button =
+        candidate.querySelector<HTMLElement>(
+          ".dff-delete:enabled, .dff-cancel:enabled"
+        ) ?? candidate.querySelector<HTMLElement>("button:enabled");
+
+      if (button) {
+        return button;
+      }
+    }
+
+    return this.input;
+  }
+
+  private formatTranslation(key: string, filename: string): string {
+    // A replacer function, so that "$&" in the filename is not a pattern
+    return this.getTranslation(key).replace("{filename}", () => filename);
   }
 
   private getTranslation(key: string) {
     return this.translations[key] ?? key;
   }
 
-  private removeCancel(index: number): void {
-    const cancelSpan = this.findCancelSpan(index);
+  // Names the list of files after the label of the field, so that the lists
+  // of several fields can be told apart. A label that wraps the input is
+  // skipped: its name would include the text of the input itself.
+  private labelFilesContainer(input: HTMLInputElement): void {
+    const label = input.labels?.[0];
 
-    if (cancelSpan) {
-      cancelSpan.remove();
+    if (!label || label.contains(input)) {
+      return;
+    }
+
+    if (!label.id) {
+      label.id = createId("dff-label");
+    }
+
+    this.container.setAttribute("aria-labelledby", label.id);
+  }
+
+  // A filename that can be clicked is a button, so that it can be reached and
+  // pressed with the keyboard
+  private makeFilenameClickable(el: Element, index: number): void {
+    const nameSpan = el.querySelector("span.dff-filename");
+
+    if (nameSpan) {
+      nameSpan.replaceWith(
+        this.createButton("dff-filename", nameSpan.textContent, index)
+      );
+    }
+  }
+
+  // Only when the focus is still in the file, or was lost because a button in
+  // it was disabled: the focus is not taken away from somewhere else.
+  private mayMoveFocus(div: Element): boolean {
+    const active = document.activeElement;
+
+    return active == null || active === document.body || div.contains(active);
+  }
+
+  private removeCancel(index: number): void {
+    const cancelButton = this.findCancelButton(index);
+
+    if (cancelButton) {
+      cancelButton.remove();
     }
   }
 
@@ -263,6 +438,12 @@ class RenderUploadFile {
         progressSpan.remove();
       }
     }
+  }
+
+  private setButtonDisabled(button: HTMLButtonElement, disabled: boolean) {
+    button.disabled = disabled;
+    // Keep the class for existing stylesheets
+    button.classList.toggle("dff-disabled", disabled);
   }
 
   private setErrorMessage(index: number, message: string): void {
@@ -281,6 +462,20 @@ class RenderUploadFile {
     this.setTextContent(span, message);
 
     el.append(span);
+  }
+
+  // Django sets aria-invalid when the server rejected the field; that is left
+  // alone
+  private setInputInvalid(invalid: boolean): void {
+    if (invalid) {
+      if (this.input.getAttribute("aria-invalid") !== "true") {
+        this.input.setAttribute("aria-invalid", "true");
+        this.isInvalidSetHere = true;
+      }
+    } else if (this.isInvalidSetHere) {
+      this.input.removeAttribute("aria-invalid");
+      this.isInvalidSetHere = false;
+    }
   }
 
   private setTextContent(element: HTMLElement, text: string) {
