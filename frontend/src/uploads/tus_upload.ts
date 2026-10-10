@@ -114,9 +114,9 @@ export default class TusUpload extends BaseUpload {
     }
   };
 
-  private _handleProgress = (bytesUploaded: number, bytesTotal: number) => {
+  private _handleProgress = (bytesSent: number, bytesTotal: null | number) => {
     if (this.onProgress) {
-      this.onProgress(bytesUploaded, bytesTotal);
+      this.onProgress(bytesSent, bytesTotal ?? 0);
     }
   };
 
