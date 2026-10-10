@@ -767,3 +767,53 @@ describe("announcements", () => {
     expect(getStatus(parent)).toBe("file.txt geüpload");
   });
 });
+
+describe("focus", () => {
+  test("moves the focus to the next file after clicking delete", async () => {
+    const { fileField, parent } = createFileField({
+      initial: [existingFile, { ...existingFile, name: "second.txt" }],
+      multiple: true
+    });
+    const deleteButton = query(parent, ".dff-file-id-0 .dff-delete");
+    deleteButton.focus();
+
+    deleteButton.click();
+
+    await vi.waitFor(() => {
+      expect(fileField.uploads).toHaveLength(1);
+    });
+
+    expect(query(parent, ".dff-file-id-1 .dff-delete")).toHaveFocus();
+  });
+
+  test("moves the focus to the input after canceling the only upload", async () => {
+    const { fileField, input, parent } = createFileField();
+    selectFiles(input, [mockFile("file.txt")]);
+    const cancelButton = query(parent, ".dff-cancel");
+    cancelButton.focus();
+
+    cancelButton.click();
+
+    await vi.waitFor(() => {
+      expect(fileField.uploads).toHaveLength(0);
+    });
+
+    expect(input).toHaveFocus();
+  });
+
+  test("does not move the focus when a file is replaced", async () => {
+    const { fileField, input, parent } = createFileField({
+      initial: [existingFile],
+      multiple: true
+    });
+    query(parent, ".dff-delete").focus();
+
+    selectFiles(input, [mockFile("existing.txt")]);
+
+    await vi.waitFor(() => {
+      expect(getUpload(fileField)).toBeInstanceOf(TusUpload);
+    });
+
+    expect(document.body).toHaveFocus();
+  });
+});

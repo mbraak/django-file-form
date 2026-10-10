@@ -98,12 +98,20 @@ class RenderUploadFile {
     this.input.value = "";
   }
 
-  public deleteFile(index: number): void {
+  // With moveFocus, the focus goes to the next file, the previous file or the
+  // input, instead of being lost when the element that has it is removed.
+  public deleteFile(index: number, moveFocus = false): void {
     const div = this.findFileDiv(index);
 
-    if (div) {
-      div.remove();
+    if (!div) {
+      return;
     }
+
+    const focusTarget =
+      moveFocus && this.mayMoveFocus(div) ? this.findFocusTarget(div) : null;
+
+    div.remove();
+    focusTarget?.focus();
   }
 
   public disableCancel(index: number): void {
@@ -149,10 +157,17 @@ class RenderUploadFile {
     this.container.append(dropHint);
   }
 
-  public setDeleteFailed(index: number): void {
+  public setDeleteFailed(index: number, moveFocus = false): void {
     this.setErrorMessage(index, this.getTranslation("Delete failed"));
 
     this.enableDelete(index);
+
+    const div = this.findFileDiv(index);
+
+    // Disabling the delete button may have taken the focus away from it
+    if (moveFocus && div && this.mayMoveFocus(div)) {
+      this.findDeleteButton(index)?.focus();
+    }
   }
 
   public setError(index: number): void {
@@ -332,6 +347,33 @@ class RenderUploadFile {
     return div.querySelector<HTMLButtonElement>(".dff-delete");
   }
 
+  // The delete or cancel button of the next file, or else of the previous file,
+  // or else the input. Landing on the same kind of button makes it easy to
+  // remove several files in a row.
+  private findFocusTarget(div: Element): HTMLElement {
+    const siblings = Array.from(
+      this.container.querySelectorAll<HTMLElement>(".dff-file")
+    );
+    const index = siblings.indexOf(div as HTMLElement);
+    const candidates = [
+      ...siblings.slice(index + 1),
+      ...siblings.slice(0, index).reverse()
+    ];
+
+    for (const candidate of candidates) {
+      const button =
+        candidate.querySelector<HTMLElement>(
+          ".dff-delete:enabled, .dff-cancel:enabled"
+        ) ?? candidate.querySelector<HTMLElement>("button:enabled");
+
+      if (button) {
+        return button;
+      }
+    }
+
+    return this.input;
+  }
+
   private formatTranslation(key: string, filename: string): string {
     // A replacer function, so that "$&" in the filename is not a pattern
     return this.getTranslation(key).replace("{filename}", () => filename);
@@ -368,6 +410,14 @@ class RenderUploadFile {
         this.createButton("dff-filename", nameSpan.textContent, index)
       );
     }
+  }
+
+  // Only when the focus is still in the file, or was lost because a button in
+  // it was disabled: the focus is not taken away from somewhere else.
+  private mayMoveFocus(div: Element): boolean {
+    const active = document.activeElement;
+
+    return active == null || active === document.body || div.contains(active);
   }
 
   private removeCancel(index: number): void {

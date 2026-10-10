@@ -837,3 +837,130 @@ describe("clickable filenames", () => {
     expect(filename).toHaveTextContent("<b>file</b>.txt");
   });
 });
+
+describe("moving the focus", () => {
+  const getDeleteButton = (div: HTMLElement | undefined) => {
+    const button = div?.querySelector<HTMLElement>(".dff-delete");
+
+    if (!button) {
+      throw new Error("No delete button");
+    }
+
+    return button;
+  };
+
+  const createFiles = () => {
+    const { parent, renderer } = createLabelledRenderer(null);
+    const divs = [1, 2, 3].map(index =>
+      renderer.addUploadedFile(`file${index.toString()}.txt`, index)
+    );
+
+    return { divs, input: parent.querySelector("input"), renderer };
+  };
+
+  test("does not move the focus by default", () => {
+    const { divs, renderer } = createFiles();
+    getDeleteButton(divs[0]).focus();
+
+    renderer.deleteFile(1);
+
+    expect(document.body).toHaveFocus();
+  });
+
+  test("moves the focus to the next file", () => {
+    const { divs, renderer } = createFiles();
+    getDeleteButton(divs[0]).focus();
+
+    renderer.deleteFile(1, true);
+
+    expect(getDeleteButton(divs[1])).toHaveFocus();
+  });
+
+  test("moves the focus to the previous file when it was the last file", () => {
+    const { divs, renderer } = createFiles();
+    getDeleteButton(divs[2]).focus();
+
+    renderer.deleteFile(3, true);
+
+    expect(getDeleteButton(divs[1])).toHaveFocus();
+  });
+
+  test("moves the focus to the input when it was the only file", () => {
+    const { parent, renderer } = createLabelledRenderer(null);
+    const div = renderer.addUploadedFile("file.txt", 1);
+    getDeleteButton(div).focus();
+
+    renderer.deleteFile(1, true);
+
+    expect(parent.querySelector("input")).toHaveFocus();
+  });
+
+  test("prefers the delete button over a clickable filename", () => {
+    const parent = document.createElement("div");
+    const input = document.createElement("input");
+    input.type = "file";
+    parent.append(input);
+    document.body.replaceChildren(parent);
+    const renderer = new RenderUploadFile({
+      clickableFilenames: true,
+      input,
+      parent,
+      skipRequired: false,
+      translations: {}
+    });
+    const div1 = renderer.addUploadedFile("file1.txt", 1);
+    const div2 = renderer.addUploadedFile("file2.txt", 2);
+    getDeleteButton(div1).focus();
+
+    renderer.deleteFile(1, true);
+
+    expect(getDeleteButton(div2)).toHaveFocus();
+  });
+
+  test("skips a file whose buttons are disabled", () => {
+    const { divs, renderer } = createFiles();
+    renderer.disableDelete(2);
+    getDeleteButton(divs[0]).focus();
+
+    renderer.deleteFile(1, true);
+
+    expect(getDeleteButton(divs[2])).toHaveFocus();
+  });
+
+  test("moves the focus when it was lost", () => {
+    const { divs, renderer } = createFiles();
+
+    renderer.deleteFile(1, true);
+
+    expect(getDeleteButton(divs[1])).toHaveFocus();
+  });
+
+  test("does not take the focus away from somewhere else", () => {
+    const { renderer } = createFiles();
+    const otherButton = document.createElement("button");
+    document.body.append(otherButton);
+    otherButton.focus();
+
+    renderer.deleteFile(1, true);
+
+    expect(otherButton).toHaveFocus();
+  });
+
+  test("gives the focus back to the delete button when the delete failed", () => {
+    const { divs, renderer } = createFiles();
+    renderer.disableDelete(1);
+
+    renderer.setDeleteFailed(1, true);
+
+    expect(getDeleteButton(divs[0])).toHaveFocus();
+  });
+
+  test("does not move the focus when the delete failed by default", () => {
+    const { renderer } = createFiles();
+    renderer.disableDelete(1);
+
+    renderer.setDeleteFailed(1);
+
+    expect(document.body).toHaveFocus();
+  });
+});

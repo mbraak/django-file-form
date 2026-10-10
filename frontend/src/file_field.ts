@@ -234,10 +234,10 @@ class FileField {
     return this.uploads.find(upload => upload.uploadIndex === uploadIndex);
   }
 
-  async handleCancel(upload: BaseUpload): Promise<void> {
+  async handleCancel(upload: BaseUpload, moveFocus = false): Promise<void> {
     this.renderer.disableCancel(upload.uploadIndex);
     await upload.abort();
-    this.removeUploadFromList(upload);
+    this.removeUploadFromList(upload, moveFocus);
     this.renderer.announce("{filename} removed", upload.name);
   }
 
@@ -259,13 +259,13 @@ class FileField {
       const upload = getUpload();
 
       if (upload) {
-        void this.removeExistingUpload(upload);
+        void this.removeExistingUpload(upload, true);
       }
     } else if (target.classList.contains("dff-cancel")) {
       const upload = getUpload();
 
       if (upload) {
-        void this.handleCancel(upload);
+        void this.handleCancel(upload, true);
       }
     } else if (target.classList.contains("dff-filename")) {
       e.preventDefault();
@@ -371,7 +371,12 @@ class FileField {
     this.renderer.clearInput();
   };
 
-  async removeExistingUpload(upload: BaseUpload): Promise<void> {
+  // moveFocus: whether the user removed the file, with the delete or cancel
+  // button, and the focus should not be lost
+  async removeExistingUpload(
+    upload: BaseUpload,
+    moveFocus = false
+  ): Promise<void> {
     const element = this.renderer.findFileDiv(upload.uploadIndex);
 
     if (element) {
@@ -387,19 +392,19 @@ class FileField {
       try {
         await upload.delete();
       } catch {
-        this.renderer.setDeleteFailed(upload.uploadIndex);
+        this.renderer.setDeleteFailed(upload.uploadIndex, moveFocus);
         this.renderer.announce("Delete failed: {filename}", upload.name);
         return;
       }
     }
 
-    this.removeUploadFromList(upload);
+    this.removeUploadFromList(upload, moveFocus);
     this.updatePlaceholderInput();
     this.renderer.announce("{filename} removed", upload.name);
   }
 
-  removeUploadFromList(upload: BaseUpload): void {
-    this.renderer.deleteFile(upload.uploadIndex);
+  removeUploadFromList(upload: BaseUpload, moveFocus = false): void {
+    this.renderer.deleteFile(upload.uploadIndex, moveFocus);
 
     const index = this.uploads.indexOf(upload);
 

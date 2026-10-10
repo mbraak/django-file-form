@@ -267,11 +267,17 @@
     _clearInput() {
       this._input.value = "";
     }
-    _deleteFile(index) {
+
+    // With moveFocus, the focus goes to the next file, the previous file or the
+    // input, instead of being lost when the element that has it is removed.
+    _deleteFile(index, moveFocus = false) {
       const div = this._findFileDiv(index);
-      if (div) {
-        div.remove();
+      if (!div) {
+        return;
       }
+      const focusTarget = moveFocus && this._mayMoveFocus(div) ? this._findFocusTarget(div) : null;
+      div.remove();
+      focusTarget?.focus();
     }
     _disableCancel(index) {
       const cancelButton = this._findCancelButton(index);
@@ -306,9 +312,15 @@
       this._setTextContent(dropHint, this._getTranslation("Drop your files here"));
       this._container.append(dropHint);
     }
-    _setDeleteFailed(index) {
+    _setDeleteFailed(index, moveFocus = false) {
       this._setErrorMessage(index, this._getTranslation("Delete failed"));
       this._enableDelete(index);
+      const div = this._findFileDiv(index);
+
+      // Disabling the delete button may have taken the focus away from it
+      if (moveFocus && div && this._mayMoveFocus(div)) {
+        this._findDeleteButton(index)?.focus();
+      }
     }
     _setError(index) {
       this._setErrorMessage(index, this._getTranslation("Upload failed"));
@@ -437,6 +449,22 @@
       }
       return div.querySelector(".dff-delete");
     }
+
+    // The delete or cancel button of the next file, or else of the previous file,
+    // or else the input. Landing on the same kind of button makes it easy to
+    // remove several files in a row.
+    _findFocusTarget(div) {
+      const siblings = Array.from(this._container.querySelectorAll(".dff-file"));
+      const index = siblings.indexOf(div);
+      const candidates = [...siblings.slice(index + 1), ...siblings.slice(0, index).reverse()];
+      for (const candidate of candidates) {
+        const button = candidate.querySelector(".dff-delete:enabled, .dff-cancel:enabled") ?? candidate.querySelector("button:enabled");
+        if (button) {
+          return button;
+        }
+      }
+      return this._input;
+    }
     _formatTranslation(key, filename) {
       // A replacer function, so that "$&" in the filename is not a pattern
       return this._getTranslation(key).replace("{filename}", () => filename);
@@ -466,6 +494,13 @@
       if (nameSpan) {
         nameSpan.replaceWith(this._createButton("dff-filename", nameSpan.textContent, index));
       }
+    }
+
+    // Only when the focus is still in the file, or was lost because a button in
+    // it was disabled: the focus is not taken away from somewhere else.
+    _mayMoveFocus(div) {
+      const active = document.activeElement;
+      return active == null || active === document.body || div.contains(active);
     }
     _removeCancel(index) {
       const cancelButton = this._findCancelButton(index);
@@ -3844,10 +3879,10 @@
     _getUploadByIndex(uploadIndex) {
       return this._uploads.find(upload => upload.uploadIndex === uploadIndex);
     }
-    async _handleCancel(upload) {
+    async _handleCancel(upload, moveFocus = false) {
       this._renderer._disableCancel(upload.uploadIndex);
       await upload.abort();
-      this._removeUploadFromList(upload);
+      this._removeUploadFromList(upload, moveFocus);
       this._renderer._announce("{filename} removed", upload.name);
     }
     _handleClick = e => {
@@ -3863,12 +3898,12 @@
       if (target.classList.contains("dff-delete")) {
         const upload = getUpload();
         if (upload) {
-          void this._removeExistingUpload(upload);
+          void this._removeExistingUpload(upload, true);
         }
       } else if (target.classList.contains("dff-cancel")) {
         const upload = getUpload();
         if (upload) {
-          void this._handleCancel(upload);
+          void this._handleCancel(upload, true);
         }
       } else if (target.classList.contains("dff-filename")) {
         e.preventDefault();
@@ -3954,7 +3989,10 @@
       void this._uploadFiles([...acceptedFiles]);
       this._renderer._clearInput();
     };
-    async _removeExistingUpload(upload) {
+
+    // moveFocus: whether the user removed the file, with the delete or cancel
+    // button, and the focus should not be lost
+    async _removeExistingUpload(upload, moveFocus = false) {
       const element = this._renderer._findFileDiv(upload.uploadIndex);
       if (element) {
         this._emitEvent("removeUpload", element, upload);
@@ -3967,17 +4005,17 @@
         try {
           await upload.delete();
         } catch {
-          this._renderer._setDeleteFailed(upload.uploadIndex);
+          this._renderer._setDeleteFailed(upload.uploadIndex, moveFocus);
           this._renderer._announce("Delete failed: {filename}", upload.name);
           return;
         }
       }
-      this._removeUploadFromList(upload);
+      this._removeUploadFromList(upload, moveFocus);
       this._updatePlaceholderInput();
       this._renderer._announce("{filename} removed", upload.name);
     }
-    _removeUploadFromList(upload) {
-      this._renderer._deleteFile(upload.uploadIndex);
+    _removeUploadFromList(upload, moveFocus = false) {
+      this._renderer._deleteFile(upload.uploadIndex, moveFocus);
       const index = this._uploads.indexOf(upload);
       if (index >= 0) {
         this._uploads.splice(index, 1);
