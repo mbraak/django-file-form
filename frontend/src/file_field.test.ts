@@ -24,6 +24,7 @@ interface CreateFileFieldParameters {
   multiple?: boolean;
   s3UploadDir?: null | string;
   supportDropArea?: boolean;
+  translations?: Record<string, string>;
 }
 
 const createHiddenInput = (name: string, value: string) => {
@@ -42,7 +43,8 @@ const createFileField = ({
   initial = [],
   multiple = false,
   s3UploadDir = null,
-  supportDropArea = false
+  supportDropArea = false,
+  translations = {}
 }: CreateFileFieldParameters = {}) => {
   const form = document.createElement("form");
   const parent = document.createElement("div");
@@ -75,7 +77,7 @@ const createFileField = ({
     s3UploadDir,
     skipRequired: false,
     supportDropArea,
-    translations: {},
+    translations,
     uploadUrl: "/upload/"
   });
 
@@ -131,6 +133,9 @@ const query = (parent: Element, selector: string) => {
 
   return element;
 };
+
+const getStatus = (parent: Element) =>
+  parent.querySelector(".dff-status")?.textContent;
 
 const existingFile: InitialFile = {
   name: "existing.txt",
@@ -629,5 +634,80 @@ describe("clicking the filename", () => {
     query(parent, ".dff-filename").click();
 
     expect(onClick).not.toHaveBeenCalled();
+  });
+});
+
+describe("announcements", () => {
+  test("does not announce the initial files", () => {
+    const { parent } = createFileField({ initial: [existingFile] });
+
+    expect(getStatus(parent)).toBe("");
+  });
+
+  test("announces a finished upload", () => {
+    const { fileField, input, parent } = createFileField();
+
+    selectFiles(input, [mockFile("file.txt")]);
+    getTusUpload(fileField).onSuccess?.();
+
+    expect(getStatus(parent)).toBe("file.txt uploaded");
+  });
+
+  test("announces a failed upload", () => {
+    const { fileField, input, parent } = createFileField();
+
+    selectFiles(input, [mockFile("file.txt")]);
+    getTusUpload(fileField).onError?.(new Error("failed"));
+
+    expect(getStatus(parent)).toBe("Upload failed: file.txt");
+  });
+
+  test("announces a deleted file", async () => {
+    const { fileField, parent } = createFileField({ initial: [existingFile] });
+
+    query(parent, ".dff-delete").click();
+
+    await vi.waitFor(() => {
+      expect(fileField.uploads).toHaveLength(0);
+    });
+
+    expect(getStatus(parent)).toBe("existing.txt removed");
+  });
+
+  test("announces a failed delete", async () => {
+    vi.spyOn(ExistingFile.prototype, "delete").mockRejectedValue(
+      new Error("Delete failed")
+    );
+    const { parent } = createFileField({ initial: [existingFile] });
+
+    query(parent, ".dff-delete").click();
+
+    await vi.waitFor(() => {
+      expect(getStatus(parent)).toBe("Delete failed: existing.txt");
+    });
+  });
+
+  test("announces a canceled upload", async () => {
+    const { fileField, input, parent } = createFileField();
+
+    selectFiles(input, [mockFile("file.txt")]);
+    query(parent, ".dff-cancel").click();
+
+    await vi.waitFor(() => {
+      expect(fileField.uploads).toHaveLength(0);
+    });
+
+    expect(getStatus(parent)).toBe("file.txt removed");
+  });
+
+  test("uses the translations", () => {
+    const { fileField, input, parent } = createFileField({
+      translations: { "{filename} uploaded": "{filename} geüpload" }
+    });
+
+    selectFiles(input, [mockFile("file.txt")]);
+    getTusUpload(fileField).onSuccess?.();
+
+    expect(getStatus(parent)).toBe("file.txt geüpload");
   });
 });

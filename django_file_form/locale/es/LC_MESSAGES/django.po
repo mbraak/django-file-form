@@ -41,3 +41,23 @@ msgstr "Deja tus archivos aquí"
 #, python-brace-format
 msgid "Upload progress for {filename}"
 msgstr "Progreso de la subida de {filename}"
+
+#: widgets/base_upload_widget.py:14
+#, python-brace-format
+msgid "{filename} uploaded"
+msgstr "{filename} subido"
+
+#: widgets/base_upload_widget.py:15
+#, python-brace-format
+msgid "{filename} removed"
+msgstr "{filename} eliminado"
+
+#: widgets/base_upload_widget.py:16
+#, python-brace-format
+msgid "Upload failed: {filename}"
+msgstr "Subida fallida: {filename}"
+
+#: widgets/base_upload_widget.py:17
+#, python-brace-format
+msgid "Delete failed: {filename}"
+msgstr "Borrado fallido: {filename}"

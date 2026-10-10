@@ -208,6 +208,7 @@
     _container;
     _errors;
     _input;
+    _status;
     _translations;
     constructor({
       _input: input,
@@ -217,6 +218,7 @@
     }) {
       this._container = this._createFilesContainer(parent);
       this._errors = this._createErrorContainer(parent);
+      this._status = this._createStatusContainer(parent);
       this._input = input;
       this._translations = translations;
       if (skipRequired) {
@@ -228,9 +230,7 @@
       const progressSpan = document.createElement("span");
       progressSpan.className = "dff-progress";
       progressSpan.setAttribute("role", "progressbar");
-      progressSpan.setAttribute("aria-label",
-      // A replacer function, so that "$&" in the filename is not a pattern
-      this._getTranslation("Upload progress for {filename}").replace("{filename}", () => filename));
+      progressSpan.setAttribute("aria-label", this._formatTranslation("Upload progress for {filename}", filename));
       progressSpan.setAttribute("aria-valuemin", "0");
       progressSpan.setAttribute("aria-valuemax", "100");
       progressSpan.setAttribute("aria-valuenow", "0");
@@ -245,6 +245,12 @@
       const element = this._addFile(filename, uploadIndex);
       this._setSuccess(uploadIndex, filesize);
       return element;
+    }
+
+    // Tells screen reader users what happened to a file: the status element is a
+    // live region, which is read out when its text changes.
+    _announce(key, filename) {
+      this._status.replaceChildren(document.createTextNode(this._formatTranslation(key, filename)));
     }
     _clearInput() {
       this._input.value = "";
@@ -360,12 +366,20 @@
     _createErrorContainer = parent => {
       const div = document.createElement("div");
       div.className = "dff-invalid-files";
+      div.setAttribute("role", "alert");
       parent.append(div);
       return div;
     };
     _createFilesContainer = parent => {
       const div = document.createElement("div");
       div.className = "dff-files";
+      parent.append(div);
+      return div;
+    };
+    _createStatusContainer = parent => {
+      const div = document.createElement("div");
+      div.className = "dff-status";
+      div.setAttribute("role", "status");
       parent.append(div);
       return div;
     };
@@ -388,6 +402,10 @@
         return div;
       }
       return div.querySelector(".dff-delete");
+    }
+    _formatTranslation(key, filename) {
+      // A replacer function, so that "$&" in the filename is not a pattern
+      return this._getTranslation(key).replace("{filename}", () => filename);
     }
     _getTranslation(key) {
       return this._translations[key] ?? key;
@@ -3758,6 +3776,7 @@
       this._renderer._disableCancel(upload.uploadIndex);
       await upload.abort();
       this._removeUploadFromList(upload);
+      this._renderer._announce("{filename} removed", upload.name);
     }
     _handleClick = e => {
       const target = e.target;
@@ -3794,6 +3813,7 @@
     };
     _handleError = (upload, error) => {
       this._renderer._setError(upload.uploadIndex);
+      this._renderer._announce("Upload failed: {filename}", upload.name);
       upload.status = "error";
       const {
         onError
@@ -3826,6 +3846,7 @@
       this._updatePlaceholderInput();
       renderer._clearInput();
       renderer._setSuccess(upload.uploadIndex, upload.getSize());
+      renderer._announce("{filename} uploaded", upload.name);
       upload.status = "done";
       const {
         onSuccess
@@ -3875,11 +3896,13 @@
           await upload.delete();
         } catch {
           this._renderer._setDeleteFailed(upload.uploadIndex);
+          this._renderer._announce("Delete failed: {filename}", upload.name);
           return;
         }
       }
       this._removeUploadFromList(upload);
       this._updatePlaceholderInput();
+      this._renderer._announce("{filename} removed", upload.name);
     }
     _removeUploadFromList(upload) {
       this._renderer._deleteFile(upload.uploadIndex);

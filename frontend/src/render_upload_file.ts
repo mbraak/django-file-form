@@ -5,6 +5,7 @@ class RenderUploadFile {
 
   private errors: Element;
   private input: HTMLInputElement;
+  private status: Element;
   private translations: Record<string, string>;
 
   constructor({
@@ -20,6 +21,7 @@ class RenderUploadFile {
   }) {
     this.container = this.createFilesContainer(parent);
     this.errors = this.createErrorContainer(parent);
+    this.status = this.createStatusContainer(parent);
     this.input = input;
     this.translations = translations;
 
@@ -36,11 +38,7 @@ class RenderUploadFile {
     progressSpan.setAttribute("role", "progressbar");
     progressSpan.setAttribute(
       "aria-label",
-      // A replacer function, so that "$&" in the filename is not a pattern
-      this.getTranslation("Upload progress for {filename}").replace(
-        "{filename}",
-        () => filename
-      )
+      this.formatTranslation("Upload progress for {filename}", filename)
     );
     progressSpan.setAttribute("aria-valuemin", "0");
     progressSpan.setAttribute("aria-valuemax", "100");
@@ -71,6 +69,14 @@ class RenderUploadFile {
     const element = this.addFile(filename, uploadIndex);
     this.setSuccess(uploadIndex, filesize);
     return element;
+  }
+
+  // Tells screen reader users what happened to a file: the status element is a
+  // live region, which is read out when its text changes.
+  public announce(key: string, filename: string): void {
+    this.status.replaceChildren(
+      document.createTextNode(this.formatTranslation(key, filename))
+    );
   }
 
   public clearInput(): void {
@@ -232,6 +238,7 @@ class RenderUploadFile {
   private createErrorContainer = (parent: Element): Element => {
     const div = document.createElement("div");
     div.className = "dff-invalid-files";
+    div.setAttribute("role", "alert");
     parent.append(div);
     return div;
   };
@@ -239,6 +246,15 @@ class RenderUploadFile {
   private createFilesContainer = (parent: Element): Element => {
     const div = document.createElement("div");
     div.className = "dff-files";
+    parent.append(div);
+
+    return div;
+  };
+
+  private createStatusContainer = (parent: Element): Element => {
+    const div = document.createElement("div");
+    div.className = "dff-status";
+    div.setAttribute("role", "status");
     parent.append(div);
 
     return div;
@@ -269,6 +285,11 @@ class RenderUploadFile {
     }
 
     return div.querySelector<HTMLButtonElement>(".dff-delete");
+  }
+
+  private formatTranslation(key: string, filename: string): string {
+    // A replacer function, so that "$&" in the filename is not a pattern
+    return this.getTranslation(key).replace("{filename}", () => filename);
   }
 
   private getTranslation(key: string) {

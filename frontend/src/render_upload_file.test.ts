@@ -41,6 +41,24 @@ describe("constructor", () => {
     expect(parent.querySelector(".dff-invalid-files")).toBeInTheDocument();
   });
 
+  test("makes the error container an alert", () => {
+    const { parent } = createRenderer();
+
+    expect(parent.querySelector(".dff-invalid-files")).toHaveAttribute(
+      "role",
+      "alert"
+    );
+  });
+
+  test("creates an empty status container", () => {
+    const { parent } = createRenderer();
+
+    const status = parent.querySelector(".dff-status");
+
+    expect(status).toHaveAttribute("role", "status");
+    expect(status).toBeEmptyDOMElement();
+  });
+
   test("keeps the input required by default", () => {
     const { input } = createRenderer();
 
@@ -516,5 +534,51 @@ describe("updateProgress", () => {
     expect(() => {
       renderer.updateProgress(1, "40");
     }).not.toThrow();
+  });
+});
+
+describe("announce", () => {
+  test("sets the text of the status container", () => {
+    const { parent, renderer } = createRenderer();
+
+    renderer.announce("{filename} uploaded", "file.txt");
+
+    expect(parent.querySelector(".dff-status")).toHaveTextContent(
+      "file.txt uploaded"
+    );
+  });
+
+  test("replaces the previous message", () => {
+    const { parent, renderer } = createRenderer();
+
+    renderer.announce("{filename} uploaded", "a.txt");
+    renderer.announce("{filename} removed", "b.txt");
+
+    expect(parent.querySelector(".dff-status")?.textContent).toBe(
+      "b.txt removed"
+    );
+  });
+
+  test("translates the message", () => {
+    const { parent, renderer } = createRenderer({
+      translations: { "{filename} uploaded": "{filename} geüpload" }
+    });
+
+    renderer.announce("{filename} uploaded", "file.txt");
+
+    expect(parent.querySelector(".dff-status")).toHaveTextContent(
+      "file.txt geüpload"
+    );
+  });
+
+  test("escapes the filename", () => {
+    const { parent, renderer } = createRenderer();
+
+    renderer.announce("{filename} uploaded", "<b>file</b>.txt");
+
+    const status = parent.querySelector(".dff-status");
+
+    expect(status?.querySelector("b")).toBeNull();
+    expect(status).toHaveTextContent("<b>file</b>.txt uploaded");
   });
 });

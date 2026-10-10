@@ -237,6 +237,7 @@ class FileField {
     this.renderer.disableCancel(upload.uploadIndex);
     await upload.abort();
     this.removeUploadFromList(upload);
+    this.renderer.announce("{filename} removed", upload.name);
   }
 
   handleClick = (e: Event): void => {
@@ -283,6 +284,7 @@ class FileField {
 
   handleError = (upload: BaseUpload, error: unknown): void => {
     this.renderer.setError(upload.uploadIndex);
+    this.renderer.announce("Upload failed: {filename}", upload.name);
     upload.status = "error";
 
     const { onError } = this.callbacks;
@@ -324,6 +326,7 @@ class FileField {
 
     renderer.clearInput();
     renderer.setSuccess(upload.uploadIndex, upload.getSize());
+    renderer.announce("{filename} uploaded", upload.name);
     upload.status = "done";
 
     const { onSuccess } = this.callbacks;
@@ -384,12 +387,14 @@ class FileField {
         await upload.delete();
       } catch {
         this.renderer.setDeleteFailed(upload.uploadIndex);
+        this.renderer.announce("Delete failed: {filename}", upload.name);
         return;
       }
     }
 
     this.removeUploadFromList(upload);
     this.updatePlaceholderInput();
+    this.renderer.announce("{filename} removed", upload.name);
   }
 
   removeUploadFromList(upload: BaseUpload): void {
