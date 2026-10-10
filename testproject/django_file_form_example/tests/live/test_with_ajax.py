@@ -327,7 +327,7 @@ class LiveTestCase(BaseLiveTestCase):
         page.upload_using_js(temp_file)
 
         el = page.find_upload_fail(temp_file)
-        self.assertEqual(el.find_elements(By.LINK_TEXT, "Delete"), [])
+        self.assertEqual(el.find_elements(By.CSS_SELECTOR, ".dff-delete"), [])
 
     @override_settings(FILE_FORM_MUST_LOGIN=True)
     def test_permission_success(self):

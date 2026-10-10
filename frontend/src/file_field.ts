@@ -253,20 +253,13 @@ class FileField {
       return this.getUploadByIndex(uploadIndex);
     };
 
-    if (
-      target.classList.contains("dff-delete") &&
-      !target.classList.contains("dff-disabled")
-    ) {
-      e.preventDefault();
-
+    if (target.classList.contains("dff-delete")) {
       const upload = getUpload();
 
       if (upload) {
         void this.removeExistingUpload(upload);
       }
     } else if (target.classList.contains("dff-cancel")) {
-      e.preventDefault();
-
       const upload = getUpload();
 
       if (upload) {

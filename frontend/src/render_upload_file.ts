@@ -40,13 +40,13 @@ class RenderUploadFile {
     progressSpan.append(innerSpan);
     div.append(progressSpan);
 
-    const cancelLink = document.createElement("a");
-    cancelLink.className = "dff-cancel";
-
-    this.setTextContent(cancelLink, this.getTranslation("Cancel"));
-    cancelLink.dataset.index = uploadIndex.toString();
-    cancelLink.href = "#";
-    div.append(cancelLink);
+    div.append(
+      this.createButton(
+        "dff-cancel",
+        this.getTranslation("Cancel"),
+        uploadIndex
+      )
+    );
 
     return div;
   }
@@ -74,18 +74,18 @@ class RenderUploadFile {
   }
 
   public disableCancel(index: number): void {
-    const cancelSpan = this.findCancelSpan(index);
+    const cancelButton = this.findCancelButton(index);
 
-    if (cancelSpan) {
-      cancelSpan.classList.add("dff-disabled");
+    if (cancelButton) {
+      this.setButtonDisabled(cancelButton, true);
     }
   }
 
   public disableDelete(index: number): void {
-    const deleteLink = this.findDeleteLink(index);
+    const deleteButton = this.findDeleteButton(index);
 
-    if (deleteLink) {
-      deleteLink.classList.add("dff-disabled");
+    if (deleteButton) {
+      this.setButtonDisabled(deleteButton, true);
     }
   }
 
@@ -159,13 +159,9 @@ class RenderUploadFile {
         el.append(fileSizeInfo);
       }
 
-      const deleteLink = document.createElement("a");
-      this.setTextContent(deleteLink, this.getTranslation("Delete"));
-      deleteLink.className = "dff-delete";
-      deleteLink.dataset.index = index.toString();
-      deleteLink.href = "#";
-
-      el.append(deleteLink);
+      el.append(
+        this.createButton("dff-delete", this.getTranslation("Delete"), index)
+      );
     }
 
     this.removeProgress(index);
@@ -199,6 +195,20 @@ class RenderUploadFile {
     return div;
   }
 
+  private createButton(
+    className: string,
+    text: string,
+    uploadIndex: number
+  ): HTMLButtonElement {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = className;
+    button.dataset.index = uploadIndex.toString();
+    this.setTextContent(button, text);
+
+    return button;
+  }
+
   private createErrorContainer = (parent: Element): Element => {
     const div = document.createElement("div");
     div.className = "dff-invalid-files";
@@ -215,30 +225,30 @@ class RenderUploadFile {
   };
 
   private enableDelete(index: number): void {
-    const deleteLink = this.findDeleteLink(index);
+    const deleteButton = this.findDeleteButton(index);
 
-    if (deleteLink) {
-      deleteLink.classList.remove("dff-disabled");
+    if (deleteButton) {
+      this.setButtonDisabled(deleteButton, false);
     }
   }
 
-  private findCancelSpan(index: number): HTMLElement | null {
+  private findCancelButton(index: number): HTMLButtonElement | null {
     const el = this.findFileDiv(index);
 
     if (!el) {
       return null;
     }
 
-    return el.querySelector<HTMLElement>(".dff-cancel");
+    return el.querySelector<HTMLButtonElement>(".dff-cancel");
   }
 
-  private findDeleteLink(index: number): HTMLElement | null {
+  private findDeleteButton(index: number): HTMLButtonElement | null {
     const div = this.findFileDiv(index);
     if (!div) {
       return div;
     }
 
-    return div.querySelector(".dff-delete");
+    return div.querySelector<HTMLButtonElement>(".dff-delete");
   }
 
   private getTranslation(key: string) {
@@ -246,10 +256,10 @@ class RenderUploadFile {
   }
 
   private removeCancel(index: number): void {
-    const cancelSpan = this.findCancelSpan(index);
+    const cancelButton = this.findCancelButton(index);
 
-    if (cancelSpan) {
-      cancelSpan.remove();
+    if (cancelButton) {
+      cancelButton.remove();
     }
   }
 
@@ -263,6 +273,12 @@ class RenderUploadFile {
         progressSpan.remove();
       }
     }
+  }
+
+  private setButtonDisabled(button: HTMLButtonElement, disabled: boolean) {
+    button.disabled = disabled;
+    // Keep the class for existing stylesheets
+    button.classList.toggle("dff-disabled", disabled);
   }
 
   private setErrorMessage(index: number, message: string): void {

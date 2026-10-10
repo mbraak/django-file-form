@@ -55,7 +55,7 @@ describe("constructor", () => {
 });
 
 describe("addNewUpload", () => {
-  test("renders the filename, the progress bar and the cancel link", () => {
+  test("renders the filename, the progress bar and the cancel button", () => {
     const { renderer } = createRenderer();
 
     const div = renderer.addNewUpload("file.txt", 1);
@@ -72,11 +72,13 @@ describe("addNewUpload", () => {
       div.querySelector(".dff-progress-inner")
     );
 
-    const cancelLink = div.querySelector(".dff-cancel");
+    const cancelButton = div.querySelector(".dff-cancel");
 
-    expect(cancelLink).toHaveTextContent("Cancel");
-    expect(cancelLink).toHaveAttribute("data-index", "1");
-    expect(cancelLink).toHaveAttribute("href", "#");
+    expect(cancelButton?.tagName).toBe("BUTTON");
+    expect(cancelButton).toHaveAttribute("type", "button");
+    expect(cancelButton).toHaveTextContent("Cancel");
+    expect(cancelButton).toHaveAttribute("data-index", "1");
+    expect(cancelButton).toBeEnabled();
   });
 
   test("makes the input optional", () => {
@@ -98,7 +100,7 @@ describe("addNewUpload", () => {
     expect(filename).toHaveTextContent("<script>alert(1)</script>");
   });
 
-  test("translates the cancel link", () => {
+  test("translates the cancel button", () => {
     const { renderer } = createRenderer({
       translations: { Cancel: "Annuleren" }
     });
@@ -118,11 +120,13 @@ describe("addUploadedFile", () => {
     expect(div).toHaveClass("dff-upload-success");
     expect(div.querySelector(".dff-filesize")).toHaveTextContent("1 KB");
 
-    const deleteLink = div.querySelector(".dff-delete");
+    const deleteButton = div.querySelector(".dff-delete");
 
-    expect(deleteLink).toHaveTextContent("Delete");
-    expect(deleteLink).toHaveAttribute("data-index", "1");
-    expect(deleteLink).toHaveAttribute("href", "#");
+    expect(deleteButton?.tagName).toBe("BUTTON");
+    expect(deleteButton).toHaveAttribute("type", "button");
+    expect(deleteButton).toHaveTextContent("Delete");
+    expect(deleteButton).toHaveAttribute("data-index", "1");
+    expect(deleteButton).toBeEnabled();
 
     expect(div.querySelector(".dff-progress")).toBeNull();
     expect(div.querySelector(".dff-cancel")).toBeNull();
@@ -144,7 +148,7 @@ describe("addUploadedFile", () => {
     expect(div.querySelector(".dff-filesize")).toHaveTextContent("0 Bytes");
   });
 
-  test("translates the delete link", () => {
+  test("translates the delete button", () => {
     const { renderer } = createRenderer({
       translations: { Delete: "Verwijderen" }
     });
@@ -188,13 +192,16 @@ describe("deleteFile", () => {
 });
 
 describe("disableCancel", () => {
-  test("disables the cancel link", () => {
+  test("disables the cancel button", () => {
     const { renderer } = createRenderer();
     const div = renderer.addNewUpload("file.txt", 1);
 
     renderer.disableCancel(1);
 
-    expect(div.querySelector(".dff-cancel")).toHaveClass("dff-disabled");
+    const cancelButton = div.querySelector(".dff-cancel");
+
+    expect(cancelButton).toBeDisabled();
+    expect(cancelButton).toHaveClass("dff-disabled");
   });
 
   test("does nothing when the file does not exist", () => {
@@ -205,7 +212,7 @@ describe("disableCancel", () => {
     }).not.toThrow();
   });
 
-  test("does nothing when the file has no cancel link", () => {
+  test("does nothing when the file has no cancel button", () => {
     const { renderer } = createRenderer();
     const div = renderer.addUploadedFile("file.txt", 1);
 
@@ -216,16 +223,19 @@ describe("disableCancel", () => {
 });
 
 describe("disableDelete", () => {
-  test("disables the delete link", () => {
+  test("disables the delete button", () => {
     const { renderer } = createRenderer();
     const div = renderer.addUploadedFile("file.txt", 1);
 
     renderer.disableDelete(1);
 
-    expect(div.querySelector(".dff-delete")).toHaveClass("dff-disabled");
+    const deleteButton = div.querySelector(".dff-delete");
+
+    expect(deleteButton).toBeDisabled();
+    expect(deleteButton).toHaveClass("dff-disabled");
   });
 
-  test("does nothing when the file has no delete link", () => {
+  test("does nothing when the file has no delete button", () => {
     const { renderer } = createRenderer();
     const div = renderer.addNewUpload("file.txt", 1);
 
@@ -264,9 +274,9 @@ describe("renderDropHint", () => {
 
     renderer.renderDropHint();
 
-    expect(renderer.container.querySelector(".dff-drop-hint")).toHaveTextContent(
-      "Drop your files here"
-    );
+    expect(
+      renderer.container.querySelector(".dff-drop-hint")
+    ).toHaveTextContent("Drop your files here");
   });
 
   test("renders the drop hint only once", () => {
@@ -287,9 +297,9 @@ describe("renderDropHint", () => {
 
     renderer.renderDropHint();
 
-    expect(renderer.container.querySelector(".dff-drop-hint")).toHaveTextContent(
-      "Sleep je bestanden hierheen"
-    );
+    expect(
+      renderer.container.querySelector(".dff-drop-hint")
+    ).toHaveTextContent("Sleep je bestanden hierheen");
   });
 });
 
@@ -313,7 +323,7 @@ describe("removeDropHint", () => {
 });
 
 describe("setDeleteFailed", () => {
-  test("renders an error and enables the delete link", () => {
+  test("renders an error and enables the delete button", () => {
     const { renderer } = createRenderer();
     const div = renderer.addUploadedFile("file.txt", 1);
     renderer.disableDelete(1);
@@ -321,10 +331,14 @@ describe("setDeleteFailed", () => {
     renderer.setDeleteFailed(1);
 
     expect(div.querySelector(".dff-error")).toHaveTextContent("Delete failed");
-    expect(div.querySelector(".dff-delete")).not.toHaveClass("dff-disabled");
+
+    const deleteButton = div.querySelector(".dff-delete");
+
+    expect(deleteButton).toBeEnabled();
+    expect(deleteButton).not.toHaveClass("dff-disabled");
   });
 
-  test("renders an error when the file has no delete link", () => {
+  test("renders an error when the file has no delete button", () => {
     const { renderer } = createRenderer();
     const div = renderer.addNewUpload("file.txt", 1);
 
@@ -348,7 +362,7 @@ describe("setDeleteFailed", () => {
 });
 
 describe("setError", () => {
-  test("renders an error and removes the progress bar and the cancel link", () => {
+  test("renders an error and removes the progress bar and the cancel button", () => {
     const { renderer } = createRenderer();
     const div = renderer.addNewUpload("file.txt", 1);
 

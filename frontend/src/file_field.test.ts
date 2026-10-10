@@ -538,7 +538,7 @@ describe("clicking delete", () => {
     expect(parent.querySelector(".dff-delete")).not.toHaveClass("dff-disabled");
   });
 
-  test("does nothing when the delete link is disabled", () => {
+  test("does nothing when the delete button is disabled", () => {
     const deleteSpy = vi.spyOn(ExistingFile.prototype, "delete");
     const { fileField, parent } = createFileField({ initial: [existingFile] });
     fileField.renderer.disableDelete(0);
@@ -584,6 +584,22 @@ describe("clicking cancel", () => {
     expect(tusAbort).toHaveBeenCalledOnce();
     expect(parent.querySelector(".dff-file")).not.toBeInTheDocument();
     expect(onDelete).toHaveBeenCalledExactlyOnceWith(upload);
+  });
+
+  test("aborts the upload only once when cancel is clicked twice", async () => {
+    const { fileField, input, parent } = createFileField();
+
+    selectFiles(input, [mockFile("file.txt")]);
+    const cancelButton = query(parent, ".dff-cancel");
+
+    cancelButton.click();
+    cancelButton.click();
+
+    await vi.waitFor(() => {
+      expect(fileField.uploads).toHaveLength(0);
+    });
+
+    expect(tusAbort).toHaveBeenCalledOnce();
   });
 });
 

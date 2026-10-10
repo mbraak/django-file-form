@@ -231,12 +231,7 @@
       innerSpan.className = "dff-progress-inner";
       progressSpan.append(innerSpan);
       div.append(progressSpan);
-      const cancelLink = document.createElement("a");
-      cancelLink.className = "dff-cancel";
-      this._setTextContent(cancelLink, this._getTranslation("Cancel"));
-      cancelLink.dataset.index = uploadIndex.toString();
-      cancelLink.href = "#";
-      div.append(cancelLink);
+      div.append(this._createButton("dff-cancel", this._getTranslation("Cancel"), uploadIndex));
       return div;
     }
     _addUploadedFile(filename, uploadIndex, filesize) {
@@ -254,15 +249,15 @@
       }
     }
     _disableCancel(index) {
-      const cancelSpan = this._findCancelSpan(index);
-      if (cancelSpan) {
-        cancelSpan.classList.add("dff-disabled");
+      const cancelButton = this._findCancelButton(index);
+      if (cancelButton) {
+        this._setButtonDisabled(cancelButton, true);
       }
     }
     _disableDelete(index) {
-      const deleteLink = this._findDeleteLink(index);
-      if (deleteLink) {
-        deleteLink.classList.add("dff-disabled");
+      const deleteButton = this._findDeleteButton(index);
+      if (deleteButton) {
+        this._setButtonDisabled(deleteButton, true);
       }
     }
     _findFileDiv(index) {
@@ -318,12 +313,7 @@
           fileSizeInfo.className = "dff-filesize";
           el.append(fileSizeInfo);
         }
-        const deleteLink = document.createElement("a");
-        this._setTextContent(deleteLink, this._getTranslation("Delete"));
-        deleteLink.className = "dff-delete";
-        deleteLink.dataset.index = index.toString();
-        deleteLink.href = "#";
-        el.append(deleteLink);
+        el.append(this._createButton("dff-delete", this._getTranslation("Delete"), index));
       }
       this._removeProgress(index);
       this._removeCancel(index);
@@ -349,6 +339,14 @@
       this._input.required = false;
       return div;
     }
+    _createButton(className, text, uploadIndex) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = className;
+      button.dataset.index = uploadIndex.toString();
+      this._setTextContent(button, text);
+      return button;
+    }
     _createErrorContainer = parent => {
       const div = document.createElement("div");
       div.className = "dff-invalid-files";
@@ -362,19 +360,19 @@
       return div;
     };
     _enableDelete(index) {
-      const deleteLink = this._findDeleteLink(index);
-      if (deleteLink) {
-        deleteLink.classList.remove("dff-disabled");
+      const deleteButton = this._findDeleteButton(index);
+      if (deleteButton) {
+        this._setButtonDisabled(deleteButton, false);
       }
     }
-    _findCancelSpan(index) {
+    _findCancelButton(index) {
       const el = this._findFileDiv(index);
       if (!el) {
         return null;
       }
       return el.querySelector(".dff-cancel");
     }
-    _findDeleteLink(index) {
+    _findDeleteButton(index) {
       const div = this._findFileDiv(index);
       if (!div) {
         return div;
@@ -385,9 +383,9 @@
       return this._translations[key] ?? key;
     }
     _removeCancel(index) {
-      const cancelSpan = this._findCancelSpan(index);
-      if (cancelSpan) {
-        cancelSpan.remove();
+      const cancelButton = this._findCancelButton(index);
+      if (cancelButton) {
+        cancelButton.remove();
       }
     }
     _removeProgress(index) {
@@ -398,6 +396,11 @@
           progressSpan.remove();
         }
       }
+    }
+    _setButtonDisabled(button, disabled) {
+      button.disabled = disabled;
+      // Keep the class for existing stylesheets
+      button.classList.toggle("dff-disabled", disabled);
     }
     _setErrorMessage(index, message) {
       const el = this._findFileDiv(index);
@@ -922,16 +925,16 @@
   }
 
   class NoopUrlStorage {
-    _listAllUploads() {
+    listAllUploads() {
       return Promise.resolve([]);
     }
-    _findUploadsByFingerprint(_fingerprint) {
+    findUploadsByFingerprint(_fingerprint) {
       return Promise.resolve([]);
     }
-    _removeUpload(_urlStorageKey) {
+    removeUpload(_urlStorageKey) {
       return Promise.resolve();
     }
-    _addUpload(_fingerprint, _upload) {
+    addUpload(_fingerprint, _upload) {
       return Promise.resolve(null);
     }
   }
@@ -3002,7 +3005,7 @@
       this._file = file;
       this.size = file.size;
     }
-    _slice(start, end) {
+    slice(start, end) {
       // In Apache Cordova applications, a File must be resolved using
       // FileReader instances, see
       // https://cordova.apache.org/docs/en/8.x/reference/cordova-plugin-file/index.html#read-a-file
@@ -3016,7 +3019,7 @@
         done
       });
     }
-    _close() {
+    close() {
       // Nothing to do here since we don't need to release any resources.
     }
   }
@@ -3057,7 +3060,7 @@
       this._reader = reader;
       this._done = false;
     }
-    _slice(start, end) {
+    slice(start, end) {
       if (start < this._bufferOffset) {
         return Promise.reject(new Error("Requested data is before the reader's current offset"));
       }
@@ -3104,7 +3107,7 @@
       // chunk from the buffer.
       return this._buffer.slice(0, end - start);
     }
-    _close() {
+    close() {
       if (this._reader.cancel) {
         this._reader.cancel();
       }
@@ -3112,7 +3115,7 @@
   }
 
   let FileReader$1 = class FileReader {
-    async _openFile(input, chunkSize) {
+    async openFile(input, chunkSize) {
       // In React Native, when user selects a file, instead of a File or Blob,
       // you usually get a file object {} with a uri property that contains
       // a local path to the file. We use XMLHttpRequest to fetch
@@ -3178,10 +3181,10 @@
   }
 
   class XHRHttpStack {
-    _createRequest(method, url) {
+    createRequest(method, url) {
       return new Request(method, url);
     }
-    _getName() {
+    getName() {
       return 'XHRHttpStack';
     }
   }
@@ -3193,20 +3196,20 @@
       this._url = url;
       this._headers = {};
     }
-    _getMethod() {
+    getMethod() {
       return this._method;
     }
-    _getURL() {
+    getURL() {
       return this._url;
     }
-    _setHeader(header, value) {
+    setHeader(header, value) {
       this._xhr.setRequestHeader(header, value);
       this._headers[header] = value;
     }
-    _getHeader(header) {
+    getHeader(header) {
       return this._headers[header];
     }
-    _setProgressHandler(progressHandler) {
+    setProgressHandler(progressHandler) {
       // Test support for progress events before attaching an event listener
       if (!('upload' in this._xhr)) {
         return;
@@ -3218,7 +3221,7 @@
         progressHandler(e.loaded);
       };
     }
-    _send(body = null) {
+    send(body = null) {
       return new Promise((resolve, reject) => {
         this._xhr.onload = () => {
           resolve(new Response(this._xhr));
@@ -3229,11 +3232,11 @@
         this._xhr.send(body);
       });
     }
-    _abort() {
+    abort() {
       this._xhr.abort();
       return Promise.resolve();
     }
-    _getUnderlyingObject() {
+    getUnderlyingObject() {
       return this._xhr;
     }
   }
@@ -3241,16 +3244,16 @@
     constructor(xhr) {
       this._xhr = xhr;
     }
-    _getStatus() {
+    getStatus() {
       return this._xhr.status;
     }
-    _getHeader(header) {
+    getHeader(header) {
       return this._xhr.getResponseHeader(header);
     }
-    _getBody() {
+    getBody() {
       return this._xhr.responseText;
     }
-    _getUnderlyingObject() {
+    getUnderlyingObject() {
       return this._xhr;
     }
   }
@@ -3280,19 +3283,19 @@
   }
   const canStoreURLs = hasStorage;
   class WebStorageUrlStorage {
-    _findAllUploads() {
+    findAllUploads() {
       const results = this._findEntries('tus::');
       return Promise.resolve(results);
     }
-    _findUploadsByFingerprint(fingerprint) {
+    findUploadsByFingerprint(fingerprint) {
       const results = this._findEntries(`tus::${fingerprint}::`);
       return Promise.resolve(results);
     }
-    _removeUpload(urlStorageKey) {
+    removeUpload(urlStorageKey) {
       localStorage.removeItem(urlStorageKey);
       return Promise.resolve();
     }
-    _addUpload(fingerprint, upload) {
+    addUpload(fingerprint, upload) {
       const id = Math.round(Math.random() * 1e12);
       const key = `tus::${fingerprint}::${id}`;
       localStorage.setItem(key, JSON.stringify(upload));
@@ -3331,7 +3334,7 @@
       };
       super(file, options);
     }
-    static _terminate(url, options = {}) {
+    static terminate(url, options = {}) {
       options = {
         ...defaultOptions,
         ...options
@@ -3399,13 +3402,13 @@
       this.onSuccess = undefined;
     }
     async abort() {
-      await this._upload._abort(true);
+      await this._upload.abort(true);
     }
     async delete() {
-      if (!this._upload._url) {
+      if (!this._upload.url) {
         return;
       }
-      await deleteUpload(this._upload._url, this._csrfToken);
+      await deleteUpload(this._upload.url, this._csrfToken);
     }
     getId() {
       return this._id;
@@ -3420,10 +3423,10 @@
       };
     }
     getSize() {
-      return this._upload._file.size;
+      return this._upload.file.size;
     }
     start() {
-      this._upload._start();
+      this._upload.start();
     }
     _addCsrTokenToRequest = request => {
       request.setHeader("X-CSRFToken", this._csrfToken);
@@ -3678,8 +3681,8 @@
         return;
       }
       const {
-        multiple,
-        renderer
+        _multiple: multiple,
+        _renderer: renderer
       } = this;
       const addInitialFile = initialFile => {
         const {
@@ -3756,14 +3759,12 @@
         const uploadIndex = parseInt(dataIndex, 10);
         return this._getUploadByIndex(uploadIndex);
       };
-      if (target.classList.contains("dff-delete") && !target.classList.contains("dff-disabled")) {
-        e.preventDefault();
+      if (target.classList.contains("dff-delete")) {
         const upload = getUpload();
         if (upload) {
           void this._removeExistingUpload(upload);
         }
       } else if (target.classList.contains("dff-cancel")) {
-        e.preventDefault();
         const upload = getUpload();
         if (upload) {
           void this._handleCancel(upload);
@@ -3810,7 +3811,7 @@
     };
     _handleSuccess = upload => {
       const {
-        renderer
+        _renderer: renderer
       } = this;
       this._updatePlaceholderInput();
       renderer._clearInput();
@@ -3895,8 +3896,8 @@
     async _uploadFile(file) {
       const createUpload = () => {
         const {
-          csrfToken,
-          s3UploadDir
+          _csrfToken: csrfToken,
+          _s3UploadDir: s3UploadDir
         } = this;
         if (s3UploadDir != null) {
           return new S3Upload({
@@ -3920,10 +3921,10 @@
         }
       };
       const {
-        fieldName,
-        formId,
-        renderer,
-        uploadUrl
+        _fieldName: fieldName,
+        _formId: formId,
+        _renderer: renderer,
+        _uploadUrl: uploadUrl
       } = this;
       const fileName = file.name;
       const existingUpload = this._findUploadByName(fileName);

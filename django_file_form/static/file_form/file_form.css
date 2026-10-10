@@ -22,11 +22,18 @@
 .dff-uploader .dff-files .dff-cancel,
 .dff-uploader .dff-files .dff-delete {
   margin-left: 8px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: LinkText;
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
 }
-.dff-uploader .dff-files .dff-cancel.dff-disabled,
-.dff-uploader .dff-files .dff-delete.dff-disabled {
+.dff-uploader .dff-files .dff-cancel:disabled,
+.dff-uploader .dff-files .dff-delete:disabled {
   color: #aaa;
-  pointer-events: none;
+  cursor: default;
 }
 .dff-uploader .dff-files span {
   margin-left: 8px;
