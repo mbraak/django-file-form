@@ -6,6 +6,7 @@ import importPlugin from "eslint-plugin-import-x";
 import jestDom from "eslint-plugin-jest-dom";
 import noUnsanitized from "eslint-plugin-no-unsanitized";
 import perfectionistPlugin from "eslint-plugin-perfectionist";
+import testingLibrary from "eslint-plugin-testing-library";
 import { defineConfig } from "eslint/config";
 import tseslint from "typescript-eslint";
 
@@ -60,7 +61,10 @@ export default defineConfig([
   },
   {
     files: ["src/**/*.test.ts"],
-    extends: [jestDom.configs["flat/recommended"]],
+    extends: [
+      jestDom.configs["flat/recommended"],
+      testingLibrary.configs["flat/dom"]
+    ],
     plugins: {
       vitest
     },
