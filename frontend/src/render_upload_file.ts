@@ -3,9 +3,9 @@ import { formatBytes } from "./util.ts";
 class RenderUploadFile {
   public container: Element;
 
-  private _errors: Element;
-  private _input: HTMLInputElement;
-  private _translations: Record<string, string>;
+  private errors: Element;
+  private input: HTMLInputElement;
+  private translations: Record<string, string>;
 
   constructor({
     input,
@@ -18,18 +18,18 @@ class RenderUploadFile {
     skipRequired: boolean;
     translations: Record<string, string>;
   }) {
-    this.container = this._createFilesContainer(parent);
-    this._errors = this._createErrorContainer(parent);
-    this._input = input;
-    this._translations = translations;
+    this.container = this.createFilesContainer(parent);
+    this.errors = this.createErrorContainer(parent);
+    this.input = input;
+    this.translations = translations;
 
     if (skipRequired) {
-      this._input.required = false;
+      this.input.required = false;
     }
   }
 
   public addNewUpload(filename: string, uploadIndex: number): HTMLElement {
-    const div = this._addFile(filename, uploadIndex);
+    const div = this.addFile(filename, uploadIndex);
 
     const progressSpan = document.createElement("span");
     progressSpan.className = "dff-progress";
@@ -43,7 +43,7 @@ class RenderUploadFile {
     const cancelLink = document.createElement("a");
     cancelLink.className = "dff-cancel";
 
-    this._setTextContent(cancelLink, this._getTranslation("Cancel"));
+    this.setTextContent(cancelLink, this.getTranslation("Cancel"));
     cancelLink.dataset.index = uploadIndex.toString();
     cancelLink.href = "#";
     div.append(cancelLink);
@@ -56,15 +56,13 @@ class RenderUploadFile {
     uploadIndex: number,
     filesize?: number
   ): HTMLElement {
-    const element = this._addFile(filename, uploadIndex);
+    const element = this.addFile(filename, uploadIndex);
     this.setSuccess(uploadIndex, filesize);
     return element;
   }
 
   public clearInput(): void {
-    const { _input: input } = this;
-
-    input.value = "";
+    this.input.value = "";
   }
 
   public deleteFile(index: number): void {
@@ -76,7 +74,7 @@ class RenderUploadFile {
   }
 
   public disableCancel(index: number): void {
-    const cancelSpan = this._findCancelSpan(index);
+    const cancelSpan = this.findCancelSpan(index);
 
     if (cancelSpan) {
       cancelSpan.classList.add("dff-disabled");
@@ -84,7 +82,7 @@ class RenderUploadFile {
   }
 
   public disableDelete(index: number): void {
-    const deleteLink = this._findDeleteLink(index);
+    const deleteLink = this.findDeleteLink(index);
 
     if (deleteLink) {
       deleteLink.classList.add("dff-disabled");
@@ -110,27 +108,27 @@ class RenderUploadFile {
 
     const dropHint = document.createElement("div");
     dropHint.className = "dff-drop-hint";
-    this._setTextContent(dropHint, this._getTranslation("Drop your files here"));
+    this.setTextContent(dropHint, this.getTranslation("Drop your files here"));
 
     this.container.append(dropHint);
   }
 
   public setDeleteFailed(index: number): void {
-    this._setErrorMessage(index, this._getTranslation("Delete failed"));
+    this.setErrorMessage(index, this.getTranslation("Delete failed"));
 
-    this._enableDelete(index);
+    this.enableDelete(index);
   }
 
   public setError(index: number): void {
-    this._setErrorMessage(index, this._getTranslation("Upload failed"));
+    this.setErrorMessage(index, this.getTranslation("Upload failed"));
 
     const el = this.findFileDiv(index);
     if (el) {
       el.classList.add("dff-upload-fail");
     }
 
-    this._removeProgress(index);
-    this._removeCancel(index);
+    this.removeProgress(index);
+    this.removeCancel(index);
   }
 
   public setErrorInvalidFiles(files: File[]): void {
@@ -138,13 +136,13 @@ class RenderUploadFile {
 
     for (const file of files) {
       const msg = document.createElement("li");
-      const invalidFileTypeMessage = this._getTranslation("Invalid file type");
-      this._setTextContent(msg, `${file.name}: ${invalidFileTypeMessage}`);
+      const invalidFileTypeMessage = this.getTranslation("Invalid file type");
+      this.setTextContent(msg, `${file.name}: ${invalidFileTypeMessage}`);
       msg.className = "dff-error";
       errorsMessages.append(msg);
     }
 
-    this._errors.replaceChildren(errorsMessages);
+    this.errors.replaceChildren(errorsMessages);
     this.clearInput();
   }
 
@@ -155,14 +153,14 @@ class RenderUploadFile {
 
       if (size != null) {
         const fileSizeInfo = document.createElement("span");
-        this._setTextContent(fileSizeInfo, formatBytes(size, 2));
+        this.setTextContent(fileSizeInfo, formatBytes(size, 2));
         fileSizeInfo.className = "dff-filesize";
 
         el.append(fileSizeInfo);
       }
 
       const deleteLink = document.createElement("a");
-      this._setTextContent(deleteLink, this._getTranslation("Delete"));
+      this.setTextContent(deleteLink, this.getTranslation("Delete"));
       deleteLink.className = "dff-delete";
       deleteLink.dataset.index = index.toString();
       deleteLink.href = "#";
@@ -170,8 +168,8 @@ class RenderUploadFile {
       el.append(deleteLink);
     }
 
-    this._removeProgress(index);
-    this._removeCancel(index);
+    this.removeProgress(index);
+    this.removeCancel(index);
   }
 
   public updateProgress(index: number, percentage: string): void {
@@ -185,7 +183,7 @@ class RenderUploadFile {
     }
   }
 
-  private _addFile(filename: string, uploadIndex: number): HTMLElement {
+  private addFile(filename: string, uploadIndex: number): HTMLElement {
     const div = document.createElement("div");
     div.className = `dff-file dff-file-id-${uploadIndex.toString()}`;
 
@@ -197,18 +195,18 @@ class RenderUploadFile {
     div.append(nameSpan);
     this.container.append(div);
 
-    this._input.required = false;
+    this.input.required = false;
     return div;
   }
 
-  private _createErrorContainer = (parent: Element): Element => {
+  private createErrorContainer = (parent: Element): Element => {
     const div = document.createElement("div");
     div.className = "dff-invalid-files";
     parent.append(div);
     return div;
   };
 
-  private _createFilesContainer = (parent: Element): Element => {
+  private createFilesContainer = (parent: Element): Element => {
     const div = document.createElement("div");
     div.className = "dff-files";
     parent.append(div);
@@ -216,15 +214,15 @@ class RenderUploadFile {
     return div;
   };
 
-  private _enableDelete(index: number): void {
-    const deleteLink = this._findDeleteLink(index);
+  private enableDelete(index: number): void {
+    const deleteLink = this.findDeleteLink(index);
 
     if (deleteLink) {
       deleteLink.classList.remove("dff-disabled");
     }
   }
 
-  private _findCancelSpan(index: number): HTMLElement | null {
+  private findCancelSpan(index: number): HTMLElement | null {
     const el = this.findFileDiv(index);
 
     if (!el) {
@@ -234,7 +232,7 @@ class RenderUploadFile {
     return el.querySelector<HTMLElement>(".dff-cancel");
   }
 
-  private _findDeleteLink(index: number): HTMLElement | null {
+  private findDeleteLink(index: number): HTMLElement | null {
     const div = this.findFileDiv(index);
     if (!div) {
       return div;
@@ -243,19 +241,19 @@ class RenderUploadFile {
     return div.querySelector(".dff-delete");
   }
 
-  private _getTranslation(key: string) {
-    return this._translations[key] ?? key;
+  private getTranslation(key: string) {
+    return this.translations[key] ?? key;
   }
 
-  private _removeCancel(index: number): void {
-    const cancelSpan = this._findCancelSpan(index);
+  private removeCancel(index: number): void {
+    const cancelSpan = this.findCancelSpan(index);
 
     if (cancelSpan) {
       cancelSpan.remove();
     }
   }
 
-  private _removeProgress(index: number): void {
+  private removeProgress(index: number): void {
     const el = this.findFileDiv(index);
 
     if (el) {
@@ -267,7 +265,7 @@ class RenderUploadFile {
     }
   }
 
-  private _setErrorMessage(index: number, message: string): void {
+  private setErrorMessage(index: number, message: string): void {
     const el = this.findFileDiv(index);
     if (!el) {
       return;
@@ -280,12 +278,12 @@ class RenderUploadFile {
 
     const span = document.createElement("span");
     span.classList.add("dff-error");
-    this._setTextContent(span, message);
+    this.setTextContent(span, message);
 
     el.append(span);
   }
 
-  private _setTextContent(element: HTMLElement, text: string) {
+  private setTextContent(element: HTMLElement, text: string) {
     element.append(document.createTextNode(text));
   }
 }

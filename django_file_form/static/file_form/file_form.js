@@ -245,10 +245,7 @@
       return element;
     }
     _clearInput() {
-      const {
-        _input: input
-      } = this;
-      input.value = "";
+      this._input.value = "";
     }
     _deleteFile(index) {
       const div = this._findFileDiv(index);

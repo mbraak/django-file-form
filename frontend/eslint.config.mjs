@@ -76,22 +76,7 @@ export default defineConfig([
       "unicorn/prefer-string-starts-ends-with": "error",
       "unicorn/require-css-escape": "error",
       "unicorn/throw-new-error": "error",
-      "@typescript-eslint/restrict-template-expressions": "error",
-      "@typescript-eslint/naming-convention": [
-        "error",
-        {
-          selector: "memberLike",
-          modifiers: ["private"],
-          format: [],
-          leadingUnderscore: "require"
-        },
-        {
-          selector: "memberLike",
-          modifiers: ["protected"],
-          format: [],
-          leadingUnderscore: "require"
-        }
-      ]
+      "@typescript-eslint/restrict-template-expressions": "error"
     },
     settings: {
       "import/resolver": {
