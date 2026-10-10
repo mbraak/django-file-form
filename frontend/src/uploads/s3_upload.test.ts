@@ -68,7 +68,9 @@ const startUpload = async (file?: File) => {
 
 describe("abort", () => {
   test("rejects with an error when the upload is not started", async () => {
-    await expect(createS3Upload().abort()).rejects.toEqual(new Error("Upload not created"));
+    await expect(createS3Upload().abort()).rejects.toThrow(
+      "Upload not created"
+    );
   });
 
   test("aborts the multipart upload after the file is uploaded", async () => {
@@ -139,7 +141,7 @@ describe("getId", () => {
 
 describe("getInitialFile", () => {
   test("return the initial file when the upload has not started", () => {
-    expect(createS3Upload().getInitialFile()).toEqual({
+    expect(createS3Upload().getInitialFile()).toStrictEqual({
       id: "",
       name: "",
       original_name: "file.txt",
@@ -151,7 +153,7 @@ describe("getInitialFile", () => {
   test("returns the key and the upload id when the file is uploaded", async () => {
     const s3Upload = await startUpload();
 
-    expect(s3Upload.getInitialFile()).toEqual({
+    expect(s3Upload.getInitialFile()).toStrictEqual({
       id: "upload-id-1",
       name: "test-key-1",
       original_name: "file.txt",
@@ -163,7 +165,7 @@ describe("getInitialFile", () => {
 
 describe("getSize", () => {
   test("returns the size", () => {
-    expect(createS3Upload().getSize()).toEqual(8);
+    expect(createS3Upload().getSize()).toBe(8);
   });
 });
 
@@ -223,7 +225,7 @@ describe("start", () => {
 
     await startUpload(file);
 
-    expect(completedParts).toEqual({
+    expect(completedParts).toStrictEqual({
       parts: [
         { ETag: "etag1", PartNumber: 1 },
         { ETag: "etag2", PartNumber: 2 }
