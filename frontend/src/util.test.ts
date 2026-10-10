@@ -11,22 +11,22 @@ import {
 describe("findInput", () => {
   test("returns an input when it exists", () => {
     const form = document.createElement("form");
-    document.body.appendChild(form);
+    document.body.append(form);
 
     const input = document.createElement("input");
     input.setAttribute("name", "field1");
-    form.appendChild(input);
+    form.append(input);
 
     expect(findInput(form, "field1", null)).toEqual(input);
   });
 
   test("returns null when the inout doesn't exists", () => {
     const form = document.createElement("form");
-    document.body.appendChild(form);
+    document.body.append(form);
 
     const input = document.createElement("input");
     input.setAttribute("name", "field1");
-    form.appendChild(input);
+    form.append(input);
 
     expect(findInput(form, "xyz", null)).toBeNull();
   });

@@ -54,7 +54,7 @@ const createForm = () => {
 };
 
 beforeEach(() => {
-  document.body.innerHTML = "";
+  document.body.replaceChildren();
 });
 
 describe(".initUploadFields", () => {

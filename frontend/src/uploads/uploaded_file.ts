@@ -38,11 +38,11 @@ export abstract class BaseUploadedFile extends BaseUpload {
     this.size = size;
   }
 
-  public async abort(): Promise<void> {
+  public abort(): Promise<void> {
     return Promise.resolve();
   }
 
-  public async delete(): Promise<void> {
+  public delete(): Promise<void> {
     return Promise.resolve();
   }
 

@@ -67,8 +67,8 @@ const startUpload = async (file?: File) => {
 };
 
 describe("abort", () => {
-  test("rejects with an empty error when the upload is not started", async () => {
-    await expect(createS3Upload().abort()).rejects.toEqual(new Error(""));
+  test("rejects with an error when the upload is not started", async () => {
+    await expect(createS3Upload().abort()).rejects.toEqual(new Error("Upload not created"));
   });
 
   test("aborts the multipart upload after the file is uploaded", async () => {

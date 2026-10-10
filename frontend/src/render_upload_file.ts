@@ -37,16 +37,16 @@ class RenderUploadFile {
     const innerSpan = document.createElement("span");
     innerSpan.className = "dff-progress-inner";
 
-    progressSpan.appendChild(innerSpan);
-    div.appendChild(progressSpan);
+    progressSpan.append(innerSpan);
+    div.append(progressSpan);
 
     const cancelLink = document.createElement("a");
     cancelLink.className = "dff-cancel";
 
     this._setTextContent(cancelLink, this._getTranslation("Cancel"));
-    cancelLink.setAttribute("data-index", uploadIndex.toString());
+    cancelLink.dataset.index = uploadIndex.toString();
     cancelLink.href = "#";
-    div.appendChild(cancelLink);
+    div.append(cancelLink);
 
     return div;
   }
@@ -112,7 +112,7 @@ class RenderUploadFile {
     dropHint.className = "dff-drop-hint";
     this._setTextContent(dropHint, this._getTranslation("Drop your files here"));
 
-    this.container.appendChild(dropHint);
+    this.container.append(dropHint);
   }
 
   public setDeleteFailed(index: number): void {
@@ -141,7 +141,7 @@ class RenderUploadFile {
       const invalidFileTypeMessage = this._getTranslation("Invalid file type");
       this._setTextContent(msg, `${file.name}: ${invalidFileTypeMessage}`);
       msg.className = "dff-error";
-      errorsMessages.appendChild(msg);
+      errorsMessages.append(msg);
     }
 
     this._errors.replaceChildren(errorsMessages);
@@ -158,16 +158,16 @@ class RenderUploadFile {
         this._setTextContent(fileSizeInfo, formatBytes(size, 2));
         fileSizeInfo.className = "dff-filesize";
 
-        el.appendChild(fileSizeInfo);
+        el.append(fileSizeInfo);
       }
 
       const deleteLink = document.createElement("a");
       this._setTextContent(deleteLink, this._getTranslation("Delete"));
       deleteLink.className = "dff-delete";
-      deleteLink.setAttribute("data-index", index.toString());
+      deleteLink.dataset.index = index.toString();
       deleteLink.href = "#";
 
-      el.appendChild(deleteLink);
+      el.append(deleteLink);
     }
 
     this._removeProgress(index);
@@ -192,10 +192,10 @@ class RenderUploadFile {
     const nameSpan = document.createElement("span");
     nameSpan.textContent = filename;
     nameSpan.className = "dff-filename";
-    nameSpan.setAttribute("data-index", uploadIndex.toString());
+    nameSpan.dataset.index = uploadIndex.toString();
 
-    div.appendChild(nameSpan);
-    this.container.appendChild(div);
+    div.append(nameSpan);
+    this.container.append(div);
 
     this._input.required = false;
     return div;
@@ -204,14 +204,14 @@ class RenderUploadFile {
   private _createErrorContainer = (parent: Element): Element => {
     const div = document.createElement("div");
     div.className = "dff-invalid-files";
-    parent.appendChild(div);
+    parent.append(div);
     return div;
   };
 
   private _createFilesContainer = (parent: Element): Element => {
     const div = document.createElement("div");
     div.className = "dff-files";
-    parent.appendChild(div);
+    parent.append(div);
 
     return div;
   };
@@ -282,7 +282,7 @@ class RenderUploadFile {
     span.classList.add("dff-error");
     this._setTextContent(span, message);
 
-    el.appendChild(span);
+    el.append(span);
   }
 
   private _setTextContent(element: HTMLElement, text: string) {

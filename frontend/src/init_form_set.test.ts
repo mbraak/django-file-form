@@ -51,7 +51,7 @@ const createFormSet = (prefix: string) => {
 };
 
 beforeEach(() => {
-  document.body.innerHTML = "";
+  document.body.replaceChildren();
 });
 
 describe(".initFormSet", () => {
