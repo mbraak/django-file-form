@@ -4,6 +4,23 @@
     "@babel/preset-typescript"
   ],
   "plugins": [
+    [
+      "prefix-private-members",
+      {
+        "excludeClasses": [
+          "BaseUpload",
+          "BaseUploadedFile",
+          "ExistingFile",
+          "PlaceholderFile",
+          "S3Upload",
+          "TusUpload",
+          "UploadedS3File",
+          "UploadedTusFile"
+        ],
+        "prefixParameterKeys": true,
+        "prefixPublicMembers": true
+      }
+    ],
     "@babel/plugin-transform-runtime"
   ]
 }
