@@ -3799,7 +3799,7 @@
       this._renderer._setErrorInvalidFiles(files);
     };
     _handleProgress = (upload, bytesUploaded, bytesTotal) => {
-      const percentage = (bytesUploaded / bytesTotal * 100).toFixed(2);
+      const percentage = bytesTotal === 0 ? "0" : (bytesUploaded / bytesTotal * 100).toFixed(2);
       this._renderer._updateProgress(upload.uploadIndex, percentage);
       const {
         onProgress
