@@ -14,7 +14,19 @@ import {
 import S3Upload from "./s3_upload.ts";
 import { MB } from "./s3_utils.ts";
 
+// The part uploads use a cross-origin XMLHttpRequest, so jsdom enforces CORS
+const corsHeaders = {
+  "Access-Control-Allow-Headers": "*",
+  "Access-Control-Allow-Methods": "PUT",
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Expose-Headers": "ETag"
+};
+
 const server = setupServer(
+  http.options(
+    "http://s3_endpoint.net/upload/*",
+    () => new HttpResponse(null, { headers: corsHeaders, status: 204 })
+  ),
   http.post("http://s3_endpoint.net/", () =>
     HttpResponse.json({ key: "test-key-1", uploadId: "upload-id-1" })
   ),
@@ -22,7 +34,7 @@ const server = setupServer(
     HttpResponse.json({ url: "http://s3_endpoint.net/upload/1" })
   ),
   http.put("http://s3_endpoint.net/upload/1", () =>
-    HttpResponse.json({}, { headers: { ETag: "etag1" } })
+    HttpResponse.json({}, { headers: { ...corsHeaders, ETag: "etag1" } })
   ),
   http.post("http://s3_endpoint.net/upload-id-1/complete", () =>
     HttpResponse.json({})
@@ -96,7 +108,10 @@ describe("abort", () => {
       http.put("http://s3_endpoint.net/upload/1", async () => {
         partRequest();
         await delay(5000);
-        return HttpResponse.json({}, { headers: { ETag: "etag1" } });
+        return HttpResponse.json(
+          {},
+          { headers: { ...corsHeaders, ETag: "etag1" } }
+        );
       }),
       http.delete("http://s3_endpoint.net/upload-id-1", () => {
         abortRequest();
@@ -209,7 +224,7 @@ describe("start", () => {
         HttpResponse.json({ url: "http://s3_endpoint.net/upload/2" })
       ),
       http.put("http://s3_endpoint.net/upload/2", () =>
-        HttpResponse.json({}, { headers: { ETag: "etag2" } })
+        HttpResponse.json({}, { headers: { ...corsHeaders, ETag: "etag2" } })
       ),
       http.post(
         "http://s3_endpoint.net/upload-id-1/complete",
@@ -296,7 +311,7 @@ describe("start", () => {
   test("calls onError when uploading a part returns an error status", async () => {
     server.use(
       http.put("http://s3_endpoint.net/upload/1", () =>
-        HttpResponse.json({}, { status: 500 })
+        HttpResponse.json({}, { headers: corsHeaders, status: 500 })
       )
     );
 
@@ -313,7 +328,9 @@ describe("start", () => {
 
   test("calls onError when the ETag header is missing", async () => {
     server.use(
-      http.put("http://s3_endpoint.net/upload/1", () => HttpResponse.json({}))
+      http.put("http://s3_endpoint.net/upload/1", () =>
+        HttpResponse.json({}, { headers: corsHeaders })
+      )
     );
 
     const s3Upload = createS3Upload();
