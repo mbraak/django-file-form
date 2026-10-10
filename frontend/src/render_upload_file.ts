@@ -1,6 +1,11 @@
 import { formatBytes } from "./util.ts";
 
-let nextLabelId = 0;
+let nextId = 0;
+
+const createId = (prefix: string): string => {
+  nextId += 1;
+  return `${prefix}-${nextId.toString()}`;
+};
 
 class RenderUploadFile {
   public container: Element;
@@ -8,6 +13,8 @@ class RenderUploadFile {
   private clickableFilenames: boolean;
   private errors: Element;
   private input: HTMLInputElement;
+  // Whether this code set aria-invalid on the input, and not the server
+  private isInvalidSetHere = false;
   private status: Element;
   private translations: Record<string, string>;
 
@@ -28,6 +35,7 @@ class RenderUploadFile {
     this.container = this.createFilesContainer(parent);
     this.labelFilesContainer(input);
     this.errors = this.createErrorContainer(parent);
+    this.describeInputWithErrors(input);
     this.status = this.createStatusContainer(parent);
     this.input = input;
     this.translations = translations;
@@ -160,6 +168,14 @@ class RenderUploadFile {
   }
 
   public setErrorInvalidFiles(files: File[]): void {
+    this.clearInput();
+
+    if (files.length === 0) {
+      this.errors.replaceChildren();
+      this.setInputInvalid(false);
+      return;
+    }
+
     const errorsMessages = document.createElement("ul");
 
     for (const file of files) {
@@ -171,7 +187,7 @@ class RenderUploadFile {
     }
 
     this.errors.replaceChildren(errorsMessages);
-    this.clearInput();
+    this.setInputInvalid(true);
   }
 
   public setSuccess(index: number, size?: number): void {
@@ -276,6 +292,19 @@ class RenderUploadFile {
     return div;
   };
 
+  // A screen reader reads the errors when the input has the focus. Django may
+  // have set aria-describedby already, for the help text.
+  private describeInputWithErrors(input: HTMLInputElement): void {
+    this.errors.id = createId("dff-errors");
+
+    const describedBy = input.getAttribute("aria-describedby");
+
+    input.setAttribute(
+      "aria-describedby",
+      describedBy ? `${describedBy} ${this.errors.id}` : this.errors.id
+    );
+  }
+
   private enableDelete(index: number): void {
     const deleteButton = this.findDeleteButton(index);
 
@@ -323,8 +352,7 @@ class RenderUploadFile {
     }
 
     if (!label.id) {
-      nextLabelId += 1;
-      label.id = `dff-label-${nextLabelId.toString()}`;
+      label.id = createId("dff-label");
     }
 
     this.container.setAttribute("aria-labelledby", label.id);
@@ -384,6 +412,20 @@ class RenderUploadFile {
     this.setTextContent(span, message);
 
     el.append(span);
+  }
+
+  // Django sets aria-invalid when the server rejected the field; that is left
+  // alone
+  private setInputInvalid(invalid: boolean): void {
+    if (invalid) {
+      if (this.input.getAttribute("aria-invalid") !== "true") {
+        this.input.setAttribute("aria-invalid", "true");
+        this.isInvalidSetHere = true;
+      }
+    } else if (this.isInvalidSetHere) {
+      this.input.removeAttribute("aria-invalid");
+      this.isInvalidSetHere = false;
+    }
   }
 
   private setTextContent(element: HTMLElement, text: string) {

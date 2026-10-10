@@ -204,12 +204,18 @@
   const getInputValueForFormAndPrefix = (form, fieldName, prefix) => findInput(form, fieldName, prefix)?.value;
   const getMetadataFieldName = (fieldName, prefix) => `${getInputNameWithoutPrefix(fieldName, prefix)}-metadata`;
 
-  let nextLabelId = 0;
+  let nextId = 0;
+  const createId = prefix => {
+    nextId += 1;
+    return `${prefix}-${nextId.toString()}`;
+  };
   class RenderUploadFile {
     _container;
     _clickableFilenames;
     _errors;
     _input;
+    // Whether this code set aria-invalid on the input, and not the server
+    _isInvalidSetHere = false;
     _status;
     _translations;
     constructor({
@@ -223,6 +229,7 @@
       this._container = this._createFilesContainer(parent);
       this._labelFilesContainer(input);
       this._errors = this._createErrorContainer(parent);
+      this._describeInputWithErrors(input);
       this._status = this._createStatusContainer(parent);
       this._input = input;
       this._translations = translations;
@@ -313,6 +320,12 @@
       this._removeCancel(index);
     }
     _setErrorInvalidFiles(files) {
+      this._clearInput();
+      if (files.length === 0) {
+        this._errors.replaceChildren();
+        this._setInputInvalid(false);
+        return;
+      }
       const errorsMessages = document.createElement("ul");
       for (const file of files) {
         const msg = document.createElement("li");
@@ -322,7 +335,7 @@
         errorsMessages.append(msg);
       }
       this._errors.replaceChildren(errorsMessages);
-      this._clearInput();
+      this._setInputInvalid(true);
     }
     _setSuccess(index, size) {
       const el = this._findFileDiv(index);
@@ -396,6 +409,14 @@
       parent.append(div);
       return div;
     };
+
+    // A screen reader reads the errors when the input has the focus. Django may
+    // have set aria-describedby already, for the help text.
+    _describeInputWithErrors(input) {
+      this._errors.id = createId("dff-errors");
+      const describedBy = input.getAttribute("aria-describedby");
+      input.setAttribute("aria-describedby", describedBy ? `${describedBy} ${this._errors.id}` : this._errors.id);
+    }
     _enableDelete(index) {
       const deleteButton = this._findDeleteButton(index);
       if (deleteButton) {
@@ -433,8 +454,7 @@
         return;
       }
       if (!label.id) {
-        nextLabelId += 1;
-        label.id = `dff-label-${nextLabelId.toString()}`;
+        label.id = createId("dff-label");
       }
       this._container.setAttribute("aria-labelledby", label.id);
     }
@@ -480,6 +500,20 @@
       span.classList.add("dff-error");
       this._setTextContent(span, message);
       el.append(span);
+    }
+
+    // Django sets aria-invalid when the server rejected the field; that is left
+    // alone
+    _setInputInvalid(invalid) {
+      if (invalid) {
+        if (this._input.getAttribute("aria-invalid") !== "true") {
+          this._input.setAttribute("aria-invalid", "true");
+          this._isInvalidSetHere = true;
+        }
+      } else if (this._isInvalidSetHere) {
+        this._input.removeAttribute("aria-invalid");
+        this._isInvalidSetHere = false;
+      }
     }
     _setTextContent(element, text) {
       element.append(document.createTextNode(text));

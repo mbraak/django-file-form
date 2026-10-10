@@ -317,6 +317,24 @@ describe("selecting files", () => {
     );
   });
 
+  test("marks the input as invalid when a file has an invalid type", () => {
+    const { input } = createFileField({ accept: ".txt" });
+
+    selectFiles(input, [mockFile("image.png")]);
+
+    expect(input).toHaveAttribute("aria-invalid", "true");
+  });
+
+  test("clears the errors when only valid files are selected", () => {
+    const { input, parent } = createFileField({ accept: ".txt" });
+    selectFiles(input, [mockFile("image.png")]);
+
+    selectFiles(input, [mockFile("file.txt")]);
+
+    expect(parent.querySelector(".dff-invalid-files")).toBeEmptyDOMElement();
+    expect(input).not.toHaveAttribute("aria-invalid");
+  });
+
   test("replaces the current file when multiple is false", async () => {
     const { fileField, input, parent } = createFileField({
       initial: [existingFile]

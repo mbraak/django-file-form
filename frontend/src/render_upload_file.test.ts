@@ -563,6 +563,86 @@ describe("setError", () => {
   });
 });
 
+describe("tying the input to its errors", () => {
+  test("describes the input with the error container", () => {
+    const { input, parent } = createRenderer();
+
+    const errors = parent.querySelector(".dff-invalid-files");
+
+    expect(errors?.id).toMatch(/^dff-errors-\d+$/);
+    expect(input).toHaveAttribute("aria-describedby", errors?.id);
+  });
+
+  test("keeps the description that the input already has", () => {
+    const parent = document.createElement("div");
+    const input = document.createElement("input");
+    input.type = "file";
+    input.setAttribute("aria-describedby", "id_file_helptext");
+    parent.append(input);
+    document.body.replaceChildren(parent);
+
+    new RenderUploadFile({
+      input,
+      parent,
+      skipRequired: false,
+      translations: {}
+    });
+
+    const errorsId = parent.querySelector(".dff-invalid-files")?.id ?? "";
+
+    expect(input).toHaveAttribute(
+      "aria-describedby",
+      `id_file_helptext ${errorsId}`
+    );
+  });
+
+  test("gives the error containers of different fields different ids", () => {
+    const { parent: parent1 } = createRenderer();
+    const id1 = parent1.querySelector(".dff-invalid-files")?.id;
+    const { parent: parent2 } = createRenderer();
+
+    expect(parent2.querySelector(".dff-invalid-files")?.id).not.toBe(id1);
+  });
+
+  test("reads the errors as the description of the input", () => {
+    const { parent, renderer } = createLabelledRenderer({ text: "Attachment" });
+
+    renderer.setErrorInvalidFiles([mockFile("file1.png")]);
+
+    expect(parent.querySelector("input")).toHaveAccessibleDescription(
+      "file1.png: Invalid file type"
+    );
+  });
+
+  test("marks the input as invalid when there are errors", () => {
+    const { input, renderer } = createRenderer();
+
+    renderer.setErrorInvalidFiles([mockFile("file1.png")]);
+
+    expect(input).toHaveAttribute("aria-invalid", "true");
+  });
+
+  test("removes the errors and the invalid mark when there are no errors", () => {
+    const { input, parent, renderer } = createRenderer();
+    renderer.setErrorInvalidFiles([mockFile("file1.png")]);
+
+    renderer.setErrorInvalidFiles([]);
+
+    expect(parent.querySelector(".dff-invalid-files")).toBeEmptyDOMElement();
+    expect(input).not.toHaveAttribute("aria-invalid");
+  });
+
+  test("keeps the invalid mark that the server set", () => {
+    const { input, renderer } = createRenderer();
+    input.setAttribute("aria-invalid", "true");
+
+    renderer.setErrorInvalidFiles([mockFile("file1.png")]);
+    renderer.setErrorInvalidFiles([]);
+
+    expect(input).toHaveAttribute("aria-invalid", "true");
+  });
+});
+
 describe("setErrorInvalidFiles", () => {
   test("renders an error for each file and clears the input", () => {
     const { parent, renderer } = createRenderer();
