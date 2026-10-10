@@ -6,13 +6,13 @@ export const deleteUpload = async (
     const xhr = new XMLHttpRequest();
     xhr.open("DELETE", url);
 
-    xhr.onload = (): void => {
+    xhr.addEventListener("load", (): void => {
       if (xhr.status === 204) {
         resolve();
       } else {
-        reject(new Error());
+        reject(new Error("Delete failed"));
       }
-    };
+    });
     xhr.setRequestHeader("Tus-Resumable", "1.0.0");
     xhr.setRequestHeader("X-CSRFToken", csrfToken);
     xhr.send(null);

@@ -23,7 +23,7 @@ const getFilesFromFileSystemEntries = async (
 
   for (const entry of entries) {
     const filesFromEntry = await getFilesFromFileSystemEntry(entry);
-    filesFromEntry.forEach(file => result.push(file));
+    result.push(...filesFromEntry);
   }
 
   return result;
@@ -44,7 +44,7 @@ const getFilesFromFileSystemEntry = async (
       entry as FileSystemDirectoryEntry
     );
     const files = await getFilesFromFileSystemEntries(entriesFromDirectory);
-    files.forEach(file => result.push(file));
+    result.push(...files);
   }
 
   return result;
@@ -53,7 +53,7 @@ const getFilesFromFileSystemEntry = async (
 const getFilesFromDataTransfer = async (
   dataTransfer: DataTransfer
 ): Promise<File[]> => {
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- items is missing in older browsers
   if (dataTransfer.items) {
     const files: File[] = [];
 
@@ -63,7 +63,7 @@ const getFilesFromDataTransfer = async (
         const filesFromEntry = await getFilesFromFileSystemEntry(
           fileSystemEntry
         );
-        filesFromEntry.forEach(file => files.push(file));
+        files.push(...filesFromEntry);
       } else {
         const file = item.getAsFile();
 

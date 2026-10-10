@@ -10,26 +10,27 @@
     }
     return findForm(parent);
   };
-  const unique = values => Array.from(new Set(values).values());
-  // eslint-disable-line @typescript-eslint/no-explicit-any
-
+  const unique = values => Array.from(new Set(values));
   const autoInitFileForms = () => {
-    const initUploadFields = window.initUploadFields; // eslint-disable-line  @typescript-eslint/no-unsafe-member-access
-
     const forms = unique(Array.from(document.querySelectorAll(".dff-uploader")).map(findForm));
-    forms.forEach(initUploadFields);
+    for (const form of forms) {
+      if (form) {
+        window.initUploadFields(form);
+      }
+    }
   };
 
   const parseInputAccept = inputAccept => {
     const extensions = [];
     const mimeTypes = [];
-    inputAccept.split(",").map(fileType => fileType.trim().toLowerCase()).filter(Boolean).forEach(fileType => {
+    const fileTypes = inputAccept.split(",").map(fileType => fileType.trim().toLowerCase()).filter(Boolean);
+    for (const fileType of fileTypes) {
       if (fileType.startsWith(".")) {
         extensions.push(fileType);
       } else {
         mimeTypes.push(fileType);
       }
-    });
+    }
     return [extensions, mimeTypes];
   };
 
@@ -79,7 +80,7 @@
     const result = [];
     for (const entry of entries) {
       const filesFromEntry = await getFilesFromFileSystemEntry(entry);
-      filesFromEntry.forEach(file => result.push(file));
+      result.push(...filesFromEntry);
     }
     return result;
   };
@@ -91,19 +92,19 @@
     } else if (entry.isDirectory) {
       const entriesFromDirectory = await getEntriesFromDirectory(entry);
       const files = await getFilesFromFileSystemEntries(entriesFromDirectory);
-      files.forEach(file => result.push(file));
+      result.push(...files);
     }
     return result;
   };
   const getFilesFromDataTransfer = async dataTransfer => {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- items is missing in older browsers
     if (dataTransfer.items) {
       const files = [];
       for (const item of dataTransfer.items) {
         const fileSystemEntry = item.webkitGetAsEntry();
         if (fileSystemEntry) {
           const filesFromEntry = await getFilesFromFileSystemEntry(fileSystemEntry);
-          filesFromEntry.forEach(file => files.push(file));
+          files.push(...filesFromEntry);
         } else {
           const file = item.getAsFile();
           if (file) {
@@ -181,7 +182,7 @@
     const dm = decimals;
     const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    const n = parseFloat((bytes / k ** i).toFixed(dm));
+    const n = Number.parseFloat((bytes / k ** i).toFixed(dm));
     const size = sizes[i];
     if (size == null) {
       return "";
@@ -193,7 +194,7 @@
   const getInputNameWithoutPrefix = (fieldName, prefix) => prefix ? fieldName.slice(prefix.length + 1) : fieldName;
   const findInput = (form, fieldName, prefix) => {
     const inputNameWithPrefix = getInputNameWithPrefix(fieldName, prefix);
-    const input = form.querySelector(`[name="${inputNameWithPrefix}"]`);
+    const input = form.querySelector(`[name="${CSS.escape(inputNameWithPrefix)}"]`);
     if (!input) {
       return null;
     }
@@ -228,14 +229,14 @@
       progressSpan.className = "dff-progress";
       const innerSpan = document.createElement("span");
       innerSpan.className = "dff-progress-inner";
-      progressSpan.appendChild(innerSpan);
-      div.appendChild(progressSpan);
+      progressSpan.append(innerSpan);
+      div.append(progressSpan);
       const cancelLink = document.createElement("a");
       cancelLink.className = "dff-cancel";
       this._setTextContent(cancelLink, this._getTranslation("Cancel"));
-      cancelLink.setAttribute("data-index", uploadIndex.toString());
+      cancelLink.dataset.index = uploadIndex.toString();
       cancelLink.href = "#";
-      div.appendChild(cancelLink);
+      div.append(cancelLink);
       return div;
     }
     addUploadedFile(filename, uploadIndex, filesize) {
@@ -283,7 +284,7 @@
       const dropHint = document.createElement("div");
       dropHint.className = "dff-drop-hint";
       this._setTextContent(dropHint, this._getTranslation("Drop your files here"));
-      this.container.appendChild(dropHint);
+      this.container.append(dropHint);
     }
     setDeleteFailed(index) {
       this._setErrorMessage(index, this._getTranslation("Delete failed"));
@@ -305,7 +306,7 @@
         const invalidFileTypeMessage = this._getTranslation("Invalid file type");
         this._setTextContent(msg, `${file.name}: ${invalidFileTypeMessage}`);
         msg.className = "dff-error";
-        errorsMessages.appendChild(msg);
+        errorsMessages.append(msg);
       }
       this._errors.replaceChildren(errorsMessages);
       this.clearInput();
@@ -318,14 +319,14 @@
           const fileSizeInfo = document.createElement("span");
           this._setTextContent(fileSizeInfo, formatBytes(size, 2));
           fileSizeInfo.className = "dff-filesize";
-          el.appendChild(fileSizeInfo);
+          el.append(fileSizeInfo);
         }
         const deleteLink = document.createElement("a");
         this._setTextContent(deleteLink, this._getTranslation("Delete"));
         deleteLink.className = "dff-delete";
-        deleteLink.setAttribute("data-index", index.toString());
+        deleteLink.dataset.index = index.toString();
         deleteLink.href = "#";
-        el.appendChild(deleteLink);
+        el.append(deleteLink);
       }
       this._removeProgress(index);
       this._removeCancel(index);
@@ -345,22 +346,22 @@
       const nameSpan = document.createElement("span");
       nameSpan.textContent = filename;
       nameSpan.className = "dff-filename";
-      nameSpan.setAttribute("data-index", uploadIndex.toString());
-      div.appendChild(nameSpan);
-      this.container.appendChild(div);
+      nameSpan.dataset.index = uploadIndex.toString();
+      div.append(nameSpan);
+      this.container.append(div);
       this._input.required = false;
       return div;
     }
     _createErrorContainer = parent => {
       const div = document.createElement("div");
       div.className = "dff-invalid-files";
-      parent.appendChild(div);
+      parent.append(div);
       return div;
     };
     _createFilesContainer = parent => {
       const div = document.createElement("div");
       div.className = "dff-files";
-      parent.appendChild(div);
+      parent.append(div);
       return div;
     };
     _enableDelete(index) {
@@ -413,7 +414,7 @@
       const span = document.createElement("span");
       span.classList.add("dff-error");
       this._setTextContent(span, message);
-      el.appendChild(span);
+      el.append(span);
     }
     _setTextContent(element, text) {
       element.append(document.createTextNode(text));
@@ -599,8 +600,7 @@
     });
     const url = urlJoin(endpoint, uploadId, number.toString(), `?key=${filename}`);
     return fetch(url, {
-      headers: headers,
-      method: "get"
+      headers: headers
     }).then(response => {
       return response.json();
     }).then(data => {
@@ -660,7 +660,7 @@
       // This mostly exists to make `abortUpload` work well: only sending the abort request if
       // the upload was already created, and if the createMultipartUpload request is still in flight,
       // aborting it immediately after it finishes.
-      this._createdPromise = Promise.reject(new Error());
+      this._createdPromise = Promise.reject(new Error("Upload not created"));
       this._chunks = [];
       this._chunkState = [];
       this._uploading = [];
@@ -671,9 +671,9 @@
       this._createdPromise.catch(() => ({})); // silence uncaught rejection warning
     }
     async abort() {
-      this._uploading.slice().forEach(xhr => {
+      for (const xhr of this._uploading.slice()) {
         xhr.abort();
-      });
+      }
       this._uploading = [];
       await this._createdPromise;
       if (this._key && this._uploadId) {
@@ -685,7 +685,7 @@
         });
       }
     }
-    async delete() {
+    delete() {
       return Promise.resolve();
     }
     getId() {
@@ -892,9 +892,9 @@
           break;
         }
       }
-      candidates.forEach(index => {
+      for (const index of candidates) {
         void this._uploadPart(index);
-      });
+      }
     }
   }
 
@@ -3345,13 +3345,13 @@
   const deleteUpload = async (url, csrfToken) => new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open("DELETE", url);
-    xhr.onload = () => {
+    xhr.addEventListener("load", () => {
       if (xhr.status === 204) {
         resolve();
       } else {
-        reject(new Error());
+        reject(new Error("Delete failed"));
       }
-    };
+    });
     xhr.setRequestHeader("Tus-Resumable", "1.0.0");
     xhr.setRequestHeader("X-CSRFToken", csrfToken);
     xhr.send(null);
@@ -3405,7 +3405,7 @@
     }
     async delete() {
       if (!this._upload.url) {
-        return Promise.resolve();
+        return;
       }
       await deleteUpload(this._upload.url, this._csrfToken);
     }
@@ -3471,10 +3471,10 @@
       });
       this.size = size;
     }
-    async abort() {
+    abort() {
       return Promise.resolve();
     }
-    async delete() {
+    delete() {
       return Promise.resolve();
     }
     getSize() {
@@ -3699,10 +3699,10 @@
         this.emitEvent("addUpload", element, upload);
       };
       if (multiple) {
-        initialFiles.forEach(file => {
+        for (const file of initialFiles) {
           addInitialFile(file);
           this.nextUploadIndex += 1;
-        });
+        }
       } else {
         const initialFile = initialFiles[0];
         if (initialFile) {
@@ -3751,7 +3751,7 @@
     handleClick = e => {
       const target = e.target;
       const getUpload = () => {
-        const dataIndex = target.getAttribute("data-index");
+        const dataIndex = target.dataset.index;
         if (!dataIndex) {
           return undefined;
         }
@@ -3996,7 +3996,7 @@
     const prefix = getPrefix();
     const csrfToken = findInput(form, "csrfmiddlewaretoken", null)?.value;
     if (!csrfToken) {
-      throw Error("Csrf token not found");
+      throw new Error("Csrf token not found");
     }
     if (!formId || !uploadUrl) {
       return;
@@ -4015,7 +4015,7 @@
         multiple
       } = input;
       const initial = getInitialFiles(fieldName);
-      const dataTranslations = container.getAttribute("data-translations");
+      const dataTranslations = container.dataset.translations;
       const translations = dataTranslations ? JSON.parse(dataTranslations) : {};
       const supportDropArea = !(options.supportDropArea === false);
       new FileField({
@@ -4064,11 +4064,9 @@
     }
   };
 
-  // eslint-disable-line @typescript-eslint/no-explicit-any
-
-  window.autoInitFileForms = autoInitFileForms; // eslint-disable-line  @typescript-eslint/no-unsafe-member-access
-  window.initFormSet = initFormSet; // eslint-disable-line  @typescript-eslint/no-unsafe-member-access
-  window.initUploadFields = initUploadFields; // eslint-disable-line  @typescript-eslint/no-unsafe-member-access
+  window.autoInitFileForms = autoInitFileForms;
+  window.initFormSet = initFormSet;
+  window.initUploadFields = initUploadFields;
 
 })();
 //# sourceMappingURL=file_form.js.map

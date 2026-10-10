@@ -11,22 +11,22 @@ import {
 describe("findInput", () => {
   test("returns an input when it exists", () => {
     const form = document.createElement("form");
-    document.body.appendChild(form);
+    document.body.append(form);
 
     const input = document.createElement("input");
     input.setAttribute("name", "field1");
-    form.appendChild(input);
+    form.append(input);
 
-    expect(findInput(form, "field1", null)).toEqual(input);
+    expect(findInput(form, "field1", null)).toBe(input);
   });
 
   test("returns null when the inout doesn't exists", () => {
     const form = document.createElement("form");
-    document.body.appendChild(form);
+    document.body.append(form);
 
     const input = document.createElement("input");
     input.setAttribute("name", "field1");
-    form.appendChild(input);
+    form.append(input);
 
     expect(findInput(form, "xyz", null)).toBeNull();
   });
@@ -34,15 +34,15 @@ describe("findInput", () => {
 
 describe("formatBytes", () => {
   test("formats 0 bytes", () => {
-    expect(formatBytes(0, 10)).toEqual("0 Bytes");
+    expect(formatBytes(0, 10)).toBe("0 Bytes");
   });
 
   test("formats 1200 bytes", () => {
-    expect(formatBytes(1200, 0)).toEqual("1 KB");
+    expect(formatBytes(1200, 0)).toBe("1 KB");
   });
 
   test("formats 1200 with 2 decimals", () => {
-    expect(formatBytes(1200, 2)).toEqual("1.17 KB");
+    expect(formatBytes(1200, 2)).toBe("1.17 KB");
   });
 });
 

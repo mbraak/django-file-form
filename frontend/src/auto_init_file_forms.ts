@@ -12,18 +12,17 @@ const findForm = (element: Element): HTMLElement | null => {
   return findForm(parent);
 };
 
-const unique = (values: unknown[]): unknown[] =>
-  Array.from(new Set(values).values());
-
-declare const window: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+const unique = <T>(values: T[]): T[] => Array.from(new Set(values));
 
 const autoInitFileForms = (): void => {
-  const initUploadFields = window.initUploadFields as () => void; // eslint-disable-line  @typescript-eslint/no-unsafe-member-access
-
   const forms = unique(
     Array.from(document.querySelectorAll(".dff-uploader")).map(findForm)
   );
-  forms.forEach(initUploadFields);
+  for (const form of forms) {
+    if (form) {
+      window.initUploadFields(form);
+    }
+  }
 };
 
 export default autoInitFileForms;

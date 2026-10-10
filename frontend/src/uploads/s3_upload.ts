@@ -72,7 +72,7 @@ class S3Upload extends BaseUpload {
     // This mostly exists to make `abortUpload` work well: only sending the abort request if
     // the upload was already created, and if the createMultipartUpload request is still in flight,
     // aborting it immediately after it finishes.
-    this._createdPromise = Promise.reject(new Error());
+    this._createdPromise = Promise.reject(new Error("Upload not created"));
     this._chunks = [];
     this._chunkState = [];
     this._uploading = [];
@@ -86,9 +86,9 @@ class S3Upload extends BaseUpload {
   }
 
   public async abort(): Promise<void> {
-    this._uploading.slice().forEach(xhr => {
+    for (const xhr of this._uploading.slice()) {
       xhr.abort();
-    });
+    }
     this._uploading = [];
 
     await this._createdPromise;
@@ -103,7 +103,7 @@ class S3Upload extends BaseUpload {
     }
   }
 
-  public async delete(): Promise<void> {
+  public delete(): Promise<void> {
     return Promise.resolve();
   }
 
@@ -378,9 +378,9 @@ class S3Upload extends BaseUpload {
       }
     }
 
-    candidates.forEach(index => {
+    for (const index of candidates) {
       void this._uploadPart(index);
-    });
+    }
   }
 }
 

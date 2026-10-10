@@ -2,17 +2,18 @@ const parseInputAccept = (inputAccept: string): [string[], string[]] => {
   const extensions: string[] = [];
   const mimeTypes: string[] = [];
 
-  inputAccept
+  const fileTypes = inputAccept
     .split(",")
     .map(fileType => fileType.trim().toLowerCase())
-    .filter(Boolean)
-    .forEach(fileType => {
-      if (fileType.startsWith(".")) {
-        extensions.push(fileType);
-      } else {
-        mimeTypes.push(fileType);
-      }
-    });
+    .filter(Boolean);
+
+  for (const fileType of fileTypes) {
+    if (fileType.startsWith(".")) {
+      extensions.push(fileType);
+    } else {
+      mimeTypes.push(fileType);
+    }
+  }
 
   return [extensions, mimeTypes];
 };

@@ -7,7 +7,7 @@ export const formatBytes = (bytes: number, decimals: number): string => {
   const dm = decimals <= 0 ? 0 : decimals || 2;
   const sizes = ["Bytes", "KB", "MB", "GB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  const n = parseFloat((bytes / k ** i).toFixed(dm));
+  const n = Number.parseFloat((bytes / k ** i).toFixed(dm));
   const size = sizes[i];
 
   if (size == null) {
@@ -33,7 +33,9 @@ export const findInput = (
   prefix: null | string
 ): HTMLInputElement | null => {
   const inputNameWithPrefix = getInputNameWithPrefix(fieldName, prefix);
-  const input = form.querySelector(`[name="${inputNameWithPrefix}"]`);
+  const input = form.querySelector(
+    `[name="${CSS.escape(inputNameWithPrefix)}"]`
+  );
 
   if (!input) {
     return null;

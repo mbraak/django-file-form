@@ -54,7 +54,7 @@ const createForm = () => {
 };
 
 beforeEach(() => {
-  document.body.innerHTML = "";
+  document.body.replaceChildren();
 });
 
 describe(".initUploadFields", () => {
@@ -68,6 +68,7 @@ describe(".initUploadFields", () => {
     expect(listener).toHaveBeenCalledOnce();
 
     const event = listener.mock.calls[0]?.[0] as UploadEvent;
+
     expect(event).toBeInstanceOf(CustomEvent);
     expect(event.target).toBe(form);
     expect(event.detail.fieldName).toBe("input_file");
@@ -87,6 +88,7 @@ describe(".initUploadFields", () => {
     initUploadFields(form);
 
     expect(listener).toHaveBeenCalledOnce();
+
     document.removeEventListener("addUpload", listener);
   });
 });
