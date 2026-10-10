@@ -36,3 +36,8 @@ msgstr "Subida fallida"
 #: django_file_form/widgets.py:17
 msgid "Drop your files here"
 msgstr "Deja tus archivos aquí"
+
+#: widgets/base_upload_widget.py:13
+#, python-brace-format
+msgid "Upload progress for {filename}"
+msgstr "Progreso de la subida de {filename}"

@@ -33,6 +33,18 @@ class RenderUploadFile {
 
     const progressSpan = document.createElement("span");
     progressSpan.className = "dff-progress";
+    progressSpan.setAttribute("role", "progressbar");
+    progressSpan.setAttribute(
+      "aria-label",
+      // A replacer function, so that "$&" in the filename is not a pattern
+      this.getTranslation("Upload progress for {filename}").replace(
+        "{filename}",
+        () => filename
+      )
+    );
+    progressSpan.setAttribute("aria-valuemin", "0");
+    progressSpan.setAttribute("aria-valuemax", "100");
+    progressSpan.setAttribute("aria-valuenow", "0");
 
     const innerSpan = document.createElement("span");
     innerSpan.className = "dff-progress-inner";
@@ -170,12 +182,20 @@ class RenderUploadFile {
 
   public updateProgress(index: number, percentage: string): void {
     const el = this.container.querySelector(`.dff-file-id-${index.toString()}`);
-    if (el) {
-      const innerProgressSpan = el.querySelector(".dff-progress-inner");
+    const progressSpan = el?.querySelector(".dff-progress");
 
-      if (innerProgressSpan) {
-        (innerProgressSpan as HTMLElement).style.width = `${percentage}%`;
-      }
+    if (!progressSpan) {
+      return;
+    }
+
+    progressSpan.setAttribute("aria-valuenow", percentage);
+
+    const innerProgressSpan = progressSpan.querySelector<HTMLElement>(
+      ".dff-progress-inner"
+    );
+
+    if (innerProgressSpan) {
+      innerProgressSpan.style.width = `${percentage}%`;
     }
   }
 

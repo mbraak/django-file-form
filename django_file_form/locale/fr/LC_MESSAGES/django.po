@@ -37,3 +37,8 @@ msgstr "Échec du téléversement"
 #: widgets.py:16
 msgid "Drop your files here"
 msgstr "Déposez vos fichiers ici"
+
+#: widgets/base_upload_widget.py:13
+#, python-brace-format
+msgid "Upload progress for {filename}"
+msgstr "Progression du téléversement de {filename}"

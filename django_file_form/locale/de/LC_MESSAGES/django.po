@@ -37,3 +37,8 @@ msgstr "Upload Fehlgeschlagen"
 #: django_file_form/widgets.py:23
 msgid "Drop your files here"
 msgstr "Dateien hier ablegen"
+
+#: widgets/base_upload_widget.py:13
+#, python-brace-format
+msgid "Upload progress for {filename}"
+msgstr "Upload-Fortschritt für {filename}"

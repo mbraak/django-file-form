@@ -227,6 +227,13 @@
       const div = this._addFile(filename, uploadIndex);
       const progressSpan = document.createElement("span");
       progressSpan.className = "dff-progress";
+      progressSpan.setAttribute("role", "progressbar");
+      progressSpan.setAttribute("aria-label",
+      // A replacer function, so that "$&" in the filename is not a pattern
+      this._getTranslation("Upload progress for {filename}").replace("{filename}", () => filename));
+      progressSpan.setAttribute("aria-valuemin", "0");
+      progressSpan.setAttribute("aria-valuemax", "100");
+      progressSpan.setAttribute("aria-valuenow", "0");
       const innerSpan = document.createElement("span");
       innerSpan.className = "dff-progress-inner";
       progressSpan.append(innerSpan);
@@ -320,11 +327,14 @@
     }
     _updateProgress(index, percentage) {
       const el = this._container.querySelector(`.dff-file-id-${index.toString()}`);
-      if (el) {
-        const innerProgressSpan = el.querySelector(".dff-progress-inner");
-        if (innerProgressSpan) {
-          innerProgressSpan.style.width = `${percentage}%`;
-        }
+      const progressSpan = el?.querySelector(".dff-progress");
+      if (!progressSpan) {
+        return;
+      }
+      progressSpan.setAttribute("aria-valuenow", percentage);
+      const innerProgressSpan = progressSpan.querySelector(".dff-progress-inner");
+      if (innerProgressSpan) {
+        innerProgressSpan.style.width = `${percentage}%`;
       }
     }
     _addFile(filename, uploadIndex) {

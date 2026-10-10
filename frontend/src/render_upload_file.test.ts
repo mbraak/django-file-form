@@ -68,9 +68,14 @@ describe("addNewUpload", () => {
     expect(filename).toHaveTextContent("file.txt");
     expect(filename).toHaveAttribute("data-index", "1");
 
-    expect(div.querySelector(".dff-progress")).toContainElement(
-      div.querySelector(".dff-progress-inner")
-    );
+    const progress = div.querySelector(".dff-progress");
+
+    expect(progress).toContainElement(div.querySelector(".dff-progress-inner"));
+    expect(progress).toHaveAttribute("role", "progressbar");
+    expect(progress).toHaveAttribute("aria-valuemin", "0");
+    expect(progress).toHaveAttribute("aria-valuemax", "100");
+    expect(progress).toHaveValue(0);
+    expect(progress).toHaveAccessibleName("Upload progress for file.txt");
 
     const cancelButton = div.querySelector(".dff-cancel");
 
@@ -108,6 +113,40 @@ describe("addNewUpload", () => {
     const div = renderer.addNewUpload("file.txt", 1);
 
     expect(div.querySelector(".dff-cancel")).toHaveTextContent("Annuleren");
+  });
+
+  test("translates the label of the progress bar", () => {
+    const { renderer } = createRenderer({
+      translations: {
+        "Upload progress for {filename}": "Uploadvoortgang van {filename}"
+      }
+    });
+
+    const div = renderer.addNewUpload("file.txt", 1);
+
+    expect(div.querySelector(".dff-progress")).toHaveAccessibleName(
+      "Uploadvoortgang van file.txt"
+    );
+  });
+
+  test("inserts a filename with replacement patterns as text", () => {
+    const { renderer } = createRenderer();
+
+    const div = renderer.addNewUpload("a$&b$'.txt", 1);
+
+    expect(div.querySelector(".dff-progress")).toHaveAccessibleName(
+      "Upload progress for a$&b$'.txt"
+    );
+  });
+
+  test("inserts a filename that contains the placeholder as text", () => {
+    const { renderer } = createRenderer();
+
+    const div = renderer.addNewUpload("{filename}.txt", 1);
+
+    expect(div.querySelector(".dff-progress")).toHaveAccessibleName(
+      "Upload progress for {filename}.txt"
+    );
   });
 });
 
@@ -451,6 +490,15 @@ describe("updateProgress", () => {
     expect(div.querySelector(".dff-progress-inner")).toHaveStyle({
       width: "40%"
     });
+  });
+
+  test("sets the value of the progress bar", () => {
+    const { renderer } = createRenderer();
+    const div = renderer.addNewUpload("file.txt", 1);
+
+    renderer.updateProgress(1, "40.50");
+
+    expect(div.querySelector(".dff-progress")).toHaveValue(40.5);
   });
 
   test("does nothing when the file does not exist", () => {

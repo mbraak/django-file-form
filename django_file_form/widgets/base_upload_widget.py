@@ -10,6 +10,7 @@ TRANSLATIONS = {
     "Upload failed": _("Upload failed"),
     "Drop your files here": _("Drop your files here"),
     "Invalid file type": _("Invalid file type. Try again"),
+    "Upload progress for {filename}": _("Upload progress for {filename}"),
 }
 
 
