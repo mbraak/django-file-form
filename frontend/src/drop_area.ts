@@ -53,7 +53,7 @@ const getFilesFromFileSystemEntry = async (
 const getFilesFromDataTransfer = async (
   dataTransfer: DataTransfer
 ): Promise<File[]> => {
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- items is missing in older browsers
   if (dataTransfer.items) {
     const files: File[] = [];
 
