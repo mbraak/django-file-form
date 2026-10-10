@@ -592,10 +592,11 @@
     _uploadId: uploadId
   }) => {
     const filename = encodeURIComponent(key);
+    const uploadIdEnc = encodeURIComponent(uploadId);
     const headers = new Headers({
       "X-CSRFToken": csrfToken
     });
-    const url = urlJoin(endpoint, uploadId, number.toString(), `?key=${filename}`);
+    const url = urlJoin(endpoint, uploadIdEnc, number.toString(), `?key=${filename}`);
     return fetch(url, {
       headers: headers
     }).then(response => {
