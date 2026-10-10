@@ -1,5 +1,4 @@
 import comments from "@eslint-community/eslint-plugin-eslint-comments/configs";
-import css from "@eslint/css";
 import eslint from "@eslint/js";
 import vitest from "@vitest/eslint-plugin";
 import compat from "eslint-plugin-compat";
@@ -138,13 +137,5 @@ export default defineConfig([
       "vitest/require-to-throw-message": "error",
       "compat/compat": "off"
     }
-  },
-  {
-    files: ["style/**/*.scss"],
-    language: "css/css",
-    plugins: {
-      css
-    },
-    extends: ["css/recommended"]
   }
 ]);
