@@ -50,7 +50,7 @@ const initUploadFields = (form: Element, options: Options = {}): void => {
   const csrfToken = findInput(form, "csrfmiddlewaretoken", null)?.value;
 
   if (!csrfToken) {
-    throw Error("Csrf token not found");
+    throw new Error("Csrf token not found");
   }
 
   if (!formId || !uploadUrl) {
@@ -58,7 +58,7 @@ const initUploadFields = (form: Element, options: Options = {}): void => {
   }
 
   form.querySelectorAll(".dff-uploader").forEach(uploaderDiv => {
-    const container = uploaderDiv.querySelector(".dff-container");
+    const container = uploaderDiv.querySelector<HTMLElement>(".dff-container");
 
     if (!container) {
       return;
@@ -73,7 +73,7 @@ const initUploadFields = (form: Element, options: Options = {}): void => {
     const fieldName = input.name;
     const { multiple } = input;
     const initial = getInitialFiles(fieldName);
-    const dataTranslations = container.getAttribute("data-translations");
+    const dataTranslations = container.dataset.translations;
     const translations: Translations = dataTranslations
       ? (JSON.parse(dataTranslations) as Translations)
       : {};

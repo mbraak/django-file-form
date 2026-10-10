@@ -63,7 +63,7 @@ export default class TusUpload extends BaseUpload {
 
   public async delete(): Promise<void> {
     if (!this._upload.url) {
-      return Promise.resolve();
+      return;
     }
 
     await deleteUpload(this._upload.url, this._csrfToken);

@@ -23,7 +23,7 @@ const getFilesFromFileSystemEntries = async (
 
   for (const entry of entries) {
     const filesFromEntry = await getFilesFromFileSystemEntry(entry);
-    filesFromEntry.forEach(file => result.push(file));
+    result.push(...filesFromEntry);
   }
 
   return result;
@@ -44,7 +44,7 @@ const getFilesFromFileSystemEntry = async (
       entry as FileSystemDirectoryEntry
     );
     const files = await getFilesFromFileSystemEntries(entriesFromDirectory);
-    files.forEach(file => result.push(file));
+    result.push(...files);
   }
 
   return result;
@@ -63,7 +63,7 @@ const getFilesFromDataTransfer = async (
         const filesFromEntry = await getFilesFromFileSystemEntry(
           fileSystemEntry
         );
-        filesFromEntry.forEach(file => files.push(file));
+        files.push(...filesFromEntry);
       } else {
         const file = item.getAsFile();
 

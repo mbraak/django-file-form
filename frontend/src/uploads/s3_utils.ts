@@ -146,8 +146,7 @@ export const prepareUploadPart = ({
     `?key=${filename}`
   );
   return fetch(url, {
-    headers: headers,
-    method: "get"
+    headers: headers
   })
     .then(response => {
       return response.json();

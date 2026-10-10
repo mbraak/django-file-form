@@ -172,10 +172,10 @@ class FileField {
     };
 
     if (multiple) {
-      initialFiles.forEach((file: InitialFile): void => {
+      for (const file of initialFiles) {
         addInitialFile(file);
         this.nextUploadIndex += 1;
-      });
+      }
     } else {
       const initialFile = initialFiles[0];
 
@@ -243,7 +243,7 @@ class FileField {
     const target = e.target as HTMLElement;
 
     const getUpload = (): BaseUpload | undefined => {
-      const dataIndex = target.getAttribute("data-index");
+      const dataIndex = target.dataset.index;
 
       if (!dataIndex) {
         return undefined;
