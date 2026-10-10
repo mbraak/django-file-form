@@ -64,6 +64,7 @@ describe("addNewUpload", () => {
     expect(renderer.container).toContainElement(div);
 
     const filename = div.querySelector(".dff-filename");
+
     expect(filename).toHaveTextContent("file.txt");
     expect(filename).toHaveAttribute("data-index", "1");
 
@@ -72,6 +73,7 @@ describe("addNewUpload", () => {
     );
 
     const cancelLink = div.querySelector(".dff-cancel");
+
     expect(cancelLink).toHaveTextContent("Cancel");
     expect(cancelLink).toHaveAttribute("data-index", "1");
     expect(cancelLink).toHaveAttribute("href", "#");
@@ -91,6 +93,7 @@ describe("addNewUpload", () => {
     const div = renderer.addNewUpload("<script>alert(1)</script>", 1);
 
     const filename = div.querySelector(".dff-filename");
+
     expect(filename?.querySelector("script")).toBeNull();
     expect(filename).toHaveTextContent("<script>alert(1)</script>");
   });
@@ -116,6 +119,7 @@ describe("addUploadedFile", () => {
     expect(div.querySelector(".dff-filesize")).toHaveTextContent("1 KB");
 
     const deleteLink = div.querySelector(".dff-delete");
+
     expect(deleteLink).toHaveTextContent("Delete");
     expect(deleteLink).toHaveAttribute("data-index", "1");
     expect(deleteLink).toHaveAttribute("href", "#");
@@ -382,6 +386,7 @@ describe("setErrorInvalidFiles", () => {
     renderer.setErrorInvalidFiles([mockFile("file1.png"), mockFile("file2")]);
 
     const errors = parent.querySelectorAll(".dff-invalid-files .dff-error");
+
     expect(errors).toHaveLength(2);
     expect(errors[0]).toHaveTextContent("file1.png: Invalid file type");
     expect(errors[1]).toHaveTextContent("file2: Invalid file type");
@@ -394,6 +399,7 @@ describe("setErrorInvalidFiles", () => {
     renderer.setErrorInvalidFiles([mockFile("file3.png")]);
 
     const errors = parent.querySelectorAll(".dff-invalid-files .dff-error");
+
     expect(errors).toHaveLength(1);
     expect(errors[0]).toHaveTextContent("file3.png: Invalid file type");
   });
