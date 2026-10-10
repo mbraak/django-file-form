@@ -30,6 +30,50 @@ const createRenderer = ({
   return { input, parent, renderer };
 };
 
+interface LabelParameters {
+  id?: string;
+  text: string;
+  wrapsInput?: boolean;
+}
+
+// A field as Django renders it: <label for="id_file"> and the input
+const createLabelledRenderer = (label: LabelParameters | null) => {
+  const parent = document.createElement("div");
+  document.body.replaceChildren(parent);
+
+  const input = document.createElement("input");
+  input.type = "file";
+
+  if (label) {
+    const labelElement = document.createElement("label");
+    labelElement.textContent = label.text;
+
+    if (label.id) {
+      labelElement.id = label.id;
+    }
+
+    if (label.wrapsInput) {
+      labelElement.append(input);
+      parent.append(labelElement);
+    } else {
+      input.id = "id_file";
+      labelElement.htmlFor = "id_file";
+      parent.append(labelElement, input);
+    }
+  } else {
+    parent.append(input);
+  }
+
+  const renderer = new RenderUploadFile({
+    input,
+    parent,
+    skipRequired: false,
+    translations: {}
+  });
+
+  return { parent, renderer };
+};
+
 const mockFile = (filename: string) =>
   new File(["test"], filename, { type: "text/plain" });
 
@@ -39,6 +83,58 @@ describe("constructor", () => {
 
     expect(parent.querySelector(".dff-files")).toBe(renderer.container);
     expect(parent.querySelector(".dff-invalid-files")).toBeInTheDocument();
+  });
+
+  test("makes the files container a list", () => {
+    const { renderer } = createRenderer();
+
+    expect(renderer.container).toHaveAttribute("role", "list");
+  });
+
+  test("names the list of files after the label of the field", () => {
+    const { parent, renderer } = createLabelledRenderer({
+      text: "Attachment:"
+    });
+
+    const label = parent.querySelector("label");
+
+    expect(label?.id).toMatch(/^dff-label-\d+$/);
+    expect(renderer.container).toHaveAttribute("aria-labelledby", label?.id);
+    expect(renderer.container).toHaveAccessibleName("Attachment:");
+  });
+
+  test("uses the id the label already has", () => {
+    const { parent, renderer } = createLabelledRenderer({
+      id: "my-label",
+      text: "Attachment"
+    });
+
+    expect(parent.querySelector("label")).toHaveAttribute("id", "my-label");
+    expect(renderer.container).toHaveAttribute("aria-labelledby", "my-label");
+  });
+
+  test("gives the labels of different fields different ids", () => {
+    const { parent: parent1 } = createLabelledRenderer({ text: "First" });
+    const id1 = parent1.querySelector("label")?.id;
+    const { parent: parent2 } = createLabelledRenderer({ text: "Second" });
+
+    expect(parent2.querySelector("label")?.id).not.toBe(id1);
+  });
+
+  test("does not name the list when the field has no label", () => {
+    const { renderer } = createLabelledRenderer(null);
+
+    expect(renderer.container).not.toHaveAttribute("aria-labelledby");
+  });
+
+  test("does not name the list after a label that wraps the input", () => {
+    const { parent, renderer } = createLabelledRenderer({
+      text: "Attachment ",
+      wrapsInput: true
+    });
+
+    expect(renderer.container).not.toHaveAttribute("aria-labelledby");
+    expect(parent.querySelector("label")).not.toHaveAttribute("id");
   });
 
   test("makes the error container an alert", () => {
@@ -79,6 +175,7 @@ describe("addNewUpload", () => {
     const div = renderer.addNewUpload("file.txt", 1);
 
     expect(div).toHaveClass("dff-file", "dff-file-id-1");
+    expect(div).toHaveAttribute("role", "listitem");
     expect(renderer.container).toContainElement(div);
 
     const filename = div.querySelector(".dff-filename");
@@ -173,6 +270,8 @@ describe("addUploadedFile", () => {
     const { renderer } = createRenderer();
 
     const div = renderer.addUploadedFile("file.txt", 1, 1024);
+
+    expect(div).toHaveAttribute("role", "listitem");
 
     expect(div).toHaveClass("dff-upload-success");
     expect(div.querySelector(".dff-filesize")).toHaveTextContent("1 KB");
@@ -334,6 +433,17 @@ describe("renderDropHint", () => {
     expect(
       renderer.container.querySelector(".dff-drop-hint")
     ).toHaveTextContent("Drop your files here");
+  });
+
+  test("hides the drop hint from screen readers", () => {
+    const { renderer } = createRenderer();
+
+    renderer.renderDropHint();
+
+    expect(renderer.container.querySelector(".dff-drop-hint")).toHaveAttribute(
+      "aria-hidden",
+      "true"
+    );
   });
 
   test("renders the drop hint only once", () => {

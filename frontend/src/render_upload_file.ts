@@ -1,5 +1,7 @@
 import { formatBytes } from "./util.ts";
 
+let nextLabelId = 0;
+
 class RenderUploadFile {
   public container: Element;
 
@@ -20,6 +22,7 @@ class RenderUploadFile {
     translations: Record<string, string>;
   }) {
     this.container = this.createFilesContainer(parent);
+    this.labelFilesContainer(input);
     this.errors = this.createErrorContainer(parent);
     this.status = this.createStatusContainer(parent);
     this.input = input;
@@ -126,6 +129,9 @@ class RenderUploadFile {
 
     const dropHint = document.createElement("div");
     dropHint.className = "dff-drop-hint";
+    // Dropping only works with a mouse, and the files container is a list,
+    // which may only contain list items
+    dropHint.setAttribute("aria-hidden", "true");
     this.setTextContent(dropHint, this.getTranslation("Drop your files here"));
 
     this.container.append(dropHint);
@@ -208,6 +214,7 @@ class RenderUploadFile {
   private addFile(filename: string, uploadIndex: number): HTMLElement {
     const div = document.createElement("div");
     div.className = `dff-file dff-file-id-${uploadIndex.toString()}`;
+    div.setAttribute("role", "listitem");
 
     const nameSpan = document.createElement("span");
     nameSpan.textContent = filename;
@@ -246,6 +253,7 @@ class RenderUploadFile {
   private createFilesContainer = (parent: Element): Element => {
     const div = document.createElement("div");
     div.className = "dff-files";
+    div.setAttribute("role", "list");
     parent.append(div);
 
     return div;
@@ -294,6 +302,24 @@ class RenderUploadFile {
 
   private getTranslation(key: string) {
     return this.translations[key] ?? key;
+  }
+
+  // Names the list of files after the label of the field, so that the lists
+  // of several fields can be told apart. A label that wraps the input is
+  // skipped: its name would include the text of the input itself.
+  private labelFilesContainer(input: HTMLInputElement): void {
+    const label = input.labels?.[0];
+
+    if (!label || label.contains(input)) {
+      return;
+    }
+
+    if (!label.id) {
+      nextLabelId += 1;
+      label.id = `dff-label-${nextLabelId.toString()}`;
+    }
+
+    this.container.setAttribute("aria-labelledby", label.id);
   }
 
   private removeCancel(index: number): void {

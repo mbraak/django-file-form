@@ -204,6 +204,7 @@
   const getInputValueForFormAndPrefix = (form, fieldName, prefix) => findInput(form, fieldName, prefix)?.value;
   const getMetadataFieldName = (fieldName, prefix) => `${getInputNameWithoutPrefix(fieldName, prefix)}-metadata`;
 
+  let nextLabelId = 0;
   class RenderUploadFile {
     _container;
     _errors;
@@ -217,6 +218,7 @@
       _translations: translations
     }) {
       this._container = this._createFilesContainer(parent);
+      this._labelFilesContainer(input);
       this._errors = this._createErrorContainer(parent);
       this._status = this._createStatusContainer(parent);
       this._input = input;
@@ -288,6 +290,9 @@
       }
       const dropHint = document.createElement("div");
       dropHint.className = "dff-drop-hint";
+      // Dropping only works with a mouse, and the files container is a list,
+      // which may only contain list items
+      dropHint.setAttribute("aria-hidden", "true");
       this._setTextContent(dropHint, this._getTranslation("Drop your files here"));
       this._container.append(dropHint);
     }
@@ -346,6 +351,7 @@
     _addFile(filename, uploadIndex) {
       const div = document.createElement("div");
       div.className = `dff-file dff-file-id-${uploadIndex.toString()}`;
+      div.setAttribute("role", "listitem");
       const nameSpan = document.createElement("span");
       nameSpan.textContent = filename;
       nameSpan.className = "dff-filename";
@@ -373,6 +379,7 @@
     _createFilesContainer = parent => {
       const div = document.createElement("div");
       div.className = "dff-files";
+      div.setAttribute("role", "list");
       parent.append(div);
       return div;
     };
@@ -409,6 +416,21 @@
     }
     _getTranslation(key) {
       return this._translations[key] ?? key;
+    }
+
+    // Names the list of files after the label of the field, so that the lists
+    // of several fields can be told apart. A label that wraps the input is
+    // skipped: its name would include the text of the input itself.
+    _labelFilesContainer(input) {
+      const label = input.labels?.[0];
+      if (!label || label.contains(input)) {
+        return;
+      }
+      if (!label.id) {
+        nextLabelId += 1;
+        label.id = `dff-label-${nextLabelId.toString()}`;
+      }
+      this._container.setAttribute("aria-labelledby", label.id);
     }
     _removeCancel(index) {
       const cancelButton = this._findCancelButton(index);
