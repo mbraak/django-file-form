@@ -1,3 +1,10 @@
+msgid ""
+msgstr ""
+"Language: nl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
 #: widgets.py:12
 msgid "Cancel"
 msgstr "Annuleren"
@@ -17,3 +24,28 @@ msgstr "Upload mislukt"
 #: widgets.py:16
 msgid "Drop your files here"
 msgstr "Sleep uw bestanden"
+
+#: widgets/base_upload_widget.py:13
+#, python-brace-format
+msgid "Upload progress for {filename}"
+msgstr "Uploadvoortgang van {filename}"
+
+#: widgets/base_upload_widget.py:14
+#, python-brace-format
+msgid "{filename} uploaded"
+msgstr "{filename} geüpload"
+
+#: widgets/base_upload_widget.py:15
+#, python-brace-format
+msgid "{filename} removed"
+msgstr "{filename} verwijderd"
+
+#: widgets/base_upload_widget.py:16
+#, python-brace-format
+msgid "Upload failed: {filename}"
+msgstr "Upload mislukt: {filename}"
+
+#: widgets/base_upload_widget.py:17
+#, python-brace-format
+msgid "Delete failed: {filename}"
+msgstr "Verwijderen mislukt: {filename}"

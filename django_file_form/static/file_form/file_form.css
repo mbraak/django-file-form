@@ -20,13 +20,22 @@
   margin-bottom: 0;
 }
 .dff-uploader .dff-files .dff-cancel,
-.dff-uploader .dff-files .dff-delete {
+.dff-uploader .dff-files .dff-delete,
+.dff-uploader .dff-files button.dff-filename {
   margin-left: 8px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: LinkText;
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
 }
-.dff-uploader .dff-files .dff-cancel.dff-disabled,
-.dff-uploader .dff-files .dff-delete.dff-disabled {
+.dff-uploader .dff-files .dff-cancel:disabled,
+.dff-uploader .dff-files .dff-delete:disabled,
+.dff-uploader .dff-files button.dff-filename:disabled {
   color: #aaa;
-  pointer-events: none;
+  cursor: default;
 }
 .dff-uploader .dff-files span {
   margin-left: 8px;
@@ -46,6 +55,14 @@
   background-color: green;
   position: absolute;
   margin: 0;
+}
+.dff-uploader .dff-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 .dff-uploader .dff-error {
   margin-left: 8px;

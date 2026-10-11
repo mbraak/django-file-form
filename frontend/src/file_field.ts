@@ -121,6 +121,7 @@ class FileField {
     this.nextUploadIndex = 0;
 
     this.renderer = new RenderUploadFile({
+      clickableFilenames: callbacks.onClick != null,
       input,
       parent,
       skipRequired,
@@ -233,10 +234,11 @@ class FileField {
     return this.uploads.find(upload => upload.uploadIndex === uploadIndex);
   }
 
-  async handleCancel(upload: BaseUpload): Promise<void> {
+  async handleCancel(upload: BaseUpload, moveFocus = false): Promise<void> {
     this.renderer.disableCancel(upload.uploadIndex);
     await upload.abort();
-    this.removeUploadFromList(upload);
+    this.removeUploadFromList(upload, moveFocus);
+    this.renderer.announce("{filename} removed", upload.name);
   }
 
   handleClick = (e: Event): void => {
@@ -253,24 +255,17 @@ class FileField {
       return this.getUploadByIndex(uploadIndex);
     };
 
-    if (
-      target.classList.contains("dff-delete") &&
-      !target.classList.contains("dff-disabled")
-    ) {
-      e.preventDefault();
-
+    if (target.classList.contains("dff-delete")) {
       const upload = getUpload();
 
       if (upload) {
-        void this.removeExistingUpload(upload);
+        void this.removeExistingUpload(upload, true);
       }
     } else if (target.classList.contains("dff-cancel")) {
-      e.preventDefault();
-
       const upload = getUpload();
 
       if (upload) {
-        void this.handleCancel(upload);
+        void this.handleCancel(upload, true);
       }
     } else if (target.classList.contains("dff-filename")) {
       e.preventDefault();
@@ -290,6 +285,7 @@ class FileField {
 
   handleError = (upload: BaseUpload, error: unknown): void => {
     this.renderer.setError(upload.uploadIndex);
+    this.renderer.announce("Upload failed: {filename}", upload.name);
     upload.status = "error";
 
     const { onError } = this.callbacks;
@@ -331,6 +327,7 @@ class FileField {
 
     renderer.clearInput();
     renderer.setSuccess(upload.uploadIndex, upload.getSize());
+    renderer.announce("{filename} uploaded", upload.name);
     upload.status = "done";
 
     const { onSuccess } = this.callbacks;
@@ -374,7 +371,12 @@ class FileField {
     this.renderer.clearInput();
   };
 
-  async removeExistingUpload(upload: BaseUpload): Promise<void> {
+  // moveFocus: whether the user removed the file, with the delete or cancel
+  // button, and the focus should not be lost
+  async removeExistingUpload(
+    upload: BaseUpload,
+    moveFocus = false
+  ): Promise<void> {
     const element = this.renderer.findFileDiv(upload.uploadIndex);
 
     if (element) {
@@ -390,17 +392,19 @@ class FileField {
       try {
         await upload.delete();
       } catch {
-        this.renderer.setDeleteFailed(upload.uploadIndex);
+        this.renderer.setDeleteFailed(upload.uploadIndex, moveFocus);
+        this.renderer.announce("Delete failed: {filename}", upload.name);
         return;
       }
     }
 
-    this.removeUploadFromList(upload);
+    this.removeUploadFromList(upload, moveFocus);
     this.updatePlaceholderInput();
+    this.renderer.announce("{filename} removed", upload.name);
   }
 
-  removeUploadFromList(upload: BaseUpload): void {
-    this.renderer.deleteFile(upload.uploadIndex);
+  removeUploadFromList(upload: BaseUpload, moveFocus = false): void {
+    this.renderer.deleteFile(upload.uploadIndex, moveFocus);
 
     const index = this.uploads.indexOf(upload);
 
