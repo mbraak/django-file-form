@@ -12,7 +12,7 @@ from .test_utils import to_class_string
 class Page(BasePage):
     def cancel_upload(self, upload_index=0):
         el = self.selenium.find_element(By.CSS_SELECTOR, f".dff-file-id-{upload_index}")
-        el.find_element(By.LINK_TEXT, "Cancel").click()
+        el.find_element(By.XPATH, ".//button[normalize-space()='Cancel']").click()
 
     def create_user(self, username, password):
         u = User.objects.create(username=username, email=f"{username}@test.nl")
@@ -24,7 +24,7 @@ class Page(BasePage):
             By.CSS_SELECTOR,
             f"{field_selector or ''} .dff-file-id-{upload_index}.dff-upload-success",
         )
-        el.find_element(By.LINK_TEXT, text).click()
+        el.find_element(By.XPATH, f".//button[normalize-space()='{text}']").click()
 
     def fill_title_field(self, value, form_prefix="example"):
         self.find_title_field(form_prefix).send_keys(value)

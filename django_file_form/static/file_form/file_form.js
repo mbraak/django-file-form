@@ -51,7 +51,7 @@
       this._extensions = extensions;
       this._mimeTypes = mimeTypes;
     }
-    isAccepted(file) {
+    _isAccepted(file) {
       if (this._extensions.length === 0 && this._mimeTypes.length === 0) {
         return true;
       }
@@ -119,20 +119,20 @@
     }
   };
   class DropArea {
-    acceptedFileTypes;
-    container;
-    onUploadFiles;
-    renderer;
+    _acceptedFileTypes;
+    _container;
+    _onUploadFiles;
+    _renderer;
     constructor({
-      container,
-      inputAccept,
-      onUploadFiles,
-      renderer
+      _container: container,
+      _inputAccept: inputAccept,
+      _onUploadFiles: onUploadFiles,
+      _renderer: renderer
     }) {
-      this.container = container;
-      this.onUploadFiles = onUploadFiles;
-      this.acceptedFileTypes = new AcceptedFileTypes(inputAccept);
-      this.renderer = renderer;
+      this._container = container;
+      this._onUploadFiles = onUploadFiles;
+      this._acceptedFileTypes = new AcceptedFileTypes(inputAccept);
+      this._renderer = renderer;
       container.addEventListener("dragenter", () => {
         container.classList.add("dff-dropping");
       });
@@ -143,11 +143,11 @@
         container.classList.add("dff-dropping");
         e.preventDefault();
       });
-      container.addEventListener("drop", this.onDrop);
+      container.addEventListener("drop", this._onDrop);
     }
-    onDrop = e => {
+    _onDrop = e => {
       const dragEvent = e;
-      this.container.classList.remove("dff-dropping");
+      this._container.classList.remove("dff-dropping");
       dragEvent.preventDefault();
       dragEvent.stopPropagation();
       const uploadFiles = async () => {
@@ -157,14 +157,14 @@
             const acceptedFiles = [];
             const invalidFiles = [];
             for (const file of files) {
-              if (this.acceptedFileTypes.isAccepted(file)) {
+              if (this._acceptedFileTypes._isAccepted(file)) {
                 acceptedFiles.push(file);
               } else {
                 invalidFiles.push(file);
               }
             }
-            this.renderer.setErrorInvalidFiles(invalidFiles);
-            void this.onUploadFiles(acceptedFiles);
+            this._renderer._setErrorInvalidFiles(invalidFiles);
+            void this._onUploadFiles(acceptedFiles);
           }
         } catch (error) {
           console.error(error);
@@ -204,102 +204,140 @@
   const getInputValueForFormAndPrefix = (form, fieldName, prefix) => findInput(form, fieldName, prefix)?.value;
   const getMetadataFieldName = (fieldName, prefix) => `${getInputNameWithoutPrefix(fieldName, prefix)}-metadata`;
 
+  let nextId = 0;
+  const createId = prefix => {
+    nextId += 1;
+    return `${prefix}-${nextId.toString()}`;
+  };
   class RenderUploadFile {
-    container;
+    _container;
+    _clickableFilenames;
     _errors;
     _input;
+    // Whether this code set aria-invalid on the input, and not the server
+    _isInvalidSetHere = false;
+    _status;
     _translations;
     constructor({
-      input,
-      parent,
-      skipRequired,
-      translations
+      _clickableFilenames: clickableFilenames = false,
+      _input: input,
+      _parent: parent,
+      _skipRequired: skipRequired,
+      _translations: translations
     }) {
-      this.container = this._createFilesContainer(parent);
+      this._clickableFilenames = clickableFilenames;
+      this._container = this._createFilesContainer(parent);
+      this._labelFilesContainer(input);
       this._errors = this._createErrorContainer(parent);
+      this._describeInputWithErrors(input);
+      this._status = this._createStatusContainer(parent);
       this._input = input;
       this._translations = translations;
       if (skipRequired) {
         this._input.required = false;
       }
     }
-    addNewUpload(filename, uploadIndex) {
+    _addNewUpload(filename, uploadIndex) {
       const div = this._addFile(filename, uploadIndex);
       const progressSpan = document.createElement("span");
       progressSpan.className = "dff-progress";
+      progressSpan.setAttribute("role", "progressbar");
+      progressSpan.setAttribute("aria-label", this._formatTranslation("Upload progress for {filename}", filename));
+      progressSpan.setAttribute("aria-valuemin", "0");
+      progressSpan.setAttribute("aria-valuemax", "100");
+      progressSpan.setAttribute("aria-valuenow", "0");
       const innerSpan = document.createElement("span");
       innerSpan.className = "dff-progress-inner";
       progressSpan.append(innerSpan);
       div.append(progressSpan);
-      const cancelLink = document.createElement("a");
-      cancelLink.className = "dff-cancel";
-      this._setTextContent(cancelLink, this._getTranslation("Cancel"));
-      cancelLink.dataset.index = uploadIndex.toString();
-      cancelLink.href = "#";
-      div.append(cancelLink);
+      div.append(this._createButton("dff-cancel", this._getTranslation("Cancel"), uploadIndex));
       return div;
     }
-    addUploadedFile(filename, uploadIndex, filesize) {
+    _addUploadedFile(filename, uploadIndex, filesize) {
       const element = this._addFile(filename, uploadIndex);
-      this.setSuccess(uploadIndex, filesize);
+      this._setSuccess(uploadIndex, filesize);
       return element;
     }
-    clearInput() {
-      const {
-        _input: input
-      } = this;
-      input.value = "";
+
+    // Tells screen reader users what happened to a file: the status element is a
+    // live region, which is read out when its text changes.
+    _announce(key, filename) {
+      this._status.replaceChildren(document.createTextNode(this._formatTranslation(key, filename)));
     }
-    deleteFile(index) {
-      const div = this.findFileDiv(index);
-      if (div) {
-        div.remove();
+    _clearInput() {
+      this._input.value = "";
+    }
+
+    // With moveFocus, the focus goes to the next file, the previous file or the
+    // input, instead of being lost when the element that has it is removed.
+    _deleteFile(index, moveFocus = false) {
+      const div = this._findFileDiv(index);
+      if (!div) {
+        return;
+      }
+      const focusTarget = moveFocus && this._mayMoveFocus(div) ? this._findFocusTarget(div) : null;
+      div.remove();
+      focusTarget?.focus();
+    }
+    _disableCancel(index) {
+      const cancelButton = this._findCancelButton(index);
+      if (cancelButton) {
+        this._setButtonDisabled(cancelButton, true);
       }
     }
-    disableCancel(index) {
-      const cancelSpan = this._findCancelSpan(index);
-      if (cancelSpan) {
-        cancelSpan.classList.add("dff-disabled");
+    _disableDelete(index) {
+      const deleteButton = this._findDeleteButton(index);
+      if (deleteButton) {
+        this._setButtonDisabled(deleteButton, true);
       }
     }
-    disableDelete(index) {
-      const deleteLink = this._findDeleteLink(index);
-      if (deleteLink) {
-        deleteLink.classList.add("dff-disabled");
-      }
+    _findFileDiv(index) {
+      return this._container.querySelector(`.dff-file-id-${index.toString()}`);
     }
-    findFileDiv(index) {
-      return this.container.querySelector(`.dff-file-id-${index.toString()}`);
-    }
-    removeDropHint() {
-      const dropHint = this.container.querySelector(".dff-drop-hint");
+    _removeDropHint() {
+      const dropHint = this._container.querySelector(".dff-drop-hint");
       if (dropHint) {
         dropHint.remove();
       }
     }
-    renderDropHint() {
-      if (this.container.querySelector(".dff-drop-hint")) {
+    _renderDropHint() {
+      if (this._container.querySelector(".dff-drop-hint")) {
         return;
       }
       const dropHint = document.createElement("div");
       dropHint.className = "dff-drop-hint";
+      // Dropping only works with a mouse, and the files container is a list,
+      // which may only contain list items
+      dropHint.setAttribute("aria-hidden", "true");
       this._setTextContent(dropHint, this._getTranslation("Drop your files here"));
-      this.container.append(dropHint);
+      this._container.append(dropHint);
     }
-    setDeleteFailed(index) {
+    _setDeleteFailed(index, moveFocus = false) {
       this._setErrorMessage(index, this._getTranslation("Delete failed"));
       this._enableDelete(index);
+      const div = this._findFileDiv(index);
+
+      // Disabling the delete button may have taken the focus away from it
+      if (moveFocus && div && this._mayMoveFocus(div)) {
+        this._findDeleteButton(index)?.focus();
+      }
     }
-    setError(index) {
+    _setError(index) {
       this._setErrorMessage(index, this._getTranslation("Upload failed"));
-      const el = this.findFileDiv(index);
+      const el = this._findFileDiv(index);
       if (el) {
         el.classList.add("dff-upload-fail");
       }
       this._removeProgress(index);
       this._removeCancel(index);
     }
-    setErrorInvalidFiles(files) {
+    _setErrorInvalidFiles(files) {
+      this._clearInput();
+      if (files.length === 0) {
+        this._errors.replaceChildren();
+        this._setInputInvalid(false);
+        return;
+      }
       const errorsMessages = document.createElement("ul");
       for (const file of files) {
         const msg = document.createElement("li");
@@ -309,92 +347,169 @@
         errorsMessages.append(msg);
       }
       this._errors.replaceChildren(errorsMessages);
-      this.clearInput();
+      this._setInputInvalid(true);
     }
-    setSuccess(index, size) {
-      const el = this.findFileDiv(index);
+    _setSuccess(index, size) {
+      const el = this._findFileDiv(index);
       if (el) {
         el.classList.add("dff-upload-success");
+        if (this._clickableFilenames) {
+          this._makeFilenameClickable(el, index);
+        }
         if (size != null) {
           const fileSizeInfo = document.createElement("span");
           this._setTextContent(fileSizeInfo, formatBytes(size, 2));
           fileSizeInfo.className = "dff-filesize";
           el.append(fileSizeInfo);
         }
-        const deleteLink = document.createElement("a");
-        this._setTextContent(deleteLink, this._getTranslation("Delete"));
-        deleteLink.className = "dff-delete";
-        deleteLink.dataset.index = index.toString();
-        deleteLink.href = "#";
-        el.append(deleteLink);
+        el.append(this._createButton("dff-delete", this._getTranslation("Delete"), index));
       }
       this._removeProgress(index);
       this._removeCancel(index);
     }
-    updateProgress(index, percentage) {
-      const el = this.container.querySelector(`.dff-file-id-${index.toString()}`);
-      if (el) {
-        const innerProgressSpan = el.querySelector(".dff-progress-inner");
-        if (innerProgressSpan) {
-          innerProgressSpan.style.width = `${percentage}%`;
-        }
+    _updateProgress(index, percentage) {
+      const el = this._container.querySelector(`.dff-file-id-${index.toString()}`);
+      const progressSpan = el?.querySelector(".dff-progress");
+      if (!progressSpan) {
+        return;
+      }
+      progressSpan.setAttribute("aria-valuenow", percentage);
+      const innerProgressSpan = progressSpan.querySelector(".dff-progress-inner");
+      if (innerProgressSpan) {
+        innerProgressSpan.style.width = `${percentage}%`;
       }
     }
     _addFile(filename, uploadIndex) {
       const div = document.createElement("div");
       div.className = `dff-file dff-file-id-${uploadIndex.toString()}`;
+      div.setAttribute("role", "listitem");
       const nameSpan = document.createElement("span");
       nameSpan.textContent = filename;
       nameSpan.className = "dff-filename";
       nameSpan.dataset.index = uploadIndex.toString();
       div.append(nameSpan);
-      this.container.append(div);
+      this._container.append(div);
       this._input.required = false;
       return div;
+    }
+    _createButton(className, text, uploadIndex) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = className;
+      button.dataset.index = uploadIndex.toString();
+      this._setTextContent(button, text);
+      return button;
     }
     _createErrorContainer = parent => {
       const div = document.createElement("div");
       div.className = "dff-invalid-files";
+      div.setAttribute("role", "alert");
       parent.append(div);
       return div;
     };
     _createFilesContainer = parent => {
       const div = document.createElement("div");
       div.className = "dff-files";
+      div.setAttribute("role", "list");
       parent.append(div);
       return div;
     };
+    _createStatusContainer = parent => {
+      const div = document.createElement("div");
+      div.className = "dff-status";
+      div.setAttribute("role", "status");
+      parent.append(div);
+      return div;
+    };
+
+    // A screen reader reads the errors when the input has the focus. Django may
+    // have set aria-describedby already, for the help text.
+    _describeInputWithErrors(input) {
+      this._errors.id = createId("dff-errors");
+      const describedBy = input.getAttribute("aria-describedby");
+      input.setAttribute("aria-describedby", describedBy ? `${describedBy} ${this._errors.id}` : this._errors.id);
+    }
     _enableDelete(index) {
-      const deleteLink = this._findDeleteLink(index);
-      if (deleteLink) {
-        deleteLink.classList.remove("dff-disabled");
+      const deleteButton = this._findDeleteButton(index);
+      if (deleteButton) {
+        this._setButtonDisabled(deleteButton, false);
       }
     }
-    _findCancelSpan(index) {
-      const el = this.findFileDiv(index);
+    _findCancelButton(index) {
+      const el = this._findFileDiv(index);
       if (!el) {
         return null;
       }
       return el.querySelector(".dff-cancel");
     }
-    _findDeleteLink(index) {
-      const div = this.findFileDiv(index);
+    _findDeleteButton(index) {
+      const div = this._findFileDiv(index);
       if (!div) {
         return div;
       }
       return div.querySelector(".dff-delete");
     }
+
+    // The delete or cancel button of the next file, or else of the previous file,
+    // or else the input. Landing on the same kind of button makes it easy to
+    // remove several files in a row.
+    _findFocusTarget(div) {
+      const siblings = Array.from(this._container.querySelectorAll(".dff-file"));
+      const index = siblings.indexOf(div);
+      const candidates = [...siblings.slice(index + 1), ...siblings.slice(0, index).reverse()];
+      for (const candidate of candidates) {
+        const button = candidate.querySelector(".dff-delete:enabled, .dff-cancel:enabled") ?? candidate.querySelector("button:enabled");
+        if (button) {
+          return button;
+        }
+      }
+      return this._input;
+    }
+    _formatTranslation(key, filename) {
+      // A replacer function, so that "$&" in the filename is not a pattern
+      return this._getTranslation(key).replace("{filename}", () => filename);
+    }
     _getTranslation(key) {
       return this._translations[key] ?? key;
     }
+
+    // Names the list of files after the label of the field, so that the lists
+    // of several fields can be told apart. A label that wraps the input is
+    // skipped: its name would include the text of the input itself.
+    _labelFilesContainer(input) {
+      const label = input.labels?.[0];
+      if (!label || label.contains(input)) {
+        return;
+      }
+      if (!label.id) {
+        label.id = createId("dff-label");
+      }
+      this._container.setAttribute("aria-labelledby", label.id);
+    }
+
+    // A filename that can be clicked is a button, so that it can be reached and
+    // pressed with the keyboard
+    _makeFilenameClickable(el, index) {
+      const nameSpan = el.querySelector("span.dff-filename");
+      if (nameSpan) {
+        nameSpan.replaceWith(this._createButton("dff-filename", nameSpan.textContent, index));
+      }
+    }
+
+    // Only when the focus is still in the file, or was lost because a button in
+    // it was disabled: the focus is not taken away from somewhere else.
+    _mayMoveFocus(div) {
+      const active = document.activeElement;
+      return active == null || active === document.body || div.contains(active);
+    }
     _removeCancel(index) {
-      const cancelSpan = this._findCancelSpan(index);
-      if (cancelSpan) {
-        cancelSpan.remove();
+      const cancelButton = this._findCancelButton(index);
+      if (cancelButton) {
+        cancelButton.remove();
       }
     }
     _removeProgress(index) {
-      const el = this.findFileDiv(index);
+      const el = this._findFileDiv(index);
       if (el) {
         const progressSpan = el.querySelector(".dff-progress");
         if (progressSpan) {
@@ -402,8 +517,13 @@
         }
       }
     }
+    _setButtonDisabled(button, disabled) {
+      button.disabled = disabled;
+      // Keep the class for existing stylesheets
+      button.classList.toggle("dff-disabled", disabled);
+    }
     _setErrorMessage(index, message) {
-      const el = this.findFileDiv(index);
+      const el = this._findFileDiv(index);
       if (!el) {
         return;
       }
@@ -415,6 +535,20 @@
       span.classList.add("dff-error");
       this._setTextContent(span, message);
       el.append(span);
+    }
+
+    // Django sets aria-invalid when the server rejected the field; that is left
+    // alone
+    _setInputInvalid(invalid) {
+      if (invalid) {
+        if (this._input.getAttribute("aria-invalid") !== "true") {
+          this._input.setAttribute("aria-invalid", "true");
+          this._isInvalidSetHere = true;
+        }
+      } else if (this._isInvalidSetHere) {
+        this._input.removeAttribute("aria-invalid");
+        this._isInvalidSetHere = false;
+      }
     }
     _setTextContent(element, text) {
       element.append(document.createTextNode(text));
@@ -518,10 +652,10 @@
 
   const MB = 1024 * 1024;
   const abortMultipartUpload = ({
-    csrfToken,
-    endpoint,
-    key,
-    uploadId
+    _csrfToken: csrfToken,
+    _endpoint: endpoint,
+    _key: key,
+    _uploadId: uploadId
   }) => {
     const filename = encodeURIComponent(key);
     const uploadIdEnc = encodeURIComponent(uploadId);
@@ -537,11 +671,11 @@
     });
   };
   const completeMultipartUpload = ({
-    csrfToken,
-    endpoint,
-    key,
-    parts,
-    uploadId
+    _csrfToken: csrfToken,
+    _endpoint: endpoint,
+    _key: key,
+    _parts: parts,
+    _uploadId: uploadId
   }) => {
     const filename = encodeURIComponent(key);
     const uploadIdEnc = encodeURIComponent(uploadId);
@@ -562,10 +696,10 @@
     });
   };
   const createMultipartUpload = ({
-    csrfToken,
-    endpoint,
-    file,
-    s3UploadDir
+    _csrfToken: csrfToken,
+    _endpoint: endpoint,
+    _file: file,
+    _s3UploadDir: s3UploadDir
   }) => {
     const headers = new Headers({
       accept: "application/json",
@@ -588,17 +722,18 @@
   };
   const getChunkSize = file => Math.ceil(file.size / 10000);
   const prepareUploadPart = ({
-    csrfToken,
-    endpoint,
-    key,
-    number,
-    uploadId
+    _csrfToken: csrfToken,
+    _endpoint: endpoint,
+    _key: key,
+    _number: number,
+    _uploadId: uploadId
   }) => {
     const filename = encodeURIComponent(key);
+    const uploadIdEnc = encodeURIComponent(uploadId);
     const headers = new Headers({
       "X-CSRFToken": csrfToken
     });
-    const url = urlJoin(endpoint, uploadId, number.toString(), `?key=${filename}`);
+    const url = urlJoin(endpoint, uploadIdEnc, number.toString(), `?key=${filename}`);
     return fetch(url, {
       headers: headers
     }).then(response => {
@@ -678,10 +813,10 @@
       await this._createdPromise;
       if (this._key && this._uploadId) {
         await abortMultipartUpload({
-          csrfToken: this._csrfToken,
-          endpoint: this._endpoint,
-          key: this._key,
-          uploadId: this._uploadId
+          _csrfToken: this._csrfToken,
+          _endpoint: this._endpoint,
+          _key: this._key,
+          _uploadId: this._uploadId
         });
       }
     }
@@ -713,11 +848,11 @@
         return Promise.resolve();
       }
       return completeMultipartUpload({
-        csrfToken: this._csrfToken,
-        endpoint: this._endpoint,
-        key: this._key,
-        parts: this._parts,
-        uploadId: this._uploadId
+        _csrfToken: this._csrfToken,
+        _endpoint: this._endpoint,
+        _key: this._key,
+        _parts: this._parts,
+        _uploadId: this._uploadId
       }).then(() => {
         if (this.onSuccess) {
           this.onSuccess();
@@ -728,10 +863,10 @@
     }
     _createUpload() {
       this._createdPromise = createMultipartUpload({
-        csrfToken: this._csrfToken,
-        endpoint: this._endpoint,
-        file: this._file,
-        s3UploadDir: this._s3UploadDir
+        _csrfToken: this._csrfToken,
+        _endpoint: this._endpoint,
+        _file: this._file,
+        _s3UploadDir: this._s3UploadDir
       });
       return this._createdPromise.then(result => {
         const valid = typeof result === "object" && result && typeof result.uploadId === "string" && typeof result.key === "string";
@@ -801,11 +936,11 @@
         return Promise.resolve();
       }
       return prepareUploadPart({
-        csrfToken: this._csrfToken,
-        endpoint: this._endpoint,
-        key: this._key,
-        number: index + 1,
-        uploadId: this._uploadId
+        _csrfToken: this._csrfToken,
+        _endpoint: this._endpoint,
+        _key: this._key,
+        _number: index + 1,
+        _uploadId: this._uploadId
       }).then(result => {
         const valid = typeof result === "object" && typeof result.url === "string";
         if (!valid) {
@@ -3587,10 +3722,10 @@
     }
   }
   const createUploadedFile = ({
-    csrfToken,
-    initialFile,
-    uploadIndex,
-    uploadUrl
+    _csrfToken: csrfToken,
+    _initialFile: initialFile,
+    _uploadIndex: uploadIndex,
+    _uploadUrl: uploadUrl
   }) => {
     switch (initialFile.type) {
       case "existing":
@@ -3610,98 +3745,99 @@
   };
 
   class FileField {
-    acceptedFileTypes;
-    callbacks;
-    chunkSize;
-    csrfToken;
-    fieldName;
-    form;
-    formId;
-    multiple;
-    nextUploadIndex;
-    prefix;
-    renderer;
-    retryDelays;
-    s3UploadDir;
-    supportDropArea;
-    uploads;
-    uploadUrl;
+    _acceptedFileTypes;
+    _callbacks;
+    _chunkSize;
+    _csrfToken;
+    _fieldName;
+    _form;
+    _formId;
+    _multiple;
+    _nextUploadIndex;
+    _prefix;
+    _renderer;
+    _retryDelays;
+    _s3UploadDir;
+    _supportDropArea;
+    _uploads;
+    _uploadUrl;
     constructor({
-      callbacks,
-      chunkSize,
-      csrfToken,
-      fieldName,
-      form,
-      formId,
-      initial,
-      input,
-      multiple,
-      parent,
-      prefix,
-      retryDelays,
-      s3UploadDir,
-      skipRequired,
-      supportDropArea,
-      translations,
-      uploadUrl
+      _callbacks: callbacks,
+      _chunkSize: chunkSize,
+      _csrfToken: csrfToken,
+      _fieldName: fieldName,
+      _form: form,
+      _formId: formId,
+      _initial: initial,
+      _input: input,
+      _multiple: multiple,
+      _parent: parent,
+      _prefix: prefix,
+      _retryDelays: retryDelays,
+      _s3UploadDir: s3UploadDir,
+      _skipRequired: skipRequired,
+      _supportDropArea: supportDropArea,
+      _translations: translations,
+      _uploadUrl: uploadUrl
     }) {
-      this.callbacks = callbacks;
-      this.chunkSize = chunkSize;
-      this.csrfToken = csrfToken;
-      this.fieldName = fieldName;
-      this.form = form;
-      this.formId = formId;
-      this.multiple = multiple;
-      this.prefix = prefix;
-      this.retryDelays = retryDelays;
-      this.s3UploadDir = s3UploadDir;
-      this.supportDropArea = supportDropArea && !input.disabled;
-      this.uploadUrl = uploadUrl;
-      this.acceptedFileTypes = new AcceptedFileTypes(input.accept);
-      this.uploads = [];
-      this.nextUploadIndex = 0;
-      this.renderer = new RenderUploadFile({
-        input,
-        parent,
-        skipRequired,
-        translations
+      this._callbacks = callbacks;
+      this._chunkSize = chunkSize;
+      this._csrfToken = csrfToken;
+      this._fieldName = fieldName;
+      this._form = form;
+      this._formId = formId;
+      this._multiple = multiple;
+      this._prefix = prefix;
+      this._retryDelays = retryDelays;
+      this._s3UploadDir = s3UploadDir;
+      this._supportDropArea = supportDropArea && !input.disabled;
+      this._uploadUrl = uploadUrl;
+      this._acceptedFileTypes = new AcceptedFileTypes(input.accept);
+      this._uploads = [];
+      this._nextUploadIndex = 0;
+      this._renderer = new RenderUploadFile({
+        _clickableFilenames: callbacks.onClick != null,
+        _input: input,
+        _parent: parent,
+        _skipRequired: skipRequired,
+        _translations: translations
       });
-      const filesContainer = this.renderer.container;
+      const filesContainer = this._renderer._container;
       if (supportDropArea) {
-        this.initDropArea(filesContainer, input.accept);
+        this._initDropArea(filesContainer, input.accept);
       }
-      this.addInitialFiles(initial);
-      this.checkDropHint();
-      input.addEventListener("change", this.onChange);
-      filesContainer.addEventListener("click", this.handleClick);
+      this._addInitialFiles(initial);
+      this._checkDropHint();
+      input.addEventListener("change", this._onChange);
+      filesContainer.addEventListener("click", this._handleClick);
     }
-    addInitialFiles(initialFiles) {
+    _addInitialFiles(initialFiles) {
       if (initialFiles.length === 0) {
         return;
       }
       const {
-        multiple,
-        renderer
+        _multiple: multiple,
+        _renderer: renderer
       } = this;
       const addInitialFile = initialFile => {
         const {
           size
         } = initialFile;
         const name = initialFile.type === "s3" && initialFile.original_name ? initialFile.original_name : initialFile.name;
-        const element = renderer.addUploadedFile(name, this.nextUploadIndex, size);
+        const element = renderer._addUploadedFile(name, this._nextUploadIndex, size);
         const upload = createUploadedFile({
-          csrfToken: this.csrfToken,
-          initialFile,
-          uploadIndex: this.nextUploadIndex,
-          uploadUrl: this.uploadUrl
+          _csrfToken: this._csrfToken,
+          _initialFile: initialFile,
+          _uploadIndex: this._nextUploadIndex,
+          _uploadUrl: this._uploadUrl
         });
-        this.uploads.push(upload);
-        this.emitEvent("addUpload", element, upload);
+        this._uploads.push(upload);
+        this._emitEvent("addUpload", element, upload);
       };
       if (multiple) {
         for (const file of initialFiles) {
           addInitialFile(file);
-          this.nextUploadIndex += 1;
+          this._nextUploadIndex += 1;
         }
       } else {
         const initialFile = initialFiles[0];
@@ -3710,45 +3846,46 @@
         }
       }
     }
-    checkDropHint() {
-      if (!this.supportDropArea) {
+    _checkDropHint() {
+      if (!this._supportDropArea) {
         return;
       }
-      const nonEmptyUploads = this.uploads.filter(e => Boolean(e));
+      const nonEmptyUploads = this._uploads.filter(e => Boolean(e));
       if (nonEmptyUploads.length === 0) {
-        this.renderer.renderDropHint();
+        this._renderer._renderDropHint();
       } else {
-        this.renderer.removeDropHint();
+        this._renderer._removeDropHint();
       }
     }
-    emitEvent(eventName, element, upload) {
+    _emitEvent(eventName, element, upload) {
       const detail = {
         element,
-        fieldName: this.fieldName,
+        fieldName: this._fieldName,
         fileName: upload.name,
-        metaDataField: this.getMetaDataField(),
+        metaDataField: this._getMetaDataField(),
         upload
       };
-      this.form.dispatchEvent(new CustomEvent(eventName, {
+      this._form.dispatchEvent(new CustomEvent(eventName, {
         bubbles: true,
         detail
       }));
     }
-    findUploadByName(fileName) {
-      return this.uploads.find(upload => upload.name === fileName);
+    _findUploadByName(fileName) {
+      return this._uploads.find(upload => upload.name === fileName);
     }
-    getMetaDataField() {
-      return findInput(this.form, getMetadataFieldName(this.fieldName, this.prefix), this.prefix);
+    _getMetaDataField() {
+      return findInput(this._form, getMetadataFieldName(this._fieldName, this._prefix), this._prefix);
     }
-    getUploadByIndex(uploadIndex) {
-      return this.uploads.find(upload => upload.uploadIndex === uploadIndex);
+    _getUploadByIndex(uploadIndex) {
+      return this._uploads.find(upload => upload.uploadIndex === uploadIndex);
     }
-    async handleCancel(upload) {
-      this.renderer.disableCancel(upload.uploadIndex);
+    async _handleCancel(upload, moveFocus = false) {
+      this._renderer._disableCancel(upload.uploadIndex);
       await upload.abort();
-      this.removeUploadFromList(upload);
+      this._removeUploadFromList(upload, moveFocus);
+      this._renderer._announce("{filename} removed", upload.name);
     }
-    handleClick = e => {
+    _handleClick = e => {
       const target = e.target;
       const getUpload = () => {
         const dataIndex = target.dataset.index;
@@ -3756,26 +3893,24 @@
           return undefined;
         }
         const uploadIndex = parseInt(dataIndex, 10);
-        return this.getUploadByIndex(uploadIndex);
+        return this._getUploadByIndex(uploadIndex);
       };
-      if (target.classList.contains("dff-delete") && !target.classList.contains("dff-disabled")) {
-        e.preventDefault();
+      if (target.classList.contains("dff-delete")) {
         const upload = getUpload();
         if (upload) {
-          void this.removeExistingUpload(upload);
+          void this._removeExistingUpload(upload, true);
         }
       } else if (target.classList.contains("dff-cancel")) {
-        e.preventDefault();
         const upload = getUpload();
         if (upload) {
-          void this.handleCancel(upload);
+          void this._handleCancel(upload, true);
         }
       } else if (target.classList.contains("dff-filename")) {
         e.preventDefault();
         const upload = getUpload();
-        if (upload?.status === "done" && this.callbacks.onClick) {
-          this.callbacks.onClick({
-            fieldName: this.fieldName,
+        if (upload?.status === "done" && this._callbacks.onClick) {
+          this._callbacks.onClick({
+            fieldName: this._fieldName,
             fileName: upload.name,
             id: upload.getId(),
             type: upload.type
@@ -3783,122 +3918,129 @@
         }
       }
     };
-    handleError = (upload, error) => {
-      this.renderer.setError(upload.uploadIndex);
+    _handleError = (upload, error) => {
+      this._renderer._setError(upload.uploadIndex);
+      this._renderer._announce("Upload failed: {filename}", upload.name);
       upload.status = "error";
       const {
         onError
-      } = this.callbacks;
+      } = this._callbacks;
       if (onError) {
         if (upload instanceof TusUpload) {
           onError(error, upload);
         }
       }
     };
-    handleInvalidFiles = files => {
-      this.renderer.setErrorInvalidFiles(files);
+    _handleInvalidFiles = files => {
+      this._renderer._setErrorInvalidFiles(files);
     };
-    handleProgress = (upload, bytesUploaded, bytesTotal) => {
-      const percentage = (bytesUploaded / bytesTotal * 100).toFixed(2);
-      this.renderer.updateProgress(upload.uploadIndex, percentage);
+    _handleProgress = (upload, bytesUploaded, bytesTotal) => {
+      const percentage = bytesTotal === 0 ? "0" : (bytesUploaded / bytesTotal * 100).toFixed(2);
+      this._renderer._updateProgress(upload.uploadIndex, percentage);
       const {
         onProgress
-      } = this.callbacks;
+      } = this._callbacks;
       if (onProgress) {
         if (upload instanceof TusUpload) {
           onProgress(bytesUploaded, bytesTotal, upload);
         }
       }
     };
-    handleSuccess = upload => {
+    _handleSuccess = upload => {
       const {
-        renderer
+        _renderer: renderer
       } = this;
-      this.updatePlaceholderInput();
-      renderer.clearInput();
-      renderer.setSuccess(upload.uploadIndex, upload.getSize());
+      this._updatePlaceholderInput();
+      renderer._clearInput();
+      renderer._setSuccess(upload.uploadIndex, upload.getSize());
+      renderer._announce("{filename} uploaded", upload.name);
       upload.status = "done";
       const {
         onSuccess
-      } = this.callbacks;
-      const element = this.renderer.findFileDiv(upload.uploadIndex);
+      } = this._callbacks;
+      const element = this._renderer._findFileDiv(upload.uploadIndex);
       if (element) {
-        this.emitEvent("uploadComplete", element, upload);
+        this._emitEvent("uploadComplete", element, upload);
       }
       if (onSuccess && upload.type === "tus") {
         onSuccess(upload);
       }
     };
-    initDropArea(container, inputAccept) {
+    _initDropArea(container, inputAccept) {
       new DropArea({
-        container,
-        inputAccept,
-        onUploadFiles: this.uploadFiles,
-        renderer: this.renderer
+        _container: container,
+        _inputAccept: inputAccept,
+        _onUploadFiles: this._uploadFiles,
+        _renderer: this._renderer
       });
     }
-    onChange = e => {
+    _onChange = e => {
       const files = e.target.files ?? [];
       const acceptedFiles = [];
       const invalidFiles = [];
       for (const file of files) {
-        if (this.acceptedFileTypes.isAccepted(file)) {
+        if (this._acceptedFileTypes._isAccepted(file)) {
           acceptedFiles.push(file);
         } else {
           invalidFiles.push(file);
         }
       }
-      this.handleInvalidFiles([...invalidFiles]);
-      void this.uploadFiles([...acceptedFiles]);
-      this.renderer.clearInput();
+      this._handleInvalidFiles([...invalidFiles]);
+      void this._uploadFiles([...acceptedFiles]);
+      this._renderer._clearInput();
     };
-    async removeExistingUpload(upload) {
-      const element = this.renderer.findFileDiv(upload.uploadIndex);
+
+    // moveFocus: whether the user removed the file, with the delete or cancel
+    // button, and the focus should not be lost
+    async _removeExistingUpload(upload, moveFocus = false) {
+      const element = this._renderer._findFileDiv(upload.uploadIndex);
       if (element) {
-        this.emitEvent("removeUpload", element, upload);
+        this._emitEvent("removeUpload", element, upload);
       }
       if (upload.status === "uploading") {
-        this.renderer.disableCancel(upload.uploadIndex);
+        this._renderer._disableCancel(upload.uploadIndex);
         await upload.abort();
       } else if (upload.status === "done") {
-        this.renderer.disableDelete(upload.uploadIndex);
+        this._renderer._disableDelete(upload.uploadIndex);
         try {
           await upload.delete();
         } catch {
-          this.renderer.setDeleteFailed(upload.uploadIndex);
+          this._renderer._setDeleteFailed(upload.uploadIndex, moveFocus);
+          this._renderer._announce("Delete failed: {filename}", upload.name);
           return;
         }
       }
-      this.removeUploadFromList(upload);
-      this.updatePlaceholderInput();
+      this._removeUploadFromList(upload, moveFocus);
+      this._updatePlaceholderInput();
+      this._renderer._announce("{filename} removed", upload.name);
     }
-    removeUploadFromList(upload) {
-      this.renderer.deleteFile(upload.uploadIndex);
-      const index = this.uploads.indexOf(upload);
+    _removeUploadFromList(upload, moveFocus = false) {
+      this._renderer._deleteFile(upload.uploadIndex, moveFocus);
+      const index = this._uploads.indexOf(upload);
       if (index >= 0) {
-        this.uploads.splice(index, 1);
+        this._uploads.splice(index, 1);
       }
-      this.checkDropHint();
+      this._checkDropHint();
       const {
         onDelete
-      } = this.callbacks;
+      } = this._callbacks;
       if (onDelete) {
         onDelete(upload);
       }
     }
-    updatePlaceholderInput() {
-      const input = findInput(this.form, getUploadsFieldName(this.fieldName, this.prefix), this.prefix);
+    _updatePlaceholderInput() {
+      const input = findInput(this._form, getUploadsFieldName(this._fieldName, this._prefix), this._prefix);
       if (!input) {
         return;
       }
-      const placeholdersInfo = this.uploads.map(upload => upload.getInitialFile());
+      const placeholdersInfo = this._uploads.map(upload => upload.getInitialFile());
       input.value = JSON.stringify(placeholdersInfo);
     }
-    async uploadFile(file) {
+    async _uploadFile(file) {
       const createUpload = () => {
         const {
-          csrfToken,
-          s3UploadDir
+          _csrfToken: csrfToken,
+          _s3UploadDir: s3UploadDir
         } = this;
         if (s3UploadDir != null) {
           return new S3Upload({
@@ -3910,66 +4052,66 @@
           });
         } else {
           return new TusUpload({
-            chunkSize: this.chunkSize,
-            csrfToken: this.csrfToken,
+            chunkSize: this._chunkSize,
+            csrfToken: this._csrfToken,
             fieldName,
             file,
             formId,
-            retryDelays: this.retryDelays,
+            retryDelays: this._retryDelays,
             uploadIndex: newUploadIndex,
             uploadUrl
           });
         }
       };
       const {
-        fieldName,
-        formId,
-        renderer,
-        uploadUrl
+        _fieldName: fieldName,
+        _formId: formId,
+        _renderer: renderer,
+        _uploadUrl: uploadUrl
       } = this;
       const fileName = file.name;
-      const existingUpload = this.findUploadByName(fileName);
-      const newUploadIndex = existingUpload ? existingUpload.uploadIndex : this.nextUploadIndex;
+      const existingUpload = this._findUploadByName(fileName);
+      const newUploadIndex = existingUpload ? existingUpload.uploadIndex : this._nextUploadIndex;
       if (!existingUpload) {
-        this.nextUploadIndex += 1;
+        this._nextUploadIndex += 1;
       }
       if (existingUpload) {
-        await this.removeExistingUpload(existingUpload);
+        await this._removeExistingUpload(existingUpload);
       }
       const upload = createUpload();
       upload.onError = error => {
-        this.handleError(upload, error);
+        this._handleError(upload, error);
       };
       upload.onProgress = (bytesUploaded, bytesTotal) => {
-        this.handleProgress(upload, bytesUploaded, bytesTotal);
+        this._handleProgress(upload, bytesUploaded, bytesTotal);
       };
       upload.onSuccess = () => {
-        this.handleSuccess(upload);
+        this._handleSuccess(upload);
       };
       upload.start();
-      this.uploads.push(upload);
-      const element = renderer.addNewUpload(fileName, newUploadIndex);
-      this.emitEvent("addUpload", element, upload);
+      this._uploads.push(upload);
+      const element = renderer._addNewUpload(fileName, newUploadIndex);
+      this._emitEvent("addUpload", element, upload);
     }
-    uploadFiles = async files => {
+    _uploadFiles = async files => {
       if (files.length === 0) {
         return;
       }
-      if (!this.multiple) {
-        for (const upload of this.uploads) {
-          this.renderer.deleteFile(upload.uploadIndex);
+      if (!this._multiple) {
+        for (const upload of this._uploads) {
+          this._renderer._deleteFile(upload.uploadIndex);
         }
-        this.uploads = [];
+        this._uploads = [];
         const file = files[0];
         if (file) {
-          await this.uploadFile(file);
+          await this._uploadFile(file);
         }
       } else {
         for (const file of files) {
-          await this.uploadFile(file);
+          await this._uploadFile(file);
         }
       }
-      this.checkDropHint();
+      this._checkDropHint();
     };
   }
 
@@ -4019,23 +4161,23 @@
       const translations = dataTranslations ? JSON.parse(dataTranslations) : {};
       const supportDropArea = !(options.supportDropArea === false);
       new FileField({
-        callbacks: options.callbacks ?? {},
-        chunkSize: options.chunkSize ?? 2621440,
-        csrfToken,
-        fieldName,
-        form,
-        formId,
-        initial,
-        input,
-        multiple,
-        parent: container,
-        prefix,
-        retryDelays: options.retryDelays ?? null,
-        s3UploadDir: s3UploadDir ?? null,
-        skipRequired,
-        supportDropArea,
-        translations,
-        uploadUrl
+        _callbacks: options.callbacks ?? {},
+        _chunkSize: options.chunkSize ?? 2621440,
+        _csrfToken: csrfToken,
+        _fieldName: fieldName,
+        _form: form,
+        _formId: formId,
+        _initial: initial,
+        _input: input,
+        _multiple: multiple,
+        _parent: container,
+        _prefix: prefix,
+        _retryDelays: options.retryDelays ?? null,
+        _s3UploadDir: s3UploadDir ?? null,
+        _skipRequired: skipRequired,
+        _supportDropArea: supportDropArea,
+        _translations: translations,
+        _uploadUrl: uploadUrl
       });
     });
   };

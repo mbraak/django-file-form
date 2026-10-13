@@ -3,12 +3,14 @@ import { describe, expect, test } from "vitest";
 import RenderUploadFile from "./render_upload_file.ts";
 
 interface CreateRendererParameters {
+  clickableFilenames?: boolean;
   inputType?: string;
   skipRequired?: boolean;
   translations?: Record<string, string>;
 }
 
 const createRenderer = ({
+  clickableFilenames = false,
   inputType = "file",
   skipRequired = false,
   translations = {}
@@ -21,6 +23,7 @@ const createRenderer = ({
   input.required = true;
 
   const renderer = new RenderUploadFile({
+    clickableFilenames,
     input,
     parent,
     skipRequired,
@@ -28,6 +31,50 @@ const createRenderer = ({
   });
 
   return { input, parent, renderer };
+};
+
+interface LabelParameters {
+  id?: string;
+  text: string;
+  wrapsInput?: boolean;
+}
+
+// A field as Django renders it: <label for="id_file"> and the input
+const createLabelledRenderer = (label: LabelParameters | null) => {
+  const parent = document.createElement("div");
+  document.body.replaceChildren(parent);
+
+  const input = document.createElement("input");
+  input.type = "file";
+
+  if (label) {
+    const labelElement = document.createElement("label");
+    labelElement.textContent = label.text;
+
+    if (label.id) {
+      labelElement.id = label.id;
+    }
+
+    if (label.wrapsInput) {
+      labelElement.append(input);
+      parent.append(labelElement);
+    } else {
+      input.id = "id_file";
+      labelElement.htmlFor = "id_file";
+      parent.append(labelElement, input);
+    }
+  } else {
+    parent.append(input);
+  }
+
+  const renderer = new RenderUploadFile({
+    input,
+    parent,
+    skipRequired: false,
+    translations: {}
+  });
+
+  return { parent, renderer };
 };
 
 const mockFile = (filename: string) =>
@@ -39,6 +86,76 @@ describe("constructor", () => {
 
     expect(parent.querySelector(".dff-files")).toBe(renderer.container);
     expect(parent.querySelector(".dff-invalid-files")).toBeInTheDocument();
+  });
+
+  test("makes the files container a list", () => {
+    const { renderer } = createRenderer();
+
+    expect(renderer.container).toHaveAttribute("role", "list");
+  });
+
+  test("names the list of files after the label of the field", () => {
+    const { parent, renderer } = createLabelledRenderer({
+      text: "Attachment:"
+    });
+
+    const label = parent.querySelector("label");
+
+    expect(label?.id).toMatch(/^dff-label-\d+$/);
+    expect(renderer.container).toHaveAttribute("aria-labelledby", label?.id);
+    expect(renderer.container).toHaveAccessibleName("Attachment:");
+  });
+
+  test("uses the id the label already has", () => {
+    const { parent, renderer } = createLabelledRenderer({
+      id: "my-label",
+      text: "Attachment"
+    });
+
+    expect(parent.querySelector("label")).toHaveAttribute("id", "my-label");
+    expect(renderer.container).toHaveAttribute("aria-labelledby", "my-label");
+  });
+
+  test("gives the labels of different fields different ids", () => {
+    const { parent: parent1 } = createLabelledRenderer({ text: "First" });
+    const id1 = parent1.querySelector("label")?.id;
+    const { parent: parent2 } = createLabelledRenderer({ text: "Second" });
+
+    expect(parent2.querySelector("label")?.id).not.toBe(id1);
+  });
+
+  test("does not name the list when the field has no label", () => {
+    const { renderer } = createLabelledRenderer(null);
+
+    expect(renderer.container).not.toHaveAttribute("aria-labelledby");
+  });
+
+  test("does not name the list after a label that wraps the input", () => {
+    const { parent, renderer } = createLabelledRenderer({
+      text: "Attachment ",
+      wrapsInput: true
+    });
+
+    expect(renderer.container).not.toHaveAttribute("aria-labelledby");
+    expect(parent.querySelector("label")).not.toHaveAttribute("id");
+  });
+
+  test("makes the error container an alert", () => {
+    const { parent } = createRenderer();
+
+    expect(parent.querySelector(".dff-invalid-files")).toHaveAttribute(
+      "role",
+      "alert"
+    );
+  });
+
+  test("creates an empty status container", () => {
+    const { parent } = createRenderer();
+
+    const status = parent.querySelector(".dff-status");
+
+    expect(status).toHaveAttribute("role", "status");
+    expect(status).toBeEmptyDOMElement();
   });
 
   test("keeps the input required by default", () => {
@@ -55,12 +172,13 @@ describe("constructor", () => {
 });
 
 describe("addNewUpload", () => {
-  test("renders the filename, the progress bar and the cancel link", () => {
+  test("renders the filename, the progress bar and the cancel button", () => {
     const { renderer } = createRenderer();
 
     const div = renderer.addNewUpload("file.txt", 1);
 
     expect(div).toHaveClass("dff-file", "dff-file-id-1");
+    expect(div).toHaveAttribute("role", "listitem");
     expect(renderer.container).toContainElement(div);
 
     const filename = div.querySelector(".dff-filename");
@@ -68,15 +186,22 @@ describe("addNewUpload", () => {
     expect(filename).toHaveTextContent("file.txt");
     expect(filename).toHaveAttribute("data-index", "1");
 
-    expect(div.querySelector(".dff-progress")).toContainElement(
-      div.querySelector(".dff-progress-inner")
-    );
+    const progress = div.querySelector(".dff-progress");
 
-    const cancelLink = div.querySelector(".dff-cancel");
+    expect(progress).toContainElement(div.querySelector(".dff-progress-inner"));
+    expect(progress).toHaveAttribute("role", "progressbar");
+    expect(progress).toHaveAttribute("aria-valuemin", "0");
+    expect(progress).toHaveAttribute("aria-valuemax", "100");
+    expect(progress).toHaveValue(0);
+    expect(progress).toHaveAccessibleName("Upload progress for file.txt");
 
-    expect(cancelLink).toHaveTextContent("Cancel");
-    expect(cancelLink).toHaveAttribute("data-index", "1");
-    expect(cancelLink).toHaveAttribute("href", "#");
+    const cancelButton = div.querySelector(".dff-cancel");
+
+    expect(cancelButton?.tagName).toBe("BUTTON");
+    expect(cancelButton).toHaveAttribute("type", "button");
+    expect(cancelButton).toHaveTextContent("Cancel");
+    expect(cancelButton).toHaveAttribute("data-index", "1");
+    expect(cancelButton).toBeEnabled();
   });
 
   test("makes the input optional", () => {
@@ -98,7 +223,7 @@ describe("addNewUpload", () => {
     expect(filename).toHaveTextContent("<script>alert(1)</script>");
   });
 
-  test("translates the cancel link", () => {
+  test("translates the cancel button", () => {
     const { renderer } = createRenderer({
       translations: { Cancel: "Annuleren" }
     });
@@ -106,6 +231,40 @@ describe("addNewUpload", () => {
     const div = renderer.addNewUpload("file.txt", 1);
 
     expect(div.querySelector(".dff-cancel")).toHaveTextContent("Annuleren");
+  });
+
+  test("translates the label of the progress bar", () => {
+    const { renderer } = createRenderer({
+      translations: {
+        "Upload progress for {filename}": "Uploadvoortgang van {filename}"
+      }
+    });
+
+    const div = renderer.addNewUpload("file.txt", 1);
+
+    expect(div.querySelector(".dff-progress")).toHaveAccessibleName(
+      "Uploadvoortgang van file.txt"
+    );
+  });
+
+  test("inserts a filename with replacement patterns as text", () => {
+    const { renderer } = createRenderer();
+
+    const div = renderer.addNewUpload("a$&b$'.txt", 1);
+
+    expect(div.querySelector(".dff-progress")).toHaveAccessibleName(
+      "Upload progress for a$&b$'.txt"
+    );
+  });
+
+  test("inserts a filename that contains the placeholder as text", () => {
+    const { renderer } = createRenderer();
+
+    const div = renderer.addNewUpload("{filename}.txt", 1);
+
+    expect(div.querySelector(".dff-progress")).toHaveAccessibleName(
+      "Upload progress for {filename}.txt"
+    );
   });
 });
 
@@ -115,14 +274,18 @@ describe("addUploadedFile", () => {
 
     const div = renderer.addUploadedFile("file.txt", 1, 1024);
 
+    expect(div).toHaveAttribute("role", "listitem");
+
     expect(div).toHaveClass("dff-upload-success");
     expect(div.querySelector(".dff-filesize")).toHaveTextContent("1 KB");
 
-    const deleteLink = div.querySelector(".dff-delete");
+    const deleteButton = div.querySelector(".dff-delete");
 
-    expect(deleteLink).toHaveTextContent("Delete");
-    expect(deleteLink).toHaveAttribute("data-index", "1");
-    expect(deleteLink).toHaveAttribute("href", "#");
+    expect(deleteButton?.tagName).toBe("BUTTON");
+    expect(deleteButton).toHaveAttribute("type", "button");
+    expect(deleteButton).toHaveTextContent("Delete");
+    expect(deleteButton).toHaveAttribute("data-index", "1");
+    expect(deleteButton).toBeEnabled();
 
     expect(div.querySelector(".dff-progress")).toBeNull();
     expect(div.querySelector(".dff-cancel")).toBeNull();
@@ -144,7 +307,7 @@ describe("addUploadedFile", () => {
     expect(div.querySelector(".dff-filesize")).toHaveTextContent("0 Bytes");
   });
 
-  test("translates the delete link", () => {
+  test("translates the delete button", () => {
     const { renderer } = createRenderer({
       translations: { Delete: "Verwijderen" }
     });
@@ -188,13 +351,16 @@ describe("deleteFile", () => {
 });
 
 describe("disableCancel", () => {
-  test("disables the cancel link", () => {
+  test("disables the cancel button", () => {
     const { renderer } = createRenderer();
     const div = renderer.addNewUpload("file.txt", 1);
 
     renderer.disableCancel(1);
 
-    expect(div.querySelector(".dff-cancel")).toHaveClass("dff-disabled");
+    const cancelButton = div.querySelector(".dff-cancel");
+
+    expect(cancelButton).toBeDisabled();
+    expect(cancelButton).toHaveClass("dff-disabled");
   });
 
   test("does nothing when the file does not exist", () => {
@@ -205,7 +371,7 @@ describe("disableCancel", () => {
     }).not.toThrow();
   });
 
-  test("does nothing when the file has no cancel link", () => {
+  test("does nothing when the file has no cancel button", () => {
     const { renderer } = createRenderer();
     const div = renderer.addUploadedFile("file.txt", 1);
 
@@ -216,16 +382,19 @@ describe("disableCancel", () => {
 });
 
 describe("disableDelete", () => {
-  test("disables the delete link", () => {
+  test("disables the delete button", () => {
     const { renderer } = createRenderer();
     const div = renderer.addUploadedFile("file.txt", 1);
 
     renderer.disableDelete(1);
 
-    expect(div.querySelector(".dff-delete")).toHaveClass("dff-disabled");
+    const deleteButton = div.querySelector(".dff-delete");
+
+    expect(deleteButton).toBeDisabled();
+    expect(deleteButton).toHaveClass("dff-disabled");
   });
 
-  test("does nothing when the file has no delete link", () => {
+  test("does nothing when the file has no delete button", () => {
     const { renderer } = createRenderer();
     const div = renderer.addNewUpload("file.txt", 1);
 
@@ -264,8 +433,19 @@ describe("renderDropHint", () => {
 
     renderer.renderDropHint();
 
-    expect(renderer.container.querySelector(".dff-drop-hint")).toHaveTextContent(
-      "Drop your files here"
+    expect(
+      renderer.container.querySelector(".dff-drop-hint")
+    ).toHaveTextContent("Drop your files here");
+  });
+
+  test("hides the drop hint from screen readers", () => {
+    const { renderer } = createRenderer();
+
+    renderer.renderDropHint();
+
+    expect(renderer.container.querySelector(".dff-drop-hint")).toHaveAttribute(
+      "aria-hidden",
+      "true"
     );
   });
 
@@ -287,9 +467,9 @@ describe("renderDropHint", () => {
 
     renderer.renderDropHint();
 
-    expect(renderer.container.querySelector(".dff-drop-hint")).toHaveTextContent(
-      "Sleep je bestanden hierheen"
-    );
+    expect(
+      renderer.container.querySelector(".dff-drop-hint")
+    ).toHaveTextContent("Sleep je bestanden hierheen");
   });
 });
 
@@ -313,7 +493,7 @@ describe("removeDropHint", () => {
 });
 
 describe("setDeleteFailed", () => {
-  test("renders an error and enables the delete link", () => {
+  test("renders an error and enables the delete button", () => {
     const { renderer } = createRenderer();
     const div = renderer.addUploadedFile("file.txt", 1);
     renderer.disableDelete(1);
@@ -321,10 +501,14 @@ describe("setDeleteFailed", () => {
     renderer.setDeleteFailed(1);
 
     expect(div.querySelector(".dff-error")).toHaveTextContent("Delete failed");
-    expect(div.querySelector(".dff-delete")).not.toHaveClass("dff-disabled");
+
+    const deleteButton = div.querySelector(".dff-delete");
+
+    expect(deleteButton).toBeEnabled();
+    expect(deleteButton).not.toHaveClass("dff-disabled");
   });
 
-  test("renders an error when the file has no delete link", () => {
+  test("renders an error when the file has no delete button", () => {
     const { renderer } = createRenderer();
     const div = renderer.addNewUpload("file.txt", 1);
 
@@ -348,7 +532,7 @@ describe("setDeleteFailed", () => {
 });
 
 describe("setError", () => {
-  test("renders an error and removes the progress bar and the cancel link", () => {
+  test("renders an error and removes the progress bar and the cancel button", () => {
     const { renderer } = createRenderer();
     const div = renderer.addNewUpload("file.txt", 1);
 
@@ -376,6 +560,86 @@ describe("setError", () => {
     expect(() => {
       renderer.setError(1);
     }).not.toThrow();
+  });
+});
+
+describe("tying the input to its errors", () => {
+  test("describes the input with the error container", () => {
+    const { input, parent } = createRenderer();
+
+    const errors = parent.querySelector(".dff-invalid-files");
+
+    expect(errors?.id).toMatch(/^dff-errors-\d+$/);
+    expect(input).toHaveAttribute("aria-describedby", errors?.id);
+  });
+
+  test("keeps the description that the input already has", () => {
+    const parent = document.createElement("div");
+    const input = document.createElement("input");
+    input.type = "file";
+    input.setAttribute("aria-describedby", "id_file_helptext");
+    parent.append(input);
+    document.body.replaceChildren(parent);
+
+    new RenderUploadFile({
+      input,
+      parent,
+      skipRequired: false,
+      translations: {}
+    });
+
+    const errorsId = parent.querySelector(".dff-invalid-files")?.id ?? "";
+
+    expect(input).toHaveAttribute(
+      "aria-describedby",
+      `id_file_helptext ${errorsId}`
+    );
+  });
+
+  test("gives the error containers of different fields different ids", () => {
+    const { parent: parent1 } = createRenderer();
+    const id1 = parent1.querySelector(".dff-invalid-files")?.id;
+    const { parent: parent2 } = createRenderer();
+
+    expect(parent2.querySelector(".dff-invalid-files")?.id).not.toBe(id1);
+  });
+
+  test("reads the errors as the description of the input", () => {
+    const { parent, renderer } = createLabelledRenderer({ text: "Attachment" });
+
+    renderer.setErrorInvalidFiles([mockFile("file1.png")]);
+
+    expect(parent.querySelector("input")).toHaveAccessibleDescription(
+      "file1.png: Invalid file type"
+    );
+  });
+
+  test("marks the input as invalid when there are errors", () => {
+    const { input, renderer } = createRenderer();
+
+    renderer.setErrorInvalidFiles([mockFile("file1.png")]);
+
+    expect(input).toHaveAttribute("aria-invalid", "true");
+  });
+
+  test("removes the errors and the invalid mark when there are no errors", () => {
+    const { input, parent, renderer } = createRenderer();
+    renderer.setErrorInvalidFiles([mockFile("file1.png")]);
+
+    renderer.setErrorInvalidFiles([]);
+
+    expect(parent.querySelector(".dff-invalid-files")).toBeEmptyDOMElement();
+    expect(input).not.toHaveAttribute("aria-invalid");
+  });
+
+  test("keeps the invalid mark that the server set", () => {
+    const { input, renderer } = createRenderer();
+    input.setAttribute("aria-invalid", "true");
+
+    renderer.setErrorInvalidFiles([mockFile("file1.png")]);
+    renderer.setErrorInvalidFiles([]);
+
+    expect(input).toHaveAttribute("aria-invalid", "true");
   });
 });
 
@@ -439,6 +703,15 @@ describe("updateProgress", () => {
     });
   });
 
+  test("sets the value of the progress bar", () => {
+    const { renderer } = createRenderer();
+    const div = renderer.addNewUpload("file.txt", 1);
+
+    renderer.updateProgress(1, "40.50");
+
+    expect(div.querySelector(".dff-progress")).toHaveValue(40.5);
+  });
+
   test("does nothing when the file does not exist", () => {
     const { renderer } = createRenderer();
 
@@ -454,5 +727,240 @@ describe("updateProgress", () => {
     expect(() => {
       renderer.updateProgress(1, "40");
     }).not.toThrow();
+  });
+});
+
+describe("announce", () => {
+  test("sets the text of the status container", () => {
+    const { parent, renderer } = createRenderer();
+
+    renderer.announce("{filename} uploaded", "file.txt");
+
+    expect(parent.querySelector(".dff-status")).toHaveTextContent(
+      "file.txt uploaded"
+    );
+  });
+
+  test("replaces the previous message", () => {
+    const { parent, renderer } = createRenderer();
+
+    renderer.announce("{filename} uploaded", "a.txt");
+    renderer.announce("{filename} removed", "b.txt");
+
+    expect(parent.querySelector(".dff-status")?.textContent).toBe(
+      "b.txt removed"
+    );
+  });
+
+  test("translates the message", () => {
+    const { parent, renderer } = createRenderer({
+      translations: { "{filename} uploaded": "{filename} geüpload" }
+    });
+
+    renderer.announce("{filename} uploaded", "file.txt");
+
+    expect(parent.querySelector(".dff-status")).toHaveTextContent(
+      "file.txt geüpload"
+    );
+  });
+
+  test("escapes the filename", () => {
+    const { parent, renderer } = createRenderer();
+
+    renderer.announce("{filename} uploaded", "<b>file</b>.txt");
+
+    const status = parent.querySelector(".dff-status");
+
+    expect(status?.querySelector("b")).toBeNull();
+    expect(status).toHaveTextContent("<b>file</b>.txt uploaded");
+  });
+});
+
+describe("clickable filenames", () => {
+  test("renders the filename as text by default", () => {
+    const { renderer } = createRenderer();
+
+    const div = renderer.addUploadedFile("file.txt", 1);
+
+    expect(div.querySelector(".dff-filename")?.tagName).toBe("SPAN");
+  });
+
+  test("renders the filename of an uploaded file as a button", () => {
+    const { renderer } = createRenderer({ clickableFilenames: true });
+
+    const div = renderer.addUploadedFile("file.txt", 1);
+
+    const filename = div.querySelector(".dff-filename");
+
+    expect(filename?.tagName).toBe("BUTTON");
+    expect(filename).toHaveAttribute("type", "button");
+    expect(filename).toHaveAttribute("data-index", "1");
+    expect(filename).toHaveAccessibleName("file.txt");
+  });
+
+  test("renders the filename as text while the file is uploading", () => {
+    const { renderer } = createRenderer({ clickableFilenames: true });
+
+    const div = renderer.addNewUpload("file.txt", 1);
+
+    expect(div.querySelector(".dff-filename")?.tagName).toBe("SPAN");
+  });
+
+  test("makes the filename a button when the upload is done", () => {
+    const { renderer } = createRenderer({ clickableFilenames: true });
+    const div = renderer.addNewUpload("file.txt", 1);
+
+    renderer.setSuccess(1, 4);
+
+    expect(div.querySelectorAll(".dff-filename")).toHaveLength(1);
+    expect(div.firstElementChild?.tagName).toBe("BUTTON");
+    expect(div.firstElementChild).toHaveClass("dff-filename");
+  });
+
+  test("keeps the filename as text when the upload fails", () => {
+    const { renderer } = createRenderer({ clickableFilenames: true });
+    const div = renderer.addNewUpload("file.txt", 1);
+
+    renderer.setError(1);
+
+    expect(div.querySelector(".dff-filename")?.tagName).toBe("SPAN");
+  });
+
+  test("escapes the filename of the button", () => {
+    const { renderer } = createRenderer({ clickableFilenames: true });
+
+    const div = renderer.addUploadedFile("<b>file</b>.txt", 1);
+
+    const filename = div.querySelector(".dff-filename");
+
+    expect(filename?.querySelector("b")).toBeNull();
+    expect(filename).toHaveTextContent("<b>file</b>.txt");
+  });
+});
+
+describe("moving the focus", () => {
+  const getDeleteButton = (div: HTMLElement | undefined) => {
+    const button = div?.querySelector<HTMLElement>(".dff-delete");
+
+    if (!button) {
+      throw new Error("No delete button");
+    }
+
+    return button;
+  };
+
+  const createFiles = () => {
+    const { parent, renderer } = createLabelledRenderer(null);
+    const divs = [1, 2, 3].map(index =>
+      renderer.addUploadedFile(`file${index.toString()}.txt`, index)
+    );
+
+    return { divs, input: parent.querySelector("input"), renderer };
+  };
+
+  test("does not move the focus by default", () => {
+    const { divs, renderer } = createFiles();
+    getDeleteButton(divs[0]).focus();
+
+    renderer.deleteFile(1);
+
+    expect(document.body).toHaveFocus();
+  });
+
+  test("moves the focus to the next file", () => {
+    const { divs, renderer } = createFiles();
+    getDeleteButton(divs[0]).focus();
+
+    renderer.deleteFile(1, true);
+
+    expect(getDeleteButton(divs[1])).toHaveFocus();
+  });
+
+  test("moves the focus to the previous file when it was the last file", () => {
+    const { divs, renderer } = createFiles();
+    getDeleteButton(divs[2]).focus();
+
+    renderer.deleteFile(3, true);
+
+    expect(getDeleteButton(divs[1])).toHaveFocus();
+  });
+
+  test("moves the focus to the input when it was the only file", () => {
+    const { parent, renderer } = createLabelledRenderer(null);
+    const div = renderer.addUploadedFile("file.txt", 1);
+    getDeleteButton(div).focus();
+
+    renderer.deleteFile(1, true);
+
+    expect(parent.querySelector("input")).toHaveFocus();
+  });
+
+  test("prefers the delete button over a clickable filename", () => {
+    const parent = document.createElement("div");
+    const input = document.createElement("input");
+    input.type = "file";
+    parent.append(input);
+    document.body.replaceChildren(parent);
+    const renderer = new RenderUploadFile({
+      clickableFilenames: true,
+      input,
+      parent,
+      skipRequired: false,
+      translations: {}
+    });
+    const div1 = renderer.addUploadedFile("file1.txt", 1);
+    const div2 = renderer.addUploadedFile("file2.txt", 2);
+    getDeleteButton(div1).focus();
+
+    renderer.deleteFile(1, true);
+
+    expect(getDeleteButton(div2)).toHaveFocus();
+  });
+
+  test("skips a file whose buttons are disabled", () => {
+    const { divs, renderer } = createFiles();
+    renderer.disableDelete(2);
+    getDeleteButton(divs[0]).focus();
+
+    renderer.deleteFile(1, true);
+
+    expect(getDeleteButton(divs[2])).toHaveFocus();
+  });
+
+  test("moves the focus when it was lost", () => {
+    const { divs, renderer } = createFiles();
+
+    renderer.deleteFile(1, true);
+
+    expect(getDeleteButton(divs[1])).toHaveFocus();
+  });
+
+  test("does not take the focus away from somewhere else", () => {
+    const { renderer } = createFiles();
+    const otherButton = document.createElement("button");
+    document.body.append(otherButton);
+    otherButton.focus();
+
+    renderer.deleteFile(1, true);
+
+    expect(otherButton).toHaveFocus();
+  });
+
+  test("gives the focus back to the delete button when the delete failed", () => {
+    const { divs, renderer } = createFiles();
+    renderer.disableDelete(1);
+
+    renderer.setDeleteFailed(1, true);
+
+    expect(getDeleteButton(divs[0])).toHaveFocus();
+  });
+
+  test("does not move the focus when the delete failed by default", () => {
+    const { renderer } = createFiles();
+    renderer.disableDelete(1);
+
+    renderer.setDeleteFailed(1);
+
+    expect(document.body).toHaveFocus();
   });
 });
