@@ -1,6 +1,6 @@
 ## Changelog
 
-**development**
+**5.1.0 (october 13 2026)**
 
 - Issue #1389 Improve accessibility.
   - Use buttons for cancel and delete
