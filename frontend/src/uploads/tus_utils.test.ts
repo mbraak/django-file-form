@@ -17,7 +17,7 @@ const FILE_URL = "http://tus_endpoint.net/upload/file-id-1";
 const server = setupServer();
 
 beforeAll(() => {
-  server.listen({ onUnhandledRequest: "error" });
+  server.listen({ onUnhandledFrame: "error" });
 });
 
 afterEach(() => {

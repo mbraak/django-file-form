@@ -29,7 +29,7 @@ const UPLOAD_URL = "http://tus_endpoint.net/upload/";
 const server = setupServer();
 
 beforeAll(() => {
-  server.listen({ onUnhandledRequest: "error" });
+  server.listen({ onUnhandledFrame: "error" });
 });
 
 afterEach(() => {
