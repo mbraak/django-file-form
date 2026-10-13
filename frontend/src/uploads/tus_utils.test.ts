@@ -14,7 +14,19 @@ import { deleteUpload } from "./tus_utils.ts";
 
 const FILE_URL = "http://tus_endpoint.net/upload/file-id-1";
 
-const server = setupServer();
+// The delete uses a cross-origin XMLHttpRequest, so jsdom enforces CORS
+const corsHeaders = {
+  "Access-Control-Allow-Headers": "*",
+  "Access-Control-Allow-Methods": "DELETE",
+  "Access-Control-Allow-Origin": "*"
+};
+
+const preflightHandler = http.options(
+  FILE_URL,
+  () => new HttpResponse(null, { headers: corsHeaders, status: 204 })
+);
+
+const server = setupServer(preflightHandler);
 
 beforeAll(() => {
   server.listen({ onUnhandledFrame: "error" });
@@ -34,7 +46,7 @@ describe("deleteUpload", () => {
     server.use(
       http.delete(FILE_URL, ({ request }) => {
         onRequest(request);
-        return new HttpResponse(null, { status: 204 });
+        return new HttpResponse(null, { headers: corsHeaders, status: 204 });
       })
     );
 
@@ -50,7 +62,10 @@ describe("deleteUpload", () => {
 
   test("resolves when the server responds with 204", async () => {
     server.use(
-      http.delete(FILE_URL, () => new HttpResponse(null, { status: 204 }))
+      http.delete(
+        FILE_URL,
+        () => new HttpResponse(null, { headers: corsHeaders, status: 204 })
+      )
     );
 
     await expect(deleteUpload(FILE_URL, "csrf1")).resolves.toBeUndefined();
@@ -60,7 +75,10 @@ describe("deleteUpload", () => {
     "rejects when the server responds with %i",
     async status => {
       server.use(
-        http.delete(FILE_URL, () => new HttpResponse(null, { status }))
+        http.delete(
+          FILE_URL,
+          () => new HttpResponse(null, { headers: corsHeaders, status })
+        )
       );
 
       await expect(deleteUpload(FILE_URL, "csrf1")).rejects.toThrow(
