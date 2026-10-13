@@ -3,6 +3,12 @@
 **development**
 
 - Issue #1389 Improve accessibility.
+  - Use buttons for cancel and delete
+  - Add aria role and aria label to progress bar
+  - Announce status changes to screen readers
+  - Use 'list' aria role
+  - Make filename accessible by keyboard
+  - Use aria-describedby for error messages
 
 **5.0.1 (september 6 2026)**
 
