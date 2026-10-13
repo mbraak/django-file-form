@@ -28,12 +28,24 @@ const createRequest = vi.fn<(request: Request) => void>();
 const patchRequest = vi.fn<(request: Request) => void>();
 const deleteRequest = vi.fn<(request: Request) => void>();
 
+// The tus client uses cross-origin XMLHttpRequests, so jsdom enforces CORS
+const corsHeaders = {
+  "Access-Control-Allow-Headers": "*",
+  "Access-Control-Allow-Methods": "DELETE, PATCH, POST",
+  "Access-Control-Allow-Origin": "*"
+};
+
 const server = setupServer(
+  http.options(
+    "http://tus_endpoint.net/upload/*",
+    () => new HttpResponse(null, { headers: corsHeaders, status: 204 })
+  ),
   http.post(UPLOAD_URL, ({ request }) => {
     createRequest(request);
 
     return new HttpResponse(null, {
       headers: {
+        ...corsHeaders,
         "Access-Control-Expose-Headers": "Location, ResourceId",
         Location: FILE_URL,
         ResourceId: "resource-id-1"
@@ -48,6 +60,7 @@ const server = setupServer(
 
     return new HttpResponse(null, {
       headers: {
+        ...corsHeaders,
         "Access-Control-Expose-Headers": "Upload-Offset",
         "Upload-Offset": (offset + body.byteLength).toString()
       },
@@ -57,12 +70,12 @@ const server = setupServer(
   http.delete(FILE_URL, ({ request }) => {
     deleteRequest(request);
 
-    return new HttpResponse(null, { status: 204 });
+    return new HttpResponse(null, { headers: corsHeaders, status: 204 });
   })
 );
 
 beforeAll(() => {
-  server.listen({ onUnhandledRequest: "error" });
+  server.listen({ onUnhandledFrame: "error" });
 });
 
 beforeEach(() => {
@@ -190,7 +203,10 @@ describe("start", () => {
 
   test("calls onError when the upload fails", async () => {
     server.use(
-      http.post(UPLOAD_URL, () => new HttpResponse(null, { status: 500 }))
+      http.post(
+        UPLOAD_URL,
+        () => new HttpResponse(null, { headers: corsHeaders, status: 500 })
+      )
     );
     const tusUpload = createTusUpload();
     const onError = vi.fn<(error: Error) => void>();
@@ -239,7 +255,10 @@ describe("delete", () => {
   test("rejects when the server does not delete the upload", async () => {
     const tusUpload = await startUpload();
     server.use(
-      http.delete(FILE_URL, () => new HttpResponse(null, { status: 500 }))
+      http.delete(
+        FILE_URL,
+        () => new HttpResponse(null, { headers: corsHeaders, status: 500 })
+      )
     );
 
     await expect(tusUpload.delete()).rejects.toThrow("Delete failed");

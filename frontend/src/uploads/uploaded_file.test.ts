@@ -26,10 +26,22 @@ import {
 
 const UPLOAD_URL = "http://tus_endpoint.net/upload/";
 
-const server = setupServer();
+// The tus delete uses a cross-origin XMLHttpRequest, so jsdom enforces CORS
+const corsHeaders = {
+  "Access-Control-Allow-Headers": "*",
+  "Access-Control-Allow-Methods": "DELETE",
+  "Access-Control-Allow-Origin": "*"
+};
+
+const server = setupServer(
+  http.options(
+    `${UPLOAD_URL}*`,
+    () => new HttpResponse(null, { headers: corsHeaders, status: 204 })
+  )
+);
 
 beforeAll(() => {
-  server.listen({ onUnhandledRequest: "error" });
+  server.listen({ onUnhandledFrame: "error" });
 });
 
 afterEach(() => {
@@ -180,7 +192,7 @@ describe("UploadedTusFile", () => {
     server.use(
       http.delete(`${UPLOAD_URL}file-id-1`, ({ request }) => {
         onRequest(request);
-        return new HttpResponse(null, { status: 204 });
+        return new HttpResponse(null, { headers: corsHeaders, status: 204 });
       })
     );
 
@@ -196,7 +208,7 @@ describe("UploadedTusFile", () => {
     server.use(
       http.delete(
         `${UPLOAD_URL}file-id-1`,
-        () => new HttpResponse(null, { status: 500 })
+        () => new HttpResponse(null, { headers: corsHeaders, status: 500 })
       )
     );
 

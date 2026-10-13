@@ -58,7 +58,7 @@
     "eslint-plugin-testing-library": "^7.16.2",
     "eslint-plugin-unicorn": "^77.0.0",
     "jsdom": "^29",
-    "msw": "^2",
+    "msw": "^3",
     "rollup": "^4.54.0",
     "rollup-plugin-serve": "^3",
     "sass": "^1.97.1",
