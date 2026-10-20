@@ -12,7 +12,8 @@
     "test:watch": "vitest",
     "tsc": "tsc --noEmit",
     "watch": "rollup -w -c rollup.config.mjs",
-    "ci": "npm run lint && npm run tsc && npm run test"
+    "ci": "npm run lint && npm run cspell && npm run tsc && npm run test",
+    "cspell": "cspell --config ../cspell.json \"src/**\" \"style/**\""
   },
   "repository": {
     "type": "git",
@@ -45,7 +46,8 @@
     "@vitest/coverage-istanbul": "^5",
     "@vitest/eslint-plugin": "^1.6.4",
     "babel-plugin-istanbul": "^8.0.2",
-    "babel-plugin-prefix-private-members": "^0.3.0",
+    "babel-plugin-prefix-private-members": "^0.3.1",
+    "cspell": "^10.3.6",
     "eslint": "^10",
     "eslint-import-resolver-typescript": "^4.4.4",
     "eslint-plugin-compat": "^7.0.2",
@@ -56,7 +58,7 @@
     "eslint-plugin-testing-library": "^7.16.2",
     "eslint-plugin-unicorn": "^77.0.0",
     "jsdom": "^29",
-    "msw": "^2",
+    "msw": "^3",
     "rollup": "^4.54.0",
     "rollup-plugin-serve": "^3",
     "sass": "^1.97.1",

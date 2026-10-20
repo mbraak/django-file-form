@@ -138,10 +138,11 @@ export const prepareUploadPart = ({
   uploadId
 }: PrepareUploadPartParameters): Promise<UrlInfo> => {
   const filename = encodeURIComponent(key);
+  const uploadIdEnc = encodeURIComponent(uploadId);
   const headers = new Headers({ "X-CSRFToken": csrfToken });
   const url = urljoin(
     endpoint,
-    uploadId,
+    uploadIdEnc,
     number.toString(),
     `?key=${filename}`
   );

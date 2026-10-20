@@ -5,10 +5,13 @@
     "ajaxuploader",
     "cancelable",
     "csrfmiddlewaretoken",
+    "describedby",
     "formtools",
+    "labelledby",
     "nocase",
     "resumable",
     "typehint",
-    "urljoin"
+    "urljoin",
+    "valuenow"
   ]
 }

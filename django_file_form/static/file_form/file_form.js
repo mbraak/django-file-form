@@ -204,19 +204,33 @@
   const getInputValueForFormAndPrefix = (form, fieldName, prefix) => findInput(form, fieldName, prefix)?.value;
   const getMetadataFieldName = (fieldName, prefix) => `${getInputNameWithoutPrefix(fieldName, prefix)}-metadata`;
 
+  let nextId = 0;
+  const createId = prefix => {
+    nextId += 1;
+    return `${prefix}-${nextId.toString()}`;
+  };
   class RenderUploadFile {
     _container;
+    _clickableFilenames;
     _errors;
     _input;
+    // Whether this code set aria-invalid on the input, and not the server
+    _isInvalidSetHere = false;
+    _status;
     _translations;
     constructor({
+      _clickableFilenames: clickableFilenames = false,
       _input: input,
       _parent: parent,
       _skipRequired: skipRequired,
       _translations: translations
     }) {
+      this._clickableFilenames = clickableFilenames;
       this._container = this._createFilesContainer(parent);
+      this._labelFilesContainer(input);
       this._errors = this._createErrorContainer(parent);
+      this._describeInputWithErrors(input);
+      this._status = this._createStatusContainer(parent);
       this._input = input;
       this._translations = translations;
       if (skipRequired) {
@@ -227,16 +241,16 @@
       const div = this._addFile(filename, uploadIndex);
       const progressSpan = document.createElement("span");
       progressSpan.className = "dff-progress";
+      progressSpan.setAttribute("role", "progressbar");
+      progressSpan.setAttribute("aria-label", this._formatTranslation("Upload progress for {filename}", filename));
+      progressSpan.setAttribute("aria-valuemin", "0");
+      progressSpan.setAttribute("aria-valuemax", "100");
+      progressSpan.setAttribute("aria-valuenow", "0");
       const innerSpan = document.createElement("span");
       innerSpan.className = "dff-progress-inner";
       progressSpan.append(innerSpan);
       div.append(progressSpan);
-      const cancelLink = document.createElement("a");
-      cancelLink.className = "dff-cancel";
-      this._setTextContent(cancelLink, this._getTranslation("Cancel"));
-      cancelLink.dataset.index = uploadIndex.toString();
-      cancelLink.href = "#";
-      div.append(cancelLink);
+      div.append(this._createButton("dff-cancel", this._getTranslation("Cancel"), uploadIndex));
       return div;
     }
     _addUploadedFile(filename, uploadIndex, filesize) {
@@ -244,28 +258,37 @@
       this._setSuccess(uploadIndex, filesize);
       return element;
     }
-    _clearInput() {
-      const {
-        _input: input
-      } = this;
-      input.value = "";
+
+    // Tells screen reader users what happened to a file: the status element is a
+    // live region, which is read out when its text changes.
+    _announce(key, filename) {
+      this._status.replaceChildren(document.createTextNode(this._formatTranslation(key, filename)));
     }
-    _deleteFile(index) {
+    _clearInput() {
+      this._input.value = "";
+    }
+
+    // With moveFocus, the focus goes to the next file, the previous file or the
+    // input, instead of being lost when the element that has it is removed.
+    _deleteFile(index, moveFocus = false) {
       const div = this._findFileDiv(index);
-      if (div) {
-        div.remove();
+      if (!div) {
+        return;
       }
+      const focusTarget = moveFocus && this._mayMoveFocus(div) ? this._findFocusTarget(div) : null;
+      div.remove();
+      focusTarget?.focus();
     }
     _disableCancel(index) {
-      const cancelSpan = this._findCancelSpan(index);
-      if (cancelSpan) {
-        cancelSpan.classList.add("dff-disabled");
+      const cancelButton = this._findCancelButton(index);
+      if (cancelButton) {
+        this._setButtonDisabled(cancelButton, true);
       }
     }
     _disableDelete(index) {
-      const deleteLink = this._findDeleteLink(index);
-      if (deleteLink) {
-        deleteLink.classList.add("dff-disabled");
+      const deleteButton = this._findDeleteButton(index);
+      if (deleteButton) {
+        this._setButtonDisabled(deleteButton, true);
       }
     }
     _findFileDiv(index) {
@@ -283,12 +306,21 @@
       }
       const dropHint = document.createElement("div");
       dropHint.className = "dff-drop-hint";
+      // Dropping only works with a mouse, and the files container is a list,
+      // which may only contain list items
+      dropHint.setAttribute("aria-hidden", "true");
       this._setTextContent(dropHint, this._getTranslation("Drop your files here"));
       this._container.append(dropHint);
     }
-    _setDeleteFailed(index) {
+    _setDeleteFailed(index, moveFocus = false) {
       this._setErrorMessage(index, this._getTranslation("Delete failed"));
       this._enableDelete(index);
+      const div = this._findFileDiv(index);
+
+      // Disabling the delete button may have taken the focus away from it
+      if (moveFocus && div && this._mayMoveFocus(div)) {
+        this._findDeleteButton(index)?.focus();
+      }
     }
     _setError(index) {
       this._setErrorMessage(index, this._getTranslation("Upload failed"));
@@ -300,6 +332,12 @@
       this._removeCancel(index);
     }
     _setErrorInvalidFiles(files) {
+      this._clearInput();
+      if (files.length === 0) {
+        this._errors.replaceChildren();
+        this._setInputInvalid(false);
+        return;
+      }
       const errorsMessages = document.createElement("ul");
       for (const file of files) {
         const msg = document.createElement("li");
@@ -309,40 +347,42 @@
         errorsMessages.append(msg);
       }
       this._errors.replaceChildren(errorsMessages);
-      this._clearInput();
+      this._setInputInvalid(true);
     }
     _setSuccess(index, size) {
       const el = this._findFileDiv(index);
       if (el) {
         el.classList.add("dff-upload-success");
+        if (this._clickableFilenames) {
+          this._makeFilenameClickable(el, index);
+        }
         if (size != null) {
           const fileSizeInfo = document.createElement("span");
           this._setTextContent(fileSizeInfo, formatBytes(size, 2));
           fileSizeInfo.className = "dff-filesize";
           el.append(fileSizeInfo);
         }
-        const deleteLink = document.createElement("a");
-        this._setTextContent(deleteLink, this._getTranslation("Delete"));
-        deleteLink.className = "dff-delete";
-        deleteLink.dataset.index = index.toString();
-        deleteLink.href = "#";
-        el.append(deleteLink);
+        el.append(this._createButton("dff-delete", this._getTranslation("Delete"), index));
       }
       this._removeProgress(index);
       this._removeCancel(index);
     }
     _updateProgress(index, percentage) {
       const el = this._container.querySelector(`.dff-file-id-${index.toString()}`);
-      if (el) {
-        const innerProgressSpan = el.querySelector(".dff-progress-inner");
-        if (innerProgressSpan) {
-          innerProgressSpan.style.width = `${percentage}%`;
-        }
+      const progressSpan = el?.querySelector(".dff-progress");
+      if (!progressSpan) {
+        return;
+      }
+      progressSpan.setAttribute("aria-valuenow", percentage);
+      const innerProgressSpan = progressSpan.querySelector(".dff-progress-inner");
+      if (innerProgressSpan) {
+        innerProgressSpan.style.width = `${percentage}%`;
       }
     }
     _addFile(filename, uploadIndex) {
       const div = document.createElement("div");
       div.className = `dff-file dff-file-id-${uploadIndex.toString()}`;
+      div.setAttribute("role", "listitem");
       const nameSpan = document.createElement("span");
       nameSpan.textContent = filename;
       nameSpan.className = "dff-filename";
@@ -352,45 +392,120 @@
       this._input.required = false;
       return div;
     }
+    _createButton(className, text, uploadIndex) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = className;
+      button.dataset.index = uploadIndex.toString();
+      this._setTextContent(button, text);
+      return button;
+    }
     _createErrorContainer = parent => {
       const div = document.createElement("div");
       div.className = "dff-invalid-files";
+      div.setAttribute("role", "alert");
       parent.append(div);
       return div;
     };
     _createFilesContainer = parent => {
       const div = document.createElement("div");
       div.className = "dff-files";
+      div.setAttribute("role", "list");
       parent.append(div);
       return div;
     };
+    _createStatusContainer = parent => {
+      const div = document.createElement("div");
+      div.className = "dff-status";
+      div.setAttribute("role", "status");
+      parent.append(div);
+      return div;
+    };
+
+    // A screen reader reads the errors when the input has the focus. Django may
+    // have set aria-describedby already, for the help text.
+    _describeInputWithErrors(input) {
+      this._errors.id = createId("dff-errors");
+      const describedBy = input.getAttribute("aria-describedby");
+      input.setAttribute("aria-describedby", describedBy ? `${describedBy} ${this._errors.id}` : this._errors.id);
+    }
     _enableDelete(index) {
-      const deleteLink = this._findDeleteLink(index);
-      if (deleteLink) {
-        deleteLink.classList.remove("dff-disabled");
+      const deleteButton = this._findDeleteButton(index);
+      if (deleteButton) {
+        this._setButtonDisabled(deleteButton, false);
       }
     }
-    _findCancelSpan(index) {
+    _findCancelButton(index) {
       const el = this._findFileDiv(index);
       if (!el) {
         return null;
       }
       return el.querySelector(".dff-cancel");
     }
-    _findDeleteLink(index) {
+    _findDeleteButton(index) {
       const div = this._findFileDiv(index);
       if (!div) {
         return div;
       }
       return div.querySelector(".dff-delete");
     }
+
+    // The delete or cancel button of the next file, or else of the previous file,
+    // or else the input. Landing on the same kind of button makes it easy to
+    // remove several files in a row.
+    _findFocusTarget(div) {
+      const siblings = Array.from(this._container.querySelectorAll(".dff-file"));
+      const index = siblings.indexOf(div);
+      const candidates = [...siblings.slice(index + 1), ...siblings.slice(0, index).reverse()];
+      for (const candidate of candidates) {
+        const button = candidate.querySelector(".dff-delete:enabled, .dff-cancel:enabled") ?? candidate.querySelector("button:enabled");
+        if (button) {
+          return button;
+        }
+      }
+      return this._input;
+    }
+    _formatTranslation(key, filename) {
+      // A replacer function, so that "$&" in the filename is not a pattern
+      return this._getTranslation(key).replace("{filename}", () => filename);
+    }
     _getTranslation(key) {
       return this._translations[key] ?? key;
     }
+
+    // Names the list of files after the label of the field, so that the lists
+    // of several fields can be told apart. A label that wraps the input is
+    // skipped: its name would include the text of the input itself.
+    _labelFilesContainer(input) {
+      const label = input.labels?.[0];
+      if (!label || label.contains(input)) {
+        return;
+      }
+      if (!label.id) {
+        label.id = createId("dff-label");
+      }
+      this._container.setAttribute("aria-labelledby", label.id);
+    }
+
+    // A filename that can be clicked is a button, so that it can be reached and
+    // pressed with the keyboard
+    _makeFilenameClickable(el, index) {
+      const nameSpan = el.querySelector("span.dff-filename");
+      if (nameSpan) {
+        nameSpan.replaceWith(this._createButton("dff-filename", nameSpan.textContent, index));
+      }
+    }
+
+    // Only when the focus is still in the file, or was lost because a button in
+    // it was disabled: the focus is not taken away from somewhere else.
+    _mayMoveFocus(div) {
+      const active = document.activeElement;
+      return active == null || active === document.body || div.contains(active);
+    }
     _removeCancel(index) {
-      const cancelSpan = this._findCancelSpan(index);
-      if (cancelSpan) {
-        cancelSpan.remove();
+      const cancelButton = this._findCancelButton(index);
+      if (cancelButton) {
+        cancelButton.remove();
       }
     }
     _removeProgress(index) {
@@ -401,6 +516,11 @@
           progressSpan.remove();
         }
       }
+    }
+    _setButtonDisabled(button, disabled) {
+      button.disabled = disabled;
+      // Keep the class for existing stylesheets
+      button.classList.toggle("dff-disabled", disabled);
     }
     _setErrorMessage(index, message) {
       const el = this._findFileDiv(index);
@@ -415,6 +535,20 @@
       span.classList.add("dff-error");
       this._setTextContent(span, message);
       el.append(span);
+    }
+
+    // Django sets aria-invalid when the server rejected the field; that is left
+    // alone
+    _setInputInvalid(invalid) {
+      if (invalid) {
+        if (this._input.getAttribute("aria-invalid") !== "true") {
+          this._input.setAttribute("aria-invalid", "true");
+          this._isInvalidSetHere = true;
+        }
+      } else if (this._isInvalidSetHere) {
+        this._input.removeAttribute("aria-invalid");
+        this._isInvalidSetHere = false;
+      }
     }
     _setTextContent(element, text) {
       element.append(document.createTextNode(text));
@@ -595,10 +729,11 @@
     _uploadId: uploadId
   }) => {
     const filename = encodeURIComponent(key);
+    const uploadIdEnc = encodeURIComponent(uploadId);
     const headers = new Headers({
       "X-CSRFToken": csrfToken
     });
-    const url = urlJoin(endpoint, uploadId, number.toString(), `?key=${filename}`);
+    const url = urlJoin(endpoint, uploadIdEnc, number.toString(), `?key=${filename}`);
     return fetch(url, {
       headers: headers
     }).then(response => {
@@ -898,45 +1033,223 @@
     }
   }
 
-  class DetailedError extends Error {
-    constructor(message, causingErr, req, res) {
-      super(message);
-      this.originalRequest = req;
-      this.originalResponse = res;
-      this.causingError = causingErr;
-      if (causingErr != null) {
-        message += `, caused by ${causingErr.toString()}`;
-      }
-      if (req != null) {
-        const requestId = req.getHeader('X-Request-ID') || 'n/a';
-        const method = req.getMethod();
-        const url = req.getURL();
-        const status = res ? res.getStatus() : 'n/a';
-        const body = res ? res.getBody() || '' : 'n/a';
-        message += `, originated from request (method: ${method}, url: ${url}, response code: ${status}, response text: ${body}, request id: ${requestId})`;
-      }
-      this.message = message;
+  function _typeof$8(o) {
+    "@babel/helpers - typeof";
+
+    return _typeof$8 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+      return typeof o;
+    } : function (o) {
+      return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
+    }, _typeof$8(o);
+  }
+  function _createClass$8(Constructor, protoProps, staticProps) {
+    Object.defineProperty(Constructor, "prototype", {
+      writable: false
+    });
+    return Constructor;
+  }
+  function _classCallCheck$8(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
     }
   }
+  function _callSuper$1(t, o, e) {
+    return o = _getPrototypeOf$1(o), _possibleConstructorReturn$1(t, _isNativeReflectConstruct$1() ? Reflect.construct(o, e || [], _getPrototypeOf$1(t).constructor) : o.apply(t, e));
+  }
+  function _possibleConstructorReturn$1(self, call) {
+    if (call && (_typeof$8(call) === "object" || typeof call === "function")) {
+      return call;
+    } else if (call !== void 0) {
+      throw new TypeError("Derived constructors may only return object or undefined");
+    }
+    return _assertThisInitialized$1(self);
+  }
+  function _assertThisInitialized$1(self) {
+    if (self === void 0) {
+      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
+    return self;
+  }
+  function _inherits$1(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+    subClass.prototype = Object.create(superClass && superClass.prototype, {
+      constructor: {
+        value: subClass,
+        writable: true,
+        configurable: true
+      }
+    });
+    Object.defineProperty(subClass, "prototype", {
+      writable: false
+    });
+    if (superClass) _setPrototypeOf$1(subClass, superClass);
+  }
+  function _wrapNativeSuper(Class) {
+    var _cache = typeof Map === "function" ? new Map() : undefined;
+    _wrapNativeSuper = function _wrapNativeSuper(Class) {
+      if (Class === null || !_isNativeFunction(Class)) return Class;
+      if (typeof Class !== "function") {
+        throw new TypeError("Super expression must either be null or a function");
+      }
+      if (typeof _cache !== "undefined") {
+        if (_cache.has(Class)) return _cache.get(Class);
+        _cache.set(Class, Wrapper);
+      }
+      function Wrapper() {
+        return _construct(Class, arguments, _getPrototypeOf$1(this).constructor);
+      }
+      Wrapper.prototype = Object.create(Class.prototype, {
+        constructor: {
+          value: Wrapper,
+          enumerable: false,
+          writable: true,
+          configurable: true
+        }
+      });
+      return _setPrototypeOf$1(Wrapper, Class);
+    };
+    return _wrapNativeSuper(Class);
+  }
+  function _construct(t, e, r) {
+    if (_isNativeReflectConstruct$1()) return Reflect.construct.apply(null, arguments);
+    var o = [null];
+    o.push.apply(o, e);
+    var p = new (t.bind.apply(t, o))();
+    return r && _setPrototypeOf$1(p, r.prototype), p;
+  }
+  function _isNativeReflectConstruct$1() {
+    try {
+      var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {}));
+    } catch (t) {}
+    return (_isNativeReflectConstruct$1 = function _isNativeReflectConstruct() {
+      return !!t;
+    })();
+  }
+  function _isNativeFunction(fn) {
+    try {
+      return Function.toString.call(fn).indexOf("[native code]") !== -1;
+    } catch (e) {
+      return typeof fn === "function";
+    }
+  }
+  function _setPrototypeOf$1(o, p) {
+    _setPrototypeOf$1 = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf(o, p) {
+      o.__proto__ = p;
+      return o;
+    };
+    return _setPrototypeOf$1(o, p);
+  }
+  function _getPrototypeOf$1(o) {
+    _getPrototypeOf$1 = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf(o) {
+      return o.__proto__ || Object.getPrototypeOf(o);
+    };
+    return _getPrototypeOf$1(o);
+  }
+  var DetailedError = /*#__PURE__*/function (_Error) {
+    function DetailedError(message) {
+      var _this;
+      var causingErr = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+      var req = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+      var res = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
+      _classCallCheck$8(this, DetailedError);
+      _this = _callSuper$1(this, DetailedError, [message]);
+      _this.originalRequest = req;
+      _this.originalResponse = res;
+      _this.causingError = causingErr;
+      if (causingErr != null) {
+        message += ", caused by ".concat(causingErr.toString());
+      }
+      if (req != null) {
+        var requestId = req.getHeader('X-Request-ID') || 'n/a';
+        var method = req.getMethod();
+        var url = req.getURL();
+        var status = res ? res.getStatus() : 'n/a';
+        var body = res ? res.getBody() || '' : 'n/a';
+        message += ", originated from request (method: ".concat(method, ", url: ").concat(url, ", response code: ").concat(status, ", response text: ").concat(body, ", request id: ").concat(requestId, ")");
+      }
+      _this.message = message;
+      return _this;
+    }
+    _inherits$1(DetailedError, _Error);
+    return _createClass$8(DetailedError);
+  }(/*#__PURE__*/_wrapNativeSuper(Error));
 
   function log(msg) {
     return;
   }
 
-  class NoopUrlStorage {
-    _findAllUploads() {
-      return Promise.resolve([]);
-    }
-    _findUploadsByFingerprint(_fingerprint) {
-      return Promise.resolve([]);
-    }
-    _removeUpload(_urlStorageKey) {
-      return Promise.resolve();
-    }
-    _addUpload(_urlStorageKey, _upload) {
-      return Promise.resolve(undefined);
+  function _typeof$7(o) {
+    "@babel/helpers - typeof";
+
+    return _typeof$7 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+      return typeof o;
+    } : function (o) {
+      return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
+    }, _typeof$7(o);
+  }
+  function _classCallCheck$7(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
     }
   }
+  function _defineProperties$7(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, _toPropertyKey$7(descriptor.key), descriptor);
+    }
+  }
+  function _createClass$7(Constructor, protoProps, staticProps) {
+    if (protoProps) _defineProperties$7(Constructor.prototype, protoProps);
+    Object.defineProperty(Constructor, "prototype", {
+      writable: false
+    });
+    return Constructor;
+  }
+  function _toPropertyKey$7(t) {
+    var i = _toPrimitive$7(t, "string");
+    return "symbol" == _typeof$7(i) ? i : i + "";
+  }
+  function _toPrimitive$7(t, r) {
+    if ("object" != _typeof$7(t) || !t) return t;
+    var e = t[Symbol.toPrimitive];
+    if (void 0 !== e) {
+      var i = e.call(t, r);
+      if ("object" != _typeof$7(i)) return i;
+      throw new TypeError("@@toPrimitive must return a primitive value.");
+    }
+    return (String )(t);
+  }
+  var NoopUrlStorage = /*#__PURE__*/function () {
+    function NoopUrlStorage() {
+      _classCallCheck$7(this, NoopUrlStorage);
+    }
+    return _createClass$7(NoopUrlStorage, [{
+      key: "listAllUploads",
+      value: function listAllUploads() {
+        return Promise.resolve([]);
+      }
+    }, {
+      key: "findUploadsByFingerprint",
+      value: function findUploadsByFingerprint(_fingerprint) {
+        return Promise.resolve([]);
+      }
+    }, {
+      key: "removeUpload",
+      value: function removeUpload(_urlStorageKey) {
+        return Promise.resolve();
+      }
+    }, {
+      key: "addUpload",
+      value: function addUpload(_fingerprint, _upload) {
+        return Promise.resolve(null);
+      }
+    }]);
+  }();
 
   /**
    *  base64.ts
@@ -949,7 +1262,7 @@
    *
    * @author Dan Kogai (https://github.com/dankogai)
    */
-  const version = '3.9.3';
+  const version = '3.9.4';
   /**
    * @deprecated use lowercase `version`.
    */
@@ -1987,10 +2300,6 @@
   var urlParseExports = requireUrlParse();
   var URL = /*@__PURE__*/getDefaultExportFromCjs(urlParseExports);
 
-  const PROTOCOL_TUS_V1 = 'tus-v1';
-  const PROTOCOL_IETF_DRAFT_03 = 'ietf-draft-03';
-  const PROTOCOL_IETF_DRAFT_05 = 'ietf-draft-05';
-
   /**
    * Generate a UUID v4 based on random numbers. We intentioanlly use the less
    * secure Math.random function here since the more secure crypto.getRandomNumbers
@@ -2004,774 +2313,1406 @@
    * @return {string} The generate UUID
    */
   function uuid() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-      const r = Math.random() * 16 | 0;
-      const v = c === 'x' ? r : r & 0x3 | 0x8;
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      var r = Math.random() * 16 | 0;
+      var v = c === 'x' ? r : r & 0x3 | 0x8;
       return v.toString(16);
     });
   }
 
-  const defaultOptions$1 = {
-    endpoint: undefined,
-    uploadUrl: undefined,
+  function _regeneratorRuntime$1() {
+
+    /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */
+    _regeneratorRuntime$1 = function _regeneratorRuntime() {
+      return e;
+    };
+    var t,
+      e = {},
+      r = Object.prototype,
+      n = r.hasOwnProperty,
+      o = Object.defineProperty || function (t, e, r) {
+        t[e] = r.value;
+      },
+      i = "function" == typeof Symbol ? Symbol : {},
+      a = i.iterator || "@@iterator",
+      c = i.asyncIterator || "@@asyncIterator",
+      u = i.toStringTag || "@@toStringTag";
+    function define(t, e, r) {
+      return Object.defineProperty(t, e, {
+        value: r,
+        enumerable: true,
+        configurable: true,
+        writable: true
+      }), t[e];
+    }
+    try {
+      define({}, "");
+    } catch (t) {
+      define = function define(t, e, r) {
+        return t[e] = r;
+      };
+    }
+    function wrap(t, e, r, n) {
+      var i = e && e.prototype instanceof Generator ? e : Generator,
+        a = Object.create(i.prototype),
+        c = new Context(n || []);
+      return o(a, "_invoke", {
+        value: makeInvokeMethod(t, r, c)
+      }), a;
+    }
+    function tryCatch(t, e, r) {
+      try {
+        return {
+          type: "normal",
+          arg: t.call(e, r)
+        };
+      } catch (t) {
+        return {
+          type: "throw",
+          arg: t
+        };
+      }
+    }
+    e.wrap = wrap;
+    var h = "suspendedStart",
+      l = "suspendedYield",
+      f = "executing",
+      s = "completed",
+      y = {};
+    function Generator() {}
+    function GeneratorFunction() {}
+    function GeneratorFunctionPrototype() {}
+    var p = {};
+    define(p, a, function () {
+      return this;
+    });
+    var d = Object.getPrototypeOf,
+      v = d && d(d(values([])));
+    v && v !== r && n.call(v, a) && (p = v);
+    var g = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(p);
+    function defineIteratorMethods(t) {
+      ["next", "throw", "return"].forEach(function (e) {
+        define(t, e, function (t) {
+          return this._invoke(e, t);
+        });
+      });
+    }
+    function AsyncIterator(t, e) {
+      function invoke(r, o, i, a) {
+        var c = tryCatch(t[r], t, o);
+        if ("throw" !== c.type) {
+          var u = c.arg,
+            h = u.value;
+          return h && "object" == _typeof$6(h) && n.call(h, "__await") ? e.resolve(h.__await).then(function (t) {
+            invoke("next", t, i, a);
+          }, function (t) {
+            invoke("throw", t, i, a);
+          }) : e.resolve(h).then(function (t) {
+            u.value = t, i(u);
+          }, function (t) {
+            return invoke("throw", t, i, a);
+          });
+        }
+        a(c.arg);
+      }
+      var r;
+      o(this, "_invoke", {
+        value: function value(t, n) {
+          function callInvokeWithMethodAndArg() {
+            return new e(function (e, r) {
+              invoke(t, n, e, r);
+            });
+          }
+          return r = r ? r.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg();
+        }
+      });
+    }
+    function makeInvokeMethod(e, r, n) {
+      var o = h;
+      return function (i, a) {
+        if (o === f) throw Error("Generator is already running");
+        if (o === s) {
+          if ("throw" === i) throw a;
+          return {
+            value: t,
+            done: true
+          };
+        }
+        for (n.method = i, n.arg = a;;) {
+          var c = n.delegate;
+          if (c) {
+            var u = maybeInvokeDelegate(c, n);
+            if (u) {
+              if (u === y) continue;
+              return u;
+            }
+          }
+          if ("next" === n.method) n.sent = n._sent = n.arg;else if ("throw" === n.method) {
+            if (o === h) throw o = s, n.arg;
+            n.dispatchException(n.arg);
+          } else "return" === n.method && n.abrupt("return", n.arg);
+          o = f;
+          var p = tryCatch(e, r, n);
+          if ("normal" === p.type) {
+            if (o = n.done ? s : l, p.arg === y) continue;
+            return {
+              value: p.arg,
+              done: n.done
+            };
+          }
+          "throw" === p.type && (o = s, n.method = "throw", n.arg = p.arg);
+        }
+      };
+    }
+    function maybeInvokeDelegate(e, r) {
+      var n = r.method,
+        o = e.iterator[n];
+      if (o === t) return r.delegate = null, "throw" === n && e.iterator["return"] && (r.method = "return", r.arg = t, maybeInvokeDelegate(e, r), "throw" === r.method) || "return" !== n && (r.method = "throw", r.arg = new TypeError("The iterator does not provide a '" + n + "' method")), y;
+      var i = tryCatch(o, e.iterator, r.arg);
+      if ("throw" === i.type) return r.method = "throw", r.arg = i.arg, r.delegate = null, y;
+      var a = i.arg;
+      return a ? a.done ? (r[e.resultName] = a.value, r.next = e.nextLoc, "return" !== r.method && (r.method = "next", r.arg = t), r.delegate = null, y) : a : (r.method = "throw", r.arg = new TypeError("iterator result is not an object"), r.delegate = null, y);
+    }
+    function pushTryEntry(t) {
+      var e = {
+        tryLoc: t[0]
+      };
+      1 in t && (e.catchLoc = t[1]), 2 in t && (e.finallyLoc = t[2], e.afterLoc = t[3]), this.tryEntries.push(e);
+    }
+    function resetTryEntry(t) {
+      var e = t.completion || {};
+      e.type = "normal", delete e.arg, t.completion = e;
+    }
+    function Context(t) {
+      this.tryEntries = [{
+        tryLoc: "root"
+      }], t.forEach(pushTryEntry, this), this.reset(true);
+    }
+    function values(e) {
+      if (e || "" === e) {
+        var r = e[a];
+        if (r) return r.call(e);
+        if ("function" == typeof e.next) return e;
+        if (!isNaN(e.length)) {
+          var o = -1,
+            i = function next() {
+              for (; ++o < e.length;) if (n.call(e, o)) return next.value = e[o], next.done = false, next;
+              return next.value = t, next.done = true, next;
+            };
+          return i.next = i;
+        }
+      }
+      throw new TypeError(_typeof$6(e) + " is not iterable");
+    }
+    return GeneratorFunction.prototype = GeneratorFunctionPrototype, o(g, "constructor", {
+      value: GeneratorFunctionPrototype,
+      configurable: true
+    }), o(GeneratorFunctionPrototype, "constructor", {
+      value: GeneratorFunction,
+      configurable: true
+    }), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, u, "GeneratorFunction"), e.isGeneratorFunction = function (t) {
+      var e = "function" == typeof t && t.constructor;
+      return !!e && (e === GeneratorFunction || "GeneratorFunction" === (e.displayName || e.name));
+    }, e.mark = function (t) {
+      return Object.setPrototypeOf ? Object.setPrototypeOf(t, GeneratorFunctionPrototype) : (t.__proto__ = GeneratorFunctionPrototype, define(t, u, "GeneratorFunction")), t.prototype = Object.create(g), t;
+    }, e.awrap = function (t) {
+      return {
+        __await: t
+      };
+    }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, c, function () {
+      return this;
+    }), e.AsyncIterator = AsyncIterator, e.async = function (t, r, n, o, i) {
+      void 0 === i && (i = Promise);
+      var a = new AsyncIterator(wrap(t, r, n, o), i);
+      return e.isGeneratorFunction(r) ? a : a.next().then(function (t) {
+        return t.done ? t.value : a.next();
+      });
+    }, defineIteratorMethods(g), define(g, u, "Generator"), define(g, a, function () {
+      return this;
+    }), define(g, "toString", function () {
+      return "[object Generator]";
+    }), e.keys = function (t) {
+      var e = Object(t),
+        r = [];
+      for (var n in e) r.push(n);
+      return r.reverse(), function next() {
+        for (; r.length;) {
+          var t = r.pop();
+          if (t in e) return next.value = t, next.done = false, next;
+        }
+        return next.done = true, next;
+      };
+    }, e.values = values, Context.prototype = {
+      constructor: Context,
+      reset: function reset(e) {
+        if (this.prev = 0, this.next = 0, this.sent = this._sent = t, this.done = false, this.delegate = null, this.method = "next", this.arg = t, this.tryEntries.forEach(resetTryEntry), !e) for (var r in this) "t" === r.charAt(0) && n.call(this, r) && !isNaN(+r.slice(1)) && (this[r] = t);
+      },
+      stop: function stop() {
+        this.done = true;
+        var t = this.tryEntries[0].completion;
+        if ("throw" === t.type) throw t.arg;
+        return this.rval;
+      },
+      dispatchException: function dispatchException(e) {
+        if (this.done) throw e;
+        var r = this;
+        function handle(n, o) {
+          return a.type = "throw", a.arg = e, r.next = n, o && (r.method = "next", r.arg = t), !!o;
+        }
+        for (var o = this.tryEntries.length - 1; o >= 0; --o) {
+          var i = this.tryEntries[o],
+            a = i.completion;
+          if ("root" === i.tryLoc) return handle("end");
+          if (i.tryLoc <= this.prev) {
+            var c = n.call(i, "catchLoc"),
+              u = n.call(i, "finallyLoc");
+            if (c && u) {
+              if (this.prev < i.catchLoc) return handle(i.catchLoc, true);
+              if (this.prev < i.finallyLoc) return handle(i.finallyLoc);
+            } else if (c) {
+              if (this.prev < i.catchLoc) return handle(i.catchLoc, true);
+            } else {
+              if (!u) throw Error("try statement without catch or finally");
+              if (this.prev < i.finallyLoc) return handle(i.finallyLoc);
+            }
+          }
+        }
+      },
+      abrupt: function abrupt(t, e) {
+        for (var r = this.tryEntries.length - 1; r >= 0; --r) {
+          var o = this.tryEntries[r];
+          if (o.tryLoc <= this.prev && n.call(o, "finallyLoc") && this.prev < o.finallyLoc) {
+            var i = o;
+            break;
+          }
+        }
+        i && ("break" === t || "continue" === t) && i.tryLoc <= e && e <= i.finallyLoc && (i = null);
+        var a = i ? i.completion : {};
+        return a.type = t, a.arg = e, i ? (this.method = "next", this.next = i.finallyLoc, y) : this.complete(a);
+      },
+      complete: function complete(t, e) {
+        if ("throw" === t.type) throw t.arg;
+        return "break" === t.type || "continue" === t.type ? this.next = t.arg : "return" === t.type ? (this.rval = this.arg = t.arg, this.method = "return", this.next = "end") : "normal" === t.type && e && (this.next = e), y;
+      },
+      finish: function finish(t) {
+        for (var e = this.tryEntries.length - 1; e >= 0; --e) {
+          var r = this.tryEntries[e];
+          if (r.finallyLoc === t) return this.complete(r.completion, r.afterLoc), resetTryEntry(r), y;
+        }
+      },
+      "catch": function _catch(t) {
+        for (var e = this.tryEntries.length - 1; e >= 0; --e) {
+          var r = this.tryEntries[e];
+          if (r.tryLoc === t) {
+            var n = r.completion;
+            if ("throw" === n.type) {
+              var o = n.arg;
+              resetTryEntry(r);
+            }
+            return o;
+          }
+        }
+        throw Error("illegal catch attempt");
+      },
+      delegateYield: function delegateYield(e, r, n) {
+        return this.delegate = {
+          iterator: values(e),
+          resultName: r,
+          nextLoc: n
+        }, "next" === this.method && (this.arg = t), y;
+      }
+    }, e;
+  }
+  function asyncGeneratorStep$1(gen, resolve, reject, _next, _throw, key, arg) {
+    try {
+      var info = gen[key](arg);
+      var value = info.value;
+    } catch (error) {
+      reject(error);
+      return;
+    }
+    if (info.done) {
+      resolve(value);
+    } else {
+      Promise.resolve(value).then(_next, _throw);
+    }
+  }
+  function _asyncToGenerator$1(fn) {
+    return function () {
+      var self = this,
+        args = arguments;
+      return new Promise(function (resolve, reject) {
+        var gen = fn.apply(self, args);
+        function _next(value) {
+          asyncGeneratorStep$1(gen, resolve, reject, _next, _throw, "next", value);
+        }
+        function _throw(err) {
+          asyncGeneratorStep$1(gen, resolve, reject, _next, _throw, "throw", err);
+        }
+        _next(undefined);
+      });
+    };
+  }
+  function _slicedToArray(arr, i) {
+    return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest();
+  }
+  function _nonIterableRest() {
+    throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+  function _iterableToArrayLimit(r, l) {
+    var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+    if (null != t) {
+      var e,
+        n,
+        i,
+        u,
+        a = [],
+        f = true,
+        o = false;
+      try {
+        if (i = (t = t.call(r)).next, 0 === l) ; else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0);
+      } catch (r) {
+        o = true, n = r;
+      } finally {
+        try {
+          if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return;
+        } finally {
+          if (o) throw n;
+        }
+      }
+      return a;
+    }
+  }
+  function _arrayWithHoles(arr) {
+    if (Array.isArray(arr)) return arr;
+  }
+  function _typeof$6(o) {
+    "@babel/helpers - typeof";
+
+    return _typeof$6 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+      return typeof o;
+    } : function (o) {
+      return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
+    }, _typeof$6(o);
+  }
+  function _createForOfIteratorHelper(o, allowArrayLike) {
+    var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"];
+    if (!it) {
+      if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike) {
+        if (it) o = it;
+        var i = 0;
+        var F = function F() {};
+        return {
+          s: F,
+          n: function n() {
+            if (i >= o.length) return {
+              done: true
+            };
+            return {
+              done: false,
+              value: o[i++]
+            };
+          },
+          e: function e(_e) {
+            throw _e;
+          },
+          f: F
+        };
+      }
+      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+    }
+    var normalCompletion = true,
+      didErr = false,
+      err;
+    return {
+      s: function s() {
+        it = it.call(o);
+      },
+      n: function n() {
+        var step = it.next();
+        normalCompletion = step.done;
+        return step;
+      },
+      e: function e(_e2) {
+        didErr = true;
+        err = _e2;
+      },
+      f: function f() {
+        try {
+          if (!normalCompletion && it["return"] != null) it["return"]();
+        } finally {
+          if (didErr) throw err;
+        }
+      }
+    };
+  }
+  function _unsupportedIterableToArray(o, minLen) {
+    if (!o) return;
+    if (typeof o === "string") return _arrayLikeToArray(o, minLen);
+    var n = Object.prototype.toString.call(o).slice(8, -1);
+    if (n === "Object" && o.constructor) n = o.constructor.name;
+    if (n === "Map" || n === "Set") return Array.from(o);
+    if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
+  }
+  function _arrayLikeToArray(arr, len) {
+    if (len == null || len > arr.length) len = arr.length;
+    for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i];
+    return arr2;
+  }
+  function ownKeys$1(e, r) {
+    var t = Object.keys(e);
+    if (Object.getOwnPropertySymbols) {
+      var o = Object.getOwnPropertySymbols(e);
+      r && (o = o.filter(function (r) {
+        return Object.getOwnPropertyDescriptor(e, r).enumerable;
+      })), t.push.apply(t, o);
+    }
+    return t;
+  }
+  function _objectSpread$1(e) {
+    for (var r = 1; r < arguments.length; r++) {
+      var t = null != arguments[r] ? arguments[r] : {};
+      r % 2 ? ownKeys$1(Object(t), true).forEach(function (r) {
+        _defineProperty$1(e, r, t[r]);
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys$1(Object(t)).forEach(function (r) {
+        Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r));
+      });
+    }
+    return e;
+  }
+  function _defineProperty$1(obj, key, value) {
+    key = _toPropertyKey$6(key);
+    if (key in obj) {
+      Object.defineProperty(obj, key, {
+        value: value,
+        enumerable: true,
+        configurable: true,
+        writable: true
+      });
+    } else {
+      obj[key] = value;
+    }
+    return obj;
+  }
+  function _classCallCheck$6(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties$6(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, _toPropertyKey$6(descriptor.key), descriptor);
+    }
+  }
+  function _createClass$6(Constructor, protoProps, staticProps) {
+    if (protoProps) _defineProperties$6(Constructor.prototype, protoProps);
+    if (staticProps) _defineProperties$6(Constructor, staticProps);
+    Object.defineProperty(Constructor, "prototype", {
+      writable: false
+    });
+    return Constructor;
+  }
+  function _toPropertyKey$6(t) {
+    var i = _toPrimitive$6(t, "string");
+    return "symbol" == _typeof$6(i) ? i : i + "";
+  }
+  function _toPrimitive$6(t, r) {
+    if ("object" != _typeof$6(t) || !t) return t;
+    var e = t[Symbol.toPrimitive];
+    if (void 0 !== e) {
+      var i = e.call(t, r);
+      if ("object" != _typeof$6(i)) return i;
+      throw new TypeError("@@toPrimitive must return a primitive value.");
+    }
+    return (String )(t);
+  }
+  var PROTOCOL_TUS_V1 = 'tus-v1';
+  var PROTOCOL_IETF_DRAFT_03 = 'ietf-draft-03';
+  var PROTOCOL_IETF_DRAFT_05 = 'ietf-draft-05';
+  var defaultOptions$1 = {
+    endpoint: null,
+    uploadUrl: null,
     metadata: {},
     metadataForPartialUploads: {},
-    fingerprint: undefined,
-    uploadSize: undefined,
-    onProgress: undefined,
-    onChunkComplete: undefined,
-    onSuccess: undefined,
-    onError: undefined,
-    onUploadUrlAvailable: undefined,
+    fingerprint: null,
+    uploadSize: null,
+    onProgress: null,
+    onChunkComplete: null,
+    onSuccess: null,
+    onError: null,
+    onUploadUrlAvailable: null,
     overridePatchMethod: false,
     headers: {},
     addRequestId: false,
-    onBeforeRequest: undefined,
-    onAfterResponse: undefined,
+    onBeforeRequest: null,
+    onAfterResponse: null,
     onShouldRetry: defaultOnShouldRetry,
     chunkSize: Number.POSITIVE_INFINITY,
     retryDelays: [0, 1000, 3000, 5000],
     parallelUploads: 1,
-    parallelUploadBoundaries: undefined,
+    parallelUploadBoundaries: null,
     storeFingerprintForResuming: true,
     removeFingerprintOnSuccess: false,
     uploadLengthDeferred: false,
     uploadDataDuringCreation: false,
-    urlStorage: undefined,
-    fileReader: undefined,
-    httpStack: undefined,
+    urlStorage: null,
+    fileReader: null,
+    httpStack: null,
     protocol: PROTOCOL_TUS_V1
   };
-  class BaseUpload {
-    constructor(file, options) {
-      // The URL against which the file will be uploaded
-      this.url = null;
-      // The fingerpinrt for the current file (set after start())
-      this._fingerprint = null;
-      // The offset used in the current PATCH request
-      this._offset = 0;
-      // True if the current PATCH request has been aborted
-      this._aborted = false;
-      // The file's size in bytes
-      this._size = null;
-      // The current count of attempts which have been made. Zero indicates none.
-      this._retryAttempt = 0;
-      // The offset of the remote upload before the latest attempt was started.
-      this._offsetBeforeRetry = 0;
+  var BaseUpload = /*#__PURE__*/function () {
+    function BaseUpload(file, options) {
+      _classCallCheck$6(this, BaseUpload);
       // Warn about removed options from previous versions
       if ('resume' in options) {
         console.log('tus: The `resume` option has been removed in tus-js-client v2. Please use the URL storage API instead.');
       }
+
       // The default options will already be added from the wrapper classes.
       this.options = options;
+
       // Cast chunkSize to integer
-      // TODO: Remove this cast
       this.options.chunkSize = Number(this.options.chunkSize);
-      this._uploadLengthDeferred = this.options.uploadLengthDeferred;
+
+      // The storage module used to store URLs
+      this._urlStorage = this.options.urlStorage;
+
+      // The underlying File/Blob object
       this.file = file;
-    }
-    async findPreviousUploads() {
-      const fingerprint = await this.options.fingerprint(this.file, this.options);
-      if (!fingerprint) {
-        throw new Error('tus: unable to calculate fingerprint for this input file');
-      }
-      return await this.options.urlStorage.findUploadsByFingerprint(fingerprint);
-    }
-    resumeFromPreviousUpload(previousUpload) {
-      this.url = previousUpload.uploadUrl || null;
-      this._parallelUploadUrls = previousUpload.parallelUploadUrls;
-      this._urlStorageKey = previousUpload.urlStorageKey;
-    }
-    start() {
-      if (!this.file) {
-        this._emitError(new Error('tus: no file or stream to upload provided'));
-        return;
-      }
-      if (![PROTOCOL_TUS_V1, PROTOCOL_IETF_DRAFT_03, PROTOCOL_IETF_DRAFT_05].includes(this.options.protocol)) {
-        this._emitError(new Error(`tus: unsupported protocol ${this.options.protocol}`));
-        return;
-      }
-      if (!this.options.endpoint && !this.options.uploadUrl && !this.url) {
-        this._emitError(new Error('tus: neither an endpoint or an upload URL is provided'));
-        return;
-      }
-      const {
-        retryDelays
-      } = this.options;
-      if (retryDelays != null && Object.prototype.toString.call(retryDelays) !== '[object Array]') {
-        this._emitError(new Error('tus: the `retryDelays` option must either be an array or null'));
-        return;
-      }
-      if (this.options.parallelUploads > 1) {
-        // Test which options are incompatible with parallel uploads.
-        if (this.options.uploadUrl != null) {
-          this._emitError(new Error('tus: cannot use the `uploadUrl` option when parallelUploads is enabled'));
-          return;
-        }
-        if (this.options.uploadSize != null) {
-          this._emitError(new Error('tus: cannot use the `uploadSize` option when parallelUploads is enabled'));
-          return;
-        }
-        if (this._uploadLengthDeferred) {
-          this._emitError(new Error('tus: cannot use the `uploadLengthDeferred` option when parallelUploads is enabled'));
-          return;
-        }
-      }
-      if (this.options.parallelUploadBoundaries) {
-        if (this.options.parallelUploads <= 1) {
-          this._emitError(new Error('tus: cannot use the `parallelUploadBoundaries` option when `parallelUploads` is disabled'));
-          return;
-        }
-        if (this.options.parallelUploads !== this.options.parallelUploadBoundaries.length) {
-          this._emitError(new Error('tus: the `parallelUploadBoundaries` must have the same length as the value of `parallelUploads`'));
-          return;
-        }
-      }
-      // Note: `start` does not return a Promise or await the preparation on purpose.
-      // Its supposed to return immediately and start the upload in the background.
-      this._prepareAndStartUpload().catch(err => {
-        if (!(err instanceof Error)) {
-          throw new Error(`tus: value thrown that is not an error: ${err}`);
-        }
-        // Errors from the actual upload requests will bubble up to here, where
-        // we then consider retrying them. Other functions should not call _emitError on their own.
-        this._retryOrEmitError(err);
-      });
-    }
-    async _prepareAndStartUpload() {
-      this._fingerprint = await this.options.fingerprint(this.file, this.options);
-      if (this._fingerprint == null) ; else {
-        log(`Calculated fingerprint: ${this._fingerprint}`);
-      }
-      if (this._source == null) {
-        this._source = await this.options.fileReader.openFile(this.file, this.options.chunkSize);
-      }
-      // First, we look at the uploadLengthDeferred option.
-      // Next, we check if the caller has supplied a manual upload size.
-      // Finally, we try to use the calculated size from the source object.
-      if (this._uploadLengthDeferred) {
-        this._size = null;
-      } else if (this.options.uploadSize != null) {
-        this._size = Number(this.options.uploadSize);
-        if (Number.isNaN(this._size)) {
-          throw new Error('tus: cannot convert `uploadSize` option into a number');
-        }
-      } else {
-        this._size = this._source.size;
-        if (this._size == null) {
-          throw new Error("tus: cannot automatically derive upload's size from input. Specify it manually using the `uploadSize` option or use the `uploadLengthDeferred` option");
-        }
-      }
-      // If the upload was configured to use multiple requests or if we resume from
-      // an upload which used multiple requests, we start a parallel upload.
-      if (this.options.parallelUploads > 1 || this._parallelUploadUrls != null) {
-        await this._startParallelUpload();
-      } else {
-        await this._startSingleUpload();
-      }
-    }
-    /**
-     * Initiate the uploading procedure for a parallelized upload, where one file is split into
-     * multiple request which are run in parallel.
-     *
-     * @api private
-     */
-    async _startParallelUpload() {
-      var _a;
-      const totalSize = this._size;
-      let totalProgress = 0;
-      this._parallelUploads = [];
-      const partCount = this._parallelUploadUrls != null ? this._parallelUploadUrls.length : this.options.parallelUploads;
-      if (this._size == null) {
-        throw new Error('tus: Expected _size to be set');
-      }
-      // The input file will be split into multiple slices which are uploaded in separate
-      // requests. Here we get the start and end position for the slices.
-      const partsBoundaries = (_a = this.options.parallelUploadBoundaries) !== null && _a !== void 0 ? _a : splitSizeIntoParts(this._size, partCount);
-      // Attach URLs from previous uploads, if available.
-      const parts = partsBoundaries.map((part, index) => {
-        var _a;
-        return {
-          ...part,
-          uploadUrl: ((_a = this._parallelUploadUrls) === null || _a === void 0 ? void 0 : _a[index]) || null
-        };
-      });
-      // Create an empty list for storing the upload URLs
-      this._parallelUploadUrls = new Array(parts.length);
-      // Generate a promise for each slice that will be resolve if the respective
-      // upload is completed.
-      const uploads = parts.map(async (part, index) => {
-        let lastPartProgress = 0;
-        // @ts-expect-error We know that `_source` is not null here.
-        const {
-          value
-        } = await this._source.slice(part.start, part.end);
-        return new Promise((resolve, reject) => {
-          // Merge with the user supplied options but overwrite some values.
-          const options = {
-            ...this.options,
-            // If available, the partial upload should be resumed from a previous URL.
-            uploadUrl: part.uploadUrl || null,
-            // We take manually care of resuming for partial uploads, so they should
-            // not be stored in the URL storage.
-            storeFingerprintForResuming: false,
-            removeFingerprintOnSuccess: false,
-            // Reset the parallelUploads option to not cause recursion.
-            parallelUploads: 1,
-            // Reset this option as we are not doing a parallel upload.
-            parallelUploadBoundaries: null,
-            metadata: this.options.metadataForPartialUploads,
-            // Add the header to indicate the this is a partial upload.
-            headers: {
-              ...this.options.headers,
-              'Upload-Concat': 'partial'
-            },
-            // Reject or resolve the promise if the upload errors or completes.
-            onSuccess: resolve,
-            onError: reject,
-            // Based in the progress for this partial upload, calculate the progress
-            // for the entire final upload.
-            onProgress: newPartProgress => {
-              totalProgress = totalProgress - lastPartProgress + newPartProgress;
-              lastPartProgress = newPartProgress;
-              if (totalSize == null) {
-                throw new Error('tus: Expected totalSize to be set');
-              }
-              this._emitProgress(totalProgress, totalSize);
-            },
-            // Wait until every partial upload has an upload URL, so we can add
-            // them to the URL storage.
-            onUploadUrlAvailable: async () => {
-              // @ts-expect-error We know that _parallelUploadUrls is defined
-              this._parallelUploadUrls[index] = upload.url;
-              // Test if all uploads have received an URL
-              // @ts-expect-error We know that _parallelUploadUrls is defined
-              if (this._parallelUploadUrls.filter(u => Boolean(u)).length === parts.length) {
-                await this._saveUploadInUrlStorage();
-              }
-            }
-          };
-          if (value == null) {
-            reject(new Error('tus: no value returned while slicing file for parallel uploads'));
-            return;
-          }
-          // @ts-expect-error `value` is unknown and not an UploadInput
-          const upload = new BaseUpload(value, options);
-          upload.start();
-          // Store the upload in an array, so we can later abort them if necessary.
-          // @ts-expect-error We know that _parallelUploadUrls is defined
-          this._parallelUploads.push(upload);
-        });
-      });
-      // Wait until all partial uploads are finished and we can send the POST request for
-      // creating the final upload.
-      await Promise.all(uploads);
-      if (this.options.endpoint == null) {
-        throw new Error('tus: Expected options.endpoint to be set');
-      }
-      const req = this._openRequest('POST', this.options.endpoint);
-      req.setHeader('Upload-Concat', `final;${this._parallelUploadUrls.join(' ')}`);
-      // Add metadata if values have been added
-      const metadata = encodeMetadata(this.options.metadata);
-      if (metadata !== '') {
-        req.setHeader('Upload-Metadata', metadata);
-      }
-      let res;
-      try {
-        res = await this._sendRequest(req);
-      } catch (err) {
-        if (!(err instanceof Error)) {
-          throw new Error(`tus: value thrown that is not an error: ${err}`);
-        }
-        throw new DetailedError('tus: failed to concatenate parallel uploads', err, req, undefined);
-      }
-      if (!inStatusCategory(res.getStatus(), 200)) {
-        throw new DetailedError('tus: unexpected response while creating upload', undefined, req, res);
-      }
-      const location = res.getHeader('Location');
-      if (location == null) {
-        throw new DetailedError('tus: invalid or missing Location header', undefined, req, res);
-      }
-      if (this.options.endpoint == null) {
-        throw new Error('tus: Expeced endpoint to be defined.');
-      }
-      this.url = resolveUrl(this.options.endpoint, location);
-      log(`Created upload at ${this.url}`);
-      await this._emitSuccess(res);
-    }
-    /**
-     * Initiate the uploading procedure for a non-parallel upload. Here the entire file is
-     * uploaded in a sequential matter.
-     *
-     * @api private
-     */
-    async _startSingleUpload() {
-      // Reset the aborted flag when the upload is started or else the
-      // _performUpload will stop before sending a request if the upload has been
-      // aborted previously.
+
+      // The URL against which the file will be uploaded
+      this.url = null;
+
+      // The underlying request object for the current PATCH request
+      this._req = null;
+
+      // The fingerpinrt for the current file (set after start())
+      this._fingerprint = null;
+
+      // The key that the URL storage returned when saving an URL with a fingerprint,
+      this._urlStorageKey = null;
+
+      // The offset used in the current PATCH request
+      this._offset = null;
+
+      // True if the current PATCH request has been aborted
       this._aborted = false;
-      // The upload had been started previously and we should reuse this URL.
-      if (this.url != null) {
-        log(`Resuming upload from previous URL: ${this.url}`);
-        return await this._resumeUpload();
-      }
-      // A URL has manually been specified, so we try to resume
-      if (this.options.uploadUrl != null) {
-        log(`Resuming upload from provided URL: ${this.options.uploadUrl}`);
-        this.url = this.options.uploadUrl;
-        return await this._resumeUpload();
-      }
-      return await this._createUpload();
+
+      // The file's size in bytes
+      this._size = null;
+
+      // The Source object which will wrap around the given file and provides us
+      // with a unified interface for getting its size and slice chunks from its
+      // content allowing us to easily handle Files, Blobs, Buffers and Streams.
+      this._source = null;
+
+      // The current count of attempts which have been made. Zero indicates none.
+      this._retryAttempt = 0;
+
+      // The timeout's ID which is used to delay the next retry
+      this._retryTimeout = null;
+
+      // The offset of the remote upload before the latest attempt was started.
+      this._offsetBeforeRetry = 0;
+
+      // An array of BaseUpload instances which are used for uploading the different
+      // parts, if the parallelUploads option is used.
+      this._parallelUploads = null;
+
+      // An array of upload URLs which are used for uploading the different
+      // parts, if the parallelUploads option is used.
+      this._parallelUploadUrls = null;
     }
+
     /**
-     * Abort any running request and stop the current upload. After abort is called, no event
-     * handler will be invoked anymore. You can use the `start` method to resume the upload
-     * again.
-     * If `shouldTerminate` is true, the `terminate` function will be called to remove the
-     * current upload from the server.
+     * Use the Termination extension to delete an upload from the server by sending a DELETE
+     * request to the specified upload URL. This is only possible if the server supports the
+     * Termination extension. If the `options.retryDelays` property is set, the method will
+     * also retry if an error ocurrs.
      *
-     * @param {boolean} shouldTerminate True if the upload should be deleted from the server.
+     * @param {String} url The upload's URL which will be terminated.
+     * @param {object} options Optional options for influencing HTTP requests.
      * @return {Promise} The Promise will be resolved/rejected when the requests finish.
      */
-    async abort(shouldTerminate = false) {
-      // Set the aborted flag before any `await`s, so no new requests are started.
-      this._aborted = true;
-      // Stop any parallel partial uploads, that have been started in _startParallelUploads.
-      if (this._parallelUploads != null) {
-        for (const upload of this._parallelUploads) {
-          await upload.abort(shouldTerminate);
-        }
-      }
-      // Stop any current running request.
-      if (this._req != null) {
-        await this._req.abort();
-        // Note: We do not close the file source here, so the user can resume in the future.
-      }
-      // Stop any timeout used for initiating a retry.
-      if (this._retryTimeout != null) {
-        clearTimeout(this._retryTimeout);
-        this._retryTimeout = undefined;
-      }
-      if (shouldTerminate && this.url != null) {
-        await terminate(this.url, this.options);
-        // Remove entry from the URL storage since the upload URL is no longer valid.
-        await this._removeFromUrlStorage();
-      }
-    }
-    _emitError(err) {
-      // Do not emit errors, e.g. from aborted HTTP requests, if the upload has been stopped.
-      if (this._aborted) return;
-      if (typeof this.options.onError === 'function') {
-        this.options.onError(err);
-      } else {
-        throw err;
-      }
-    }
-    _retryOrEmitError(err) {
-      // Do not retry if explicitly aborted
-      if (this._aborted) return;
-      // Check if we should retry, when enabled, before sending the error to the user.
-      if (this.options.retryDelays != null) {
-        // We will reset the attempt counter if
-        // - we were already able to connect to the server (offset != null) and
-        // - we were able to upload a small chunk of data to the server
-        const shouldResetDelays = this._offset != null && this._offset > this._offsetBeforeRetry;
-        if (shouldResetDelays) {
-          this._retryAttempt = 0;
-        }
-        if (shouldRetry(err, this._retryAttempt, this.options)) {
-          const delay = this.options.retryDelays[this._retryAttempt++];
-          this._offsetBeforeRetry = this._offset;
-          this._retryTimeout = setTimeout(() => {
-            this.start();
-          }, delay);
-          return;
-        }
-      }
-      // If we are not retrying, emit the error to the user.
-      this._emitError(err);
-    }
-    /**
-     * Publishes notification if the upload has been successfully completed.
-     *
-     * @param {object} lastResponse Last HTTP response.
-     * @api private
-     */
-    async _emitSuccess(lastResponse) {
-      if (this.options.removeFingerprintOnSuccess) {
-        // Remove stored fingerprint and corresponding endpoint. This causes
-        // new uploads of the same file to be treated as a different file.
-        await this._removeFromUrlStorage();
-      }
-      if (typeof this.options.onSuccess === 'function') {
-        this.options.onSuccess({
-          lastResponse
+    return _createClass$6(BaseUpload, [{
+      key: "findPreviousUploads",
+      value: function findPreviousUploads() {
+        var _this = this;
+        return this.options.fingerprint(this.file, this.options).then(function (fingerprint) {
+          return _this._urlStorage.findUploadsByFingerprint(fingerprint);
         });
       }
-    }
-    /**
-     * Publishes notification when data has been sent to the server. This
-     * data may not have been accepted by the server yet.
-     *
-     * @param {number} bytesSent  Number of bytes sent to the server.
-     * @param {number|null} bytesTotal Total number of bytes to be sent to the server.
-     * @api private
-     */
-    _emitProgress(bytesSent, bytesTotal) {
-      if (typeof this.options.onProgress === 'function') {
-        this.options.onProgress(bytesSent, bytesTotal);
+    }, {
+      key: "resumeFromPreviousUpload",
+      value: function resumeFromPreviousUpload(previousUpload) {
+        this.url = previousUpload.uploadUrl || null;
+        this._parallelUploadUrls = previousUpload.parallelUploadUrls || null;
+        this._urlStorageKey = previousUpload.urlStorageKey;
       }
-    }
-    /**
-     * Publishes notification when a chunk of data has been sent to the server
-     * and accepted by the server.
-     * @param {number} chunkSize  Size of the chunk that was accepted by the server.
-     * @param {number} bytesAccepted Total number of bytes that have been
-     *                                accepted by the server.
-     * @param {number|null} bytesTotal Total number of bytes to be sent to the server.
-     * @api private
-     */
-    _emitChunkComplete(chunkSize, bytesAccepted, bytesTotal) {
-      if (typeof this.options.onChunkComplete === 'function') {
-        this.options.onChunkComplete(chunkSize, bytesAccepted, bytesTotal);
-      }
-    }
-    /**
-     * Create a new upload using the creation extension by sending a POST
-     * request to the endpoint. After successful creation the file will be
-     * uploaded
-     *
-     * @api private
-     */
-    async _createUpload() {
-      if (!this.options.endpoint) {
-        throw new Error('tus: unable to create upload because no endpoint is provided');
-      }
-      const req = this._openRequest('POST', this.options.endpoint);
-      if (this._uploadLengthDeferred) {
-        req.setHeader('Upload-Defer-Length', '1');
-      } else {
-        if (this._size == null) {
-          throw new Error('tus: expected _size to be set');
+    }, {
+      key: "start",
+      value: function start() {
+        var _this2 = this;
+        var file = this.file;
+        if (!file) {
+          this._emitError(new Error('tus: no file or stream to upload provided'));
+          return;
         }
-        req.setHeader('Upload-Length', `${this._size}`);
+        if (![PROTOCOL_TUS_V1, PROTOCOL_IETF_DRAFT_03, PROTOCOL_IETF_DRAFT_05].includes(this.options.protocol)) {
+          this._emitError(new Error("tus: unsupported protocol ".concat(this.options.protocol)));
+          return;
+        }
+        if (!this.options.endpoint && !this.options.uploadUrl && !this.url) {
+          this._emitError(new Error('tus: neither an endpoint or an upload URL is provided'));
+          return;
+        }
+        var retryDelays = this.options.retryDelays;
+        if (retryDelays != null && Object.prototype.toString.call(retryDelays) !== '[object Array]') {
+          this._emitError(new Error('tus: the `retryDelays` option must either be an array or null'));
+          return;
+        }
+        if (this.options.parallelUploads > 1) {
+          // Test which options are incompatible with parallel uploads.
+          for (var _i = 0, _arr = ['uploadUrl', 'uploadSize', 'uploadLengthDeferred']; _i < _arr.length; _i++) {
+            var optionName = _arr[_i];
+            if (this.options[optionName]) {
+              this._emitError(new Error("tus: cannot use the ".concat(optionName, " option when parallelUploads is enabled")));
+              return;
+            }
+          }
+        }
+        if (this.options.parallelUploadBoundaries) {
+          if (this.options.parallelUploads <= 1) {
+            this._emitError(new Error('tus: cannot use the `parallelUploadBoundaries` option when `parallelUploads` is disabled'));
+            return;
+          }
+          if (this.options.parallelUploads !== this.options.parallelUploadBoundaries.length) {
+            this._emitError(new Error('tus: the `parallelUploadBoundaries` must have the same length as the value of `parallelUploads`'));
+            return;
+          }
+        }
+        this.options.fingerprint(file, this.options).then(function (fingerprint) {
+          _this2._fingerprint = fingerprint;
+          if (_this2._source) {
+            return _this2._source;
+          }
+          return _this2.options.fileReader.openFile(file, _this2.options.chunkSize);
+        }).then(function (source) {
+          _this2._source = source;
+
+          // First, we look at the uploadLengthDeferred option.
+          // Next, we check if the caller has supplied a manual upload size.
+          // Finally, we try to use the calculated size from the source object.
+          if (_this2.options.uploadLengthDeferred) {
+            _this2._size = null;
+          } else if (_this2.options.uploadSize != null) {
+            _this2._size = Number(_this2.options.uploadSize);
+            if (Number.isNaN(_this2._size)) {
+              _this2._emitError(new Error('tus: cannot convert `uploadSize` option into a number'));
+              return;
+            }
+          } else {
+            _this2._size = _this2._source.size;
+            if (_this2._size == null) {
+              _this2._emitError(new Error("tus: cannot automatically derive upload's size from input. Specify it manually using the `uploadSize` option or use the `uploadLengthDeferred` option"));
+              return;
+            }
+          }
+
+          // If the upload was configured to use multiple requests or if we resume from
+          // an upload which used multiple requests, we start a parallel upload.
+          if (_this2.options.parallelUploads > 1 || _this2._parallelUploadUrls != null) {
+            _this2._startParallelUpload();
+          } else {
+            _this2._startSingleUpload();
+          }
+        })["catch"](function (err) {
+          _this2._emitError(err);
+        });
       }
-      // Add metadata if values have been added
-      const metadata = encodeMetadata(this.options.metadata);
-      if (metadata !== '') {
-        req.setHeader('Upload-Metadata', metadata);
+
+      /**
+       * Initiate the uploading procedure for a parallelized upload, where one file is split into
+       * multiple request which are run in parallel.
+       *
+       * @api private
+       */
+    }, {
+      key: "_startParallelUpload",
+      value: function _startParallelUpload() {
+        var _this$options$paralle,
+          _this3 = this;
+        var totalSize = this._size;
+        var totalProgress = 0;
+        this._parallelUploads = [];
+        var partCount = this._parallelUploadUrls != null ? this._parallelUploadUrls.length : this.options.parallelUploads;
+
+        // The input file will be split into multiple slices which are uploaded in separate
+        // requests. Here we get the start and end position for the slices.
+        var parts = (_this$options$paralle = this.options.parallelUploadBoundaries) !== null && _this$options$paralle !== void 0 ? _this$options$paralle : splitSizeIntoParts(this._source.size, partCount);
+
+        // Attach URLs from previous uploads, if available.
+        if (this._parallelUploadUrls) {
+          parts.forEach(function (part, index) {
+            part.uploadUrl = _this3._parallelUploadUrls[index] || null;
+          });
+        }
+
+        // Create an empty list for storing the upload URLs
+        this._parallelUploadUrls = new Array(parts.length);
+
+        // Generate a promise for each slice that will be resolve if the respective
+        // upload is completed.
+        var uploads = parts.map(function (part, index) {
+          var lastPartProgress = 0;
+          return _this3._source.slice(part.start, part.end).then(function (_ref) {
+            var value = _ref.value;
+            return new Promise(function (resolve, reject) {
+              // Merge with the user supplied options but overwrite some values.
+              var options = _objectSpread$1(_objectSpread$1({}, _this3.options), {}, {
+                // If available, the partial upload should be resumed from a previous URL.
+                uploadUrl: part.uploadUrl || null,
+                // We take manually care of resuming for partial uploads, so they should
+                // not be stored in the URL storage.
+                storeFingerprintForResuming: false,
+                removeFingerprintOnSuccess: false,
+                // Reset the parallelUploads option to not cause recursion.
+                parallelUploads: 1,
+                // Reset this option as we are not doing a parallel upload.
+                parallelUploadBoundaries: null,
+                metadata: _this3.options.metadataForPartialUploads,
+                // Add the header to indicate the this is a partial upload.
+                headers: _objectSpread$1(_objectSpread$1({}, _this3.options.headers), {}, {
+                  'Upload-Concat': 'partial'
+                }),
+                // Reject or resolve the promise if the upload errors or completes.
+                onSuccess: resolve,
+                onError: reject,
+                // Based in the progress for this partial upload, calculate the progress
+                // for the entire final upload.
+                onProgress: function onProgress(newPartProgress) {
+                  totalProgress = totalProgress - lastPartProgress + newPartProgress;
+                  lastPartProgress = newPartProgress;
+                  _this3._emitProgress(totalProgress, totalSize);
+                },
+                // Wait until every partial upload has an upload URL, so we can add
+                // them to the URL storage.
+                onUploadUrlAvailable: function onUploadUrlAvailable() {
+                  _this3._parallelUploadUrls[index] = upload.url;
+                  // Test if all uploads have received an URL
+                  if (_this3._parallelUploadUrls.filter(function (u) {
+                    return Boolean(u);
+                  }).length === parts.length) {
+                    _this3._saveUploadInUrlStorage();
+                  }
+                }
+              });
+              var upload = new BaseUpload(value, options);
+              upload.start();
+
+              // Store the upload in an array, so we can later abort them if necessary.
+              _this3._parallelUploads.push(upload);
+            });
+          });
+        });
+        var req;
+        // Wait until all partial uploads are finished and we can send the POST request for
+        // creating the final upload.
+        Promise.all(uploads).then(function () {
+          req = _this3._openRequest('POST', _this3.options.endpoint);
+          req.setHeader('Upload-Concat', "final;".concat(_this3._parallelUploadUrls.join(' ')));
+
+          // Add metadata if values have been added
+          var metadata = encodeMetadata(_this3.options.metadata);
+          if (metadata !== '') {
+            req.setHeader('Upload-Metadata', metadata);
+          }
+          return _this3._sendRequest(req, null);
+        }).then(function (res) {
+          if (!inStatusCategory(res.getStatus(), 200)) {
+            _this3._emitHttpError(req, res, 'tus: unexpected response while creating upload');
+            return;
+          }
+          var location = res.getHeader('Location');
+          if (location == null) {
+            _this3._emitHttpError(req, res, 'tus: invalid or missing Location header');
+            return;
+          }
+          _this3.url = resolveUrl(_this3.options.endpoint, location);
+          log("Created upload at ".concat(_this3.url));
+          _this3._emitSuccess(res);
+        })["catch"](function (err) {
+          _this3._emitError(err);
+        });
       }
-      let res;
-      try {
-        if (this.options.uploadDataDuringCreation && !this._uploadLengthDeferred) {
+
+      /**
+       * Initiate the uploading procedure for a non-parallel upload. Here the entire file is
+       * uploaded in a sequential matter.
+       *
+       * @api private
+       */
+    }, {
+      key: "_startSingleUpload",
+      value: function _startSingleUpload() {
+        // Reset the aborted flag when the upload is started or else the
+        // _performUpload will stop before sending a request if the upload has been
+        // aborted previously.
+        this._aborted = false;
+
+        // The upload had been started previously and we should reuse this URL.
+        if (this.url != null) {
+          log("Resuming upload from previous URL: ".concat(this.url));
+          this._resumeUpload();
+          return;
+        }
+
+        // A URL has manually been specified, so we try to resume
+        if (this.options.uploadUrl != null) {
+          log("Resuming upload from provided URL: ".concat(this.options.uploadUrl));
+          this.url = this.options.uploadUrl;
+          this._resumeUpload();
+          return;
+        }
+        this._createUpload();
+      }
+
+      /**
+       * Abort any running request and stop the current upload. After abort is called, no event
+       * handler will be invoked anymore. You can use the `start` method to resume the upload
+       * again.
+       * If `shouldTerminate` is true, the `terminate` function will be called to remove the
+       * current upload from the server.
+       *
+       * @param {boolean} shouldTerminate True if the upload should be deleted from the server.
+       * @return {Promise} The Promise will be resolved/rejected when the requests finish.
+       */
+    }, {
+      key: "abort",
+      value: function abort(shouldTerminate) {
+        var _this4 = this;
+        // Stop any parallel partial uploads, that have been started in _startParallelUploads.
+        if (this._parallelUploads != null) {
+          var _iterator = _createForOfIteratorHelper(this._parallelUploads),
+            _step;
+          try {
+            for (_iterator.s(); !(_step = _iterator.n()).done;) {
+              var upload = _step.value;
+              upload.abort(shouldTerminate);
+            }
+          } catch (err) {
+            _iterator.e(err);
+          } finally {
+            _iterator.f();
+          }
+        }
+
+        // Stop any current running request.
+        if (this._req !== null) {
+          this._req.abort();
+          // Note: We do not close the file source here, so the user can resume in the future.
+        }
+        this._aborted = true;
+
+        // Stop any timeout used for initiating a retry.
+        if (this._retryTimeout != null) {
+          clearTimeout(this._retryTimeout);
+          this._retryTimeout = null;
+        }
+        if (!shouldTerminate || this.url == null) {
+          return Promise.resolve();
+        }
+        return BaseUpload.terminate(this.url, this.options)
+        // Remove entry from the URL storage since the upload URL is no longer valid.
+        .then(function () {
+          return _this4._removeFromUrlStorage();
+        });
+      }
+    }, {
+      key: "_emitHttpError",
+      value: function _emitHttpError(req, res, message, causingErr) {
+        this._emitError(new DetailedError(message, causingErr, req, res));
+      }
+    }, {
+      key: "_emitError",
+      value: function _emitError(err) {
+        var _this5 = this;
+        // Do not emit errors, e.g. from aborted HTTP requests, if the upload has been stopped.
+        if (this._aborted) return;
+
+        // Check if we should retry, when enabled, before sending the error to the user.
+        if (this.options.retryDelays != null) {
+          // We will reset the attempt counter if
+          // - we were already able to connect to the server (offset != null) and
+          // - we were able to upload a small chunk of data to the server
+          var shouldResetDelays = this._offset != null && this._offset > this._offsetBeforeRetry;
+          if (shouldResetDelays) {
+            this._retryAttempt = 0;
+          }
+          if (shouldRetry(err, this._retryAttempt, this.options)) {
+            var delay = this.options.retryDelays[this._retryAttempt++];
+            this._offsetBeforeRetry = this._offset;
+            this._retryTimeout = setTimeout(function () {
+              _this5.start();
+            }, delay);
+            return;
+          }
+        }
+        if (typeof this.options.onError === 'function') {
+          this.options.onError(err);
+        } else {
+          throw err;
+        }
+      }
+
+      /**
+       * Publishes notification if the upload has been successfully completed.
+       *
+       * @param {object} lastResponse Last HTTP response.
+       * @api private
+       */
+    }, {
+      key: "_emitSuccess",
+      value: function _emitSuccess(lastResponse) {
+        if (this.options.removeFingerprintOnSuccess) {
+          // Remove stored fingerprint and corresponding endpoint. This causes
+          // new uploads of the same file to be treated as a different file.
+          this._removeFromUrlStorage();
+        }
+        if (typeof this.options.onSuccess === 'function') {
+          this.options.onSuccess({
+            lastResponse: lastResponse
+          });
+        }
+      }
+
+      /**
+       * Publishes notification when data has been sent to the server. This
+       * data may not have been accepted by the server yet.
+       *
+       * @param {number} bytesSent  Number of bytes sent to the server.
+       * @param {number} bytesTotal Total number of bytes to be sent to the server.
+       * @api private
+       */
+    }, {
+      key: "_emitProgress",
+      value: function _emitProgress(bytesSent, bytesTotal) {
+        if (typeof this.options.onProgress === 'function') {
+          this.options.onProgress(bytesSent, bytesTotal);
+        }
+      }
+
+      /**
+       * Publishes notification when a chunk of data has been sent to the server
+       * and accepted by the server.
+       * @param {number} chunkSize  Size of the chunk that was accepted by the server.
+       * @param {number} bytesAccepted Total number of bytes that have been
+       *                                accepted by the server.
+       * @param {number} bytesTotal Total number of bytes to be sent to the server.
+       * @api private
+       */
+    }, {
+      key: "_emitChunkComplete",
+      value: function _emitChunkComplete(chunkSize, bytesAccepted, bytesTotal) {
+        if (typeof this.options.onChunkComplete === 'function') {
+          this.options.onChunkComplete(chunkSize, bytesAccepted, bytesTotal);
+        }
+      }
+
+      /**
+       * Create a new upload using the creation extension by sending a POST
+       * request to the endpoint. After successful creation the file will be
+       * uploaded
+       *
+       * @api private
+       */
+    }, {
+      key: "_createUpload",
+      value: function _createUpload() {
+        var _this6 = this;
+        if (!this.options.endpoint) {
+          this._emitError(new Error('tus: unable to create upload because no endpoint is provided'));
+          return;
+        }
+        var req = this._openRequest('POST', this.options.endpoint);
+        if (this.options.uploadLengthDeferred) {
+          req.setHeader('Upload-Defer-Length', '1');
+        } else {
+          req.setHeader('Upload-Length', "".concat(this._size));
+        }
+
+        // Add metadata if values have been added
+        var metadata = encodeMetadata(this.options.metadata);
+        if (metadata !== '') {
+          req.setHeader('Upload-Metadata', metadata);
+        }
+        var promise;
+        if (this.options.uploadDataDuringCreation && !this.options.uploadLengthDeferred) {
           this._offset = 0;
-          res = await this._addChunkToRequest(req);
+          promise = this._addChunkToRequest(req);
         } else {
           if (this.options.protocol === PROTOCOL_IETF_DRAFT_03 || this.options.protocol === PROTOCOL_IETF_DRAFT_05) {
             req.setHeader('Upload-Complete', '?0');
           }
-          res = await this._sendRequest(req);
+          promise = this._sendRequest(req, null);
         }
-      } catch (err) {
-        if (!(err instanceof Error)) {
-          throw new Error(`tus: value thrown that is not an error: ${err}`);
-        }
-        throw new DetailedError('tus: failed to create upload', err, req, undefined);
+        promise.then(function (res) {
+          if (!inStatusCategory(res.getStatus(), 200)) {
+            _this6._emitHttpError(req, res, 'tus: unexpected response while creating upload');
+            return;
+          }
+          var location = res.getHeader('Location');
+          if (location == null) {
+            _this6._emitHttpError(req, res, 'tus: invalid or missing Location header');
+            return;
+          }
+          _this6.url = resolveUrl(_this6.options.endpoint, location);
+          log("Created upload at ".concat(_this6.url));
+          if (typeof _this6.options.onUploadUrlAvailable === 'function') {
+            _this6.options.onUploadUrlAvailable();
+          }
+          if (_this6._size === 0) {
+            // Nothing to upload and file was successfully created
+            _this6._emitSuccess(res);
+            _this6._source.close();
+            return;
+          }
+          _this6._saveUploadInUrlStorage().then(function () {
+            if (_this6.options.uploadDataDuringCreation) {
+              _this6._handleUploadResponse(req, res);
+            } else {
+              _this6._offset = 0;
+              _this6._performUpload();
+            }
+          });
+        })["catch"](function (err) {
+          _this6._emitHttpError(req, null, 'tus: failed to create upload', err);
+        });
       }
-      if (!inStatusCategory(res.getStatus(), 200)) {
-        throw new DetailedError('tus: unexpected response while creating upload', undefined, req, res);
+
+      /*
+       * Try to resume an existing upload. First a HEAD request will be sent
+       * to retrieve the offset. If the request fails a new upload will be
+       * created. In the case of a successful response the file will be uploaded.
+       *
+       * @api private
+       */
+    }, {
+      key: "_resumeUpload",
+      value: function _resumeUpload() {
+        var _this7 = this;
+        var req = this._openRequest('HEAD', this.url);
+        var promise = this._sendRequest(req, null);
+        promise.then(function (res) {
+          var status = res.getStatus();
+          if (!inStatusCategory(status, 200)) {
+            // If the upload is locked (indicated by the 423 Locked status code), we
+            // emit an error instead of directly starting a new upload. This way the
+            // retry logic can catch the error and will retry the upload. An upload
+            // is usually locked for a short period of time and will be available
+            // afterwards.
+            if (status === 423) {
+              _this7._emitHttpError(req, res, 'tus: upload is currently locked; retry later');
+              return;
+            }
+            if (inStatusCategory(status, 400)) {
+              // Remove stored fingerprint and corresponding endpoint,
+              // on client errors since the file can not be found
+              _this7._removeFromUrlStorage();
+            }
+            if (!_this7.options.endpoint) {
+              // Don't attempt to create a new upload if no endpoint is provided.
+              _this7._emitHttpError(req, res, 'tus: unable to resume upload (new upload cannot be created without an endpoint)');
+              return;
+            }
+
+            // Try to create a new upload
+            _this7.url = null;
+            _this7._createUpload();
+            return;
+          }
+          var offset = Number.parseInt(res.getHeader('Upload-Offset'), 10);
+          if (Number.isNaN(offset)) {
+            _this7._emitHttpError(req, res, 'tus: invalid or missing offset value');
+            return;
+          }
+          var length = Number.parseInt(res.getHeader('Upload-Length'), 10);
+          if (Number.isNaN(length) && !_this7.options.uploadLengthDeferred && _this7.options.protocol === PROTOCOL_TUS_V1) {
+            _this7._emitHttpError(req, res, 'tus: invalid or missing length value');
+            return;
+          }
+          if (typeof _this7.options.onUploadUrlAvailable === 'function') {
+            _this7.options.onUploadUrlAvailable();
+          }
+          _this7._saveUploadInUrlStorage().then(function () {
+            // Upload has already been completed and we do not need to send additional
+            // data to the server
+            if (offset === length) {
+              _this7._emitProgress(length, length);
+              _this7._emitSuccess(res);
+              return;
+            }
+            _this7._offset = offset;
+            _this7._performUpload();
+          });
+        })["catch"](function (err) {
+          _this7._emitHttpError(req, null, 'tus: failed to resume upload', err);
+        });
       }
-      const location = res.getHeader('Location');
-      if (location == null) {
-        throw new DetailedError('tus: invalid or missing Location header', undefined, req, res);
-      }
-      if (this.options.endpoint == null) {
-        throw new Error('tus: Expected options.endpoint to be set');
-      }
-      this.url = resolveUrl(this.options.endpoint, location);
-      log(`Created upload at ${this.url}`);
-      if (typeof this.options.onUploadUrlAvailable === 'function') {
-        await this.options.onUploadUrlAvailable();
-      }
-      if (this._size === 0) {
-        // Nothing to upload and file was successfully created
-        await this._emitSuccess(res);
-        if (this._source) this._source.close();
-        return;
-      }
-      await this._saveUploadInUrlStorage();
-      if (this.options.uploadDataDuringCreation) {
-        await this._handleUploadResponse(req, res);
-      } else {
-        this._offset = 0;
-        await this._performUpload();
-      }
-    }
-    /**
-     * Try to resume an existing upload. First a HEAD request will be sent
-     * to retrieve the offset. If the request fails a new upload will be
-     * created. In the case of a successful response the file will be uploaded.
-     *
-     * @api private
-     */
-    async _resumeUpload() {
-      if (this.url == null) {
-        throw new Error('tus: Expected url to be set');
-      }
-      const req = this._openRequest('HEAD', this.url);
-      let res;
-      try {
-        res = await this._sendRequest(req);
-      } catch (err) {
-        if (!(err instanceof Error)) {
-          throw new Error(`tus: value thrown that is not an error: ${err}`);
-        }
-        throw new DetailedError('tus: failed to resume upload', err, req, undefined);
-      }
-      const status = res.getStatus();
-      if (!inStatusCategory(status, 200)) {
-        // If the upload is locked (indicated by the 423 Locked status code), we
-        // emit an error instead of directly starting a new upload. This way the
-        // retry logic can catch the error and will retry the upload. An upload
-        // is usually locked for a short period of time and will be available
-        // afterwards.
-        if (status === 423) {
-          throw new DetailedError('tus: upload is currently locked; retry later', undefined, req, res);
-        }
-        if (inStatusCategory(status, 400)) {
-          // Remove stored fingerprint and corresponding endpoint,
-          // on client errors since the file can not be found
-          await this._removeFromUrlStorage();
-        }
-        if (!this.options.endpoint) {
-          // Don't attempt to create a new upload if no endpoint is provided.
-          throw new DetailedError('tus: unable to resume upload (new upload cannot be created without an endpoint)', undefined, req, res);
-        }
-        // Try to create a new upload
-        this.url = null;
-        await this._createUpload();
-      }
-      const offsetStr = res.getHeader('Upload-Offset');
-      if (offsetStr === undefined) {
-        throw new DetailedError('tus: missing Upload-Offset header', undefined, req, res);
-      }
-      const offset = Number.parseInt(offsetStr, 10);
-      if (Number.isNaN(offset)) {
-        throw new DetailedError('tus: invalid Upload-Offset header', undefined, req, res);
-      }
-      const deferLength = res.getHeader('Upload-Defer-Length');
-      this._uploadLengthDeferred = deferLength === '1';
-      // @ts-expect-error parseInt also handles undefined as we want it to
-      const length = Number.parseInt(res.getHeader('Upload-Length'), 10);
-      if (Number.isNaN(length) && !this._uploadLengthDeferred && this.options.protocol === PROTOCOL_TUS_V1) {
-        throw new DetailedError('tus: invalid or missing length value', undefined, req, res);
-      }
-      if (typeof this.options.onUploadUrlAvailable === 'function') {
-        await this.options.onUploadUrlAvailable();
-      }
-      await this._saveUploadInUrlStorage();
-      // Upload has already been completed and we do not need to send additional
-      // data to the server
-      if (offset === length) {
-        this._emitProgress(length, length);
-        await this._emitSuccess(res);
-        return;
-      }
-      this._offset = offset;
-      await this._performUpload();
-    }
-    /**
-     * Start uploading the file using PATCH requests. The file will be divided
-     * into chunks as specified in the chunkSize option. During the upload
-     * the onProgress event handler may be invoked multiple times.
-     *
-     * @api private
-     */
-    async _performUpload() {
-      // If the upload has been aborted, we will not send the next PATCH request.
-      // This is important if the abort method was called during a callback, such
-      // as onChunkComplete or onProgress.
-      if (this._aborted) {
-        return;
-      }
-      let req;
-      if (this.url == null) {
-        throw new Error('tus: Expected url to be set');
-      }
-      // Some browser and servers may not support the PATCH method. For those
-      // cases, you can tell tus-js-client to use a POST request with the
-      // X-HTTP-Method-Override header for simulating a PATCH request.
-      if (this.options.overridePatchMethod) {
-        req = this._openRequest('POST', this.url);
-        req.setHeader('X-HTTP-Method-Override', 'PATCH');
-      } else {
-        req = this._openRequest('PATCH', this.url);
-      }
-      req.setHeader('Upload-Offset', `${this._offset}`);
-      let res;
-      try {
-        res = await this._addChunkToRequest(req);
-      } catch (err) {
-        // Don't emit an error if the upload was aborted manually
+
+      /**
+       * Start uploading the file using PATCH requests. The file will be divided
+       * into chunks as specified in the chunkSize option. During the upload
+       * the onProgress event handler may be invoked multiple times.
+       *
+       * @api private
+       */
+    }, {
+      key: "_performUpload",
+      value: function _performUpload() {
+        var _this8 = this;
+        // If the upload has been aborted, we will not send the next PATCH request.
+        // This is important if the abort method was called during a callback, such
+        // as onChunkComplete or onProgress.
         if (this._aborted) {
           return;
         }
-        if (!(err instanceof Error)) {
-          throw new Error(`tus: value thrown that is not an error: ${err}`);
+        var req;
+
+        // Some browser and servers may not support the PATCH method. For those
+        // cases, you can tell tus-js-client to use a POST request with the
+        // X-HTTP-Method-Override header for simulating a PATCH request.
+        if (this.options.overridePatchMethod) {
+          req = this._openRequest('POST', this.url);
+          req.setHeader('X-HTTP-Method-Override', 'PATCH');
+        } else {
+          req = this._openRequest('PATCH', this.url);
         }
-        throw new DetailedError(`tus: failed to upload chunk at offset ${this._offset}`, err, req, undefined);
+        req.setHeader('Upload-Offset', "".concat(this._offset));
+        var promise = this._addChunkToRequest(req);
+        promise.then(function (res) {
+          if (!inStatusCategory(res.getStatus(), 200)) {
+            _this8._emitHttpError(req, res, 'tus: unexpected response while uploading chunk');
+            return;
+          }
+          _this8._handleUploadResponse(req, res);
+        })["catch"](function (err) {
+          // Don't emit an error if the upload was aborted manually
+          if (_this8._aborted) {
+            return;
+          }
+          _this8._emitHttpError(req, null, "tus: failed to upload chunk at offset ".concat(_this8._offset), err);
+        });
       }
-      if (!inStatusCategory(res.getStatus(), 200)) {
-        throw new DetailedError('tus: unexpected response while uploading chunk', undefined, req, res);
+
+      /**
+       * _addChunktoRequest reads a chunk from the source and sends it using the
+       * supplied request object. It will not handle the response.
+       *
+       * @api private
+       */
+    }, {
+      key: "_addChunkToRequest",
+      value: function _addChunkToRequest(req) {
+        var _this9 = this;
+        var start = this._offset;
+        var end = this._offset + this.options.chunkSize;
+        req.setProgressHandler(function (bytesSent) {
+          _this9._emitProgress(start + bytesSent, _this9._size);
+        });
+        if (this.options.protocol === PROTOCOL_TUS_V1) {
+          req.setHeader('Content-Type', 'application/offset+octet-stream');
+        } else if (this.options.protocol === PROTOCOL_IETF_DRAFT_05) {
+          req.setHeader('Content-Type', 'application/partial-upload');
+        }
+
+        // The specified chunkSize may be Infinity or the calcluated end position
+        // may exceed the file's size. In both cases, we limit the end position to
+        // the input's total size for simpler calculations and correctness.
+        if ((end === Number.POSITIVE_INFINITY || end > this._size) && !this.options.uploadLengthDeferred) {
+          end = this._size;
+        }
+        return this._source.slice(start, end).then(function (_ref2) {
+          var value = _ref2.value,
+            done = _ref2.done;
+          var valueSize = value !== null && value !== void 0 && value.size ? value.size : 0;
+
+          // If the upload length is deferred, the upload size was not specified during
+          // upload creation. So, if the file reader is done reading, we know the total
+          // upload size and can tell the tus server.
+          if (_this9.options.uploadLengthDeferred && done) {
+            _this9._size = _this9._offset + valueSize;
+            req.setHeader('Upload-Length', "".concat(_this9._size));
+          }
+
+          // The specified uploadSize might not match the actual amount of data that a source
+          // provides. In these cases, we cannot successfully complete the upload, so we
+          // rather error out and let the user know. If not, tus-js-client will be stuck
+          // in a loop of repeating empty PATCH requests.
+          // See https://community.transloadit.com/t/how-to-abort-hanging-companion-uploads/16488/13
+          var newSize = _this9._offset + valueSize;
+          if (!_this9.options.uploadLengthDeferred && done && newSize !== _this9._size) {
+            return Promise.reject(new Error("upload was configured with a size of ".concat(_this9._size, " bytes, but the source is done after ").concat(newSize, " bytes")));
+          }
+          if (value === null) {
+            return _this9._sendRequest(req);
+          }
+          if (_this9.options.protocol === PROTOCOL_IETF_DRAFT_03 || _this9.options.protocol === PROTOCOL_IETF_DRAFT_05) {
+            req.setHeader('Upload-Complete', done ? '?1' : '?0');
+          }
+          _this9._emitProgress(_this9._offset, _this9._size);
+          return _this9._sendRequest(req, value);
+        });
       }
-      await this._handleUploadResponse(req, res);
-    }
-    /**
-     * _addChunktoRequest reads a chunk from the source and sends it using the
-     * supplied request object. It will not handle the response.
-     *
-     * @api private
-     */
-    async _addChunkToRequest(req) {
-      const start = this._offset;
-      let end = this._offset + this.options.chunkSize;
-      req.setProgressHandler(bytesSent => {
-        this._emitProgress(start + bytesSent, this._size);
-      });
-      if (this.options.protocol === PROTOCOL_TUS_V1) {
-        req.setHeader('Content-Type', 'application/offset+octet-stream');
-      } else if (this.options.protocol === PROTOCOL_IETF_DRAFT_05) {
-        req.setHeader('Content-Type', 'application/partial-upload');
+
+      /**
+       * _handleUploadResponse is used by requests that haven been sent using _addChunkToRequest
+       * and already have received a response.
+       *
+       * @api private
+       */
+    }, {
+      key: "_handleUploadResponse",
+      value: function _handleUploadResponse(req, res) {
+        var offset = Number.parseInt(res.getHeader('Upload-Offset'), 10);
+        if (Number.isNaN(offset)) {
+          this._emitHttpError(req, res, 'tus: invalid or missing offset value');
+          return;
+        }
+        this._emitProgress(offset, this._size);
+        this._emitChunkComplete(offset - this._offset, offset, this._size);
+        this._offset = offset;
+        if (offset === this._size) {
+          // Yay, finally done :)
+          this._emitSuccess(res);
+          this._source.close();
+          return;
+        }
+        this._performUpload();
       }
-      // The specified chunkSize may be Infinity or the calcluated end position
-      // may exceed the file's size. In both cases, we limit the end position to
-      // the input's total size for simpler calculations and correctness.
-      if (
-      // @ts-expect-error _size is set here
-      (end === Number.POSITIVE_INFINITY || end > this._size) && !this._uploadLengthDeferred) {
-        // @ts-expect-error _size is set here
-        end = this._size;
+
+      /**
+       * Create a new HTTP request object with the given method and URL.
+       *
+       * @api private
+       */
+    }, {
+      key: "_openRequest",
+      value: function _openRequest(method, url) {
+        var req = openRequest(method, url, this.options);
+        this._req = req;
+        return req;
       }
-      // TODO: What happens if abort is called during slice?
-      // @ts-expect-error _source is set here
-      const {
-        value,
-        size,
-        done
-      } = await this._source.slice(start, end);
-      const sizeOfValue = size !== null && size !== void 0 ? size : 0;
-      // If the upload length is deferred, the upload size was not specified during
-      // upload creation. So, if the file reader is done reading, we know the total
-      // upload size and can tell the tus server.
-      if (this._uploadLengthDeferred && done) {
-        this._size = this._offset + sizeOfValue;
-        req.setHeader('Upload-Length', `${this._size}`);
-        this._uploadLengthDeferred = false;
+
+      /**
+       * Remove the entry in the URL storage, if it has been saved before.
+       *
+       * @api private
+       */
+    }, {
+      key: "_removeFromUrlStorage",
+      value: function _removeFromUrlStorage() {
+        var _this10 = this;
+        if (!this._urlStorageKey) return;
+        this._urlStorage.removeUpload(this._urlStorageKey)["catch"](function (err) {
+          _this10._emitError(err);
+        });
+        this._urlStorageKey = null;
       }
-      // The specified uploadSize might not match the actual amount of data that a source
-      // provides. In these cases, we cannot successfully complete the upload, so we
-      // rather error out and let the user know. If not, tus-js-client will be stuck
-      // in a loop of repeating empty PATCH requests.
-      // See https://community.transloadit.com/t/how-to-abort-hanging-companion-uploads/16488/13
-      const newSize = this._offset + sizeOfValue;
-      if (!this._uploadLengthDeferred && done && newSize !== this._size) {
-        throw new Error(`upload was configured with a size of ${this._size} bytes, but the source is done after ${newSize} bytes`);
+
+      /**
+       * Add the upload URL to the URL storage, if possible.
+       *
+       * @api private
+       */
+    }, {
+      key: "_saveUploadInUrlStorage",
+      value: function _saveUploadInUrlStorage() {
+        var _this11 = this;
+        // We do not store the upload URL
+        // - if it was disabled in the option, or
+        // - if no fingerprint was calculated for the input (i.e. a stream), or
+        // - if the URL is already stored (i.e. key is set alread).
+        if (!this.options.storeFingerprintForResuming || !this._fingerprint || this._urlStorageKey !== null) {
+          return Promise.resolve();
+        }
+        var storedUpload = {
+          size: this._size,
+          metadata: this.options.metadata,
+          creationTime: new Date().toString()
+        };
+        if (this._parallelUploads) {
+          // Save multiple URLs if the parallelUploads option is used ...
+          storedUpload.parallelUploadUrls = this._parallelUploadUrls;
+        } else {
+          // ... otherwise we just save the one available URL.
+          storedUpload.uploadUrl = this.url;
+        }
+        return this._urlStorage.addUpload(this._fingerprint, storedUpload).then(function (urlStorageKey) {
+          _this11._urlStorageKey = urlStorageKey;
+        });
       }
-      if (value == null) {
-        return await this._sendRequest(req);
+
+      /**
+       * Send a request with the provided body.
+       *
+       * @api private
+       */
+    }, {
+      key: "_sendRequest",
+      value: function _sendRequest(req) {
+        var body = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+        return sendRequest(req, body, this.options);
       }
-      if (this.options.protocol === PROTOCOL_IETF_DRAFT_03 || this.options.protocol === PROTOCOL_IETF_DRAFT_05) {
-        req.setHeader('Upload-Complete', done ? '?1' : '?0');
+    }], [{
+      key: "terminate",
+      value: function terminate(url) {
+        var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+        var req = openRequest('DELETE', url, options);
+        return sendRequest(req, null, options).then(function (res) {
+          // A 204 response indicates a successfull request
+          if (res.getStatus() === 204) {
+            return;
+          }
+          throw new DetailedError('tus: unexpected response while terminating upload', null, req, res);
+        })["catch"](function (err) {
+          if (!(err instanceof DetailedError)) {
+            err = new DetailedError('tus: failed to terminate upload', err, req, null);
+          }
+          if (!shouldRetry(err, 0, options)) {
+            throw err;
+          }
+
+          // Instead of keeping track of the retry attempts, we remove the first element from the delays
+          // array. If the array is empty, all retry attempts are used up and we will bubble up the error.
+          // We recursively call the terminate function will removing elements from the retryDelays array.
+          var delay = options.retryDelays[0];
+          var remainingDelays = options.retryDelays.slice(1);
+          var newOptions = _objectSpread$1(_objectSpread$1({}, options), {}, {
+            retryDelays: remainingDelays
+          });
+          return new Promise(function (resolve) {
+            return setTimeout(resolve, delay);
+          }).then(function () {
+            return BaseUpload.terminate(url, newOptions);
+          });
+        });
       }
-      this._emitProgress(this._offset, this._size);
-      return await this._sendRequest(req, value);
-    }
-    /**
-     * _handleUploadResponse is used by requests that haven been sent using _addChunkToRequest
-     * and already have received a response.
-     *
-     * @api private
-     */
-    async _handleUploadResponse(req, res) {
-      // TODO: || '' is not very good.
-      const offset = Number.parseInt(res.getHeader('Upload-Offset') || '', 10);
-      if (Number.isNaN(offset)) {
-        throw new DetailedError('tus: invalid or missing offset value', undefined, req, res);
-      }
-      this._emitProgress(offset, this._size);
-      this._emitChunkComplete(offset - this._offset, offset, this._size);
-      this._offset = offset;
-      if (offset === this._size) {
-        // Yay, finally done :)
-        await this._emitSuccess(res);
-        if (this._source) this._source.close();
-        return;
-      }
-      await this._performUpload();
-    }
-    /**
-     * Create a new HTTP request object with the given method and URL.
-     *
-     * @api private
-     */
-    _openRequest(method, url) {
-      const req = openRequest(method, url, this.options);
-      this._req = req;
-      return req;
-    }
-    /**
-     * Remove the entry in the URL storage, if it has been saved before.
-     *
-     * @api private
-     */
-    async _removeFromUrlStorage() {
-      if (!this._urlStorageKey) return;
-      await this.options.urlStorage.removeUpload(this._urlStorageKey);
-      this._urlStorageKey = undefined;
-    }
-    /**
-     * Add the upload URL to the URL storage, if possible.
-     *
-     * @api private
-     */
-    async _saveUploadInUrlStorage() {
-      // We do not store the upload URL
-      // - if it was disabled in the option, or
-      // - if no fingerprint was calculated for the input (i.e. a stream), or
-      // - if the URL is already stored (i.e. key is set alread).
-      if (!this.options.storeFingerprintForResuming || !this._fingerprint || this._urlStorageKey != null) {
-        return;
-      }
-      const storedUpload = {
-        size: this._size,
-        metadata: this.options.metadata,
-        creationTime: new Date().toString(),
-        urlStorageKey: this._fingerprint
-      };
-      if (this._parallelUploads) {
-        // Save multiple URLs if the parallelUploads option is used ...
-        storedUpload.parallelUploadUrls = this._parallelUploadUrls;
-      } else {
-        // ... otherwise we just save the one available URL.
-        // @ts-expect-error We still have to figure out the null/undefined situation.
-        storedUpload.uploadUrl = this.url;
-      }
-      const urlStorageKey = await this.options.urlStorage.addUpload(this._fingerprint, storedUpload);
-      // TODO: Emit a waring if urlStorageKey is undefined. Should we even allow this?
-      this._urlStorageKey = urlStorageKey;
-    }
-    /**
-     * Send a request with the provided body.
-     *
-     * @api private
-     */
-    _sendRequest(req, body) {
-      return sendRequest(req, body, this.options);
-    }
-  }
+    }]);
+  }();
   function encodeMetadata(metadata) {
-    return Object.entries(metadata).map(([key, value]) => `${key} ${gBase64.encode(String(value))}`).join(',');
+    return Object.entries(metadata).map(function (_ref3) {
+      var _ref4 = _slicedToArray(_ref3, 2),
+        key = _ref4[0],
+        value = _ref4[1];
+      return "".concat(key, " ").concat(gBase64.encode(String(value)));
+    }).join(',');
   }
+
   /**
    * Checks whether a given status is in the range of the expected category.
    * For example, only a status between 200 and 299 will satisfy the category 200.
@@ -2781,6 +3722,7 @@
   function inStatusCategory(status, category) {
     return status >= category && status < category + 100;
   }
+
   /**
    * Create a new HTTP request with the specified method and URL.
    * The necessary headers that are included in every request
@@ -2789,7 +3731,7 @@
    * @api private
    */
   function openRequest(method, url, options) {
-    const req = options.httpStack.createRequest(method, url);
+    var req = options.httpStack.createRequest(method, url);
     if (options.protocol === PROTOCOL_IETF_DRAFT_03) {
       req.setHeader('Upload-Draft-Interop-Version', '5');
     } else if (options.protocol === PROTOCOL_IETF_DRAFT_05) {
@@ -2797,49 +3739,78 @@
     } else {
       req.setHeader('Tus-Resumable', '1.0.0');
     }
-    const headers = options.headers || {};
-    for (const [name, value] of Object.entries(headers)) {
+    var headers = options.headers || {};
+    for (var _i2 = 0, _Object$entries = Object.entries(headers); _i2 < _Object$entries.length; _i2++) {
+      var _Object$entries$_i = _slicedToArray(_Object$entries[_i2], 2),
+        name = _Object$entries$_i[0],
+        value = _Object$entries$_i[1];
       req.setHeader(name, value);
     }
     if (options.addRequestId) {
-      const requestId = uuid();
+      var requestId = uuid();
       req.setHeader('X-Request-ID', requestId);
     }
     return req;
   }
+
   /**
    * Send a request with the provided body while invoking the onBeforeRequest
    * and onAfterResponse callbacks.
    *
    * @api private
    */
-  async function sendRequest(req, body, options) {
-    if (typeof options.onBeforeRequest === 'function') {
-      await options.onBeforeRequest(req);
-    }
-    const res = await req.send(body);
-    if (typeof options.onAfterResponse === 'function') {
-      await options.onAfterResponse(req, res);
-    }
-    return res;
+  function sendRequest(_x, _x2, _x3) {
+    return _sendRequest2.apply(this, arguments);
   }
   /**
    * Checks whether the browser running this code has internet access.
    * This function will always return true in the node.js environment
-   * TODO: Move this into a browser-specific location.
    *
    * @api private
    */
+  function _sendRequest2() {
+    _sendRequest2 = _asyncToGenerator$1(/*#__PURE__*/_regeneratorRuntime$1().mark(function _callee(req, body, options) {
+      var res;
+      return _regeneratorRuntime$1().wrap(function _callee$(_context) {
+        while (1) switch (_context.prev = _context.next) {
+          case 0:
+            if (!(typeof options.onBeforeRequest === 'function')) {
+              _context.next = 3;
+              break;
+            }
+            _context.next = 3;
+            return options.onBeforeRequest(req);
+          case 3:
+            _context.next = 5;
+            return req.send(body);
+          case 5:
+            res = _context.sent;
+            if (!(typeof options.onAfterResponse === 'function')) {
+              _context.next = 9;
+              break;
+            }
+            _context.next = 9;
+            return options.onAfterResponse(req, res);
+          case 9:
+            return _context.abrupt("return", res);
+          case 10:
+          case "end":
+            return _context.stop();
+        }
+      }, _callee);
+    }));
+    return _sendRequest2.apply(this, arguments);
+  }
   function isOnline() {
-    let online = true;
+    var online = true;
     // Note: We don't reference `window` here because the navigator object also exists
     // in a Web Worker's context.
-    // -disable-next-line no-undef
     if (typeof navigator !== 'undefined' && navigator.onLine === false) {
       online = false;
     }
     return online;
   }
+
   /**
    * Checks whether or not it is ok to retry a request.
    * @param {Error|DetailedError} err the error returned from the last request
@@ -2856,8 +3827,7 @@
     // - the error is server error (i.e. not a status 4xx except a 409 or 423) or
     // a onShouldRetry is specified and returns true
     // - the browser does not indicate that we are offline
-    const isNetworkError = 'originalRequest' in err && err._originalRequest != null;
-    if (options.retryDelays == null || retryAttempt >= options.retryDelays.length || !isNetworkError) {
+    if (options.retryDelays == null || retryAttempt >= options.retryDelays.length || err.originalRequest == null) {
       return false;
     }
     if (options && typeof options.onShouldRetry === 'function') {
@@ -2865,15 +3835,17 @@
     }
     return defaultOnShouldRetry(err);
   }
+
   /**
    * determines if the request should be retried. Will only retry if not a status 4xx except a 409 or 423
    * @param {DetailedError} err
    * @returns {boolean}
    */
   function defaultOnShouldRetry(err) {
-    const status = err._originalResponse ? err._originalResponse.getStatus() : 0;
+    var status = err.originalResponse ? err.originalResponse.getStatus() : 0;
     return (!inStatusCategory(status, 400) || status === 409 || status === 423) && isOnline();
   }
+
   /**
    * Resolve a relative link given the origin as source. For example,
    * if a HTTP request to http://example.com/files/ returns a Location
@@ -2883,19 +3855,20 @@
   function resolveUrl(origin, link) {
     return new URL(link, origin).toString();
   }
+
   /**
    * Calculate the start and end positions for the parts if an upload
    * is split into multiple parallel requests.
    *
    * @param {number} totalSize The byte size of the upload, which will be split.
    * @param {number} partCount The number in how many parts the upload will be split.
-   * @return {Part[]}
+   * @return {object[]}
    * @api private
    */
   function splitSizeIntoParts(totalSize, partCount) {
-    const partSize = Math.floor(totalSize / partCount);
-    const parts = [];
-    for (let i = 0; i < partCount; i++) {
+    var partSize = Math.floor(totalSize / partCount);
+    var parts = [];
+    for (var i = 0; i < partCount; i++) {
       parts.push({
         start: partSize * i,
         end: partSize * (i + 1)
@@ -2904,305 +3877,11 @@
     parts[partCount - 1].end = totalSize;
     return parts;
   }
-  function wait(delay) {
-    return new Promise(resolve => {
-      setTimeout(resolve, delay);
-    });
-  }
-  /**
-   * Use the Termination extension to delete an upload from the server by sending a DELETE
-   * request to the specified upload URL. This is only possible if the server supports the
-   * Termination extension. If the `options.retryDelays` property is set, the method will
-   * also retry if an error ocurrs.
-   *
-   * @param {String} url The upload's URL which will be terminated.
-   * @param {object} options Optional options for influencing HTTP requests.
-   * @return {Promise} The Promise will be resolved/rejected when the requests finish.
-   */
-  async function terminate(url, options) {
-    const req = openRequest('DELETE', url, options);
-    try {
-      const res = await sendRequest(req, undefined, options);
-      // A 204 response indicates a successfull request
-      if (res.getStatus() === 204) {
-        return;
-      }
-      throw new DetailedError('tus: unexpected response while terminating upload', undefined, req, res);
-    } catch (err) {
-      if (!(err instanceof Error)) {
-        throw new Error(`tus: value thrown that is not an error: ${err}`);
-      }
-      const detailedErr = err instanceof DetailedError ? err : new DetailedError('tus: failed to terminate upload', err, req);
-      if (!shouldRetry(detailedErr, 0, options)) {
-        throw detailedErr;
-      }
-      // Instead of keeping track of the retry attempts, we remove the first element from the delays
-      // array. If the array is empty, all retry attempts are used up and we will bubble up the error.
-      // We recursively call the terminate function will removing elements from the retryDelays array.
-      const delay = options.retryDelays[0];
-      const remainingDelays = options.retryDelays.slice(1);
-      const newOptions = {
-        ...options,
-        retryDelays: remainingDelays
-      };
-      await wait(delay);
-      await terminate(url, newOptions);
-    }
-  }
+  BaseUpload.defaultOptions = defaultOptions$1;
 
-  /**
-   * ArrayBufferViewFileSource implements FileSource for ArrayBufferView instances
-   * (e.g. TypedArry or DataView).
-   *
-   * Note that the underlying ArrayBuffer should not change once passed to tus-js-client
-   * or it will lead to weird behavior.
-   */
-  class ArrayBufferViewFileSource {
-    constructor(view) {
-      this._view = view;
-      this.size = view.byteLength;
-    }
-    _slice(start, end) {
-      const buffer = this._view.buffer;
-      const startInBuffer = this._view.byteOffset + start;
-      end = Math.min(end, this.size); // ensure end is finite and not greater than size
-      const byteLength = end - start;
-      // Use DataView instead of ArrayBuffer.slice to avoid copying the buffer.
-      const value = new DataView(buffer, startInBuffer, byteLength);
-      const size = value.byteLength;
-      const done = end >= this.size;
-      return Promise.resolve({
-        value,
-        size,
-        done
-      });
-    }
-    _close() {
-      // Nothing to do here since we don't need to release any resources.
-    }
-  }
-
-  const isCordova = () => typeof window !== 'undefined' && ('PhoneGap' in window || 'Cordova' in window || 'cordova' in window);
-
-  /**
-   * readAsByteArray converts a File/Blob object to a Uint8Array.
-   * This function is only used on the Apache Cordova platform.
-   * See https://cordova.apache.org/docs/en/latest/reference/cordova-plugin-file/index.html#read-a-file
-   */
-  // TODO: Reconsider whether this is a sensible approach or whether we cause
-  // high memory usage with `chunkSize` is unset.
-  function readAsByteArray(chunk) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        if (!(reader.result instanceof ArrayBuffer)) {
-          reject(new Error(`invalid result types for readAsArrayBuffer: ${typeof reader.result}`));
-          return;
-        }
-        const value = new Uint8Array(reader.result);
-        resolve(value);
-      };
-      reader.onerror = err => {
-        reject(err);
-      };
-      reader.readAsArrayBuffer(chunk);
-    });
-  }
-
-  /**
-   * BlobFileSource implements FileSource for Blobs (and therefore also for File instances).
-   */
-  class BlobFileSource {
-    constructor(file) {
-      this._file = file;
-      this.size = file.size;
-    }
-    async _slice(start, end) {
-      // TODO: This looks fishy. We should test how this actually works in Cordova
-      // and consider moving this into the lib/cordova/ directory.
-      // In Apache Cordova applications, a File must be resolved using
-      // FileReader instances, see
-      // https://cordova.apache.org/docs/en/8.x/reference/cordova-plugin-file/index.html#read-a-file
-      if (isCordova()) {
-        const value = await readAsByteArray(this._file.slice(start, end));
-        const size = value.length;
-        const done = end >= this.size;
-        return {
-          value,
-          size,
-          done
-        };
-      }
-      const value = this._file.slice(start, end);
-      const size = value.size;
-      const done = end >= this.size;
-      return {
-        value,
-        size,
-        done
-      };
-    }
-    _close() {
-      // Nothing to do here since we don't need to release any resources.
-    }
-  }
-
-  function len(blobOrArray) {
-    if (blobOrArray === undefined) return 0;
-    if (blobOrArray instanceof Blob) return blobOrArray.size;
-    return blobOrArray.length;
-  }
-  /*
-    Typed arrays and blobs don't have a concat method.
-    This function helps StreamSource accumulate data to reach chunkSize.
-  */
-  function concat(a, b) {
-    if (a instanceof Blob && b instanceof Blob) {
-      return new Blob([a, b], {
-        type: a.type
-      });
-    }
-    if (a instanceof Uint8Array && b instanceof Uint8Array) {
-      const c = new Uint8Array(a.length + b.length);
-      c.set(a);
-      c.set(b, a.length);
-      return c;
-    }
-    throw new Error('Unknown data type');
-  }
-  /**
-   * WebStreamFileSource implements FileSource for Web Streams.
-   */
-  // TODO: Can we share code with NodeStreamFileSource?
-  class WebStreamFileSource {
-    constructor(stream) {
-      // _bufferOffset defines at which position the content of _buffer (if it is set)
-      // is located in the view of the entire stream. It does not mean at which offset
-      // the content in _buffer begins.
-      this._bufferOffset = 0;
-      this._done = false;
-      // Setting the size to null indicates that we have no calculation available
-      // for how much data this stream will emit requiring the user to specify
-      // it manually (see the `uploadSize` option).
-      this.size = null;
-      if (stream.locked) {
-        throw new Error('Readable stream is already locked to reader. tus-js-client cannot obtain a new reader.');
-      }
-      this._reader = stream.getReader();
-    }
-    async _slice(start, end) {
-      if (start < this._bufferOffset) {
-        throw new Error("Requested data is before the reader's current offset");
-      }
-      return await this._readUntilEnoughDataOrDone(start, end);
-    }
-    async _readUntilEnoughDataOrDone(start, end) {
-      const hasEnoughData = end <= this._bufferOffset + len(this._buffer);
-      if (this._done || hasEnoughData) {
-        const value = this._getDataFromBuffer(start, end);
-        if (value === null) {
-          return {
-            value: null,
-            size: null,
-            done: true
-          };
-        }
-        const size = value instanceof Blob ? value.size : value.length;
-        const done = this._done;
-        return {
-          value,
-          size,
-          done
-        };
-      }
-      const {
-        value,
-        done
-      } = await this._reader.read();
-      if (done) {
-        this._done = true;
-      } else {
-        const chunkSize = len(value);
-        // If all of the chunk occurs before 'start' then drop it and clear the buffer.
-        // This greatly improves performance when reading from a stream we haven't started processing yet and 'start' is near the end of the file.
-        // Rather than buffering all of the unused data in memory just to only read a chunk near the end, rather immidiately drop data which will never be read.
-        if (this._bufferOffset + len(this._buffer) + chunkSize < start) {
-          this._buffer = undefined;
-          this._bufferOffset += chunkSize;
-        } else if (this._buffer === undefined) {
-          this._buffer = value;
-        } else {
-          this._buffer = concat(this._buffer, value);
-        }
-      }
-      return await this._readUntilEnoughDataOrDone(start, end);
-    }
-    _getDataFromBuffer(start, end) {
-      if (this._buffer === undefined) {
-        throw new Error('cannot _getDataFromBuffer because _buffer is unset');
-      }
-      // Remove data from buffer before `start`.
-      // Data might be reread from the buffer if an upload fails, so we can only
-      // safely delete data when it comes *before* what is currently being read.
-      if (start > this._bufferOffset) {
-        this._buffer = this._buffer.slice(start - this._bufferOffset);
-        this._bufferOffset = start;
-      }
-      // If the buffer is empty after removing old data, all data has been read.
-      const hasAllDataBeenRead = len(this._buffer) === 0;
-      if (this._done && hasAllDataBeenRead) {
-        return null;
-      }
-      // We already removed data before `start`, so we just return the first
-      // chunk from the buffer.
-      return this._buffer.slice(0, end - start);
-    }
-    _close() {
-      this._reader.cancel();
-    }
-  }
-
-  /**
-   * openFile provides FileSources for input types that have to be handled in all environments,
-   * including Node.js and browsers.
-   */
-  function openFile(input, chunkSize) {
-    // File is a subtype of Blob, so we only check for Blob here.
-    // Note: We could turn Blobs into ArrayBuffers using `input.arrayBuffer()` and then
-    // pass it to the ArrayBufferFileSource. However, in browsers, a File instance can
-    // represent a file on disk. By keeping it a File instance and passing it to XHR/Fetch,
-    // we can avoid reading the entire file into memory.
-    if (input instanceof Blob) {
-      return new BlobFileSource(input);
-    }
-    // ArrayBufferViews can be TypedArray (e.g. Uint8Array) or DataView instances.
-    // Note that Node.js' Buffers are also Uint8Arrays.
-    if (ArrayBuffer.isView(input)) {
-      return new ArrayBufferViewFileSource(input);
-    }
-    // SharedArrayBuffer is not available in all browser context for security reasons.
-    // Hence we check if the constructor exists at all.
-    if (input instanceof ArrayBuffer || typeof SharedArrayBuffer !== 'undefined' && input instanceof SharedArrayBuffer) {
-      const view = new DataView(input);
-      return new ArrayBufferViewFileSource(view);
-    }
-    if (input instanceof ReadableStream) {
-      chunkSize = Number(chunkSize);
-      if (!Number.isFinite(chunkSize)) {
-        throw new Error('cannot create source for stream without a finite value for the `chunkSize` option');
-      }
-      return new WebStreamFileSource(input);
-    }
-    return null;
-  }
-  const supportedTypes = ['File', 'Blob', 'ArrayBuffer', 'SharedArrayBuffer', 'ArrayBufferView', 'ReadableStream (Web Streams)'];
-
-  function isReactNativePlatform() {
+  var isReactNative = function isReactNative() {
     return typeof navigator !== 'undefined' && typeof navigator.product === 'string' && navigator.product.toLowerCase() === 'reactnative';
-  }
-  function isReactNativeFile(input) {
-    return input != null && typeof input === 'object' && 'uri' in input && typeof input.uri === 'string';
-  }
+  };
 
   /**
    * uriToBlob resolves a URI to a Blob object. This is used for
@@ -3210,14 +3889,14 @@
    * URI) as a blob.
    */
   function uriToBlob(uri) {
-    return new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
+    return new Promise(function (resolve, reject) {
+      var xhr = new XMLHttpRequest();
       xhr.responseType = 'blob';
-      xhr.onload = () => {
-        const blob = xhr.response;
+      xhr.onload = function () {
+        var blob = xhr.response;
         resolve(blob);
       };
-      xhr.onerror = err => {
+      xhr.onerror = function (err) {
         reject(err);
       };
       xhr.open('GET', uri);
@@ -3225,287 +3904,1157 @@
     });
   }
 
-  class BrowserFileReader {
-    async _openFile(input, chunkSize) {
-      // In React Native, when user selects a file, instead of a File or Blob,
-      // you usually get a file object {} with a uri property that contains
-      // a local path to the file. We use XMLHttpRequest to fetch
-      // the file blob, before uploading with tus.
-      if (isReactNativeFile(input)) {
-        if (!isReactNativePlatform()) {
-          throw new Error('tus: file objects with `uri` property is only supported in React Native');
-        }
-        try {
-          const blob = await uriToBlob(input.uri);
-          return new BlobFileSource(blob);
-        } catch (err) {
-          throw new Error(`tus: cannot fetch \`file.uri\` as Blob, make sure the uri is correct and accessible. ${err}`);
-        }
-      }
-      const fileSource = openFile(input, chunkSize);
-      if (fileSource) return fileSource;
-      throw new Error(`in this environment the source object may only be an instance of: ${supportedTypes.join(', ')}`);
+  var isCordova = function isCordova() {
+    return typeof window !== 'undefined' && (typeof window.PhoneGap !== 'undefined' || typeof window.Cordova !== 'undefined' || typeof window.cordova !== 'undefined');
+  };
+
+  /**
+   * readAsByteArray converts a File object to a Uint8Array.
+   * This function is only used on the Apache Cordova platform.
+   * See https://cordova.apache.org/docs/en/latest/reference/cordova-plugin-file/index.html#read-a-file
+   */
+  function readAsByteArray(chunk) {
+    return new Promise(function (resolve, reject) {
+      var reader = new FileReader();
+      reader.onload = function () {
+        var value = new Uint8Array(reader.result);
+        resolve({
+          value: value
+        });
+      };
+      reader.onerror = function (err) {
+        reject(err);
+      };
+      reader.readAsArrayBuffer(chunk);
+    });
+  }
+
+  function _typeof$5(o) {
+    "@babel/helpers - typeof";
+
+    return _typeof$5 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+      return typeof o;
+    } : function (o) {
+      return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
+    }, _typeof$5(o);
+  }
+  function _classCallCheck$5(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
     }
   }
+  function _defineProperties$5(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, _toPropertyKey$5(descriptor.key), descriptor);
+    }
+  }
+  function _createClass$5(Constructor, protoProps, staticProps) {
+    if (protoProps) _defineProperties$5(Constructor.prototype, protoProps);
+    Object.defineProperty(Constructor, "prototype", {
+      writable: false
+    });
+    return Constructor;
+  }
+  function _toPropertyKey$5(t) {
+    var i = _toPrimitive$5(t, "string");
+    return "symbol" == _typeof$5(i) ? i : i + "";
+  }
+  function _toPrimitive$5(t, r) {
+    if ("object" != _typeof$5(t) || !t) return t;
+    var e = t[Symbol.toPrimitive];
+    if (void 0 !== e) {
+      var i = e.call(t, r);
+      if ("object" != _typeof$5(i)) return i;
+      throw new TypeError("@@toPrimitive must return a primitive value.");
+    }
+    return (String )(t);
+  }
+  var FileSource = /*#__PURE__*/function () {
+    // Make this.size a method
+    function FileSource(file) {
+      _classCallCheck$5(this, FileSource);
+      this._file = file;
+      this.size = file.size;
+    }
+    return _createClass$5(FileSource, [{
+      key: "slice",
+      value: function slice(start, end) {
+        // In Apache Cordova applications, a File must be resolved using
+        // FileReader instances, see
+        // https://cordova.apache.org/docs/en/8.x/reference/cordova-plugin-file/index.html#read-a-file
+        if (isCordova()) {
+          return readAsByteArray(this._file.slice(start, end));
+        }
+        var value = this._file.slice(start, end);
+        var done = end >= this.size;
+        return Promise.resolve({
+          value: value,
+          done: done
+        });
+      }
+    }, {
+      key: "close",
+      value: function close() {
+        // Nothing to do here since we don't need to release any resources.
+      }
+    }]);
+  }();
+
+  function _typeof$4(o) {
+    "@babel/helpers - typeof";
+
+    return _typeof$4 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+      return typeof o;
+    } : function (o) {
+      return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
+    }, _typeof$4(o);
+  }
+  function _classCallCheck$4(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties$4(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, _toPropertyKey$4(descriptor.key), descriptor);
+    }
+  }
+  function _createClass$4(Constructor, protoProps, staticProps) {
+    if (protoProps) _defineProperties$4(Constructor.prototype, protoProps);
+    Object.defineProperty(Constructor, "prototype", {
+      writable: false
+    });
+    return Constructor;
+  }
+  function _toPropertyKey$4(t) {
+    var i = _toPrimitive$4(t, "string");
+    return "symbol" == _typeof$4(i) ? i : i + "";
+  }
+  function _toPrimitive$4(t, r) {
+    if ("object" != _typeof$4(t) || !t) return t;
+    var e = t[Symbol.toPrimitive];
+    if (void 0 !== e) {
+      var i = e.call(t, r);
+      if ("object" != _typeof$4(i)) return i;
+      throw new TypeError("@@toPrimitive must return a primitive value.");
+    }
+    return (String )(t);
+  }
+  function len(blobOrArray) {
+    if (blobOrArray === undefined) return 0;
+    if (blobOrArray.size !== undefined) return blobOrArray.size;
+    return blobOrArray.length;
+  }
+
+  /*
+    Typed arrays and blobs don't have a concat method.
+    This function helps StreamSource accumulate data to reach chunkSize.
+  */
+  function concat(a, b) {
+    if (a.concat) {
+      // Is `a` an Array?
+      return a.concat(b);
+    }
+    if (a instanceof Blob) {
+      return new Blob([a, b], {
+        type: a.type
+      });
+    }
+    if (a.set) {
+      // Is `a` a typed array?
+      var c = new a.constructor(a.length + b.length);
+      c.set(a);
+      c.set(b, a.length);
+      return c;
+    }
+    throw new Error('Unknown data type');
+  }
+  var StreamSource = /*#__PURE__*/function () {
+    function StreamSource(reader) {
+      _classCallCheck$4(this, StreamSource);
+      this._buffer = undefined;
+      this._bufferOffset = 0;
+      this._reader = reader;
+      this._done = false;
+    }
+    return _createClass$4(StreamSource, [{
+      key: "slice",
+      value: function slice(start, end) {
+        if (start < this._bufferOffset) {
+          return Promise.reject(new Error("Requested data is before the reader's current offset"));
+        }
+        return this._readUntilEnoughDataOrDone(start, end);
+      }
+    }, {
+      key: "_readUntilEnoughDataOrDone",
+      value: function _readUntilEnoughDataOrDone(start, end) {
+        var _this = this;
+        var hasEnoughData = end <= this._bufferOffset + len(this._buffer);
+        if (this._done || hasEnoughData) {
+          var value = this._getDataFromBuffer(start, end);
+          var done = value == null ? this._done : false;
+          return Promise.resolve({
+            value: value,
+            done: done
+          });
+        }
+        return this._reader.read().then(function (_ref) {
+          var value = _ref.value,
+            done = _ref.done;
+          if (done) {
+            _this._done = true;
+          } else if (_this._buffer === undefined) {
+            _this._buffer = value;
+          } else {
+            _this._buffer = concat(_this._buffer, value);
+          }
+          return _this._readUntilEnoughDataOrDone(start, end);
+        });
+      }
+    }, {
+      key: "_getDataFromBuffer",
+      value: function _getDataFromBuffer(start, end) {
+        // Remove data from buffer before `start`.
+        // Data might be reread from the buffer if an upload fails, so we can only
+        // safely delete data when it comes *before* what is currently being read.
+        if (start > this._bufferOffset) {
+          this._buffer = this._buffer.slice(start - this._bufferOffset);
+          this._bufferOffset = start;
+        }
+        // If the buffer is empty after removing old data, all data has been read.
+        var hasAllDataBeenRead = len(this._buffer) === 0;
+        if (this._done && hasAllDataBeenRead) {
+          return null;
+        }
+        // We already removed data before `start`, so we just return the first
+        // chunk from the buffer.
+        return this._buffer.slice(0, end - start);
+      }
+    }, {
+      key: "close",
+      value: function close() {
+        if (this._reader.cancel) {
+          this._reader.cancel();
+        }
+      }
+    }]);
+  }();
+
+  function _typeof$3(o) {
+    "@babel/helpers - typeof";
+
+    return _typeof$3 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+      return typeof o;
+    } : function (o) {
+      return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
+    }, _typeof$3(o);
+  }
+  function _regeneratorRuntime() {
+
+    /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */
+    _regeneratorRuntime = function _regeneratorRuntime() {
+      return e;
+    };
+    var t,
+      e = {},
+      r = Object.prototype,
+      n = r.hasOwnProperty,
+      o = Object.defineProperty || function (t, e, r) {
+        t[e] = r.value;
+      },
+      i = "function" == typeof Symbol ? Symbol : {},
+      a = i.iterator || "@@iterator",
+      c = i.asyncIterator || "@@asyncIterator",
+      u = i.toStringTag || "@@toStringTag";
+    function define(t, e, r) {
+      return Object.defineProperty(t, e, {
+        value: r,
+        enumerable: true,
+        configurable: true,
+        writable: true
+      }), t[e];
+    }
+    try {
+      define({}, "");
+    } catch (t) {
+      define = function define(t, e, r) {
+        return t[e] = r;
+      };
+    }
+    function wrap(t, e, r, n) {
+      var i = e && e.prototype instanceof Generator ? e : Generator,
+        a = Object.create(i.prototype),
+        c = new Context(n || []);
+      return o(a, "_invoke", {
+        value: makeInvokeMethod(t, r, c)
+      }), a;
+    }
+    function tryCatch(t, e, r) {
+      try {
+        return {
+          type: "normal",
+          arg: t.call(e, r)
+        };
+      } catch (t) {
+        return {
+          type: "throw",
+          arg: t
+        };
+      }
+    }
+    e.wrap = wrap;
+    var h = "suspendedStart",
+      l = "suspendedYield",
+      f = "executing",
+      s = "completed",
+      y = {};
+    function Generator() {}
+    function GeneratorFunction() {}
+    function GeneratorFunctionPrototype() {}
+    var p = {};
+    define(p, a, function () {
+      return this;
+    });
+    var d = Object.getPrototypeOf,
+      v = d && d(d(values([])));
+    v && v !== r && n.call(v, a) && (p = v);
+    var g = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(p);
+    function defineIteratorMethods(t) {
+      ["next", "throw", "return"].forEach(function (e) {
+        define(t, e, function (t) {
+          return this._invoke(e, t);
+        });
+      });
+    }
+    function AsyncIterator(t, e) {
+      function invoke(r, o, i, a) {
+        var c = tryCatch(t[r], t, o);
+        if ("throw" !== c.type) {
+          var u = c.arg,
+            h = u.value;
+          return h && "object" == _typeof$3(h) && n.call(h, "__await") ? e.resolve(h.__await).then(function (t) {
+            invoke("next", t, i, a);
+          }, function (t) {
+            invoke("throw", t, i, a);
+          }) : e.resolve(h).then(function (t) {
+            u.value = t, i(u);
+          }, function (t) {
+            return invoke("throw", t, i, a);
+          });
+        }
+        a(c.arg);
+      }
+      var r;
+      o(this, "_invoke", {
+        value: function value(t, n) {
+          function callInvokeWithMethodAndArg() {
+            return new e(function (e, r) {
+              invoke(t, n, e, r);
+            });
+          }
+          return r = r ? r.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg();
+        }
+      });
+    }
+    function makeInvokeMethod(e, r, n) {
+      var o = h;
+      return function (i, a) {
+        if (o === f) throw Error("Generator is already running");
+        if (o === s) {
+          if ("throw" === i) throw a;
+          return {
+            value: t,
+            done: true
+          };
+        }
+        for (n.method = i, n.arg = a;;) {
+          var c = n.delegate;
+          if (c) {
+            var u = maybeInvokeDelegate(c, n);
+            if (u) {
+              if (u === y) continue;
+              return u;
+            }
+          }
+          if ("next" === n.method) n.sent = n._sent = n.arg;else if ("throw" === n.method) {
+            if (o === h) throw o = s, n.arg;
+            n.dispatchException(n.arg);
+          } else "return" === n.method && n.abrupt("return", n.arg);
+          o = f;
+          var p = tryCatch(e, r, n);
+          if ("normal" === p.type) {
+            if (o = n.done ? s : l, p.arg === y) continue;
+            return {
+              value: p.arg,
+              done: n.done
+            };
+          }
+          "throw" === p.type && (o = s, n.method = "throw", n.arg = p.arg);
+        }
+      };
+    }
+    function maybeInvokeDelegate(e, r) {
+      var n = r.method,
+        o = e.iterator[n];
+      if (o === t) return r.delegate = null, "throw" === n && e.iterator["return"] && (r.method = "return", r.arg = t, maybeInvokeDelegate(e, r), "throw" === r.method) || "return" !== n && (r.method = "throw", r.arg = new TypeError("The iterator does not provide a '" + n + "' method")), y;
+      var i = tryCatch(o, e.iterator, r.arg);
+      if ("throw" === i.type) return r.method = "throw", r.arg = i.arg, r.delegate = null, y;
+      var a = i.arg;
+      return a ? a.done ? (r[e.resultName] = a.value, r.next = e.nextLoc, "return" !== r.method && (r.method = "next", r.arg = t), r.delegate = null, y) : a : (r.method = "throw", r.arg = new TypeError("iterator result is not an object"), r.delegate = null, y);
+    }
+    function pushTryEntry(t) {
+      var e = {
+        tryLoc: t[0]
+      };
+      1 in t && (e.catchLoc = t[1]), 2 in t && (e.finallyLoc = t[2], e.afterLoc = t[3]), this.tryEntries.push(e);
+    }
+    function resetTryEntry(t) {
+      var e = t.completion || {};
+      e.type = "normal", delete e.arg, t.completion = e;
+    }
+    function Context(t) {
+      this.tryEntries = [{
+        tryLoc: "root"
+      }], t.forEach(pushTryEntry, this), this.reset(true);
+    }
+    function values(e) {
+      if (e || "" === e) {
+        var r = e[a];
+        if (r) return r.call(e);
+        if ("function" == typeof e.next) return e;
+        if (!isNaN(e.length)) {
+          var o = -1,
+            i = function next() {
+              for (; ++o < e.length;) if (n.call(e, o)) return next.value = e[o], next.done = false, next;
+              return next.value = t, next.done = true, next;
+            };
+          return i.next = i;
+        }
+      }
+      throw new TypeError(_typeof$3(e) + " is not iterable");
+    }
+    return GeneratorFunction.prototype = GeneratorFunctionPrototype, o(g, "constructor", {
+      value: GeneratorFunctionPrototype,
+      configurable: true
+    }), o(GeneratorFunctionPrototype, "constructor", {
+      value: GeneratorFunction,
+      configurable: true
+    }), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, u, "GeneratorFunction"), e.isGeneratorFunction = function (t) {
+      var e = "function" == typeof t && t.constructor;
+      return !!e && (e === GeneratorFunction || "GeneratorFunction" === (e.displayName || e.name));
+    }, e.mark = function (t) {
+      return Object.setPrototypeOf ? Object.setPrototypeOf(t, GeneratorFunctionPrototype) : (t.__proto__ = GeneratorFunctionPrototype, define(t, u, "GeneratorFunction")), t.prototype = Object.create(g), t;
+    }, e.awrap = function (t) {
+      return {
+        __await: t
+      };
+    }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, c, function () {
+      return this;
+    }), e.AsyncIterator = AsyncIterator, e.async = function (t, r, n, o, i) {
+      void 0 === i && (i = Promise);
+      var a = new AsyncIterator(wrap(t, r, n, o), i);
+      return e.isGeneratorFunction(r) ? a : a.next().then(function (t) {
+        return t.done ? t.value : a.next();
+      });
+    }, defineIteratorMethods(g), define(g, u, "Generator"), define(g, a, function () {
+      return this;
+    }), define(g, "toString", function () {
+      return "[object Generator]";
+    }), e.keys = function (t) {
+      var e = Object(t),
+        r = [];
+      for (var n in e) r.push(n);
+      return r.reverse(), function next() {
+        for (; r.length;) {
+          var t = r.pop();
+          if (t in e) return next.value = t, next.done = false, next;
+        }
+        return next.done = true, next;
+      };
+    }, e.values = values, Context.prototype = {
+      constructor: Context,
+      reset: function reset(e) {
+        if (this.prev = 0, this.next = 0, this.sent = this._sent = t, this.done = false, this.delegate = null, this.method = "next", this.arg = t, this.tryEntries.forEach(resetTryEntry), !e) for (var r in this) "t" === r.charAt(0) && n.call(this, r) && !isNaN(+r.slice(1)) && (this[r] = t);
+      },
+      stop: function stop() {
+        this.done = true;
+        var t = this.tryEntries[0].completion;
+        if ("throw" === t.type) throw t.arg;
+        return this.rval;
+      },
+      dispatchException: function dispatchException(e) {
+        if (this.done) throw e;
+        var r = this;
+        function handle(n, o) {
+          return a.type = "throw", a.arg = e, r.next = n, o && (r.method = "next", r.arg = t), !!o;
+        }
+        for (var o = this.tryEntries.length - 1; o >= 0; --o) {
+          var i = this.tryEntries[o],
+            a = i.completion;
+          if ("root" === i.tryLoc) return handle("end");
+          if (i.tryLoc <= this.prev) {
+            var c = n.call(i, "catchLoc"),
+              u = n.call(i, "finallyLoc");
+            if (c && u) {
+              if (this.prev < i.catchLoc) return handle(i.catchLoc, true);
+              if (this.prev < i.finallyLoc) return handle(i.finallyLoc);
+            } else if (c) {
+              if (this.prev < i.catchLoc) return handle(i.catchLoc, true);
+            } else {
+              if (!u) throw Error("try statement without catch or finally");
+              if (this.prev < i.finallyLoc) return handle(i.finallyLoc);
+            }
+          }
+        }
+      },
+      abrupt: function abrupt(t, e) {
+        for (var r = this.tryEntries.length - 1; r >= 0; --r) {
+          var o = this.tryEntries[r];
+          if (o.tryLoc <= this.prev && n.call(o, "finallyLoc") && this.prev < o.finallyLoc) {
+            var i = o;
+            break;
+          }
+        }
+        i && ("break" === t || "continue" === t) && i.tryLoc <= e && e <= i.finallyLoc && (i = null);
+        var a = i ? i.completion : {};
+        return a.type = t, a.arg = e, i ? (this.method = "next", this.next = i.finallyLoc, y) : this.complete(a);
+      },
+      complete: function complete(t, e) {
+        if ("throw" === t.type) throw t.arg;
+        return "break" === t.type || "continue" === t.type ? this.next = t.arg : "return" === t.type ? (this.rval = this.arg = t.arg, this.method = "return", this.next = "end") : "normal" === t.type && e && (this.next = e), y;
+      },
+      finish: function finish(t) {
+        for (var e = this.tryEntries.length - 1; e >= 0; --e) {
+          var r = this.tryEntries[e];
+          if (r.finallyLoc === t) return this.complete(r.completion, r.afterLoc), resetTryEntry(r), y;
+        }
+      },
+      "catch": function _catch(t) {
+        for (var e = this.tryEntries.length - 1; e >= 0; --e) {
+          var r = this.tryEntries[e];
+          if (r.tryLoc === t) {
+            var n = r.completion;
+            if ("throw" === n.type) {
+              var o = n.arg;
+              resetTryEntry(r);
+            }
+            return o;
+          }
+        }
+        throw Error("illegal catch attempt");
+      },
+      delegateYield: function delegateYield(e, r, n) {
+        return this.delegate = {
+          iterator: values(e),
+          resultName: r,
+          nextLoc: n
+        }, "next" === this.method && (this.arg = t), y;
+      }
+    }, e;
+  }
+  function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
+    try {
+      var info = gen[key](arg);
+      var value = info.value;
+    } catch (error) {
+      reject(error);
+      return;
+    }
+    if (info.done) {
+      resolve(value);
+    } else {
+      Promise.resolve(value).then(_next, _throw);
+    }
+  }
+  function _asyncToGenerator(fn) {
+    return function () {
+      var self = this,
+        args = arguments;
+      return new Promise(function (resolve, reject) {
+        var gen = fn.apply(self, args);
+        function _next(value) {
+          asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);
+        }
+        function _throw(err) {
+          asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);
+        }
+        _next(undefined);
+      });
+    };
+  }
+  function _classCallCheck$3(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties$3(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, _toPropertyKey$3(descriptor.key), descriptor);
+    }
+  }
+  function _createClass$3(Constructor, protoProps, staticProps) {
+    if (protoProps) _defineProperties$3(Constructor.prototype, protoProps);
+    Object.defineProperty(Constructor, "prototype", {
+      writable: false
+    });
+    return Constructor;
+  }
+  function _toPropertyKey$3(t) {
+    var i = _toPrimitive$3(t, "string");
+    return "symbol" == _typeof$3(i) ? i : i + "";
+  }
+  function _toPrimitive$3(t, r) {
+    if ("object" != _typeof$3(t) || !t) return t;
+    var e = t[Symbol.toPrimitive];
+    if (void 0 !== e) {
+      var i = e.call(t, r);
+      if ("object" != _typeof$3(i)) return i;
+      throw new TypeError("@@toPrimitive must return a primitive value.");
+    }
+    return (String )(t);
+  }
+  var FileReader$1 = /*#__PURE__*/function () {
+    function FileReader() {
+      _classCallCheck$3(this, FileReader);
+    }
+    return _createClass$3(FileReader, [{
+      key: "openFile",
+      value: function () {
+        var _openFile = _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee(input, chunkSize) {
+          var blob;
+          return _regeneratorRuntime().wrap(function _callee$(_context) {
+            while (1) switch (_context.prev = _context.next) {
+              case 0:
+                if (!(isReactNative() && input && typeof input.uri !== 'undefined')) {
+                  _context.next = 11;
+                  break;
+                }
+                _context.prev = 1;
+                _context.next = 4;
+                return uriToBlob(input.uri);
+              case 4:
+                blob = _context.sent;
+                return _context.abrupt("return", new FileSource(blob));
+              case 8:
+                _context.prev = 8;
+                _context.t0 = _context["catch"](1);
+                throw new Error("tus: cannot fetch `file.uri` as Blob, make sure the uri is correct and accessible. ".concat(_context.t0));
+              case 11:
+                if (!(typeof input.slice === 'function' && typeof input.size !== 'undefined')) {
+                  _context.next = 13;
+                  break;
+                }
+                return _context.abrupt("return", Promise.resolve(new FileSource(input)));
+              case 13:
+                if (!(typeof input.read === 'function')) {
+                  _context.next = 18;
+                  break;
+                }
+                chunkSize = Number(chunkSize);
+                if (Number.isFinite(chunkSize)) {
+                  _context.next = 17;
+                  break;
+                }
+                return _context.abrupt("return", Promise.reject(new Error('cannot create source for stream without a finite value for the `chunkSize` option')));
+              case 17:
+                return _context.abrupt("return", Promise.resolve(new StreamSource(input, chunkSize)));
+              case 18:
+                return _context.abrupt("return", Promise.reject(new Error('source object may only be an instance of File, Blob, or Reader in this environment')));
+              case 19:
+              case "end":
+                return _context.stop();
+            }
+          }, _callee, null, [[1, 8]]);
+        }));
+        function openFile(_x, _x2) {
+          return _openFile.apply(this, arguments);
+        }
+        return openFile;
+      }()
+    }]);
+  }();
+
+  // TODO: Differenciate between input types
 
   /**
    * Generate a fingerprint for a file which will be used the store the endpoint
+   *
+   * @param {File} file
+   * @param {Object} options
+   * @param {Function} callback
    */
   function fingerprint(file, options) {
-    if (isReactNativePlatform() && isReactNativeFile(file)) {
+    if (isReactNative()) {
       return Promise.resolve(reactNativeFingerprint(file, options));
     }
-    if (file instanceof Blob) {
-      return Promise.resolve(
-      //@ts-expect-error TODO: We have to check the input type here
-      // This can be fixed by moving the fingerprint function to the FileReader class
-      ['tus-br', file.name, file.type, file.size, file.lastModified, options.endpoint].join('-'));
-    }
-    return Promise.resolve(null);
+    return Promise.resolve(['tus-br', file.name, file.type, file.size, file.lastModified, options.endpoint].join('-'));
   }
   function reactNativeFingerprint(file, options) {
-    const exifHash = file.exif ? hashCode(JSON.stringify(file.exif)) : 'noexif';
+    var exifHash = file.exif ? hashCode(JSON.stringify(file.exif)) : 'noexif';
     return ['tus-rn', file.name || 'noname', file.size || 'nosize', exifHash, options.endpoint].join('/');
   }
   function hashCode(str) {
     // from https://stackoverflow.com/a/8831937/151666
-    let hash = 0;
+    var hash = 0;
     if (str.length === 0) {
       return hash;
     }
-    for (let i = 0; i < str.length; i++) {
-      const char = str.charCodeAt(i);
-      hash = (hash << 5) - hash + char;
+    for (var i = 0; i < str.length; i++) {
+      var _char = str.charCodeAt(i);
+      hash = (hash << 5) - hash + _char;
       hash &= hash; // Convert to 32bit integer
     }
     return hash;
   }
 
-  let hasStorage = false;
-  try {
-    // Note: `window` is absent in a Web Worker and a Service Worker, and a bare
-    // reference to it throws a ReferenceError rather than a DOMException, so it
-    // would escape the catch below and take this module -- and with it the whole
-    // browser entry point -- down on import. `typeof` covers both realms: it is
-    // false where there is no storage, and still throws the SecurityError that a
-    // sandboxed iframe raises from the getter.
-    // The method check is for runtimes that define the global without a working
-    // implementation behind it, such as Node without `--localstorage-file`.
-    hasStorage = typeof localStorage !== 'undefined' && typeof localStorage.getItem === 'function';
-    if (hasStorage) {
-      // Attempt to store and read entries from the local storage to detect Private
-      // Mode on Safari on iOS (see #49)
-      // If the key was not used before, we remove it from local storage again to
-      // not cause confusion where the entry came from.
-      const key = 'tusSupport';
-      const originalValue = localStorage.getItem(key);
-      localStorage.setItem(key, String(originalValue));
-      if (originalValue == null) localStorage.removeItem(key);
+  function _typeof$2(o) {
+    "@babel/helpers - typeof";
+
+    return _typeof$2 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+      return typeof o;
+    } : function (o) {
+      return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
+    }, _typeof$2(o);
+  }
+  function _classCallCheck$2(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
     }
+  }
+  function _defineProperties$2(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, _toPropertyKey$2(descriptor.key), descriptor);
+    }
+  }
+  function _createClass$2(Constructor, protoProps, staticProps) {
+    if (protoProps) _defineProperties$2(Constructor.prototype, protoProps);
+    Object.defineProperty(Constructor, "prototype", {
+      writable: false
+    });
+    return Constructor;
+  }
+  function _toPropertyKey$2(t) {
+    var i = _toPrimitive$2(t, "string");
+    return "symbol" == _typeof$2(i) ? i : i + "";
+  }
+  function _toPrimitive$2(t, r) {
+    if ("object" != _typeof$2(t) || !t) return t;
+    var e = t[Symbol.toPrimitive];
+    if (void 0 !== e) {
+      var i = e.call(t, r);
+      if ("object" != _typeof$2(i)) return i;
+      throw new TypeError("@@toPrimitive must return a primitive value.");
+    }
+    return (String )(t);
+  }
+  var XHRHttpStack = /*#__PURE__*/function () {
+    function XHRHttpStack() {
+      _classCallCheck$2(this, XHRHttpStack);
+    }
+    return _createClass$2(XHRHttpStack, [{
+      key: "createRequest",
+      value: function createRequest(method, url) {
+        return new Request(method, url);
+      }
+    }, {
+      key: "getName",
+      value: function getName() {
+        return 'XHRHttpStack';
+      }
+    }]);
+  }();
+  var Request = /*#__PURE__*/function () {
+    function Request(method, url) {
+      _classCallCheck$2(this, Request);
+      this._xhr = new XMLHttpRequest();
+      this._xhr.open(method, url, true);
+      this._method = method;
+      this._url = url;
+      this._headers = {};
+    }
+    return _createClass$2(Request, [{
+      key: "getMethod",
+      value: function getMethod() {
+        return this._method;
+      }
+    }, {
+      key: "getURL",
+      value: function getURL() {
+        return this._url;
+      }
+    }, {
+      key: "setHeader",
+      value: function setHeader(header, value) {
+        this._xhr.setRequestHeader(header, value);
+        this._headers[header] = value;
+      }
+    }, {
+      key: "getHeader",
+      value: function getHeader(header) {
+        return this._headers[header];
+      }
+    }, {
+      key: "setProgressHandler",
+      value: function setProgressHandler(progressHandler) {
+        // Test support for progress events before attaching an event listener
+        if (!('upload' in this._xhr)) {
+          return;
+        }
+        this._xhr.upload.onprogress = function (e) {
+          if (!e.lengthComputable) {
+            return;
+          }
+          progressHandler(e.loaded);
+        };
+      }
+    }, {
+      key: "send",
+      value: function send() {
+        var _this = this;
+        var body = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+        return new Promise(function (resolve, reject) {
+          _this._xhr.onload = function () {
+            resolve(new Response(_this._xhr));
+          };
+          _this._xhr.onerror = function (err) {
+            reject(err);
+          };
+          _this._xhr.send(body);
+        });
+      }
+    }, {
+      key: "abort",
+      value: function abort() {
+        this._xhr.abort();
+        return Promise.resolve();
+      }
+    }, {
+      key: "getUnderlyingObject",
+      value: function getUnderlyingObject() {
+        return this._xhr;
+      }
+    }]);
+  }();
+  var Response = /*#__PURE__*/function () {
+    function Response(xhr) {
+      _classCallCheck$2(this, Response);
+      this._xhr = xhr;
+    }
+    return _createClass$2(Response, [{
+      key: "getStatus",
+      value: function getStatus() {
+        return this._xhr.status;
+      }
+    }, {
+      key: "getHeader",
+      value: function getHeader(header) {
+        return this._xhr.getResponseHeader(header);
+      }
+    }, {
+      key: "getBody",
+      value: function getBody() {
+        return this._xhr.responseText;
+      }
+    }, {
+      key: "getUnderlyingObject",
+      value: function getUnderlyingObject() {
+        return this._xhr;
+      }
+    }]);
+  }();
+
+  function _typeof$1(o) {
+    "@babel/helpers - typeof";
+
+    return _typeof$1 = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+      return typeof o;
+    } : function (o) {
+      return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
+    }, _typeof$1(o);
+  }
+  function _classCallCheck$1(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+  function _defineProperties$1(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, _toPropertyKey$1(descriptor.key), descriptor);
+    }
+  }
+  function _createClass$1(Constructor, protoProps, staticProps) {
+    if (protoProps) _defineProperties$1(Constructor.prototype, protoProps);
+    Object.defineProperty(Constructor, "prototype", {
+      writable: false
+    });
+    return Constructor;
+  }
+  function _toPropertyKey$1(t) {
+    var i = _toPrimitive$1(t, "string");
+    return "symbol" == _typeof$1(i) ? i : i + "";
+  }
+  function _toPrimitive$1(t, r) {
+    if ("object" != _typeof$1(t) || !t) return t;
+    var e = t[Symbol.toPrimitive];
+    if (void 0 !== e) {
+      var i = e.call(t, r);
+      if ("object" != _typeof$1(i)) return i;
+      throw new TypeError("@@toPrimitive must return a primitive value.");
+    }
+    return (String )(t);
+  }
+  var hasStorage = false;
+  try {
+    // Note: localStorage does not exist in the Web Worker's context, so we must use window here.
+    hasStorage = 'localStorage' in window;
+
+    // Attempt to store and read entries from the local storage to detect Private
+    // Mode on Safari on iOS (see #49)
+    // If the key was not used before, we remove it from local storage again to
+    // not cause confusion where the entry came from.
+    var key = 'tusSupport';
+    var originalValue = localStorage.getItem(key);
+    localStorage.setItem(key, originalValue);
+    if (originalValue === null) localStorage.removeItem(key);
   } catch (e) {
     // If we try to access localStorage inside a sandboxed iframe, a SecurityError
     // is thrown. When in private mode on iOS Safari, a QuotaExceededError is
     // thrown (see #49)
-    // TODO: Replace `code` with `name`
-    if (e instanceof DOMException && (e.code === e.SECURITY_ERR || e.code === e.QUOTA_EXCEEDED_ERR)) {
+    if (e.code === e.SECURITY_ERR || e.code === e.QUOTA_EXCEEDED_ERR) {
       hasStorage = false;
     } else {
       throw e;
     }
   }
-  const canStoreURLs = hasStorage;
-  class WebStorageUrlStorage {
-    _findAllUploads() {
-      const results = this._findEntries('tus::');
-      return Promise.resolve(results);
+  var canStoreURLs = hasStorage;
+  var WebStorageUrlStorage = /*#__PURE__*/function () {
+    function WebStorageUrlStorage() {
+      _classCallCheck$1(this, WebStorageUrlStorage);
     }
-    _findUploadsByFingerprint(fingerprint) {
-      const results = this._findEntries(`tus::${fingerprint}::`);
-      return Promise.resolve(results);
-    }
-    _removeUpload(urlStorageKey) {
-      localStorage.removeItem(urlStorageKey);
-      return Promise.resolve();
-    }
-    _addUpload(fingerprint, upload) {
-      const id = Math.round(Math.random() * 1e12);
-      const key = `tus::${fingerprint}::${id}`;
-      localStorage.setItem(key, JSON.stringify(upload));
-      return Promise.resolve(key);
-    }
-    _findEntries(prefix) {
-      const results = [];
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key == null) {
-          throw new Error(`didn't find key for item ${i}`);
-        }
-        // Ignore entires that are not from tus-js-client
-        if (key.indexOf(prefix) !== 0) continue;
-        const item = localStorage.getItem(key);
-        if (item == null) {
-          throw new Error(`didn't find item for key ${key}`);
-        }
-        try {
-          // TODO: Validate JSON
-          const upload = JSON.parse(item);
-          upload.urlStorageKey = key;
-          results.push(upload);
-        } catch (_e) {
-          // The JSON parse error is intentionally ignored here, so a malformed
-          // entry in the storage cannot prevent an upload.
-        }
+    return _createClass$1(WebStorageUrlStorage, [{
+      key: "findAllUploads",
+      value: function findAllUploads() {
+        var results = this._findEntries('tus::');
+        return Promise.resolve(results);
       }
-      return results;
+    }, {
+      key: "findUploadsByFingerprint",
+      value: function findUploadsByFingerprint(fingerprint) {
+        var results = this._findEntries("tus::".concat(fingerprint, "::"));
+        return Promise.resolve(results);
+      }
+    }, {
+      key: "removeUpload",
+      value: function removeUpload(urlStorageKey) {
+        localStorage.removeItem(urlStorageKey);
+        return Promise.resolve();
+      }
+    }, {
+      key: "addUpload",
+      value: function addUpload(fingerprint, upload) {
+        var id = Math.round(Math.random() * 1e12);
+        var key = "tus::".concat(fingerprint, "::").concat(id);
+        localStorage.setItem(key, JSON.stringify(upload));
+        return Promise.resolve(key);
+      }
+    }, {
+      key: "_findEntries",
+      value: function _findEntries(prefix) {
+        var results = [];
+        for (var i = 0; i < localStorage.length; i++) {
+          var _key = localStorage.key(i);
+          if (_key.indexOf(prefix) !== 0) continue;
+          try {
+            var upload = JSON.parse(localStorage.getItem(_key));
+            upload.urlStorageKey = _key;
+            results.push(upload);
+          } catch (_e) {
+            // The JSON parse error is intentionally ignored here, so a malformed
+            // entry in the storage cannot prevent an upload.
+          }
+        }
+        return results;
+      }
+    }]);
+  }();
+
+  function _typeof(o) {
+    "@babel/helpers - typeof";
+
+    return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
+      return typeof o;
+    } : function (o) {
+      return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
+    }, _typeof(o);
+  }
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
     }
   }
-
-  var isStream_1;
-  var hasRequiredIsStream;
-
-  function requireIsStream () {
-  	if (hasRequiredIsStream) return isStream_1;
-  	hasRequiredIsStream = 1;
-
-  	const isStream = stream =>
-  		stream !== null &&
-  		typeof stream === 'object' &&
-  		typeof stream.pipe === 'function';
-
-  	isStream.writable = stream =>
-  		isStream(stream) &&
-  		stream.writable !== false &&
-  		typeof stream._write === 'function' &&
-  		typeof stream._writableState === 'object';
-
-  	isStream.readable = stream =>
-  		isStream(stream) &&
-  		stream.readable !== false &&
-  		typeof stream._read === 'function' &&
-  		typeof stream._readableState === 'object';
-
-  	isStream.duplex = stream =>
-  		isStream.writable(stream) &&
-  		isStream.readable(stream);
-
-  	isStream.transform = stream =>
-  		isStream.duplex(stream) &&
-  		typeof stream._transform === 'function';
-
-  	isStream_1 = isStream;
-  	return isStream_1;
-  }
-
-  var isStreamExports = requireIsStream();
-
-  class XHRHttpStack {
-    _createRequest(method, url) {
-      return new XHRRequest(method, url);
-    }
-    _getName() {
-      return 'XHRHttpStack';
+  function _defineProperties(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, _toPropertyKey(descriptor.key), descriptor);
     }
   }
-  class XHRRequest {
-    constructor(method, url) {
-      this._xhr = new XMLHttpRequest();
-      this._headers = {};
-      this._xhr.open(method, url, true);
-      this._method = method;
-      this._url = url;
+  function _createClass(Constructor, protoProps, staticProps) {
+    if (staticProps) _defineProperties(Constructor, staticProps);
+    Object.defineProperty(Constructor, "prototype", {
+      writable: false
+    });
+    return Constructor;
+  }
+  function _callSuper(t, o, e) {
+    return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct() ? Reflect.construct(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e));
+  }
+  function _possibleConstructorReturn(self, call) {
+    if (call && (_typeof(call) === "object" || typeof call === "function")) {
+      return call;
+    } else if (call !== void 0) {
+      throw new TypeError("Derived constructors may only return object or undefined");
     }
-    _getMethod() {
-      return this._method;
+    return _assertThisInitialized(self);
+  }
+  function _assertThisInitialized(self) {
+    if (self === void 0) {
+      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
     }
-    _getURL() {
-      return this._url;
+    return self;
+  }
+  function _isNativeReflectConstruct() {
+    try {
+      var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {}));
+    } catch (t) {}
+    return (_isNativeReflectConstruct = function _isNativeReflectConstruct() {
+      return !!t;
+    })();
+  }
+  function _getPrototypeOf(o) {
+    _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf(o) {
+      return o.__proto__ || Object.getPrototypeOf(o);
+    };
+    return _getPrototypeOf(o);
+  }
+  function _inherits(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+      throw new TypeError("Super expression must either be null or a function");
     }
-    _setHeader(header, value) {
-      this._xhr.setRequestHeader(header, value);
-      this._headers[header] = value;
-    }
-    _getHeader(header) {
-      return this._headers[header];
-    }
-    _setProgressHandler(progressHandler) {
-      // Test support for progress events before attaching an event listener
-      if (!('upload' in this._xhr)) {
-        return;
+    subClass.prototype = Object.create(superClass && superClass.prototype, {
+      constructor: {
+        value: subClass,
+        writable: true,
+        configurable: true
       }
-      this._xhr.upload.onprogress = e => {
-        if (!e.lengthComputable) {
-          return;
-        }
-        progressHandler(e.loaded);
-      };
+    });
+    Object.defineProperty(subClass, "prototype", {
+      writable: false
+    });
+    if (superClass) _setPrototypeOf(subClass, superClass);
+  }
+  function _setPrototypeOf(o, p) {
+    _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf(o, p) {
+      o.__proto__ = p;
+      return o;
+    };
+    return _setPrototypeOf(o, p);
+  }
+  function ownKeys(e, r) {
+    var t = Object.keys(e);
+    if (Object.getOwnPropertySymbols) {
+      var o = Object.getOwnPropertySymbols(e);
+      r && (o = o.filter(function (r) {
+        return Object.getOwnPropertyDescriptor(e, r).enumerable;
+      })), t.push.apply(t, o);
     }
-    _send(body) {
-      if (isStreamExports.readable(body)) {
-        throw new Error('Using a Node.js readable stream as HTTP request body is not supported using the XMLHttpRequest HTTP stack.');
-      }
-      return new Promise((resolve, reject) => {
-        this._xhr.onload = () => {
-          resolve(new XHRResponse(this._xhr));
-        };
-        this._xhr.onerror = err => {
-          reject(err);
-        };
-        this._xhr.onabort = () => {
-          reject(new DOMException('Request was aborted', 'AbortError'));
-        };
-        this._xhr.send(body);
+    return t;
+  }
+  function _objectSpread(e) {
+    for (var r = 1; r < arguments.length; r++) {
+      var t = null != arguments[r] ? arguments[r] : {};
+      r % 2 ? ownKeys(Object(t), true).forEach(function (r) {
+        _defineProperty(e, r, t[r]);
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) {
+        Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r));
       });
     }
-    _abort() {
-      // Note: Calling abort() triggers the `abort` event, but no `error` event.
-      this._xhr.abort();
-      return Promise.resolve();
-    }
-    _getUnderlyingObject() {
-      return this._xhr;
-    }
+    return e;
   }
-  class XHRResponse {
-    constructor(xhr) {
-      this._xhr = xhr;
+  function _defineProperty(obj, key, value) {
+    key = _toPropertyKey(key);
+    if (key in obj) {
+      Object.defineProperty(obj, key, {
+        value: value,
+        enumerable: true,
+        configurable: true,
+        writable: true
+      });
+    } else {
+      obj[key] = value;
     }
-    _getStatus() {
-      return this._xhr.status;
-    }
-    _getHeader(header) {
-      return this._xhr.getResponseHeader(header) || undefined;
-    }
-    _getBody() {
-      return this._xhr.responseText;
-    }
-    _getUnderlyingObject() {
-      return this._xhr;
-    }
+    return obj;
   }
-
-  const defaultOptions = {
-    ...defaultOptions$1,
+  function _toPropertyKey(t) {
+    var i = _toPrimitive(t, "string");
+    return "symbol" == _typeof(i) ? i : i + "";
+  }
+  function _toPrimitive(t, r) {
+    if ("object" != _typeof(t) || !t) return t;
+    var e = t[Symbol.toPrimitive];
+    if (void 0 !== e) {
+      var i = e.call(t, r);
+      if ("object" != _typeof(i)) return i;
+      throw new TypeError("@@toPrimitive must return a primitive value.");
+    }
+    return ("string" === r ? String : Number)(t);
+  }
+  var defaultOptions = _objectSpread(_objectSpread({}, BaseUpload.defaultOptions), {}, {
     httpStack: new XHRHttpStack(),
-    fileReader: new BrowserFileReader(),
+    fileReader: new FileReader$1(),
     urlStorage: canStoreURLs ? new WebStorageUrlStorage() : new NoopUrlStorage(),
-    fingerprint
-  };
-  class Upload extends BaseUpload {
-    constructor(file, options = {}) {
-      const allOpts = {
-        ...defaultOptions,
-        ...options
-      };
-      super(file, allOpts);
+    fingerprint: fingerprint
+  });
+  var Upload = /*#__PURE__*/function (_BaseUpload) {
+    function Upload() {
+      var file = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+      var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+      _classCallCheck(this, Upload);
+      options = _objectSpread(_objectSpread({}, defaultOptions), options);
+      return _callSuper(this, Upload, [file, options]);
     }
-    static _terminate(url, options = {}) {
-      const allOpts = {
-        ...defaultOptions,
-        ...options
-      };
-      return terminate(url, allOpts);
-    }
-  }
+    _inherits(Upload, _BaseUpload);
+    return _createClass(Upload, null, [{
+      key: "terminate",
+      value: function terminate(url) {
+        var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+        options = _objectSpread(_objectSpread({}, defaultOptions), options);
+        return BaseUpload.terminate(url, options);
+      }
+    }]);
+  }(BaseUpload); // Note: We don't reference `window` here because these classes also exist in a Web Worker's context.
 
   const deleteUpload = async (url, csrfToken) => new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
@@ -3826,6 +5375,7 @@
       this._uploads = [];
       this._nextUploadIndex = 0;
       this._renderer = new RenderUploadFile({
+        _clickableFilenames: callbacks.onClick != null,
         _input: input,
         _parent: parent,
         _skipRequired: skipRequired,
@@ -3845,8 +5395,8 @@
         return;
       }
       const {
-        multiple,
-        renderer
+        _multiple: multiple,
+        _renderer: renderer
       } = this;
       const addInitialFile = initialFile => {
         const {
@@ -3908,10 +5458,11 @@
     _getUploadByIndex(uploadIndex) {
       return this._uploads.find(upload => upload.uploadIndex === uploadIndex);
     }
-    async _handleCancel(upload) {
+    async _handleCancel(upload, moveFocus = false) {
       this._renderer._disableCancel(upload.uploadIndex);
       await upload.abort();
-      this._removeUploadFromList(upload);
+      this._removeUploadFromList(upload, moveFocus);
+      this._renderer._announce("{filename} removed", upload.name);
     }
     _handleClick = e => {
       const target = e.target;
@@ -3923,17 +5474,15 @@
         const uploadIndex = parseInt(dataIndex, 10);
         return this._getUploadByIndex(uploadIndex);
       };
-      if (target.classList.contains("dff-delete") && !target.classList.contains("dff-disabled")) {
-        e.preventDefault();
+      if (target.classList.contains("dff-delete")) {
         const upload = getUpload();
         if (upload) {
-          void this._removeExistingUpload(upload);
+          void this._removeExistingUpload(upload, true);
         }
       } else if (target.classList.contains("dff-cancel")) {
-        e.preventDefault();
         const upload = getUpload();
         if (upload) {
-          void this._handleCancel(upload);
+          void this._handleCancel(upload, true);
         }
       } else if (target.classList.contains("dff-filename")) {
         e.preventDefault();
@@ -3950,6 +5499,7 @@
     };
     _handleError = (upload, error) => {
       this._renderer._setError(upload.uploadIndex);
+      this._renderer._announce("Upload failed: {filename}", upload.name);
       upload.status = "error";
       const {
         onError
@@ -3977,11 +5527,12 @@
     };
     _handleSuccess = upload => {
       const {
-        renderer
+        _renderer: renderer
       } = this;
       this._updatePlaceholderInput();
       renderer._clearInput();
       renderer._setSuccess(upload.uploadIndex, upload.getSize());
+      renderer._announce("{filename} uploaded", upload.name);
       upload.status = "done";
       const {
         onSuccess
@@ -4017,7 +5568,10 @@
       void this._uploadFiles([...acceptedFiles]);
       this._renderer._clearInput();
     };
-    async _removeExistingUpload(upload) {
+
+    // moveFocus: whether the user removed the file, with the delete or cancel
+    // button, and the focus should not be lost
+    async _removeExistingUpload(upload, moveFocus = false) {
       const element = this._renderer._findFileDiv(upload.uploadIndex);
       if (element) {
         this._emitEvent("removeUpload", element, upload);
@@ -4030,15 +5584,17 @@
         try {
           await upload.delete();
         } catch {
-          this._renderer._setDeleteFailed(upload.uploadIndex);
+          this._renderer._setDeleteFailed(upload.uploadIndex, moveFocus);
+          this._renderer._announce("Delete failed: {filename}", upload.name);
           return;
         }
       }
-      this._removeUploadFromList(upload);
+      this._removeUploadFromList(upload, moveFocus);
       this._updatePlaceholderInput();
+      this._renderer._announce("{filename} removed", upload.name);
     }
-    _removeUploadFromList(upload) {
-      this._renderer._deleteFile(upload.uploadIndex);
+    _removeUploadFromList(upload, moveFocus = false) {
+      this._renderer._deleteFile(upload.uploadIndex, moveFocus);
       const index = this._uploads.indexOf(upload);
       if (index >= 0) {
         this._uploads.splice(index, 1);
@@ -4062,8 +5618,8 @@
     async _uploadFile(file) {
       const createUpload = () => {
         const {
-          csrfToken,
-          s3UploadDir
+          _csrfToken: csrfToken,
+          _s3UploadDir: s3UploadDir
         } = this;
         if (s3UploadDir != null) {
           return new S3Upload({
@@ -4087,10 +5643,10 @@
         }
       };
       const {
-        fieldName,
-        formId,
-        renderer,
-        uploadUrl
+        _fieldName: fieldName,
+        _formId: formId,
+        _renderer: renderer,
+        _uploadUrl: uploadUrl
       } = this;
       const fileName = file.name;
       const existingUpload = this._findUploadByName(fileName);

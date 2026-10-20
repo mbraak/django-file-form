@@ -35,42 +35,42 @@ const matchesMimeType = (mimeType: string, pattern: string): boolean => {
 };
 
 class AcceptedFileTypes {
-  private _extensions: string[];
-  private _mimeTypes: string[];
+  private extensions: string[];
+  private mimeTypes: string[];
 
   constructor(inputAccept: string) {
     const [extensions, mimeTypes] = parseInputAccept(inputAccept);
 
-    this._extensions = extensions;
-    this._mimeTypes = mimeTypes;
+    this.extensions = extensions;
+    this.mimeTypes = mimeTypes;
   }
 
   public isAccepted(file: File): boolean {
-    if (this._extensions.length === 0 && this._mimeTypes.length === 0) {
+    if (this.extensions.length === 0 && this.mimeTypes.length === 0) {
       return true;
     }
     return (
-      this._isMimeTypeAccepted(file.type) ||
-      this._isExtensionAccepted(file.name)
+      this.isMimeTypeAccepted(file.type) ||
+      this.isExtensionAccepted(file.name)
     );
   }
 
-  private _isExtensionAccepted(fileName: string): boolean {
+  private isExtensionAccepted(fileName: string): boolean {
     const lowerCaseFileName = fileName.toLowerCase();
 
-    return this._extensions.some(extension =>
+    return this.extensions.some(extension =>
       lowerCaseFileName.endsWith(extension)
     );
   }
 
-  private _isMimeTypeAccepted(mimeType: string): boolean {
+  private isMimeTypeAccepted(mimeType: string): boolean {
     if (!mimeType) {
       return false;
     }
 
     const lowerCaseMimeType = mimeType.toLowerCase();
 
-    return this._mimeTypes.some(pattern =>
+    return this.mimeTypes.some(pattern =>
       matchesMimeType(lowerCaseMimeType, pattern)
     );
   }
