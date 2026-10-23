@@ -3,6 +3,11 @@
   "dependencies": {
     "nyc": "^18.0.0"
   },
+  "overrides": {
+    "@istanbuljs/load-nyc-config": {
+      "js-yaml": "^4.1.0"
+    }
+  },
   "scripts": {
     "merge_coverage": "nyc --reporter lcov -t ./js_coverage --cwd .. report"
   }
