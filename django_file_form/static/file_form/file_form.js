@@ -579,21 +579,29 @@
     }
   };
 
+  const SCHEME = '[^/:\\d][^/:]*';
+  const PLAIN_PROTOCOL = new RegExp('^' + SCHEME + ':/*$');
+  const PROTOCOL_PREFIX = new RegExp('^(' + SCHEME + '):/*');
+  const HOST_PORT = /^[^/:]+:\d+(?:[/?#]|$)/;
+
   function normalize (strArray) {
     const resultArray = [];
     // Whether each part in resultArray was separated from the previous one by a slash in the input.
     const slashBefore = [];
-    if (strArray.length === 0) { return ''; }
 
     // Filter out any empty string values.
     strArray = strArray.filter((part) => part !== '');
+    if (strArray.length === 0) { return ''; }
 
     if (typeof strArray[0] !== 'string') {
       throw new TypeError('Url must be a string. Received ' + strArray[0]);
     }
 
+    // Check before joining a plain protocol so ('http:', '3000') stays explicit.
+    const isHostPort = HOST_PORT.test(strArray[0]);
+
     // If the first part is a plain protocol, we combine it with the next part.
-    if (strArray[0].match(/^[^/:]+:\/*$/) && strArray.length > 1) {
+    if (PLAIN_PROTOCOL.test(strArray[0]) && strArray.length > 1) {
       strArray[0] = strArray.shift() + strArray[0];
     }
 
@@ -604,19 +612,29 @@
 
     // There must be two or three slashes in the file protocol, two slashes in anything else.
     if (strArray[0].match(/^file:\/\/\//)) {
-      strArray[0] = strArray[0].replace(/^([^/:]+):\/*/, '$1:///');
-    } else if (!strArray[0].match(/^\[.*:.*\]/)) {
-      // If the first part is not an IPv6 host, we replace the protocol.
-      strArray[0] = strArray[0].replace(/^([^/:]+):\/*/, '$1://');
+      strArray[0] = strArray[0].replace(PROTOCOL_PREFIX, '$1:///');
+    } else if (!isHostPort && !strArray[0].match(/^\[.*:.*\]/)) {
+      // If the first part is not a host with a port or an IPv6 host, replace the protocol.
+      strArray[0] = strArray[0].replace(PROTOCOL_PREFIX, '$1://');
     }
 
     let prevEndsWithSlash = false;
+    let hasSuffix = false;
+    let preserveTrailingSlash = false;
 
     for (let i = 0; i < strArray.length; i++) {
       let component = strArray[i];
 
       if (typeof component !== 'string') {
         throw new TypeError('Url must be a string. Received ' + component);
+      }
+
+      const suffixIndex = component.search(/[?&#]/);
+      if (!hasSuffix && suffixIndex !== -1) {
+        preserveTrailingSlash = suffixIndex === 0
+          ? prevEndsWithSlash
+          : component[suffixIndex - 1] === '/';
+        hasSuffix = true;
       }
 
       const startsWithSlash = component.startsWith('/');
@@ -673,8 +691,14 @@
     }
     // Each input component is now separated by a single slash except the possible first plain protocol part.
 
-    // remove trailing slash before parameters or hash
-    str = str.replace(/\/(\?|&|#[^!])/g, '$1');
+    // Keep an explicit path slash, but retain normalization for query-only
+    // and hash-only inputs such as '/?a' and '/#a'.
+    const suffixIndex = str.search(/[?&#]/);
+    str = str.replace(/\/(\?|&|#[^!])/g, (match, separator, offset) =>
+      preserveTrailingSlash && offset > 0 && offset + 1 === suffixIndex
+        ? match
+        : separator
+    );
 
     // replace ? and & in parameters with &
     const hashIndex = str.indexOf('#');
@@ -1127,7 +1151,7 @@
    *
    * @author Dan Kogai (https://github.com/dankogai)
    */
-  const version = '3.9.4';
+  const version = '3.9.5';
   /**
    * @deprecated use lowercase `version`.
    */
@@ -1176,7 +1200,7 @@
    */
   const _btoa = typeof btoa === 'function' ? (bin) => btoa(bin)
       : btoaPolyfill;
-  const _fromUint8Array = typeof Uint8Array.prototype.toBase64 === 'function' ? (u8a) => u8a.toBase64()
+  const _fromUint8Array = typeof Uint8Array.prototype.toBase64 === 'function' ? Function.prototype.call.bind(Uint8Array.prototype.toBase64)
       : (u8a) => {
           // cf. https://stackoverflow.com/questions/12710001/how-to-convert-uint8-array-to-base64-encoded-string/12713326#12713326
           const maxargs = 0x1000;
