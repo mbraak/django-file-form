@@ -56,7 +56,7 @@
     "eslint-plugin-no-unsanitized": "^4.1.5",
     "eslint-plugin-perfectionist": "^5.1.0",
     "eslint-plugin-testing-library": "^7.16.2",
-    "eslint-plugin-unicorn": "^78.0.0",
+    "eslint-plugin-unicorn": "^79",
     "jsdom": "^29",
     "msw": "^3",
     "rollup": "^4.54.0",
@@ -72,7 +72,7 @@
     "@babel/runtime": "^8.0.0",
     "@rollup/plugin-alias": "^6",
     "tus-js-client": "^4.3.1",
-    "url-join": "^5.0.0"
+    "url-join": "^6"
   },
   "overrides": {
     "@rollup/plugin-babel": {
