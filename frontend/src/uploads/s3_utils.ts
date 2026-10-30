@@ -1,5 +1,3 @@
-import urljoin from "url-join";
-
 export interface LocationInfo {
   location: string;
 }
@@ -39,7 +37,7 @@ export const abortMultipartUpload = ({
   const headers = new Headers({
     "X-CSRFToken": csrfToken
   });
-  const url = urljoin(endpoint, uploadIdEnc, `?key=${filename}`);
+  const url = `${endpoint}${uploadIdEnc}/?key=${filename}`;
   return fetch(url, {
     headers: headers,
     method: "delete"
@@ -68,7 +66,7 @@ export const completeMultipartUpload = ({
   const headers = new Headers({
     "X-CSRFToken": csrfToken
   });
-  const url = urljoin(endpoint, uploadIdEnc, "complete", `?key=${filename}`);
+  const url = `${endpoint}${uploadIdEnc}/complete?key=${filename}`;
   return fetch(url, {
     body: JSON.stringify({
       parts: parts
@@ -140,12 +138,7 @@ export const prepareUploadPart = ({
   const filename = encodeURIComponent(key);
   const uploadIdEnc = encodeURIComponent(uploadId);
   const headers = new Headers({ "X-CSRFToken": csrfToken });
-  const url = urljoin(
-    endpoint,
-    uploadIdEnc,
-    number.toString(),
-    `?key=${filename}`
-  );
+  const url = `${endpoint}${uploadIdEnc}/${number.toString()}?key=${filename}`;
   return fetch(url, {
     headers: headers
   })

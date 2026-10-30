@@ -87,7 +87,7 @@ describe("abortMultipartUpload", () => {
     const request = getRequest();
 
     expect(request.method).toBe("DELETE");
-    expect(request.url.pathname).toBe("/s3/upload-id-1");
+    expect(request.url.pathname).toBe("/s3/upload-id-1/");
     expect(request.url.searchParams.get("key")).toBe("upload_dir/file.txt");
     expect(request.headers.get("X-CSRFToken")).toBe("csrf1");
   });
@@ -104,7 +104,7 @@ describe("abortMultipartUpload", () => {
 
     const request = getRequest();
 
-    expect(request.url.pathname).toBe("/s3/id%2F1");
+    expect(request.url.pathname).toBe("/s3/id%2F1/");
     expect(request.url.searchParams.get("key")).toBe("dir/a&b c.txt");
   });
 
