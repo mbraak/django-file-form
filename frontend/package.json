@@ -71,8 +71,7 @@
   "dependencies": {
     "@babel/runtime": "^8.0.0",
     "@rollup/plugin-alias": "^6",
-    "tus-js-client": "^4.3.1",
-    "url-join": "^6"
+    "tus-js-client": "^4.3.1"
   },
   "overrides": {
     "@rollup/plugin-babel": {
