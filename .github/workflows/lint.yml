@@ -12,10 +12,8 @@ jobs:
       - name: Ruff check
         uses: astral-sh/ruff-action@v4.1.0
         with:
-          version-file: testproject/requirements_ci.txt
           args: check --output-format=github
       - name: Ruff format
         uses: astral-sh/ruff-action@v4.1.0
         with:
-          version-file: testproject/requirements_ci.txt
           args: format --check --diff

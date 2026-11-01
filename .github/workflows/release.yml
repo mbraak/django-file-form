@@ -49,16 +49,15 @@ jobs:
         working-directory: ./frontend
         run: npm run build
 
-      - name: Set up Python
-        uses: actions/setup-python@v7
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v10
         with:
           python-version: "3.12"
 
       - name: Build python package
         run: |
-          pip install build twine
-          python -m build
-          twine check --strict dist/*
+          uv build
+          uvx twine check --strict dist/*
 
       - name: Upload package
         uses: actions/upload-artifact@v7

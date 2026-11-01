@@ -70,8 +70,7 @@ used by the test suite.
 To check the contents of a build locally:
 
 ```sh
-pip install build
-python -m build
+uv build
 unzip -l dist/*.whl
 ```
 
