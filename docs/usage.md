@@ -111,6 +111,12 @@ It's also possible to delete unused temporary file using a management command:
 
 ```
 python manage.py delete_unused_files
+```
 
 The command deletes temporary files and records that are created at least one day ago.
+
+Use `--dry-run` to see which files would be deleted, without deleting them:
+
+```
+python manage.py delete_unused_files --dry-run
 ```

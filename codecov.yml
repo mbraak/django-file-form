@@ -1,0 +1,20 @@
+codecov:
+  notify:
+    # Each CI run uploads one report per Django version in the matrix; wait for
+    # all of them, so the status isn't based on a partial upload
+    after_n_builds: 3
+
+coverage:
+  status:
+    # The total coverage may not drop by more than 0.5%
+    project:
+      default:
+        target: auto
+        threshold: 0.5%
+    # The lines changed in a commit or pull request must be at least 90% covered
+    patch:
+      default:
+        target: 90%
+
+comment:
+  after_n_builds: 3

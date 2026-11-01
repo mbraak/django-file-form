@@ -828,7 +828,6 @@
       }
       this._chunks = chunks;
       this._chunkState = chunks.map(() => ({
-        busy: false,
         done: false,
         uploaded: 0
       }));
@@ -857,10 +856,6 @@
       }
     }
     _uploadPart(index) {
-      const state = this._chunkState[index];
-      if (state) {
-        state.busy = true;
-      }
       if (!this._key || !this._uploadId) {
         return Promise.resolve();
       }
@@ -898,17 +893,9 @@
       });
       xhr.addEventListener("abort", () => {
         remove(this._uploading, xhr);
-        const state = this._chunkState[index];
-        if (state) {
-          state.busy = false;
-        }
       });
       xhr.addEventListener("load", () => {
         remove(this._uploading, xhr);
-        const state = this._chunkState[index];
-        if (state) {
-          state.busy = false;
-        }
         if (xhr.status < 200 || xhr.status >= 300) {
           this._handleError(new Error("Non 2xx"));
           return;
@@ -925,38 +912,18 @@
       });
       xhr.addEventListener("error", () => {
         remove(this._uploading, xhr);
-        const state = this._chunkState[index];
-        if (state) {
-          state.busy = false;
-        }
         const error = new Error("Unknown error");
         this._handleError(error);
       });
       xhr.send(body);
     }
-    _uploadParts() {
-      const need = 1 - this._uploading.length;
-      if (need === 0) {
-        return;
-      }
 
-      // All parts are uploaded.
-      if (this._chunkState.every(state => state.done)) {
+    // Upload the parts one at a time; this is called when the upload is created and after each part is uploaded
+    _uploadParts() {
+      const index = this._chunkState.findIndex(state => !state.done);
+      if (index === -1) {
         void this._completeUpload();
-        return;
-      }
-      const candidates = [];
-      for (let i = 0; i < this._chunkState.length; i++) {
-        const state = this._chunkState[i];
-        if (!state || state.done || state.busy) {
-          continue;
-        }
-        candidates.push(i);
-        if (candidates.length >= need) {
-          break;
-        }
-      }
-      for (const index of candidates) {
+      } else {
         void this._uploadPart(index);
       }
     }
@@ -1013,7 +980,7 @@
    *
    * @author Dan Kogai (https://github.com/dankogai)
    */
-  const version = '3.9.3';
+  const version = '3.9.5';
   /**
    * @deprecated use lowercase `version`.
    */
@@ -1062,7 +1029,7 @@
    */
   const _btoa = typeof btoa === 'function' ? (bin) => btoa(bin)
       : btoaPolyfill;
-  const _fromUint8Array = typeof Uint8Array.prototype.toBase64 === 'function' ? (u8a) => u8a.toBase64()
+  const _fromUint8Array = typeof Uint8Array.prototype.toBase64 === 'function' ? Function.prototype.call.bind(Uint8Array.prototype.toBase64)
       : (u8a) => {
           // cf. https://stackoverflow.com/questions/12710001/how-to-convert-uint8-array-to-base64-encoded-string/12713326#12713326
           const maxargs = 0x1000;

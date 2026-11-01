@@ -1,15 +1,12 @@
 import base64
-import json
 import logging
 import uuid
 
-from django.core.exceptions import PermissionDenied
-from django.http import HttpResponseForbidden
 from django.utils._os import safe_join, to_path
 from django.views.decorators.http import require_http_methods, require_POST
 
 from django_file_form import conf
-from django_file_form.django_util import check_permission, get_upload_path
+from django_file_form.django_util import get_upload_path, permission_required
 from django_file_form.models import TemporaryUploadedFile
 
 from .utils import (
@@ -23,15 +20,8 @@ logger = logging.getLogger(__name__)
 
 
 @require_POST
+@permission_required
 def start_upload(request):
-    try:
-        check_permission(request)
-    except PermissionDenied:
-        return HttpResponseForbidden(
-            json.dumps({"status": "permission denied"}),
-            content_type="application/json",
-        )
-
     response = get_tus_response()
 
     if request.META.get("HTTP_TUS_RESUMABLE", None) is None:
@@ -46,7 +36,8 @@ def start_upload(request):
 
     if upload_metadata:
         for kv in upload_metadata.split(","):
-            (key, value) = kv.split(" ")
+            # The value is optional, e.g. "is_confidential"
+            key, _, value = kv.partition(" ")
             metadata[key] = base64.b64decode(value).decode("utf-8")
 
     logger.info(f"TUS post metadata={metadata}")
@@ -84,14 +75,13 @@ def start_upload(request):
 
 
 @require_http_methods(["DELETE", "HEAD", "PATCH"])
+@permission_required
 def handle_upload(request, resource_id):
-    check_permission(request)
-
     if request.method == "DELETE":
         return cancel_upload(resource_id)
     if request.method == "HEAD":
         return upload_info(resource_id)
-    elif request.method == "PATCH":
+    else:  # PATCH; require_http_methods rejects other methods
         return upload_part(request, resource_id)
 
 
@@ -139,19 +129,12 @@ def upload_part(request, resource_id):
     )
 
     try:
-        file = upload_file_path.open("r+b")
-    except OSError:
-        file = upload_file_path.open("wb")
-
-    if file:
-        try:
+        with upload_file_path.open("r+b") as file:
             file.seek(file_offset)
             file.write(request.body)
-        except OSError:
-            response.status_code = 500
-            return response
-        finally:
-            file.close()
+    except OSError:
+        response.status_code = 500
+        return response
 
     try:
         new_offset = cache.incr(f"tus-uploads/{resource_id}/offset", chunk_size)
