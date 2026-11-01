@@ -25,6 +25,7 @@ Settings in `settings.py`:
     * Name of a cache backend defined in `settings.CACHES`.
     * The default is Django's `default` cache.
     * The cache is used to store data about files while they are being uploaded. If the default might be cleared while a file upload is in progress then using a different backend like django's database cache might be more appropriate. Note that `cache.clear()` will clear the whole cache at a specified `LOCATION` regardless what the `KEY_PREFIX` is.
+    * The cache must be shared between all processes and servers that handle uploads, so don't use local-memory caching (Django's default) in production. See 'Multiple processes or servers' in the 'Details' section.
 
 * **FILE_UPLOAD_PERMISSIONS** (octal) [django-setting]:
     * This is a setting from the DJANGO core.
