@@ -82,16 +82,16 @@ wheels = [
 
 [[package]]
 name = "boto3"
-version = "1.43.108"
+version = "1.43.121"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "botocore" },
     { name = "jmespath" },
     { name = "s3transfer" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/48/59/fb93b6ebd9ad43eb9a58c7a6da51a0fe24ab0c04bc4d534a0bfc5eba7f59/boto3-1.43.108.tar.gz", hash = "sha256:03341f089158368acf83e921aca98b706095322ca52bc4c039a616940aa5ad41", size = 112682, upload-time = "2026-10-02T19:32:25.211Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/50/5c/41fb4571d14c1cfc87543a1e6f491f36f89c1ceac966aeddd61651ee4ba3/boto3-1.43.121.tar.gz", hash = "sha256:0599bdde7d0c03d914d9247b0a328ea48c15b0b3b5fb31a153857fa5bc7a4fd3", size = 112685, upload-time = "2026-10-28T19:19:00.615Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/74/e4/7e88c40e9f61888e12dac0de41a5fddc2bcd1c3992d9b28e17d915cce0df/boto3-1.43.108-py3-none-any.whl", hash = "sha256:19e9da95ef0c494e27052049a42137550e66730509bb613e76eaa30ddf9a7170", size = 140045, upload-time = "2026-10-02T19:32:23.826Z" },
+    { url = "https://files.pythonhosted.org/packages/31/57/a5fda6560d519037cc7df6dd116d5d66e7914be2f562e8c7b1ef888161a2/boto3-1.43.121-py3-none-any.whl", hash = "sha256:fc41ea80507416c30a3f7bdea3682124551ec0c36405c0d8149efaf65d9628e7", size = 140041, upload-time = "2026-10-28T19:18:58.973Z" },
 ]
 
 [[package]]
@@ -720,7 +720,7 @@ ci = [
     { name = "ruff", specifier = "==0.17.1" },
 ]
 dev = [
-    { name = "boto3", marker = "python_full_version >= '3.12'", specifier = "==1.43.108" },
+    { name = "boto3", marker = "python_full_version >= '3.12'", specifier = "==1.43.121" },
     { name = "coverage", marker = "python_full_version >= '3.12'", specifier = "==7.16.2" },
     { name = "cryptography", marker = "python_full_version >= '3.12'", specifier = "==50.0.2" },
     { name = "django", marker = "python_full_version >= '3.12'", specifier = ">=6.1,<6.2" },
@@ -751,7 +751,7 @@ test = [
     { name = "werkzeug", specifier = "==3.1.9" },
 ]
 testproject = [
-    { name = "boto3", specifier = "==1.43.108" },
+    { name = "boto3", specifier = "==1.43.121" },
     { name = "django-csp", specifier = "==4.0" },
     { name = "django-formtools", specifier = "==2.7" },
     { name = "django-storages", specifier = "==1.14.6" },
