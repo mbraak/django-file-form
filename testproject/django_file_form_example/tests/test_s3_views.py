@@ -3,7 +3,7 @@ import os
 from unittest import mock
 
 from django.contrib.auth.models import User
-from django.test import Client, TestCase, override_settings
+from django.test import Client, SimpleTestCase, TestCase, override_settings
 
 from django_file_form.s3_multipart import utils
 from django_file_form.s3_multipart.utils import get_available_name, get_client
@@ -203,6 +203,35 @@ class S3ViewTests(MockS3Mixin, TestCase):
             data=json.dumps({"parts": [{"ETag": part["ETag"], "PartNumber": 1}]}),
             content_type="application/json",
         )
+
+
+class LookupEnvTests(SimpleTestCase):
+    # Use names that don't exist in a real environment
+    def lookup(self, environ):
+        with mock.patch.dict(os.environ, environ):
+            return utils.lookup_env(["DFF_TEST_FIRST", "DFF_TEST_SECOND"])
+
+    def test_first_name(self):
+        self.assertEqual(self.lookup({"DFF_TEST_FIRST": "first"}), "first")
+
+    def test_second_name(self):
+        self.assertEqual(self.lookup({"DFF_TEST_SECOND": "second"}), "second")
+
+    def test_first_name_takes_precedence(self):
+        self.assertEqual(
+            self.lookup({"DFF_TEST_FIRST": "first", "DFF_TEST_SECOND": "second"}),
+            "first",
+        )
+
+    def test_empty_value_is_skipped(self):
+        self.assertEqual(
+            self.lookup({"DFF_TEST_FIRST": "", "DFF_TEST_SECOND": "second"}),
+            "second",
+        )
+
+    def test_not_found(self):
+        self.assertIsNone(self.lookup({}))
+        self.assertIsNone(self.lookup({"DFF_TEST_FIRST": ""}))
 
 
 class S3SettingsTests(TestCase):
