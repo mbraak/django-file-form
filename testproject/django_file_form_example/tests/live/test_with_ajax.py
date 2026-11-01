@@ -61,6 +61,29 @@ class LiveTestCase(BaseLiveTestCase):
         self.assertEqual(TemporaryUploadedFile.objects.count(), 0)
         self.assertFalse(Path(uploaded_file.uploaded_file.path).exists())
 
+    def test_upload_empty_file(self):
+        page = self.page
+
+        temp_file = page.create_temp_file("")
+
+        page.open("/single")
+        page.selenium.find_element(By.CSS_SELECTOR, ".dff-files")
+
+        page.fill_title_field("abc")
+        page.upload_using_js(temp_file)
+
+        page.find_upload_success(temp_file)
+        self.assertEqual(TemporaryUploadedFile.objects.count(), 1)
+
+        uploaded_file = TemporaryUploadedFile.objects.first()
+        self.assertEqual(uploaded_file.original_filename, temp_file.base_name())
+        self.assertEqual(read_file(uploaded_file.uploaded_file), b"")
+
+        # The form finds the uploaded file; Django's FileField rejects empty files
+        page.submit()
+        page.assert_page_contains_text("The submitted file is empty.")
+        self.assertFalse(Example.objects.filter(title="abc").exists())
+
     def test_upload_binary_file(self):
         content = (
             Path(__file__).parent.joinpath("../test_data/wikipedia.png").read_bytes()

@@ -4,6 +4,16 @@
 
 - Apply `FILE_FORM_MUST_LOGIN` option to S3 views.
 - Add `--dry-run` option to the `delete_unused_files` management command.
+- Tus uploads: lock concurrent PATCH and DELETE requests for the same upload.
+- Tus uploads: support the expiration extension; responses include an `Upload-Expires` header.
+- Tus uploads: remove the `Access-Control-*` headers that allowed any origin. Cross-origin uploads didn't work, because preflight requests were rejected and a CSRF token is required. Use `django-cors-headers` if you need CORS.
+- `delete_unused_files` no longer deletes files of tus uploads that are still in progress; unfinished uploads are deleted once they expire.
+- Tus uploads: use the size of the received data instead of the `Content-Length` header for the upload offset.
+- Tus uploads: reject a POST without a valid `Upload-Length` header or without a `formId` in the `Upload-Metadata` header (`400`), and a chunk that exceeds the upload length (`413`).
+- Tus uploads: respond with `412` to a request without a supported `Tus-Resumable` header (was `400` for a POST and not checked for other requests), and with `415` to a PATCH request without `Content-Type: application/offset+octet-stream`.
+- Tus uploads: respond to `OPTIONS` requests with the configuration of the tus server.
+- Add the `FILE_FORM_MAX_UPLOAD_SIZE` setting for the maximum size of a tus upload.
+- Tus uploads: fix uploading an empty file. The tus client doesn't send a PATCH request for an empty file, so the uploaded file wasn't saved.
 
 **5.1.0 (october 13 2026)**
 
