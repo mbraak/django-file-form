@@ -16,7 +16,6 @@ import {
 } from "./s3_utils.ts";
 
 interface ChunkState {
-  busy: boolean;
   done: boolean;
   etag?: string;
   uploaded: number;
@@ -207,7 +206,6 @@ class S3Upload extends BaseUpload {
 
     this.chunks = chunks;
     this.chunkState = chunks.map(() => ({
-      busy: false,
       done: false,
       uploaded: 0
     }));
@@ -244,12 +242,6 @@ class S3Upload extends BaseUpload {
   }
 
   private uploadPart(index: number): Promise<void> {
-    const state = this.chunkState[index];
-
-    if (state) {
-      state.busy = true;
-    }
-
     if (!this.key || !this.uploadId) {
       return Promise.resolve();
     }
@@ -299,22 +291,10 @@ class S3Upload extends BaseUpload {
 
     xhr.addEventListener("abort", () => {
       remove(this.uploading, xhr);
-
-      const state = this.chunkState[index];
-
-      if (state) {
-        state.busy = false;
-      }
     });
 
     xhr.addEventListener("load", () => {
       remove(this.uploading, xhr);
-
-      const state = this.chunkState[index];
-
-      if (state) {
-        state.busy = false;
-      }
 
       if (xhr.status < 200 || xhr.status >= 300) {
         this.handleError(new Error("Non 2xx"));
@@ -340,45 +320,19 @@ class S3Upload extends BaseUpload {
     xhr.addEventListener("error", () => {
       remove(this.uploading, xhr);
 
-      const state = this.chunkState[index];
-
-      if (state) {
-        state.busy = false;
-      }
-
       const error = new Error("Unknown error");
       this.handleError(error);
     });
     xhr.send(body);
   }
 
+  // Upload the parts one at a time; this is called when the upload is created and after each part is uploaded
   private uploadParts(): void {
-    const need = 1 - this.uploading.length;
-    if (need === 0) {
-      return;
-    }
+    const index = this.chunkState.findIndex(state => !state.done);
 
-    // All parts are uploaded.
-    if (this.chunkState.every(state => state.done)) {
+    if (index === -1) {
       void this.completeUpload();
-      return;
-    }
-
-    const candidates = [];
-    for (let i = 0; i < this.chunkState.length; i++) {
-      const state = this.chunkState[i];
-
-      if (!state || state.done || state.busy) {
-        continue;
-      }
-
-      candidates.push(i);
-      if (candidates.length >= need) {
-        break;
-      }
-    }
-
-    for (const index of candidates) {
+    } else {
       void this.uploadPart(index);
     }
   }

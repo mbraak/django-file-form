@@ -386,3 +386,47 @@ describe("start", () => {
     expect(onSuccess).not.toHaveBeenCalled();
   });
 });
+
+describe("without callbacks", () => {
+  test("completes the upload when onSuccess is not set", async () => {
+    const completeRequest = vi.fn();
+    server.use(
+      http.post("http://s3_endpoint.net/upload-id-1/complete", () => {
+        completeRequest();
+        return HttpResponse.json({});
+      })
+    );
+
+    createS3Upload().start();
+
+    await waitFor(() => {
+      expect(completeRequest).toHaveBeenCalledOnce();
+    });
+  });
+});
+
+describe("abort after an invalid create result", () => {
+  test("does not send an abort request", async () => {
+    const abortRequest = vi.fn();
+    server.use(
+      http.post("http://s3_endpoint.net/", () => HttpResponse.json({})),
+      http.delete("http://s3_endpoint.net/*", () => {
+        abortRequest();
+        return HttpResponse.json({});
+      })
+    );
+
+    const s3Upload = createS3Upload();
+    const onError = vi.fn();
+    s3Upload.onError = onError;
+    s3Upload.start();
+
+    await waitFor(() => {
+      expect(onError).toHaveBeenCalled();
+    });
+
+    await s3Upload.abort();
+
+    expect(abortRequest).not.toHaveBeenCalled();
+  });
+});
