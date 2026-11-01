@@ -39,15 +39,76 @@ class ViewTests(TestCase):
     def test_post(self):
         self.do_post(Client())
 
-    def test_post_without_metadata(self):
+    def test_post_without_tus_resumable(self):
         with self.assertLogs("django_file_form.tus.views", level="WARNING"):
-            response = Client().post("/upload/")
+            response = Client().post("/upload/", HTTP_UPLOAD_LENGTH="6")
 
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(
-            response.reason_phrase,
-            "Received file upload for unsupported file transfer protocol",
+        self.assertEqual(response.status_code, 412)
+        self.assertEqual(response.reason_phrase, "Unsupported tus version")
+        self.assertEqual(response["Tus-Version"], "1.0.0")
+        self.assertFalse(response.has_header("Location"))
+
+    def test_post_with_unsupported_tus_version(self):
+        with self.assertLogs("django_file_form.tus.views", level="WARNING"):
+            response = Client().post(
+                "/upload/",
+                HTTP_TUS_RESUMABLE="2.0.0",
+                HTTP_UPLOAD_LENGTH="6",
+                HTTP_UPLOAD_METADATA=encode_metadata(formId="form1"),
+            )
+
+        self.assertEqual(response.status_code, 412)
+        self.assertFalse(response.has_header("Location"))
+
+    def test_handle_upload_without_tus_resumable(self):
+        client = Client()
+        resource_id = self.do_post(
+            client, upload_length=6, metadata={"filename": "test.txt"}
         )
+
+        with self.assertLogs("django_file_form.tus.views", level="WARNING"):
+            responses = {
+                "HEAD": client.head(f"/upload/{resource_id}"),
+                "PATCH": client.patch(
+                    f"/upload/{resource_id}",
+                    data=b"abc",
+                    content_type="application/offset+octet-stream",
+                    HTTP_UPLOAD_OFFSET="0",
+                ),
+                "DELETE": client.delete(f"/upload/{resource_id}"),
+            }
+
+        for method, response in responses.items():
+            with self.subTest(method=method):
+                self.assertEqual(response.status_code, 412)
+                self.assertEqual(response["Tus-Version"], "1.0.0")
+
+        # Nothing is changed
+        self.assertEqual(cache.get(f"tus-uploads/{resource_id}/offset"), 0)
+        self.assertTrue(get_upload_path().joinpath(resource_id).exists())
+
+    def test_patch_with_wrong_content_type(self):
+        client = Client()
+        resource_id = self.do_post(
+            client, upload_length=6, metadata={"filename": "test.txt"}
+        )
+
+        for content_type in ["application/octet-stream", "text/plain"]:
+            with self.subTest(content_type=content_type):
+                response = client.patch(
+                    f"/upload/{resource_id}",
+                    data=b"abc",
+                    content_type=content_type,
+                    HTTP_TUS_RESUMABLE="1.0.0",
+                    HTTP_UPLOAD_OFFSET="0",
+                )
+
+                self.assertEqual(response.status_code, 415)
+                self.assertEqual(response["Tus-Resumable"], "1.0.0")
+                self.assertEqual(cache.get(f"tus-uploads/{resource_id}/offset"), 0)
+                self.assertEqual(
+                    get_upload_path().joinpath(resource_id).read_bytes(), b""
+                )
 
     def test_post_creates_empty_file(self):
         resource_id = self.do_post(Client())
@@ -176,7 +237,7 @@ class ViewTests(TestCase):
         response = self.do_patch(client, resource_id, b"abc", offset=0)
         self.assertEqual(response.status_code, 410)
 
-        response = client.head(f"/upload/{resource_id}")
+        response = client.head(f"/upload/{resource_id}", HTTP_TUS_RESUMABLE="1.0.0")
         self.assertEqual(response.status_code, 404)
 
     def test_post_when_file_cannot_be_created(self):
@@ -198,7 +259,7 @@ class ViewTests(TestCase):
 
         resource_id = self.do_post(client)
 
-        response = client.head(f"/upload/{resource_id}")
+        response = client.head(f"/upload/{resource_id}", HTTP_TUS_RESUMABLE="1.0.0")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response["Upload-Offset"], "0")
         self.assertEqual(response["Upload-Length"], "6")
@@ -211,13 +272,13 @@ class ViewTests(TestCase):
 
         self.do_patch(client, resource_id, b"abc", offset=0)
 
-        response = client.head(f"/upload/{resource_id}")
+        response = client.head(f"/upload/{resource_id}", HTTP_TUS_RESUMABLE="1.0.0")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response["Upload-Offset"], "3")
         self.assertEqual(response["Upload-Length"], "6")
 
     def test_head_with_unknown_resource_id(self):
-        response = Client().head("/upload/unknown")
+        response = Client().head("/upload/unknown", HTTP_TUS_RESUMABLE="1.0.0")
         self.assertEqual(response.status_code, 404)
 
     def test_upload_in_one_patch(self):
@@ -613,7 +674,7 @@ class ViewTests(TestCase):
             metadata={"filename": "empty.txt", "formId": "form1"},
         )
 
-        response = client.delete(f"/upload/{resource_id}")
+        response = client.delete(f"/upload/{resource_id}", HTTP_TUS_RESUMABLE="1.0.0")
 
         self.assertEqual(response.status_code, 204)
         self.assertFalse(
@@ -715,7 +776,7 @@ class ViewTests(TestCase):
         )
         self.do_patch(client, resource_id, b"abc", offset=0)
 
-        response = client.delete(f"/upload/{resource_id}")
+        response = client.delete(f"/upload/{resource_id}", HTTP_TUS_RESUMABLE="1.0.0")
 
         self.assertEqual(response.status_code, 204)
         self.assertFalse(get_upload_path().joinpath(resource_id).exists())
@@ -738,7 +799,7 @@ class ViewTests(TestCase):
             TemporaryUploadedFile.objects.filter(file_id=resource_id).exists()
         )
 
-        response = client.delete(f"/upload/{resource_id}")
+        response = client.delete(f"/upload/{resource_id}", HTTP_TUS_RESUMABLE="1.0.0")
 
         self.assertEqual(response.status_code, 204)
         self.assertFalse(
@@ -747,7 +808,7 @@ class ViewTests(TestCase):
         self.assertFalse(get_upload_path().joinpath(resource_id).exists())
 
     def test_delete_with_unknown_resource_id(self):
-        response = Client().delete("/upload/unknown")
+        response = Client().delete("/upload/unknown", HTTP_TUS_RESUMABLE="1.0.0")
         self.assertEqual(response.status_code, 204)
 
     def test_delete_releases_lock(self):
@@ -756,7 +817,7 @@ class ViewTests(TestCase):
             client, upload_length=6, metadata={"filename": "test.txt"}
         )
 
-        response = client.delete(f"/upload/{resource_id}")
+        response = client.delete(f"/upload/{resource_id}", HTTP_TUS_RESUMABLE="1.0.0")
 
         self.assertEqual(response.status_code, 204)
         self.assertIsNone(cache.get(f"tus-uploads/{resource_id}/lock"))
@@ -777,7 +838,9 @@ class ViewTests(TestCase):
         with mock.patch(
             "django_file_form.tus.utils.time.sleep", side_effect=release_lock
         ) as sleep:
-            response = client.delete(f"/upload/{resource_id}")
+            response = client.delete(
+                f"/upload/{resource_id}", HTTP_TUS_RESUMABLE="1.0.0"
+            )
 
         self.assertEqual(response.status_code, 204)
         sleep.assert_called_once()
@@ -796,7 +859,7 @@ class ViewTests(TestCase):
         # Simulate a patch request that holds the lock
         cache.add(lock_key, "patch-request")
 
-        response = client.delete(f"/upload/{resource_id}")
+        response = client.delete(f"/upload/{resource_id}", HTTP_TUS_RESUMABLE="1.0.0")
 
         self.assertEqual(response.status_code, 423)
         self.assertEqual(response["Tus-Resumable"], "1.0.0")
@@ -825,10 +888,12 @@ class ViewTests(TestCase):
         client = Client()
 
         # A HEAD response has no body
-        self.assertEqual(client.head("/upload/unknown").status_code, 403)
+        self.assertEqual(
+            client.head("/upload/unknown", HTTP_TUS_RESUMABLE="1.0.0").status_code, 403
+        )
 
         for response in [
-            client.delete("/upload/unknown"),
+            client.delete("/upload/unknown", HTTP_TUS_RESUMABLE="1.0.0"),
             self.do_patch(client, "unknown", b"abc", offset=0),
         ]:
             self.assertEqual(response.status_code, 403)

@@ -19,6 +19,7 @@ from .utils import (
     get_tus_response,
     lock_resource,
     remove_resource_from_cache,
+    tus_api_version_supported,
 )
 
 logger = logging.getLogger(__name__)
@@ -27,17 +28,30 @@ logger = logging.getLogger(__name__)
 DELETE_LOCK_WAIT = 5
 
 
+def check_tus_resumable(request):
+    """
+    Return an error response if the request doesn't use a supported tus version
+    """
+    tus_resumable = request.META.get("HTTP_TUS_RESUMABLE")
+
+    if tus_resumable in tus_api_version_supported:
+        return None
+
+    logger.warning(f"TUS request with unsupported Tus-Resumable={tus_resumable}")
+    response = get_tus_response()
+    response.status_code = 412  # HTTP 412 Precondition Failed
+    response.reason_phrase = "Unsupported tus version"
+    return response
+
+
 @require_POST
 @permission_required
 def start_upload(request):
-    response = get_tus_response()
+    error_response = check_tus_resumable(request)
+    if error_response:
+        return error_response
 
-    if request.META.get("HTTP_TUS_RESUMABLE", None) is None:
-        error_message = "Received file upload for unsupported file transfer protocol"
-        logger.warning(error_message)
-        response.status_code = 400
-        response.reason_phrase = error_message
-        return response
+    response = get_tus_response()
 
     metadata = {}
     upload_metadata = request.META.get("HTTP_UPLOAD_METADATA", None)
@@ -119,6 +133,10 @@ def start_upload(request):
 @require_http_methods(["DELETE", "HEAD", "PATCH"])
 @permission_required
 def handle_upload(request, resource_id):
+    error_response = check_tus_resumable(request)
+    if error_response:
+        return error_response
+
     if request.method == "DELETE":
         return cancel_upload(resource_id)
     if request.method == "HEAD":
@@ -148,6 +166,14 @@ def upload_info(resource_id):
 
 
 def upload_part(request, resource_id):
+    if request.content_type != "application/offset+octet-stream":
+        logger.info(
+            f"TUS patch resource_id={resource_id} unsupported Content-Type={request.content_type}"
+        )
+        response = get_tus_response()
+        response.status_code = 415  # HTTP 415 Unsupported Media Type
+        return response
+
     # Read the body before locking, so the lock isn't held while receiving the data
     chunk = request.body
 
