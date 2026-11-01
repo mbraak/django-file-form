@@ -56,7 +56,7 @@ ci = [
     "ruff==0.17.1",
 ]
 docs = [
-    "mkdocs-materialx==10.2.1",
+    "mkdocs-materialx==10.2.2",
     "properdocs==1.6.7",
 ]
 # Installed by default with `uv sync`
