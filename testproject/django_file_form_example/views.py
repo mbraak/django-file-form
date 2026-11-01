@@ -80,14 +80,16 @@ def admin_login(request):
 
     login(request, user, backend="django.contrib.auth.backends.ModelBackend")
 
-    next_url = request.GET.get("next")
+    next_url = request.GET.get("next", "")
 
-    if not next_url or not url_has_allowed_host_and_scheme(
-        next_url, allowed_hosts={request.get_host()}
+    if url_has_allowed_host_and_scheme(
+        next_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
     ):
-        next_url = reverse("admin:index")
+        return HttpResponseRedirect(next_url)
 
-    return HttpResponseRedirect(next_url)
+    return HttpResponseRedirect(reverse("admin:index"))
 
 
 class ExampleSuccessView(generic.TemplateView):
