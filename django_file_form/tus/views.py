@@ -50,7 +50,20 @@ def start_upload(request):
 
     logger.info(f"TUS post metadata={metadata}")
 
-    file_size = int(request.META.get("HTTP_UPLOAD_LENGTH", "0"))
+    upload_length = request.META.get("HTTP_UPLOAD_LENGTH")
+
+    # The length must be a non-negative integer; deferring the length is not supported
+    if (
+        upload_length is None
+        or not upload_length.isascii()
+        or not upload_length.isdigit()
+    ):
+        logger.info(f"TUS post invalid Upload-Length={upload_length}")
+        response.status_code = 400
+        response.reason_phrase = "Missing or invalid Upload-Length"
+        return response
+
+    file_size = int(upload_length)
     resource_id = str(uuid.uuid4())
 
     # The upload expires when its data is removed from the cache
@@ -181,6 +194,19 @@ def write_chunk(request, resource_id, chunk):
         response.status_code = 409  # HTTP 409 Conflict
         return response
 
+    file_size = cache.get(f"tus-uploads/{resource_id}/file_size")
+
+    if file_size is None:
+        response.status_code = 404
+        return response
+
+    if file_offset + len(chunk) > file_size:
+        logger.info(
+            f"TUS patch resource_id={resource_id} exceeds Upload-Length={file_size}"
+        )
+        response.status_code = 413  # HTTP 413 Content Too Large
+        return response
+
     logger.info(
         f"TUS patch resource_id={resource_id} filename={filename} metadata={metadata} offset={offset} upload_file_path={upload_file_path}"
     )
@@ -199,16 +225,8 @@ def write_chunk(request, resource_id, chunk):
         response.status_code = 404
         return response
 
-    file_size_string = cache.get(f"tus-uploads/{resource_id}/file_size")
-
-    if file_size_string is None:
-        response.status_code = 404
-        return response
-
     response["Upload-Offset"] = new_offset
     response.status_code = 204
-
-    file_size = int(file_size_string)
 
     if file_size == new_offset:
         # Create the record before removing the upload from the cache, so the file is

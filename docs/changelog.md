@@ -9,6 +9,7 @@
 - Tus uploads: remove the `Access-Control-*` headers that allowed any origin. Cross-origin uploads didn't work, because preflight requests were rejected and a CSRF token is required. Use `django-cors-headers` if you need CORS.
 - `delete_unused_files` no longer deletes files of tus uploads that are still in progress; unfinished uploads are deleted once they expire.
 - Tus uploads: use the size of the received data instead of the `Content-Length` header for the upload offset.
+- Tus uploads: reject a POST without a valid `Upload-Length` header (`400`) and a chunk that exceeds the upload length (`413`).
 
 **5.1.0 (october 13 2026)**
 

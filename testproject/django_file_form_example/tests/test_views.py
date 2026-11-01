@@ -75,6 +75,7 @@ class ViewTests(TestCase):
         response = Client().post(
             "/upload/",
             HTTP_TUS_RESUMABLE="1.0.0",
+            HTTP_UPLOAD_LENGTH="0",
             HTTP_UPLOAD_METADATA=f"{encode_metadata(filename='test.txt')},is_confidential,empty ",
         )
         self.assertEqual(response.status_code, 201)
@@ -85,7 +86,9 @@ class ViewTests(TestCase):
         )
 
     def test_post_has_tus_headers(self):
-        response = Client().post("/upload/", HTTP_TUS_RESUMABLE="1.0.0")
+        response = Client().post(
+            "/upload/", HTTP_TUS_RESUMABLE="1.0.0", HTTP_UPLOAD_LENGTH="0"
+        )
 
         self.assertEqual(response["Tus-Resumable"], "1.0.0")
         self.assertEqual(response["Tus-Version"], "1.0.0")
@@ -109,7 +112,9 @@ class ViewTests(TestCase):
 
     def test_post_has_upload_expires(self):
         before = time.time()
-        response = Client().post("/upload/", HTTP_TUS_RESUMABLE="1.0.0")
+        response = Client().post(
+            "/upload/", HTTP_TUS_RESUMABLE="1.0.0", HTTP_UPLOAD_LENGTH="0"
+        )
         after = time.time()
 
         # The upload expires when its data is removed from the cache
@@ -168,7 +173,9 @@ class ViewTests(TestCase):
             mock.patch.object(Path, "open", side_effect=OSError("disk full")),
             self.assertLogs("django_file_form.tus.views", level="ERROR"),
         ):
-            response = Client().post("/upload/", HTTP_TUS_RESUMABLE="1.0.0")
+            response = Client().post(
+                "/upload/", HTTP_TUS_RESUMABLE="1.0.0", HTTP_UPLOAD_LENGTH="0"
+            )
 
         self.assertEqual(response.status_code, 500)
 
@@ -472,6 +479,58 @@ class ViewTests(TestCase):
         self.assertEqual(response.status_code, 204)
         self.assertEqual(cache.get(lock_key), "other-request")
 
+    def test_post_without_upload_length(self):
+        response = Client().post("/upload/", HTTP_TUS_RESUMABLE="1.0.0")
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.reason_phrase, "Missing or invalid Upload-Length")
+        self.assertEqual(response["Tus-Resumable"], "1.0.0")
+        self.assertFalse(response.has_header("Location"))
+
+    def test_post_with_invalid_upload_length(self):
+        for upload_length in ["", "abc", "-1", "1.5", " 3", "+3", "\u00b2"]:
+            with self.subTest(upload_length=upload_length):
+                response = Client().post(
+                    "/upload/",
+                    HTTP_TUS_RESUMABLE="1.0.0",
+                    HTTP_UPLOAD_LENGTH=upload_length,
+                )
+
+                self.assertEqual(response.status_code, 400)
+                self.assertFalse(response.has_header("Location"))
+
+    def test_patch_exceeding_upload_length(self):
+        client = Client()
+        resource_id = self.do_post(
+            client, upload_length=4, metadata={"filename": "test.txt"}
+        )
+
+        response = self.do_patch(client, resource_id, b"abc", offset=0)
+        self.assertEqual(response.status_code, 204)
+
+        # The chunk is rejected and nothing is written
+        response = self.do_patch(client, resource_id, b"def", offset=3)
+
+        self.assertEqual(response.status_code, 413)
+        self.assertEqual(response["Tus-Resumable"], "1.0.0")
+        self.assertEqual(cache.get(f"tus-uploads/{resource_id}/offset"), 3)
+        self.assertEqual(get_upload_path().joinpath(resource_id).read_bytes(), b"abc")
+        self.assertFalse(
+            TemporaryUploadedFile.objects.filter(file_id=resource_id).exists()
+        )
+        self.assertIsNone(cache.get(f"tus-uploads/{resource_id}/lock"))
+
+    def test_patch_with_zero_upload_length(self):
+        client = Client()
+        resource_id = self.do_post(
+            client, upload_length=0, metadata={"filename": "test.txt"}
+        )
+
+        response = self.do_patch(client, resource_id, b"a", offset=0)
+
+        self.assertEqual(response.status_code, 413)
+        self.assertEqual(get_upload_path().joinpath(resource_id).read_bytes(), b"")
+
     def test_patch_with_wrong_offset(self):
         client = Client()
         resource_id = self.do_post(
@@ -661,7 +720,9 @@ class ViewTests(TestCase):
 
     @override_settings(FILE_FORM_MUST_LOGIN=True)
     def test_post_must_login(self):
-        response = Client().post("/upload/", HTTP_TUS_RESUMABLE="1.0.0")
+        response = Client().post(
+            "/upload/", HTTP_TUS_RESUMABLE="1.0.0", HTTP_UPLOAD_LENGTH="0"
+        )
 
         self.assertEqual(response.status_code, 403)
         self.assertEqual(response.json(), {"status": "permission denied"})
@@ -706,11 +767,11 @@ class ViewTests(TestCase):
             TemporaryUploadedFile.objects.filter(file_id=resource_id).exists()
         )
 
-    def do_post(self, client, upload_length=None, metadata=None):
-        headers = {"HTTP_TUS_RESUMABLE": "1.0.0"}
-
-        if upload_length is not None:
-            headers["HTTP_UPLOAD_LENGTH"] = str(upload_length)
+    def do_post(self, client, upload_length=0, metadata=None):
+        headers = {
+            "HTTP_TUS_RESUMABLE": "1.0.0",
+            "HTTP_UPLOAD_LENGTH": str(upload_length),
+        }
 
         if metadata:
             headers["HTTP_UPLOAD_METADATA"] = encode_metadata(**metadata)
