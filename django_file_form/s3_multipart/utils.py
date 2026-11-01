@@ -47,13 +47,17 @@ def file_form_upload_dir():
     return setting("FILE_FORM_UPLOAD_DIR", "temp_uploads")
 
 
+GET_CLIENT_MAX_ATTEMPTS = 10
+
+
 def get_client():
     signature_version = setting("AWS_S3_SIGNATURE_VERSION", None)
     region_name = setting("AWS_S3_REGION_NAME", None)
 
-    while True:
+    # Creating a client isn't thread-safe and can fail intermittently, so retry a few times
+    # https://github.com/boto/boto3/issues/801
+    for attempt in range(1, GET_CLIENT_MAX_ATTEMPTS + 1):
         try:
-            # https://github.com/boto/boto3/issues/801
             return boto3.client(
                 "s3",
                 endpoint_url=get_endpoint_url(),
@@ -64,6 +68,9 @@ def get_client():
                 ),
             )
         except Exception:
+            if attempt == GET_CLIENT_MAX_ATTEMPTS:
+                raise
+
             time.sleep(0.01)
 
 
