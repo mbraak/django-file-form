@@ -46,7 +46,8 @@ def start_upload(request):
 
     if upload_metadata:
         for kv in upload_metadata.split(","):
-            (key, value) = kv.split(" ")
+            # The value is optional, e.g. "is_confidential"
+            key, _, value = kv.partition(" ")
             metadata[key] = base64.b64decode(value).decode("utf-8")
 
     logger.info(f"TUS post metadata={metadata}")
