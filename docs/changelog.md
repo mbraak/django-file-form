@@ -4,6 +4,10 @@
 
 - Apply `FILE_FORM_MUST_LOGIN` option to S3 views.
 - Add `--dry-run` option to the `delete_unused_files` management command.
+- Tus uploads: lock concurrent PATCH and DELETE requests for the same upload.
+- Tus uploads: support the expiration extension; responses include an `Upload-Expires` header.
+- `delete_unused_files` no longer deletes files of tus uploads that are still in progress; unfinished uploads are deleted once they expire.
+- Tus uploads: use the size of the received data instead of the `Content-Length` header for the upload offset.
 
 **5.1.0 (october 13 2026)**
 

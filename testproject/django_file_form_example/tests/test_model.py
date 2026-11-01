@@ -1,3 +1,5 @@
+import os
+import time
 from datetime import timedelta
 from io import StringIO
 from pathlib import Path
@@ -10,6 +12,7 @@ from django.test import TestCase
 from django.test.utils import override_settings
 from django.utils import timezone
 
+from django_file_form import conf
 from django_file_form.django_util import get_upload_path
 from django_file_form.models import TemporaryUploadedFile, get_temp_storage_class
 from django_file_form.util import get_list
@@ -21,6 +24,12 @@ from django_file_form_example.tests.utils.test_utils import (
 )
 
 media_root = Path(settings.MEDIA_ROOT)
+
+
+def make_expired(path):
+    # Set the modification time to just before the upload expired
+    modified = time.time() - conf.CACHE_TIMEOUT - 1
+    os.utime(path, (modified, modified))
 
 
 class CustomStorage(FileSystemStorage):
@@ -145,9 +154,37 @@ class DeleteUnusedFileTest(TestCase):
 
         with uploaded_file_path.open("w") as f:
             f.write("abc")
+        make_expired(uploaded_file_path)
 
-        TemporaryUploadedFile.objects.delete_unused_files()
+        deleted_files = TemporaryUploadedFile.objects.delete_unused_files()
 
+        self.assertEqual(deleted_files, [self.filename])
+        self.assertFalse(uploaded_file_path.exists())
+
+    def test_file_without_record_of_upload_in_progress(self):
+        # An upload that is in progress has a file but no record yet
+        uploaded_file_path = self.get_uploaded_file_path()
+        uploaded_file_path.write_text("abc")
+
+        deleted_files = TemporaryUploadedFile.objects.delete_unused_files()
+
+        self.assertEqual(deleted_files, [])
+        self.assertTrue(uploaded_file_path.exists())
+
+    def test_file_without_record_before_and_after_expiry(self):
+        uploaded_file_path = self.get_uploaded_file_path()
+        uploaded_file_path.write_text("abc")
+
+        deleted_files = TemporaryUploadedFile.objects.delete_unused_files(
+            now=timezone.now() + timedelta(seconds=conf.CACHE_TIMEOUT - 60)
+        )
+        self.assertEqual(deleted_files, [])
+        self.assertTrue(uploaded_file_path.exists())
+
+        deleted_files = TemporaryUploadedFile.objects.delete_unused_files(
+            now=timezone.now() + timedelta(seconds=conf.CACHE_TIMEOUT + 1)
+        )
+        self.assertEqual(deleted_files, [self.filename])
         self.assertFalse(uploaded_file_path.exists())
 
     def test_dry_run_command(self):
@@ -157,6 +194,7 @@ class DeleteUnusedFileTest(TestCase):
         )
         file_without_record_path = self.temp_uploads_path.joinpath(get_random_id())
         file_without_record_path.write_text("abc")
+        make_expired(file_without_record_path)
 
         try:
             stdout = StringIO()

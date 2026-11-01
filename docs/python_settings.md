@@ -5,6 +5,7 @@ Settings in `settings.py`:
 * **FILE_FORM_CACHE_TIMEOUT** (int)
     * Cache timeout in seconds
     * The Default is 24 hours
+    * A tus upload expires this many seconds after it is started. The `delete_unused_files` command deletes files of unfinished uploads after they expire.
 
 * **FILE_FORM_MUST_LOGIN** (True / False):
     * Must the user be logged in to upload a file.

@@ -113,7 +113,7 @@ It's also possible to delete unused temporary file using a management command:
 python manage.py delete_unused_files
 ```
 
-The command deletes temporary files and records that are created at least one day ago.
+The command deletes temporary files and records that are created at least one day ago. It also deletes files of uploads that were never finished, once the upload has expired (see `FILE_FORM_CACHE_TIMEOUT`). Files of uploads that are still in progress are kept.
 
 Use `--dry-run` to see which files would be deleted, without deleting them:
 

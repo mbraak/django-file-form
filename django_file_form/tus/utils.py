@@ -64,6 +64,7 @@ def remove_resource_from_cache(resource_id):
             f"tus-uploads/{resource_id}/filename",
             f"tus-uploads/{resource_id}/offset",
             f"tus-uploads/{resource_id}/metadata",
+            f"tus-uploads/{resource_id}/expires",
         ]
     )
 
@@ -106,7 +107,7 @@ tus_api_version = "1.0.0"
 tus_api_version_supported = [
     "1.0.0",
 ]
-tus_api_extensions = ["creation", "termination", "file-check"]
+tus_api_extensions = ["creation", "expiration", "termination", "file-check"]
 
 
 def get_tus_response():
@@ -117,7 +118,7 @@ def get_tus_response():
     response["Access-Control-Allow-Origin"] = "*"
     response["Access-Control-Allow-Methods"] = "PATCH,HEAD,GET,POST,OPTIONS"
     response["Access-Control-Expose-Headers"] = (
-        "Tus-Resumable,upload-length,upload-metadata,Location,Upload-Offset"
+        "Tus-Resumable,upload-length,upload-metadata,Location,Upload-Offset,Upload-Expires"
     )
     response["Access-Control-Allow-Headers"] = (
         "Tus-Resumable,upload-length,upload-metadata,Location,Upload-Offset,content-type"

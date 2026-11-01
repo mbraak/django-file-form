@@ -1,11 +1,14 @@
 import base64
 import re
+import time
 from pathlib import Path
 from unittest import mock
 
 from django.contrib.auth.models import User
 from django.test import Client, RequestFactory, TestCase, override_settings
+from django.utils.http import parse_http_date
 
+from django_file_form import conf
 from django_file_form.django_util import get_upload_path
 from django_file_form.models import TemporaryUploadedFile
 from django_file_form.tus.utils import cache
@@ -80,10 +83,71 @@ class ViewTests(TestCase):
 
         self.assertEqual(response["Tus-Resumable"], "1.0.0")
         self.assertEqual(response["Tus-Version"], "1.0.0")
-        self.assertEqual(response["Tus-Extension"], "creation,termination,file-check")
+        self.assertEqual(
+            response["Tus-Extension"], "creation,expiration,termination,file-check"
+        )
+        self.assertIn(
+            "Upload-Expires", response["Access-Control-Expose-Headers"].split(",")
+        )
         self.assertEqual(
             response["ResourceId"], response["Location"][len("/upload/") :]
         )
+
+    def test_post_has_upload_expires(self):
+        before = time.time()
+        response = Client().post("/upload/", HTTP_TUS_RESUMABLE="1.0.0")
+        after = time.time()
+
+        # The upload expires when its data is removed from the cache
+        expires = parse_http_date(response["Upload-Expires"])
+        self.assertGreaterEqual(expires, int(before) + conf.CACHE_TIMEOUT)
+        self.assertLessEqual(expires, after + conf.CACHE_TIMEOUT)
+
+    def test_patch_has_upload_expires(self):
+        client = Client()
+        response = client.post(
+            "/upload/",
+            HTTP_TUS_RESUMABLE="1.0.0",
+            HTTP_UPLOAD_LENGTH="6",
+            HTTP_UPLOAD_METADATA=encode_metadata(filename="test.txt", formId="form1"),
+        )
+        resource_id = response["ResourceId"]
+        upload_expires = response["Upload-Expires"]
+
+        # The expiration doesn't change while uploading
+        response = self.do_patch(client, resource_id, b"abc", offset=0)
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(response["Upload-Expires"], upload_expires)
+
+        response = self.do_patch(client, resource_id, b"abc", offset=0)
+        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response["Upload-Expires"], upload_expires)
+
+        # A finished upload doesn't expire
+        response = self.do_patch(client, resource_id, b"def", offset=3)
+        self.assertEqual(response.status_code, 204)
+        self.assertNotIn("Upload-Expires", response)
+        self.assertIsNone(cache.get(f"tus-uploads/{resource_id}/expires"))
+
+    def test_patch_after_upload_expired(self):
+        client = Client()
+        resource_id = self.do_post(
+            client, upload_length=6, metadata={"filename": "test.txt"}
+        )
+
+        # Simulate that the cache timeout passed
+        cache.delete_many(
+            [
+                f"tus-uploads/{resource_id}/{key}"
+                for key in ["filename", "file_size", "offset", "metadata", "expires"]
+            ]
+        )
+
+        response = self.do_patch(client, resource_id, b"abc", offset=0)
+        self.assertEqual(response.status_code, 410)
+
+        response = client.head(f"/upload/{resource_id}")
+        self.assertEqual(response.status_code, 404)
 
     def test_post_when_file_cannot_be_created(self):
         with (
@@ -403,6 +467,7 @@ class ViewTests(TestCase):
         self.assertEqual(response.status_code, 204)
         self.assertFalse(get_upload_path().joinpath(resource_id).exists())
         self.assertIsNone(cache.get(f"tus-uploads/{resource_id}/offset"))
+        self.assertIsNone(cache.get(f"tus-uploads/{resource_id}/expires"))
 
     def test_delete_after_upload(self):
         client = Client()

@@ -1,8 +1,10 @@
 import base64
 import logging
+import time
 import uuid
 
 from django.utils._os import safe_join, to_path
+from django.utils.http import http_date
 from django.views.decorators.http import require_http_methods, require_POST
 
 from django_file_form import conf
@@ -49,6 +51,9 @@ def start_upload(request):
     file_size = int(request.META.get("HTTP_UPLOAD_LENGTH", "0"))
     resource_id = str(uuid.uuid4())
 
+    # The upload expires when its data is removed from the cache
+    expires = time.time() + conf.CACHE_TIMEOUT
+
     cache.add(
         f"tus-uploads/{resource_id}/filename",
         metadata.get("filename"),
@@ -57,6 +62,7 @@ def start_upload(request):
     cache.add(f"tus-uploads/{resource_id}/file_size", file_size, conf.CACHE_TIMEOUT)
     cache.add(f"tus-uploads/{resource_id}/offset", 0, conf.CACHE_TIMEOUT)
     cache.add(f"tus-uploads/{resource_id}/metadata", metadata, conf.CACHE_TIMEOUT)
+    cache.add(f"tus-uploads/{resource_id}/expires", expires, conf.CACHE_TIMEOUT)
 
     try:
         with to_path(safe_join(get_upload_path(), resource_id)).open("wb"):
@@ -75,6 +81,7 @@ def start_upload(request):
     response.status_code = 201
     response["Location"] = f"{request.get_full_path()}{resource_id}"
     response["ResourceId"] = resource_id
+    response["Upload-Expires"] = http_date(expires)
     return response
 
 
@@ -137,6 +144,10 @@ def write_chunk(request, resource_id, chunk):
         response.status_code = 410
         return response
 
+    expires = cache.get(f"tus-uploads/{resource_id}/expires")
+    if expires is not None:
+        response["Upload-Expires"] = http_date(expires)
+
     if file_offset != offset:  # check to make sure we're in sync
         response.status_code = 409  # HTTP 409 Conflict
         return response
@@ -171,8 +182,8 @@ def write_chunk(request, resource_id, chunk):
     file_size = int(file_size_string)
 
     if file_size == new_offset:
-        remove_resource_from_cache(resource_id)
-
+        # Create the record before removing the upload from the cache, so the file is
+        # never without both (see delete_unused_files)
         create_uploaded_file_in_db(
             field_name=metadata.get("fieldName"),
             file_id=resource_id,
@@ -180,6 +191,9 @@ def write_chunk(request, resource_id, chunk):
             original_filename=metadata.get("filename"),
             uploaded_file=upload_file_path,
         )
+
+        remove_resource_from_cache(resource_id)
+        del response["Upload-Expires"]
 
     return response
 
