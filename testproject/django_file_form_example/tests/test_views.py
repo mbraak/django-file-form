@@ -4,11 +4,12 @@ from pathlib import Path
 from unittest import mock
 
 from django.contrib.auth.models import User
-from django.test import Client, TestCase, override_settings
+from django.test import Client, RequestFactory, TestCase, override_settings
 
 from django_file_form.django_util import get_upload_path
 from django_file_form.models import TemporaryUploadedFile
 from django_file_form.tus.utils import cache
+from django_file_form.tus.views import handle_upload
 from django_file_form_example.tests.utils.test_utils import remove_test_files
 
 
@@ -172,6 +173,36 @@ class ViewTests(TestCase):
         response = self.do_patch(client, resource_id, b"def", offset=3)
         self.assertEqual(response.status_code, 204)
         self.assertEqual(response["Upload-Offset"], "6")
+
+        uploaded_file = TemporaryUploadedFile.objects.get(file_id=resource_id)
+        self.assertEqual(self.read_uploaded_file(uploaded_file), b"abcdef")
+
+    def test_patch_without_content_length_uses_body_length(self):
+        client = Client()
+        resource_id = self.do_post(
+            client,
+            upload_length=6,
+            metadata={"filename": "test.txt", "formId": "form1"},
+        )
+
+        request = RequestFactory().patch(
+            f"/upload/{resource_id}",
+            data=b"abc",
+            content_type="application/offset+octet-stream",
+            HTTP_TUS_RESUMABLE="1.0.0",
+            HTTP_UPLOAD_OFFSET="0",
+        )
+        # The offset is based on the bytes received, not on the Content-Length header
+        del request.META["CONTENT_LENGTH"]
+
+        response = handle_upload(request, resource_id)
+
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(response["Upload-Offset"], "3")
+        self.assertEqual(cache.get(f"tus-uploads/{resource_id}/offset"), 3)
+
+        response = self.do_patch(client, resource_id, b"def", offset=3)
+        self.assertEqual(response.status_code, 204)
 
         uploaded_file = TemporaryUploadedFile.objects.get(file_id=resource_id)
         self.assertEqual(self.read_uploaded_file(uploaded_file), b"abcdef")

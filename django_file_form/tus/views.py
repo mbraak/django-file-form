@@ -113,7 +113,6 @@ def upload_part(request, resource_id):
     offset = cache.get(f"tus-uploads/{resource_id}/offset")
 
     file_offset = int(request.META.get("HTTP_UPLOAD_OFFSET", 0))
-    chunk_size = int(request.META.get("CONTENT_LENGTH", 102400))
 
     upload_file_path = to_path(safe_join(get_upload_path(), resource_id))
     if filename is None or not upload_file_path.exists():
@@ -128,16 +127,18 @@ def upload_part(request, resource_id):
         f"TUS patch resource_id={resource_id} filename={filename} metadata={metadata} offset={offset} upload_file_path={upload_file_path}"
     )
 
+    chunk = request.body
+
     try:
         with upload_file_path.open("r+b") as file:
             file.seek(file_offset)
-            file.write(request.body)
+            file.write(chunk)
     except OSError:
         response.status_code = 500
         return response
 
     try:
-        new_offset = cache.incr(f"tus-uploads/{resource_id}/offset", chunk_size)
+        new_offset = cache.incr(f"tus-uploads/{resource_id}/offset", len(chunk))
     except ValueError:
         response.status_code = 404
         return response
