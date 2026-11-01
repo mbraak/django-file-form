@@ -1,5 +1,9 @@
 ## Changelog
 
+**Unreleased**
+
+- Check permissions in S3 views.
+
 **5.1.0 (october 13 2026)**
 
 - Issue #1389 Improve accessibility.

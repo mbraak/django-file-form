@@ -4,12 +4,15 @@ import logging
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_http_methods, require_POST
 
+from django_file_form.django_util import permission_required
+
 from .utils import file_form_upload_dir, get_available_name, get_bucket_name, get_client
 
 logger = logging.getLogger(__name__)
 
 
 @require_POST
+@permission_required
 def create_upload(request):
     logger.info("Create upload")
 
@@ -36,6 +39,7 @@ def create_upload(request):
 
 
 @require_http_methods(["DELETE"])
+@permission_required
 def abort_upload(request, upload_id):
     logger.info("Abort upload")
     client = get_client()
@@ -51,6 +55,7 @@ def abort_upload(request, upload_id):
 
 
 @require_GET
+@permission_required
 def sign_upload_part(request, upload_id, part_number):
     logger.info("Generate presigned url")
 
@@ -72,6 +77,7 @@ def sign_upload_part(request, upload_id, part_number):
 
 
 @require_POST
+@permission_required
 def complete_upload(request, upload_id):
     logger.info("Complete upload")
 

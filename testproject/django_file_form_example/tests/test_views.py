@@ -356,11 +356,20 @@ class ViewTests(TestCase):
     def test_handle_upload_must_login(self):
         client = Client()
 
+        # A HEAD response has no body
         self.assertEqual(client.head("/upload/unknown").status_code, 403)
-        self.assertEqual(client.delete("/upload/unknown").status_code, 403)
-        self.assertEqual(
-            self.do_patch(client, "unknown", b"abc", offset=0).status_code, 403
-        )
+
+        for response in [
+            client.delete("/upload/unknown"),
+            self.do_patch(client, "unknown", b"abc", offset=0),
+        ]:
+            self.assertEqual(response.status_code, 403)
+            self.assertEqual(response.json(), {"status": "permission denied"})
+
+    @override_settings(FILE_FORM_MUST_LOGIN=True)
+    def test_must_login_does_not_change_unsupported_method(self):
+        self.assertEqual(Client().get("/upload/").status_code, 405)
+        self.assertEqual(Client().get("/upload/unknown").status_code, 405)
 
     @override_settings(FILE_FORM_MUST_LOGIN=True)
     def test_upload_when_logged_in(self):

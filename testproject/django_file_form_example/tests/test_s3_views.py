@@ -2,6 +2,7 @@ import json
 import os
 from unittest import mock
 
+from django.contrib.auth.models import User
 from django.test import Client, TestCase, override_settings
 
 from django_file_form.s3_multipart import utils
@@ -89,6 +90,61 @@ class S3ViewTests(MockS3Mixin, TestCase):
         self.assertEqual(response.json(), {})
         self.assertNotIn("Uploads", self.s3.list_multipart_uploads(Bucket=BUCKET_NAME))
 
+    @override_settings(FILE_FORM_MUST_LOGIN=True)
+    def test_must_login(self):
+        client = Client()
+
+        self.s3.create_multipart_upload(Bucket=BUCKET_NAME, Key="temp_uploads/a.txt")
+        [upload] = self.s3.list_multipart_uploads(Bucket=BUCKET_NAME)["Uploads"]
+        upload_id = upload["UploadId"]
+
+        responses = [
+            self.create_upload(filename="b.txt", s3_upload_dir="", client=client),
+            client.get(f"/s3upload/{upload_id}/1", {"key": "temp_uploads/a.txt"}),
+            client.post(
+                f"/s3upload/{upload_id}/complete?key=temp_uploads/a.txt",
+                data=json.dumps({"parts": []}),
+                content_type="application/json",
+            ),
+            client.delete(f"/s3upload/{upload_id}/?key=temp_uploads/a.txt"),
+        ]
+
+        for response in responses:
+            self.assertEqual(response.status_code, 403)
+            self.assertEqual(response.json(), {"status": "permission denied"})
+
+        # Nothing was created, completed or aborted
+        self.assertEqual(
+            [
+                (upload["Key"], upload["UploadId"])
+                for upload in self.s3.list_multipart_uploads(Bucket=BUCKET_NAME)[
+                    "Uploads"
+                ]
+            ],
+            [("temp_uploads/a.txt", upload_id)],
+        )
+
+    @override_settings(FILE_FORM_MUST_LOGIN=True)
+    def test_upload_when_logged_in(self):
+        client = Client()
+        client.force_login(User.objects.create_user("user1"))
+
+        response = self.create_upload(
+            filename="test.txt", s3_upload_dir="dir1", client=client
+        )
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+
+        response = client.get(f"/s3upload/{data['uploadId']}/1", {"key": data["key"]})
+        self.assertEqual(response.status_code, 200)
+
+        response = client.delete(f"/s3upload/{data['uploadId']}/?key={data['key']}")
+        self.assertEqual(response.status_code, 200)
+
+    @override_settings(FILE_FORM_MUST_LOGIN=True)
+    def test_must_login_does_not_change_unsupported_method(self):
+        self.assertEqual(Client().get("/s3upload/").status_code, 405)
+
     def test_unsupported_methods(self):
         client = Client()
 
@@ -118,8 +174,10 @@ class S3ViewTests(MockS3Mixin, TestCase):
                 "dir1/test_bbbbbbb.txt",
             )
 
-    def create_upload(self, filename, s3_upload_dir, content_type="text/plain"):
-        return Client().post(
+    def create_upload(
+        self, filename, s3_upload_dir, content_type="text/plain", client=None
+    ):
+        return (client or Client()).post(
             "/s3upload/",
             data=json.dumps(
                 {
