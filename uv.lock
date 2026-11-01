@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.10"
 resolution-markers = [
     "python_full_version >= '3.12'",
@@ -708,6 +708,10 @@ testproject = [
     { name = "pytz" },
 ]
 
+[package.group-requires-python]
+dev = ">=3.12,>=3.12"
+django = ">=3.12"
+
 [package.metadata]
 
 [package.metadata.requires-dev]
@@ -734,7 +738,7 @@ dev = [
 ]
 django = [{ name = "django", marker = "python_full_version >= '3.12'", specifier = ">=6.1,<6.2" }]
 docs = [
-    { name = "mkdocs-materialx", specifier = "==10.2.1" },
+    { name = "mkdocs-materialx", specifier = "==10.2.2" },
     { name = "properdocs", specifier = "==1.6.7" },
 ]
 test = [
@@ -1087,16 +1091,16 @@ wheels = [
 
 [[package]]
 name = "mkdocs-document-dates"
-version = "3.8.8"
+version = "3.8.9"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "babel" },
     { name = "mkdocs" },
     { name = "properdocs" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/74/13/8b7e6d4899ed9ebe60170bae7ffb641d844249f853f455b148adcf8626a0/mkdocs_document_dates-3.8.8.tar.gz", hash = "sha256:c063726a63d9b28a095a720c90ae785b41a2bf6a193b9933ae472589ca639ca1", size = 196085, upload-time = "2026-10-15T16:09:34.086Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/93/26/b002299952b7982ace7451e38f508afd8d41bd7805efc47c4d2c2657400a/mkdocs_document_dates-3.8.9.tar.gz", hash = "sha256:85f339723d191bc8a7f9c15e33eabfb18c7ae03af44aef5c4c85e08be6541f34", size = 196314, upload-time = "2026-10-23T03:21:19.569Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/74/a7/77f412704bc8b87adaade05c2594cda78e1fa05c2b4913165c2430163297/mkdocs_document_dates-3.8.8-py3-none-any.whl", hash = "sha256:6fe8102574088b3f0e7159e56d9bf4b8bd84be2cea9203c0c1550d9705b08c84", size = 200916, upload-time = "2026-10-15T16:09:32.539Z" },
+    { url = "https://files.pythonhosted.org/packages/53/99/86cac310dc5bcef8e420f61f64b68e0b9e554f3076114c186c3fe55162fd/mkdocs_document_dates-3.8.9-py3-none-any.whl", hash = "sha256:47f2846d58026acf04ec9c9319b4dc295c198e341655fda7719c6d6c627d7ef8", size = 201107, upload-time = "2026-10-23T03:21:17.914Z" },
 ]
 
 [[package]]
@@ -1125,7 +1129,7 @@ wheels = [
 
 [[package]]
 name = "mkdocs-materialx"
-version = "10.2.1"
+version = "10.2.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "babel" },
@@ -1144,9 +1148,9 @@ dependencies = [
     { name = "pymdown-extensions" },
     { name = "requests" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/1d/db/870670646cc37648bc01edcd3bd2932cfedab1291baef0ad2cc33919a55f/mkdocs_materialx-10.2.1.tar.gz", hash = "sha256:91c687d4df73ce4798a3215456118525dfadf67b489fe9376ae6a79e3f604e4e", size = 4269978, upload-time = "2026-10-16T14:23:41.497Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/bd/1d/d542f5028b29edc7931917e3a2e533a166c1b13d5e2b57836f838d13811b/mkdocs_materialx-10.2.2.tar.gz", hash = "sha256:8806bcc53db72ae02937e3e7171a58fe47dc628ba904f9510e6ab5c3561b3529", size = 4271957, upload-time = "2026-10-24T07:50:52.165Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/12/93/046e7cade88be1a22f669af001ac3fbec03849f770409d29cfd8a3acbdf4/mkdocs_materialx-10.2.1-py3-none-any.whl", hash = "sha256:4d11d1a3180a5e36ee8c8dca732418b17eeafdad4bedec449d5000045b033268", size = 10221456, upload-time = "2026-10-16T14:23:38.727Z" },
+    { url = "https://files.pythonhosted.org/packages/e4/03/d7ff2670ab8c637ff74f42c317bb923b7ad9928da5a8248198f19f803e22/mkdocs_materialx-10.2.2-py3-none-any.whl", hash = "sha256:887fd8a7dede53882dd3e00f2be3db94ee531aad0c361cf8f97990bf3c57cd1b", size = 10223521, upload-time = "2026-10-24T07:50:49.581Z" },
 ]
 
 [[package]]
