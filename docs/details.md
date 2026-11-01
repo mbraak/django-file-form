@@ -159,6 +159,15 @@ Django-file-form uses the Django cache for storing data while uploading files.
 - The cache backed is configurable using `FILE_FORM_CACHE`.
 - The cache is also used to lock an upload while a chunk is written or the upload is deleted, so concurrent requests for the same upload can't corrupt it. A chunk request for a locked upload gets a `423 Locked` response; the client retries it when `retryDelays` is set. A delete request waits up to 5 seconds for the lock before responding with `423 Locked`. Locking relies on `cache.add` being atomic, which is the case for the memcached, redis, database and local memory backends, but not for the file based cache. Note that the local memory cache is per process.
 
+## Checksums
+
+The tus upload endpoint supports the tus [checksum extension](https://tus.io/protocols/resumable-upload#checksum). A client can send an `Upload-Checksum` header with each chunk, for example `Upload-Checksum: sha1 <base64 encoded digest>`. The supported algorithms are `md5`, `sha1`, `sha256` and `sha512`.
+
+- If the checksum doesn't match, the chunk is discarded and the response is `460 Checksum Mismatch`. The client can then send the chunk again.
+- If the algorithm is not supported or the header is invalid, the response is `400 Bad Request`.
+
+The javascript client of django-file-form (`tus-js-client`) doesn't send checksums; this is for other tus clients.
+
 ## Disabled property
 
 Make the input disabled by setting the `disabled` attribute.

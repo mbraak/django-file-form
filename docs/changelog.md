@@ -6,6 +6,7 @@
 - Add `--dry-run` option to the `delete_unused_files` management command.
 - Tus uploads: lock concurrent PATCH and DELETE requests for the same upload.
 - Tus uploads: support the expiration extension; responses include an `Upload-Expires` header.
+- Tus uploads: support the checksum extension (md5, sha1, sha256 and sha512).
 - `delete_unused_files` no longer deletes files of tus uploads that are still in progress; unfinished uploads are deleted once they expire.
 - Tus uploads: use the size of the received data instead of the `Content-Length` header for the upload offset.
 

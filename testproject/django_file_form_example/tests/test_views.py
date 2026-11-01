@@ -1,4 +1,5 @@
 import base64
+import hashlib
 import re
 import time
 from pathlib import Path
@@ -21,6 +22,11 @@ def encode_metadata(**metadata):
         f"{key} {base64.b64encode(value.encode('utf-8')).decode('ascii')}"
         for key, value in metadata.items()
     )
+
+
+def encode_checksum(algorithm, data):
+    digest = hashlib.new(algorithm, data).digest()
+    return f"{algorithm} {base64.b64encode(digest).decode('ascii')}"
 
 
 class ViewTests(TestCase):
@@ -84,7 +90,12 @@ class ViewTests(TestCase):
         self.assertEqual(response["Tus-Resumable"], "1.0.0")
         self.assertEqual(response["Tus-Version"], "1.0.0")
         self.assertEqual(
-            response["Tus-Extension"], "creation,expiration,termination,file-check"
+            response["Tus-Extension"],
+            "checksum,creation,expiration,termination,file-check",
+        )
+        self.assertEqual(response["Tus-Checksum-Algorithm"], "md5,sha1,sha256,sha512")
+        self.assertIn(
+            "Upload-Checksum", response["Access-Control-Allow-Headers"].split(",")
         )
         self.assertIn(
             "Upload-Expires", response["Access-Control-Expose-Headers"].split(",")
@@ -307,6 +318,96 @@ class ViewTests(TestCase):
             uploaded_file.uploaded_file.name, f"temp_uploads/{resource_id}"
         )
         self.assertFalse(get_upload_path().joinpath(resource_id).exists())
+
+    def test_patch_with_checksum(self):
+        client = Client()
+        resource_id = self.do_post(
+            client,
+            upload_length=6,
+            metadata={"filename": "test.txt", "formId": "form1"},
+        )
+
+        response = self.do_patch(
+            client,
+            resource_id,
+            b"abc",
+            offset=0,
+            HTTP_UPLOAD_CHECKSUM=encode_checksum("sha1", b"abc"),
+        )
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(response["Upload-Offset"], "3")
+
+        response = self.do_patch(
+            client,
+            resource_id,
+            b"def",
+            offset=3,
+            HTTP_UPLOAD_CHECKSUM=encode_checksum("sha256", b"def"),
+        )
+        self.assertEqual(response.status_code, 204)
+
+        uploaded_file = TemporaryUploadedFile.objects.get(file_id=resource_id)
+        self.assertEqual(self.read_uploaded_file(uploaded_file), b"abcdef")
+
+    def test_patch_with_checksum_mismatch(self):
+        client = Client()
+        resource_id = self.do_post(
+            client, upload_length=6, metadata={"filename": "test.txt"}
+        )
+
+        response = self.do_patch(
+            client,
+            resource_id,
+            b"abc",
+            offset=0,
+            HTTP_UPLOAD_CHECKSUM=encode_checksum("sha1", b"xyz"),
+        )
+
+        # The chunk is discarded
+        self.assertEqual(response.status_code, 460)
+        self.assertEqual(response.reason_phrase, "Checksum Mismatch")
+        self.assertEqual(response["Tus-Resumable"], "1.0.0")
+        self.assertEqual(cache.get(f"tus-uploads/{resource_id}/offset"), 0)
+        self.assertEqual(get_upload_path().joinpath(resource_id).read_bytes(), b"")
+
+    def test_patch_with_unsupported_checksum_algorithm(self):
+        client = Client()
+        resource_id = self.do_post(
+            client, upload_length=6, metadata={"filename": "test.txt"}
+        )
+
+        response = self.do_patch(
+            client,
+            resource_id,
+            b"abc",
+            offset=0,
+            HTTP_UPLOAD_CHECKSUM=encode_checksum("sha3_256", b"abc"),
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            response.reason_phrase, "Unsupported checksum algorithm: sha3_256"
+        )
+        self.assertEqual(cache.get(f"tus-uploads/{resource_id}/offset"), 0)
+
+    def test_patch_with_invalid_checksum(self):
+        client = Client()
+        resource_id = self.do_post(
+            client, upload_length=6, metadata={"filename": "test.txt"}
+        )
+
+        for upload_checksum in ["sha1 not-base64!", "sha1", ""]:
+            with self.subTest(upload_checksum=upload_checksum):
+                response = self.do_patch(
+                    client,
+                    resource_id,
+                    b"abc",
+                    offset=0,
+                    HTTP_UPLOAD_CHECKSUM=upload_checksum,
+                )
+
+                self.assertEqual(response.status_code, 400)
+                self.assertEqual(cache.get(f"tus-uploads/{resource_id}/offset"), 0)
 
     def test_patch_when_locked(self):
         client = Client()
@@ -620,13 +721,14 @@ class ViewTests(TestCase):
 
         return re_url_upload_resource.match(response["Location"]).group(1)
 
-    def do_patch(self, client, resource_id, data, offset):
+    def do_patch(self, client, resource_id, data, offset, **extra):
         return client.patch(
             f"/upload/{resource_id}",
             data=data,
             content_type="application/offset+octet-stream",
             HTTP_TUS_RESUMABLE="1.0.0",
             HTTP_UPLOAD_OFFSET=str(offset),
+            **extra,
         )
 
     def read_uploaded_file(self, uploaded_file):

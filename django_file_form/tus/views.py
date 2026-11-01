@@ -12,7 +12,9 @@ from django_file_form.django_util import get_upload_path, permission_required
 from django_file_form.models import TemporaryUploadedFile
 
 from .utils import (
+    InvalidChecksumHeader,
     cache,
+    checksum_matches,
     create_uploaded_file_in_db,
     get_tus_response,
     lock_resource,
@@ -120,6 +122,12 @@ def upload_part(request, resource_id):
     # Read the body before locking, so the lock isn't held while receiving the data
     chunk = request.body
 
+    upload_checksum = request.META.get("HTTP_UPLOAD_CHECKSUM")
+    if upload_checksum is not None:
+        response = check_chunk(resource_id, upload_checksum, chunk)
+        if response:
+            return response
+
     with lock_resource(resource_id) as locked:
         if not locked:
             logger.info(f"TUS patch resource_id={resource_id} is locked")
@@ -128,6 +136,27 @@ def upload_part(request, resource_id):
             return response
 
         return write_chunk(request, resource_id, chunk)
+
+
+def check_chunk(resource_id, upload_checksum, chunk):
+    """
+    Return an error response if the chunk doesn't match the Upload-Checksum header
+    """
+    try:
+        if checksum_matches(upload_checksum, chunk):
+            return None
+    except InvalidChecksumHeader as e:
+        logger.info(f"TUS patch resource_id={resource_id} {e}")
+        response = get_tus_response()
+        response.status_code = 400
+        response.reason_phrase = str(e)
+        return response
+
+    logger.info(f"TUS patch resource_id={resource_id} checksum mismatch")
+    response = get_tus_response()
+    response.status_code = 460
+    response.reason_phrase = "Checksum Mismatch"
+    return response
 
 
 def write_chunk(request, resource_id, chunk):

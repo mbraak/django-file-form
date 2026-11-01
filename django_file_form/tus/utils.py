@@ -1,3 +1,6 @@
+import base64
+import binascii
+import hashlib
 import os
 import time
 import uuid
@@ -107,7 +110,37 @@ tus_api_version = "1.0.0"
 tus_api_version_supported = [
     "1.0.0",
 ]
-tus_api_extensions = ["creation", "expiration", "termination", "file-check"]
+tus_api_extensions = ["checksum", "creation", "expiration", "termination", "file-check"]
+tus_checksum_algorithms = ["md5", "sha1", "sha256", "sha512"]
+
+
+class InvalidChecksumHeader(ValueError):
+    pass
+
+
+def checksum_matches(upload_checksum, chunk):
+    """
+    Check the Upload-Checksum header of a patch request ("<algorithm> <base64 digest>").
+
+    Raises InvalidChecksumHeader if the header is malformed or the algorithm is not
+    supported.
+    """
+    algorithm, _, encoded_digest = upload_checksum.strip().partition(" ")
+
+    if algorithm not in tus_checksum_algorithms:
+        raise InvalidChecksumHeader(f"Unsupported checksum algorithm: {algorithm}")
+
+    chunk_hash = hashlib.new(algorithm, chunk)
+
+    try:
+        digest = base64.b64decode(encoded_digest, validate=True)
+    except binascii.Error as e:
+        raise InvalidChecksumHeader("Invalid checksum") from e
+
+    if len(digest) != chunk_hash.digest_size:
+        raise InvalidChecksumHeader("Invalid checksum")
+
+    return chunk_hash.digest() == digest
 
 
 def get_tus_response():
@@ -115,13 +148,14 @@ def get_tus_response():
     response["Tus-Resumable"] = tus_api_version
     response["Tus-Version"] = ",".join(tus_api_version_supported)
     response["Tus-Extension"] = ",".join(tus_api_extensions)
+    response["Tus-Checksum-Algorithm"] = ",".join(tus_checksum_algorithms)
     response["Access-Control-Allow-Origin"] = "*"
     response["Access-Control-Allow-Methods"] = "PATCH,HEAD,GET,POST,OPTIONS"
     response["Access-Control-Expose-Headers"] = (
         "Tus-Resumable,upload-length,upload-metadata,Location,Upload-Offset,Upload-Expires"
     )
     response["Access-Control-Allow-Headers"] = (
-        "Tus-Resumable,upload-length,upload-metadata,Location,Upload-Offset,content-type"
+        "Tus-Resumable,upload-length,upload-metadata,Location,Upload-Offset,Upload-Checksum,content-type"
     )
     response["Cache-Control"] = "no-store"
 
