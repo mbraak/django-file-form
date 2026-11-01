@@ -4,7 +4,7 @@ from django.urls import path
 from . import views
 
 urlpatterns = (
-    path("", views.ExampleView.as_view(), name="example"),
+    path("", views.IndexView.as_view(), name="index"),
     path("accept", views.WithAcceptExample.as_view(), name="with_accept_example"),
     path(
         "custom_widget",
@@ -47,8 +47,13 @@ urlpatterns = (
         name="multiple_without_js_example",
     ),
     path("placeholder", views.PlaceholderView.as_view(), name="placeholder_example"),
+    path("single", views.ExampleView.as_view(), name="example"),
     path("s3single", views.S3SingleExampleView.as_view(), name="s3_example"),
-    path("s3multiple", views.S3MultipleExampleView.as_view(), name="s3_example"),
+    path(
+        "s3multiple",
+        views.S3MultipleExampleView.as_view(),
+        name="s3_multiple_example",
+    ),
     path(
         "s3placeholder",
         views.S3PlaceholderExampleView.as_view(),

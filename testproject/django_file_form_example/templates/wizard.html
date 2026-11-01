@@ -4,9 +4,7 @@
 {% block title %}Wizard example{% endblock %}
 
 {% block body %}
-    <div>
-        Page {{ wizard.steps.step1 }}
-    </div>
+    <div class="wizard-step">Page {{ wizard.steps.step1 }} of {{ wizard.steps.count }}</div>
     <form
         method="POST"
         enctype="multipart/form-data"
@@ -15,10 +13,12 @@
         {% csrf_token %}
         {{ wizard.management_form }}
         {{ wizard.form.as_p }}
-        {% if wizard.steps.prev %}
-            <button name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}">Previous</button>
-        {% endif %}
-        <input type="submit" value="Submit" />
+        <div class="form-actions">
+            {% if wizard.steps.prev %}
+                <button name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}" class="secondary">Previous</button>
+            {% endif %}
+            <input type="submit" value="Submit" />
+        </div>
     </form>
 
     <script src="{% static file_form_js|safe %}"></script>

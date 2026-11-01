@@ -30,7 +30,7 @@ class LiveTestCase(BaseLiveTestCase):
         temp_uploads_path = Path(settings.MEDIA_ROOT).joinpath("temp_uploads")
         original_temp_file_count = count_temp_uploads()
 
-        page.open("/")
+        page.open("/single")
 
         page.selenium.find_element(By.CSS_SELECTOR, ".dff-files")
 
@@ -68,7 +68,7 @@ class LiveTestCase(BaseLiveTestCase):
 
         page = self.page
         temp_file = page.create_temp_file(content, binary=True)
-        page.open("/")
+        page.open("/single")
         page.selenium.find_element(By.CSS_SELECTOR, ".dff-files")
         page.upload_using_js(temp_file)
 
@@ -153,7 +153,7 @@ class LiveTestCase(BaseLiveTestCase):
         temp_file1 = page.create_temp_file("content1")
         temp_file2 = page.create_temp_file("content2")
 
-        page.open("/")
+        page.open("/single")
 
         page.fill_title_field("abc")
 
@@ -187,7 +187,7 @@ class LiveTestCase(BaseLiveTestCase):
 
         temp_file = page.create_temp_file("content1")
 
-        page.open("/")
+        page.open("/single")
         page.upload_using_js(temp_file)
         page.find_upload_success(temp_file)
 
@@ -215,7 +215,7 @@ class LiveTestCase(BaseLiveTestCase):
 
         temp_file = page.create_temp_file("content1")
 
-        page.open("/")
+        page.open("/single")
         page.upload_using_js(temp_file)
         page.find_upload_success(temp_file)
 
@@ -258,7 +258,7 @@ class LiveTestCase(BaseLiveTestCase):
 
         temp_file = page.create_temp_file("content1")
 
-        page.open("/")
+        page.open("/single")
         page.upload_using_js(temp_file)
         page.find_upload_success(temp_file)
         self.assertEqual(TemporaryUploadedFile.objects.count(), 1)
@@ -301,7 +301,7 @@ class LiveTestCase(BaseLiveTestCase):
 
         temp_file = page.create_temp_file("content1", prefix=prefix)
 
-        page.open("/")
+        page.open("/single")
         page.upload_using_js(temp_file)
         page.find_upload_success(temp_file)
 
@@ -323,7 +323,7 @@ class LiveTestCase(BaseLiveTestCase):
 
         temp_file = page.create_temp_file("content1")
 
-        page.open("/")
+        page.open("/single")
         page.upload_using_js(temp_file)
 
         el = page.find_upload_fail(temp_file)
@@ -384,7 +384,7 @@ class LiveTestCase(BaseLiveTestCase):
 
         temp_file = page.create_temp_file("content1", prefix=prefix)
 
-        page.open("/")
+        page.open("/single")
         page.upload_using_js(temp_file)
         page.find_upload_success(temp_file)
 
@@ -642,7 +642,7 @@ class LiveTestCase(BaseLiveTestCase):
         temp_uploads_path = Path(settings.MEDIA_ROOT).joinpath("temp_uploads")
         original_temp_file_count = count_temp_uploads()
 
-        page.open("/")
+        page.open("/single")
 
         page.selenium.find_element(By.CSS_SELECTOR, ".dff-files")
 
@@ -942,7 +942,7 @@ class LiveTestCase(BaseLiveTestCase):
     def test_click_handler(self):
         page = self.page
 
-        page.open("/")
+        page.open("/single")
         page.assert_page_contains_text("Drop your files here")
 
         temp_file = page.create_temp_file("content1")
@@ -958,7 +958,7 @@ class LiveTestCase(BaseLiveTestCase):
 
     def test_click_handler_for_submitted_file(self):
         page = self.page
-        page.open("/")
+        page.open("/single")
         page.assert_page_contains_text("Drop your files here")
 
         temp_file = page.create_temp_file("content1")
@@ -998,7 +998,7 @@ class LiveTestCase(BaseLiveTestCase):
         page = self.page
         temp_file = page.create_temp_file("content1")
 
-        page.open("/")
+        page.open("/single")
         drop_area = page.selenium.find_element(By.CSS_SELECTOR, ".dff-files")
         page.drop_file(drop_area, temp_file)
 
