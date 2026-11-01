@@ -32,6 +32,7 @@ class ModelAdminTests(TestCase):
         finally:
             super().tearDown()
 
+    @override_settings(DJANGO_FILE_FORM_COVERAGE_JS=False)
     def test_media(self):
         media = admin.site.get_model_admin(Example).media
 

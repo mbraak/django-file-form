@@ -11,7 +11,7 @@ class ExampleAdmin(FileFormAdmin):
         if getattr(settings, "DJANGO_FILE_FORM_COVERAGE_JS", False):
             return "file_form/file_form.coverage.js"
         else:
-            return super().get_file_form_js()  # pragma: no cover
+            return super().get_file_form_js()
 
 
 class ExampleFileInline(admin.TabularInline):
