@@ -149,14 +149,6 @@ def get_tus_response():
     response["Tus-Version"] = ",".join(tus_api_version_supported)
     response["Tus-Extension"] = ",".join(tus_api_extensions)
     response["Tus-Checksum-Algorithm"] = ",".join(tus_checksum_algorithms)
-    response["Access-Control-Allow-Origin"] = "*"
-    response["Access-Control-Allow-Methods"] = "PATCH,HEAD,GET,POST,OPTIONS"
-    response["Access-Control-Expose-Headers"] = (
-        "Tus-Resumable,upload-length,upload-metadata,Location,Upload-Offset,Upload-Expires"
-    )
-    response["Access-Control-Allow-Headers"] = (
-        "Tus-Resumable,upload-length,upload-metadata,Location,Upload-Offset,Upload-Checksum,content-type"
-    )
     response["Cache-Control"] = "no-store"
 
     return response

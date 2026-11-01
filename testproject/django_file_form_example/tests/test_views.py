@@ -94,11 +94,14 @@ class ViewTests(TestCase):
             "checksum,creation,expiration,termination,file-check",
         )
         self.assertEqual(response["Tus-Checksum-Algorithm"], "md5,sha1,sha256,sha512")
-        self.assertIn(
-            "Upload-Checksum", response["Access-Control-Allow-Headers"].split(",")
-        )
-        self.assertIn(
-            "Upload-Expires", response["Access-Control-Expose-Headers"].split(",")
+
+        # The uploads are same origin, so there are no CORS headers
+        self.assertFalse(
+            [
+                header
+                for header in response.headers
+                if header.startswith("Access-Control")
+            ]
         )
         self.assertEqual(
             response["ResourceId"], response["Location"][len("/upload/") :]
