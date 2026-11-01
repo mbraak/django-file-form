@@ -79,7 +79,7 @@ try:
                 "type": "s3",
             }
 
-except (ImportError, ImproperlyConfigured):
+except (ImportError, ImproperlyConfigured):  # pragma: no cover
     # S3 is an optional feature but we keep the symbol
     class S3UploadedFileWithId:
         pass

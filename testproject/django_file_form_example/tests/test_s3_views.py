@@ -2,45 +2,14 @@ import json
 import os
 from unittest import mock
 
-import boto3
 from django.test import Client, TestCase, override_settings
-from moto import mock_aws
 
 from django_file_form.s3_multipart import utils
 from django_file_form.s3_multipart.utils import get_available_name, get_client
-
-BUCKET_NAME = "bucket1"
-REGION_NAME = "eu-west-1"
+from django_file_form_example.tests.utils.mock_s3 import BUCKET_NAME, MockS3Mixin
 
 
-@override_settings(
-    AWS_STORAGE_BUCKET_NAME=BUCKET_NAME,
-    AWS_S3_ENDPOINT_URL="",
-    AWS_ACCESS_KEY_ID="access1",
-    AWS_SECRET_ACCESS_KEY="secret1",
-    AWS_S3_REGION_NAME=REGION_NAME,
-)
-class S3ViewTests(TestCase):
-    def setUp(self):
-        super().setUp()
-
-        # A custom endpoint from the environment would bypass moto
-        environ_patch = mock.patch.dict(os.environ)
-        environ_patch.start()
-        self.addCleanup(environ_patch.stop)
-        os.environ.pop("AWS_S3_ENDPOINT_URL", None)
-        os.environ.pop("AWS_ENDPOINT_URL", None)
-
-        aws_mock = mock_aws()
-        aws_mock.start()
-        self.addCleanup(aws_mock.stop)
-
-        self.s3 = boto3.client("s3", region_name=REGION_NAME)
-        self.s3.create_bucket(
-            Bucket=BUCKET_NAME,
-            CreateBucketConfiguration={"LocationConstraint": REGION_NAME},
-        )
-
+class S3ViewTests(MockS3Mixin, TestCase):
     def test_create_upload(self):
         response = self.create_upload(filename="test.txt", s3_upload_dir="dir1")
 
