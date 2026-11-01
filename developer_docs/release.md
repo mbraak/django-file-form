@@ -11,14 +11,15 @@ The release requires a trusted publisher setup on pypi.org.
 ## Release steps
 
 1. Make sure `master` is green in CI.
-2. Update the version in `pyproject.toml`:
+2. Update the version:
 
-   ```toml
-   version = "5.0.1"
+   ```sh
+   uv version 5.0.1
    ```
 
-   Then run `uv lock` to update the version in `uv.lock`. CI installs with
-   `uv sync --locked`, which fails if the lockfile is out of date.
+   This updates the version in both `pyproject.toml` and `uv.lock`. Don't
+   edit `pyproject.toml` by hand: CI installs with `uv sync --locked`, which
+   fails if `uv.lock` is out of date.
 
 3. Add an entry at the top of `docs/changelog.md`, following the existing
    format:
