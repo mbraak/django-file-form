@@ -81,7 +81,7 @@ def handle_upload(request, resource_id):
         return cancel_upload(resource_id)
     if request.method == "HEAD":
         return upload_info(resource_id)
-    elif request.method == "PATCH":
+    else:  # PATCH; require_http_methods rejects other methods
         return upload_part(request, resource_id)
 
 

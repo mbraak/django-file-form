@@ -56,7 +56,7 @@ def get_client():
 
     # Creating a client isn't thread-safe and can fail intermittently, so retry a few times
     # https://github.com/boto/boto3/issues/801
-    for attempt in range(1, GET_CLIENT_MAX_ATTEMPTS + 1):
+    for attempt in range(1, GET_CLIENT_MAX_ATTEMPTS + 1):  # pragma: no branch
         try:
             return boto3.client(
                 "s3",
