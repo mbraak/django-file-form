@@ -252,13 +252,30 @@ class ViewTests(TestCase):
         )
 
         file = mock.MagicMock()
+        file.__enter__.return_value = file
         file.write.side_effect = OSError("disk full")
 
         with mock.patch.object(Path, "open", return_value=file):
             response = self.do_patch(client, resource_id, b"abc", offset=0)
 
         self.assertEqual(response.status_code, 500)
-        file.close.assert_called_once()
+        file.__exit__.assert_called_once()
+
+    def test_patch_when_file_cannot_be_opened(self):
+        client = Client()
+        resource_id = self.do_post(
+            client, upload_length=6, metadata={"filename": "test.txt"}
+        )
+        self.do_patch(client, resource_id, b"abc", offset=0)
+
+        with mock.patch.object(Path, "open", side_effect=OSError("permission denied")):
+            response = self.do_patch(client, resource_id, b"def", offset=3)
+
+        self.assertEqual(response.status_code, 500)
+
+        # The part that was already uploaded is kept, and the offset is unchanged
+        self.assertEqual(get_upload_path().joinpath(resource_id).read_bytes(), b"abc")
+        self.assertEqual(cache.get(f"tus-uploads/{resource_id}/offset"), 3)
 
     def test_patch_when_offset_expires(self):
         client = Client()

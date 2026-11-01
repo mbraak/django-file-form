@@ -140,19 +140,12 @@ def upload_part(request, resource_id):
     )
 
     try:
-        file = upload_file_path.open("r+b")
-    except OSError:
-        file = upload_file_path.open("wb")
-
-    if file:
-        try:
+        with upload_file_path.open("r+b") as file:
             file.seek(file_offset)
             file.write(request.body)
-        except OSError:
-            response.status_code = 500
-            return response
-        finally:
-            file.close()
+    except OSError:
+        response.status_code = 500
+        return response
 
     try:
         new_offset = cache.incr(f"tus-uploads/{resource_id}/offset", chunk_size)
