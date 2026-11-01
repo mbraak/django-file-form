@@ -2,6 +2,9 @@
 
 {% block title %}Upload success{% endblock %}
 
+{% block heading_container %}{% endblock %}
+
 {% block body %}
-    Upload success
+    <div class="success-message">Upload success</div>
+    <p><a href="{% url "index" %}">Back to all examples</a></p>
 {% endblock %}

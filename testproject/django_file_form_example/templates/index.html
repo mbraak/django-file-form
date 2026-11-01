@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Examples{% endblock %}
+
+{% block heading_container %}
+    <h1 class="page-title">Examples</h1>
+    <p class="intro">
+        Example pages for django-file-form. Each page demonstrates a feature of the file upload widget.
+    </p>
+{% endblock %}
+
+{% block body %}
+    {% for group_title, pages in groups %}
+        <section class="example-group">
+            <h2>{{ group_title }}</h2>
+            <ul class="example-list">
+                {% for page in pages %}
+                    <li>
+                        <a href="{{ page.url }}">{{ page.title }}</a>
+                        {% if page.description %}
+                            <span class="example-description">{{ page.description }}</span>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        </section>
+    {% endfor %}
+    <section class="example-group">
+        <h2>Admin</h2>
+        <ul class="example-list">
+            <li>
+                <a href="/admin/django_file_form_example/">Django admin</a>
+                <span class="example-description">File fields in the Django admin; requires a staff user.</span>
+            </li>
+        </ul>
+    </section>
+{% endblock %}

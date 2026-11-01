@@ -2,11 +2,29 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <title>{% block title %}{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}{% endblock %} · django-file-form</title>
+    <link rel="stylesheet" href="{% static "example.css" %}">
     {% block head %}{% endblock %}
 </head>
 <body>
-    {% block body %}
-    {% endblock %}
+    <header class="site-header">
+        <div class="site-header-inner">
+            <a class="site-name" href="{% url "index" %}">django-file-form</a>
+            <nav class="site-nav">
+                <a href="{% url "index" %}">All examples</a>
+                <a href="/admin/">Admin</a>
+            </nav>
+        </div>
+    </header>
+    <main class="content">
+        {% block heading_container %}
+            <h1 class="page-title">{% block heading %}{{ page_title }}{% endblock %}</h1>
+        {% endblock %}
+        <div class="card">
+            {% block body %}
+            {% endblock %}
+        </div>
+    </main>
 </body>
 </html>

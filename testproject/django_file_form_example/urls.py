@@ -12,6 +12,7 @@ urlpatterns = (
         name="with_custom_widget",
     ),
     path("disabled", views.DisabledExampleView.as_view(), name="disabled"),
+    path("index", views.IndexView.as_view(), name="index"),
     path("form_set", views.FormSetExampleView.as_view(), name="form_set_example"),
     path("login/", LoginView.as_view(template_name="admin/login.html")),
     path("model_form", views.CreateModelFormView.as_view(), name="model_form_create"),
@@ -48,7 +49,11 @@ urlpatterns = (
     ),
     path("placeholder", views.PlaceholderView.as_view(), name="placeholder_example"),
     path("s3single", views.S3SingleExampleView.as_view(), name="s3_example"),
-    path("s3multiple", views.S3MultipleExampleView.as_view(), name="s3_example"),
+    path(
+        "s3multiple",
+        views.S3MultipleExampleView.as_view(),
+        name="s3_multiple_example",
+    ),
     path(
         "s3placeholder",
         views.S3PlaceholderExampleView.as_view(),
