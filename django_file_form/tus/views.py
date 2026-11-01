@@ -63,6 +63,13 @@ def start_upload(request):
         response.reason_phrase = "Missing or invalid Upload-Length"
         return response
 
+    # The form id is needed to create the uploaded file record
+    if not metadata.get("formId"):
+        logger.info("TUS post without formId in Upload-Metadata")
+        response.status_code = 400
+        response.reason_phrase = "Missing formId in Upload-Metadata"
+        return response
+
     file_size = int(upload_length)
     resource_id = str(uuid.uuid4())
 

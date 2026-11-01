@@ -76,18 +76,26 @@ class ViewTests(TestCase):
             "/upload/",
             HTTP_TUS_RESUMABLE="1.0.0",
             HTTP_UPLOAD_LENGTH="6",
-            HTTP_UPLOAD_METADATA=f"{encode_metadata(filename='test.txt')},is_confidential,empty ",
+            HTTP_UPLOAD_METADATA=f"{encode_metadata(filename='test.txt', formId='form1')},is_confidential,empty ",
         )
         self.assertEqual(response.status_code, 201)
 
         self.assertEqual(
             cache.get(f"tus-uploads/{response['ResourceId']}/metadata"),
-            {"filename": "test.txt", "is_confidential": "", "empty": ""},
+            {
+                "filename": "test.txt",
+                "formId": "form1",
+                "is_confidential": "",
+                "empty": "",
+            },
         )
 
     def test_post_has_tus_headers(self):
         response = Client().post(
-            "/upload/", HTTP_TUS_RESUMABLE="1.0.0", HTTP_UPLOAD_LENGTH="6"
+            "/upload/",
+            HTTP_TUS_RESUMABLE="1.0.0",
+            HTTP_UPLOAD_LENGTH="6",
+            HTTP_UPLOAD_METADATA=encode_metadata(formId="form1"),
         )
 
         self.assertEqual(response["Tus-Resumable"], "1.0.0")
@@ -113,7 +121,10 @@ class ViewTests(TestCase):
     def test_post_has_upload_expires(self):
         before = time.time()
         response = Client().post(
-            "/upload/", HTTP_TUS_RESUMABLE="1.0.0", HTTP_UPLOAD_LENGTH="6"
+            "/upload/",
+            HTTP_TUS_RESUMABLE="1.0.0",
+            HTTP_UPLOAD_LENGTH="6",
+            HTTP_UPLOAD_METADATA=encode_metadata(formId="form1"),
         )
         after = time.time()
 
@@ -174,7 +185,10 @@ class ViewTests(TestCase):
             self.assertLogs("django_file_form.tus.views", level="ERROR"),
         ):
             response = Client().post(
-                "/upload/", HTTP_TUS_RESUMABLE="1.0.0", HTTP_UPLOAD_LENGTH="6"
+                "/upload/",
+                HTTP_TUS_RESUMABLE="1.0.0",
+                HTTP_UPLOAD_LENGTH="6",
+                HTTP_UPLOAD_METADATA=encode_metadata(formId="form1"),
             )
 
         self.assertEqual(response.status_code, 500)
@@ -499,6 +513,34 @@ class ViewTests(TestCase):
                 self.assertEqual(response.status_code, 400)
                 self.assertFalse(response.has_header("Location"))
 
+    def test_post_without_form_id(self):
+        for metadata in [{}, {"filename": "test.txt"}, {"formId": ""}]:
+            with self.subTest(metadata=metadata):
+                headers = {"HTTP_TUS_RESUMABLE": "1.0.0", "HTTP_UPLOAD_LENGTH": "6"}
+                if metadata:
+                    headers["HTTP_UPLOAD_METADATA"] = encode_metadata(**metadata)
+
+                response = Client().post("/upload/", **headers)
+
+                self.assertEqual(response.status_code, 400)
+                self.assertEqual(
+                    response.reason_phrase, "Missing formId in Upload-Metadata"
+                )
+                self.assertEqual(response["Tus-Resumable"], "1.0.0")
+                self.assertFalse(response.has_header("Location"))
+
+    def test_post_empty_file_without_form_id(self):
+        # Previously this failed with a database error when creating the record
+        response = Client().post(
+            "/upload/",
+            HTTP_TUS_RESUMABLE="1.0.0",
+            HTTP_UPLOAD_LENGTH="0",
+            HTTP_UPLOAD_METADATA=encode_metadata(filename="empty.txt"),
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(TemporaryUploadedFile.objects.count(), 0)
+
     def test_patch_exceeding_upload_length(self):
         client = Client()
         resource_id = self.do_post(
@@ -769,7 +811,10 @@ class ViewTests(TestCase):
     @override_settings(FILE_FORM_MUST_LOGIN=True)
     def test_post_must_login(self):
         response = Client().post(
-            "/upload/", HTTP_TUS_RESUMABLE="1.0.0", HTTP_UPLOAD_LENGTH="6"
+            "/upload/",
+            HTTP_TUS_RESUMABLE="1.0.0",
+            HTTP_UPLOAD_LENGTH="6",
+            HTTP_UPLOAD_METADATA=encode_metadata(formId="form1"),
         )
 
         self.assertEqual(response.status_code, 403)
@@ -821,8 +866,9 @@ class ViewTests(TestCase):
             "HTTP_UPLOAD_LENGTH": str(upload_length),
         }
 
-        if metadata:
-            headers["HTTP_UPLOAD_METADATA"] = encode_metadata(**metadata)
+        # A form id is required
+        metadata = {"formId": "form1", **(metadata or {})}
+        headers["HTTP_UPLOAD_METADATA"] = encode_metadata(**metadata)
 
         response = client.post("/upload/", **headers)
         self.assertEqual(response.status_code, 201)
