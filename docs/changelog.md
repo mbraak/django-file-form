@@ -10,6 +10,7 @@
 - `delete_unused_files` no longer deletes files of tus uploads that are still in progress; unfinished uploads are deleted once they expire.
 - Tus uploads: use the size of the received data instead of the `Content-Length` header for the upload offset.
 - Tus uploads: reject a POST without a valid `Upload-Length` header (`400`) and a chunk that exceeds the upload length (`413`).
+- Tus uploads: fix uploading an empty file. The tus client doesn't send a PATCH request for an empty file, so the uploaded file wasn't saved.
 
 **5.1.0 (october 13 2026)**
 

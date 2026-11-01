@@ -79,8 +79,10 @@ def start_upload(request):
     cache.add(f"tus-uploads/{resource_id}/metadata", metadata, conf.CACHE_TIMEOUT)
     cache.add(f"tus-uploads/{resource_id}/expires", expires, conf.CACHE_TIMEOUT)
 
+    upload_file_path = to_path(safe_join(get_upload_path(), resource_id))
+
     try:
-        with to_path(safe_join(get_upload_path(), resource_id)).open("wb"):
+        with upload_file_path.open("wb"):
             pass
     except OSError as e:
         logger.error(
@@ -96,7 +98,14 @@ def start_upload(request):
     response.status_code = 201
     response["Location"] = f"{request.get_full_path()}{resource_id}"
     response["ResourceId"] = resource_id
-    response["Upload-Expires"] = http_date(expires)
+
+    if file_size == 0:
+        # A tus client doesn't send a patch request for an empty file, so the upload
+        # is already finished
+        finish_upload(resource_id, metadata, upload_file_path)
+    else:
+        response["Upload-Expires"] = http_date(expires)
+
     return response
 
 
@@ -229,20 +238,24 @@ def write_chunk(request, resource_id, chunk):
     response.status_code = 204
 
     if file_size == new_offset:
-        # Create the record before removing the upload from the cache, so the file is
-        # never without both (see delete_unused_files)
-        create_uploaded_file_in_db(
-            field_name=metadata.get("fieldName"),
-            file_id=resource_id,
-            form_id=metadata.get("formId"),
-            original_filename=metadata.get("filename"),
-            uploaded_file=upload_file_path,
-        )
-
-        remove_resource_from_cache(resource_id)
+        finish_upload(resource_id, metadata, upload_file_path)
         del response["Upload-Expires"]
 
     return response
+
+
+def finish_upload(resource_id, metadata, upload_file_path):
+    # Create the record before removing the upload from the cache, so the file is
+    # never without both (see delete_unused_files)
+    create_uploaded_file_in_db(
+        field_name=metadata.get("fieldName"),
+        file_id=resource_id,
+        form_id=metadata.get("formId"),
+        original_filename=metadata.get("filename"),
+        uploaded_file=upload_file_path,
+    )
+
+    remove_resource_from_cache(resource_id)
 
 
 def cancel_upload(resource_id):
