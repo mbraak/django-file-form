@@ -2,7 +2,7 @@
 
 **Unreleased**
 
-- Check permissions in S3 views.
+- Apply `FILE_FORM_MUST_LOGIN` option to S3 views.
 
 **5.1.0 (october 13 2026)**
 

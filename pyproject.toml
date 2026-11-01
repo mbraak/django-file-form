@@ -80,6 +80,15 @@ dev = { requires-python = ">=3.12" }
 [tool.setuptools.packages.find]
 include = ["django_file_form*"]
 
+[tool.coverage.run]
+branch = true
+source = ["django_file_form", "testproject/django_file_form_example"]
+omit = ["*/migrations/*"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+
 [tool.ruff.lint]
 select = [
     "E",   # pycodestyle errors
