@@ -3,6 +3,7 @@
 **Unreleased**
 
 - Apply `FILE_FORM_MUST_LOGIN` option to S3 views.
+- Add `--dry-run` option to the `delete_unused_files` management command.
 
 **5.1.0 (october 13 2026)**
 
