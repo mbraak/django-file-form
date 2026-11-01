@@ -13,10 +13,14 @@ from .utils import (
     cache,
     create_uploaded_file_in_db,
     get_tus_response,
+    lock_resource,
     remove_resource_from_cache,
 )
 
 logger = logging.getLogger(__name__)
+
+# Seconds a delete request waits for a lock held by a patch request
+DELETE_LOCK_WAIT = 5
 
 
 @require_POST
@@ -106,6 +110,20 @@ def upload_info(resource_id):
 
 
 def upload_part(request, resource_id):
+    # Read the body before locking, so the lock isn't held while receiving the data
+    chunk = request.body
+
+    with lock_resource(resource_id) as locked:
+        if not locked:
+            logger.info(f"TUS patch resource_id={resource_id} is locked")
+            response = get_tus_response()
+            response.status_code = 423  # HTTP 423 Locked
+            return response
+
+        return write_chunk(request, resource_id, chunk)
+
+
+def write_chunk(request, resource_id, chunk):
     response = get_tus_response()
 
     filename = cache.get(f"tus-uploads/{resource_id}/filename")
@@ -126,8 +144,6 @@ def upload_part(request, resource_id):
     logger.info(
         f"TUS patch resource_id={resource_id} filename={filename} metadata={metadata} offset={offset} upload_file_path={upload_file_path}"
     )
-
-    chunk = request.body
 
     try:
         with upload_file_path.open("r+b") as file:
@@ -171,6 +187,19 @@ def upload_part(request, resource_id):
 def cancel_upload(resource_id):
     logger.info(f"TUS delete resource_id={resource_id}")
 
+    # The client sends the delete right after aborting a patch, which may still be
+    # writing its chunk. So wait for the lock instead of failing immediately.
+    with lock_resource(resource_id, wait=DELETE_LOCK_WAIT) as locked:
+        if not locked:
+            logger.info(f"TUS delete resource_id={resource_id} is locked")
+            response = get_tus_response()
+            response.status_code = 423  # HTTP 423 Locked
+            return response
+
+        return delete_upload(resource_id)
+
+
+def delete_upload(resource_id):
     remove_resource_from_cache(resource_id)
 
     upload_file_path = to_path(safe_join(get_upload_path(), resource_id))

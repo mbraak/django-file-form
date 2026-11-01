@@ -9,7 +9,7 @@ from django.test import Client, RequestFactory, TestCase, override_settings
 from django_file_form.django_util import get_upload_path
 from django_file_form.models import TemporaryUploadedFile
 from django_file_form.tus.utils import cache
-from django_file_form.tus.views import handle_upload
+from django_file_form.tus.views import handle_upload, write_chunk
 from django_file_form_example.tests.utils.test_utils import remove_test_files
 
 
@@ -244,6 +244,66 @@ class ViewTests(TestCase):
         )
         self.assertFalse(get_upload_path().joinpath(resource_id).exists())
 
+    def test_patch_when_locked(self):
+        client = Client()
+        resource_id = self.do_post(
+            client, upload_length=6, metadata={"filename": "test.txt"}
+        )
+
+        # Simulate a concurrent request that holds the lock
+        cache.add(f"tus-uploads/{resource_id}/lock", "other-request")
+
+        response = self.do_patch(client, resource_id, b"abc", offset=0)
+
+        self.assertEqual(response.status_code, 423)
+        self.assertEqual(response["Tus-Resumable"], "1.0.0")
+        self.assertEqual(cache.get(f"tus-uploads/{resource_id}/offset"), 0)
+        self.assertEqual(get_upload_path().joinpath(resource_id).read_bytes(), b"")
+
+        # The lock of the other request is kept
+        self.assertEqual(cache.get(f"tus-uploads/{resource_id}/lock"), "other-request")
+
+    def test_patch_releases_lock(self):
+        client = Client()
+        resource_id = self.do_post(
+            client,
+            upload_length=6,
+            metadata={"filename": "test.txt", "formId": "form1"},
+        )
+
+        response = self.do_patch(client, resource_id, b"abc", offset=0)
+        self.assertEqual(response.status_code, 204)
+        self.assertIsNone(cache.get(f"tus-uploads/{resource_id}/lock"))
+
+        # Also when the patch is rejected
+        response = self.do_patch(client, resource_id, b"def", offset=0)
+        self.assertEqual(response.status_code, 409)
+        self.assertIsNone(cache.get(f"tus-uploads/{resource_id}/lock"))
+
+        response = self.do_patch(client, resource_id, b"def", offset=3)
+        self.assertEqual(response.status_code, 204)
+
+    def test_patch_does_not_release_lock_of_other_request(self):
+        client = Client()
+        resource_id = self.do_post(
+            client, upload_length=6, metadata={"filename": "test.txt"}
+        )
+        lock_key = f"tus-uploads/{resource_id}/lock"
+
+        # Simulate that the lock expires during the request and another request takes it
+        def write_chunk_and_lose_lock(*args, **kwargs):
+            cache.set(lock_key, "other-request")
+            return write_chunk(*args, **kwargs)
+
+        with mock.patch(
+            "django_file_form.tus.views.write_chunk",
+            side_effect=write_chunk_and_lose_lock,
+        ):
+            response = self.do_patch(client, resource_id, b"abc", offset=0)
+
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(cache.get(lock_key), "other-request")
+
     def test_patch_with_wrong_offset(self):
         client = Client()
         resource_id = self.do_post(
@@ -371,6 +431,60 @@ class ViewTests(TestCase):
     def test_delete_with_unknown_resource_id(self):
         response = Client().delete("/upload/unknown")
         self.assertEqual(response.status_code, 204)
+
+    def test_delete_releases_lock(self):
+        client = Client()
+        resource_id = self.do_post(
+            client, upload_length=6, metadata={"filename": "test.txt"}
+        )
+
+        response = client.delete(f"/upload/{resource_id}")
+
+        self.assertEqual(response.status_code, 204)
+        self.assertIsNone(cache.get(f"tus-uploads/{resource_id}/lock"))
+
+    def test_delete_waits_for_lock(self):
+        client = Client()
+        resource_id = self.do_post(
+            client, upload_length=6, metadata={"filename": "test.txt"}
+        )
+        lock_key = f"tus-uploads/{resource_id}/lock"
+
+        # Simulate a patch request that holds the lock and finishes while the delete waits
+        cache.add(lock_key, "patch-request")
+
+        def release_lock(seconds):
+            cache.delete(lock_key)
+
+        with mock.patch(
+            "django_file_form.tus.utils.time.sleep", side_effect=release_lock
+        ) as sleep:
+            response = client.delete(f"/upload/{resource_id}")
+
+        self.assertEqual(response.status_code, 204)
+        sleep.assert_called_once()
+        self.assertFalse(get_upload_path().joinpath(resource_id).exists())
+        self.assertIsNone(cache.get(f"tus-uploads/{resource_id}/offset"))
+        self.assertIsNone(cache.get(lock_key))
+
+    @mock.patch("django_file_form.tus.views.DELETE_LOCK_WAIT", 0)
+    def test_delete_when_locked(self):
+        client = Client()
+        resource_id = self.do_post(
+            client, upload_length=6, metadata={"filename": "test.txt"}
+        )
+        lock_key = f"tus-uploads/{resource_id}/lock"
+
+        # Simulate a patch request that holds the lock
+        cache.add(lock_key, "patch-request")
+
+        response = client.delete(f"/upload/{resource_id}")
+
+        self.assertEqual(response.status_code, 423)
+        self.assertEqual(response["Tus-Resumable"], "1.0.0")
+        self.assertTrue(get_upload_path().joinpath(resource_id).exists())
+        self.assertEqual(cache.get(f"tus-uploads/{resource_id}/offset"), 0)
+        self.assertEqual(cache.get(lock_key), "patch-request")
 
     def test_unsupported_method(self):
         response = Client().get("/upload/unknown")

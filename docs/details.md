@@ -157,6 +157,7 @@ Django-file-form uses the Django cache for storing data while uploading files.
 - The default cache timeout is 24 hours. An upload will fail if it takes longer than that.
 - The timeout is configurable using the `FILE_FORM_CACHE_TIMEOUT` setting. See the 'Python settings' section.
 - The cache backed is configurable using `FILE_FORM_CACHE`.
+- The cache is also used to lock an upload while a chunk is written or the upload is deleted, so concurrent requests for the same upload can't corrupt it. A chunk request for a locked upload gets a `423 Locked` response; the client retries it when `retryDelays` is set. A delete request waits up to 5 seconds for the lock before responding with `423 Locked`. Locking relies on `cache.add` being atomic, which is the case for the memcached, redis, database and local memory backends, but not for the file based cache. Note that the local memory cache is per process.
 
 ## Disabled property
 

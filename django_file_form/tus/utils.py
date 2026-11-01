@@ -1,4 +1,7 @@
 import os
+import time
+import uuid
+from contextlib import contextmanager
 from pathlib import Path
 
 from django.conf import settings
@@ -10,6 +13,48 @@ from django.http import HttpResponse
 from django_file_form.models import TemporaryUploadedFile, get_temp_storage_class
 
 cache = caches[getattr(settings, "FILE_FORM_CACHE", "default")]
+
+# Seconds after which a lock expires, e.g. when a worker dies while holding it
+LOCK_TIMEOUT = 60
+
+
+LOCK_POLL_INTERVAL = 0.1
+
+
+def acquire_lock(lock_key, token, wait):
+    deadline = time.monotonic() + wait
+
+    while not cache.add(lock_key, token, LOCK_TIMEOUT):
+        if time.monotonic() >= deadline:
+            return False
+
+        time.sleep(LOCK_POLL_INTERVAL)
+
+    return True
+
+
+@contextmanager
+def lock_resource(resource_id, wait=0):
+    """
+    Lock an upload resource, so concurrent requests can't change it at the same time.
+
+    Waits at most `wait` seconds for the lock. Yields True if the lock was acquired
+    and False if the resource is still locked. Uses cache.add, which is atomic for
+    the memcached, redis, database and local memory cache backends.
+    """
+    lock_key = f"tus-uploads/{resource_id}/lock"
+    token = str(uuid.uuid4())
+
+    if not acquire_lock(lock_key, token, wait):
+        yield False
+        return
+
+    try:
+        yield True
+    finally:
+        # Don't release a lock that expired and was acquired by another request
+        if cache.get(lock_key) == token:
+            cache.delete(lock_key)
 
 
 def remove_resource_from_cache(resource_id):
