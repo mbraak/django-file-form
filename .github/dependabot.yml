@@ -4,6 +4,10 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    # Matches exclude-newer = "3 days" in pyproject.toml; without it, updates to
+    # releases younger than 3 days can't be locked
+    cooldown:
+      default-days: 3
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
