@@ -4,7 +4,7 @@ from django.urls import path
 from . import views
 
 urlpatterns = (
-    path("", views.ExampleView.as_view(), name="example"),
+    path("", views.IndexView.as_view(), name="index"),
     path("accept", views.WithAcceptExample.as_view(), name="with_accept_example"),
     path(
         "custom_widget",
@@ -12,7 +12,6 @@ urlpatterns = (
         name="with_custom_widget",
     ),
     path("disabled", views.DisabledExampleView.as_view(), name="disabled"),
-    path("index", views.IndexView.as_view(), name="index"),
     path("form_set", views.FormSetExampleView.as_view(), name="form_set_example"),
     path("login/", LoginView.as_view(template_name="admin/login.html")),
     path("model_form", views.CreateModelFormView.as_view(), name="model_form_create"),
@@ -48,6 +47,7 @@ urlpatterns = (
         name="multiple_without_js_example",
     ),
     path("placeholder", views.PlaceholderView.as_view(), name="placeholder_example"),
+    path("single", views.ExampleView.as_view(), name="example"),
     path("s3single", views.S3SingleExampleView.as_view(), name="s3_example"),
     path(
         "s3multiple",
