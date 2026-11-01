@@ -36,7 +36,7 @@ Changelog = "https://mbraak.github.io/django-file-form/changelog/"
 django = ["Django>=6.1,<6.2"]
 # Packages used by the example project in testproject/
 testproject = [
-    "boto3==1.43.108",
+    "boto3==1.43.121",
     "django-csp==4.0",
     "django-formtools==2.7",
     "django-storages==1.14.6",
