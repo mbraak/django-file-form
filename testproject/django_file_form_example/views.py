@@ -17,8 +17,8 @@ from django_file_form.type_util import with_typehint
 from django_file_form.uploaded_file import PlaceholderUploadedFile
 
 from . import forms
-from .pages import get_index_groups
 from .models import Example, Example2, ExampleFile
+from .pages import get_index_groups
 
 
 def file_form_js():
