@@ -11,6 +11,8 @@
 - Tus uploads: use the size of the received data instead of the `Content-Length` header for the upload offset.
 - Tus uploads: reject a POST without a valid `Upload-Length` header or without a `formId` in the `Upload-Metadata` header (`400`), and a chunk that exceeds the upload length (`413`).
 - Tus uploads: respond with `412` to a request without a supported `Tus-Resumable` header (was `400` for a POST and not checked for other requests), and with `415` to a PATCH request without `Content-Type: application/offset+octet-stream`.
+- Tus uploads: respond to `OPTIONS` requests with the configuration of the tus server.
+- Add the `FILE_FORM_MAX_UPLOAD_SIZE` setting for the maximum size of a tus upload.
 - Tus uploads: fix uploading an empty file. The tus client doesn't send a PATCH request for an empty file, so the uploaded file wasn't saved.
 
 **5.1.0 (october 13 2026)**

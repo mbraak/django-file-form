@@ -13,6 +13,7 @@ from django.core.files import File
 from django.core.files.storage import FileSystemStorage
 from django.http import HttpResponse
 
+from django_file_form import conf
 from django_file_form.models import TemporaryUploadedFile, get_temp_storage_class
 
 cache = caches[getattr(settings, "FILE_FORM_CACHE", "default")]
@@ -149,6 +150,11 @@ def get_tus_response():
     response["Tus-Version"] = ",".join(tus_api_version_supported)
     response["Tus-Extension"] = ",".join(tus_api_extensions)
     response["Tus-Checksum-Algorithm"] = ",".join(tus_checksum_algorithms)
+
+    max_upload_size = conf.get_max_upload_size()
+    if max_upload_size is not None:
+        response["Tus-Max-Size"] = max_upload_size
+
     response["Cache-Control"] = "no-store"
 
     return response

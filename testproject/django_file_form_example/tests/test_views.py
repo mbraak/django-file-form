@@ -871,6 +871,76 @@ class ViewTests(TestCase):
         response = Client().get("/upload/unknown")
         self.assertEqual(response.status_code, 405)
 
+    def test_options(self):
+        # An OPTIONS request doesn't need a Tus-Resumable header
+        for url in ["/upload/", "/upload/unknown"]:
+            with self.subTest(url=url):
+                response = Client().options(url)
+
+                self.assertEqual(response.status_code, 204)
+                self.assertEqual(response["Tus-Version"], "1.0.0")
+                self.assertEqual(
+                    response["Tus-Extension"],
+                    "checksum,creation,expiration,termination,file-check",
+                )
+                self.assertEqual(
+                    response["Tus-Checksum-Algorithm"], "md5,sha1,sha256,sha512"
+                )
+                self.assertFalse(response.has_header("Tus-Max-Size"))
+
+    @override_settings(FILE_FORM_MAX_UPLOAD_SIZE=1000)
+    def test_options_with_max_upload_size(self):
+        response = Client().options("/upload/")
+
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(response["Tus-Max-Size"], "1000")
+
+    @override_settings(FILE_FORM_MUST_LOGIN=True)
+    def test_options_does_not_need_login(self):
+        response = Client().options("/upload/")
+
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(response["Tus-Version"], "1.0.0")
+
+    def test_options_does_not_change_upload(self):
+        client = Client()
+        resource_id = self.do_post(
+            client, upload_length=6, metadata={"filename": "test.txt"}
+        )
+
+        response = client.options(f"/upload/{resource_id}")
+
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(cache.get(f"tus-uploads/{resource_id}/offset"), 0)
+        self.assertTrue(get_upload_path().joinpath(resource_id).exists())
+
+    @override_settings(FILE_FORM_MAX_UPLOAD_SIZE=6)
+    def test_post_with_max_upload_size(self):
+        client = Client()
+
+        # The maximum size is allowed
+        resource_id = self.do_post(
+            client, upload_length=6, metadata={"filename": "test.txt"}
+        )
+        response = self.do_patch(client, resource_id, b"abcdef", offset=0)
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(response["Tus-Max-Size"], "6")
+
+        response = client.post(
+            "/upload/",
+            HTTP_TUS_RESUMABLE="1.0.0",
+            HTTP_UPLOAD_LENGTH="7",
+            HTTP_UPLOAD_METADATA=encode_metadata(filename="test.txt", formId="form1"),
+        )
+
+        self.assertEqual(response.status_code, 413)
+        self.assertEqual(
+            response.reason_phrase, "Upload-Length exceeds the maximum upload size"
+        )
+        self.assertEqual(response["Tus-Max-Size"], "6")
+        self.assertFalse(response.has_header("Location"))
+        self.assertEqual(TemporaryUploadedFile.objects.count(), 1)
+
     @override_settings(FILE_FORM_MUST_LOGIN=True)
     def test_post_must_login(self):
         response = Client().post(

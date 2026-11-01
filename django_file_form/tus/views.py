@@ -2,10 +2,11 @@ import base64
 import logging
 import time
 import uuid
+from functools import wraps
 
 from django.utils._os import safe_join, to_path
 from django.utils.http import http_date
-from django.views.decorators.http import require_http_methods, require_POST
+from django.views.decorators.http import require_http_methods
 
 from django_file_form import conf
 from django_file_form.django_util import get_upload_path, permission_required
@@ -44,7 +45,28 @@ def check_tus_resumable(request):
     return response
 
 
-@require_POST
+def handle_options(view):
+    """
+    Respond to an OPTIONS request with the configuration of the tus server.
+
+    An OPTIONS request doesn't need to be logged in and doesn't include a
+    Tus-Resumable header.
+    """
+
+    @wraps(view)
+    def wrapper(request, *args, **kwargs):
+        if request.method == "OPTIONS":
+            response = get_tus_response()
+            response.status_code = 204
+            return response
+
+        return view(request, *args, **kwargs)
+
+    return wrapper
+
+
+@require_http_methods(["OPTIONS", "POST"])
+@handle_options
 @permission_required
 def start_upload(request):
     error_response = check_tus_resumable(request)
@@ -85,6 +107,16 @@ def start_upload(request):
         return response
 
     file_size = int(upload_length)
+
+    max_upload_size = conf.get_max_upload_size()
+    if max_upload_size is not None and file_size > max_upload_size:
+        logger.info(
+            f"TUS post Upload-Length={file_size} exceeds maximum size {max_upload_size}"
+        )
+        response.status_code = 413  # HTTP 413 Content Too Large
+        response.reason_phrase = "Upload-Length exceeds the maximum upload size"
+        return response
+
     resource_id = str(uuid.uuid4())
 
     # The upload expires when its data is removed from the cache
@@ -130,7 +162,8 @@ def start_upload(request):
     return response
 
 
-@require_http_methods(["DELETE", "HEAD", "PATCH"])
+@require_http_methods(["DELETE", "HEAD", "OPTIONS", "PATCH"])
+@handle_options
 @permission_required
 def handle_upload(request, resource_id):
     error_response = check_tus_resumable(request)
@@ -141,7 +174,7 @@ def handle_upload(request, resource_id):
         return cancel_upload(resource_id)
     if request.method == "HEAD":
         return upload_info(resource_id)
-    else:  # PATCH; require_http_methods rejects other methods
+    else:  # PATCH; OPTIONS is handled by handle_options and other methods are rejected
         return upload_part(request, resource_id)
 
 

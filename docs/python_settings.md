@@ -7,6 +7,13 @@ Settings in `settings.py`:
     * The Default is 24 hours
     * A tus upload expires this many seconds after it is started. The `delete_unused_files` command deletes files of unfinished uploads after they expire.
 
+* **FILE_FORM_MAX_UPLOAD_SIZE** (int)
+    * Maximum size of an uploaded file in bytes.
+    * The default is `None`: no maximum.
+    * Applies to tus uploads (not to uploads to S3). An upload of a larger file is rejected with `413` before any data is sent, and the browser shows "Upload failed".
+    * The tus server reports the maximum in the `Tus-Max-Size` header.
+    * This doesn't validate the file in the form; use a validator on the form field for a proper error message.
+
 * **FILE_FORM_MUST_LOGIN** (True / False):
     * Must the user be logged in to upload a file.
     * The default is `False`.
