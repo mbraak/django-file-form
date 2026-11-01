@@ -17,6 +17,9 @@ The release requires a trusted publisher setup on pypi.org.
    version = "5.0.1"
    ```
 
+   Then run `uv lock` to update the version in `uv.lock`. CI installs with
+   `uv sync --locked`, which fails if the lockfile is out of date.
+
 3. Add an entry at the top of `docs/changelog.md`, following the existing
    format:
 
@@ -30,7 +33,9 @@ The release requires a trusted publisher setup on pypi.org.
    - the classifiers in `pyproject.toml`
    - the supported versions in `docs/index.md`
    - the Django matrix in `.github/workflows/ci.yml`
-5. Commit and push to `master`, and wait for CI to pass.
+   - the `django` dependency group in `pyproject.toml` (the version used for
+     local development), followed by `uv lock`
+5. Commit (including `uv.lock`) and push to `master`, and wait for CI to pass.
 6. Tag the commit and push the tag. The tag must be exactly the version
    number, without a `v` prefix:
 
@@ -54,7 +59,7 @@ soon as step 5 is pushed.
 
 1. **Build**: checks that the tag equals the version in `pyproject.toml`,
    rebuilds the javascript bundle with `npm run build`, builds the wheel and
-   sdist with `python -m build`, and validates them with `twine check`.
+   sdist with `uv build`, and validates them with `twine check`.
 2. **Publish to PyPI**: uploads the wheel and sdist using trusted publishing.
 3. **Create GitHub release**: creates a release for the tag with
    auto-generated notes and the built files attached.
