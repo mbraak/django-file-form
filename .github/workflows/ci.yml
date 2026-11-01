@@ -48,13 +48,15 @@ jobs:
       - name: Install javascript packages
         working-directory: ./frontend
         run: npm clean-install --audit=false --fund=false --loglevel=http
-      - name: Set up Python
-        uses: actions/setup-python@v7
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v10.3.3
         with:
           python-version: "3.12"
-          cache: "pip"
       - name: Install python packages
-        run: pip install ${{ matrix.django }} && pip install -r testproject/requirements.txt && pip install -r testproject/requirements_test.txt && pip install -r testproject/requirements_ci.txt && pip install -e .
+        run: |
+          uv sync --locked
+          uv pip install "${{ matrix.django }}"
+          echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
       - name: Run django check
         run: python testproject/manage.py check
       - name: Check migrations
