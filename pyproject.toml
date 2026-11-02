@@ -46,7 +46,7 @@ test = [
     "cryptography==50.0.2",
     "Flask==3.1.3",
     "Flask-Cors==6.0.5",
-    "moto==5.2.4",
+    "moto==5.2.5",
     "psycopg==3.3.6",
     "selenium==4.51.0",
     "Werkzeug==3.1.9",
