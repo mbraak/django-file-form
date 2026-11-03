@@ -40,6 +40,8 @@ class S3Upload extends BaseUpload {
   public onProgress?: (bytesUploaded: number, bytesTotal: number) => void;
   public onSuccess?: () => void;
 
+  // Ends the wait for a retry early
+  private cancelRetryWait?: () => void;
   private chunks: Blob[];
   private chunkState: ChunkState[];
   private createdPromise: Promise<MultipartUpload>;
@@ -100,13 +102,15 @@ class S3Upload extends BaseUpload {
   public async abort(): Promise<void> {
     this.stopped = true;
     clearTimeout(this.retryTimeout);
+    this.cancelRetryWait?.();
 
     for (const xhr of this.uploading.slice()) {
       xhr.abort();
     }
     this.uploading = [];
 
-    await this.createdPromise;
+    // If creating the upload failed, there is nothing to abort
+    await this.createdPromise.catch(() => undefined);
     await this.abortMultipartUpload();
   }
 
@@ -155,13 +159,17 @@ class S3Upload extends BaseUpload {
       return Promise.resolve();
     }
 
-    return completeMultipartUpload({
-      csrfToken: this.csrfToken,
-      endpoint: this.endpoint,
-      key: this.key,
-      parts: this.parts,
-      uploadId: this.uploadId
-    }).then(
+    const { key, uploadId } = this;
+
+    return this.requestWithRetries(() =>
+      completeMultipartUpload({
+        csrfToken: this.csrfToken,
+        endpoint: this.endpoint,
+        key,
+        parts: this.parts,
+        uploadId
+      })
+    ).then(
       () => {
         if (this.onSuccess) {
           this.onSuccess();
@@ -174,12 +182,14 @@ class S3Upload extends BaseUpload {
   }
 
   private createUpload(): Promise<void> {
-    this.createdPromise = createMultipartUpload({
-      csrfToken: this.csrfToken,
-      endpoint: this.endpoint,
-      file: this.file,
-      s3UploadDir: this.s3UploadDir
-    });
+    this.createdPromise = this.requestWithRetries(() =>
+      createMultipartUpload({
+        csrfToken: this.csrfToken,
+        endpoint: this.endpoint,
+        file: this.file,
+        s3UploadDir: this.s3UploadDir
+      })
+    );
     return this.createdPromise
       .then((result: MultipartUpload | null) => {
         const valid =
@@ -203,15 +213,18 @@ class S3Upload extends BaseUpload {
       });
   }
 
-  // The upload has failed and can't be continued
+  // The upload has failed and can't be continued.
+  // An error after the upload is aborted or has already failed is ignored.
   private handleError(error: unknown): void {
-    if (!this.stopped) {
-      this.stopped = true;
-
-      // Remove the parts that are already uploaded from S3. This is cleanup, so a
-      // failure is ignored; the upload has already failed.
-      this.abortMultipartUpload().catch(() => undefined);
+    if (this.stopped) {
+      return;
     }
+
+    this.stopped = true;
+
+    // Remove the parts that are already uploaded from S3. This is cleanup, so a
+    // failure is ignored; the upload has already failed.
+    this.abortMultipartUpload().catch(() => undefined);
 
     if (this.onError) {
       this.onError(error);
@@ -269,6 +282,31 @@ class S3Upload extends BaseUpload {
     }
   }
 
+  // Send a request to the S3 views; retry it after a temporary error
+  private async requestWithRetries<T>(request: () => Promise<T>): Promise<T> {
+    for (let attempt = 0; ; attempt += 1) {
+      try {
+        return await request();
+      } catch (error) {
+        const delay = this.retryDelays[attempt];
+
+        if (
+          this.stopped ||
+          delay === undefined ||
+          !isRetryableRequestError(error)
+        ) {
+          throw error;
+        }
+
+        const waited = await this.waitForRetry(delay);
+
+        if (!waited) {
+          throw error;
+        }
+      }
+    }
+  }
+
   // Retry uploading a part after a temporary error, or fail the upload.
   // A retry requests a new url for the part, because the previous one may have expired.
   private retryPartOrFail(
@@ -291,10 +329,11 @@ class S3Upload extends BaseUpload {
     // The data of the failed attempt is sent again
     this.onPartProgress(index, 0);
 
-    this.retryTimeout = setTimeout(() => {
-      this.retryTimeout = undefined;
-      void this.uploadPart(index, attempt + 1);
-    }, delay);
+    void this.waitForRetry(delay).then(waited => {
+      if (waited) {
+        void this.uploadPart(index, attempt + 1);
+      }
+    });
   }
 
   // attempt: 0 for the first attempt, 1 for the first retry, etc.
@@ -406,6 +445,19 @@ class S3Upload extends BaseUpload {
     } else {
       void this.uploadPart(index, 0);
     }
+  }
+
+  // Wait before a retry. Resolves with true after the delay, or early with false
+  // when the upload is aborted.
+  private waitForRetry(delay: number): Promise<boolean> {
+    return new Promise(resolve => {
+      this.cancelRetryWait = () => {
+        resolve(false);
+      };
+      this.retryTimeout = setTimeout(() => {
+        resolve(true);
+      }, delay);
+    });
   }
 }
 

@@ -83,10 +83,37 @@ const startUpload = async (file?: File) => {
 };
 
 describe("abort", () => {
-  test("rejects with an error when the upload is not started", async () => {
-    await expect(createS3Upload().abort()).rejects.toThrow(
-      "Upload not created"
+  test("does nothing when the upload is not started", async () => {
+    const abortRequest = vi.fn();
+    server.use(
+      http.delete("http://s3_endpoint.net/*", () => {
+        abortRequest();
+        return HttpResponse.json({});
+      })
     );
+
+    await expect(createS3Upload().abort()).resolves.toBeUndefined();
+
+    expect(abortRequest).not.toHaveBeenCalled();
+  });
+
+  test("resolves when creating the upload failed", async () => {
+    server.use(
+      http.post("http://s3_endpoint.net/", () =>
+        HttpResponse.json({}, { status: 500 })
+      )
+    );
+
+    const s3Upload = createS3Upload();
+    const onError = vi.fn();
+    s3Upload.onError = onError;
+    s3Upload.start();
+
+    await waitFor(() => {
+      expect(onError).toHaveBeenCalledOnce();
+    });
+
+    await expect(s3Upload.abort()).resolves.toBeUndefined();
   });
 
   test("aborts the multipart upload after the file is uploaded", async () => {
@@ -762,6 +789,185 @@ describe("retries", () => {
 
     expect(abortRequest).toHaveBeenCalledOnce();
     expect(urlRequest).not.toHaveBeenCalled();
+  });
+
+  // Respond to the create requests with the given responses, in order. After that, succeed.
+  const respondToCreate = (responses: (() => Response)[]) => {
+    const createRequest = vi.fn();
+
+    server.use(
+      http.post("http://s3_endpoint.net/", () => {
+        createRequest();
+        const respond = responses.shift();
+        return respond
+          ? respond()
+          : HttpResponse.json({ key: "test-key-1", uploadId: "upload-id-1" });
+      })
+    );
+
+    return createRequest;
+  };
+
+  // Respond to the complete requests with the given responses, in order. After that, succeed.
+  const respondToComplete = (responses: (() => Response)[]) => {
+    const completeRequest = vi.fn<(body: unknown) => void>();
+
+    server.use(
+      http.post(
+        "http://s3_endpoint.net/upload-id-1/complete",
+        async ({ request }) => {
+          completeRequest(await request.json());
+          const respond = responses.shift();
+          return respond ? respond() : HttpResponse.json({});
+        }
+      )
+    );
+
+    return completeRequest;
+  };
+
+  const viewError = (status: number) => () =>
+    HttpResponse.json({}, { status });
+
+  test.each([
+    { name: "a server error", respond: viewError(500) },
+    { name: "a network error", respond: () => HttpResponse.error() }
+  ])("retries creating the upload after $name", async ({ respond }) => {
+    const createRequest = respondToCreate([respond]);
+
+    const { onError, onSuccess } = startWithCallbacks([0]);
+
+    await waitFor(() => {
+      expect(onSuccess).toHaveBeenCalledOnce();
+    });
+
+    expect(onError).not.toHaveBeenCalled();
+    expect(createRequest).toHaveBeenCalledTimes(2);
+  });
+
+  test("does not retry creating the upload after a 403 response", async () => {
+    const createRequest = respondToCreate([viewError(403)]);
+
+    const { onError } = startWithCallbacks([0, 0]);
+
+    await waitFor(() => {
+      expect(onError).toHaveBeenCalledExactlyOnceWith(new RequestError(403));
+    });
+
+    expect(createRequest).toHaveBeenCalledOnce();
+  });
+
+  test("fails after the last retry of creating the upload", async () => {
+    const abortRequest = recordAbortRequests();
+    const createRequest = respondToCreate([
+      viewError(500),
+      viewError(500),
+      viewError(500)
+    ]);
+
+    const { onError, onSuccess } = startWithCallbacks([0, 0]);
+
+    await waitFor(() => {
+      expect(onError).toHaveBeenCalledExactlyOnceWith(new RequestError(500));
+    });
+
+    expect(createRequest).toHaveBeenCalledTimes(3);
+    expect(onSuccess).not.toHaveBeenCalled();
+    // There is no upload to abort
+    expect(abortRequest).not.toHaveBeenCalled();
+  });
+
+  test("retries completing the upload after a server error", async () => {
+    const completeRequest = respondToComplete([viewError(503)]);
+
+    const { onError, onSuccess } = startWithCallbacks([0]);
+
+    await waitFor(() => {
+      expect(onSuccess).toHaveBeenCalledOnce();
+    });
+
+    expect(onError).not.toHaveBeenCalled();
+    expect(completeRequest).toHaveBeenCalledTimes(2);
+
+    const parts = { parts: [{ ETag: "etag1", PartNumber: 1 }] };
+
+    expect(completeRequest).toHaveBeenNthCalledWith(1, parts);
+    expect(completeRequest).toHaveBeenNthCalledWith(2, parts);
+  });
+
+  test("fails after the last retry of completing the upload and aborts it", async () => {
+    const abortRequest = recordAbortRequests();
+    const completeRequest = respondToComplete([viewError(500), viewError(500)]);
+
+    const { onError, onSuccess } = startWithCallbacks([0]);
+
+    await waitFor(() => {
+      expect(onError).toHaveBeenCalledExactlyOnceWith(new RequestError(500));
+    });
+
+    expect(completeRequest).toHaveBeenCalledTimes(2);
+    expect(onSuccess).not.toHaveBeenCalled();
+
+    await waitFor(() => {
+      expect(abortRequest).toHaveBeenCalledOnce();
+    });
+  });
+
+  // The retry delay is longer than the timeout of the test, so these tests also check that
+  // abort doesn't wait for the delay
+  test("stops waiting to retry creating the upload when it is aborted", async () => {
+    const abortRequest = recordAbortRequests();
+    const createRequest = respondToCreate([viewError(500)]);
+
+    const { onError, onSuccess, s3Upload } = startWithCallbacks([60_000]);
+
+    await waitFor(() => {
+      expect(createRequest).toHaveBeenCalledOnce();
+    });
+
+    await s3Upload.abort();
+
+    expect(createRequest).toHaveBeenCalledOnce();
+    expect(abortRequest).not.toHaveBeenCalled();
+    expect(onError).not.toHaveBeenCalled();
+    expect(onSuccess).not.toHaveBeenCalled();
+  });
+
+  test("stops waiting to retry completing the upload when it is aborted", async () => {
+    const abortRequest = recordAbortRequests();
+    const completeRequest = respondToComplete([viewError(500)]);
+
+    const { onError, onSuccess, s3Upload } = startWithCallbacks([60_000]);
+
+    await waitFor(() => {
+      expect(completeRequest).toHaveBeenCalledOnce();
+    });
+
+    await s3Upload.abort();
+    await delay(50);
+
+    expect(completeRequest).toHaveBeenCalledOnce();
+    expect(abortRequest).toHaveBeenCalledOnce();
+    expect(onError).not.toHaveBeenCalled();
+    expect(onSuccess).not.toHaveBeenCalled();
+  });
+
+  test("stops waiting to retry a part when the upload is aborted", async () => {
+    const abortRequest = recordAbortRequests();
+    const { putRequest } = respondToPart([], [partError(500)]);
+
+    const { onError, s3Upload } = startWithCallbacks([60_000]);
+
+    await waitFor(() => {
+      expect(putRequest).toHaveBeenCalledOnce();
+    });
+
+    await s3Upload.abort();
+    await delay(50);
+
+    expect(putRequest).toHaveBeenCalledOnce();
+    expect(abortRequest).toHaveBeenCalledOnce();
+    expect(onError).not.toHaveBeenCalled();
   });
 
   test("uses the default retry delays when retryDelays is null", async () => {
