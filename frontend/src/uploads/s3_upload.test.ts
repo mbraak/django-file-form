@@ -264,6 +264,50 @@ describe("start", () => {
     });
   });
 
+  test("calls onError when creating the multipart upload returns an error status", async () => {
+    server.use(
+      http.post("http://s3_endpoint.net/", () =>
+        HttpResponse.json({ status: "permission denied" }, { status: 403 })
+      )
+    );
+
+    const s3Upload = createS3Upload();
+    const onError = vi.fn();
+    s3Upload.onError = onError;
+
+    s3Upload.start();
+
+    await waitFor(() => {
+      expect(onError).toHaveBeenCalledWith(
+        new Error("S3 upload request failed with status 403")
+      );
+    });
+  });
+
+  test("calls onError instead of onSuccess when completing the upload returns an error status", async () => {
+    server.use(
+      http.post("http://s3_endpoint.net/upload-id-1/complete", () =>
+        HttpResponse.json({}, { status: 500 })
+      )
+    );
+
+    const s3Upload = createS3Upload();
+    const onError = vi.fn();
+    const onSuccess = vi.fn();
+    s3Upload.onError = onError;
+    s3Upload.onSuccess = onSuccess;
+
+    s3Upload.start();
+
+    await waitFor(() => {
+      expect(onError).toHaveBeenCalledWith(
+        new Error("S3 upload request failed with status 500")
+      );
+    });
+
+    expect(onSuccess).not.toHaveBeenCalled();
+  });
+
   test("calls onError when the result of createMultipartUpload is invalid", async () => {
     server.use(
       http.post("http://s3_endpoint.net/", () =>

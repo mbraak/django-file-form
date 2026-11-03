@@ -19,6 +19,17 @@ export interface UrlInfo {
 
 export const MB = 1024 * 1024;
 
+// Reject if the response has an error status; otherwise return the json data
+const getJsonData = async <T>(response: Response): Promise<T> => {
+  if (!response.ok) {
+    throw new Error(
+      `S3 upload request failed with status ${response.status.toString()}`
+    );
+  }
+
+  return (await response.json()) as T;
+};
+
 interface AbortMultipartUploadParameters {
   csrfToken: string;
   endpoint: string;
@@ -41,9 +52,7 @@ export const abortMultipartUpload = ({
   return fetch(url, {
     headers: headers,
     method: "delete"
-  }).then(response => {
-    return response.json();
-  });
+  }).then(getJsonData);
 };
 
 interface CompleteMultipartUploadParameters {
@@ -74,12 +83,7 @@ export const completeMultipartUpload = ({
     headers: headers,
     method: "post"
   })
-    .then(response => {
-      return response.json();
-    })
-    .then(data => {
-      return data as LocationInfo;
-    });
+    .then(getJsonData<LocationInfo>);
 };
 
 interface CreateMultipartUploadParameters {
@@ -109,12 +113,7 @@ export const createMultipartUpload = ({
     headers: headers,
     method: "post"
   })
-    .then(response => {
-      return response.json();
-    })
-    .then(data => {
-      return data as MultipartUpload;
-    });
+    .then(getJsonData<MultipartUpload>);
 };
 
 export const getChunkSize = (file: File): number =>
@@ -142,12 +141,7 @@ export const prepareUploadPart = ({
   return fetch(url, {
     headers: headers
   })
-    .then(response => {
-      return response.json();
-    })
-    .then(data => {
-      return data as UrlInfo;
-    });
+    .then(getJsonData<UrlInfo>);
 };
 
 export const remove = (arr: unknown[], el: unknown): void => {

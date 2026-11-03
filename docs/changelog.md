@@ -4,6 +4,7 @@
 
 - Apply `FILE_FORM_MUST_LOGIN` option to S3 views.
 - S3 uploads: create the S3 client with django-storages' `S3Boto3Storage`, so the upload views also use settings such as `AWS_S3_ADDRESSING_STYLE`, `AWS_S3_PROXIES`, `AWS_S3_CLIENT_CONFIG`, `AWS_SESSION_TOKEN` and `AWS_S3_SESSION_PROFILE`. Reading an uploaded S3 file now uses the same configuration as the upload views, including the `DJANGO_AWS_STORAGE_BUCKET_NAME` and `AWS_S3_ENDPOINT_URL` environment variables.
+- S3 uploads: an error status from the S3 views now fails the upload. Before, an error with a json body was read as a normal response; for example, a failed request to complete the upload was reported as a successful upload.
 - Add `--dry-run` option to the `delete_unused_files` management command.
 - Tus uploads: lock concurrent PATCH and DELETE requests for the same upload.
 - Tus uploads: support the expiration extension; responses include an `Upload-Expires` header.

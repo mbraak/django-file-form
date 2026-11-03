@@ -259,6 +259,66 @@ describe("prepareUploadPart", () => {
   });
 });
 
+describe("error status", () => {
+  const endpoint = "http://s3_endpoint.net/s3/";
+
+  test.each([
+    {
+      name: "abortMultipartUpload",
+      request: () =>
+        abortMultipartUpload({
+          csrfToken: "csrf1",
+          endpoint,
+          key: "file.txt",
+          uploadId: "upload-id-1"
+        })
+    },
+    {
+      name: "completeMultipartUpload",
+      request: () =>
+        completeMultipartUpload({
+          csrfToken: "csrf1",
+          endpoint,
+          key: "file.txt",
+          parts: [],
+          uploadId: "upload-id-1"
+        })
+    },
+    {
+      name: "createMultipartUpload",
+      request: () =>
+        createMultipartUpload({
+          csrfToken: "csrf1",
+          endpoint,
+          file: new File(["content"], "file.txt"),
+          s3UploadDir: "upload_dir"
+        })
+    },
+    {
+      name: "prepareUploadPart",
+      request: () =>
+        prepareUploadPart({
+          csrfToken: "csrf1",
+          endpoint,
+          key: "file.txt",
+          number: 1,
+          uploadId: "upload-id-1"
+        })
+    }
+  ])("$name rejects when the response is not ok", async ({ request }) => {
+    // A json body, so the error doesn't come from parsing the response
+    server.use(
+      http.all("http://s3_endpoint.net/*", () =>
+        HttpResponse.json({ status: "permission denied" }, { status: 403 })
+      )
+    );
+
+    await expect(request()).rejects.toThrow(
+      new Error("S3 upload request failed with status 403")
+    );
+  });
+});
+
 describe("getChunkSize", () => {
   test.each([
     { expected: 0, size: 0 },
