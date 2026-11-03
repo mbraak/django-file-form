@@ -49,6 +49,9 @@ interface UploadParameters {
 
 type UploadStatus = "done" | "error" | "uploading";
 
+// Wait times in ms before retrying a failed request; there is one retry for each value
+export const DEFAULT_RETRY_DELAYS = [0, 1000, 3000, 5000];
+
 abstract class BaseUpload {
   name: string;
   status: UploadStatus;

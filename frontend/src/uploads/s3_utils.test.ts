@@ -15,9 +15,12 @@ import {
   completeMultipartUpload,
   createMultipartUpload,
   getChunkSize,
+  isRetryableRequestError,
+  isRetryableStatus,
   MB,
   prepareUploadPart,
-  remove
+  remove,
+  RequestError
 } from "./s3_utils.ts";
 
 interface ReceivedRequest {
@@ -314,8 +317,48 @@ describe("error status", () => {
     );
 
     await expect(request()).rejects.toThrow(
-      new Error("S3 upload request failed with status 403")
+      new RequestError(403)
     );
+  });
+});
+
+describe("RequestError", () => {
+  test("has the status and a message", () => {
+    const error = new RequestError(404);
+
+    expect(error).toBeInstanceOf(Error);
+    expect(error.status).toBe(404);
+    expect(error.message).toBe("S3 upload request failed with status 404");
+  });
+});
+
+describe("isRetryableStatus", () => {
+  test.each([408, 429, 500, 502, 503, 504])("%i is retryable", status => {
+    expect(isRetryableStatus(status)).toBe(true);
+  });
+
+  test.each([200, 400, 401, 403, 404, 413])("%i is not retryable", status => {
+    expect(isRetryableStatus(status)).toBe(false);
+  });
+});
+
+describe("isRetryableRequestError", () => {
+  test.each([
+    { error: new RequestError(503), expected: true, name: "a server error" },
+    { error: new RequestError(403), expected: false, name: "a 403 response" },
+    {
+      error: new TypeError("Failed to fetch"),
+      expected: true,
+      name: "a network error"
+    },
+    {
+      error: new SyntaxError("Unexpected token"),
+      expected: false,
+      name: "an invalid json response"
+    },
+    { error: "failed", expected: false, name: "a string" }
+  ])("returns $expected for $name", ({ error, expected }) => {
+    expect(isRetryableRequestError(error)).toBe(expected);
   });
 });
 

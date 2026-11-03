@@ -291,9 +291,7 @@ class FileField {
     const { onError } = this.callbacks;
 
     if (onError) {
-      if (upload instanceof TusUpload) {
-        onError(error, upload);
-      }
+      onError(error, upload);
     }
   };
 
@@ -447,6 +445,7 @@ class FileField {
           csrfToken,
           endpoint: uploadUrl,
           file,
+          retryDelays: this.retryDelays,
           s3UploadDir,
           uploadIndex: newUploadIndex
         });

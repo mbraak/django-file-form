@@ -515,6 +515,22 @@ describe("handleError", () => {
 
     expect(onError).toHaveBeenCalledExactlyOnceWith(error, upload);
   });
+
+  test("calls the onError callback for an s3 upload", () => {
+    const onError = vi.fn();
+    const { fileField, input } = createFileField({
+      callbacks: { onError },
+      s3UploadDir: "dir1"
+    });
+    const error = new Error("failed");
+
+    selectFiles(input, [mockFile("file.txt")]);
+    const upload = getS3Upload(fileField);
+    upload.onError?.(error);
+
+    expect(upload.status).toBe("error");
+    expect(onError).toHaveBeenCalledExactlyOnceWith(error, upload);
+  });
 });
 
 describe("clicking delete", () => {
@@ -873,22 +889,18 @@ describe("edge cases", () => {
     expect(fileField.uploads).toHaveLength(1);
   });
 
-  test("does not call the onError and onProgress callbacks for an s3 upload", () => {
-    const onError = vi.fn();
+  test("does not call the onProgress callback for an s3 upload", () => {
     const onProgress = vi.fn();
     const { fileField, input } = createFileField({
-      callbacks: { onError, onProgress },
+      callbacks: { onProgress },
       s3UploadDir: "dir1"
     });
 
     selectFiles(input, [mockFile("file.txt")]);
     const upload = getS3Upload(fileField);
     upload.onProgress?.(10, 100);
-    upload.onError?.(new Error("failed"));
 
-    expect(upload.status).toBe("error");
     expect(onProgress).not.toHaveBeenCalled();
-    expect(onError).not.toHaveBeenCalled();
   });
 
   test("does not dispatch uploadComplete when the file is no longer rendered", () => {

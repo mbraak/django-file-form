@@ -555,6 +555,8 @@
     }
   }
 
+  // Wait times in ms before retrying a failed request; there is one retry for each value
+  const DEFAULT_RETRY_DELAYS = [0, 1000, 3000, 5000];
   let BaseUpload$1 = class BaseUpload {
     name;
     status;
@@ -580,6 +582,30 @@
   };
 
   const MB = 1024 * 1024;
+
+  // A response with an error status from the S3 views of django-file-form
+  class RequestError extends Error {
+    _status;
+    constructor(status) {
+      super(`S3 upload request failed with status ${status.toString()}`);
+      this._status = status;
+    }
+  }
+
+  // Server errors, timeouts and rate limiting are temporary, so the request can be retried
+  const isRetryableStatus = status => status === 408 || status === 429 || status >= 500;
+
+  // Can a failed request to the S3 views be retried?
+  // - fetch rejects with a TypeError on a network error
+  const isRetryableRequestError = error => error instanceof RequestError ? isRetryableStatus(error._status) : error instanceof TypeError;
+
+  // Reject if the response has an error status; otherwise return the json data
+  const getJsonData = async response => {
+    if (!response.ok) {
+      throw new RequestError(response.status);
+    }
+    return await response.json();
+  };
   const abortMultipartUpload = ({
     _csrfToken: csrfToken,
     _endpoint: endpoint,
@@ -595,9 +621,7 @@
     return fetch(url, {
       headers: headers,
       method: "delete"
-    }).then(response => {
-      return response.json();
-    });
+    }).then(getJsonData);
   };
   const completeMultipartUpload = ({
     _csrfToken: csrfToken,
@@ -618,11 +642,7 @@
       }),
       headers: headers,
       method: "post"
-    }).then(response => {
-      return response.json();
-    }).then(data => {
-      return data;
-    });
+    }).then(getJsonData);
   };
   const createMultipartUpload = ({
     _csrfToken: csrfToken,
@@ -643,11 +663,7 @@
       }),
       headers: headers,
       method: "post"
-    }).then(response => {
-      return response.json();
-    }).then(data => {
-      return data;
-    });
+    }).then(getJsonData);
   };
   const getChunkSize = file => Math.ceil(file.size / 10000);
   const prepareUploadPart = ({
@@ -665,11 +681,7 @@
     const url = `${endpoint}${uploadIdEnc}/${number.toString()}?key=${filename}`;
     return fetch(url, {
       headers: headers
-    }).then(response => {
-      return response.json();
-    }).then(data => {
-      return data;
-    });
+    }).then(getJsonData);
   };
   const remove = (arr, el) => {
     const i = arr.indexOf(el);
@@ -693,13 +705,18 @@
     _file;
     _key;
     _parts;
+    _retryDelays;
+    _retryTimeout;
     _s3UploadDir;
+    // Set when the upload is aborted or has failed; no more requests are started
+    _stopped;
     _uploadId;
     _uploading;
     constructor({
       csrfToken,
       endpoint,
       file,
+      retryDelays,
       s3UploadDir,
       uploadIndex
     }) {
@@ -712,7 +729,9 @@
       this._csrfToken = csrfToken;
       this._endpoint = endpoint;
       this._file = file;
+      this._retryDelays = retryDelays ?? DEFAULT_RETRY_DELAYS;
       this._s3UploadDir = s3UploadDir;
+      this._stopped = false;
       this._key = null;
       this._uploadId = null;
       this._parts = [];
@@ -735,19 +754,14 @@
       this._createdPromise.catch(() => ({})); // silence uncaught rejection warning
     }
     async abort() {
+      this._stopped = true;
+      clearTimeout(this._retryTimeout);
       for (const xhr of this._uploading.slice()) {
         xhr.abort();
       }
       this._uploading = [];
       await this._createdPromise;
-      if (this._key && this._uploadId) {
-        await abortMultipartUpload({
-          _csrfToken: this._csrfToken,
-          _endpoint: this._endpoint,
-          _key: this._key,
-          _uploadId: this._uploadId
-        });
-      }
+      await this._abortMultipartUpload();
     }
     delete() {
       return Promise.resolve();
@@ -769,6 +783,16 @@
     }
     start() {
       void this._createUpload();
+    }
+    async _abortMultipartUpload() {
+      if (this._key && this._uploadId) {
+        await abortMultipartUpload({
+          _csrfToken: this._csrfToken,
+          _endpoint: this._endpoint,
+          _key: this._key,
+          _uploadId: this._uploadId
+        });
+      }
     }
     _completeUpload() {
       // Parts may not have completed uploading in sorted order, if limit > 1.
@@ -809,7 +833,16 @@
         this._handleError(err);
       });
     }
+
+    // The upload has failed and can't be continued
     _handleError(error) {
+      if (!this._stopped) {
+        this._stopped = true;
+
+        // Remove the parts that are already uploaded from S3. This is cleanup, so a
+        // failure is ignored; the upload has already failed.
+        this._abortMultipartUpload().catch(() => undefined);
+      }
       if (this.onError) {
         this.onError(error);
       } else {
@@ -855,31 +888,56 @@
         this.onProgress(totalUploaded, this._file.size);
       }
     }
-    _uploadPart(index) {
-      if (!this._key || !this._uploadId) {
-        return Promise.resolve();
+
+    // Retry uploading a part after a temporary error, or fail the upload.
+    // A retry requests a new url for the part, because the previous one may have expired.
+    _retryPartOrFail(index, attempt, error, retryable) {
+      if (this._stopped) {
+        return;
       }
-      return prepareUploadPart({
-        _csrfToken: this._csrfToken,
-        _endpoint: this._endpoint,
-        _key: this._key,
-        _number: index + 1,
-        _uploadId: this._uploadId
-      }).then(result => {
-        const valid = typeof result === "object" && typeof result.url === "string";
-        if (!valid) {
-          throw new TypeError("AwsS3/Multipart: Got incorrect result from `prepareUploadPart()`, expected an object `{ url }`.");
-        }
-        return result;
-      }).then(({
-        url
-      }) => {
-        this._uploadPartBytes(index, url);
-      }, err => {
-        this._handleError(err);
-      });
+      const delay = this._retryDelays[attempt];
+      if (!retryable || delay === undefined) {
+        this._handleError(error);
+        return;
+      }
+
+      // The data of the failed attempt is sent again
+      this._onPartProgress(index, 0);
+      this._retryTimeout = setTimeout(() => {
+        this._retryTimeout = undefined;
+        void this._uploadPart(index, attempt + 1);
+      }, delay);
     }
-    _uploadPartBytes(index, url) {
+
+    // attempt: 0 for the first attempt, 1 for the first retry, etc.
+    async _uploadPart(index, attempt) {
+      if (!this._key || !this._uploadId) {
+        return;
+      }
+      let result;
+      try {
+        result = await prepareUploadPart({
+          _csrfToken: this._csrfToken,
+          _endpoint: this._endpoint,
+          _key: this._key,
+          _number: index + 1,
+          _uploadId: this._uploadId
+        });
+      } catch (error) {
+        this._retryPartOrFail(index, attempt, error, isRetryableRequestError(error));
+        return;
+      }
+      if (this._stopped) {
+        return;
+      }
+      const valid = typeof result === "object" && typeof result.url === "string";
+      if (!valid) {
+        this._handleError(new TypeError("AwsS3/Multipart: Got incorrect result from `prepareUploadPart()`, expected an object `{ url }`."));
+        return;
+      }
+      this._uploadPartBytes(index, result.url, attempt);
+    }
+    _uploadPartBytes(index, url, attempt) {
       const body = this._chunks[index];
       const xhr = new XMLHttpRequest();
       xhr.open("PUT", url, true);
@@ -897,7 +955,7 @@
       xhr.addEventListener("load", () => {
         remove(this._uploading, xhr);
         if (xhr.status < 200 || xhr.status >= 300) {
-          this._handleError(new Error("Non 2xx"));
+          this._retryPartOrFail(index, attempt, new Error("Non 2xx"), isRetryableStatus(xhr.status));
           return;
         }
         this._onPartProgress(index, body?.size ?? 0);
@@ -912,19 +970,23 @@
       });
       xhr.addEventListener("error", () => {
         remove(this._uploading, xhr);
-        const error = new Error("Unknown error");
-        this._handleError(error);
+
+        // A network error
+        this._retryPartOrFail(index, attempt, new Error("Unknown error"), true);
       });
       xhr.send(body);
     }
 
     // Upload the parts one at a time; this is called when the upload is created and after each part is uploaded
     _uploadParts() {
+      if (this._stopped) {
+        return;
+      }
       const index = this._chunkState.findIndex(state => !state.done);
       if (index === -1) {
         void this._completeUpload();
       } else {
-        void this._uploadPart(index);
+        void this._uploadPart(index, 0);
       }
     }
   }
@@ -3425,7 +3487,7 @@
         onError: this._handleError,
         onProgress: this._handleProgress,
         onSuccess: this._handleSuccess,
-        retryDelays: retryDelays ?? [0, 1000, 3000, 5000]
+        retryDelays: retryDelays ?? DEFAULT_RETRY_DELAYS
       });
       this.onError = undefined;
       this.onProgress = undefined;
@@ -3822,9 +3884,7 @@
         onError
       } = this._callbacks;
       if (onError) {
-        if (upload instanceof TusUpload) {
-          onError(error, upload);
-        }
+        onError(error, upload);
       }
     };
     _handleInvalidFiles = files => {
@@ -3943,6 +4003,7 @@
             csrfToken,
             endpoint: uploadUrl,
             file,
+            retryDelays: this._retryDelays,
             s3UploadDir,
             uploadIndex: newUploadIndex
           });

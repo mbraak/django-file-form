@@ -13,6 +13,8 @@ initUploadFields(formDomElement, options);
     - Note that Django limits the size of a request. See https://docs.djangoproject.com/en/4.1/ref/settings/#data-upload-max-memory-size.
   - `prefix`: set this if the Django form has a prefix; default is empty
   - `retryDelays`: set retry delays
+    - The wait times in milliseconds before retrying a failed request; there is one retry for each value.
+    - Applies to tus uploads and to the parts of an S3 upload.
     - Also see `https://github.com/tus/tus-js-client#tusdefaultoptions`
     - Default is `[0, 1000, 3000, 5000]`
   - `skipRequired` : don't set the `required` field of the file input; default is `false`
@@ -39,7 +41,7 @@ The callbacks are:
   - Called when file is deleted
   - Signature of callback is `function(upload)`
 - `onError`:
-  - Called when an upload error occurs
+  - Called when an upload error occurs; for tus and S3 uploads
   - Signature of callback is `function(error, upload)`
     - `error`: javascript Error
 - `onProgress`:
