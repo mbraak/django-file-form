@@ -22,3 +22,4 @@ testproject/media
 testproject/screenshots/
 testproject/static/
 testproject/t
+testproject/.coverage
