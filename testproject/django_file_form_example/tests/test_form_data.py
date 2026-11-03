@@ -1,7 +1,9 @@
 import json
+import os
+from unittest import mock
 
 from django.http import QueryDict
-from django.test import SimpleTestCase, TestCase
+from django.test import SimpleTestCase, TestCase, override_settings
 
 from django_file_form.uploaded_file import PlaceholderUploadedFile, S3UploadedFileWithId
 from django_file_form.widgets.form_data import FormData
@@ -150,3 +152,26 @@ class S3FormDataTests(MockS3Mixin, TestCase):
                 "type": "s3",
             },
         )
+
+    @override_settings(AWS_STORAGE_BUCKET_NAME="")
+    def test_s3_upload_with_bucket_from_environment(self):
+        self.s3.put_object(
+            Bucket=BUCKET_NAME, Key="temp_uploads/dir1/test.txt", Body=b"abc"
+        )
+
+        with mock.patch.dict(
+            os.environ, {"DJANGO_AWS_STORAGE_BUCKET_NAME": BUCKET_NAME}
+        ):
+            [upload] = create_form_data(
+                uploads=[
+                    {
+                        "type": "s3",
+                        "id": "id1",
+                        "name": "temp_uploads/dir1/test.txt",
+                        "original_name": "test.txt",
+                        "size": 3,
+                    }
+                ]
+            ).s3_and_placeholder_uploads
+
+        self.assertEqual(upload.read(), b"abc")

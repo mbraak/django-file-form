@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.test import Client, SimpleTestCase, TestCase, override_settings
 
 from django_file_form.s3_multipart import utils
-from django_file_form.s3_multipart.utils import get_available_name, get_client
+from django_file_form.s3_multipart.utils import get_available_name, get_storage
 from django_file_form_example.tests.utils.mock_s3 import BUCKET_NAME, MockS3Mixin
 
 
@@ -154,7 +154,7 @@ class S3ViewTests(MockS3Mixin, TestCase):
         self.assertEqual(client.get("/s3upload/upload1/complete").status_code, 405)
 
     def test_get_available_name(self):
-        client = get_client()
+        client = get_storage().connection.meta.client
 
         self.assertEqual(
             get_available_name(client, BUCKET_NAME, "dir1/test.txt"), "dir1/test.txt"
@@ -234,26 +234,35 @@ class LookupEnvTests(SimpleTestCase):
         self.assertIsNone(self.lookup({"DFF_TEST_FIRST": ""}))
 
 
-class S3SettingsTests(TestCase):
+class S3SettingsTests(SimpleTestCase):
     @override_settings(
         AWS_STORAGE_BUCKET_NAME="",
+        AWS_S3_ACCESS_KEY_ID="",
         AWS_ACCESS_KEY_ID="",
+        AWS_S3_SECRET_ACCESS_KEY="",
         AWS_SECRET_ACCESS_KEY="",
         AWS_S3_ENDPOINT_URL="",
     )
     def test_settings_from_environment(self):
         environ = {
             "DJANGO_AWS_STORAGE_BUCKET_NAME": "env-bucket",
-            "AWS_ACCESS_KEY_ID": "env-access",
-            "AWS_SECRET_ACCESS_KEY": "env-secret",
+            "AWS_S3_ENDPOINT_URL": "http://env-s3-endpoint",
             "AWS_ENDPOINT_URL": "http://env-endpoint",
         }
 
         with mock.patch.dict(os.environ, environ):
-            self.assertEqual(utils.get_bucket_name(), "env-bucket")
-            self.assertEqual(utils.get_access_key_id(), "env-access")
-            self.assertEqual(utils.get_secret_access_key(), "env-secret")
-            self.assertEqual(utils.get_endpoint_url(), "http://env-endpoint")
+            storage = get_storage()
+
+        self.assertEqual(storage.bucket_name, "env-bucket")
+        self.assertEqual(storage.endpoint_url, "http://env-s3-endpoint")
+
+    @override_settings(AWS_S3_ENDPOINT_URL="")
+    def test_endpoint_from_generic_environment_variable(self):
+        with mock.patch.dict(os.environ, {"AWS_ENDPOINT_URL": "http://env-endpoint"}):
+            os.environ.pop("AWS_S3_ENDPOINT_URL", None)
+            storage = get_storage()
+
+        self.assertEqual(storage.endpoint_url, "http://env-endpoint")
 
     @override_settings(
         AWS_STORAGE_BUCKET_NAME="settings-bucket",
@@ -266,42 +275,30 @@ class S3SettingsTests(TestCase):
     def test_settings_take_precedence(self):
         environ = {
             "DJANGO_AWS_STORAGE_BUCKET_NAME": "env-bucket",
+            "AWS_S3_ACCESS_KEY_ID": "env-s3-access",
             "AWS_ACCESS_KEY_ID": "env-access",
+            "AWS_S3_SECRET_ACCESS_KEY": "env-s3-secret",
             "AWS_SECRET_ACCESS_KEY": "env-secret",
+            "AWS_S3_ENDPOINT_URL": "http://env-s3-endpoint",
             "AWS_ENDPOINT_URL": "http://env-endpoint",
         }
 
         with mock.patch.dict(os.environ, environ):
-            self.assertEqual(utils.get_bucket_name(), "settings-bucket")
-            self.assertEqual(utils.get_access_key_id(), "settings-s3-access")
-            self.assertEqual(utils.get_secret_access_key(), "settings-s3-secret")
-            self.assertEqual(utils.get_endpoint_url(), "http://settings-endpoint")
+            storage = get_storage()
 
-    def test_get_client_retries(self):
-        client = mock.Mock()
+        self.assertEqual(storage.bucket_name, "settings-bucket")
+        self.assertEqual(storage.access_key, "settings-s3-access")
+        self.assertEqual(storage.secret_key, "settings-s3-secret")
+        self.assertEqual(storage.endpoint_url, "http://settings-endpoint")
 
-        with (
-            mock.patch.object(
-                utils.boto3,
-                "client",
-                side_effect=[KeyError("credential_provider"), client],
-            ) as boto3_client,
-            mock.patch.object(utils.time, "sleep") as sleep,
-        ):
-            self.assertIs(get_client(), client)
+    @override_settings(
+        AWS_S3_ADDRESSING_STYLE="path",
+        AWS_S3_REGION_NAME="eu-west-1",
+        AWS_S3_SIGNATURE_VERSION="s3v4",
+    )
+    def test_client_uses_storage_settings(self):
+        client = get_storage().connection.meta.client
 
-        self.assertEqual(boto3_client.call_count, 2)
-        sleep.assert_called_once_with(0.01)
-
-    def test_get_client_gives_up_after_max_attempts(self):
-        with (
-            mock.patch.object(
-                utils.boto3, "client", side_effect=ValueError("invalid config")
-            ) as boto3_client,
-            mock.patch.object(utils.time, "sleep") as sleep,
-            self.assertRaisesMessage(ValueError, "invalid config"),
-        ):
-            get_client()
-
-        self.assertEqual(boto3_client.call_count, utils.GET_CLIENT_MAX_ATTEMPTS)
-        self.assertEqual(sleep.call_count, utils.GET_CLIENT_MAX_ATTEMPTS - 1)
+        self.assertEqual(client.meta.region_name, "eu-west-1")
+        self.assertEqual(client.meta.config.signature_version, "s3v4")
+        self.assertEqual(client.meta.config.s3, {"addressing_style": "path"})
