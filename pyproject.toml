@@ -48,7 +48,7 @@ test = [
     "Flask-Cors==6.0.5",
     "moto==5.2.5",
     "psycopg==3.3.6",
-    "selenium==4.51.0",
+    "selenium==4.52.0",
     "Werkzeug==3.1.9",
 ]
 ci = [
