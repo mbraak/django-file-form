@@ -693,6 +693,9 @@
   // The following code is adapted from https://github.com/transloadit/uppy/blob/master/packages/%40uppy/aws-s3-multipart/src/MultipartUploader.js
   // which is released under a MIT License (https://github.com/transloadit/uppy/blob/master/LICENSE)
 
+
+  // The multipart upload after it is created
+
   class S3Upload extends BaseUpload$1 {
     onError;
     onProgress;
@@ -701,7 +704,6 @@
     // Ends the wait for a retry early
     _cancelRetryWait;
     _chunks;
-    _chunkState;
     _createdPromise;
     _csrfToken;
     _endpoint;
@@ -748,7 +750,6 @@
       // aborting it immediately after it finishes.
       this._createdPromise = Promise.reject(new Error("Upload not created"));
       this._chunks = [];
-      this._chunkState = [];
       this._uploading = [];
       this.onError = undefined;
       this.onProgress = undefined;
@@ -800,22 +801,15 @@
         });
       }
     }
-    _completeUpload() {
+    _completeUpload(upload) {
       // Parts may not have completed uploading in sorted order, if limit > 1.
       this._parts.sort((a, b) => a.PartNumber - b.PartNumber);
-      if (!this._uploadId || !this._key) {
-        return Promise.resolve();
-      }
-      const {
-        _key: key,
-        _uploadId: uploadId
-      } = this;
       return this._requestWithRetries(() => completeMultipartUpload({
         _csrfToken: this._csrfToken,
         _endpoint: this._endpoint,
-        _key: key,
+        _key: upload.key,
         _parts: this._parts,
-        _uploadId: uploadId
+        _uploadId: upload.uploadId
       })).then(() => {
         if (this.onSuccess) {
           this.onSuccess();
@@ -838,7 +832,10 @@
         }
         this._key = result.key;
         this._uploadId = result.uploadId;
-        this._uploadParts();
+        this._uploadParts({
+          key: result.key,
+          uploadId: result.uploadId
+        });
       }).catch(err => {
         this._handleError(err);
       });
@@ -869,34 +866,27 @@
       const chunkSize = Math.max(desiredChunkSize, minChunkSize);
       for (let i = 0; i < this._file.size; i += chunkSize) {
         const end = Math.min(this._file.size, i + chunkSize);
-        chunks.push(this._file.slice(i, end));
+        chunks.push({
+          blob: this._file.slice(i, end),
+          done: false,
+          partNumber: chunks.length + 1,
+          uploaded: 0
+        });
       }
       this._chunks = chunks;
-      this._chunkState = chunks.map(() => ({
-        done: false,
-        uploaded: 0
-      }));
     }
-    _onPartComplete(index, etag) {
-      const state = this._chunkState[index];
-      if (state) {
-        state.etag = etag;
-        state.done = true;
-      }
-      const part = {
+    _onPartComplete(upload, chunk, etag) {
+      chunk.done = true;
+      this._parts.push({
         ETag: etag,
-        PartNumber: index + 1
-      };
-      this._parts.push(part);
-      this._uploadParts();
+        PartNumber: chunk.partNumber
+      });
+      this._uploadParts(upload);
     }
-    _onPartProgress(index, sent) {
-      const state = this._chunkState[index];
-      if (state) {
-        state.uploaded = sent;
-      }
+    _onPartProgress(chunk, sent) {
+      chunk.uploaded = sent;
       if (this.onProgress) {
-        const totalUploaded = this._chunkState.reduce((n, c) => n + c.uploaded, 0);
+        const totalUploaded = this._chunks.reduce((n, c) => n + c.uploaded, 0);
         this.onProgress(totalUploaded, this._file.size);
       }
     }
@@ -921,7 +911,7 @@
 
     // Retry uploading a part after a temporary error, or fail the upload.
     // A retry requests a new url for the part, because the previous one may have expired.
-    _retryPartOrFail(index, attempt, error, retryable) {
+    _retryPartOrFail(upload, chunk, attempt, error, retryable) {
       if (this._stopped) {
         return;
       }
@@ -932,30 +922,27 @@
       }
 
       // The data of the failed attempt is sent again
-      this._onPartProgress(index, 0);
+      this._onPartProgress(chunk, 0);
       void this._waitForRetry(delay).then(waited => {
         if (waited) {
-          void this._uploadPart(index, attempt + 1);
+          void this._uploadPart(upload, chunk, attempt + 1);
         }
       });
     }
 
     // attempt: 0 for the first attempt, 1 for the first retry, etc.
-    async _uploadPart(index, attempt) {
-      if (!this._key || !this._uploadId) {
-        return;
-      }
+    async _uploadPart(upload, chunk, attempt) {
       let result;
       try {
         result = await prepareUploadPart({
           _csrfToken: this._csrfToken,
           _endpoint: this._endpoint,
-          _key: this._key,
-          _number: index + 1,
-          _uploadId: this._uploadId
+          _key: upload.key,
+          _number: chunk.partNumber,
+          _uploadId: upload.uploadId
         });
       } catch (error) {
-        this._retryPartOrFail(index, attempt, error, isRetryableRequestError(error));
+        this._retryPartOrFail(upload, chunk, attempt, error, isRetryableRequestError(error));
         return;
       }
       if (this._stopped) {
@@ -966,19 +953,15 @@
         this._handleError(new TypeError("AwsS3/Multipart: Got incorrect result from `prepareUploadPart()`, expected an object `{ url }`."));
         return;
       }
-      this._uploadPartBytes(index, result.url, attempt);
+      this._uploadPartBytes(upload, chunk, result.url, attempt);
     }
-    _uploadPartBytes(index, url, attempt) {
-      const body = this._chunks[index];
+    _uploadPartBytes(upload, chunk, url, attempt) {
       const xhr = new XMLHttpRequest();
       xhr.open("PUT", url, true);
       xhr.responseType = "text";
       this._uploading.push(xhr);
       xhr.upload.addEventListener("progress", ev => {
-        if (!ev.lengthComputable) {
-          return;
-        }
-        this._onPartProgress(index, ev.loaded);
+        this._onPartProgress(chunk, ev.loaded);
       });
       xhr.addEventListener("abort", () => {
         remove(this._uploading, xhr);
@@ -986,10 +969,10 @@
       xhr.addEventListener("load", () => {
         remove(this._uploading, xhr);
         if (xhr.status < 200 || xhr.status >= 300) {
-          this._retryPartOrFail(index, attempt, new Error("Non 2xx"), isRetryableStatus(xhr.status));
+          this._retryPartOrFail(upload, chunk, attempt, new Error("Non 2xx"), isRetryableStatus(xhr.status));
           return;
         }
-        this._onPartProgress(index, body?.size ?? 0);
+        this._onPartProgress(chunk, chunk.blob.size);
 
         // NOTE This must be allowed by CORS.
         const etag = xhr.getResponseHeader("ETag");
@@ -997,27 +980,27 @@
           this._handleError(new Error("AwsS3/Multipart: Could not read the ETag header. This likely means CORS is not configured correctly on the S3 Bucket. See https://uppy.io/docs/aws-s3-multipart#S3-Bucket-Configuration for instructions."));
           return;
         }
-        this._onPartComplete(index, etag);
+        this._onPartComplete(upload, chunk, etag);
       });
       xhr.addEventListener("error", () => {
         remove(this._uploading, xhr);
 
         // A network error
-        this._retryPartOrFail(index, attempt, new Error("Unknown error"), true);
+        this._retryPartOrFail(upload, chunk, attempt, new Error("Unknown error"), true);
       });
-      xhr.send(body);
+      xhr.send(chunk.blob);
     }
 
     // Upload the parts one at a time; this is called when the upload is created and after each part is uploaded
-    _uploadParts() {
+    _uploadParts(upload) {
       if (this._stopped) {
         return;
       }
-      const index = this._chunkState.findIndex(state => !state.done);
-      if (index === -1) {
-        void this._completeUpload();
+      const chunk = this._chunks.find(c => !c.done);
+      if (chunk) {
+        void this._uploadPart(upload, chunk, 0);
       } else {
-        void this._uploadPart(index, 0);
+        void this._completeUpload(upload);
       }
     }
 

@@ -20,10 +20,17 @@ import {
   type UrlInfo
 } from "./s3_utils.ts";
 
-interface ChunkState {
+interface Chunk {
+  blob: Blob;
   done: boolean;
-  etag?: string;
+  partNumber: number;
   uploaded: number;
+}
+
+// The multipart upload after it is created
+interface CreatedUpload {
+  key: string;
+  uploadId: string;
 }
 
 interface S3UploadParameters {
@@ -42,8 +49,7 @@ class S3Upload extends BaseUpload {
 
   // Ends the wait for a retry early
   private cancelRetryWait?: () => void;
-  private chunks: Blob[];
-  private chunkState: ChunkState[];
+  private chunks: Chunk[];
   private createdPromise: Promise<MultipartUpload>;
   private csrfToken: string;
   private endpoint: string;
@@ -88,7 +94,6 @@ class S3Upload extends BaseUpload {
     // aborting it immediately after it finishes.
     this.createdPromise = Promise.reject(new Error("Upload not created"));
     this.chunks = [];
-    this.chunkState = [];
     this.uploading = [];
     this.onError = undefined;
     this.onProgress = undefined;
@@ -151,23 +156,17 @@ class S3Upload extends BaseUpload {
     }
   }
 
-  private completeUpload(): Promise<void> {
+  private completeUpload(upload: CreatedUpload): Promise<void> {
     // Parts may not have completed uploading in sorted order, if limit > 1.
     this.parts.sort((a, b) => a.PartNumber - b.PartNumber);
-
-    if (!this.uploadId || !this.key) {
-      return Promise.resolve();
-    }
-
-    const { key, uploadId } = this;
 
     return this.requestWithRetries(() =>
       completeMultipartUpload({
         csrfToken: this.csrfToken,
         endpoint: this.endpoint,
-        key,
+        key: upload.key,
         parts: this.parts,
-        uploadId
+        uploadId: upload.uploadId
       })
     ).then(
       () => {
@@ -206,7 +205,7 @@ class S3Upload extends BaseUpload {
         this.key = result.key;
         this.uploadId = result.uploadId;
 
-        this.uploadParts();
+        this.uploadParts({ key: result.key, uploadId: result.uploadId });
       })
       .catch((err: unknown) => {
         this.handleError(err);
@@ -234,7 +233,7 @@ class S3Upload extends BaseUpload {
   }
 
   private initChunks(): void {
-    const chunks: Blob[] = [];
+    const chunks: Chunk[] = [];
     const desiredChunkSize = getChunkSize(this.file);
     // at least 5MB per request, at most 10k requests
     const minChunkSize = Math.max(5 * MB, Math.ceil(this.file.size / 10000));
@@ -242,42 +241,37 @@ class S3Upload extends BaseUpload {
 
     for (let i = 0; i < this.file.size; i += chunkSize) {
       const end = Math.min(this.file.size, i + chunkSize);
-      chunks.push(this.file.slice(i, end));
+      chunks.push({
+        blob: this.file.slice(i, end),
+        done: false,
+        partNumber: chunks.length + 1,
+        uploaded: 0
+      });
     }
 
     this.chunks = chunks;
-    this.chunkState = chunks.map(() => ({
-      done: false,
-      uploaded: 0
-    }));
   }
 
-  private onPartComplete(index: number, etag: string): void {
-    const state = this.chunkState[index];
+  private onPartComplete(
+    upload: CreatedUpload,
+    chunk: Chunk,
+    etag: string
+  ): void {
+    chunk.done = true;
 
-    if (state) {
-      state.etag = etag;
-      state.done = true;
-    }
-
-    const part = {
+    this.parts.push({
       ETag: etag,
-      PartNumber: index + 1
-    };
-    this.parts.push(part);
+      PartNumber: chunk.partNumber
+    });
 
-    this.uploadParts();
+    this.uploadParts(upload);
   }
 
-  private onPartProgress(index: number, sent: number): void {
-    const state = this.chunkState[index];
-
-    if (state) {
-      state.uploaded = sent;
-    }
+  private onPartProgress(chunk: Chunk, sent: number): void {
+    chunk.uploaded = sent;
 
     if (this.onProgress) {
-      const totalUploaded = this.chunkState.reduce((n, c) => n + c.uploaded, 0);
+      const totalUploaded = this.chunks.reduce((n, c) => n + c.uploaded, 0);
       this.onProgress(totalUploaded, this.file.size);
     }
   }
@@ -310,7 +304,8 @@ class S3Upload extends BaseUpload {
   // Retry uploading a part after a temporary error, or fail the upload.
   // A retry requests a new url for the part, because the previous one may have expired.
   private retryPartOrFail(
-    index: number,
+    upload: CreatedUpload,
+    chunk: Chunk,
     attempt: number,
     error: unknown,
     retryable: boolean
@@ -327,33 +322,39 @@ class S3Upload extends BaseUpload {
     }
 
     // The data of the failed attempt is sent again
-    this.onPartProgress(index, 0);
+    this.onPartProgress(chunk, 0);
 
     void this.waitForRetry(delay).then(waited => {
       if (waited) {
-        void this.uploadPart(index, attempt + 1);
+        void this.uploadPart(upload, chunk, attempt + 1);
       }
     });
   }
 
   // attempt: 0 for the first attempt, 1 for the first retry, etc.
-  private async uploadPart(index: number, attempt: number): Promise<void> {
-    if (!this.key || !this.uploadId) {
-      return;
-    }
-
+  private async uploadPart(
+    upload: CreatedUpload,
+    chunk: Chunk,
+    attempt: number
+  ): Promise<void> {
     let result: UrlInfo;
 
     try {
       result = await prepareUploadPart({
         csrfToken: this.csrfToken,
         endpoint: this.endpoint,
-        key: this.key,
-        number: index + 1,
-        uploadId: this.uploadId
+        key: upload.key,
+        number: chunk.partNumber,
+        uploadId: upload.uploadId
       });
     } catch (error) {
-      this.retryPartOrFail(index, attempt, error, isRetryableRequestError(error));
+      this.retryPartOrFail(
+        upload,
+        chunk,
+        attempt,
+        error,
+        isRetryableRequestError(error)
+      );
       return;
     }
 
@@ -371,11 +372,15 @@ class S3Upload extends BaseUpload {
       return;
     }
 
-    this.uploadPartBytes(index, result.url, attempt);
+    this.uploadPartBytes(upload, chunk, result.url, attempt);
   }
 
-  private uploadPartBytes(index: number, url: string, attempt: number): void {
-    const body = this.chunks[index];
+  private uploadPartBytes(
+    upload: CreatedUpload,
+    chunk: Chunk,
+    url: string,
+    attempt: number
+  ): void {
     const xhr = new XMLHttpRequest();
     xhr.open("PUT", url, true);
     xhr.responseType = "text";
@@ -383,11 +388,7 @@ class S3Upload extends BaseUpload {
     this.uploading.push(xhr);
 
     xhr.upload.addEventListener("progress", ev => {
-      if (!ev.lengthComputable) {
-        return;
-      }
-
-      this.onPartProgress(index, ev.loaded);
+      this.onPartProgress(chunk, ev.loaded);
     });
 
     xhr.addEventListener("abort", () => {
@@ -399,7 +400,8 @@ class S3Upload extends BaseUpload {
 
       if (xhr.status < 200 || xhr.status >= 300) {
         this.retryPartOrFail(
-          index,
+          upload,
+          chunk,
           attempt,
           new Error("Non 2xx"),
           isRetryableStatus(xhr.status)
@@ -407,7 +409,7 @@ class S3Upload extends BaseUpload {
         return;
       }
 
-      this.onPartProgress(index, body?.size ?? 0);
+      this.onPartProgress(chunk, chunk.blob.size);
 
       // NOTE This must be allowed by CORS.
       const etag = xhr.getResponseHeader("ETag");
@@ -420,30 +422,36 @@ class S3Upload extends BaseUpload {
         return;
       }
 
-      this.onPartComplete(index, etag);
+      this.onPartComplete(upload, chunk, etag);
     });
 
     xhr.addEventListener("error", () => {
       remove(this.uploading, xhr);
 
       // A network error
-      this.retryPartOrFail(index, attempt, new Error("Unknown error"), true);
+      this.retryPartOrFail(
+        upload,
+        chunk,
+        attempt,
+        new Error("Unknown error"),
+        true
+      );
     });
-    xhr.send(body);
+    xhr.send(chunk.blob);
   }
 
   // Upload the parts one at a time; this is called when the upload is created and after each part is uploaded
-  private uploadParts(): void {
+  private uploadParts(upload: CreatedUpload): void {
     if (this.stopped) {
       return;
     }
 
-    const index = this.chunkState.findIndex(state => !state.done);
+    const chunk = this.chunks.find(c => !c.done);
 
-    if (index === -1) {
-      void this.completeUpload();
+    if (chunk) {
+      void this.uploadPart(upload, chunk, 0);
     } else {
-      void this.uploadPart(index, 0);
+      void this.completeUpload(upload);
     }
   }
 

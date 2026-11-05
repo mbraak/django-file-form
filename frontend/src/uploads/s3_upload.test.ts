@@ -1063,6 +1063,37 @@ describe("without callbacks", () => {
       expect(completeRequest).toHaveBeenCalledOnce();
     });
   });
+
+  test("throws the error when onError is not set", async () => {
+    server.use(
+      http.put("http://s3_endpoint.net/upload/1", () =>
+        HttpResponse.json({}, { headers: corsHeaders })
+      )
+    );
+
+    // The error is thrown in the event listener of the part request, so
+    // jsdom reports it as an error event on the window
+    const onWindowError = vi.fn((event: ErrorEvent) => {
+      event.preventDefault();
+    });
+    window.addEventListener("error", onWindowError);
+
+    try {
+      createS3Upload().start();
+
+      await waitFor(() => {
+        expect(onWindowError).toHaveBeenCalledOnce();
+      });
+
+      expect(onWindowError.mock.calls[0]?.[0].error).toStrictEqual(
+        new Error(
+          "AwsS3/Multipart: Could not read the ETag header. This likely means CORS is not configured correctly on the S3 Bucket. See https://uppy.io/docs/aws-s3-multipart#S3-Bucket-Configuration for instructions."
+        )
+      );
+    } finally {
+      window.removeEventListener("error", onWindowError);
+    }
+  });
 });
 
 describe("abort after an invalid create result", () => {
