@@ -15,9 +15,12 @@ import {
   completeMultipartUpload,
   createMultipartUpload,
   getChunkSize,
+  isRetryableRequestError,
+  isRetryableStatus,
   MB,
   prepareUploadPart,
-  remove
+  remove,
+  RequestError
 } from "./s3_utils.ts";
 
 interface ReceivedRequest {
@@ -256,6 +259,106 @@ describe("prepareUploadPart", () => {
         uploadId: "upload-id-1"
       })
     ).resolves.toStrictEqual({ url: "http://s3/part/3" });
+  });
+});
+
+describe("error status", () => {
+  const endpoint = "http://s3_endpoint.net/s3/";
+
+  test.each([
+    {
+      name: "abortMultipartUpload",
+      request: () =>
+        abortMultipartUpload({
+          csrfToken: "csrf1",
+          endpoint,
+          key: "file.txt",
+          uploadId: "upload-id-1"
+        })
+    },
+    {
+      name: "completeMultipartUpload",
+      request: () =>
+        completeMultipartUpload({
+          csrfToken: "csrf1",
+          endpoint,
+          key: "file.txt",
+          parts: [],
+          uploadId: "upload-id-1"
+        })
+    },
+    {
+      name: "createMultipartUpload",
+      request: () =>
+        createMultipartUpload({
+          csrfToken: "csrf1",
+          endpoint,
+          file: new File(["content"], "file.txt"),
+          s3UploadDir: "upload_dir"
+        })
+    },
+    {
+      name: "prepareUploadPart",
+      request: () =>
+        prepareUploadPart({
+          csrfToken: "csrf1",
+          endpoint,
+          key: "file.txt",
+          number: 1,
+          uploadId: "upload-id-1"
+        })
+    }
+  ])("$name rejects when the response is not ok", async ({ request }) => {
+    // A json body, so the error doesn't come from parsing the response
+    server.use(
+      http.all("http://s3_endpoint.net/*", () =>
+        HttpResponse.json({ status: "permission denied" }, { status: 403 })
+      )
+    );
+
+    await expect(request()).rejects.toThrow(
+      new RequestError(403)
+    );
+  });
+});
+
+describe("RequestError", () => {
+  test("has the status and a message", () => {
+    const error = new RequestError(404);
+
+    expect(error).toBeInstanceOf(Error);
+    expect(error.status).toBe(404);
+    expect(error.message).toBe("S3 upload request failed with status 404");
+  });
+});
+
+describe("isRetryableStatus", () => {
+  test.each([408, 429, 500, 502, 503, 504])("%i is retryable", status => {
+    expect(isRetryableStatus(status)).toBe(true);
+  });
+
+  test.each([200, 400, 401, 403, 404, 413])("%i is not retryable", status => {
+    expect(isRetryableStatus(status)).toBe(false);
+  });
+});
+
+describe("isRetryableRequestError", () => {
+  test.each([
+    { error: new RequestError(503), expected: true, name: "a server error" },
+    { error: new RequestError(403), expected: false, name: "a 403 response" },
+    {
+      error: new TypeError("Failed to fetch"),
+      expected: true,
+      name: "a network error"
+    },
+    {
+      error: new SyntaxError("Unexpected token"),
+      expected: false,
+      name: "an invalid json response"
+    },
+    { error: "failed", expected: false, name: "a string" }
+  ])("returns $expected for $name", ({ error, expected }) => {
+    expect(isRetryableRequestError(error)).toBe(expected);
   });
 });
 

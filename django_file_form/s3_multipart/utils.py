@@ -1,10 +1,8 @@
 import os
-import time
 
-import boto3
-from botocore.client import Config
 from botocore.exceptions import ClientError
 from django.utils.crypto import get_random_string
+from storages.backends.s3boto3 import S3Boto3Storage
 from storages.utils import setting
 
 
@@ -25,18 +23,6 @@ def get_bucket_name():
     )
 
 
-def get_access_key_id():
-    return setting("AWS_S3_ACCESS_KEY_ID", setting("AWS_ACCESS_KEY_ID")) or lookup_env(
-        ["AWS_S3_ACCESS_KEY_ID", "AWS_ACCESS_KEY_ID"]
-    )
-
-
-def get_secret_access_key():
-    return setting(
-        "AWS_S3_SECRET_ACCESS_KEY", setting("AWS_SECRET_ACCESS_KEY")
-    ) or lookup_env(["AWS_S3_SECRET_ACCESS_KEY", "AWS_SECRET_ACCESS_KEY"])
-
-
 def get_endpoint_url():
     return setting("AWS_S3_ENDPOINT_URL") or lookup_env(
         ["AWS_S3_ENDPOINT_URL", "AWS_ENDPOINT_URL"]
@@ -47,31 +33,19 @@ def file_form_upload_dir():
     return setting("FILE_FORM_UPLOAD_DIR", "temp_uploads")
 
 
-GET_CLIENT_MAX_ATTEMPTS = 10
+def get_storage():
+    """
+    Return an S3 storage configured from the django-storages settings.
 
+    The bucket and endpoint additionally fall back to the environment
+    variables DJANGO_AWS_STORAGE_BUCKET_NAME and AWS_S3_ENDPOINT_URL.
 
-def get_client():
-    signature_version = setting("AWS_S3_SIGNATURE_VERSION", None)
-    region_name = setting("AWS_S3_REGION_NAME", None)
-
-    # Creating a client isn't thread-safe and can fail intermittently, so retry a few times
-    # https://github.com/boto/boto3/issues/801
-    for attempt in range(1, GET_CLIENT_MAX_ATTEMPTS + 1):  # pragma: no branch
-        try:
-            return boto3.client(
-                "s3",
-                endpoint_url=get_endpoint_url(),
-                aws_access_key_id=get_access_key_id(),
-                aws_secret_access_key=get_secret_access_key(),
-                config=Config(
-                    signature_version=signature_version, region_name=region_name
-                ),
-            )
-        except Exception:
-            if attempt == GET_CLIENT_MAX_ATTEMPTS:
-                raise
-
-            time.sleep(0.01)
+    A new storage is created on each call so that changed settings are
+    picked up. Its boto3 session is not shared with other storages.
+    """
+    return S3Boto3Storage(
+        bucket_name=get_bucket_name(), endpoint_url=get_endpoint_url()
+    )
 
 
 def exists(client, bucket_name, name):

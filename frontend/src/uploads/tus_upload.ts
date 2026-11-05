@@ -1,6 +1,9 @@
 import { type HttpRequest, type HttpResponse, Upload } from "tus-js-client";
 
-import BaseUpload, { type InitialFile } from "./base_upload.ts";
+import BaseUpload, {
+  DEFAULT_RETRY_DELAYS,
+  type InitialFile
+} from "./base_upload.ts";
 import { deleteUpload } from "./tus_utils.ts";
 
 interface Parameters {
@@ -49,7 +52,7 @@ export default class TusUpload extends BaseUpload {
       onError: this.handleError,
       onProgress: this.handleProgress,
       onSuccess: this.handleSuccess,
-      retryDelays: retryDelays ?? [0, 1000, 3000, 5000]
+      retryDelays: retryDelays ?? DEFAULT_RETRY_DELAYS
     });
 
     this.onError = undefined;
