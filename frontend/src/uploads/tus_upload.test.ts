@@ -220,6 +220,32 @@ describe("start", () => {
 
     expect(onError.mock.calls[0]?.[0]).toBeInstanceOf(Error);
   });
+
+  test("throws the error when onError is not set", async () => {
+    server.use(
+      http.post(
+        UPLOAD_URL,
+        () => new HttpResponse(null, { headers: corsHeaders, status: 500 })
+      )
+    );
+
+    // tus-js-client calls the error handler in a promise, so the error is an
+    // unhandled rejection
+    const onRejection = vi.fn();
+    process.on("unhandledRejection", onRejection);
+
+    try {
+      createTusUpload().start();
+
+      await vi.waitFor(() => {
+        expect(onRejection).toHaveBeenCalledOnce();
+      });
+
+      expect(onRejection.mock.calls[0]?.[0]).toBeInstanceOf(Error);
+    } finally {
+      process.off("unhandledRejection", onRejection);
+    }
+  });
 });
 
 describe("abort", () => {
