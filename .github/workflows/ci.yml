@@ -48,13 +48,17 @@ jobs:
       - name: Install javascript packages
         working-directory: ./frontend
         run: npm clean-install --audit=false --fund=false --loglevel=http
-      - name: Set up Python
-        uses: actions/setup-python@v7
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v10.3.3
         with:
           python-version: "3.12"
-          cache: "pip"
+          # Separate cache per Django version, because it's installed outside uv.lock
+          cache-suffix: ${{ matrix.django }}
       - name: Install python packages
-        run: pip install ${{ matrix.django }} && pip install -r testproject/requirements.txt && pip install -r testproject/requirements_test.txt && pip install -r testproject/requirements_ci.txt && pip install -e .
+        run: |
+          uv sync --locked
+          uv pip install "${{ matrix.django }}"
+          echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
       - name: Run django check
         run: python testproject/manage.py check
       - name: Check migrations
@@ -73,7 +77,8 @@ jobs:
         run: python manage.py collectstatic --no-input
         working-directory: testproject
       - name: Test with coverage
-        run: COVERAGE=true coverage run --source=django_file_form,testproject/django_file_form_example testproject/manage.py test django_file_form_example -v 2
+        # Coverage settings are in pyproject.toml
+        run: COVERAGE=true coverage run testproject/manage.py test django_file_form_example -v 2
       - name: Merge Python coverage
         run: coverage report && coverage lcov
       - name: Merge javascript coverage

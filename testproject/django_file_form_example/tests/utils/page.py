@@ -96,7 +96,7 @@ class Page(BasePage):
         ).get_property("value")
 
     def login(self, username, password):
-        self.open("/login/?next=/")
+        self.open("/login/?next=/single")
         self.selenium.find_element(By.NAME, "username").send_keys(username)
         self.selenium.find_element(By.NAME, "password").send_keys(password)
         self.selenium.find_element(By.CSS_SELECTOR, "input[type=submit]").click()

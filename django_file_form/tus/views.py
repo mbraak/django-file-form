@@ -1,58 +1,126 @@
 import base64
-import json
 import logging
+import time
 import uuid
+from functools import wraps
 
-from django.core.exceptions import PermissionDenied
-from django.http import HttpResponseForbidden
 from django.utils._os import safe_join, to_path
-from django.views.decorators.http import require_http_methods, require_POST
+from django.utils.http import http_date
+from django.views.decorators.http import require_http_methods
 
 from django_file_form import conf
-from django_file_form.django_util import check_permission, get_upload_path
+from django_file_form.django_util import get_upload_path, permission_required
 from django_file_form.models import TemporaryUploadedFile
 
 from .utils import (
+    InvalidChecksumHeader,
     cache,
+    checksum_matches,
     create_uploaded_file_in_db,
     get_tus_response,
+    lock_resource,
     remove_resource_from_cache,
+    tus_api_version_supported,
 )
 
 logger = logging.getLogger(__name__)
 
+# Seconds a delete request waits for a lock held by a patch request
+DELETE_LOCK_WAIT = 5
 
-@require_POST
+
+def check_tus_resumable(request):
+    """
+    Return an error response if the request doesn't use a supported tus version
+    """
+    tus_resumable = request.META.get("HTTP_TUS_RESUMABLE")
+
+    if tus_resumable in tus_api_version_supported:
+        return None
+
+    logger.warning(f"TUS request with unsupported Tus-Resumable={tus_resumable}")
+    response = get_tus_response()
+    response.status_code = 412  # HTTP 412 Precondition Failed
+    response.reason_phrase = "Unsupported tus version"
+    return response
+
+
+def handle_options(view):
+    """
+    Respond to an OPTIONS request with the configuration of the tus server.
+
+    An OPTIONS request doesn't need to be logged in and doesn't include a
+    Tus-Resumable header.
+    """
+
+    @wraps(view)
+    def wrapper(request, *args, **kwargs):
+        if request.method == "OPTIONS":
+            response = get_tus_response()
+            response.status_code = 204
+            return response
+
+        return view(request, *args, **kwargs)
+
+    return wrapper
+
+
+@require_http_methods(["OPTIONS", "POST"])
+@handle_options
+@permission_required
 def start_upload(request):
-    try:
-        check_permission(request)
-    except PermissionDenied:
-        return HttpResponseForbidden(
-            json.dumps({"status": "permission denied"}),
-            content_type="application/json",
-        )
+    error_response = check_tus_resumable(request)
+    if error_response:
+        return error_response
 
     response = get_tus_response()
-
-    if request.META.get("HTTP_TUS_RESUMABLE", None) is None:
-        error_message = "Received file upload for unsupported file transfer protocol"
-        logger.warning(error_message)
-        response.status_code = 400
-        response.reason_phrase = error_message
-        return response
 
     metadata = {}
     upload_metadata = request.META.get("HTTP_UPLOAD_METADATA", None)
 
     if upload_metadata:
         for kv in upload_metadata.split(","):
-            (key, value) = kv.split(" ")
+            # The value is optional, e.g. "is_confidential"
+            key, _, value = kv.partition(" ")
             metadata[key] = base64.b64decode(value).decode("utf-8")
 
     logger.info(f"TUS post metadata={metadata}")
 
-    file_size = int(request.META.get("HTTP_UPLOAD_LENGTH", "0"))
+    upload_length = request.META.get("HTTP_UPLOAD_LENGTH")
+
+    # The length must be a non-negative integer; deferring the length is not supported
+    if (
+        upload_length is None
+        or not upload_length.isascii()
+        or not upload_length.isdigit()
+    ):
+        logger.info(f"TUS post invalid Upload-Length={upload_length}")
+        response.status_code = 400
+        response.reason_phrase = "Missing or invalid Upload-Length"
+        return response
+
+    # The form id is needed to create the uploaded file record
+    if not metadata.get("formId"):
+        logger.info("TUS post without formId in Upload-Metadata")
+        response.status_code = 400
+        response.reason_phrase = "Missing formId in Upload-Metadata"
+        return response
+
+    file_size = int(upload_length)
+
+    max_upload_size = conf.get_max_upload_size()
+    if max_upload_size is not None and file_size > max_upload_size:
+        logger.info(
+            f"TUS post Upload-Length={file_size} exceeds maximum size {max_upload_size}"
+        )
+        response.status_code = 413  # HTTP 413 Content Too Large
+        response.reason_phrase = "Upload-Length exceeds the maximum upload size"
+        return response
+
     resource_id = str(uuid.uuid4())
+
+    # The upload expires when its data is removed from the cache
+    expires = time.time() + conf.CACHE_TIMEOUT
 
     cache.add(
         f"tus-uploads/{resource_id}/filename",
@@ -62,9 +130,12 @@ def start_upload(request):
     cache.add(f"tus-uploads/{resource_id}/file_size", file_size, conf.CACHE_TIMEOUT)
     cache.add(f"tus-uploads/{resource_id}/offset", 0, conf.CACHE_TIMEOUT)
     cache.add(f"tus-uploads/{resource_id}/metadata", metadata, conf.CACHE_TIMEOUT)
+    cache.add(f"tus-uploads/{resource_id}/expires", expires, conf.CACHE_TIMEOUT)
+
+    upload_file_path = to_path(safe_join(get_upload_path(), resource_id))
 
     try:
-        with to_path(safe_join(get_upload_path(), resource_id)).open("wb"):
+        with upload_file_path.open("wb"):
             pass
     except OSError as e:
         logger.error(
@@ -80,18 +151,30 @@ def start_upload(request):
     response.status_code = 201
     response["Location"] = f"{request.get_full_path()}{resource_id}"
     response["ResourceId"] = resource_id
+
+    if file_size == 0:
+        # A tus client doesn't send a patch request for an empty file, so the upload
+        # is already finished
+        finish_upload(resource_id, metadata, upload_file_path)
+    else:
+        response["Upload-Expires"] = http_date(expires)
+
     return response
 
 
-@require_http_methods(["DELETE", "HEAD", "PATCH"])
+@require_http_methods(["DELETE", "HEAD", "OPTIONS", "PATCH"])
+@handle_options
+@permission_required
 def handle_upload(request, resource_id):
-    check_permission(request)
+    error_response = check_tus_resumable(request)
+    if error_response:
+        return error_response
 
     if request.method == "DELETE":
         return cancel_upload(resource_id)
     if request.method == "HEAD":
         return upload_info(resource_id)
-    elif request.method == "PATCH":
+    else:  # PATCH; OPTIONS is handled by handle_options and other methods are rejected
         return upload_part(request, resource_id)
 
 
@@ -116,6 +199,55 @@ def upload_info(resource_id):
 
 
 def upload_part(request, resource_id):
+    if request.content_type != "application/offset+octet-stream":
+        logger.info(
+            f"TUS patch resource_id={resource_id} unsupported Content-Type={request.content_type}"
+        )
+        response = get_tus_response()
+        response.status_code = 415  # HTTP 415 Unsupported Media Type
+        return response
+
+    # Read the body before locking, so the lock isn't held while receiving the data
+    chunk = request.body
+
+    upload_checksum = request.META.get("HTTP_UPLOAD_CHECKSUM")
+    if upload_checksum is not None:
+        response = check_chunk(resource_id, upload_checksum, chunk)
+        if response:
+            return response
+
+    with lock_resource(resource_id) as locked:
+        if not locked:
+            logger.info(f"TUS patch resource_id={resource_id} is locked")
+            response = get_tus_response()
+            response.status_code = 423  # HTTP 423 Locked
+            return response
+
+        return write_chunk(request, resource_id, chunk)
+
+
+def check_chunk(resource_id, upload_checksum, chunk):
+    """
+    Return an error response if the chunk doesn't match the Upload-Checksum header
+    """
+    try:
+        if checksum_matches(upload_checksum, chunk):
+            return None
+    except InvalidChecksumHeader as e:
+        logger.info(f"TUS patch resource_id={resource_id} {e}")
+        response = get_tus_response()
+        response.status_code = 400
+        response.reason_phrase = str(e)
+        return response
+
+    logger.info(f"TUS patch resource_id={resource_id} checksum mismatch")
+    response = get_tus_response()
+    response.status_code = 460
+    response.reason_phrase = "Checksum Mismatch"
+    return response
+
+
+def write_chunk(request, resource_id, chunk):
     response = get_tus_response()
 
     filename = cache.get(f"tus-uploads/{resource_id}/filename")
@@ -123,15 +255,31 @@ def upload_part(request, resource_id):
     offset = cache.get(f"tus-uploads/{resource_id}/offset")
 
     file_offset = int(request.META.get("HTTP_UPLOAD_OFFSET", 0))
-    chunk_size = int(request.META.get("CONTENT_LENGTH", 102400))
 
     upload_file_path = to_path(safe_join(get_upload_path(), resource_id))
     if filename is None or not upload_file_path.exists():
         response.status_code = 410
         return response
 
+    expires = cache.get(f"tus-uploads/{resource_id}/expires")
+    if expires is not None:
+        response["Upload-Expires"] = http_date(expires)
+
     if file_offset != offset:  # check to make sure we're in sync
         response.status_code = 409  # HTTP 409 Conflict
+        return response
+
+    file_size = cache.get(f"tus-uploads/{resource_id}/file_size")
+
+    if file_size is None:
+        response.status_code = 404
+        return response
+
+    if file_offset + len(chunk) > file_size:
+        logger.info(
+            f"TUS patch resource_id={resource_id} exceeds Upload-Length={file_size}"
+        )
+        response.status_code = 413  # HTTP 413 Content Too Large
         return response
 
     logger.info(
@@ -139,54 +287,59 @@ def upload_part(request, resource_id):
     )
 
     try:
-        file = upload_file_path.open("r+b")
-    except OSError:
-        file = upload_file_path.open("wb")
-
-    if file:
-        try:
+        with upload_file_path.open("r+b") as file:
             file.seek(file_offset)
-            file.write(request.body)
-        except OSError:
-            response.status_code = 500
-            return response
-        finally:
-            file.close()
-
-    try:
-        new_offset = cache.incr(f"tus-uploads/{resource_id}/offset", chunk_size)
-    except ValueError:
-        response.status_code = 404
+            file.write(chunk)
+    except OSError:
+        response.status_code = 500
         return response
 
-    file_size_string = cache.get(f"tus-uploads/{resource_id}/file_size")
-
-    if file_size_string is None:
+    try:
+        new_offset = cache.incr(f"tus-uploads/{resource_id}/offset", len(chunk))
+    except ValueError:
         response.status_code = 404
         return response
 
     response["Upload-Offset"] = new_offset
     response.status_code = 204
 
-    file_size = int(file_size_string)
-
     if file_size == new_offset:
-        remove_resource_from_cache(resource_id)
-
-        create_uploaded_file_in_db(
-            field_name=metadata.get("fieldName"),
-            file_id=resource_id,
-            form_id=metadata.get("formId"),
-            original_filename=metadata.get("filename"),
-            uploaded_file=upload_file_path,
-        )
+        finish_upload(resource_id, metadata, upload_file_path)
+        del response["Upload-Expires"]
 
     return response
+
+
+def finish_upload(resource_id, metadata, upload_file_path):
+    # Create the record before removing the upload from the cache, so the file is
+    # never without both (see delete_unused_files)
+    create_uploaded_file_in_db(
+        field_name=metadata.get("fieldName"),
+        file_id=resource_id,
+        form_id=metadata.get("formId"),
+        original_filename=metadata.get("filename"),
+        uploaded_file=upload_file_path,
+    )
+
+    remove_resource_from_cache(resource_id)
 
 
 def cancel_upload(resource_id):
     logger.info(f"TUS delete resource_id={resource_id}")
 
+    # The client sends the delete right after aborting a patch, which may still be
+    # writing its chunk. So wait for the lock instead of failing immediately.
+    with lock_resource(resource_id, wait=DELETE_LOCK_WAIT) as locked:
+        if not locked:
+            logger.info(f"TUS delete resource_id={resource_id} is locked")
+            response = get_tus_response()
+            response.status_code = 423  # HTTP 423 Locked
+            return response
+
+        return delete_upload(resource_id)
+
+
+def delete_upload(resource_id):
     remove_resource_from_cache(resource_id)
 
     upload_file_path = to_path(safe_join(get_upload_path(), resource_id))

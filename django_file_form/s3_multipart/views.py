@@ -4,20 +4,24 @@ import logging
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_http_methods, require_POST
 
-from .utils import file_form_upload_dir, get_available_name, get_bucket_name, get_client
+from django_file_form.django_util import permission_required
+
+from .utils import file_form_upload_dir, get_available_name, get_storage
 
 logger = logging.getLogger(__name__)
 
 
 @require_POST
+@permission_required
 def create_upload(request):
     logger.info("Create upload")
 
-    client = get_client()
+    storage = get_storage()
+    client = storage.connection.meta.client
+    bucket_name = storage.bucket_name
     json_body = json.loads(request.body)
     filename = json_body["filename"]
     s3_upload_dir = json_body["s3UploadDir"]
-    bucket_name = get_bucket_name()
     key = get_available_name(
         client,
         bucket_name,
@@ -36,10 +40,12 @@ def create_upload(request):
 
 
 @require_http_methods(["DELETE"])
+@permission_required
 def abort_upload(request, upload_id):
     logger.info("Abort upload")
-    client = get_client()
-    bucket_name = get_bucket_name()
+    storage = get_storage()
+    client = storage.connection.meta.client
+    bucket_name = storage.bucket_name
     key = request.GET["key"]
 
     client.abort_multipart_upload(
@@ -51,12 +57,14 @@ def abort_upload(request, upload_id):
 
 
 @require_GET
+@permission_required
 def sign_upload_part(request, upload_id, part_number):
     logger.info("Generate presigned url")
 
-    client = get_client()
+    storage = get_storage()
+    client = storage.connection.meta.client
+    bucket_name = storage.bucket_name
     key = request.GET["key"]
-    bucket_name = get_bucket_name()
     response = client.generate_presigned_url(
         ClientMethod="upload_part",
         Params={
@@ -72,14 +80,16 @@ def sign_upload_part(request, upload_id, part_number):
 
 
 @require_POST
+@permission_required
 def complete_upload(request, upload_id):
     logger.info("Complete upload")
 
-    client = get_client()
+    storage = get_storage()
+    client = storage.connection.meta.client
+    bucket_name = storage.bucket_name
     json_body = json.loads(request.body)
     key = request.GET["key"]
     parts = json_body["parts"]
-    bucket_name = get_bucket_name()
     response = client.complete_multipart_upload(
         Bucket=bucket_name,
         Key=key,

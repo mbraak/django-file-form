@@ -86,6 +86,7 @@ TEMPLATES = [
                 "django.template.context_processors.tz",
                 "django.contrib.messages.context_processors.messages",
                 "django.template.context_processors.request",
+                "django_file_form_example.pages.page_title",
             ]
         },
     },
