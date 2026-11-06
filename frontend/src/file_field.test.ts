@@ -435,6 +435,20 @@ describe("handleProgress", () => {
 
     expect(onProgress).toHaveBeenCalledExactlyOnceWith(10, 100, upload);
   });
+
+  test("calls the onProgress callback for an s3 upload", () => {
+    const onProgress = vi.fn();
+    const { fileField, input } = createFileField({
+      callbacks: { onProgress },
+      s3UploadDir: "dir1"
+    });
+
+    selectFiles(input, [mockFile("file.txt")]);
+    const upload = getS3Upload(fileField);
+    upload.onProgress?.(10, 100);
+
+    expect(onProgress).toHaveBeenCalledExactlyOnceWith(10, 100, upload);
+  });
 });
 
 describe("handleSuccess", () => {
@@ -901,20 +915,6 @@ describe("edge cases", () => {
     query(parent, ".dff-file").click();
 
     expect(fileField.uploads).toHaveLength(1);
-  });
-
-  test("does not call the onProgress callback for an s3 upload", () => {
-    const onProgress = vi.fn();
-    const { fileField, input } = createFileField({
-      callbacks: { onProgress },
-      s3UploadDir: "dir1"
-    });
-
-    selectFiles(input, [mockFile("file.txt")]);
-    const upload = getS3Upload(fileField);
-    upload.onProgress?.(10, 100);
-
-    expect(onProgress).not.toHaveBeenCalled();
   });
 
   test("does not dispatch uploadComplete when the file is no longer rendered", () => {

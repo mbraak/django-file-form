@@ -8,7 +8,7 @@
 - S3 uploads: retry a request after a network error or a `408`, `429` or `5xx` response, using the `retryDelays` javascript option. This applies to creating the upload, uploading a part and completing the upload. Only the failed part is uploaded again.
 - S3 uploads: abort the multipart upload when an upload fails, so the uploaded parts are removed from S3.
 - S3 uploads: call the `onError` javascript callback when an upload fails.
-- S3 uploads: call the `onSuccess` javascript callback when an upload is done.
+- S3 uploads: call the `onSuccess` javascript callback when an upload is done, and the `onProgress` callback when progress information is available.
 - Add `--dry-run` option to the `delete_unused_files` management command.
 - Tus uploads: lock concurrent PATCH and DELETE requests for the same upload.
 - Tus uploads: support the expiration extension; responses include an `Upload-Expires` header.

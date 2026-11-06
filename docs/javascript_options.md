@@ -45,13 +45,27 @@ The callbacks are:
   - Signature of callback is `function(error, upload)`
     - `error`: javascript Error
 - `onProgress`:
-  - Called each time when progress information is available.
+  - Called each time when progress information is available; for tus and S3 uploads
   - Signature of callback is `function(bytesUploaded, bytesTotal, upload)`
 - `onSuccess`:
   - Called when file upload is done; for tus and S3 uploads
   - Signature of callback is `function(upload)`
 
-The callbacks receive an `upload` parameter which is [this class](https://github.com/tus/tus-js-client#new-tusuploadfile-options).
+The `upload` parameter of the callbacks is an upload object of django-file-form. It has these properties and methods:
+
+- `name`: the file name
+- `type`: the kind of upload
+  - `tus`: a tus upload
+  - `s3`: an S3 upload
+  - `uploadedTus` or `uploadedS3`: a file that was uploaded before the form was rendered, e.g. when the form had validation errors
+  - `placeholder`: a placeholder
+  - `existing`: an existing file
+- `status`: `uploading`, `done` or `error`
+- `uploadIndex`: a number that identifies the upload within its form field
+- `getId()`: the id of the upload on the server; `undefined` when the upload isn't created yet
+- `getSize()`: the size of the file in bytes, if it's known
+
+`onDelete` can receive any kind of upload; `onError`, `onProgress` and `onSuccess` receive a `tus` or `s3` upload.
 
 Examples:
 

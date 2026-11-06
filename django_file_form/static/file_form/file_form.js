@@ -3927,9 +3927,7 @@
         onProgress
       } = this._callbacks;
       if (onProgress) {
-        if (upload instanceof TusUpload) {
-          onProgress(bytesUploaded, bytesTotal, upload);
-        }
+        onProgress(bytesUploaded, bytesTotal, upload);
       }
     };
     _handleSuccess = upload => {
