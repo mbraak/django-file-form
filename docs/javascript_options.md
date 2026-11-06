@@ -25,14 +25,17 @@ The callbacks are:
 - `onClick`
 
   - Called when the filename of an uploaded file is clicked
-  - Signature of callback is `function({ fileName, fieldName, type })`
+  - Signature of callback is `function({ fileName, fieldName, id, type })`
     - fileName: the file name
     - fieldName: the name of the form field
-    - id: the id of the temporary uploaded file
+    - id: the id of the upload; `undefined` for a placeholder or an existing file
+      - For a tus upload, this is the id of the temporary uploaded file.
+      - For an S3 upload, this is the id of the S3 multipart upload.
     - type:
-      - `tus` or `uploadedTus`: uploaded file
-      - `placeholder`: placeholder
-      - `existing`: existing file
+      - `tus` or `uploadedTus`: a tus upload
+      - `s3` or `uploadedS3`: an S3 upload
+      - `placeholder`: a placeholder
+      - `existing`: an existing file
     - The filename is rendered with the `dff-filename` class. You can use this class to change the styling.
     - When this callback is set, the filename of an uploaded file is rendered as a `<button>`, so that it can also be
       clicked using the keyboard. While a file is uploading, the filename is plain text.
