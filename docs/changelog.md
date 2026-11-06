@@ -10,6 +10,7 @@
 - S3 uploads: call the `onError` javascript callback when an upload fails.
 - S3 uploads: call the `onSuccess` javascript callback when an upload is done, and the `onProgress` callback when progress information is available.
 - Don't upload a file that is dropped on a disabled file input.
+- When a file input without `multiple` gets a new file, remove the current file like the delete button does: abort it while it's uploading, and delete it from the server when it's uploaded. Before, an upload that was still running continued in the background. The `removeUpload` event and the `onDelete` callback are now also called for the replaced file.
 - Add `--dry-run` option to the `delete_unused_files` management command.
 - Tus uploads: lock concurrent PATCH and DELETE requests for the same upload.
 - Tus uploads: support the expiration extension; responses include an `Upload-Expires` header.

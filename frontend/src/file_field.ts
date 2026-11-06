@@ -502,11 +502,13 @@ class FileField {
     }
 
     if (!this.multiple) {
-      for (const upload of this.uploads) {
-        this.renderer.deleteFile(upload.uploadIndex);
+      // Remove the current file like the delete button does: abort an upload that
+      // is still running, and delete an uploaded file from the server.
+      // Iterate over a copy, because removing an upload changes this.uploads.
+      for (const upload of this.uploads.slice()) {
+        await this.removeExistingUpload(upload);
       }
 
-      this.uploads = [];
       const file = files[0];
 
       if (file) {

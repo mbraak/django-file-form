@@ -150,7 +150,7 @@ describe(".initUploadFields", () => {
       // don't upload
     });
 
-    const form = createForm({ s3UploadDir: "dir1" });
+    const form = createForm({ initialUploads: [], s3UploadDir: "dir1" });
     initUploadFields(form);
 
     const listener = vi.fn();

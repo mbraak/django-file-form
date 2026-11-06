@@ -410,12 +410,60 @@ describe("selecting files", () => {
 
     selectFiles(input, [mockFile("file.txt")]);
 
+    // The current file is removed first
     await vi.waitFor(() => {
-      expect(fileField.uploads).toHaveLength(1);
+      expect(fileField.uploads.map(upload => upload.name)).toStrictEqual([
+        "file.txt"
+      ]);
     });
 
-    expect(getUpload(fileField).name).toBe("file.txt");
     expect(parent.querySelectorAll(".dff-file")).toHaveLength(1);
+  });
+
+  test("aborts the current upload when it is replaced and multiple is false", async () => {
+    const { fileField, input } = createFileField();
+    selectFiles(input, [mockFile("a.txt")]);
+    const replacedUpload = getTusUpload(fileField);
+
+    selectFiles(input, [mockFile("b.txt")]);
+
+    await vi.waitFor(() => {
+      expect(fileField.uploads.map(upload => upload.name)).toStrictEqual([
+        "b.txt"
+      ]);
+    });
+
+    // Otherwise the replaced upload continues in the background
+    expect(tusAbort).toHaveBeenCalledOnce();
+    expect(tusAbort.mock.contexts[0]).toBe(replacedUpload);
+  });
+
+  test("deletes the current file from the server when it is replaced and multiple is false", async () => {
+    const deleteSpy = vi
+      .spyOn(TusUpload.prototype, "delete")
+      .mockResolvedValue();
+    const onDelete = vi.fn();
+    const { fileField, form, input } = createFileField({
+      callbacks: { onDelete }
+    });
+    const removeUploadListener = vi.fn();
+    form.addEventListener("removeUpload", removeUploadListener);
+
+    selectFiles(input, [mockFile("a.txt")]);
+    const replacedUpload = getTusUpload(fileField);
+    replacedUpload.onSuccess?.();
+
+    selectFiles(input, [mockFile("b.txt")]);
+
+    await vi.waitFor(() => {
+      expect(fileField.uploads.map(upload => upload.name)).toStrictEqual([
+        "b.txt"
+      ]);
+    });
+
+    expect(deleteSpy).toHaveBeenCalledOnce();
+    expect(removeUploadListener).toHaveBeenCalledOnce();
+    expect(onDelete).toHaveBeenCalledExactlyOnceWith(replacedUpload);
   });
 
   test("uploads all files when multiple is true", async () => {
