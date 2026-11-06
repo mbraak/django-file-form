@@ -449,6 +449,22 @@ describe("selecting files", () => {
     expect(parent.querySelectorAll(".dff-file")).toHaveLength(2);
   });
 
+  test("disables the cancel button of an upload that is replaced while it's aborted", async () => {
+    // The abort of the replaced upload doesn't finish
+    tusAbort.mockReturnValueOnce(new Promise<void>(() => undefined));
+    // With multiple, an upload with the same name is replaced
+    const { input, parent } = createFileField({ multiple: true });
+
+    selectFiles(input, [mockFile("file.txt")]);
+    const cancelButton = query(parent, ".dff-cancel");
+
+    selectFiles(input, [mockFile("file.txt")]);
+
+    await vi.waitFor(() => {
+      expect(cancelButton).toBeDisabled();
+    });
+  });
+
   test("removes the drop hint", async () => {
     const { input, parent } = createFileField({ supportDropArea: true });
 
@@ -671,6 +687,30 @@ describe("clicking delete", () => {
 
     expect(fileField.uploads).toHaveLength(1);
     expect(parent.querySelector(".dff-delete")).not.toHaveClass("dff-disabled");
+  });
+
+  test("disables the delete button while the file is deleted", async () => {
+    let finishDelete = () => {
+      // do nothing
+    };
+    vi.spyOn(ExistingFile.prototype, "delete").mockReturnValue(
+      new Promise<void>(resolve => {
+        finishDelete = resolve;
+      })
+    );
+    const { fileField, parent } = createFileField({ initial: [existingFile] });
+    const deleteButton = query(parent, ".dff-delete");
+
+    deleteButton.click();
+
+    // So the file can't be deleted twice
+    expect(deleteButton).toBeDisabled();
+
+    finishDelete();
+
+    await vi.waitFor(() => {
+      expect(fileField.uploads).toHaveLength(0);
+    });
   });
 
   test("does nothing when the delete button is disabled", () => {
