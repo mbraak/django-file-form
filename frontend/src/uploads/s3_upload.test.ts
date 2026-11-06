@@ -160,10 +160,16 @@ describe("abort", () => {
       expect(partRequest).toHaveBeenCalled();
     });
 
+    const xhrAbort = vi.spyOn(XMLHttpRequest.prototype, "abort");
+
     await s3Upload.abort();
 
+    // The part request is cancelled, so the browser stops sending the part
+    expect(xhrAbort).toHaveBeenCalledOnce();
     expect(abortRequest).toHaveBeenCalled();
     expect(onSuccess).not.toHaveBeenCalled();
+
+    xhrAbort.mockRestore();
   });
 });
 
@@ -247,16 +253,57 @@ describe("start", () => {
     expect(onProgress).toHaveBeenLastCalledWith(8, 8);
   });
 
-  test("uploads a large file in multiple parts", async () => {
+  test("uploads a file of exactly the chunk size in one part", async () => {
+    const partRequest = vi.fn();
     let completedParts: unknown = null;
+
+    server.use(
+      http.put("http://s3_endpoint.net/upload/1", async ({ request }) => {
+        partRequest((await request.arrayBuffer()).byteLength);
+        return HttpResponse.json(
+          {},
+          { headers: { ...corsHeaders, ETag: "etag1" } }
+        );
+      }),
+      http.post(
+        "http://s3_endpoint.net/upload-id-1/complete",
+        async ({ request }) => {
+          completedParts = await request.json();
+          return HttpResponse.json({});
+        }
+      )
+    );
+
+    const file = new File([new Uint8Array(5 * MB)], "file.txt");
+
+    await startUpload(file);
+
+    expect(partRequest).toHaveBeenCalledExactlyOnceWith(5 * MB);
+    expect(completedParts).toStrictEqual({
+      parts: [{ ETag: "etag1", PartNumber: 1 }]
+    });
+  });
+
+  test("uploads a large file in multiple parts", async () => {
+    const partSizes: Record<string, number> = {};
+    let completedParts: unknown = null;
+
+    const respondToPart =
+      (partNumber: string) =>
+      async ({ request }: { request: Request }) => {
+        partSizes[partNumber] = (await request.arrayBuffer()).byteLength;
+        return HttpResponse.json(
+          {},
+          { headers: { ...corsHeaders, ETag: `etag${partNumber}` } }
+        );
+      };
 
     server.use(
       http.get("http://s3_endpoint.net/upload-id-1/2", () =>
         HttpResponse.json({ url: "http://s3_endpoint.net/upload/2" })
       ),
-      http.put("http://s3_endpoint.net/upload/2", () =>
-        HttpResponse.json({}, { headers: { ...corsHeaders, ETag: "etag2" } })
-      ),
+      http.put("http://s3_endpoint.net/upload/1", respondToPart("1")),
+      http.put("http://s3_endpoint.net/upload/2", respondToPart("2")),
       http.post(
         "http://s3_endpoint.net/upload-id-1/complete",
         async ({ request }) => {
@@ -271,6 +318,8 @@ describe("start", () => {
 
     await startUpload(file);
 
+    // Each part contains its own slice of the file
+    expect(partSizes).toStrictEqual({ "1": 5 * MB, "2": 1 });
     expect(completedParts).toStrictEqual({
       parts: [
         { ETag: "etag1", PartNumber: 1 },
@@ -309,9 +358,7 @@ describe("start", () => {
     s3Upload.start();
 
     await waitFor(() => {
-      expect(onError).toHaveBeenCalledWith(
-        new RequestError(403)
-      );
+      expect(onError).toHaveBeenCalledWith(new RequestError(403));
     });
   });
 
@@ -331,35 +378,37 @@ describe("start", () => {
     s3Upload.start();
 
     await waitFor(() => {
-      expect(onError).toHaveBeenCalledWith(
-        new RequestError(500)
-      );
+      expect(onError).toHaveBeenCalledWith(new RequestError(500));
     });
 
     expect(onSuccess).not.toHaveBeenCalled();
   });
 
-  test("calls onError when the result of createMultipartUpload is invalid", async () => {
-    server.use(
-      http.post("http://s3_endpoint.net/", () =>
-        HttpResponse.json({ key: "test-key-1" })
-      )
-    );
-
-    const s3Upload = createS3Upload();
-    const onError = vi.fn();
-    s3Upload.onError = onError;
-
-    s3Upload.start();
-
-    await waitFor(() => {
-      expect(onError).toHaveBeenCalledWith(
-        new TypeError(
-          "AwsS3/Multipart: Got incorrect result from `createMultipartUpload()`, expected an object `{ uploadId, key }`."
-        )
+  test.each([
+    { name: "without uploadId", result: { key: "test-key-1" } },
+    { name: "without key", result: { uploadId: "upload-id-1" } }
+  ])(
+    "calls onError when the result of createMultipartUpload is invalid ($name)",
+    async ({ result }) => {
+      server.use(
+        http.post("http://s3_endpoint.net/", () => HttpResponse.json(result))
       );
-    });
-  });
+
+      const s3Upload = createS3Upload();
+      const onError = vi.fn();
+      s3Upload.onError = onError;
+
+      s3Upload.start();
+
+      await waitFor(() => {
+        expect(onError).toHaveBeenCalledWith(
+          new TypeError(
+            "AwsS3/Multipart: Got incorrect result from `createMultipartUpload()`, expected an object `{ uploadId, key }`."
+          )
+        );
+      });
+    }
+  );
 
   test("calls onError when the result of prepareUploadPart is invalid", async () => {
     server.use(
@@ -546,21 +595,27 @@ describe("retries", () => {
   });
 
   test.each([
-    { name: "a server error", respond: () => HttpResponse.json({}, { status: 500 }) },
+    {
+      name: "a server error",
+      respond: () => HttpResponse.json({}, { status: 500 })
+    },
     { name: "a network error", respond: () => HttpResponse.error() }
-  ])("retries requesting the url of a part after $name", async ({ respond }) => {
-    const { putRequest, urlRequest } = respondToPart([respond], []);
+  ])(
+    "retries requesting the url of a part after $name",
+    async ({ respond }) => {
+      const { putRequest, urlRequest } = respondToPart([respond], []);
 
-    const { onError, onSuccess } = startWithCallbacks([0]);
+      const { onError, onSuccess } = startWithCallbacks([0]);
 
-    await waitFor(() => {
-      expect(onSuccess).toHaveBeenCalledOnce();
-    });
+      await waitFor(() => {
+        expect(onSuccess).toHaveBeenCalledOnce();
+      });
 
-    expect(onError).not.toHaveBeenCalled();
-    expect(urlRequest).toHaveBeenCalledTimes(2);
-    expect(putRequest).toHaveBeenCalledOnce();
-  });
+      expect(onError).not.toHaveBeenCalled();
+      expect(urlRequest).toHaveBeenCalledTimes(2);
+      expect(putRequest).toHaveBeenCalledOnce();
+    }
+  );
 
   test("does not retry requesting the url after a 403 response", async () => {
     const { urlRequest } = respondToPart(
@@ -571,9 +626,7 @@ describe("retries", () => {
     const { onError, onSuccess } = startWithCallbacks([0, 0]);
 
     await waitFor(() => {
-      expect(onError).toHaveBeenCalledWith(
-        new RequestError(403)
-      );
+      expect(onError).toHaveBeenCalledWith(new RequestError(403));
     });
 
     expect(urlRequest).toHaveBeenCalledOnce();
@@ -722,7 +775,10 @@ describe("retries", () => {
       }),
       http.put("http://s3_endpoint.net/upload/1", () => {
         putRequest();
-        return HttpResponse.json({}, { headers: { ...corsHeaders, ETag: "etag1" } });
+        return HttpResponse.json(
+          {},
+          { headers: { ...corsHeaders, ETag: "etag1" } }
+        );
       })
     );
 
@@ -774,7 +830,10 @@ describe("retries", () => {
       http.post("http://s3_endpoint.net/", async () => {
         createRequest();
         await delay(50);
-        return HttpResponse.json({ key: "test-key-1", uploadId: "upload-id-1" });
+        return HttpResponse.json({
+          key: "test-key-1",
+          uploadId: "upload-id-1"
+        });
       })
     );
 
@@ -826,8 +885,7 @@ describe("retries", () => {
     return completeRequest;
   };
 
-  const viewError = (status: number) => () =>
-    HttpResponse.json({}, { status });
+  const viewError = (status: number) => () => HttpResponse.json({}, { status });
 
   test.each([
     { name: "a server error", respond: viewError(500) },

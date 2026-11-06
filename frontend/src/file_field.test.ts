@@ -276,6 +276,43 @@ describe("constructor", () => {
 
     expect(parent.querySelector(".dff-drop-hint")).not.toBeInTheDocument();
   });
+
+  test("renders the drop hint again when the last file is removed", async () => {
+    const { fileField, parent } = createFileField({
+      initial: [existingFile],
+      supportDropArea: true
+    });
+
+    query(parent, ".dff-delete").click();
+
+    await vi.waitFor(() => {
+      expect(fileField.uploads).toHaveLength(0);
+    });
+
+    expect(parent.querySelector(".dff-drop-hint")).toBeInTheDocument();
+  });
+});
+
+describe("drop area", () => {
+  // The drop area highlights the files container when a file is dragged over it
+  const dragOver = (parent: Element) => {
+    const filesContainer = query(parent, ".dff-files");
+    filesContainer.dispatchEvent(new Event("dragover", { cancelable: true }));
+
+    return filesContainer;
+  };
+
+  test("adds a drop area when supportDropArea is true", () => {
+    const { parent } = createFileField({ supportDropArea: true });
+
+    expect(dragOver(parent)).toHaveClass("dff-dropping");
+  });
+
+  test("does not add a drop area when supportDropArea is false", () => {
+    const { parent } = createFileField({ supportDropArea: false });
+
+    expect(dragOver(parent)).not.toHaveClass("dff-dropping");
+  });
 });
 
 describe("selecting files", () => {

@@ -91,4 +91,35 @@ describe(".initUploadFields", () => {
 
     document.removeEventListener("addUpload", listener);
   });
+
+  describe("supportDropArea", () => {
+    // The drop area highlights the files container when a file is dragged over it
+    const dragOver = (form: Element) => {
+      const filesContainer = form.querySelector(".dff-files");
+
+      if (!filesContainer) {
+        throw new Error("No files container");
+      }
+
+      filesContainer.dispatchEvent(new Event("dragover", { cancelable: true }));
+
+      return filesContainer;
+    };
+
+    test("adds a drop area by default", () => {
+      const form = createForm();
+
+      initUploadFields(form);
+
+      expect(dragOver(form)).toHaveClass("dff-dropping");
+    });
+
+    test("does not add a drop area when supportDropArea is false", () => {
+      const form = createForm();
+
+      initUploadFields(form, { supportDropArea: false });
+
+      expect(dragOver(form)).not.toHaveClass("dff-dropping");
+    });
+  });
 });
