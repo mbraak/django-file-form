@@ -313,6 +313,27 @@ describe("drop area", () => {
 
     expect(dragOver(parent)).not.toHaveClass("dff-dropping");
   });
+
+  test("does not upload a file that is dropped on a disabled input", async () => {
+    const { fileField, parent } = createFileField({
+      disabled: true,
+      supportDropArea: true
+    });
+
+    expect(dragOver(parent)).not.toHaveClass("dff-dropping");
+
+    const dataTransfer = {
+      files: [mockFile("file.txt")]
+    } as unknown as DataTransfer;
+    query(parent, ".dff-files").dispatchEvent(
+      new DragEvent("drop", { dataTransfer })
+    );
+
+    // Wait for the async drop handler
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    expect(fileField.uploads).toHaveLength(0);
+  });
 });
 
 describe("selecting files", () => {

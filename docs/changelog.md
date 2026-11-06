@@ -9,6 +9,7 @@
 - S3 uploads: abort the multipart upload when an upload fails, so the uploaded parts are removed from S3.
 - S3 uploads: call the `onError` javascript callback when an upload fails.
 - S3 uploads: call the `onSuccess` javascript callback when an upload is done, and the `onProgress` callback when progress information is available.
+- Don't upload a file that is dropped on a disabled file input.
 - Add `--dry-run` option to the `delete_unused_files` management command.
 - Tus uploads: lock concurrent PATCH and DELETE requests for the same upload.
 - Tus uploads: support the expiration extension; responses include an `Upload-Expires` header.

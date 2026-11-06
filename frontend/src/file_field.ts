@@ -129,7 +129,8 @@ class FileField {
     });
     const filesContainer = this.renderer.container;
 
-    if (supportDropArea) {
+    // No drop area for a disabled input
+    if (this.supportDropArea) {
       this.initDropArea(filesContainer, input.accept);
     }
 

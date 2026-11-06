@@ -3791,7 +3791,9 @@
         _translations: translations
       });
       const filesContainer = this._renderer._container;
-      if (supportDropArea) {
+
+      // No drop area for a disabled input
+      if (this._supportDropArea) {
         this._initDropArea(filesContainer, input.accept);
       }
       this._addInitialFiles(initial);
