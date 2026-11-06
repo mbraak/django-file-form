@@ -48,7 +48,7 @@ The callbacks are:
   - Called each time when progress information is available.
   - Signature of callback is `function(bytesUploaded, bytesTotal, upload)`
 - `onSuccess`:
-  - Called when file upload is done.
+  - Called when file upload is done; for tus and S3 uploads
   - Signature of callback is `function(upload)`
 
 The callbacks receive an `upload` parameter which is [this class](https://github.com/tus/tus-js-client#new-tusuploadfile-options).

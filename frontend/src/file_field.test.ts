@@ -485,6 +485,20 @@ describe("handleSuccess", () => {
 
     expect(onSuccess).toHaveBeenCalledExactlyOnceWith(upload);
   });
+
+  test("calls the onSuccess callback for an s3 upload", () => {
+    const onSuccess = vi.fn();
+    const { fileField, input } = createFileField({
+      callbacks: { onSuccess },
+      s3UploadDir: "dir1"
+    });
+
+    selectFiles(input, [mockFile("file.txt")]);
+    const upload = getS3Upload(fileField);
+    upload.onSuccess?.();
+
+    expect(onSuccess).toHaveBeenCalledExactlyOnceWith(upload);
+  });
 });
 
 describe("handleError", () => {

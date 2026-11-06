@@ -336,7 +336,7 @@ class FileField {
       this.emitEvent("uploadComplete", element, upload);
     }
 
-    if (onSuccess && upload.type === "tus") {
+    if (onSuccess) {
       onSuccess(upload);
     }
   };
