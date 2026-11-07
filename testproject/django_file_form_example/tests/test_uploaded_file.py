@@ -5,10 +5,12 @@ from django.test import TestCase
 
 from django_file_form.uploaded_file import (
     PlaceholderUploadedFile,
+    S3UploadedFileWithId,
     UploadedTusFile,
     get_initial_data_from_uploaded_file,
 )
 from django_file_form_example.models import Example
+from django_file_form_example.tests.utils.mock_s3 import BUCKET_NAME, MockS3Mixin
 from django_file_form_example.tests.utils.test_utils import remove_test_files
 
 
@@ -83,3 +85,33 @@ class UploadedFileTests(TestCase):
         example = Example.objects.create(title="abc", input_file="example/missing.txt")
 
         self.assertEqual(get_initial_data_from_uploaded_file(example.input_file), {})
+
+
+class S3UploadedFileTests(MockS3Mixin, TestCase):
+    def test_s3_file(self):
+        self.s3.put_object(
+            Bucket=BUCKET_NAME, Key="temp_uploads/dir1/test.txt", Body=b"abc"
+        )
+
+        s3_file = S3UploadedFileWithId(
+            file_id="id1",
+            name="temp_uploads/dir1/test.txt",
+            original_name="test.txt",
+            size=3,
+            metadata={"a": 1},
+        )
+
+        self.assertEqual(s3_file.read(), b"abc")
+        self.assertFalse(s3_file.is_placeholder)
+        self.assertTrue(s3_file.is_s3direct)
+        self.assertEqual(s3_file.metadata, {"a": 1})
+        self.assertEqual(s3_file.original_name, "test.txt")
+        self.assertEqual(
+            get_initial_data_from_uploaded_file(s3_file),
+            {
+                "id": "id1",
+                "name": "temp_uploads/dir1/test.txt",
+                "size": 3,
+                "type": "s3",
+            },
+        )

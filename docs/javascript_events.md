@@ -28,5 +28,5 @@ initUploadFields(form);
 * `fieldName`: the name of the form field
 * `fileName`: the file name
 * `metaDataField`: the metadata input. See 'Additional file metadata' in this document.
-* `upload`: the upload object
+* `upload`: the upload object. See the callbacks in 'Javascript options' for its properties.
 * This api is experimental.

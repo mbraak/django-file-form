@@ -44,6 +44,18 @@ describe("formatBytes", () => {
   test("formats 1200 with 2 decimals", () => {
     expect(formatBytes(1200, 2)).toBe("1.17 KB");
   });
+
+  test.each([
+    { bytes: 500, expected: "500 Bytes" },
+    { bytes: 1.5 * 1024 ** 2, expected: "1.5 MB" },
+    { bytes: 2 * 1024 ** 3, expected: "2 GB" }
+  ])("formats $bytes bytes as $expected", ({ bytes, expected }) => {
+    expect(formatBytes(bytes, 2)).toBe(expected);
+  });
+
+  test("returns an empty string for a size of a TB or more", () => {
+    expect(formatBytes(1024 ** 4, 2)).toBe("");
+  });
 });
 
 describe("getInputNameWithPrefix", () => {

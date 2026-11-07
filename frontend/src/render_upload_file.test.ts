@@ -192,6 +192,8 @@ describe("addNewUpload", () => {
     expect(progress).toHaveAttribute("role", "progressbar");
     expect(progress).toHaveAttribute("aria-valuemin", "0");
     expect(progress).toHaveAttribute("aria-valuemax", "100");
+    // toHaveValue(0) also passes for an empty aria-valuenow
+    expect(progress?.getAttribute("aria-valuenow")).toBe("0");
     expect(progress).toHaveValue(0);
     expect(progress).toHaveAccessibleName("Upload progress for file.txt");
 
@@ -688,6 +690,18 @@ describe("setSuccess", () => {
     expect(() => {
       renderer.setSuccess(1, 1024);
     }).not.toThrow();
+  });
+
+  test("replaces the progress bar and the cancel button with a delete button", () => {
+    const { renderer } = createRenderer();
+    const div = renderer.addNewUpload("file.txt", 1);
+
+    renderer.setSuccess(1, 1024);
+
+    expect(div).toHaveClass("dff-upload-success");
+    expect(div.querySelector(".dff-progress")).not.toBeInTheDocument();
+    expect(div.querySelector(".dff-cancel")).not.toBeInTheDocument();
+    expect(div.querySelector(".dff-delete")).toBeInTheDocument();
   });
 });
 
