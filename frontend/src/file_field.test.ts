@@ -276,6 +276,64 @@ describe("constructor", () => {
 
     expect(parent.querySelector(".dff-drop-hint")).not.toBeInTheDocument();
   });
+
+  test("renders the drop hint again when the last file is removed", async () => {
+    const { fileField, parent } = createFileField({
+      initial: [existingFile],
+      supportDropArea: true
+    });
+
+    query(parent, ".dff-delete").click();
+
+    await vi.waitFor(() => {
+      expect(fileField.uploads).toHaveLength(0);
+    });
+
+    expect(parent.querySelector(".dff-drop-hint")).toBeInTheDocument();
+  });
+});
+
+describe("drop area", () => {
+  // The drop area highlights the files container when a file is dragged over it
+  const dragOver = (parent: Element) => {
+    const filesContainer = query(parent, ".dff-files");
+    filesContainer.dispatchEvent(new Event("dragover", { cancelable: true }));
+
+    return filesContainer;
+  };
+
+  test("adds a drop area when supportDropArea is true", () => {
+    const { parent } = createFileField({ supportDropArea: true });
+
+    expect(dragOver(parent)).toHaveClass("dff-dropping");
+  });
+
+  test("does not add a drop area when supportDropArea is false", () => {
+    const { parent } = createFileField({ supportDropArea: false });
+
+    expect(dragOver(parent)).not.toHaveClass("dff-dropping");
+  });
+
+  test("does not upload a file that is dropped on a disabled input", async () => {
+    const { fileField, parent } = createFileField({
+      disabled: true,
+      supportDropArea: true
+    });
+
+    expect(dragOver(parent)).not.toHaveClass("dff-dropping");
+
+    const dataTransfer = {
+      files: [mockFile("file.txt")]
+    } as unknown as DataTransfer;
+    query(parent, ".dff-files").dispatchEvent(
+      new DragEvent("drop", { dataTransfer })
+    );
+
+    // Wait for the async drop handler
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    expect(fileField.uploads).toHaveLength(0);
+  });
 });
 
 describe("selecting files", () => {
@@ -352,12 +410,60 @@ describe("selecting files", () => {
 
     selectFiles(input, [mockFile("file.txt")]);
 
+    // The current file is removed first
     await vi.waitFor(() => {
-      expect(fileField.uploads).toHaveLength(1);
+      expect(fileField.uploads.map(upload => upload.name)).toStrictEqual([
+        "file.txt"
+      ]);
     });
 
-    expect(getUpload(fileField).name).toBe("file.txt");
     expect(parent.querySelectorAll(".dff-file")).toHaveLength(1);
+  });
+
+  test("aborts the current upload when it is replaced and multiple is false", async () => {
+    const { fileField, input } = createFileField();
+    selectFiles(input, [mockFile("a.txt")]);
+    const replacedUpload = getTusUpload(fileField);
+
+    selectFiles(input, [mockFile("b.txt")]);
+
+    await vi.waitFor(() => {
+      expect(fileField.uploads.map(upload => upload.name)).toStrictEqual([
+        "b.txt"
+      ]);
+    });
+
+    // Otherwise the replaced upload continues in the background
+    expect(tusAbort).toHaveBeenCalledOnce();
+    expect(tusAbort.mock.contexts[0]).toBe(replacedUpload);
+  });
+
+  test("deletes the current file from the server when it is replaced and multiple is false", async () => {
+    const deleteSpy = vi
+      .spyOn(TusUpload.prototype, "delete")
+      .mockResolvedValue();
+    const onDelete = vi.fn();
+    const { fileField, form, input } = createFileField({
+      callbacks: { onDelete }
+    });
+    const removeUploadListener = vi.fn();
+    form.addEventListener("removeUpload", removeUploadListener);
+
+    selectFiles(input, [mockFile("a.txt")]);
+    const replacedUpload = getTusUpload(fileField);
+    replacedUpload.onSuccess?.();
+
+    selectFiles(input, [mockFile("b.txt")]);
+
+    await vi.waitFor(() => {
+      expect(fileField.uploads.map(upload => upload.name)).toStrictEqual([
+        "b.txt"
+      ]);
+    });
+
+    expect(deleteSpy).toHaveBeenCalledOnce();
+    expect(removeUploadListener).toHaveBeenCalledOnce();
+    expect(onDelete).toHaveBeenCalledExactlyOnceWith(replacedUpload);
   });
 
   test("uploads all files when multiple is true", async () => {
@@ -389,6 +495,22 @@ describe("selecting files", () => {
     expect(getUpload(fileField, 1).uploadIndex).toBe(0);
     expect(fileField.nextUploadIndex).toBe(2);
     expect(parent.querySelectorAll(".dff-file")).toHaveLength(2);
+  });
+
+  test("disables the cancel button of an upload that is replaced while it's aborted", async () => {
+    // The abort of the replaced upload doesn't finish
+    tusAbort.mockReturnValueOnce(new Promise<void>(() => undefined));
+    // With multiple, an upload with the same name is replaced
+    const { input, parent } = createFileField({ multiple: true });
+
+    selectFiles(input, [mockFile("file.txt")]);
+    const cancelButton = query(parent, ".dff-cancel");
+
+    selectFiles(input, [mockFile("file.txt")]);
+
+    await vi.waitFor(() => {
+      expect(cancelButton).toBeDisabled();
+    });
   });
 
   test("removes the drop hint", async () => {
@@ -431,6 +553,20 @@ describe("handleProgress", () => {
 
     selectFiles(input, [mockFile("file.txt")]);
     const upload = getTusUpload(fileField);
+    upload.onProgress?.(10, 100);
+
+    expect(onProgress).toHaveBeenCalledExactlyOnceWith(10, 100, upload);
+  });
+
+  test("calls the onProgress callback for an s3 upload", () => {
+    const onProgress = vi.fn();
+    const { fileField, input } = createFileField({
+      callbacks: { onProgress },
+      s3UploadDir: "dir1"
+    });
+
+    selectFiles(input, [mockFile("file.txt")]);
+    const upload = getS3Upload(fileField);
     upload.onProgress?.(10, 100);
 
     expect(onProgress).toHaveBeenCalledExactlyOnceWith(10, 100, upload);
@@ -481,6 +617,20 @@ describe("handleSuccess", () => {
 
     selectFiles(input, [mockFile("file.txt")]);
     const upload = getTusUpload(fileField);
+    upload.onSuccess?.();
+
+    expect(onSuccess).toHaveBeenCalledExactlyOnceWith(upload);
+  });
+
+  test("calls the onSuccess callback for an s3 upload", () => {
+    const onSuccess = vi.fn();
+    const { fileField, input } = createFileField({
+      callbacks: { onSuccess },
+      s3UploadDir: "dir1"
+    });
+
+    selectFiles(input, [mockFile("file.txt")]);
+    const upload = getS3Upload(fileField);
     upload.onSuccess?.();
 
     expect(onSuccess).toHaveBeenCalledExactlyOnceWith(upload);
@@ -585,6 +735,30 @@ describe("clicking delete", () => {
 
     expect(fileField.uploads).toHaveLength(1);
     expect(parent.querySelector(".dff-delete")).not.toHaveClass("dff-disabled");
+  });
+
+  test("disables the delete button while the file is deleted", async () => {
+    let finishDelete = () => {
+      // do nothing
+    };
+    vi.spyOn(ExistingFile.prototype, "delete").mockReturnValue(
+      new Promise<void>(resolve => {
+        finishDelete = resolve;
+      })
+    );
+    const { fileField, parent } = createFileField({ initial: [existingFile] });
+    const deleteButton = query(parent, ".dff-delete");
+
+    deleteButton.click();
+
+    // So the file can't be deleted twice
+    expect(deleteButton).toBeDisabled();
+
+    finishDelete();
+
+    await vi.waitFor(() => {
+      expect(fileField.uploads).toHaveLength(0);
+    });
   });
 
   test("does nothing when the delete button is disabled", () => {
@@ -887,20 +1061,6 @@ describe("edge cases", () => {
     query(parent, ".dff-file").click();
 
     expect(fileField.uploads).toHaveLength(1);
-  });
-
-  test("does not call the onProgress callback for an s3 upload", () => {
-    const onProgress = vi.fn();
-    const { fileField, input } = createFileField({
-      callbacks: { onProgress },
-      s3UploadDir: "dir1"
-    });
-
-    selectFiles(input, [mockFile("file.txt")]);
-    const upload = getS3Upload(fileField);
-    upload.onProgress?.(10, 100);
-
-    expect(onProgress).not.toHaveBeenCalled();
   });
 
   test("does not dispatch uploadComplete when the file is no longer rendered", () => {

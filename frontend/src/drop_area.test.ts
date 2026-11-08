@@ -9,13 +9,13 @@ const mockFile = (filename: string) =>
   new File(["test"], filename, { type: "text/plain" });
 
 const mockFileSystemEntry = (file: File) =>
-({
-  file: (successCallback: FileCallback) => {
-    successCallback(file);
-  },
-  isDirectory: false,
-  isFile: true
-} as FileSystemFileEntry);
+  ({
+    file: (successCallback: FileCallback) => {
+      successCallback(file);
+    },
+    isDirectory: false,
+    isFile: true
+  }) as FileSystemFileEntry;
 
 const mockFileSystemDirectoryEntry = (fileEntries: FileSystemFileEntry[]) => {
   const directoryReader = {
@@ -32,13 +32,13 @@ const mockFileSystemDirectoryEntry = (fileEntries: FileSystemFileEntry[]) => {
 };
 
 const mockDataTransferItem = (fileEntry: FileSystemEntry) =>
-({
-  getAsFile: () => null,
-  getAsString: () => "test",
-  kind: "file",
-  type: "text/plain",
-  webkitGetAsEntry: () => fileEntry
-} as DataTransferItem);
+  ({
+    getAsFile: () => null,
+    getAsString: () => "test",
+    kind: "file",
+    type: "text/plain",
+    webkitGetAsEntry: () => fileEntry
+  }) as DataTransferItem;
 
 const mockDataTransfer = (fileEntries: FileSystemEntry[]) => {
   const dataTransferItems = fileEntries.map(mockDataTransferItem);
@@ -220,9 +220,35 @@ describe("DropArea dragging", () => {
     });
   });
 
+  test("keeps the browser from handling the drop", async () => {
+    const { container, onUploadFiles } = createDropArea();
+    const parent = document.createElement("div");
+    parent.append(container);
+    const parentListener = vi.fn();
+    parent.addEventListener("drop", parentListener);
+
+    const file = mockFile("test.txt");
+    const dataTransfer = mockDataTransfer([mockFileSystemEntry(file)]);
+    const dropEvent = new DragEvent("drop", {
+      bubbles: true,
+      cancelable: true,
+      dataTransfer
+    });
+
+    fireEvent(container, dropEvent);
+
+    // Otherwise the browser opens the dropped file, and leaves the page
+    expect(dropEvent.defaultPrevented).toBe(true);
+    // An outer drop area doesn't also handle the drop
+    expect(parentListener).not.toHaveBeenCalled();
+
+    await waitFor(() => {
+      expect(onUploadFiles).toHaveBeenCalledExactlyOnceWith([file]);
+    });
+  });
+
   test("does nothing when the drop event has no data transfer", async () => {
-    const { container, onUploadFiles, setErrorInvalidFiles } =
-      createDropArea();
+    const { container, onUploadFiles, setErrorInvalidFiles } = createDropArea();
 
     fireEvent(container, new DragEvent("drop"));
 
@@ -275,11 +301,9 @@ describe("DropArea dragging", () => {
   });
 
   test("logs an error when reading a directory fails", async () => {
-    const consoleError = vi
-      .spyOn(console, "error")
-      .mockImplementation(() => {
-        //
-      });
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {
+      //
+    });
     const { container, onUploadFiles } = createDropArea();
     const error = new Error("Cannot read directory");
     const directoryEntry = {

@@ -3791,7 +3791,9 @@
         _translations: translations
       });
       const filesContainer = this._renderer._container;
-      if (supportDropArea) {
+
+      // No drop area for a disabled input
+      if (this._supportDropArea) {
         this._initDropArea(filesContainer, input.accept);
       }
       this._addInitialFiles(initial);
@@ -3927,9 +3929,7 @@
         onProgress
       } = this._callbacks;
       if (onProgress) {
-        if (upload instanceof TusUpload) {
-          onProgress(bytesUploaded, bytesTotal, upload);
-        }
+        onProgress(bytesUploaded, bytesTotal, upload);
       }
     };
     _handleSuccess = upload => {
@@ -3948,7 +3948,7 @@
       if (element) {
         this._emitEvent("uploadComplete", element, upload);
       }
-      if (onSuccess && upload.type === "tus") {
+      if (onSuccess) {
         onSuccess(upload);
       }
     };
@@ -4085,10 +4085,12 @@
         return;
       }
       if (!this._multiple) {
-        for (const upload of this._uploads) {
-          this._renderer._deleteFile(upload.uploadIndex);
+        // Remove the current file like the delete button does: abort an upload that
+        // is still running, and delete an uploaded file from the server.
+        // Iterate over a copy, because removing an upload changes this.uploads.
+        for (const upload of this._uploads.slice()) {
+          await this._removeExistingUpload(upload);
         }
-        this._uploads = [];
         const file = files[0];
         if (file) {
           await this._uploadFile(file);

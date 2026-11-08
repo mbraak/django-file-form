@@ -6,13 +6,14 @@ from pathlib import Path
 from unittest import mock
 
 from django.contrib.auth.models import User
+from django.core.cache import caches
 from django.test import Client, RequestFactory, TestCase, override_settings
 from django.utils.http import parse_http_date
 
 from django_file_form import conf
 from django_file_form.django_util import get_upload_path
 from django_file_form.models import TemporaryUploadedFile
-from django_file_form.tus.utils import cache
+from django_file_form.tus.utils import cache, lock_resource
 from django_file_form.tus.views import handle_upload, write_chunk
 from django_file_form_example.tests.utils.test_utils import remove_test_files
 
@@ -264,6 +265,9 @@ class ViewTests(TestCase):
         self.assertEqual(response["Upload-Offset"], "0")
         self.assertEqual(response["Upload-Length"], "6")
 
+        # Required by the tus protocol, so the offset is never cached
+        self.assertEqual(response["Cache-Control"], "no-store")
+
     def test_head_after_patch(self):
         client = Client()
         resource_id = self.do_post(
@@ -308,8 +312,17 @@ class ViewTests(TestCase):
         self.assertEqual(self.read_uploaded_file(uploaded_file), b"abcdef")
 
         # The upload is finished, so it is removed from the cache
-        self.assertIsNone(cache.get(f"tus-uploads/{resource_id}/offset"))
-        self.assertIsNone(cache.get(f"tus-uploads/{resource_id}/filename"))
+        self.assert_resource_not_in_cache(resource_id)
+
+    def test_upload_uses_file_form_cache(self):
+        # The testproject sets FILE_FORM_CACHE to a separate cache
+        resource_id = self.do_post(
+            Client(), upload_length=6, metadata={"filename": "test.txt"}
+        )
+
+        offset_key = f"tus-uploads/{resource_id}/offset"
+        self.assertEqual(caches["file_form"].get(offset_key), 0)
+        self.assertIsNone(caches["default"].get(offset_key))
 
     def test_upload_in_chunks(self):
         client = Client()
@@ -481,7 +494,13 @@ class ViewTests(TestCase):
             client, upload_length=6, metadata={"filename": "test.txt"}
         )
 
-        for upload_checksum in ["sha1 not-base64!", "sha1", ""]:
+        for upload_checksum in [
+            "sha1 not-base64!",
+            # A valid checksum followed by a character that is not base64
+            encode_checksum("sha1", b"abc") + "!",
+            "sha1",
+            "",
+        ]:
             with self.subTest(upload_checksum=upload_checksum):
                 response = self.do_patch(
                     client,
@@ -503,8 +522,11 @@ class ViewTests(TestCase):
         # Simulate a concurrent request that holds the lock
         cache.add(f"tus-uploads/{resource_id}/lock", "other-request")
 
-        response = self.do_patch(client, resource_id, b"abc", offset=0)
+        with mock.patch("django_file_form.tus.utils.time.sleep") as sleep:
+            response = self.do_patch(client, resource_id, b"abc", offset=0)
 
+        # A patch doesn't wait for the lock; the client retries it
+        sleep.assert_not_called()
         self.assertEqual(response.status_code, 423)
         self.assertEqual(response["Tus-Resumable"], "1.0.0")
         self.assertEqual(cache.get(f"tus-uploads/{resource_id}/offset"), 0)
@@ -512,6 +534,44 @@ class ViewTests(TestCase):
 
         # The lock of the other request is kept
         self.assertEqual(cache.get(f"tus-uploads/{resource_id}/lock"), "other-request")
+
+    def test_patch_without_upload_offset(self):
+        # Without an Upload-Offset header the offset is 0
+        client = Client()
+        resource_id = self.do_post(
+            client, upload_length=6, metadata={"filename": "test.txt"}
+        )
+
+        response = self.do_patch(client, resource_id, b"abc", offset=None)
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(response["Upload-Offset"], "3")
+
+        # So a second chunk without the header doesn't match the offset
+        response = self.do_patch(client, resource_id, b"def", offset=None)
+        self.assertEqual(response.status_code, 409)
+
+    def test_lock_expires(self):
+        # A lock expires after 60 seconds, so a worker that dies while holding it
+        # doesn't block the upload forever
+        resource_id = "lock-expires"
+
+        def lock_after(seconds):
+            # Try to get the lock in another request, `seconds` later
+            with (
+                mock.patch(
+                    "django.core.cache.backends.locmem.time.time",
+                    return_value=now + seconds,
+                ),
+                lock_resource(resource_id) as locked_by_other_request,
+            ):
+                return locked_by_other_request
+
+        with lock_resource(resource_id) as locked:
+            self.assertTrue(locked)
+            now = time.time()
+
+            self.assertFalse(lock_after(59))
+            self.assertTrue(lock_after(60.5))
 
     def test_patch_releases_lock(self):
         client = Client()
@@ -780,8 +840,7 @@ class ViewTests(TestCase):
 
         self.assertEqual(response.status_code, 204)
         self.assertFalse(get_upload_path().joinpath(resource_id).exists())
-        self.assertIsNone(cache.get(f"tus-uploads/{resource_id}/offset"))
-        self.assertIsNone(cache.get(f"tus-uploads/{resource_id}/expires"))
+        self.assert_resource_not_in_cache(resource_id)
 
     def test_delete_after_upload(self):
         client = Client()
@@ -995,6 +1054,11 @@ class ViewTests(TestCase):
             TemporaryUploadedFile.objects.filter(file_id=resource_id).exists()
         )
 
+    def assert_resource_not_in_cache(self, resource_id):
+        for name in ["file_size", "filename", "offset", "metadata", "expires"]:
+            with self.subTest(name=name):
+                self.assertIsNone(cache.get(f"tus-uploads/{resource_id}/{name}"))
+
     def do_post(self, client, upload_length=6, metadata=None):
         headers = {
             "HTTP_TUS_RESUMABLE": "1.0.0",
@@ -1015,12 +1079,15 @@ class ViewTests(TestCase):
         return re_url_upload_resource.match(response["Location"]).group(1)
 
     def do_patch(self, client, resource_id, data, offset, **extra):
+        # Pass offset=None to send the patch without an Upload-Offset header
+        if offset is not None:
+            extra["HTTP_UPLOAD_OFFSET"] = str(offset)
+
         return client.patch(
             f"/upload/{resource_id}",
             data=data,
             content_type="application/offset+octet-stream",
             HTTP_TUS_RESUMABLE="1.0.0",
-            HTTP_UPLOAD_OFFSET=str(offset),
             **extra,
         )
 
