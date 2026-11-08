@@ -1,4 +1,4 @@
-## Javascript options
+## JavaScript options
 
 Signature of `initUploadFields` is:
 
@@ -6,7 +6,7 @@ Signature of `initUploadFields` is:
 initUploadFields(formDomElement, options);
 ```
 
-- `formDomElement` (required); e.g. `document.getElementById("example-form")`
+- `formDomElement` (required); for example `document.getElementById("example-form")`
 - options (optional)
   - `callbacks`: callbacks for things like upload progress and errors.
   - `chunkSize`: the maximum size of an upload. Default is 2.5 MB.
@@ -26,8 +26,8 @@ The callbacks are:
 
   - Called when the filename of an uploaded file is clicked
   - Signature of callback is `function({ fileName, fieldName, id, type })`
-    - fileName: the file name
-    - fieldName: the name of the form field
+    - `fileName`: the filename
+    - `fieldName`: the name of the form field
     - id: the id of the upload; `undefined` for a placeholder or an existing file
       - For a tus upload, this is the id of the temporary uploaded file.
       - For an S3 upload, this is the id of the S3 multipart upload.
@@ -46,7 +46,7 @@ The callbacks are:
 - `onError`:
   - Called when an upload error occurs; for tus and S3 uploads
   - Signature of callback is `function(error, upload)`
-    - `error`: javascript Error
+    - `error`: a JavaScript `Error`
 - `onProgress`:
   - Called each time when progress information is available; for tus and S3 uploads
   - Signature of callback is `function(bytesUploaded, bytesTotal, upload)`
@@ -60,7 +60,7 @@ The `upload` parameter of the callbacks is an upload object of django-file-form.
 - `type`: the kind of upload
   - `tus`: a tus upload
   - `s3`: an S3 upload
-  - `uploadedTus` or `uploadedS3`: a file that was uploaded before the form was rendered, e.g. when the form had validation errors
+  - `uploadedTus` or `uploadedS3`: a file that was uploaded before the form was rendered, for example when the form had validation errors
   - `placeholder`: a placeholder
   - `existing`: an existing file
 - `status`: `uploading`, `done` or `error`

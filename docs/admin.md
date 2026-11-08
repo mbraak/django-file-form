@@ -13,5 +13,5 @@ class ExampleAdmin(FileFormAdmin):
 admin.site.register(Example, ExampleAdmin)
 ```
 
-- Also see the testproject in the repository.
+- Also see the `testproject` directory in the repository.
 - Inline forms are not supported.

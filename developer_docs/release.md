@@ -18,8 +18,8 @@ The release requires a trusted publisher setup on pypi.org.
    ```
 
    This updates the version in both `pyproject.toml` and `uv.lock`. Don't
-   edit `pyproject.toml` by hand: CI installs with `uv sync --locked`, which
-   fails if `uv.lock` is out of date.
+   edit `pyproject.toml` by hand, because CI installs with `uv sync --locked`,
+   which fails if `uv.lock` is out of date.
 
 3. Add an entry at the top of `docs/changelog.md`, following the existing
    format:
@@ -53,13 +53,13 @@ The release requires a trusted publisher setup on pypi.org.
    and the release under _Releases_ on GitHub.
 
 The documentation site is deployed separately from `master` by the
-`Publish docs via GitHub Pages` workflow, so the changelog appears online as
-soon as step 5 is pushed.
+`Publish docs via GitHub Pages` workflow, so the changelog appears online once
+you push step 5.
 
 ## What the workflow does
 
 1. **Build**: checks that the tag equals the version in `pyproject.toml`,
-   rebuilds the javascript bundle with `npm run build`, builds the wheel and
+   rebuilds the JavaScript bundle with `npm run build`, builds the wheel and
    sdist with `uv build`, and validates them with `twine check`.
 2. **Publish to PyPI**: uploads the wheel and sdist using trusted publishing.
 3. **Create GitHub release**: creates a release for the tag with
@@ -68,7 +68,7 @@ soon as step 5 is pushed.
 ## Package contents
 
 `MANIFEST.in` controls which non-python files end up in the package. The
-templates, the built javascript and css in `django_file_form/static`, and the
+templates, the built JavaScript and CSS in `django_file_form/static`, and the
 translations in `django_file_form/locale` are included. The coverage
 instrumented bundle (`file_form.coverage.js`) is excluded because it is only
 used by the test suite.
@@ -82,7 +82,7 @@ unzip -l dist/*.whl
 
 ## Troubleshooting
 
-**The build job fails with "Tag ... does not match version ..."**
+**The build job fails with `Tag ... does not match version ...`**
 
 The version in `pyproject.toml` was not bumped, or the tag has a typo. Delete
 the tag, fix the problem, and tag again:

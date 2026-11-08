@@ -23,3 +23,5 @@ testproject/screenshots/
 testproject/static/
 testproject/t
 testproject/.coverage
+.github/styles/*
+!.github/styles/config/

@@ -1,7 +1,7 @@
 ## Form sets
 
 You can also use a form set instead of a form. In that case `initFormSet` (instead of `initUploadFields`)
-in your javascript code.
+in your JavaScript code.
 
 ```
 initFormSet(form_element, options)
