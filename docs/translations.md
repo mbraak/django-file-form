@@ -15,4 +15,4 @@ uv sync
 uv run django-admin makemessages -l fr
 ```
 
-You can now edit generated po file and commit your changes as usual
+You can now edit the generated `.po` file and commit your changes as usual

@@ -1,6 +1,6 @@
-## Javascript events
+## JavaScript events
 
-There are javascript events for adding and removing an upload. The events are `addUpload`, `removeUpload`,
+There are JavaScript events for adding and removing an upload. The events are `addUpload`, `removeUpload`,
 and `uploadComplete`.
 
 The events are dispatched on the form element as a `CustomEvent`. The event data is in `event.detail`.
@@ -24,9 +24,9 @@ form.addEventListener('uploadComplete', ({ detail: { element, fieldName, fileNam
 initUploadFields(form);
 ```
 
-* `element`: the html element that renders the upload
+* `element`: the HTML element that renders the upload
 * `fieldName`: the name of the form field
 * `fileName`: the file name
 * `metaDataField`: the metadata input. See 'Additional file metadata' in this document.
-* `upload`: the upload object. See the callbacks in 'Javascript options' for its properties.
-* This api is experimental.
+* `upload`: the upload object. See the callbacks in 'JavaScript options' for its properties.
+* This API is experimental.
