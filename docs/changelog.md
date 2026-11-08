@@ -1,6 +1,6 @@
 ## Changelog
 
-**Unreleased**
+**5.2.0 (November 8 2026)**
 
 - Apply `FILE_FORM_MUST_LOGIN` option to S3 views.
 - S3 uploads: create the S3 client with django-storages' `S3Boto3Storage`, so the upload views also use settings such as `AWS_S3_ADDRESSING_STYLE`, `AWS_S3_PROXIES`, `AWS_S3_CLIENT_CONFIG`, `AWS_SESSION_TOKEN` and `AWS_S3_SESSION_PROFILE`. Reading an uploaded S3 file now uses the same configuration as the upload views, including the `DJANGO_AWS_STORAGE_BUCKET_NAME` and `AWS_S3_ENDPOINT_URL` environment variables.
