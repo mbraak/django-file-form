@@ -36,6 +36,7 @@
     "@babel/preset-typescript": "^8.0.1",
     "@eslint-community/eslint-plugin-eslint-comments": "^4.8.1",
     "@eslint/js": "^10",
+    "@rollup/plugin-alias": "^6",
     "@rollup/plugin-babel": "^7",
     "@rollup/plugin-commonjs": "^29",
     "@rollup/plugin-node-resolve": "^16.0.3",
@@ -70,7 +71,6 @@
   },
   "dependencies": {
     "@babel/runtime": "^8.0.0",
-    "@rollup/plugin-alias": "^6",
     "tus-js-client": "^4.3.1"
   },
   "overrides": {
