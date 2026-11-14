@@ -1,4 +1,3 @@
-import alias from "@rollup/plugin-alias";
 import babel from "@rollup/plugin-babel";
 import commonjs from "@rollup/plugin-commonjs";
 import resolve from "@rollup/plugin-node-resolve";
@@ -23,14 +22,6 @@ const babelConfigFile = includeCoverage
   : "./babel.config.json";
 
 const plugins = [
-  alias({
-    entries: [
-      {
-        find: "tus-js-client",
-        replacement: "tus-js-client/lib/browser/index.js"
-      }
-    ]
-  }),
   resolve({ browser: true, extensions: [".js", ".ts"] }),
   commonjs(),
   babel({
