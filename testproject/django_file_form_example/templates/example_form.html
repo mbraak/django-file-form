@@ -6,7 +6,6 @@
 {% block head %}
     {{ block.super }}
     <link rel="stylesheet" href="{% static "file_form/file_form.css" %}">
-    <link rel="stylesheet" href="{% static "example.css" %}">
 {% endblock %}
 
 {% block body %}
@@ -20,19 +19,21 @@
             {{ hidden }}
         {% endfor %}
         {{ form.non_field_errors }}
-        <div id="row-example-input_title">
+        <div id="row-example-input_title" class="form-row">
             {{ form.title.errors }}
             <label for="{{ form.title.id_for_label }}">Title</label>
             {{ form.title }}
         </div>
 
-        <div id="row-example-input_file" {% if form.input_file.errors %} class="has-error" {% endif %}>
+        <div id="row-example-input_file" class="form-row{% if form.input_file.errors %} has-error{% endif %}">
             {{ form.input_file.errors }}
             {{ form.input_file }}
         </div>
         {% block extra_fields %}
         {% endblock %}
-        <input type="submit" value="Save" />
+        <div class="form-actions">
+            <input type="submit" value="Save" />
+        </div>
     </form>
 
     <div id="messages"></div>

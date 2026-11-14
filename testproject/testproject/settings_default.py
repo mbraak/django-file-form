@@ -38,6 +38,20 @@ DATABASES = {
     }
 }
 
+# Use a separate cache for the uploads, as recommended in the docs. Local-memory
+# caching is fine here, because the tests and runserver use a single process.
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+    },
+    "file_form": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "file_form",
+    },
+}
+
+FILE_FORM_CACHE = "file_form"
+
 INSTALLED_APPS = [
     # Project app
     "django_file_form_example",
@@ -86,6 +100,7 @@ TEMPLATES = [
                 "django.template.context_processors.tz",
                 "django.contrib.messages.context_processors.messages",
                 "django.template.context_processors.request",
+                "django_file_form_example.pages.page_title",
             ]
         },
     },

@@ -44,23 +44,13 @@ class UploadedTusFile(uploadedfile.UploadedFile):
 
 
 try:
-    from storages.backends.s3boto3 import S3Boto3Storage, S3Boto3StorageFile
-    from storages.utils import setting
+    from storages.backends.s3boto3 import S3Boto3StorageFile
+
+    from django_file_form.s3_multipart.utils import get_storage
 
     class S3UploadedFileWithId(S3Boto3StorageFile):
         def __init__(self, file_id, name, original_name, size, metadata=None, **kwargs):
-            boto_storage = S3Boto3Storage(
-                bucket_name=setting("AWS_STORAGE_BUCKET_NAME"),
-                endpoint_url=setting("AWS_S3_ENDPOINT_URL"),
-                access_key=setting(
-                    "AWS_S3_ACCESS_KEY_ID", setting("AWS_ACCESS_KEY_ID")
-                ),
-                secret_key=setting(
-                    "AWS_S3_SECRET_ACCESS_KEY", setting("AWS_SECRET_ACCESS_KEY")
-                ),
-            )
-
-            super().__init__(name=name, mode="rb", storage=boto_storage, **kwargs)
+            super().__init__(name=name, mode="rb", storage=get_storage(), **kwargs)
 
             self.file_id = file_id
             self.original_name = original_name
@@ -79,7 +69,7 @@ try:
                 "type": "s3",
             }
 
-except (ImportError, ImproperlyConfigured):
+except (ImportError, ImproperlyConfigured):  # pragma: no cover
     # S3 is an optional feature but we keep the symbol
     class S3UploadedFileWithId:
         pass

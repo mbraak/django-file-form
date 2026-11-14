@@ -1,10 +1,13 @@
 import os
 
 from django.conf import settings
+from django.contrib import admin
+from django.contrib.auth import get_user_model, login
 from django.core.files.storage import FileSystemStorage
 from django.db.models.fields.files import FieldFile
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.views import generic
 from django.views.generic.base import ContextMixin
 from formtools.wizard.views import SessionWizardView
@@ -15,6 +18,7 @@ from django_file_form.uploaded_file import PlaceholderUploadedFile
 
 from . import forms
 from .models import Example, Example2, ExampleFile
+from .pages import get_index_groups
 
 
 def file_form_js():
@@ -50,6 +54,42 @@ class ExampleView(BaseFormView):
 
 class WithoutJsExampleView(ExampleView):
     use_ajax = False
+
+
+class IndexView(generic.TemplateView):
+    template_name = "index.html"
+
+    def get_context_data(self, **kwargs):
+        kwargs["groups"] = get_index_groups()
+        return super().get_context_data(**kwargs)
+
+
+def admin_login(request):
+    """Log in to the admin without a password when DEBUG is enabled."""
+    if not settings.DEBUG:
+        return admin.site.login(request)
+
+    user, created = get_user_model().objects.get_or_create(
+        username="admin",
+        defaults={"is_staff": True, "is_superuser": True},
+    )
+
+    if created:
+        user.set_unusable_password()
+        user.save()
+
+    login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+
+    next_url = request.GET.get("next", "")
+
+    if url_has_allowed_host_and_scheme(
+        next_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return HttpResponseRedirect(next_url)
+
+    return HttpResponseRedirect(reverse("admin:index"))
 
 
 class ExampleSuccessView(generic.TemplateView):

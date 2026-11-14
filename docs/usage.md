@@ -8,7 +8,7 @@ pip install django-file-form
 
 **2 Add the apps to your INSTALLED_APPS**
 
-You must include 'django_file_form'
+You must include `django_file_form`
 
 ```python
 INSTALLED_APPS = [
@@ -16,9 +16,9 @@ INSTALLED_APPS = [
 ]
 ```
 
-**3 Add the app to your urls**
+**3 Add the app to your URLs**
 
-In this example we use the url **upload/**. You can use a different url if you like.
+This example uses the URL **upload/**. You can use a different URL if you like.
 
 ```python
 urlpatterns = patterns(
@@ -49,16 +49,16 @@ class ExampleForm(FileFormMixin, forms.Form):
 
 Import and use `MultipleUploadedFileField` if you intent to add multiple files.
 
-**6 Include javascript and css in your template**
+**6 Include JavaScript and CSS in your template**
 
 ```js
 <script src="{% static "file_form/file_form.min.js" %}"></script>
 <link rel="stylesheet" href="{% static "file_form/file_form.css" %}">
 ```
 
-There is also an uncompressed javascript version: `file_form/file_form.js`.
+There is also an uncompressed JavaScript version: `file_form/file_form.js`.
 
-**7 Call the initUploadFields javascript function**
+**7 Call the initUploadFields JavaScript function**
 
 ```html
 <form id="example-form" method="POST" enctype="multipart/form-data">
@@ -111,6 +111,12 @@ It's also possible to delete unused temporary file using a management command:
 
 ```
 python manage.py delete_unused_files
+```
 
-The command deletes temporary files and records that are created at least one day ago.
+The command deletes temporary files and records that are created at least one day ago. It also deletes files of uploads that were never finished, once the upload has expired (see `FILE_FORM_CACHE_TIMEOUT`). Files of uploads that are still in progress are kept.
+
+Use `--dry-run` to see which files would be deleted, without deleting them:
+
+```
+python manage.py delete_unused_files --dry-run
 ```

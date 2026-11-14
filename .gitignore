@@ -1,5 +1,7 @@
 .npmrc
 .python-version
+.tox/
+.venv/
 .vscode/
 *.egg-info
 *.pyc
@@ -9,6 +11,7 @@ django_file_form/static/file_form/file_form.coverage.js
 django_file_form/static/file_form/file_form.coverage.js.map
 frontend/coverage/
 frontend/mise.toml
+mise.toml
 node_modules/
 Pipfile
 Pipfile.lock
@@ -19,3 +22,6 @@ testproject/media
 testproject/screenshots/
 testproject/static/
 testproject/t
+testproject/.coverage
+.github/styles/*
+!.github/styles/config/

@@ -7,6 +7,7 @@ from django.db import models
 from django.utils import timezone
 from django.utils.module_loading import import_string
 
+from . import conf
 from .django_util import get_upload_path
 from .model_manager import ModelManager
 
@@ -20,6 +21,7 @@ from .uploaded_file import (
 
 class TemporaryUploadedFileManager(ModelManager):
     def delete_unused_files(self, delete=True, now=None):
+        now = now or timezone.now()
         deleted_files = []
 
         for t in self.get_queryset():
@@ -34,7 +36,9 @@ class TemporaryUploadedFileManager(ModelManager):
         for f in temp_path.iterdir():
             basename = f.name
 
-            if not self.get_for_file(basename):
+            # A file without a record can be an upload that is still in progress, so
+            # only delete it when the upload has expired
+            if not self.get_for_file(basename) and is_expired_upload(f, now):
                 deleted_files.append(basename)
 
                 if delete:
@@ -47,6 +51,15 @@ class TemporaryUploadedFileManager(ModelManager):
 
     def get_for_file(self, filename):
         return self.try_get(uploaded_file=get_upload_to_for_filename(filename))
+
+
+def is_expired_upload(path, now):
+    """
+    An upload expires FILE_FORM_CACHE_TIMEOUT seconds after it is started. The file
+    is changed while uploading, so a file that wasn't changed for that long belongs to
+    an expired upload.
+    """
+    return now.timestamp() - path.stat().st_mtime >= conf.CACHE_TIMEOUT
 
 
 def get_upload_to_for_filename(filename):

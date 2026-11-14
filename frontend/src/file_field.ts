@@ -129,7 +129,8 @@ class FileField {
     });
     const filesContainer = this.renderer.container;
 
-    if (supportDropArea) {
+    // No drop area for a disabled input
+    if (this.supportDropArea) {
       this.initDropArea(filesContainer, input.accept);
     }
 
@@ -291,9 +292,7 @@ class FileField {
     const { onError } = this.callbacks;
 
     if (onError) {
-      if (upload instanceof TusUpload) {
-        onError(error, upload);
-      }
+      onError(error, upload);
     }
   };
 
@@ -314,9 +313,7 @@ class FileField {
     const { onProgress } = this.callbacks;
 
     if (onProgress) {
-      if (upload instanceof TusUpload) {
-        onProgress(bytesUploaded, bytesTotal, upload);
-      }
+      onProgress(bytesUploaded, bytesTotal, upload);
     }
   };
 
@@ -338,7 +335,7 @@ class FileField {
       this.emitEvent("uploadComplete", element, upload);
     }
 
-    if (onSuccess && upload.type === "tus") {
+    if (onSuccess) {
       onSuccess(upload);
     }
   };
@@ -447,6 +444,7 @@ class FileField {
           csrfToken,
           endpoint: uploadUrl,
           file,
+          retryDelays: this.retryDelays,
           s3UploadDir,
           uploadIndex: newUploadIndex
         });
@@ -504,11 +502,13 @@ class FileField {
     }
 
     if (!this.multiple) {
-      for (const upload of this.uploads) {
-        this.renderer.deleteFile(upload.uploadIndex);
+      // Remove the current file like the delete button does: abort an upload that
+      // is still running, and delete an uploaded file from the server.
+      // Iterate over a copy, because removing an upload changes this.uploads.
+      for (const upload of this.uploads.slice()) {
+        await this.removeExistingUpload(upload);
       }
 
-      this.uploads = [];
       const file = files[0];
 
       if (file) {

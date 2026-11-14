@@ -11,7 +11,9 @@
     >
         {% csrf_token %}
         {{ form.as_p }}
-        <input type="submit" value="Submit" />
+        <div class="form-actions">
+            <input type="submit" value="Submit" />
+        </div>
     </form>
 
     <script src="{% static file_form_js|safe %}"></script>
