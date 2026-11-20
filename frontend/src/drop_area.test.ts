@@ -62,8 +62,8 @@ describe("DropArea", () => {
   test("uploads a file", async () => {
     const onUploadFiles = vi.fn();
     const renderer = {
-      setErrorInvalidFiles: vi.fn() as unknown
-    } as RenderUploadFile;
+      setErrorInvalidFiles: vi.fn()
+    } as unknown as RenderUploadFile;
 
     const container = document.createElement("div");
 
@@ -89,8 +89,8 @@ describe("DropArea", () => {
   test("upload a file when the data transfer doesn't have an items property", async () => {
     const onUploadFiles = vi.fn();
     const renderer = {
-      setErrorInvalidFiles: vi.fn() as unknown
-    } as RenderUploadFile;
+      setErrorInvalidFiles: vi.fn()
+    } as unknown as RenderUploadFile;
 
     const container = document.createElement("div");
 
@@ -115,8 +115,8 @@ describe("DropArea", () => {
   test("uploads a file when uploading a directory", async () => {
     const onUploadFiles = vi.fn();
     const renderer = {
-      setErrorInvalidFiles: vi.fn() as unknown
-    } as RenderUploadFile;
+      setErrorInvalidFiles: vi.fn()
+    } as unknown as RenderUploadFile;
 
     const container = document.createElement("div");
 
