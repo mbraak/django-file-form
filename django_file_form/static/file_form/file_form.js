@@ -1069,7 +1069,7 @@
    *
    * @author Dan Kogai (https://github.com/dankogai)
    */
-  const version = '3.9.6';
+  const version = '3.9.7';
   /**
    * @deprecated use lowercase `version`.
    */
@@ -1085,9 +1085,6 @@
   })(b64chs);
   const b64re = /^(?:[A-Za-z\d+\/]{4})*?(?:[A-Za-z\d+\/]{2}(?:==)?|[A-Za-z\d+\/]{3}=?)?$/;
   const _fromCC = String.fromCharCode.bind(String);
-  const _U8Afrom = typeof Uint8Array.from === 'function'
-      ? Uint8Array.from.bind(Uint8Array)
-      : (it) => new Uint8Array(Array.prototype.slice.call(it, 0));
   const _mkUriSafe = (src) => src
       .replace(/=/g, '').replace(/[+\/]/g, (m0) => m0 == '+' ? '-' : '_');
   const _tidyB64 = (s) => s.replace(/[^A-Za-z0-9\+\/]/g, '');
@@ -1246,7 +1243,12 @@
       : atobPolyfill;
   //
   const _toUint8Array = typeof Uint8Array.fromBase64 === 'function'
-      ? (a) => Uint8Array.fromBase64(a) : (a) => _U8Afrom(_atob(a).split('').map(c => c.charCodeAt(0)));
+      ? (a) => Uint8Array.fromBase64(a) : (a) => {
+      const bin = _atob(a), l = bin.length, u8a = new Uint8Array(l);
+      for (let i = 0; i < l; i++)
+          u8a[i] = bin.charCodeAt(i);
+      return u8a;
+  };
   /**
    * converts a Base64 string to a Uint8Array.
    */

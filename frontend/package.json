@@ -42,7 +42,7 @@
     "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-terser": "^1",
     "@testing-library/dom": "^10.4.1",
-    "@testing-library/jest-dom": "^7",
+    "@testing-library/jest-dom": "^8",
     "@types/node": "^26",
     "@vitest/coverage-istanbul": "^5",
     "@vitest/eslint-plugin": "^1.6.4",
